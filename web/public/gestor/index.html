@@ -306,9 +306,13 @@ $('#lf').addEventListener('submit', async e=>{
   e.preventDefault(); const err=$('#err'),okm=$('#okm'); err.hidden=true; okm.hidden=true;
   const email=$('#em').value.trim(), pass=$('#pw').value;
   $('#lbtn').disabled=true;
+  // Bloqueo progresivo por correo/IP (SQL 23); si el SQL no está, entra normal.
+  const em=email.toLowerCase().slice(0,120), rpcN=async(n,a)=>{ try{ const {data,error}=await sb.rpc(n,a); return error?0:(data|0); }catch(_){ return 0; } };
+  const espera=await rpcN('xa_login_espera',{p_email:em});
+  if(espera>0){ err.textContent=`🔒 Por seguridad, espera ${espera>=90?Math.ceil(espera/60)+' min':espera+' s'} antes de volver a intentar.`; err.hidden=false; setTimeout(()=>{$('#lbtn').disabled=false;},Math.min(espera,60)*1000); return; }
   try{
-    const perfil=await AUTH.entrar(email,pass); sesionPerdida.on=false;
-    if(!perfil||!ACCESO[perfil.rol]){ await AUTH.salir(); throw new Error('Esta cuenta no tiene acceso al panel de XyroStudio.'); }
+    let perfil; try{ perfil=await AUTH.entrar(email,pass); }catch(x){ await rpcN('xa_login_fallo',{p_email:em,p_ua:'Panel XyroStudio · '+navigator.userAgent.slice(0,160)}); throw x; } sesionPerdida.on=false;
+    if(!perfil||!ACCESO[perfil.rol]){ await AUTH.salir(); await rpcN('xa_login_fallo',{p_email:em,p_ua:'Panel XyroStudio · cuenta sin acceso'}); throw new Error('Esta cuenta no tiene acceso al panel de XyroStudio.'); }
     me={id:perfil.id,nombre:perfil.nombre||'Gestor',email,rol:perfil.rol};
     $('#pw').value=''; await start();
   }catch(ex){ err.textContent=traducir(ex.message); err.hidden=false; }
@@ -340,7 +344,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps']]],['Operación',[['soporte','🛟','Modo soporte'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps']]],['Operación',[['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
     NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}</button>`).join('')).join('')+
@@ -361,7 +365,8 @@ V.resumen=async ()=>{
   const facturado=C.reduce((a,c)=>a+(+c.costo||0),0);
   const mensual=C.filter(c=>c.estado!=='baja').reduce((a,c)=>a+mensualDe(c),0);
   const pend=C.filter(c=>c.pago==='pendiente').reduce((a,c)=>a+(+c.costo||0),0);
-  return `<div class="grid4">
+  let segN=0,segF=0;try{const d24=new Date(Date.now()-864e5).toISOString();const[a,f]=await Promise.all([sb.from('xa_seguridad').select('id',{count:'exact',head:true}).in('tipo',['ataque','sospechoso']).gte('creado',d24),sb.from('xa_seguridad').select('id',{count:'exact',head:true}).eq('tipo','login_fallido').gte('creado',d24)]);segN=a.count||0;segF=f.count||0}catch(_){}
+  return `${segN||segF>=25?`<div class="note" style="border-color:#ff5c7a66;background:#ff5c7a14">🛡️ <div><b>${segN?`${segN} alerta${segN===1?'':'s'} de seguridad`:`${segF} intentos fallidos de entrar`} en las últimas 24 h.</b> Ya se bloquearon solos. <button class="btn btn-g btn-sm" data-v="seguridad">Ver Seguridad</button></div></div>`:''}<div class="grid4">
       <div class="kpi"><b>${C.length}</b><small>Clientes</small></div>
       <div class="kpi g"><b>${act.length}</b><small>Activos / soporte</small></div>
       <div class="kpi"><b>${soles(facturado)}</b><small>Total facturado</small></div>
@@ -631,13 +636,50 @@ async function vistaPreview(){
     <label class="bks-safe"><input type="checkbox" id="bkSafe" checked> Antes de restaurar, guardar una copia de cómo está hoy (para poder deshacer)</label>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-p" data-bkdo>↩ Restaurar las secciones marcadas</button><button class="btn btn-g" data-bkcancel>Cancelar</button></div></div>`;
 }
+// ---- Seguridad (SQL 23): intentos fallidos, bloqueos, ataques y errores de Xyro Apps ----
+const SEG_T={login_fallido:['Clave incorrecta','pend'],ataque:['Ataque','baja'],sospechoso:['Bot / sospechoso','baja'],error:['Error de la app','soporte'],restaurado:['Copia restaurada','activo'],bloqueo:['Bloqueo','pausado']};
+V.seguridad=async ()=>{
+  H('Seguridad','Intentos de entrar a Xyro Apps, bloqueos, ataques y errores. Solo tú lo ves.');
+  $('#acts').innerHTML='<button class="btn btn-g" data-v="seguridad">↻ Actualizar</button> <button class="btn btn-g" data-segprune>🧹 Borrar de más de 30 días</button>';
+  const d7=new Date(Date.now()-7*864e5).toISOString(),d24=Date.now()-864e5,h1=Date.now()-36e5;
+  const {data,error}=await sb.from('xa_seguridad').select('id,creado,tipo,email,ip,ua,sitio_id,detalle').gte('creado',d7).order('creado',{ascending:false}).limit(2000);
+  if(error)return `<div class="note">🛡️ Para activar la protección del login y este registro, corre <b>23-xyro-seguridad-respaldos.sql</b> en Supabase.</div>`;
+  let sit=[];try{sit=(await sb.from('sitios').select('id,slug,negocio')).data||[]}catch(_){}
+  const sn=id=>{const s=sit.find(x=>String(x.id)===String(id));return s?(s.negocio||s.slug):''};
+  const L=data||[],t=r=>new Date(r.creado).getTime(),U=L.filter(r=>t(r)>d24);
+  const fal=U.filter(r=>r.tipo==='login_fallido'),ata=L.filter(r=>r.tipo==='ataque'||r.tipo==='sospechoso'),err=U.filter(r=>r.tipo==='error');
+  const cuenta=(arr,k)=>{const m={};arr.forEach(r=>{const v=r[k]||'—';m[v]=(m[v]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+  const bloq=cuenta(L.filter(r=>r.tipo==='login_fallido'&&t(r)>h1),'ip').filter(([ip,n])=>ip!=='—'&&n>=5);
+  const ips=cuenta(fal,'ip').slice(0,8),ems=cuenta(fal,'email').slice(0,8);
+  const top=(arr,lab)=>arr.length?`<div class="tbl"><table><tr><th>${lab}</th><th style="text-align:right">Intentos (24 h)</th></tr>${arr.map(([k,n])=>`<tr><td>${esc(k)}</td><td style="text-align:right"><b>${n}</b></td></tr>`).join('')}</table></div>`:'<div class="empty">Nada en las últimas 24 h.</div>';
+  const tag=tp=>{const x=SEG_T[tp]||[tp,''];return `<span class="tag ${x[1]}">${esc(x[0])}</span>`};
+  const fila=r=>`<tr><td style="white-space:nowrap">${fechaHora(r.creado)}</td><td>${tag(r.tipo)}</td><td>${esc(r.email||'')}${r.sitio_id?`<br><small style="color:var(--mu)">${esc(sn(r.sitio_id)||'')}</small>`:''}</td><td><small>${esc(r.ip||'')}</small></td><td><small style="color:var(--mu)">${esc((r.detalle||r.ua||'').slice(0,160))}</small></td></tr>`;
+  const est=ata.length?'<span style="color:#ff5c7a">⚠️ Hubo ataques esta semana (ya bloqueados)</span>':bloq.length?'<span style="color:var(--warn,#ffb547)">🔒 Hay bloqueos activos</span>':'<span style="color:var(--ok)">✅ Todo tranquilo</span>';
+  return `<div class="grid4"><div class="kpi"><b>${fal.length}</b><small>Claves incorrectas (24 h)</small></div><div class="kpi w"><b>${bloq.length}</b><small>IPs bloqueadas ahora</small></div><div class="kpi"><b>${ata.length}</b><small>Ataques / bots (7 días)</small></div><div class="kpi g"><b>${err.length}</b><small>Errores de la app (24 h)</small></div></div>
+    <div class="panel"><h3>Estado: ${est}</h3><p class="d">El login de Xyro Apps espera cada vez más tras varios intentos fallidos (1 min, 5 min, 15 min, 1 hora) por correo y por IP. Si una IP insiste más de 20 veces en 10 minutos se marca como ataque. Los datos de cada negocio están aislados en la base: nadie puede leer los de otro.</p>
+      ${ata.length?`<div class="tbl"><table><tr><th>Fecha</th><th>Tipo</th><th>Correo</th><th>IP</th><th>Detalle</th></tr>${ata.slice(0,20).map(fila).join('')}</table></div>`:''}</div>
+    <div class="grid2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px"><div class="panel"><h3>IPs con más intentos</h3>${top(ips,'IP')}</div><div class="panel"><h3>Cuentas más intentadas</h3>${top(ems,'Correo')}</div></div>
+    <div class="panel"><h3>Últimos eventos</h3><p class="d">Últimos 7 días. Se borran solos a los 90 días.</p>${L.length?`<div class="tbl"><table><tr><th>Fecha</th><th>Tipo</th><th>Cuenta / negocio</th><th>IP</th><th>Detalle</th></tr>${L.slice(0,150).map(fila).join('')}</table></div>`:'<div class="empty">Sin eventos. Todo funcionando.</div>'}</div>`;
+};
+// ---- Copias de Xyro Apps (SQL 23): clientes, planes, membresías, pagos, asistencias, tienda y caja de cada negocio ----
+async function xaRespaldosHTML(){
+  const {data,error}=await sb.from('xa_respaldos').select('id,sitio_id,creado,auto,filas').order('creado',{ascending:false}).limit(1000);
+  if(error)return `<div class="panel"><h3>📱 Xyro Apps</h3><div class="note">Para guardar copias de las ventas, clientes y caja de cada negocio, corre <b>23-xyro-seguridad-respaldos.sql</b> en Supabase.</div></div>`;
+  const [{data:si},{data:cs}]=await Promise.all([sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,valor').eq('clave','config')]);
+  const xy={};(cs||[]).forEach(r=>xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[]);
+  const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps'));
+  const cards=L.map(s=>{const C=(data||[]).filter(r=>String(r.sitio_id)===String(s.id)),ult=C[0],nm=s.negocio||s.slug;
+    const filas=C.map(r=>`<tr><td><b>${fechaHora(r.creado)}</b> ${r.auto?'<span class="tag">Automática</span>':'<span class="tag x">Manual</span>'}</td><td>${(+r.filas||0).toLocaleString('es-PE')} registros</td><td style="text-align:right;white-space:nowrap"><button class="btn btn-p btn-sm" data-xarest="${r.id}" data-n="${esc(nm)}">↩ Restaurar</button> <button class="btn btn-g btn-sm" data-xadl="${r.id}" data-n="${esc(s.slug)}">⬇ Descargar</button> <button class="btn btn-g btn-sm" data-xadel="${r.id}">Borrar</button></td></tr>`).join('')||'<tr><td colspan="3" class="empty">Aún no tiene copias. La primera se hace sola esta madrugada.</td></tr>';
+    return `<details class="bk-cli" data-bk="xa-${esc(s.id)}" ${bkAbierto==='xa-'+s.id||L.length===1?'open':''}><summary><div class="bk-av">${esc(nm.slice(0,1).toUpperCase())}</div><div class="bk-info"><b>${esc(nm)}</b><small>${C.length} copia${C.length===1?'':'s'}${ult?' · última: '+fechaHora(ult.creado):' · sin copias'}</small></div><button class="btn btn-p btn-sm" data-xarsp="${esc(s.id)}">＋ Copia ahora</button></summary><div class="tbl"><table><tr><th>Fecha</th><th>Contenido</th><th></th></tr>${filas}</table></div></details>`}).join('')||'<div class="empty">Aún no hay clientes con Xyro Apps.</div>';
+  return `<div class="panel"><h3>📱 Xyro Apps <span class="tag x">Solo tú</span></h3><p class="d">Todo el sistema de cada negocio: clientes, planes, membresías, pagos, asistencias, tienda y cierres de caja. Se copia solo cada día a las 3 am (se guardan las últimas 14) y puedes hacer copias cuando quieras. Al restaurar, antes se guarda una copia de cómo está ahora.</p><div class="bk-list">${cards}</div></div>`;
+}
 let bkAbierto=null;
 V.backups=async ()=>{
-  H('Copias de seguridad','Respaldos del contenido de cada cliente. Se crean solos cada domingo.');
+  H('Copias de seguridad','Webs: cada domingo. Xyro Apps: todos los días a las 3 am. Solo tú puedes restaurar.');
   if(bkPreview){ $('#acts').innerHTML=''; return vistaPreview(); }
   $('#acts').innerHTML=`<button class="btn btn-g" data-backupnow>＋ Copia de todos</button>`;
   let grupos=[], err=false; try{ grupos=await cargarBackups(); }catch(_){ err=true; }
-  if(err) return `<div class="note">💾 Para activar los backups, corre <b>07-backup.sql</b> y <b>08-backups-ui.sql</b> en Supabase (carpeta <b>backend</b>).</div>`;
+  if(err) return `<div class="note">💾 Para activar los backups de las webs, corre <b>07-backup.sql</b> y <b>08-backups-ui.sql</b> en Supabase (carpeta <b>backend</b>).</div>${await xaRespaldosHTML()}`;
   const totalCopias=grupos.reduce((a,g)=>a+g.snaps.length,0);
   const kpi=(t,v)=>`<div class="bk-kpi"><small>${t}</small><b>${v}</b></div>`;
   const cards=grupos.map(g=>{
@@ -652,7 +694,7 @@ V.backups=async ()=>{
   return `<div class="panel"><div class="bk-kpis">${kpi('Clientes',grupos.filter(g=>g.sid).length)}${kpi('Copias guardadas',totalCopias)}</div>
     <p class="d">Cada cliente tiene sus propias copias. Toca un cliente para ver sus fechas, restaurar o borrar. Restaurar solo afecta a ese cliente.</p>
     <div class="bk-list">${cards}</div>
-    ${totalCopias?`<button class="btn btn-g" data-prunebackups style="margin-top:14px">🧹 Borrar copias de más de 30 días</button>`:''}</div>`;
+    ${totalCopias?`<button class="btn btn-g" data-prunebackups style="margin-top:14px">🧹 Borrar copias de más de 30 días</button>`:''}</div>${await xaRespaldosHTML()}`;
 };
 V.soporte=async ()=>{
   H('Modo soporte','Entra al sistema de un cliente para darle soporte o ayuda.');
@@ -687,6 +729,11 @@ document.addEventListener('click', async e=>{
   const d=el.dataset;
   try{
     if(d.v)return go(d.v);
+    if(d.xarsp){ e.preventDefault(); el.disabled=true; bkAbierto='xa-'+d.xarsp; const {error}=await sb.rpc('xa_respaldar',{p_sitio:d.xarsp}); if(error)throw error; toast('✅ Copia guardada'); return go('backups'); }
+    if(d.xarest){ const ok=prompt(`Vas a dejar el Xyro Apps de ${d.n} tal como estaba en esa copia. Lo que se hizo después se reemplaza (antes se guarda una copia de cómo está ahora, por si acaso).\n\nEscribe RESTAURAR para confirmar:`); if((ok||'').trim().toUpperCase()!=='RESTAURAR')return; el.disabled=true; const {data:n,error}=await sb.rpc('xa_restaurar',{p_id:+d.xarest}); if(error)throw error; touch(`Restauró Xyro Apps de ${d.n}`); toast(`✅ Restaurado: ${n||0} registros`); return go('backups'); }
+    if(d.xadl){ el.disabled=true; const {data:r,error}=await sb.from('xa_respaldos').select('creado,datos').eq('id',+d.xadl).single(); el.disabled=false; if(error)throw error; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(r.datos)],{type:'application/json'})); a.download=`xyro-apps-${d.n}-${String(r.creado).slice(0,10)}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); return; }
+    if(d.xadel){ if(!confirm('¿Borrar esta copia de Xyro Apps?'))return; const {error}=await sb.from('xa_respaldos').delete().eq('id',+d.xadel); if(error)throw error; return go('backups'); }
+    if('segprune'in d){ if(!confirm('¿Borrar los registros de seguridad de más de 30 días?'))return; const {error}=await sb.from('xa_seguridad').delete().lt('creado',new Date(Date.now()-30*864e5).toISOString()); if(error)throw error; return go('seguridad'); }
     if(d.sop&&d.xapp){const c=clientes.find(x=>x.id===d.sop);if(c&&cfg().soporteSinRegistro)touch(`Entró en modo soporte a ${c.negocio}`)}
     if(d.xapp){const w=window.open('about:blank','_blank');let u='../app/?s='+encodeURIComponent(d.xapp);try{const{data:c}=await sb.rpc('xa_pase');if(c)u+='#xa='+c}catch(_){}if(w){try{w.opener=null}catch(_){}w.location.href=u}else location.href=u;touch('Entró al Xyro Apps de '+d.xapp);return}
     if('logout'in d)return logout();

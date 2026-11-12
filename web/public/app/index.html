@@ -254,8 +254,8 @@ body:not(.dentro){background:#05060a}
     <img src="../img/marca/logo-apps-app.svg" alt="">
     <div><h1 style="font-size:28px;letter-spacing:-.03em">Xyro <span class="grad">Apps</span></h1><p class="mu">Entra con la cuenta de tu negocio</p></div>
     <form class="card" id="lf">
-      <label class="fl">Correo<input id="em" type="email" required autocomplete="username"></label>
-      <label class="fl">Contraseña<input id="pw" type="password" required autocomplete="current-password"></label>
+      <label class="fl">Correo<input id="em" type="email" required maxlength="120" autocomplete="username"></label>
+      <label class="fl">Contraseña<input id="pw" type="password" required maxlength="128" autocomplete="current-password"><input id="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"></label>
       <p class="err" id="lerr" hidden></p>
       <button class="btn p">Entrar</button>
       <button type="button" class="lnk" id="olv">¿Olvidaste tu contraseña?</button>
@@ -423,7 +423,18 @@ function checkin(v){
 }
 
 /* ===== UI base ===== */
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2600)}
+// Nada de errores técnicos en pantalla: se traduce y se avisa a XyroStudio (SQL 23).
+const TEC=/violates|syntax|relation|does not exist|PGRST|JWT|Failed to fetch|NetworkError|Load failed|TypeError|ReferenceError|undefined|null value|duplicate key|permission denied|invalid input|Cannot read|is not a function|status code|timeout|unexpected|stack|exception|\bat \w+ \(/i;
+let nEv=0;function reportar(tipo,det){if(DEMO||!sb||nEv>=8)return;nEv++;try{sb.rpc('xa_evento',{p_tipo:tipo,p_detalle:String(det||'').slice(0,500),p_sitio:SLUG||null}).then(()=>{},()=>{})}catch(_){}}
+function amable(m){m=String(m==null?'':m.message||m);if(!TEC.test(m))return m;reportar('error',m+' · '+(location.hash||''));
+ if(/fetch|NetworkError|Load failed|timeout/i.test(m))return navigator.onLine===false?'Sin internet. Revisa tu conexión e intenta de nuevo.':'No pudimos conectar. Intenta de nuevo en unos segundos.';
+ if(/JWT|expired/i.test(m))return'Tu sesión venció. Vuelve a entrar.';
+ if(/duplicate key/i.test(m))return'Ese dato ya está registrado.';
+ if(/permission denied/i.test(m))return'No tienes permiso para hacer eso.';
+ return'Algo no salió bien. Intenta de nuevo; si sigue pasando, escríbenos a Soporte.'}
+addEventListener('error',e=>reportar('error',(e.message||'')+' @'+String(e.filename||'').split('/').pop()+':'+(e.lineno||'')));
+addEventListener('unhandledrejection',e=>{const r=e.reason;reportar('error','promesa: '+(r&&r.message||r))});
+function toast(m){m=amable(m);const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),2600)}
 function countUp(root){(root||document).querySelectorAll('[data-n]').forEach(el=>{const to=+el.dataset.n,f=el.dataset.f,t0=performance.now(),D=900;const st=t=>{const k=Math.min(1,(t-t0)/D),v=to*(1-Math.pow(1-k,3));el.textContent=f==='s'?sol(Math.round(v)):Math.round(v).toLocaleString('es-PE');if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)})}
 function area(vals,w=600,h=150){const mx=Math.max(1,...vals),n=vals.length-1||1;const pts=vals.map((v,i)=>(i*w/n).toFixed(1)+','+(h-8-(v/mx)*(h-24)).toFixed(1));const d='M'+pts.join('L');
  return`<svg class="ch" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--a);stop-opacity:.45"/><stop offset="1" style="stop-color:var(--a);stop-opacity:0"/></linearGradient><linearGradient id="gl"><stop offset="0" style="stop-color:var(--b)"/><stop offset="1" style="stop-color:var(--a)"/></linearGradient></defs><path d="${d}L${w},${h}L0,${h}Z" fill="url(#ga)"/><path d="${d}" class="ln" pathLength="1" fill="none" stroke="url(#gl)" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`}
@@ -1460,17 +1471,28 @@ async function boot(){
  if(!data||!data.user)return login(/error_code=|error=/.test(H0)?'El enlace venció o ya se usó. Pide uno nuevo con «¿Olvidaste tu contraseña?».':'');
  try{await entrar(data.user)}catch(er){fatal(er.message)}
 }
+let lkT;
+async function espera(em){try{const{data,error}=await sb.rpc('xa_login_espera',{p_email:em});return error?0:(data|0)}catch(_){return 0}}
+async function fallo(em){try{const{data,error}=await sb.rpc('xa_login_fallo',{p_email:em,p_ua:navigator.userAgent.slice(0,200)});return error?0:(data|0)}catch(_){return 0}}
+function bloqueo(seg){const b=$('#lf .btn'),er=$('#lerr');clearInterval(lkT);let s=seg|0;
+ const f=()=>{if(s<=0){clearInterval(lkT);b.disabled=false;er.hidden=true;return}b.disabled=true;er.textContent=`🔒 Por seguridad, espera ${s>=90?Math.ceil(s/60)+' min':s+' s'} antes de volver a intentar.`;er.hidden=false;s--};f();lkT=setInterval(f,1000)}
 function login(msg){
  $('#boot').hidden=true;$('#login').hidden=false;{const e=P.get('e');if(e&&!$('#em').value)$('#em').value=e.slice(0,120);if(msg){const er=$('#lerr');er.textContent=msg;er.hidden=false}}
  $('#lf').onsubmit=async e=>{e.preventDefault();const er=$('#lerr');er.hidden=true;const b=$('#lf .btn');b.disabled=true;
-  try{const{data,error}=await sb.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});if(error)throw new Error(/confirm/i.test(error.message)?'Tu correo aún no está confirmado.':'Correo o contraseña incorrectos.');await entrar(data.user)}catch(x){er.textContent=x.message;er.hidden=false;b.disabled=false}};
+  const em=$('#em').value.trim().toLowerCase().slice(0,120),pw=$('#pw').value.slice(0,128);
+  if($('#hp').value){reportar('sospechoso','Bot en el login (llenó el campo trampa) · '+em);await new Promise(r=>setTimeout(r,1500));er.textContent='Correo o contraseña incorrectos.';er.hidden=false;b.disabled=false;return}
+  const w=await espera(em);if(w>0)return bloqueo(w);
+  try{const{data,error}=await sb.auth.signInWithPassword({email:em,password:pw});
+   if(error){if(/confirm/i.test(error.message))throw new Error('Tu correo aún no está confirmado.');if(/rate|too many|429/i.test(error.message+(error.status||''))){await fallo(em);return bloqueo(60)}
+    $('#pw').value='';const w2=await fallo(em);if(w2>0)return bloqueo(w2);throw new Error('Correo o contraseña incorrectos.')}
+   await entrar(data.user)}catch(x){er.textContent=amable(x.message);er.hidden=false;b.disabled=false}};
  $('#olv').onclick=()=>form('🔑 Recuperar contraseña',[{k:'e',l:'Tu correo',t:'email',v:$('#em').value.trim(),req:1}],async v=>{
   const{error}=await sb.auth.resetPasswordForEmail(v.e.toLowerCase(),{redirectTo:appURL()+(P.get('s')?'?s='+encodeURIComponent(P.get('s')):'')});
-  if(error)throw new Error(/rate|seconds|limit/i.test(error.message)?'Ya enviamos un correo hace poco. Espera unos minutos.':error.message);
+  if(error)throw new Error(/rate|seconds|limit/i.test(error.message)?'Ya enviamos un correo hace poco. Espera unos minutos.':amable(error.message));
   sheet(`<div style="text-align:center;display:grid;gap:10px"><div style="font-size:46px">📧</div><h3>Revisa tu correo</h3><p class="mu sm">Si <b>${esc(v.e)}</b> tiene cuenta, te llegó un enlace para crear una contraseña nueva (mira también en spam). También puedes pedirle una clave temporal a tu administrador.</p><button class="btn p" data-x>Entendido</button></div>`);
  },'');
 }
-function fatal(m,extra){$('#boot').hidden=true;$('#login').hidden=true;const d=document.createElement('div');d.className='cen';d.innerHTML=`<div class="lg"><img src="../img/marca/logo-apps-app.svg" alt=""><h2>${m}</h2>${extra||''}<button class="btn" onclick="location.reload()">Reintentar</button></div>`;document.body.appendChild(d)}
+function fatal(m,extra){m=esc(amable(m));$('#boot').hidden=true;$('#login').hidden=true;const d=document.createElement('div');d.className='cen';d.innerHTML=`<div class="lg"><img src="../img/marca/logo-apps-app.svg" alt=""><h2>${m}</h2>${extra||''}<button class="btn" onclick="location.reload()">Reintentar</button></div>`;document.body.appendChild(d)}
 async function entrar(u){
  const{data:p}=await sb.from('perfiles').select('*').eq('id',u.id).maybeSingle();
  if(!p||!ROLES[p.rol]||p.activo===false){await sb.auth.signOut();throw new Error('Esta cuenta no tiene acceso a Xyro Apps.')}
