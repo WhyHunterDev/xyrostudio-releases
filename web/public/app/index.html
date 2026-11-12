@@ -601,7 +601,12 @@ function socios(){
 document.addEventListener('importar',()=>importador());
 // ===== Carnets por WhatsApp: imagen + mensaje, solo a socios activos =====
 const CENV=()=>'xa-cenv-'+(SID||'demo'),cEnv=()=>new Set(LS.g(CENV(),[])),marcaEnv=id=>{const s=cEnv();s.add(id);LS.s(CENV(),[...s])};
-const carnetMsg=c=>{const url=new URL('carnet.html?c='+c.codigo,location.href).href;return`Hola ${c.nombre.split(' ')[0]} 👋 Este es tu carnet de ${nombre()}.\nMuestra el QR en la entrada para marcar tu asistencia${c.num?` (o marca con tu código ${c.num})`:''}.\nTambién lo abres aquí: ${url}`};
+const MOTIV=['Cada repetición te acerca a tu mejor versión. ¡Vamos con todo! 💪','La constancia le gana al talento. Te esperamos hoy. 🔥','Tu único rival eres tú de ayer. ¡A superarte! 🏆','Los resultados llegan a los que no se rinden. ¡Tú puedes! 💥','Hoy es un gran día para empezar fuerte. ¡Vamos! ⚡'];
+const carnetMsg=c=>`¡Hola ${c.nombre.trim().split(' ')[0]}! 👋 Bienvenido(a) a la familia de ${nombre()}.\n\nTe enviamos tu carnet de socio 🪪${c.num?` (N.º ${c.num})`:''}. Muéstralo en recepción para marcar tu ingreso; también puedes marcar con tu DNI.\n\n${MOTIV[Math.floor(Math.random()*MOTIV.length)]}`;
+// Caja útil de una imagen (sin bordes transparentes) para centrarla bien.
+function bordes(im){const w=im.naturalWidth||im.width,hh=im.naturalHeight||im.height;try{const c=document.createElement('canvas'),k=Math.min(1,300/Math.max(w,hh));c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(hh*k));const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);const d=x.getImageData(0,0,c.width,c.height).data;let x0=c.width,y0=c.height,x1=-1,y1=-1;
+ for(let y=0;y<c.height;y++)for(let X=0;X<c.width;X++)if(d[(y*c.width+X)*4+3]>16){if(X<x0)x0=X;if(X>x1)x1=X;if(y<y0)y0=y;if(y>y1)y1=y}
+ if(x1<0)return{x:0,y:0,w,h:hh};return{x:x0/k,y:y0/k,w:(x1-x0+1)/k,h:(y1-y0+1)/k}}catch(_){return{x:0,y:0,w,h:hh}}}
 const imgDe=src=>new Promise(r=>{if(!src)return r(null);const im=new Image();im.crossOrigin='anonymous';im.onload=()=>r(im);im.onerror=()=>r(null);im.src=src;setTimeout(()=>r(null),4000)});
 async function carnetPNG(c){
  if(!window.qrcode)await cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');
@@ -619,7 +624,7 @@ async function carnetPNG(c){
  // cabecera con logo
  x.save();rr(cx0,cy0,cw,300,64);x.clip();const hg=x.createLinearGradient(0,cy0,0,cy0+300);hg.addColorStop(0,A+'40');hg.addColorStop(1,'#11111100');x.fillStyle=hg;x.fillRect(cx0,cy0,cw,300);x.restore();
  const lg=await imgDe(logoDe());let ty=cy0+120;
- if(lg){const s=150,lx=W/2-s/2,ly=cy0+52;x.save();x.beginPath();x.arc(W/2,ly+s/2,s/2+8,0,7);x.fillStyle='#0b0b0b';x.fill();x.lineWidth=4;x.strokeStyle=A;x.stroke();x.beginPath();x.arc(W/2,ly+s/2,s/2,0,7);x.clip();const r=Math.min(s/lg.width,s/lg.height);x.drawImage(lg,W/2-lg.width*r/2,ly+s/2-lg.height*r/2,lg.width*r,lg.height*r);x.restore();ty=ly+s+70}
+ if(lg){const s=170,lx=W/2-s/2,ly=cy0+52;x.save();x.beginPath();x.arc(W/2,ly+s/2,s/2+8,0,7);x.fillStyle='#0b0b0b';x.fill();x.lineWidth=4;x.strokeStyle=A;x.stroke();x.beginPath();x.arc(W/2,ly+s/2,s/2,0,7);x.clip();const bx=bordes(lg),in_=s*.78,r=Math.min(in_/bx.w,in_/bx.h);x.drawImage(lg,bx.x,bx.y,bx.w,bx.h,W/2-bx.w*r/2,ly+s/2-bx.h*r/2,bx.w*r,bx.h*r);x.restore();ty=ly+s+70}
  x.textAlign='center';x.fillStyle='#fff';fit(nombre().toUpperCase(),cw-120,56,900);x.fillText(nombre().toUpperCase(),W/2,ty);
  x.fillStyle=A;x.font=`700 26px ${F}`;x.fillText('C A R N E T   D E   S O C I O',W/2,ty+46);
  // QR
@@ -637,13 +642,13 @@ async function carnetPNG(c){
 }
 async function enviarCarnet(c){
  if(!c.codigo){await DB.upd('cli',c.id,{codigo:codigo()})}
- const b=await carnetPNG(c),f=new File([b],'carnet-'+(c.num||c.codigo)+'.png',{type:'image/png'});
+ const msg=carnetMsg(c),b=await carnetPNG(c),f=new File([b],'carnet-'+(c.num||c.codigo)+'.png',{type:'image/png'});
  // Celular: WhatsApp recibe imagen + mensaje juntos (eliges el chat). Computadora: se copia la imagen y se abre su chat con el mensaje.
- if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){try{await navigator.share({files:[f]});marcaEnv(c.id);return true}catch(er){if(er&&er.name==='AbortError')return false}}
+ if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){try{await navigator.share({files:[f],text:msg});marcaEnv(c.id);return true}catch(er){if(er&&er.name==='AbortError')return false}}
  let copiada=false;try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);copiada=true}catch(_){}
  if(!copiada){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)}
- if(c.telefono&&!DEMO){const u='https://wa.me/'+tel(c.telefono),w=window.open(u,'_blank');if(!w){location.href=u;return true}try{w.opener=null}catch(_){}}
- toast(copiada?'🖼️ Imagen copiada: pégala en el chat (Ctrl+V) y envía':'🖼️ Imagen descargada: adjúntala en el chat');marcaEnv(c.id);return true;
+ if(c.telefono&&!DEMO){const u=waLink(c,msg),w=window.open(u,'_blank');if(!w){location.href=u;return true}try{w.opener=null}catch(_){}}
+ toast(copiada?'🖼️ Imagen copiada: en el chat pega con Ctrl+V y envía':'🖼️ Imagen descargada: adjúntala en el chat');marcaEnv(c.id);return true;
 }
 document.addEventListener('carnets',()=>{
  window.qrcode||cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js').catch(()=>{});let ver='pend';
@@ -651,7 +656,7 @@ document.addEventListener('carnets',()=>{
   el.querySelector('#cnb').innerHTML=`<div class="chips"><button class="chip ${ver==='pend'?'on':''}" data-cv="pend">Por enviar<span>${P.length}</span></button><button class="chip ${ver==='env'?'on':''}" data-cv="env">Enviados<span>${A.length-P.length}</span></button></div>
    <div class="tl" style="max-height:52vh;overflow:auto">${L.slice(0,300).map(([c,e])=>`<div class="row">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${c.num?'N.º '+esc(c.num)+' · ':''}${esc(e.t)}</small></span><button class="btn sm ${ver==='pend'?'p':''}" data-cs="${esc(c.id)}">${ver==='pend'?'📲 Enviar':'Reenviar'}</button></div>`).join('')||`<p class="mu" style="padding:12px">${ver==='pend'?'🎉 Ya les enviaste el carnet a todos los socios activos.':'Aún no envías ninguno.'}</p>`}</div>
    ${sinT?`<p class="mu sm" style="margin-top:8px">${sinT} socio${sinT===1?'':'s'} activo${sinT===1?'':'s'} sin celular: agrégalo en su ficha para enviarle el carnet.</p>`:''}`};
- sheet(`<h3>🪪 Enviar carnets</h3><p class="mu sm">Solo socios con ${esc(R.plan.toLowerCase())} activa. Cada carnet va solo como imagen con su QR (sin enlaces). En el celular eliges WhatsApp y el chat; en la computadora se abre su chat y pegas la imagen (Ctrl+V).</p><div id="cnb"></div><div class="bt"><button class="btn p" data-x>Listo</button></div>`,el=>{
+ sheet(`<h3>🪪 Enviar carnets</h3><p class="mu sm">Solo socios con ${esc(R.plan.toLowerCase())} activa. Cada carnet va como imagen con su QR y un mensaje de bienvenida (sin enlaces). En el celular eliges WhatsApp y el chat; en la computadora se abre su chat y pegas la imagen (Ctrl+V).</p><div id="cnb"></div><div class="bt"><button class="btn p" data-x>Listo</button></div>`,el=>{
   draw(el);el.addEventListener('click',async e=>{const v=e.target.closest('[data-cv]');if(v){ver=v.dataset.cv;return draw(el)}
    const b=e.target.closest('[data-cs]');if(!b)return;const c=cli(b.dataset.cs);if(!c)return;b.disabled=true;b.textContent='…';try{await enviarCarnet(c)}catch(er){toast(er.message)}draw(el)})});
 });
