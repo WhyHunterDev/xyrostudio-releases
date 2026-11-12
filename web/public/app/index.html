@@ -282,6 +282,9 @@ const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',as
 
 let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[]};
 const KS=['cli','pla','mem','pag','asi','pro','mov','cie'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
+const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','WhatsApp que responde, agenda, recuerda pagos y cierra ventas'],['edits','Xyro Edits','Videos y reels editados rápido para tus redes']];
+const tiene=k=>DEMO||!!(ME&&ME.gestor)||XY.includes(k);
+const CTL=()=>tiene('control');
 const isAdmin=()=>ME&&(ME.rol==='admin'||ME.rol==='gestor');
 
 /* ===== Fechas ===== */
@@ -428,7 +431,7 @@ function form(title,fields,onSave,extra){
 }
 
 /* ===== Navegación ===== */
-const NAV=()=>ME&&ME.rol==='cafetin'?[['tienda','🥤',tiendaN()],['caja','💰','Caja'],['metas','🎯','Metas'],['cuenta','🔐','Mi cuenta']]:[['inicio','✨','Inicio'],['socios','👥',R.clis],['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['metas','🎯','Metas'],['planes','🏷️','Planes']].concat(isAdmin()?[['reportes','📊','Reportes'],['equipo','👤','Equipo'],['ajustes','⚙️','Ajustes']]:[]).concat([['cuenta','🔐','Mi cuenta']]);
+const NAV=()=>(ME&&ME.rol==='cafetin'?[['tienda','🥤',tiendaN()],['caja','💰','Caja'],['metas','🎯','Metas'],['cuenta','🔐','Mi cuenta']]:[['inicio','✨','Inicio'],['socios','👥',R.clis],['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['metas','🎯','Metas'],['planes','🏷️','Planes']].concat(isAdmin()?[['reportes','📊','Reportes'],['equipo','👤','Equipo'],['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]:[]).concat([['cuenta','🔐','Mi cuenta']])).filter(x=>x[0]!=='tienda'||CTL());
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'../img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='../img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
@@ -442,14 +445,15 @@ let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
 function go(){
  ixOff();
  const h=(location.hash||'#/inicio').slice(2).split('/');ruta=h[0]||'inicio';arg=decodeURIComponent(h[1]||'');
- if(ME&&ME.rol==='cafetin'&&!['tienda','caja','metas','mas','cuenta'].includes(ruta)){ruta='tienda';history.replaceState(null,'','#/tienda');if(cjF&&!cjF.t)cjF.t='tienda'}
+ if(ME&&ME.rol==='cafetin'&&!['tienda','caja','metas','mas','cuenta'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
- $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta'].includes(ruta))));
- const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta}[ruta]||inicio;
+ $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros'].includes(ruta))));
+ if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
+ const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${html}</div>`;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
- $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta'}[ruta]||'';
+ $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
 $('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>isAdmin()?editProd():toast('Solo el administrador crea productos'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave()})[ruta]||nuevoCli)()};
@@ -752,7 +756,7 @@ function ajustes(){
  if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
  const COL=[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo']];
  setTimeout(()=>{
-  $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])},{k:'tienda',l:'Nombre de tu tienda',v:CFG.tienda||'',ph:R.tienda||'Cafetín'}],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
+  $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])},...(CTL()?[{k:'tienda',l:'Nombre de tu tienda',v:CFG.tienda||'',ph:R.tienda||'Cafetín'}]:[])],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
   $('#amk').onclick=()=>form('🎨 Marca y colores',[{k:'color',l:'Color principal',t:'color',v:CFG.color||WEB.color||'#3ad6ff',half:1},{k:'color2',l:'Color secundario',t:'color',v:CFG.color2||WEB.color2||'#7c5cff',half:1},{k:'logo',l:'Logo (enlace a la imagen)',v:CFG.logo||WEB.logo||'',ph:'https://…/logo.png'},{k:'web',l:'Tu página web',v:CFG.web||'',ph:'https://tunegocio.com'}],async v=>{await DB.cfg(v);shell();go();toast('Listo, la app ya luce como tu marca ✨')});
   $('#acp').onclick=async e=>{const url=CFG.web||prompt('¿Cuál es tu página web?','https://');if(!url)return;const b=e.target;b.disabled=true;b.textContent='Leyendo tu web…';
    try{const t=await temaDeWeb(url);if(!t.color&&!t.logo)throw new Error('No encontramos colores');await DB.cfg({color:t.color||CFG.color,color2:t.color2||CFG.color2,bg:t.bg||'',logo:t.logo||CFG.logo,web:t.web,nombre:CFG.nombre||t.nombre});shell();go();confeti(40);toast('🎨 Copiamos el look de tu web')}
@@ -1143,6 +1147,23 @@ function reportes(){
 function mas(){
  const n=NAV().filter(x=>!['inicio','socios','kiosco','tienda','caja'].includes(x[0]));
  return`<div class="hi"><h2>Más</h2></div><div class="mas st">${n.map(([k,i,t])=>`<a class="card" href="#/${k}"><em>${i}</em>${esc(t)}</a>`).join('')}${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
+}
+
+/* ===== Integraciones: Xyro Apps es la base y el resto se activa en el mismo panel ===== */
+function xyros(){
+ const on=k=>k==='apps'||XY.includes(k)||(DEMO&&k==='control');
+ const wa=n=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, quiero activar '+n+' para '+nombre())}`;
+ setTimeout(()=>{const b=$('#pwEd');b&&(b.onclick=()=>form('🌐 Panel de la web',[{k:'panelWeb',l:'Enlace del panel de su web',v:CFG.panelWeb||'',ph:'https://…/panel.html'}],async v=>{await DB.cfg({panelWeb:v.panelWeb});go();toast('Guardado ✓')}))});
+ const desc=k=>k==='apps'?'Tu sistema base: '+R.clis.toLowerCase()+', '+R.plan.toLowerCase()+'s, cobros, asistencia, caja, metas y equipo.':XYROS.find(x=>x[0]===k)[2]+'.';
+ const acc=k=>{if(!on(k))return isAdmin()?`<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
+  if(k==='control')return'<a class="btn sm" href="#/tienda">Abrir punto de venta</a>';
+  if(k==='webs')return(CFG.panelWeb?`<a class="btn sm" target="_blank" rel="noopener" href="${esc(CFG.panelWeb)}">Editar mi web ↗</a>`:'')+(ME.gestor?'<button class="btn sm" id="pwEd">Enlace del panel</button>':'');
+  return''};
+ const pedido=ruta==='xyros'&&location.hash.indexOf('tienda')>=0;
+ return`<div class="hi"><div><h2>Integraciones</h2><p class="mu">Todo tu negocio en un solo panel. Xyro Apps es la base y le sumas lo que necesites, sin instalar otras apps.</p></div></div>
+ ${pedido?`<div class="card" style="margin-bottom:12px;border-color:var(--a)">🥤 <b>El punto de venta es parte de Xyro Control.</b> <span class="mu">Actívalo para vender productos, llevar stock y ver tus márgenes aquí mismo.</span></div>`:''}
+ <div class="eq st">${XYROS.map(([k,n])=>`<div class="card eqc"><img src="../img/marca/logo-${k}-app.svg" alt="" style="width:44px;height:44px;flex:none"><div class="nm"><b>${esc(n)}${k==='apps'?' <small class="mu">· base</small>':''}</b><small style="white-space:normal">${esc(desc(k))}</small></div><div class="eqa">${on(k)?'<span class="pill act">Activo</span>':'<span class="pill sin">No activo</span>'}${k==='apps'?'':acc(k)}</div></div>`).join('')}</div>
+ ${ME.gestor?'<p class="mu sm" style="margin-top:12px">Como XyroStudio ves todas las funciones. Los módulos del cliente se activan en tu Panel XyroStudio → Clientes → Xyros.</p>':''}`;
 }
 
 /* ===== Equipo: cuentas, permisos y claves (mismas cuentas que el panel de la web) ===== */
