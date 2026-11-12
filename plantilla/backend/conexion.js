@@ -62,6 +62,9 @@
     },
     async salir() { await sb.auth.signOut(); },
     async actual() {
+      // Entrada con un clic desde Xyro Apps: #xa=CODIGO de un solo uso (SQL 21) → sesión propia de este panel.
+      const xa = /^#xa=([a-f0-9]{32,128})$/.exec(location.hash);
+      if (xa) { history.replaceState(null, '', location.pathname + location.search); try { const { data: tk } = await sb.rpc('xa_canje', { p_code: xa[1] }); if (tk) await sb.auth.refreshSession({ refresh_token: tk }); } catch (_) {} }
       const { data } = await sb.auth.getUser();
       if (!data.user) return null;
       return (await sb.from('perfiles').select('*').eq('id', data.user.id).single()).data;

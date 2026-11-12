@@ -324,7 +324,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes']]],['Operación',[['soporte','🛟','Modo soporte'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps']]],['Operación',[['soporte','🛟','Modo soporte'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
     NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}</button>`).join('')).join('')+
@@ -357,6 +357,26 @@ V.resumen=async ()=>{
 function clCard(cl){return`<div class="cl"><div class="in"><h4>${esc(cl.negocio)} <span class="tag ${cl.estado}">${estLabel(cl.estado)}</span> <span class="tag ${cl.pago==='pagado'?'pg':'pend'}">${cl.pago==='pagado'?'Pagado':'Por cobrar'}</span></h4>
   <div class="meta"><span>${esc(cl.rubro||'—')}</span><span>${soles(cl.costo)}</span>${+cl.soporte?`<span>+ ${soles(cl.soporte)}/mes</span>`:''}${cl.entregado?`<span>Entregado ${cl.entregado}</span>`:''}</div></div>
   <div class="acts"><button class="btn btn-g btn-sm" data-open="${cl.id}">Abrir ficha</button>${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Web ↗</a>`:''}</div></div>`;}
+// Xyro Apps de todos tus clientes: cómo van este mes y entrar con un clic (solo tú lo ves; mirar no deja rastro).
+async function sumaPagos(sid,desde){let t=0,i=0;for(;;){const{data,error}=await sb.from('xa_pagos').select('monto').eq('sitio_id',sid).gte('fecha',desde).order('id').range(i,i+999);if(error||!data)break;data.forEach(r=>t+=+r.monto||0);if(data.length<1000)break;i+=1000}return t}
+V.negocios=async ()=>{
+  H('Xyro Apps','Cómo van los negocios de tus clientes. Solo tú lo ves y mirar no deja rastro.');
+  $('#acts').innerHTML='<button class="btn btn-g" data-v="negocios">↻ Actualizar</button>';
+  const [{data:si},{data:cs}]=await Promise.all([sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,valor').eq('clave','config')]);
+  const xy={};(cs||[]).forEach(r=>xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[]);
+  const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps'));
+  if(!L.length)return '<div class="panel"><div class="empty">Aún no hay clientes con Xyro Apps. Actívalo en Clientes → ficha → Xyros.</div></div>';
+  const m0=new Date();m0.setDate(1);m0.setHours(0,0,0,0);const h0=new Date();h0.setHours(0,0,0,0);
+  const cnt=async(t,s,f)=>{let q=sb.from(t).select('id',{count:'exact',head:true}).eq('sitio_id',s);if(f)q=f(q);const r=await q;return r.count||0};
+  const R=await Promise.all(L.map(async s=>{const[soc,asi,mes,hoy]=await Promise.all([cnt('xa_clientes',s.id),cnt('xa_asistencias',s.id,q=>q.gte('t',h0.toISOString())),sumaPagos(s.id,m0.toISOString()),sumaPagos(s.id,h0.toISOString())]);return{s,soc,asi,mes,hoy,mods:xy[s.id]}}));
+  R.sort((a,b)=>b.mes-a.mes);
+  const T=k=>R.reduce((a,r)=>a+r[k],0);
+  const MOD={control:'Control',webs:'Web',bots:'Bots',edits:'Edits'};
+  return `<div class="grid4"><div class="kpi"><b>${R.length}</b><small>Negocios con Xyro Apps</small></div><div class="kpi g"><b>${soles(T('mes'))}</b><small>Cobrado por ellos este mes</small></div><div class="kpi"><b>${T('soc').toLocaleString('es-PE')}</b><small>Clientes registrados</small></div><div class="kpi w"><b>${T('asi').toLocaleString('es-PE')}</b><small>Asistencias de hoy</small></div></div>
+    <div class="panel tbl"><table><tr><th>Negocio</th><th>Integraciones</th><th style="text-align:right">Hoy</th><th style="text-align:right">Este mes</th><th style="text-align:right">Clientes</th><th style="text-align:right">Asist. hoy</th><th></th></tr>
+    ${R.map(r=>`<tr><td><b>${esc(r.s.negocio||r.s.slug)}</b><br><small style="color:var(--mu)">${esc(r.s.slug)}</small></td><td>${Object.keys(MOD).filter(k=>r.mods.includes(k)).map(k=>`<span class="tag">${MOD[k]}</span>`).join(' ')||'<small style="color:var(--mu)">Solo base</small>'}</td><td style="text-align:right">${soles(r.hoy)}</td><td style="text-align:right"><b>${soles(r.mes)}</b></td><td style="text-align:right">${r.soc}</td><td style="text-align:right">${r.asi}</td><td style="text-align:right"><button class="btn btn-g btn-sm" data-xapp="${esc(r.s.slug)}">Entrar ↗</button></td></tr>`).join('')}</table>
+    <p class="d" style="margin-top:10px">«Entrar» abre su Xyro Apps con tu cuenta de XyroStudio sin pedir contraseña. Ahí ves y corriges todo; los cambios que hagas quedan con tu nombre.</p></div>`;
+};
 let flt='todos';
 V.clientes=async ()=>{
   H('Clientes','Cada web que creas, con su costo, soporte y versiones. Guardado en la nube.');
@@ -651,6 +671,7 @@ document.addEventListener('click', async e=>{
   const d=el.dataset;
   try{
     if(d.v)return go(d.v);
+    if(d.xapp){const w=window.open('about:blank','_blank');let u='../app/?s='+encodeURIComponent(d.xapp);try{const{data:c}=await sb.rpc('xa_pase');if(c)u+='#xa='+c}catch(_){}if(w){try{w.opener=null}catch(_){}w.location.href=u}else location.href=u;touch('Entró al Xyro Apps de '+d.xapp);return}
     if('logout'in d)return logout();
     if(el.id==='mb')return $('#side').classList.toggle('open');
     if(el.id==='swSop'){const c=cfg();c.soporteSinRegistro=!c.soporteSinRegistro;setCfg(c);return go('soporte');}
