@@ -1,0 +1,12 @@
+{
+  // Web xyrostudio.net (estática, carpeta public/) en Cloudflare.
+  // Se publica solo al hacer push a main (Cloudflare Workers Builds, carpeta web/)
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "xyrostudio",
+  "compatibility_date": "2026-11-03",
+  "assets": { "directory": "public" },
+  "routes": [
+    { "pattern": "xyrostudio.net", "custom_domain": true },
+    { "pattern": "www.xyrostudio.net", "custom_domain": true }
+  ]
+}
