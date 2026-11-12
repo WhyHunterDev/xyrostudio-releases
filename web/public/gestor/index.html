@@ -145,6 +145,18 @@ th{color:var(--mu);font-size:.66rem;letter-spacing:.08em;text-transform:uppercas
 }
 .xlogo{background:none!important;padding:0;object-fit:contain}
 .xy-grid{display:grid;gap:10px}.xy{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}.xy.on{border-color:color-mix(in srgb,var(--ac) 55%,transparent);background:rgba(124,92,255,.06)}.xy img{width:44px;height:44px;border-radius:12px}.xy small{color:var(--mu);font-size:.78rem;display:block}.xy .xp{display:flex;gap:8px;align-items:center}.xy .xp input{width:90px}.xy-tot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.xy-tot b{font-family:var(--mono);font-size:1.3rem;color:var(--ac2)}@media(max-width:600px){.xy{grid-template-columns:40px 1fr}.xy .xp{grid-column:1/-1}}
+
+/* Tema sobrio (como el panel de Santos): negro liso, sin degradados; un solo color de acento en lo activo. */
+:root{--bg:#0b0b0b;--bg2:#101010;--card:#141414;--card2:#181818;--line:#ffffff16;--line2:#ffffff22;--mu:#9b9b9b}
+body::before,body::after{display:none}
+aside{background:#101010;backdrop-filter:none}
+.btn-p,.toast,.ftabs button.on{background:var(--ac);box-shadow:none}
+.nv.on{background:var(--ac);color:#fff}.nv.on::before{display:none}
+.kpi,.panel,.cl,.fhead{background:#141414}
+.kpi::before,.kpi.g::before,.kpi.w::before{display:none}
+.tag.x{background:#ffffff12;color:var(--tx)}
+.logo,.bk-av,.fav{background:var(--ac)}
+.xy.on{background:#141414}
 </style>
 </head>
 <body>
