@@ -645,10 +645,21 @@ async function enviarCarnet(c){
  const msg=carnetMsg(c),b=await carnetPNG(c),f=new File([b],'carnet-'+(c.num||c.codigo)+'.png',{type:'image/png'});
  // Celular: WhatsApp recibe imagen + mensaje juntos (eliges el chat). Computadora: se copia la imagen y se abre su chat con el mensaje.
  if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){try{await navigator.share({files:[f],text:msg});marcaEnv(c.id);return true}catch(er){if(er&&er.name==='AbortError')return false}}
- let copiada=false;try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);copiada=true}catch(_){}
- if(!copiada){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)}
- if(c.telefono&&!DEMO){const u=waLink(c,msg),w=window.open(u,'_blank');if(!w){location.href=u;return true}try{w.opener=null}catch(_){}}
- toast(copiada?'🖼️ Imagen copiada: en el chat pega con Ctrl+V y envía':'🖼️ Imagen descargada: adjúntala en el chat');marcaEnv(c.id);return true;
+ // Computadora: WhatsApp no deja adjuntar por enlace, así que se copia la imagen y recepción la pega (Ctrl+V).
+ // El texto va sin emojis: WhatsApp de escritorio los rompe (�) cuando llegan por enlace.
+ const txt=msg.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').replace(/ +([,.!)])/g,'$1').replace(/[ \t]+/g,' ').replace(/ ?\n ?/g,'\n').trim();
+ const iu=URL.createObjectURL(b),copia=async()=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);return true}catch(_){return false}};
+ let ok=await copia();
+ await new Promise(fin=>sheet(`<h3>🪪 Carnet de ${esc(c.nombre.split(' ')[0])}</h3><img src="${iu}" alt="" style="display:block;max-height:42vh;max-width:100%;margin:8px auto;border-radius:14px">
+  <ol class="mu sm" style="margin:8px 0 0 18px;display:grid;gap:4px"><li>Toca <b>Abrir su chat</b> (el mensaje de bienvenida ya va escrito).</li><li>En el chat pega la imagen con <b>Ctrl + V</b>.</li><li>Dale <b>Enviar</b> ✅</li></ol>
+  <p class="sm" id="cpOk" style="margin-top:8px;color:${ok?'var(--ok)':'var(--wa)'}">${ok?'✅ Imagen copiada, lista para pegar.':'⚠️ Tu navegador no dejó copiar: usa «Descargar» y adjúntala con el clip 📎.'}</p>
+  <div class="bt"><button class="btn" id="cpDl">⬇️ Descargar</button>${c.telefono&&!DEMO?'<button class="btn p" id="cpGo">📲 Abrir su chat</button>':'<button class="btn p" data-x>Listo</button>'}</div>`,(el,close)=>{
+  const o=el.closest('.ov');new MutationObserver((_,mo)=>{if(!document.body.contains(o)){mo.disconnect();URL.revokeObjectURL(iu);fin()}}).observe(document.body,{childList:true});
+  el.querySelector('#cpDl').onclick=()=>{const a=document.createElement('a');a.href=iu;a.download=f.name;a.click()};
+  const g=el.querySelector('#cpGo');g&&(g.onclick=async()=>{ok=await copia()||ok;const u=waLink(c,txt),w=window.open(u,'_blank');if(!w)location.href=u;else try{w.opener=null}catch(_){}
+   marcaEnv(c.id);g.textContent='✅ Chat abierto · pega con Ctrl+V';el.querySelector('#cpOk').textContent=ok?'✅ Imagen copiada: pégala en el chat con Ctrl+V y envía.':'⚠️ Adjunta la imagen descargada con el clip 📎.';setTimeout(close,6000)});
+ }));
+ return true;
 }
 document.addEventListener('carnets',()=>{
  window.qrcode||cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js').catch(()=>{});let ver='pend';
