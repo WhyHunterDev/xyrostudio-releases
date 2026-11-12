@@ -128,7 +128,7 @@ th{color:var(--mu);font-size:.66rem;letter-spacing:.08em;text-transform:uppercas
 .ftabs button.on{color:#fff;background:linear-gradient(135deg,var(--ac),#9d7bff);box-shadow:0 8px 20px -10px rgba(124,108,255,.9)}
 .ftabs i{font-style:normal;font-family:var(--mono);font-size:.7rem;background:rgba(255,255,255,.12);padding:.05rem .4rem;border-radius:99px;margin-left:2px}
 .fbody .ftab{display:none;animation:fIn .25s ease}
-.fbody[data-cur="resumen"] [data-ft="resumen"],.fbody[data-cur="datos"] [data-ft="datos"],.fbody[data-cur="tema"] [data-ft="tema"],.fbody[data-cur="manto"] [data-ft="manto"],.fbody[data-cur="cuentas"] [data-ft="cuentas"],.fbody[data-cur="uso"] [data-ft="uso"],.fbody[data-cur="versiones"] [data-ft="versiones"]{display:block}
+.fbody[data-cur="xyros"] [data-ft="xyros"],.fbody[data-cur="resumen"] [data-ft="resumen"],.fbody[data-cur="datos"] [data-ft="datos"],.fbody[data-cur="tema"] [data-ft="tema"],.fbody[data-cur="manto"] [data-ft="manto"],.fbody[data-cur="cuentas"] [data-ft="cuentas"],.fbody[data-cur="uso"] [data-ft="uso"],.fbody[data-cur="versiones"] [data-ft="versiones"]{display:block}
 @keyframes fIn{from{opacity:0;transform:translateY(6px)}}
 .back{color:var(--mu);font-size:.85rem;margin-bottom:12px;display:inline-flex;gap:.4rem;cursor:pointer}
 .menuBtn{display:none}
@@ -144,6 +144,7 @@ th{color:var(--mu);font-size:.66rem;letter-spacing:.08em;text-transform:uppercas
   .cl{grid-template-columns:1fr}.cl .acts{justify-content:flex-start}
 }
 .xlogo{background:none!important;padding:0;object-fit:contain}
+.xy-grid{display:grid;gap:10px}.xy{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}.xy.on{border-color:color-mix(in srgb,var(--ac) 55%,transparent);background:rgba(124,92,255,.06)}.xy img{width:44px;height:44px;border-radius:12px}.xy small{color:var(--mu);font-size:.78rem;display:block}.xy .xp{display:flex;gap:8px;align-items:center}.xy .xp input{width:90px}.xy-tot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.xy-tot b{font-family:var(--mono);font-size:1.3rem;color:var(--ac2)}@media(max-width:600px){.xy{grid-template-columns:40px 1fr}.xy .xp{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -207,6 +208,31 @@ const touch=m=>{try{const l=logGet();l.unshift({t:Date.now(),m});localStorage.se
 async function cargar(){ const {data,error}=await sb.from('clientes_agencia').select('*').order('creado',{ascending:true}); if(error)throw error; clientes=data||[]; }
 async function guardar(c){ const {error}=await sb.from('clientes_agencia').upsert(c); if(error)throw error; }
 async function borrar(id){ const {error}=await sb.from('clientes_agencia').delete().eq('id',id); if(error)throw error; }
+
+// ---- Xyros (divisiones que el cliente puede tener) ----
+// Activos -> config.xyros del sitio (la plataforma del cliente lo lee para ofrecer mejoras).
+// Precios -> clientes_agencia.modulos (privado, solo tú). Requiere 14-xyros.sql.
+const XYROS=[['webs','Xyro Webs','Web y panel editable'],['apps','Xyro Apps','Clientes, membresías y cobros'],['control','Xyro Control','Caja, inventario y reportes'],['bots','Xyro Bots','WhatsApp que atiende y vende'],['edits','Xyro Edits','Reels y videos con IA']];
+const modsDe=(cl,cf)=>{ const m=structuredClone(cl.modulos||{}); const act=(cf&&cf.xyros)||(cl.url?['webs']:[]); XYROS.forEach(([k])=>{ m[k]=m[k]||{}; if(m[k].on===undefined)m[k].on=act.includes(k); if(k==='webs'&&m[k].precio==null&&m[k].on)m[k].precio=+cl.soporte||0; }); return m; };
+const mensualDe=c=>{ const m=c.modulos; if(m&&Object.keys(m).length) return Object.values(m).reduce((a,x)=>a+(x&&x.on?(+x.precio||0):0),0); return c.ciclo==='mensual'?(+c.soporte||0):0; };
+function xyrosPanel(cl,cf,slug){
+  const m=modsDe(cl,cf), tot=Object.values(m).reduce((a,x)=>a+(x.on?(+x.precio||0):0),0);
+  return `<div class="panel"><h3>Xyros del cliente <span class="tag x">Suscripción</span></h3><p class="d">Activa cada división que el cliente contrata y su mensualidad. Las que no tenga le aparecen en su panel como mejora.</p>
+    <div class="xy-grid">${XYROS.map(([k,n,d])=>`<div class="xy ${m[k].on?'on':''}"><img src="../img/marca/logo-${k}-app.svg" alt=""><div><b>${n}</b><small>${d}</small></div><div class="xp"><input type="number" min="0" step="any" placeholder="S/ mes" data-xyp="${k}" value="${m[k].precio??''}"><button class="tema${m[k].on?' save':''}" data-xyt="${k}" style="${m[k].on?'border-color:var(--ok);color:var(--ok)':''}">${m[k].on?'✅ Activo':'➕ Activar'}</button></div></div>`).join('')}</div>
+    <div class="xy-tot"><span>Mensualidad total</span><b id="xyTot">${soles(tot)}</b></div>
+    <button class="btn btn-p" data-xysave="${esc(cl.id)}" data-slug="${esc(slug||'')}" style="margin-top:12px">💾 Guardar Xyros</button></div>`;
+}
+async function guardarXyros(id,slug){
+  const cl=clientes.find(c=>c.id==id), m={};
+  $$('[data-xyt]').forEach(b=>{ const k=b.dataset.xyt, v=$(`[data-xyp="${k}"]`).value; m[k]={on:b.classList.contains('save'),precio:v===''?null:+v}; });
+  const {error}=await sb.from('clientes_agencia').update({modulos:m}).eq('id',id);
+  if(error){ if(/modulos|column|schema cache/i.test(error.message)) throw new Error('Corre 14-xyros.sql en Supabase para guardar los Xyros.'); throw error; }
+  if(slug) await guardarPromo(slug,{xyros:XYROS.map(([k])=>k).filter(k=>m[k].on)});
+  touch(`Actualizó los Xyros de ${cl?cl.negocio:'un cliente'}`);
+}
+
+function xyTot(){ const t=$$('[data-xyt]').reduce((a,b)=>a+(b.classList.contains('save')?(+$(`[data-xyp="${b.dataset.xyt}"]`).value||0):0),0); const o=$('#xyTot'); if(o)o.textContent=soles(t); }
+document.addEventListener('input',e=>{ if(e.target.dataset&&e.target.dataset.xyp)xyTot(); });
 
 // ---- Temas de temporada (aplica a la web del cliente) ----
 const TEMAS=[['','Normal','✨'],['navidad','Navidad','🎄'],['halloween','Halloween','🎃'],['anionuevo','Año Nuevo','🎆'],['fiestaspatrias','Fiestas Patrias','🎊'],['sanvalentin','San Valentín','❤️']];
@@ -317,13 +343,13 @@ V.resumen=async ()=>{
   H('Hola, '+me.nombre.split(' ')[0],'Tu agencia de un vistazo.'); $('#acts').innerHTML=`<span class="livechip"><span class="d"></span>${new Date().toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'})}</span> <button class="btn btn-p" data-v="clientes">Ver clientes</button>`;
   const C=clientes, act=C.filter(c=>c.estado==='activo'||c.estado==='soporte');
   const facturado=C.reduce((a,c)=>a+(+c.costo||0),0);
-  const mensual=C.filter(c=>c.estado!=='baja'&&c.ciclo==='mensual').reduce((a,c)=>a+(+c.soporte||0),0);
+  const mensual=C.filter(c=>c.estado!=='baja').reduce((a,c)=>a+mensualDe(c),0);
   const pend=C.filter(c=>c.pago==='pendiente').reduce((a,c)=>a+(+c.costo||0),0);
   return `<div class="grid4">
       <div class="kpi"><b>${C.length}</b><small>Clientes</small></div>
       <div class="kpi g"><b>${act.length}</b><small>Activos / soporte</small></div>
       <div class="kpi"><b>${soles(facturado)}</b><small>Total facturado</small></div>
-      <div class="kpi w"><b>${soles(mensual)}</b><small>Soporte mensual</small></div></div>
+      <div class="kpi w"><b>${soles(mensual)}</b><small>Ingreso mensual</small></div></div>
     ${pend?`<div class="note">⚠️ Tienes ${soles(pend)} en pagos pendientes de cobro.</div>`:''}
     <div class="panel"><h3>Clientes recientes</h3><p class="d">Toca uno para ver todo su detalle.</p>
       <div class="clients">${C.slice(0,4).map(clCard).join('')||'<div class="empty">Aún no tienes clientes. Agrega el primero en «Clientes».</div>'}</div></div>`;
@@ -355,14 +381,15 @@ async function clForm(){
     fi.slug?(cf&&cf.mantenimiento?chip('🛠️ Mantenimiento','var(--warn)'):chip('🟢 Web en vivo','var(--ok)')):chip('Sin URL','var(--mu)'),
     cf&&cf.tema?chip(TEMA_NOM[cf.tema]||cf.tema,'var(--ac)'):'',
     cl.soporte?chip(`S/ ${esc(cl.soporte)} ${cl.ciclo==='anual'?'/año':cl.ciclo==='mensual'?'/mes':''}`,'var(--ac2)'):''].join('');
-  const TABS=[['resumen','📊','Resumen'],['datos','📝','Datos'],['tema','🎨','Tema'],['manto','🛠️','Mantenimiento'],['cuentas','👥','Cuentas',fi.nU],['uso','💾','Uso'],['versiones','🕑','Versiones',fi.nV]];
+  const nX=XYROS.filter(([k])=>modsDe(cl,cf)[k].on).length;
+  const TABS=[['resumen','📊','Resumen'],['xyros','🧩','Xyros',nX],['datos','📝','Datos'],['tema','🎨','Tema'],['manto','🛠️','Mantenimiento'],['cuentas','👥','Cuentas',fi.nU],['uso','💾','Uso'],['versiones','🕑','Versiones',fi.nV]];
   if(!TABS.some(t=>t[0]===fichaTab)) fichaTab='resumen';
   return `<a class="back" data-cancel>← Volver a clientes</a>
     <div class="fhead"><div class="fav">${esc((cl.negocio||'?').trim().charAt(0).toUpperCase())}</div>
       <div class="fti"><h2>${esc(cl.negocio)}</h2><small>${esc(cl.rubro||'Cliente')}${cl.contacto?' · '+esc(cl.contacto):''}</small><div class="fchips">${chips}</div></div>
       <div class="facts">${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">🌐 Web ↗</a>`:''}${cl.panel?`<a class="btn btn-g btn-sm" href="${esc(cl.panel)}" target="_blank" rel="noopener">🔐 Panel ↗</a>`:''}${wa?`<a class="btn btn-g btn-sm" href="https://wa.me/${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}</div></div>
     <nav class="ftabs">${TABS.map(([k,e,t,b])=>`<button data-ftab="${k}" class="${k===fichaTab?'on':''}">${e} ${t}${b?` <i>${b}</i>`:''}</button>`).join('')}</nav>
-    <div class="fbody" data-cur="${fichaTab}"><section class="ftab" data-ft="datos">${datos}</section>${resto}</div>`;
+    <div class="fbody" data-cur="${fichaTab}"><section class="ftab" data-ft="datos">${datos}</section><section class="ftab" data-ft="xyros">${xyrosPanel(cl,cf,fi.slug)}</section>${resto}</div>`;
 }
 const TEMA_NOM={'':'Normal','navidad':'🎄 Navidad','halloween':'🎃 Halloween','anionuevo':'🎆 Año Nuevo','fiestaspatrias':'🎊 Fiestas Patrias','sanvalentin':'❤️ San Valentín'};
 async function leerSitio(slug){
@@ -628,6 +655,8 @@ document.addEventListener('click', async e=>{
     if(el.id==='mb')return $('#side').classList.toggle('open');
     if(el.id==='swSop'){const c=cfg();c.soporteSinRegistro=!c.soporteSinRegistro;setCfg(c);return go('soporte');}
     if(d.flt){flt=d.flt;return go('clientes');}
+    if(d.xyt){ const on=!el.classList.contains('save'); el.classList.toggle('save',on); el.style.cssText=on?'border-color:var(--ok);color:var(--ok)':''; el.textContent=on?'✅ Activo':'➕ Activar'; el.closest('.xy').classList.toggle('on',on); xyTot(); return; }
+    if(d.xysave){ el.disabled=true; try{ await guardarXyros(d.xysave,d.slug); await cargar(); toast('Xyros guardados ✓'); fichaTab='xyros'; return go('clientes'); }catch(ex){ toast(ex.message); el.disabled=false; } return; }
     if(d.ftab){ fichaTab=d.ftab; $$('.ftabs button').forEach(b=>b.classList.toggle('on',b.dataset.ftab===fichaTab)); $('.fbody').dataset.cur=fichaTab; return; }
     if('new'in d){editing='new';return go('clientes');}
     if(d.open){editing=d.open;fichaTab='resumen';view='clientes';return go('clientes');}

@@ -40,13 +40,16 @@ input{padding:10px 12px;border-radius:10px;border:1px solid var(--line);backgrou
   // Roles que pueden entrar a este panel. Agrega aquí los del proyecto (ej. recepcion, caja).
   const ROLES = { gestor: 'Gestor (XyroStudio)', admin: 'Administrador' };
   let me = null, d = null;
+  // Xyros: lo que el cliente ya tiene (config.xyros, lo activa XyroStudio) y lo que puede sumar.
+  const XYRO_WA = '51936449066';
+  const XYROS = [['webs', 'Xyro Webs', 'Tu web y panel editable', '🌐'], ['apps', 'Xyro Apps', 'Clientes, membresías y cobros automáticos', '📱'], ['control', 'Xyro Control', 'Caja, inventario y reportes', '📊'], ['bots', 'Xyro Bots', 'WhatsApp que atiende y vende 24/7', '💬'], ['edits', 'Xyro Edits', 'Reels y videos con IA para tus redes', '🎬']];
 
   async function entrar(perfil, email) {
     const sid = await BK.idDe();
     if (!perfil || !ROLES[perfil.rol] || (perfil.rol !== 'gestor' && perfil.sitio_id !== sid) || perfil.activo === false) { await BK.auth.salir(); throw new Error('Esta cuenta no tiene acceso a este panel.'); }
     me = { ...perfil, email, gestor: perfil.rol === 'gestor' };
     const n = await BK.cargar();
-    d = { negocio: n.negocio || {}, items: n.items || [] };
+    d = { negocio: n.negocio || {}, items: n.items || [], xyros: (n.config && n.config.xyros) || ['webs'] };
     $('#login').hidden = true; $('#app').hidden = false; vigilar(); pintar();
   }
   // Registro de actividad: el gestor no deja rastro.
@@ -68,9 +71,16 @@ input{padding:10px 12px;border-radius:10px;border:1px solid var(--line);backgrou
       </div>
       <div class="card"><h3>Productos / servicios</h3><div id="its"></div><button class="btn g" id="add">＋ Agregar</button></div>
       <button class="btn" id="save">💾 Guardar cambios</button>
+      ${me.rol === 'admin' || me.gestor ? `<div class="card"><h3>🚀 Haz crecer tu negocio</h3><p class="mu">Tienes: ${XYROS.filter((x) => d.xyros.includes(x[0])).map((x) => x[1]).join(', ') || '—'}. Suma más con un clic:</p>
+        ${XYROS.filter((x) => !d.xyros.includes(x[0])).map(([k, t, desc, emo]) => `<div class="row" style="grid-template-columns:40px 1fr auto"><span style="font-size:24px">${emo}</span><div><b>${t}</b><div class="mu">${desc}</div></div><button class="btn g" data-up="${k}">Lo quiero</button></div>`).join('') || '<p class="mu">¡Ya tienes todo el ecosistema! 🎉</p>'}</div>` : ''}
       <a class="mu" href="./" target="_blank">Ver mi web ↗</a>`;
     items();
     $('#out').onclick = salir;
+    // Mejora: avisa a XyroStudio por WhatsApp y queda registrado (luego: pago en línea y activación automática).
+    document.querySelectorAll('[data-up]').forEach((b) => (b.onclick = () => {
+      const x = XYROS.find((y) => y[0] === b.dataset.up); log('pidió ' + x[1]);
+      open('https://wa.me/' + XYRO_WA + '?text=' + encodeURIComponent(`Hola XyroStudio, quiero sumar ${x[1]} a ${n.nombre || 'mi negocio'}.`), '_blank', 'noopener');
+    }));
     $('#add').onclick = () => { d.items.push({ emo: '⭐', nombre: '', precio: '' }); items(); };
     $('#save').onclick = async (e) => {
       e.target.disabled = true;
