@@ -592,12 +592,51 @@ function socios(){
  const E=S.cli.map(c=>est(c).k),n=k=>E.filter(x=>k==='act'?x==='act'||x==='pronto':x===k).length;
  const F=[['todos','Todos',S.cli.length],['act','Activos',n('act')],['pronto','Por vencer',n('pronto')],['venc','Vencidos',n('venc')],['sin','Sin plan',n('sin')]].concat(n('cong')?[['cong','Congelados',n('cong')]]:[]);
  setTimeout(()=>{$$('.chip').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;$$('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lst').innerHTML=lista()});const s=$('#q2');s&&(s.oninput=e=>{qtxt=e.target.value;$('#q').value=qtxt;$('#lst').innerHTML=lista()})});
- return`<div class="hi"><h2>${esc(R.clis)}</h2><div style="display:flex;gap:8px">${isAdmin()?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('importar',{bubbles:true}))">📥 Importar de AppFit</button>`:''}${n('venc')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('masivo',{bubbles:true}))">📲 Recordar a vencidos</button>`:''}</div></div>
+ return`<div class="hi"><h2>${esc(R.clis)}</h2><div style="display:flex;gap:8px">${isAdmin()?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('importar',{bubbles:true}))">📥 Importar de AppFit</button>`:''}${n('act')+n('cong')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('carnets',{bubbles:true}))">🪪 Enviar carnets</button>`:''}${n('venc')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('masivo',{bubbles:true}))">📲 Recordar a vencidos</button>`:''}</div></div>
  <label class="srch" style="display:flex;width:100%;margin-bottom:12px"><span>🔎</span><input id="q2" value="${esc(qtxt)}" placeholder="Buscar por nombre, código, DNI o celular"></label>
  <div class="chips">${F.map(([k,t,c])=>`<button class="chip ${filtro===k?'on':''}" data-f="${k}">${t}<span>${c}</span></button>`).join('')}</div>
  <div class="card" style="padding:8px" id="lst">${lista()}</div>`;
 }
 document.addEventListener('importar',()=>importador());
+// ===== Carnets por WhatsApp: imagen + mensaje, solo a socios activos =====
+const CENV=()=>'xa-cenv-'+(SID||'demo'),cEnv=()=>new Set(LS.g(CENV(),[])),marcaEnv=id=>{const s=cEnv();s.add(id);LS.s(CENV(),[...s])};
+const carnetMsg=c=>{const url=new URL('carnet.html?c='+c.codigo,location.href).href;return`Hola ${c.nombre.split(' ')[0]} 👋 Este es tu carnet de ${nombre()}.\nMuestra el QR en la entrada para marcar tu asistencia${c.num?` (o marca con tu código ${c.num})`:''}.\nTambién lo abres aquí: ${url}`};
+async function carnetPNG(c){
+ if(!window.qrcode)await cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');
+ const W=720,H=1040,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),A=getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||'#7c5cff',e=est(c),F="'Inter',system-ui,sans-serif";
+ x.fillStyle='#0b0b0b';x.fillRect(0,0,W,H);x.strokeStyle=A;x.lineWidth=6;x.beginPath();x.roundRect(14,14,W-28,H-28,40);x.stroke();
+ x.fillStyle=A;x.fillRect(14+40,14,W-28-80,6);
+ x.textAlign='center';x.fillStyle='#fff';x.font=`800 44px ${F}`;x.fillText(nombre().slice(0,26),W/2,110);
+ x.fillStyle='#9b9b9b';x.font=`600 24px ${F}`;x.fillText('CARNET DIGITAL',W/2,150);
+ const q=qrcode(0,'M');q.addData(c.codigo);q.make();const n=q.getModuleCount(),S=440,cs=Math.floor(S/n),qs=cs*n,ox=(W-qs)/2,oy=200;
+ x.fillStyle='#fff';x.beginPath();x.roundRect(ox-28,oy-28,qs+56,qs+56,28);x.fill();x.fillStyle='#000';
+ for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(ox+k*cs,oy+r*cs,cs,cs);
+ const y=oy+qs+100;x.fillStyle='#fff';x.font=`800 46px ${F}`;x.fillText(c.nombre.slice(0,28),W/2,y);
+ x.fillStyle='#bdbdbd';x.font=`500 28px ${F}`;x.fillText(e.m?`${(e.m.plan_nombre||R.plan).slice(0,24)} · hasta ${fF(e.m.fin)}`:'',W/2,y+50);
+ x.fillStyle=A;x.font=`800 40px ${F}`;x.fillText(c.num?'N.º '+c.num:c.codigo,W/2,y+120);
+ x.fillStyle='#8a8a8a';x.font=`500 24px ${F}`;x.fillText('Muéstralo en la entrada para marcar tu asistencia',W/2,H-60);
+ return new Promise(r=>cv.toBlob(r,'image/png'));
+}
+async function enviarCarnet(c){
+ if(!c.codigo){await DB.upd('cli',c.id,{codigo:codigo()})}
+ const msg=carnetMsg(c),b=await carnetPNG(c),f=new File([b],'carnet-'+(c.num||c.codigo)+'.png',{type:'image/png'});
+ // Celular: WhatsApp recibe imagen + mensaje juntos (eliges el chat). Computadora: se copia la imagen y se abre su chat con el mensaje.
+ if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){try{await navigator.share({files:[f],text:msg});marcaEnv(c.id);return true}catch(er){if(er&&er.name==='AbortError')return false}}
+ let copiada=false;try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);copiada=true}catch(_){}
+ if(!copiada){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)}
+ if(c.telefono&&!DEMO){const w=window.open(waLink(c,msg),'_blank');if(!w){location.href=waLink(c,msg);return true}try{w.opener=null}catch(_){}}
+ toast(copiada?'🖼️ Imagen copiada: pégala en el chat (Ctrl+V) y envía':'🖼️ Imagen descargada: adjúntala en el chat');marcaEnv(c.id);return true;
+}
+document.addEventListener('carnets',()=>{
+ window.qrcode||cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js').catch(()=>{});let ver='pend';
+ const draw=el=>{const env=cEnv(),A=S.cli.map(c=>[c,est(c)]).filter(([c,e])=>['act','pronto','cong'].includes(e.k)&&c.telefono).sort((a,b)=>(+a[0].num||1e9)-(+b[0].num||1e9)||a[0].nombre.localeCompare(b[0].nombre)),P=A.filter(([c])=>!env.has(c.id)),L=ver==='pend'?P:A.filter(([c])=>env.has(c.id)),sinT=S.cli.filter(c=>['act','pronto','cong'].includes(est(c).k)&&!c.telefono).length;
+  el.querySelector('#cnb').innerHTML=`<div class="chips"><button class="chip ${ver==='pend'?'on':''}" data-cv="pend">Por enviar<span>${P.length}</span></button><button class="chip ${ver==='env'?'on':''}" data-cv="env">Enviados<span>${A.length-P.length}</span></button></div>
+   <div class="tl" style="max-height:52vh;overflow:auto">${L.slice(0,300).map(([c,e])=>`<div class="row">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${c.num?'N.º '+esc(c.num)+' · ':''}${esc(e.t)}</small></span><button class="btn sm ${ver==='pend'?'p':''}" data-cs="${esc(c.id)}">${ver==='pend'?'📲 Enviar':'Reenviar'}</button></div>`).join('')||`<p class="mu" style="padding:12px">${ver==='pend'?'🎉 Ya les enviaste el carnet a todos los socios activos.':'Aún no envías ninguno.'}</p>`}</div>
+   ${sinT?`<p class="mu sm" style="margin-top:8px">${sinT} socio${sinT===1?'':'s'} activo${sinT===1?'':'s'} sin celular: agrégalo en su ficha para enviarle el carnet.</p>`:''}`};
+ sheet(`<h3>🪪 Enviar carnets</h3><p class="mu sm">Solo socios con ${esc(R.plan.toLowerCase())} activa. Cada carnet va como imagen con su QR y un mensaje. En el celular eliges WhatsApp y el chat; en la computadora se abre su chat y pegas la imagen (Ctrl+V).</p><div id="cnb"></div><div class="bt"><button class="btn p" data-x>Listo</button></div>`,el=>{
+  draw(el);el.addEventListener('click',async e=>{const v=e.target.closest('[data-cv]');if(v){ver=v.dataset.cv;return draw(el)}
+   const b=e.target.closest('[data-cs]');if(!b)return;const c=cli(b.dataset.cs);if(!c)return;b.disabled=true;b.textContent='…';try{await enviarCarnet(c)}catch(er){toast(er.message)}draw(el)})});
+});
 document.addEventListener('masivo',()=>{
  const L=S.cli.map(c=>[c,est(c)]).filter(x=>x[1].k==='venc'&&x[0].telefono&&x[1].d>=-60);
  sheet(`<h3>📲 Recordatorios por WhatsApp</h3><p class="mu sm">Toca cada uno: se abre WhatsApp con el mensaje listo. Con Xyro Bots se envían solos.</p><div class="tl">${L.map(([c,e])=>`<a class="row" target="_blank" rel="noopener" href="${waLink(c,waMsg(c,e))}" onclick="this.style.opacity=.4">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${e.t}</small></span>📲</a>`).join('')||'<p class="mu">Nadie con celular registrado.</p>'}</div><div class="bt"><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Bots para enviar recordatorios automáticos')}">🤖 Automatizar con Xyro Bots</a><button class="btn p" data-x>Listo</button></div>`);
@@ -1422,7 +1461,7 @@ async function carnet(c){
  const e=est(c),url=new URL('carnet.html?c='+c.codigo,location.href).href;
  sheet(`<div class="carnet"><b style="position:relative">${esc(nombre())}</b><div class="qr" id="qrb"><div style="aspect-ratio:1;display:grid;place-items:center;color:#000">…</div></div><div style="position:relative"><h3>${esc(c.nombre)}</h3><p class="sm" style="opacity:.8">${e.m?esc(e.m.plan_nombre||'')+' · hasta '+fF(e.m.fin):'Sin '+esc(R.plan.toLowerCase())}</p><p class="sm" style="opacity:.6;letter-spacing:.2em">${c.num?'#'+esc(c.num)+' · ':''}${esc(c.codigo)}</p></div></div>
  <p class="mu sm" style="text-align:center">Muéstralo en la entrada para marcar asistencia.</p>
- <div class="bt" style="justify-content:center">${c.telefono&&!DEMO?`<a class="btn p" target="_blank" rel="noopener" href="${waLink(c,'Hola '+c.nombre.split(' ')[0]+', este es tu carnet digital de '+nombre()+': '+url)}">📲 Enviar por WhatsApp</a>`:''}<button class="btn" data-x>Cerrar</button></div>`,async el=>{try{el.querySelector('#qrb').innerHTML=await qrSVG(c.codigo)}catch(_){el.querySelector('#qrb').innerHTML='<b style="color:#000;font-size:22px">'+esc(c.codigo)+'</b>'}});
+ <div class="bt" style="justify-content:center">${c.telefono||DEMO?`<button class="btn p" id="cEnv">📲 Enviar por WhatsApp</button>`:''}<button class="btn" id="cDl">⬇️ Imagen</button><button class="btn" data-x>Cerrar</button></div>`,async el=>{const be=el.querySelector('#cEnv');be&&(be.onclick=()=>enviarCarnet(c).catch(er=>toast(er.message)));el.querySelector('#cDl').onclick=async()=>{const b=await carnetPNG(c),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='carnet-'+(c.num||c.codigo)+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)};try{el.querySelector('#qrb').innerHTML=await qrSVG(c.codigo)}catch(_){el.querySelector('#qrb').innerHTML='<b style="color:#000;font-size:22px">'+esc(c.codigo)+'</b>'}});
 }
 
 /* ===== Kiosco de asistencia (tablet en la entrada) ===== */
