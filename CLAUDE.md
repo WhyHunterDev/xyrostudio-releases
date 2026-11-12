@@ -6,6 +6,7 @@ Responde en español, corto. Ahorra tokens: no explores el repo entero; usa este
 - `web/public/index.html` · portada xyrostudio.net (SPA tipo app, rutas `#/webs #/apps #/control #/bots #/edits #/arma #/resultados`). Todo el CSS/JS va inline. ~57 KB: no la leas completa.
 - `web/public/videos/` · landing de la app de videos. Legales, `gracias.html`, `discord/`, `img/` quedan en raíz (la app y los pagos los enlazan).
 - `web/public/gestor/` · **Panel XyroStudio** (privado, PWA). Supabase: misma base que Santos Strength. Accesos por rol en el objeto `ACCESO` de `gestor/index.html` (hoy solo `gestor` = dueño).
+- `plantilla/` · base para cada proyecto nuevo de cliente (web + panel + conexion.js). Ver `plantilla/README.md`. No se publica.
 - `marca/` y `web/public/img/marca/` · logos (misma X; el centro cambia por división).
 
 ## Publicar

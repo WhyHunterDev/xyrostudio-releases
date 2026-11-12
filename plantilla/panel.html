@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel</title>
+<meta name="robots" content="noindex,nofollow">
+<!-- Panel del cliente (plantilla XyroStudio). Roles: admin y los que agregues. El gestor entra sin dejar rastro. -->
+<style>
+:root{--c:#7c5cff;--bg:#0b0b12;--card:#13131c;--line:#26263a;--tx:#eef0f6;--mu:#8b8ba3}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+button,input{font:inherit;color:inherit}
+.box{max-width:640px;margin:0 auto;padding:24px 16px;display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px}
+label{display:grid;gap:4px;font-size:13px;color:var(--mu);font-weight:600}
+input{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0006;outline:none;width:100%}
+.btn{padding:10px 14px;border-radius:10px;border:0;background:var(--c);color:#fff;font-weight:700;cursor:pointer}
+.btn.g{background:#ffffff12}
+.row{display:grid;grid-template-columns:60px 1fr 100px 40px;gap:6px;align-items:center}
+.top{display:flex;justify-content:space-between;align-items:center}
+.err{color:#ff6b7a;font-size:14px}.mu{color:var(--mu);font-size:13px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--c);padding:10px 16px;border-radius:10px;font-weight:700;display:none}
+</style>
+</head>
+<body>
+<div class="box" id="login">
+  <h1>Panel</h1>
+  <form class="card" id="lf"><label>Correo<input id="em" type="email" required autocomplete="username"></label><label>Contraseña<input id="pw" type="password" required autocomplete="current-password"></label><p class="err" id="err" hidden></p><button class="btn">Entrar</button><p class="mu">¿Olvidaste tu clave? Pídele una temporal a tu administrador.</p></form>
+</div>
+<div class="box" id="app" hidden></div>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="backend/conexion.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const toast = (m) => { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => (t.style.display = 'none'), 2500); };
+  const BK = window.SS_BACKEND; if (!BK) { $('#login').innerHTML = '<p class="err">Falta configurar backend/conexion.js</p>'; return; }
+  // Roles que pueden entrar a este panel. Agrega aquí los del proyecto (ej. recepcion, caja).
+  const ROLES = { gestor: 'Gestor (XyroStudio)', admin: 'Administrador' };
+  let me = null, d = null;
+
+  async function entrar(perfil, email) {
+    const sid = await BK.idDe();
+    if (!perfil || !ROLES[perfil.rol] || (perfil.rol !== 'gestor' && perfil.sitio_id !== sid) || perfil.activo === false) { await BK.auth.salir(); throw new Error('Esta cuenta no tiene acceso a este panel.'); }
+    me = { ...perfil, email, gestor: perfil.rol === 'gestor' };
+    const n = await BK.cargar();
+    d = { negocio: n.negocio || {}, items: n.items || [] };
+    $('#login').hidden = true; $('#app').hidden = false; vigilar(); pintar();
+  }
+  // Registro de actividad: el gestor no deja rastro.
+  const log = (que) => { if (!me.gestor) BK.actividad(null, me.nombre || me.email, que).catch(() => {}); };
+  // Cierre de sesión tras 1 hora sin uso (no aplica al gestor).
+  function vigilar() { if (me.gestor) return; let t; const r = () => { clearTimeout(t); t = setTimeout(salir, 36e5); }; ['click', 'keydown', 'touchstart'].forEach((e) => addEventListener(e, r, { passive: true })); r(); }
+  async function salir() { await BK.auth.salir(); location.reload(); }
+
+  function pintar() {
+    const n = d.negocio;
+    if (me.debe_cambiar && !me.gestor) {
+      $('#app').innerHTML = `<h1>Crea tu contraseña</h1><form class="card" id="pf"><label>Nueva contraseña (mín. 8)<input id="np" type="password" minlength="8" required></label><button class="btn">Guardar</button></form>`;
+      $('#pf').onsubmit = async (e) => { e.preventDefault(); try { await BK.auth.cambiarPass($('#np').value); try { await BK.sb.rpc('limpiar_debe_cambiar'); } catch (_) {} me.debe_cambiar = false; log('cambió su contraseña'); pintar(); } catch (ex) { toast(ex.message); } };
+      return;
+    }
+    $('#app').innerHTML = `<div class="top"><div><h1>${esc(n.nombre || 'Mi negocio')}</h1><p class="mu">${esc(ROLES[me.rol])} · ${esc(me.email)}</p></div><button class="btn g" id="out">Salir</button></div>
+      <div class="card"><h3>Datos de la web</h3>
+        ${[['nombre', 'Nombre del negocio'], ['titulo', 'Título principal'], ['sub', 'Frase'], ['cta', 'Texto del botón'], ['whatsapp', 'WhatsApp (con 51)'], ['color', 'Color (#hex)']].map(([k, l]) => `<label>${l}<input data-n="${k}" value="${esc(n[k] || '')}"></label>`).join('')}
+      </div>
+      <div class="card"><h3>Productos / servicios</h3><div id="its"></div><button class="btn g" id="add">＋ Agregar</button></div>
+      <button class="btn" id="save">💾 Guardar cambios</button>
+      <a class="mu" href="./" target="_blank">Ver mi web ↗</a>`;
+    items();
+    $('#out').onclick = salir;
+    $('#add').onclick = () => { d.items.push({ emo: '⭐', nombre: '', precio: '' }); items(); };
+    $('#save').onclick = async (e) => {
+      e.target.disabled = true;
+      document.querySelectorAll('[data-n]').forEach((i) => (d.negocio[i.dataset.n] = i.value.trim()));
+      try { await BK.guardarClave('negocio', d.negocio); await BK.guardarClave('items', d.items.filter((x) => x.nombre)); log('editó la web'); toast('Guardado ✓'); } catch (ex) { toast(ex.message); }
+      e.target.disabled = false;
+    };
+  }
+  function items() {
+    $('#its').innerHTML = d.items.map((x, i) => `<div class="row"><input data-i="${i}" data-f="emo" value="${esc(x.emo)}"><input data-i="${i}" data-f="nombre" placeholder="Nombre" value="${esc(x.nombre)}"><input data-i="${i}" data-f="precio" type="number" step="0.1" placeholder="S/" value="${esc(x.precio)}"><button class="btn g" data-del="${i}">✕</button></div>`).join('');
+    document.querySelectorAll('#its input').forEach((i) => (i.oninput = () => (d.items[i.dataset.i][i.dataset.f] = i.value)));
+    document.querySelectorAll('[data-del]').forEach((b) => (b.onclick = () => { d.items.splice(+b.dataset.del, 1); items(); }));
+  }
+
+  $('#lf').onsubmit = async (e) => {
+    e.preventDefault(); $('#err').hidden = true;
+    try { const email = $('#em').value.trim(); await entrar(await BK.auth.entrar(email, $('#pw').value), email); }
+    catch (ex) { $('#err').textContent = /Invalid login/i.test(ex.message) ? 'Correo o contraseña incorrectos.' : ex.message; $('#err').hidden = false; }
+  };
+  (async () => { try { const p = await BK.auth.actual(); if (p) { const { data } = await BK.sb.auth.getUser(); await entrar(p, data.user.email); } } catch (_) {} })();
+})();
+</script>
+</body>
+</html>

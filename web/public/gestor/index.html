@@ -210,7 +210,16 @@ async function borrar(id){ const {error}=await sb.from('clientes_agencia').delet
 
 // ---- Temas de temporada (aplica a la web del cliente) ----
 const TEMAS=[['','Normal','✨'],['navidad','Navidad','🎄'],['halloween','Halloween','🎃'],['anionuevo','Año Nuevo','🎆'],['fiestaspatrias','Fiestas Patrias','🎊'],['sanvalentin','San Valentín','❤️']];
-const slugDe=url=>{try{const p=new URL(url).pathname.split('/').filter(Boolean);return p[p.length-1]||'';}catch(_){return '';}};
+// Slug del proyecto: último tramo de la ruta (…/santos-strength/) o, si la web está en la raíz, el subdominio/dominio (panaderia.xyrostudio.net → panaderia).
+const slugDe=url=>{try{const u=new URL(url),p=u.pathname.split('/').filter(Boolean).filter(x=>!/\.html?$/i.test(x));if(p.length)return p[p.length-1];const h=u.hostname.split('.').filter(x=>x!=='www');return h[0]||'';}catch(_){return '';}};
+// Conecta un proyecto nuevo: crea su fila en 'sitios' si aún no existe (requiere 13-nuevos-proyectos.sql).
+async function asegurarSitio(c){
+  const slug=slugDe(c.url||''); if(!slug)return;
+  const {data:s}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle(); if(s)return;
+  const {error}=await sb.from('sitios').insert({slug,negocio:c.negocio||slug});
+  if(error){ toast('Cliente guardado, pero falta conectar «'+slug+'»: corre 13-nuevos-proyectos.sql en Supabase.'); throw Object.assign(new Error(''),{silencio:1}); }
+  touch(`Conectó el proyecto «${slug}»`); toast('Proyecto «'+slug+'» conectado ✓');
+}
 async function aplicarTema(slug,tema){
   const {data:s,error:e1}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle(); if(e1)throw e1;
   if(!s)throw new Error('No encuentro el sitio «'+slug+'». Revisa la URL de la web.');
@@ -626,7 +635,7 @@ document.addEventListener('click', async e=>{
     if('save'in d){ const o=collect($('#cf')); if(!o.negocio)return toast('Ponle nombre al negocio');
       if(editing==='new'){ o.versiones=[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:''}]; }
       else{ o.id=editing; }
-      await guardar(o); touch(`${editing==='new'?'Agregó':'Editó'} al cliente ${o.negocio}`); await cargar(); editing=null; toast('Guardado ✓'); return go('clientes'); }
+      await guardar(o); touch(`${editing==='new'?'Agregó':'Editó'} al cliente ${o.negocio}`); let ok=true; try{ await asegurarSitio(o); }catch(_){ ok=false; } await cargar(); editing=null; if(ok)toast('Guardado ✓'); return go('clientes'); }
     if(d.del){ const c=clientes.find(x=>x.id===d.del); if(!confirm(`¿Eliminar a ${c.negocio}? No se puede deshacer.`))return; await borrar(d.del); touch(`Eliminó al cliente ${c.negocio}`); await cargar(); editing=null; toast('Eliminado'); return go('clientes'); }
     if(d.ver){ const c=clientes.find(x=>x.id===d.ver), etq=$('#vf [data-k="etq"]').value.trim()||'Punto de respaldo', nota=$('#vf [data-k="nota"]').value.trim(); const vs=[...(c.versiones||[]),{id:crypto.randomUUID(),t:Date.now(),etq,nota}]; await guardar({id:c.id,versiones:vs}); touch(`Guardó versión «${etq}» de ${c.negocio}`); await cargar(); toast('Versión guardada ✓'); return go('clientes'); }
     if(d.rollback){ const[cid,vid]=d.rollback.split(':'),c=clientes.find(x=>x.id===cid),v=c.versiones.find(x=>x.id===vid); if(!confirm(`¿Volver a la versión «${v.etq}»? Se marcará como la actual.`))return; const vs=[...c.versiones,{id:crypto.randomUUID(),t:Date.now(),etq:'↩ '+v.etq,nota:'Restaurada'}]; await guardar({id:cid,versiones:vs}); touch(`Restauró ${c.negocio} a «${v.etq}»`); await cargar(); toast('Restaurada ✓'); return go('clientes'); }
