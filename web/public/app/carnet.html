@@ -40,7 +40,7 @@ h1{font-size:22px;letter-spacing:-.02em}
     document.title=(d.negocio||'Mi carnet')+' · Carnet';
     const hoy=new Date().toISOString().slice(0,10),ok=d.fin&&d.fin>=hoy;
     const f=d.fin?new Date(d.fin+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'}):'';
-    el.innerHTML=`<b style="position:relative">${esc(d.negocio||'')}</b><div class="qr" id="q"></div><div style="position:relative;display:grid;gap:6px"><h1>${esc(d.nombre)}</h1><span class="p">${d.plan?esc(d.plan)+' · ':''}${ok?'vigente hasta '+f:d.fin?'venció el '+f:'sin plan activo'}</span><p class="mu" style="letter-spacing:.2em">${esc(code)}</p></div>`;
+    el.innerHTML=`<b style="position:relative">${esc(d.negocio||'')}</b><div class="qr" id="q"></div><div style="position:relative;display:grid;gap:6px"><h1>${esc(d.nombre)}</h1><span class="p">${d.plan?esc(d.plan)+' · ':''}${ok?'vigente hasta '+f:d.fin?'venció el '+f:'sin plan activo'}</span><p class="mu" style="letter-spacing:.2em">${d.num?'Código '+esc(d.num)+' · ':''}${esc(code)}</p></div>`;
     try{await js('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');const q=qrcode(0,'M');q.addData(code);q.make();document.getElementById('q').innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}
     catch(_){document.getElementById('q').innerHTML='<b style="color:#000;font-size:24px;letter-spacing:.1em">'+esc(code)+'</b>'}
   }catch(_){el.innerHTML='<b>Sin conexión</b><p class="mu">Revisa tu internet y vuelve a abrir el enlace.</p>'}

@@ -43,7 +43,7 @@ main{overflow:auto;height:100%;position:relative}
 .srch input{background:none;border:0;outline:0;width:100%}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;font-weight:700;background:#ffffff10;border:1px solid var(--ln);transition:.2s;white-space:nowrap}
 .btn:hover{background:#ffffff1a;transform:translateY(-1px)}
-.btn.p{background:linear-gradient(135deg,var(--b),var(--a));border:0;color:#fff;box-shadow:0 8px 30px -10px var(--a)}
+.btn.p{background:linear-gradient(135deg,var(--b),var(--a));border:0;color:var(--on,#fff);box-shadow:0 8px 30px -10px var(--a)}
 .btn.ok{background:#3ddc9722;border-color:#3ddc9755;color:var(--ok)}
 .btn.bad{background:#ff5c7a1a;border-color:#ff5c7a44;color:var(--bad)}
 .btn.sm{padding:7px 11px;font-size:13px;border-radius:10px}
@@ -166,6 +166,14 @@ main{overflow:auto;height:100%;position:relative}
 #toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-80px);z-index:90;padding:12px 18px;border-radius:14px;background:#12121d;border:1px solid #ffffff22;font-weight:700;transition:.35s cubic-bezier(.2,1.4,.3,1);box-shadow:0 20px 50px -10px #000;opacity:0;pointer-events:none}
 #toast.on{transform:translate(-50%,0);opacity:1}
 .bn{display:none}
+.drop{display:block;border:2px dashed #ffffff26;border-radius:18px;padding:28px;text-align:center;cursor:pointer;transition:.2s}.drop:hover,.drop.on{border-color:var(--a);background:#ffffff08}
+.imp .sc{overflow:auto;max-height:220px;border:1px solid var(--ln);border-radius:12px}.imp table{width:100%;border-collapse:collapse;font-size:12.5px}.imp td,.imp th{padding:7px 9px;border-bottom:1px solid var(--ln);text-align:left;white-space:nowrap}
+.sh.wide{width:min(760px,100%)}
+.tk{width:100%;height:330px;border:0;border-radius:14px;background:#fff}
+.num{font-size:11px;font-weight:800;color:var(--a);background:#ffffff10;padding:2px 7px;border-radius:7px;margin-right:6px;font-variant-numeric:tabular-nums}
+.sw{width:30px;height:30px;border-radius:10px;display:inline-block;border:2px solid #fff3;vertical-align:middle}
+.lgo{width:44px;height:44px;border-radius:12px;object-fit:contain;background:#fff1;padding:4px}
+.btn.p,.chip.on.p{color:var(--on,#fff)}
 @media (max-width:900px){.k4{grid-template-columns:1fr 1fr}.g2,.fx{grid-template-columns:1fr}}
 @media (max-width:720px){
  #app{grid-template-columns:1fr}
@@ -232,7 +240,7 @@ const ROLES={gestor:'XyroStudio',admin:'Administrador',recepcion:'Recepción'};
 const METODOS=['Efectivo','Yape','Plin','Tarjeta','Transferencia'];
 const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',asi:'xa_asistencias'};
 
-let sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[]};
+let WEB={planes:[],sedes:[]},sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[]};
 const isAdmin=()=>ME&&(ME.rol==='admin'||ME.rol==='gestor');
 
 /* ===== Fechas ===== */
@@ -256,6 +264,7 @@ const tel=t=>{t=String(t||'').replace(/\D/g,'');return t.length===9?'51'+t:t};
 /* ===== Datos (Supabase o demo local; misma interfaz) ===== */
 const DKEY=()=>'xa-demo-'+(CFG.rubro||'gym');
 const saveDemo=()=>LS.s(DKEY(),{S,CFG});
+const fixErr=e=>/column|xa_series|xa_siguiente|schema cache/i.test(e.message||'')?new Error('Falta correr el SQL 16 en Supabase.'):e;
 const DB={
  async load(){
   if(DEMO)return;
@@ -267,12 +276,18 @@ const DB={
  },
  async ins(t,row){
   if(DEMO){row.id=row.id||uid();S[t].unshift(row);saveDemo();return row}
-  row.sitio_id=SID;const{data,error}=await sb.from(T[t]).insert(row).select().single();if(error)throw error;S[t].unshift(data);return data;
+  row.sitio_id=SID;const{data,error}=await sb.from(T[t]).insert(row).select().single();if(error)throw fixErr(error);S[t].unshift(data);return data;
  },
  async upd(t,id,p){
   const i=S[t].findIndex(x=>x.id===id);
-  if(!DEMO){const{error}=await sb.from(T[t]).update(p).eq('id',id);if(error)throw error}
+  if(!DEMO){const{error}=await sb.from(T[t]).update(p).eq('id',id);if(error)throw fixErr(error)}
   if(i>=0)Object.assign(S[t][i],p);if(DEMO)saveDemo();
+ },
+ async insMany(t,rows,prog){
+  if(!rows.length)return;
+  if(DEMO){S[t].push(...rows);saveDemo();prog&&prog(1);return}
+  rows.forEach(r=>r.sitio_id=SID);
+  for(let i=0;i<rows.length;i+=400){const{error}=await sb.from(T[t]).insert(rows.slice(i,i+400));if(error)throw fixErr(error);S[t].push(...rows.slice(i,i+400));prog&&prog(Math.min(1,(i+400)/rows.length))}
  },
  async del(t,id){
   if(!DEMO){const{error}=await sb.from(T[t]).delete().eq('id',id);if(error)throw error}
@@ -296,14 +311,14 @@ const nombre=()=>CFG.nombre||R.demo;
 const waMsg=(c,e)=>`Hola ${String(c.nombre).split(' ')[0]} 👋, tu ${(e.m&&e.m.plan_nombre)||R.plan.toLowerCase()} en ${nombre()} ${e.d<0?'venció el':'vence el'} ${fF(e.m&&e.m.fin)}. Renueva y no pierdas el ritmo. ${R.lema}`;
 const waLink=(c,msg)=>'https://wa.me/'+tel(c.telefono)+'?text='+encodeURIComponent(msg);
 async function renovar(c,p,monto,metodo){
- const m=memDe(c.id),ini0=m&&m.fin>=hoy()?addD(m.fin,1):hoy();
+ const m=memDe(c.id),ini0=m&&m.fin>=hoy()?addD(m.fin,1):hoy();let pago=null;
  const mem=await DB.ins('mem',{cliente_id:c.id,plan_id:p.id,plan_nombre:p.nombre,inicio:ini0,fin:addD(ini0,Math.max(1,+p.dias)-1),precio:+monto,creado:new Date().toISOString()});
- if(+monto>0)await DB.ins('pag',{cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre,monto:+monto,metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]});
- return mem;
+ if(+monto>0)pago=await DB.ins('pag',{cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre,monto:+monto,metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]});
+ return pago;
 }
 function checkin(v){
  v=String(v||'').trim().toUpperCase();if(!v)return null;
- const c=S.cli.find(x=>(x.codigo||'').toUpperCase()===v||String(x.dni||'')===v);
+ const c=S.cli.find(x=>(x.codigo||'').toUpperCase()===v)||S.cli.find(x=>String(x.dni||'')===v)||S.cli.find(x=>x.num&&(String(x.num).toUpperCase()===v||(/^\d+$/.test(v)&&+x.num===+v)));
  if(!c)return{ok:false,t:'No encontramos ese código',s:'Acércate a recepción'};
  const e=est(c),ya=S.asi.find(a=>a.cliente_id===c.id&&Date.now()-new Date(a.t)<3*36e5);
  if(e.k==='venc'||e.k==='sin')return{ok:false,c,t:'Hola '+c.nombre.split(' ')[0],s:e.k==='sin'?'Aún no tienes '+R.plan.toLowerCase()+' activa':'Tu '+R.plan.toLowerCase()+' venció el '+fF(e.m.fin)+'. Renueva en recepción.'};
@@ -317,18 +332,19 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clea
 function countUp(root){(root||document).querySelectorAll('[data-n]').forEach(el=>{const to=+el.dataset.n,f=el.dataset.f,t0=performance.now(),D=900;const st=t=>{const k=Math.min(1,(t-t0)/D),v=to*(1-Math.pow(1-k,3));el.textContent=f==='s'?sol(Math.round(v)):Math.round(v).toLocaleString('es-PE');if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)})}
 function area(vals,w=600,h=150){const mx=Math.max(1,...vals),n=vals.length-1||1;const pts=vals.map((v,i)=>(i*w/n).toFixed(1)+','+(h-8-(v/mx)*(h-24)).toFixed(1));const d='M'+pts.join('L');
  return`<svg class="ch" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--a);stop-opacity:.45"/><stop offset="1" style="stop-color:var(--a);stop-opacity:0"/></linearGradient><linearGradient id="gl"><stop offset="0" style="stop-color:var(--b)"/><stop offset="1" style="stop-color:var(--a)"/></linearGradient></defs><path d="${d}L${w},${h}L0,${h}Z" fill="url(#ga)"/><path d="${d}" class="ln" pathLength="1" fill="none" stroke="url(#gl)" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`}
-function sheet(html,onMount){const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="sh">${html}</div>`;document.body.appendChild(o);const close=()=>o.remove();o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-x]'))close()});onMount&&onMount(o.firstChild,close);return close}
+function sheet(html,onMount,cls){const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="sh ${cls||''}">${html}</div>`;document.body.appendChild(o);const close=()=>o.remove();o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-x]'))close()});onMount&&onMount(o.firstChild,close);return close}
 /* Formulario genérico: campos [{k,l,t,v,o,req,ph}] */
 function form(title,fields,onSave,extra){
  const fh=f=>{const id='f_'+f.k;if(f.t==='opts')return`<div class="fl">${f.l}<div class="opts" data-k="${f.k}">${f.o.map(o=>`<button type="button" data-v="${esc(o[0])}" class="${String(o[0])===String(f.v)?'on':''}">${esc(o[1])}</button>`).join('')}</div></div>`;
   if(f.t==='sel')return`<label class="fl">${f.l}<select id="${id}">${f.o.map(o=>`<option value="${esc(o[0])}" ${String(o[0])===String(f.v)?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`;
+  if(f.t==='chk')return`<label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx)"><input id="${id}" type="checkbox" ${f.v?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">${f.l}</label>`;
   if(f.t==='area')return`<label class="fl">${f.l}<textarea id="${id}" rows="3">${esc(f.v)}</textarea></label>`;
   return`<label class="fl">${f.l}<input id="${id}" type="${f.t||'text'}" value="${esc(f.v??'')}" ${f.req?'required':''} placeholder="${esc(f.ph||'')}" ${f.t==='number'?'step="any" min="0"':''} ${f.im?`inputmode="${f.im}"`:''}></label>`};
  const rows=[];for(let i=0;i<fields.length;i++){const f=fields[i];if(f.half&&fields[i+1]&&fields[i+1].half){rows.push(`<div class="f2">${fh(f)}${fh(fields[i+1])}</div>`);i++}else rows.push(fh(f))}
  sheet(`<form class="g" style="gap:12px"><h3>${title}</h3>${rows.join('')}<p class="err" hidden></p><div class="bt">${extra||''}<button type="button" class="btn" data-x>Cancelar</button><button class="btn p">Guardar</button></div></form>`,(el,close)=>{
   const fm=el.querySelector('form');
   fm.querySelectorAll('.opts').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));g.dispatchEvent(new Event('change'))}));
-  const val=()=>{const o={};fields.forEach(f=>{if(f.t==='opts'){const b=fm.querySelector(`[data-k="${f.k}"] .on`);o[f.k]=b?b.dataset.v:''}else{const x=fm.querySelector('#f_'+f.k);o[f.k]=x?x.value.trim():''}});return o};
+  const val=()=>{const o={};fields.forEach(f=>{if(f.t==='opts'){const b=fm.querySelector(`[data-k="${f.k}"] .on`);o[f.k]=b?b.dataset.v:''}else{const x=fm.querySelector('#f_'+f.k);o[f.k]=x?(x.type==='checkbox'?x.checked:x.value.trim()):''}});return o};
   fields.forEach(f=>f.on&&f.on(fm,val));
   setTimeout(()=>{const i=fm.querySelector('input');i&&i.focus()},80);
   fm.addEventListener('submit',async e=>{e.preventDefault();const b=fm.querySelector('.btn.p');b.disabled=true;try{await onSave(val(),fm);close()}catch(er){const p=fm.querySelector('.err');p.textContent=er.message||String(er);p.hidden=false;b.disabled=false}});
@@ -339,11 +355,11 @@ function form(title,fields,onSave,extra){
 const NAV=()=>[['inicio','✨','Inicio'],['socios','👥',R.clis],['kiosco','📷','Asistencia'],['caja','💰','Caja'],['planes','🏷️','Planes']].concat(isAdmin()?[['ajustes','⚙️','Ajustes']]:[]);
 function shell(){
  const n=NAV();
- $('#side').innerHTML=`<div class="brand"><img src="../img/marca/logo-apps-app.svg" alt=""><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
+ $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'../img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='../img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
   `<div class="side-f"><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor?'<button class="btn sm" id="cambia">Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
  $('#bn').innerHTML=n.filter(x=>x[0]!=='ajustes').map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=()=>{LS.r('xa-s');location.href='./'});
- document.documentElement.style.setProperty('--a',CFG.color||'#3ad6ff');
+ marca();
  document.title=nombre()+' · Xyro Apps';
 }
 let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
@@ -402,27 +418,29 @@ function bienvenida(){
  <div class="g" style="margin-top:22px;text-align:left">
   <button class="card row" id="w1" style="text-align:left"><span class="av" style="--h:260">1</span><span class="nm"><b>Carga tus planes</b><small>Usamos los típicos de ${esc(R.n.toLowerCase())} y luego los ajustas</small></span>→</button>
   <a class="card row" href="#/socios"><span class="av" style="--h:190">2</span><span class="nm"><b>Registra a tus ${esc(R.clis.toLowerCase())}</b><small>Nombre, DNI y WhatsApp. Cobras en el mismo paso</small></span>→</a>
+  <button class="card row" style="text-align:left" onclick="this.dispatchEvent(new CustomEvent('importar',{bubbles:true}))"><span class="av" style="--h:30">↧</span><span class="nm"><b>¿Vienes de AppFit? Importa todo</b><small>Sube su Excel: socios, códigos, planes y vencimientos</small></span>→</button>
   <a class="card row" href="#/kiosco"><span class="av" style="--h:150">3</span><span class="nm"><b>Abre la asistencia en una tablet</b><small>Marcan con su DNI o el QR de su carnet</small></span>→</a>
  </div></div>`;
 }
 function filtrados(){
  const q=qtxt.trim().toLowerCase();
- return S.cli.map(c=>[c,est(c)]).filter(([c,e])=>(filtro==='todos'||e.k===filtro||(filtro==='act'&&e.k==='pronto'))&&(!q||c.nombre.toLowerCase().includes(q)||String(c.dni||'').includes(q)||String(c.telefono||'').includes(q)));
+ return S.cli.map(c=>[c,est(c)]).filter(([c,e])=>(filtro==='todos'||e.k===filtro||(filtro==='act'&&e.k==='pronto'))&&(!q||c.nombre.toLowerCase().includes(q)||String(c.dni||'').includes(q)||String(c.telefono||'').includes(q)||String(c.num||'').toLowerCase()===q));
 }
 function lista(){
  const L=filtrados();
  if(!L.length)return`<div class="empty"><b>🔍</b>${S.cli.length?'Nadie coincide':'Aún no tienes '+R.clis.toLowerCase()}<br><br><button class="btn p" onclick="document.getElementById('nuevo').click()">＋ Registrar ${esc(R.cli.toLowerCase())}</button></div>`;
- return L.slice(0,300).map(([c,e])=>`<a class="row" href="#/socio/${c.id}">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${esc(c.dni?'DNI '+c.dni:'')}${c.dni&&e.m?' · ':''}${esc(e.m?e.m.plan_nombre||'':'')}</small></span><span class="pill ${e.k}">${e.t}</span></a>`).join('')+(L.length>300?`<p class="mu sm" style="padding:10px">Mostrando 300 de ${L.length}. Usa el buscador.</p>`:'');
+ return L.slice(0,300).map(([c,e])=>`<a class="row" href="#/socio/${c.id}">${av(c)}<span class="nm"><b>${c.num?`<span class="num">#${esc(c.num)}</span>`:''}${esc(c.nombre)}</b><small>${esc(c.dni?'DNI '+c.dni:'')}${c.dni&&e.m?' · ':''}${esc(e.m?e.m.plan_nombre||'':'')}</small></span><span class="pill ${e.k}">${e.t}</span></a>`).join('')+(L.length>300?`<p class="mu sm" style="padding:10px">Mostrando 300 de ${L.length}. Usa el buscador.</p>`:'');
 }
 function socios(){
  const E=S.cli.map(c=>est(c).k),n=k=>E.filter(x=>k==='act'?x==='act'||x==='pronto':x===k).length;
  const F=[['todos','Todos',S.cli.length],['act','Activos',n('act')],['pronto','Por vencer',n('pronto')],['venc','Vencidos',n('venc')],['sin','Sin plan',n('sin')]];
  setTimeout(()=>{$$('.chip').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;$$('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lst').innerHTML=lista()});const s=$('#q2');s&&(s.oninput=e=>{qtxt=e.target.value;$('#q').value=qtxt;$('#lst').innerHTML=lista()})});
- return`<div class="hi"><h2>${esc(R.clis)}</h2><div style="display:flex;gap:8px">${n('venc')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('masivo',{bubbles:true}))">📲 Recordar a vencidos</button>`:''}</div></div>
- <label class="srch" style="display:flex;width:100%;margin-bottom:12px"><span>🔎</span><input id="q2" value="${esc(qtxt)}" placeholder="Buscar por nombre, DNI o celular"></label>
+ return`<div class="hi"><h2>${esc(R.clis)}</h2><div style="display:flex;gap:8px">${isAdmin()?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('importar',{bubbles:true}))">📥 Importar de AppFit</button>`:''}${n('venc')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('masivo',{bubbles:true}))">📲 Recordar a vencidos</button>`:''}</div></div>
+ <label class="srch" style="display:flex;width:100%;margin-bottom:12px"><span>🔎</span><input id="q2" value="${esc(qtxt)}" placeholder="Buscar por nombre, código, DNI o celular"></label>
  <div class="chips">${F.map(([k,t,c])=>`<button class="chip ${filtro===k?'on':''}" data-f="${k}">${t}<span>${c}</span></button>`).join('')}</div>
  <div class="card" style="padding:8px" id="lst">${lista()}</div>`;
 }
+document.addEventListener('importar',()=>importador());
 document.addEventListener('masivo',()=>{
  const L=S.cli.map(c=>[c,est(c)]).filter(x=>x[1].k==='venc'&&x[0].telefono&&x[1].d>=-60);
  sheet(`<h3>📲 Recordatorios por WhatsApp</h3><p class="mu sm">Toca cada uno: se abre WhatsApp con el mensaje listo. Con Xyro Bots se envían solos.</p><div class="tl">${L.map(([c,e])=>`<a class="row" target="_blank" rel="noopener" href="${waLink(c,waMsg(c,e))}" onclick="this.style.opacity=.4">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${e.t}</small></span>📲</a>`).join('')||'<p class="mu">Nadie con celular registrado.</p>'}</div><div class="bt"><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Bots para enviar recordatorios automáticos')}">🤖 Automatizar con Xyro Bots</a><button class="btn p" data-x>Listo</button></div>`);
@@ -442,7 +460,7 @@ function socio(){
  return`<div class="fx st">
  <div class="card pf">
   <span class="av" style="--h:${hue(c.nombre)};width:76px;height:76px;border-radius:24px;font-size:26px">${esc(ini(c.nombre))}</span>
-  <div><h2 style="font-size:22px;letter-spacing:-.02em">${esc(c.nombre)}</h2><p class="mu sm">${esc([c.dni&&'DNI '+c.dni,c.telefono].filter(Boolean).join(' · '))}</p></div>
+  <div><h2 style="font-size:22px;letter-spacing:-.02em">${esc(c.nombre)}</h2><p class="mu sm">${esc([c.num&&'Código '+c.num,c.dni&&'DNI '+c.dni,c.telefono].filter(Boolean).join(' · '))}</p></div>
   <div class="ring"><svg width="150" height="150"><circle cx="75" cy="75" r="64" stroke="#ffffff10"/><circle class="rv" cx="75" cy="75" r="64" stroke="${col}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><div>${m?`<b>${Math.max(0,e.d)}</b><small>días restantes</small>`:'<b>—</b><small>sin plan</small>'}</div></div>
   <span class="pill ${e.k}">${m?esc(m.plan_nombre||'')+' · ':''}${e.k==='act'?'hasta '+fF(m.fin):e.t}</span>
   <div class="acts"><button class="btn p" id="bCob">💳 ${m?'Renovar':'Cobrar'}</button><button class="btn" id="bAs">✅ Marcar ingreso</button><button class="btn" id="bCar">🪪 Carnet QR</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:'<span></span>'}<button class="btn" id="bEd">✏️ Editar</button>${isAdmin()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
@@ -451,7 +469,7 @@ function socio(){
  <div class="g">
   <div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
   <div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.map(x=>`<div class="row"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu">Sin historial</p>'}</div></div>
-  <div class="card"><h3>Pagos</h3><div class="tl">${pags.map(p=>`<div class="row"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b></div>`).join('')||'<p class="mu">Sin pagos recientes</p>'}</div></div>
+  <div class="card"><h3>Pagos</h3><div class="tl">${pags.map(p=>`<a class="row" href="#" data-p="${p.id}"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b> 🖨️</a>`).join('')||'<p class="mu">Sin pagos recientes</p>'}</div></div>
  </div></div>`;
 }
 function planes(){
@@ -471,28 +489,31 @@ function editPlan(p){
 }
 function nuevoCli(c){
  const P0=S.pla.filter(p=>p.activo!==false);
- const f=[{k:'nombre',l:'Nombre completo',v:c&&c.nombre,req:1,ph:'Ej. María Quispe'},{k:'dni',l:'DNI',v:c&&c.dni,half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:c&&c.telefono,half:1,t:'tel',ph:'9xx xxx xxx'},{k:'nacimiento',l:'Cumpleaños',t:'date',v:c&&c.nacimiento,half:1},{k:'email',l:'Correo',t:'email',v:c&&c.email,half:1}];
- if(!c&&P0.length)f.push({k:'plan',l:R.plan+' (cobra en el mismo paso)',t:'opts',v:'',o:[['','Ninguna']].concat(P0.map(p=>[p.id,p.nombre+' · '+sol(p.precio)]))},{k:'metodo',l:'Método de pago',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])});
+ const f=[{k:'nombre',l:'Nombre completo',v:c&&c.nombre,req:1,ph:'Ej. María Quispe'},{k:'num',l:'Código de '+R.cli.toLowerCase(),v:c?c.num:nextNum(),half:1},{k:'dni',l:'DNI',v:c&&c.dni,half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:c&&c.telefono,half:1,t:'tel',ph:'9xx xxx xxx'},{k:'nacimiento',l:'Cumpleaños',t:'date',v:c&&c.nacimiento,half:1},{k:'email',l:'Correo',t:'email',v:c&&c.email}];
+ if(!c&&P0.length)f.push({k:'plan',l:R.plan+' (cobra en el mismo paso)',t:'opts',v:'',o:[['','Ninguna']].concat(P0.map(p=>[p.id,p.nombre+' · '+sol(p.precio)]))},{k:'metodo',l:'Método de pago',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},...compFields());
  f.push({k:'notas',l:'Notas',t:'area',v:c&&c.notas});
  form(c?'Editar '+R.cli.toLowerCase():'Nuevo '+R.cli.toLowerCase(),f,async v=>{
-  const row={nombre:v.nombre,dni:v.dni||null,telefono:v.telefono||null,nacimiento:v.nacimiento||null,email:v.email||null,notas:v.notas||null};
+  const row={nombre:v.nombre,num:v.num||null,dni:v.dni||null,telefono:v.telefono||null,nacimiento:v.nacimiento||null,email:v.email||null,notas:v.notas||null};
   if(row.dni&&S.cli.some(x=>x.dni===row.dni&&(!c||x.id!==c.id)))throw new Error('Ya existe alguien con ese DNI.');
+  if(row.num&&S.cli.some(x=>x.num===row.num&&(!c||x.id!==c.id)))throw new Error('Ese código ya lo usa otra persona.');
+  if(!c&&v.plan)valComp(v);
   if(c){await DB.upd('cli',c.id,row);toast('Guardado ✓');return go()}
   const n=await DB.ins('cli',Object.assign(row,{codigo:codigo(),creado:new Date().toISOString()}));
-  const p=v.plan&&plan(v.plan);if(p)await renovar(n,p,p.precio,v.metodo);
-  S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));toast('¡'+n.nombre.split(' ')[0]+' registrado! 🎉');confeti(24);location.hash='#/socio/'+n.id;
+  const p=v.plan&&plan(v.plan),ev=p&&evDe(p.nombre),pg=p?await renovar(n,p,ev?ev.precio:p.precio,v.metodo):null;
+  S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));confeti(24);location.hash='#/socio/'+n.id;
+  if(pg)await finCobro(pg,v,'¡Listo! '+n.nombre.split(' ')[0]+' ya está en '+nombre());else toast('¡Listo! '+n.nombre.split(' ')[0]+' ya está en '+nombre()+' 🎉');
  });
 }
 function cobrar(c){
  const P0=S.pla.filter(p=>p.activo!==false);if(!P0.length){toast('Primero crea un plan');location.hash='#/planes';return}
  const m=memDe(c.id),ini0=m&&m.fin>=hoy()?addD(m.fin,1):hoy();
- form('💳 '+(m?'Renovar':'Cobrar')+' · '+esc(c.nombre.split(' ')[0]),[{k:'plan',l:R.plan,t:'opts',v:P0[Math.min(1,P0.length-1)].id,o:P0.map(p=>[p.id,p.nombre]),on:(fm,val)=>{const g=fm.querySelector('[data-k=plan]');g.insertAdjacentHTML('afterend','<p class="mu sm" id="hint"></p>');const up=()=>{const p=plan(val().plan);if(!p)return;fm.querySelector('#f_monto').value=p.precio;fm.querySelector('#hint').textContent='Del '+fF(ini0)+' al '+fF(addD(ini0,p.dias-1))};g.addEventListener('change',up);setTimeout(up)}},{k:'monto',l:'Monto (S/)',t:'number',req:1},{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])}],async v=>{
-  const p=plan(v.plan);if(!p)throw new Error('Elige un plan');await renovar(c,p,v.monto,v.metodo);toast('Cobro registrado ✓ '+sol(v.monto));confeti(30);go();
+ form('💳 '+(m?'Renovar':'Cobrar')+' · '+esc(c.nombre.split(' ')[0]),[{k:'plan',l:R.plan,t:'opts',v:P0[Math.min(1,P0.length-1)].id,o:P0.map(p=>[p.id,p.nombre]),on:(fm,val)=>{const g=fm.querySelector('[data-k=plan]');g.insertAdjacentHTML('afterend','<p class="mu sm" id="hint"></p>');const up=()=>{const p=plan(val().plan);if(!p)return;const ev=evDe(p.nombre);fm.querySelector('#f_monto').value=ev?ev.precio:p.precio;fm.querySelector('#hint').textContent='Del '+fF(ini0)+' al '+fF(addD(ini0,p.dias-1))+(ev?' · 🔥 '+ev.t+' (de tu web) hasta '+fF(ev.hasta):'')};g.addEventListener('change',up);setTimeout(up)}},{k:'monto',l:'Monto (S/)',t:'number',req:1},{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},...compFields()],async v=>{
+  const p=plan(v.plan);if(!p)throw new Error('Elige un plan');valComp(v);const pg=await renovar(c,p,v.monto,v.metodo);confeti(30);go();await finCobro(pg,v,'Cobro registrado');
  });
 }
 function cobroSuelto(){
- form('Nuevo cobro',[{k:'concepto',l:'Concepto',req:1,ph:'Ej. Agua, suplemento, clase extra'},{k:'monto',l:'Monto (S/)',t:'number',req:1,half:1},{k:'cliente',l:R.cli+' (opcional)',t:'sel',half:1,v:'',o:[['','—']].concat(S.cli.map(c=>[c.id,c.nombre]))},{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])}],async v=>{
-  await DB.ins('pag',{concepto:v.concepto,monto:+v.monto,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]});toast('Cobro registrado ✓');go();
+ form('Nuevo cobro',[{k:'concepto',l:'Concepto',req:1,ph:'Ej. Agua, suplemento, clase extra'},{k:'monto',l:'Monto (S/)',t:'number',req:1,half:1},{k:'cliente',l:R.cli+' (opcional)',t:'sel',half:1,v:'',o:[['','—']].concat(S.cli.map(c=>[c.id,c.nombre]))},{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},...compFields()],async v=>{
+  valComp(v);const pg=await DB.ins('pag',{concepto:v.concepto,monto:+v.monto,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]});go();await finCobro(pg,v,'Cobro registrado');
  });
 }
 function caja(){
@@ -500,21 +521,225 @@ function caja(){
  if(!ms.includes(mesSel))mesSel=ms[0];
  const L=S.pag.filter(p=>mk(p.fecha)===mesSel),tot=L.reduce((a,p)=>a+ +p.monto,0),hoyT=S.pag.filter(p=>ymd(new Date(p.fecha))===hoy()).reduce((a,p)=>a+ +p.monto,0);
  const pm={};L.forEach(p=>pm[p.metodo||'Otro']=(pm[p.metodo||'Otro']||0)+ +p.monto);const mx=Math.max(1,...Object.values(pm));
- setTimeout(()=>{$$('[data-m]').forEach(b=>b.onclick=()=>{mesSel=b.dataset.m;go()});$('#csv').onclick=()=>{const rows=[['Fecha','Concepto',R.cli,'Método','Monto','Registró']].concat(L.map(p=>[new Date(p.fecha).toLocaleString('es-PE'),p.concepto||'',(cli(p.cliente_id)||{}).nombre||'',p.metodo||'',p.monto,p.quien||'']));const b=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='caja-'+mesSel+'.csv';a.click()}});
+ setTimeout(()=>{$$('[data-m]').forEach(b=>b.onclick=()=>{mesSel=b.dataset.m;go()});$('#csv').onclick=()=>{const rows=[['Fecha','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(L.map(p=>[new Date(p.fecha).toLocaleString('es-PE'),compTxt(p.comp),p.concepto||'',(cli(p.cliente_id)||{}).nombre||'',(cli(p.cliente_id)||{}).num||'',p.metodo||'',p.monto,p.quien||'']));const b=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='caja-'+mesSel+'.csv';a.click()}});
  return`<div class="hi"><h2>Caja</h2><div class="chips" style="margin:0">${ms.map(m=>`<button class="chip ${m===mesSel?'on':''}" data-m="${m}">${MES[+m.slice(5)-1]} ${m.slice(2,4)}</button>`).join('')}</div></div>
  <div class="g g2 st"><div class="card"><small class="mu">Total del mes</small><div class="big grad" data-n="${Math.round(tot)}" data-f="s">0</div><p class="mu sm">${L.length} cobros · hoy ${sol(hoyT)}</p></div>
  <div class="card"><h3>Por método</h3><div class="mb">${Object.entries(pm).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div><span style="background:none;height:auto;overflow:visible">${esc(k)}</span><span><i style="width:${v/mx*100}%"></i></span><b style="text-align:right">${sol(v)}</b></div>`).join('')||'<p class="mu">Sin cobros</p>'}</div></div></div>
- <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">Movimientos <button class="btn sm" id="csv">⬇ Excel (CSV)</button></h3><div class="tl">${L.map(p=>{const c=cli(p.cliente_id);return`<div class="row">${c?av(c):'<span class="av" style="--h:40">S/</span>'}<span class="nm"><b>${esc(p.concepto||'Pago')}${c?' · '+esc(c.nombre):''}</b><small>${fF(p.fecha)} ${fH(p.fecha)} · ${esc(p.metodo||'')}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b></div>`}).join('')||'<div class="empty">Sin movimientos este mes</div>'}</div></div>
- <p class="mu sm" style="margin-top:12px">🧾 ¿Boletas y facturas SUNAT automáticas? <a class="grad" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero boletas SUNAT en Xyro Apps')}"><b>Actívalo aquí</b></a></p>`;
+ <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">Movimientos <button class="btn sm" id="csv">⬇ Excel (CSV)</button></h3><div class="tl">${L.map(p=>{const c=cli(p.cliente_id);return`<a class="row" href="#" data-p="${p.id}">${c?av(c):'<span class="av" style="--h:40">S/</span>'}<span class="nm"><b>${esc(p.concepto||'Pago')}${c?' · '+esc(c.nombre):''}</b><small>${fF(p.fecha)} ${fH(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b></a>`}).join('')||'<div class="empty">Sin movimientos este mes</div>'}</div></div>
+ <p class="mu sm" style="margin-top:12px">🧾 Toca un movimiento para reimprimir su comprobante. ¿Boletas y facturas electrónicas SUNAT? <a class="grad" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero boletas SUNAT en Xyro Apps')}"><b>Actívalo aquí</b></a></p>`;
 }
 function ajustes(){
  if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
- setTimeout(()=>{$('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])},{k:'color',l:'Color de la app',t:'opts',v:CFG.color||'#3ad6ff',o:[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo']]}],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')})});
- return`<div class="hi"><h2>Ajustes</h2></div><div class="g st" style="max-width:640px">
+ const COL=[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo']];
+ setTimeout(()=>{
+  $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])}],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
+  $('#amk').onclick=()=>form('🎨 Marca y colores',[{k:'color',l:'Color principal',t:'color',v:CFG.color||WEB.color||'#3ad6ff',half:1},{k:'color2',l:'Color secundario',t:'color',v:CFG.color2||WEB.color2||'#7c5cff',half:1},{k:'logo',l:'Logo (enlace a la imagen)',v:CFG.logo||WEB.logo||'',ph:'https://…/logo.png'},{k:'web',l:'Tu página web',v:CFG.web||'',ph:'https://tunegocio.com'}],async v=>{await DB.cfg(v);shell();go();toast('Listo, la app ya luce como tu marca ✨')});
+  $('#acp').onclick=async e=>{const url=CFG.web||prompt('¿Cuál es tu página web?','https://');if(!url)return;const b=e.target;b.disabled=true;b.textContent='Leyendo tu web…';
+   try{const t=await temaDeWeb(url);if(!t.color&&!t.logo)throw new Error('No encontramos colores');await DB.cfg({color:t.color||CFG.color,color2:t.color2||CFG.color2,bg:t.bg||'',logo:t.logo||CFG.logo,web:t.web,nombre:CFG.nombre||t.nombre});shell();go();confeti(40);toast('🎨 Copiamos el look de tu web')}
+   catch(er){toast('No pudimos leer tu web. Ponlo a mano en «Editar».');b.disabled=false;b.textContent='✨ Copiar de mi web'}};
+  $('#asy').onclick=async()=>{await syncWeb(true);go()};
+  const at=$('#aut');at&&(at.onchange=async()=>{await DB.cfg({syncWeb:at.checked});toast(at.checked?'Se sincroniza solo ✓':'Sincronización manual')});
+  $('#afi').onclick=()=>form('🧾 Datos para comprobantes',[{k:'razon',l:'Razón social',v:CFG.razon||''},{k:'ruc',l:'RUC',v:CFG.ruc||'',half:1,im:'numeric'},{k:'telefono',l:'Teléfono',v:CFG.telefono||'',half:1},{k:'direccion',l:'Dirección',v:CFG.direccion||''},{k:'serieB',l:'Serie boletas',v:CFG.serieB||'B001',half:1},{k:'serieF',l:'Serie facturas',v:CFG.serieF||'F001',half:1},{k:'compDef',l:'Al cobrar, por defecto',t:'opts',v:CFG.compDef??'B',o:[['B','Boleta'],['F','Factura'],['','Sin comprobante']]},{k:'igv',l:'Mostrar IGV 18% (precios con IGV incluido)',t:'chk',v:CFG.igv},{k:'autoPrint',l:'Imprimir el ticket apenas cobro',t:'chk',v:CFG.autoPrint},{k:'a4',l:'Imprimir en hoja A4 (si no, ticketera 80 mm)',t:'chk',v:CFG.a4}],async v=>{if(v.ruc&&!/^\d{11}$/.test(v.ruc))throw new Error('El RUC tiene 11 dígitos.');v.serieB=v.serieB.toUpperCase();v.serieF=v.serieF.toUpperCase();await DB.cfg(v);go();toast('Guardado ✓')});
+  $('#aim').onclick=importador;
+ });
+ const sw=(c,t)=>c?`<span title="${t}" class="sw" style="background:${esc(c)}"></span>`:'';
+ return`<div class="hi"><h2>Ajustes</h2></div><div class="g st" style="max-width:720px">
  <div class="card"><h3>${R.ico} ${esc(nombre())} <button class="btn sm" id="aj">✏️ Editar</button></h3><p class="mu sm">Rubro: ${esc(R.n)} · ${S.cli.length} ${esc(R.clis.toLowerCase())} · ${S.pla.length} planes</p></div>
+ <div class="card"><h3>🎨 Marca y colores <span style="display:flex;gap:6px"><button class="btn sm" id="acp">✨ Copiar de mi web</button><button class="btn sm" id="amk">✏️ Editar</button></span></h3><div style="display:flex;gap:12px;align-items:center">${logoDe()?`<img class="lgo" src="${esc(logoDe())}" alt="">`:''}${sw(CFG.color||WEB.color||'#3ad6ff','Principal')}${sw(CFG.color2||WEB.color2,'Secundario')}${sw(CFG.bg,'Fondo')}<span class="mu sm">La app usa el logo y los colores de tu web, así tu equipo y tus ${esc(R.clis.toLowerCase())} sienten que es la misma marca.</span></div></div>
+ <div class="card"><h3>🌐 Conectada a tu web <button class="btn sm" id="asy">🔄 Sincronizar ahora</button></h3>
+  <p class="mu sm">${DEMO?'En tu versión, los planes, precios y promociones que publicas en tu web pasan solos a la app.':WEB.planes.length?'Planes de tu web: '+WEB.planes.map(w=>esc(w.nombre)+' '+sol(w.ev?w.ev.precio:w.precio)+(w.ev?' 🔥':'')).join(' · '):'Tu web aún no tiene planes publicados.'}</p>
+  <label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx);margin-top:8px"><input id="aut" type="checkbox" ${CFG.syncWeb!==false?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">Copiar solos los cambios de precios y planes de mi web</label></div>
+ <div class="card"><h3>🧾 Comprobantes <button class="btn sm" id="afi">✏️ Editar</button></h3><p class="mu sm">${CFG.ruc?'RUC '+esc(CFG.ruc)+' · ':''}Series ${esc(CFG.serieB||'B001')} / ${esc(CFG.serieF||'F001')} · ${CFG.a4?'Hoja A4':'Ticketera 80 mm'}${CFG.autoPrint?' · imprime al cobrar':''}</p>
+  <p class="mu sm" style="margin-top:6px">${CFG.sunat?'✅ Conectado a SUNAT: boletas y facturas electrónicas.':'Hoy se imprime como <b>nota de venta</b> con serie y número. Para boletas y facturas electrónicas válidas ante SUNAT, <a class="grad" target="_blank" rel="noopener" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Quiero activar boletas SUNAT en Xyro Apps para '+nombre())+'"><b>actívalo aquí</b></a>.'}</p></div>
+ <div class="card"><h3>📥 Importar desde AppFit <button class="btn sm p" id="aim">Subir Excel</button></h3><p class="mu sm">Trae a tus ${esc(R.clis.toLowerCase())} con su código, DNI, celular, plan y fecha de vencimiento. Detectamos las columnas solas y no duplicamos a nadie.</p></div>
  <div class="card"><h3>👥 Cuentas del equipo</h3><p class="mu sm">${DEMO?'En tu versión tendrás cuentas para recepción y administración.':'Las cuentas (admin y recepción) se crean desde tu panel. Si alguien olvida su clave, el admin le da una temporal.'}</p></div>
  <div class="card"><h3>🚀 Más para tu negocio</h3><div class="tl">${[['🤖','Recordatorios automáticos por WhatsApp','Xyro Bots'],['🧾','Boletas y facturas SUNAT','Facturación'],['🔳','Lector QR en la puerta','Hardware'],['🌐','Web con planes y reservas','Xyro Webs']].map(([i,t,k])=>`<a class="row" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero '+k+' para '+nombre())}"><span style="font-size:22px">${i}</span><span class="nm"><b>${t}</b><small>${k}</small></span>→</a>`).join('')}</div></div>
  </div>`;
+}
+
+/* ===== Puente con la web del cliente: nombre, logo, colores y planes ===== */
+const norm=s=>String(s??'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9/° ]/g,' ').replace(/\s+/g,' ').trim();
+const lum=h=>{h=String(h||'').replace('#','');if(h.length!==6)return .5;const[r,g,b]=[0,2,4].map(i=>parseInt(h.substr(i,2),16));return(.299*r+.587*g+.114*b)/255};
+function deWeb(C){
+ const n=C.negocio||{},cf=C.config||{},mk=cf.marca||n.marca||{},pl=[];
+ (Array.isArray(C.planes)?C.planes:[]).forEach(p=>{if(!p||!p.nombre)return;pl.push({nombre:p.nombre,precio:+p.precio||0,dias:+p.dias||(p.meses?Math.round(p.meses*30.4):30),ev:+p.precioEvento&&p.eventoHasta&&p.eventoHasta>=hoy()?{precio:+p.precioEvento,t:p.eventoTexto||'Precio de evento',hasta:p.eventoHasta}:null})});
+ if(C.pase&&+C.pase.socio)pl.unshift({nombre:'Pase diario',precio:+C.pase.socio,dias:1});
+ (Array.isArray(C.items)?C.items:[]).forEach(x=>{if(x&&x.nombre&&+x.precio&&/mes|plan|membres|paquete|sesion|ciclo|anual/i.test(norm(x.nombre)))pl.push({nombre:x.nombre,precio:+x.precio,dias:+x.dias||30})});
+ return{nombre:n.nombre,color:mk.color||n.color||cf.color,color2:mk.color2,logo:mk.logo||n.logo,planes:pl,sedes:(Array.isArray(C.sedes)?C.sedes:[]).map(s=>({id:s.id,nombre:s.nombre}))};
+}
+const evDe=nm=>{const w=WEB.planes.find(x=>norm(x.nombre)===norm(nm));return w&&w.ev};
+async function syncWeb(manual){
+ if(!isAdmin()||!WEB.planes.length){manual&&toast(DEMO?'En tu versión se copian solos los planes de tu web':'Tu web aún no tiene planes que copiar');return 0}
+ let n=0;
+ for(const w of WEB.planes){const p=S.pla.find(x=>norm(x.nombre)===norm(w.nombre));
+  try{if(!p){await DB.ins('pla',{nombre:w.nombre,precio:w.precio,dias:w.dias,color:['#3ad6ff','#7c5cff','#3ddc97','#f5b544'][n%4],activo:true});n++}
+   else if(+p.precio!==+w.precio||+p.dias!==+w.dias||p.activo===false){await DB.upd('pla',p.id,{precio:w.precio,dias:w.dias,activo:true});n++}}catch(e){manual&&toast(e.message);return n}}
+ S.pla.sort((a,b)=>a.precio-b.precio);
+ if(n||manual)toast(n?'🔄 '+n+' planes al día con tu web':'Tus planes ya están igual que en tu web');
+ return n;
+}
+// Lee la web pública (HTML + CSS) y saca color principal, secundario, fondo y logo.
+async function temaDeWeb(url){
+ const u=new URL(/^https?:/.test(url)?url:'https://'+url);
+ const h=await(await fetch(u)).text(),doc=new DOMParser().parseFromString(h,'text/html');
+ let css='';doc.querySelectorAll('style').forEach(s=>css+=s.textContent);
+ for(const l of[...doc.querySelectorAll('link[rel=stylesheet]')].slice(0,3)){try{css+=await(await fetch(new URL(l.getAttribute('href'),u))).text()}catch(_){}}
+ const cnt={};(css.match(/#[0-9a-fA-F]{6}\b/g)||[]).forEach(c=>{c=c.toLowerCase();cnt[c]=(cnt[c]||0)+1});
+ const sat=c=>{const v=[1,3,5].map(i=>parseInt(c.substr(i,2),16)/255),mx=Math.max(...v),mn=Math.min(...v);return{s:mx?(mx-mn)/mx:0,l:(mx+mn)/2}};
+ const ok=c=>{const x=sat(c);return x.s>.45&&x.l>.25&&x.l<.85};
+ const vars=[...css.matchAll(/--[\w-]+\s*:\s*(#[0-9a-fA-F]{6})\b/g)].map(m=>m[1].toLowerCase()).filter(ok);
+ const cols=[...new Set(vars.concat(Object.entries(cnt).filter(([c])=>ok(c)).sort((a,b)=>b[1]-a[1]).map(x=>x[0])))];
+ const tc=doc.querySelector('meta[name=theme-color]'),bg=(css.match(/--bg\s*:\s*(#[0-9a-fA-F]{6})/)||[])[1]||(tc&&tc.content)||'';
+ const im=[...doc.querySelectorAll('img')].find(i=>/logo/i.test((i.getAttribute('src')||'')+' '+i.className+' '+i.id))||doc.querySelector('link[rel~=icon]');
+ const t=doc.querySelector('meta[property="og:site_name"]')||doc.querySelector('title');
+ return{color:cols[0]||'',color2:cols.find(c=>c!==cols[0])||'',bg:/^#[0-9a-f]{6}$/i.test(bg)&&lum(bg)<.2?bg:'',logo:im?new URL(im.getAttribute('src')||im.getAttribute('href'),u).href:'',nombre:t?String(t.content||t.textContent||'').split(/[|·–]| - /)[0].trim():'',web:u.href};
+}
+function marca(){
+ const r=document.documentElement.style,a=CFG.color||WEB.color||'#3ad6ff';
+ r.setProperty('--a',a);r.setProperty('--b',CFG.color2||WEB.color2||(CFG.color||WEB.color?a:'#7c5cff'));
+ r.setProperty('--on',lum(a)>.62?'#111':'#fff');
+ if(CFG.bg)r.setProperty('--bg',CFG.bg);
+}
+const logoDe=()=>CFG.logo||WEB.logo||'';
+
+/* ===== Código de socio (como AppFit: número correlativo; se respeta el importado) ===== */
+const nextNum=()=>String(S.cli.reduce((m,c)=>Math.max(m,/^\d{1,7}$/.test(c.num||'')?+c.num:0),1000)+1);
+
+/* ===== Comprobantes: boleta / factura con serie y correlativo (listo para SUNAT vía OSE) ===== */
+function letras(n){
+ const U=['','UNO','DOS','TRES','CUATRO','CINCO','SEIS','SIETE','OCHO','NUEVE','DIEZ','ONCE','DOCE','TRECE','CATORCE','QUINCE','DIECISÉIS','DIECISIETE','DIECIOCHO','DIECINUEVE','VEINTE','VEINTIUNO','VEINTIDÓS','VEINTITRÉS','VEINTICUATRO','VEINTICINCO','VEINTISÉIS','VEINTISIETE','VEINTIOCHO','VEINTINUEVE'],D=['','','','TREINTA','CUARENTA','CINCUENTA','SESENTA','SETENTA','OCHENTA','NOVENTA'],C=['','CIENTO','DOSCIENTOS','TRESCIENTOS','CUATROCIENTOS','QUINIENTOS','SEISCIENTOS','SETECIENTOS','OCHOCIENTOS','NOVECIENTOS'];
+ const c3=x=>{if(x===100)return'CIEN';const c=Math.floor(x/100),r=x%100;return[C[c],r<30?U[r]:D[Math.floor(r/10)]+(r%10?' Y '+U[r%10]:'')].filter(Boolean).join(' ')};
+ n=Math.round((+n||0)*100)/100;const e=Math.floor(n),ct=Math.round((n-e)*100);
+ const m=Math.floor(e/1e6),k=Math.floor(e/1000)%1000,u=e%1000;
+ const s=e?[m?(m===1?'UN MILLÓN':c3(m)+' MILLONES'):'',k?(k===1?'MIL':c3(k).replace(/UNO$/,'UN')+' MIL'):'',u?c3(u):''].filter(Boolean).join(' '):'CERO';
+ return'SON: '+s+' CON '+pad(ct)+'/100 SOLES';
+}
+const compTxt=cp=>cp&&cp.serie?cp.serie+'-'+String(cp.n).padStart(8,'0'):'';
+const compFields=()=>[{k:'comp',l:'Comprobante',t:'opts',v:CFG.compDef??'B',o:[['B','🧾 Boleta'],['F','🏢 Factura'],['','Sin comprobante']],on:(fm,val)=>{const g=fm.querySelector('[data-k=comp]'),w=fm.querySelector('#f_ruc').closest('.f2'),up=()=>w.style.display=val().comp==='F'?'':'none';g.addEventListener('change',up);up()}},{k:'ruc',l:'RUC',half:1,im:'numeric',ph:'20xxxxxxxxx'},{k:'razon',l:'Razón social',half:1}];
+function valComp(v){if(v.comp==='F'&&!/^(10|15|17|20)\d{9}$/.test(v.ruc||''))throw new Error('Para factura pon un RUC válido de 11 dígitos.');if(v.comp==='F'&&!v.razon)throw new Error('Para factura falta la razón social.')}
+async function correlativo(serie){
+ if(DEMO){CFG.corr=CFG.corr||{};CFG.corr[serie]=(CFG.corr[serie]||0)+1;saveDemo();return CFG.corr[serie]}
+ const{data,error}=await sb.rpc('xa_siguiente',{sid:SID,p_serie:serie});if(error)throw new Error('Falta correr el SQL 16 en Supabase (comprobantes).');return data;
+}
+async function emitir(p,v){
+ if(!p||!v.comp)return p;
+ const serie=v.comp==='F'?(CFG.serieF||'F001'):(CFG.serieB||'B001'),c=cli(p.cliente_id);
+ const comp={tipo:v.comp,serie,n:await correlativo(serie),doc:v.comp==='F'?v.ruc:((c&&c.dni)||''),nombre:v.comp==='F'?v.razon:((c&&c.nombre)||'Cliente varios')};
+ await DB.upd('pag',p.id,{comp});return p;
+}
+function ticketHTML(p,a4){
+ const c=cli(p.cliente_id),cp=p.comp||{},tot=+p.monto||0,igv=CFG.igv?tot-tot/1.18:0,mm=S.mem.find(x=>x.id===p.membresia_id),of=!!CFG.sunat,lg=logoDe();
+ const tit=of?(cp.tipo==='F'?'FACTURA ELECTRÓNICA':'BOLETA DE VENTA ELECTRÓNICA'):'NOTA DE VENTA';
+ const css=a4?'@page{size:A4;margin:16mm}body{font:13px/1.5 Arial,sans-serif;max-width:720px;margin:0 auto;padding:10px}.h{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.bx{border:2px solid #000;border-radius:10px;padding:12px 18px;text-align:center;font-weight:700;min-width:220px}th,td{border-bottom:1px solid #ccc;padding:8px}'
+  :'@page{size:80mm auto;margin:2mm}body{font:12px/1.35 "Courier New",monospace;width:74mm;margin:0 auto;padding:6px 2px}.h{text-align:center}.bx{text-align:center;font-weight:700;border-top:1px dashed #000;border-bottom:1px dashed #000;padding:4px 0;margin:6px 0}th{border-bottom:1px dashed #000}td,th{padding:3px 0}';
+ return`<!doctype html><html><head><meta charset="utf-8"><title>${esc(compTxt(cp)||'Comprobante')}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{color:#000;background:#fff}${css}img{max-height:64px;max-width:170px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin:10px 0}th{text-align:left}.r{text-align:right}p{margin:6px 0}hr{border:0;border-top:1px dashed #000;margin:8px 0}.t{font-weight:700;font-size:1.3em}.c{text-align:center}</style></head><body>
+ <div class="h"><div>${lg?`<img src="${esc(lg)}" alt=""><br>`:''}<b style="font-size:1.15em">${esc(CFG.razon||nombre())}</b><br>${CFG.razon&&CFG.razon!==nombre()?esc(nombre())+'<br>':''}${CFG.ruc?'RUC '+esc(CFG.ruc)+'<br>':''}${CFG.direccion?esc(CFG.direccion)+'<br>':''}${CFG.telefono?'Tel. '+esc(CFG.telefono):''}</div>
+ <div class="bx">${tit}<br>${esc(compTxt(cp)||'—')}</div></div>
+ <p>Fecha: ${new Date(p.fecha).toLocaleString('es-PE')}<br>${cp.tipo==='F'?'RUC':'DNI'}: ${esc(cp.doc||(c&&c.dni)||'-')}<br>Cliente: ${esc(cp.nombre||(c&&c.nombre)||'Cliente varios')}${c&&c.num?'<br>Código: '+esc(c.num):''}</p>
+ <table><tr><th>Cant</th><th>Descripción</th><th class="r">Importe</th></tr><tr><td>1</td><td>${esc(p.concepto||'Servicio')}${mm?'<br><small>'+fF(mm.inicio)+' al '+fF(mm.fin)+'</small>':''}</td><td class="r">${tot.toFixed(2)}</td></tr></table>
+ ${CFG.igv?`<p class="r">Op. gravada: S/ ${(tot-igv).toFixed(2)}<br>IGV 18%: S/ ${igv.toFixed(2)}</p>`:''}
+ <p class="r t">TOTAL S/ ${tot.toFixed(2)}</p><p>${letras(tot)}</p><p>Pago: ${esc(p.metodo||'')}${p.quien?' · Atendió: '+esc(p.quien):''}</p><hr>
+ <p class="c">${of?'Representación impresa del comprobante electrónico.':'Documento interno de control.'}<br>¡Gracias por tu preferencia!</p></body></html>`;
+}
+function imprimir(p,a4){const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.onload=()=>setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(_){toast('No se pudo imprimir')}setTimeout(()=>f.remove(),6e4)},300);f.srcdoc=ticketHTML(p,a4)}
+function listo(p,titulo){
+ if(!p)return;const c=cli(p.cliente_id),mm=S.mem.find(x=>x.id===p.membresia_id);
+ const msg=c?`Hola ${c.nombre.split(' ')[0]} 👋, gracias por tu pago de ${sol(p.monto)} en ${nombre()}: ${p.concepto||''}${mm?' del '+fF(mm.inicio)+' al '+fF(mm.fin):''}.${p.comp&&p.comp.serie?' Comprobante '+compTxt(p.comp)+'.':''}${c.num?' Tu código de socio: '+c.num+'.':''} ${R.lema}`:'';
+ sheet(`<div style="text-align:center;display:grid;gap:4px"><div style="font-size:42px">✅</div><h3>${esc(titulo)}</h3><p class="mu sm">${sol(p.monto)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}</p></div>
+ <iframe class="tk" title="Comprobante"></iframe>
+ <div class="bt" style="justify-content:center;flex-wrap:wrap"><button class="btn p" id="pt">🖨️ Ticket</button><button class="btn" id="pa">📄 A4</button>${c&&c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,msg)}">📲 WhatsApp</a>`:''}<button class="btn" data-x>Listo</button></div>`,el=>{el.querySelector('.tk').srcdoc=ticketHTML(p,false);el.querySelector('#pt').onclick=()=>imprimir(p,false);el.querySelector('#pa').onclick=()=>imprimir(p,true)});
+}
+async function finCobro(p,v,titulo){
+ if(p&&v.comp)await emitir(p,v);
+ if(p&&CFG.autoPrint)imprimir(p,!!CFG.a4);
+ p&&listo(p,titulo);
+}
+document.addEventListener('click',e=>{const r=e.target.closest('[data-p]');if(!r)return;e.preventDefault();listo(S.pag.find(x=>x.id===r.dataset.p),'Comprobante')});
+
+/* ===== Importar desde AppFit u otro sistema (Excel o CSV) ===== */
+const CAMPOS=[['num','Código de socio',['codigo','cod','codigo socio','codigo de socio','id socio','nro socio','n° socio','id cliente','codigo cliente','numero']],['nombre','Nombre completo',['nombre completo','nombres y apellidos','apellidos y nombres','cliente','socio','nombre']],['nombres','Nombres',['nombres','primer nombre']],['apellidos','Apellidos',['apellidos','apellido paterno','apellido']],['dni','DNI / documento',['dni','documento','nro documento','numero de documento','n° documento','doc','ruc/dni','dni/ruc','ce']],['telefono','Celular',['celular','telefono','movil','whatsapp','cel','tel']],['email','Correo',['correo','email','e mail','mail','correo electronico']],['nacimiento','Cumpleaños',['fecha de nacimiento','nacimiento','cumpleanos','f nac','fec nac']],['plan','Membresía / plan',['membresia','plan','paquete','producto','servicio','tipo de membresia','tipo']],['inicio','Fecha de inicio',['fecha de inicio','fecha inicio','inicio','desde','f inicio','fec inicio']],['fin','Fecha de fin',['fecha de vencimiento','fecha de fin','fecha fin','vencimiento','vence','fin','hasta','f fin','fec fin']],['monto','Monto pagado',['monto pagado','monto','pagado','importe','total','precio','pago']],['notas','Notas',['observaciones','notas','obs','comentario','comentarios']]];
+function autoMap(hdr){
+ const H=hdr.map(norm),m={},used=new Set(),put=(k,i)=>{m[k]=i;used.add(i)};
+ CAMPOS.forEach(([k,,syn])=>{const i=H.findIndex((h,j)=>!used.has(j)&&syn.includes(h));i>=0&&put(k,i)});
+ CAMPOS.forEach(([k,,syn])=>{if(m[k]!=null)return;for(const s of syn){if(s.length<3)continue;const i=H.findIndex((h,j)=>!used.has(j)&&(' '+h+' ').includes(' '+s+' '));if(i>=0){put(k,i);break}}});
+ if(m.nombre==null&&m.nombres!=null&&m.apellidos==null){m.nombre=m.nombres;delete m.nombres}
+ return m;
+}
+function parseCSV(t){
+ t=t.replace(/^﻿/,'');const l0=t.split('\n')[0],cnt=ch=>l0.split(ch).length;const d=[';',',','\t'].sort((a,b)=>cnt(b)-cnt(a))[0];
+ const rows=[];let r=[],f='',q=false;
+ for(let i=0;i<t.length;i++){const ch=t[i];if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch}else if(ch==='"')q=true;else if(ch===d){r.push(f);f=''}else if(ch==='\n'){r.push(f.replace(/\r$/,''));rows.push(r);r=[];f=''}else f+=ch}
+ if(f||r.length){r.push(f);rows.push(r)}
+ return rows;
+}
+function pDate(v){
+ if(v==null||v==='')return null;
+ if(typeof v==='number'&&v>20000&&v<80000)return new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10);
+ const s=String(v).trim();let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+ if(m){let y=+m[3];if(y<100)y+=y>50?1900:2000;let d=+m[1],mo=+m[2];if(mo>12&&d<=12)[d,mo]=[mo,d];return y+'-'+pad(mo)+'-'+pad(d)}
+ m=s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);if(m)return m[1]+'-'+pad(m[2])+'-'+pad(m[3]);
+ return null;
+}
+const pMonto=v=>{if(typeof v==='number')return v;let s=String(v||'').replace(/[^\d.,-]/g,'');if(/,\d{1,2}$/.test(s))s=s.replace(/\./g,'').replace(',','.');else s=s.replace(/,/g,'');return parseFloat(s)||0};
+const titulo=s=>s===s.toUpperCase()?s.toLowerCase().replace(/(^|\s)\S/g,x=>x.toUpperCase()):s;
+async function leerArchivo(file){
+ if(/\.xlsx?$/i.test(file.name)){
+  if(!window.XLSX)await cargaJS('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+  const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];
+  return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+ }
+ return parseCSV(await file.text());
+}
+function preparar(rows,m){
+ const g=(r,k)=>m[k]!=null&&m[k]!==''?r[m[k]]:'';
+ const byDni=new Map(S.cli.filter(c=>c.dni).map(c=>[String(c.dni),c])),byNum=new Map(S.cli.filter(c=>c.num).map(c=>[String(c.num),c]));
+ let next=+nextNum();const nuevos=[],memb=[],planes={};let existen=0;
+ for(const r of rows){
+  const nm=titulo(String(g(r,'nombre')||[g(r,'nombres'),g(r,'apellidos')].filter(Boolean).join(' ')).replace(/\s+/g,' ').trim());if(!nm)continue;
+  const dni=String(g(r,'dni')||'').replace(/\D/g,'')||null,num=String(g(r,'num')||'').trim()||null;
+  let c=(num&&byNum.get(num))||(dni&&byDni.get(dni));
+  if(c)existen++;else{c={id:uid(),nombre:nm.slice(0,120),dni,num:num||String(next++),telefono:String(g(r,'telefono')||'').replace(/\D/g,'').slice(-9)||null,email:String(g(r,'email')||'').trim()||null,nacimiento:pDate(g(r,'nacimiento')),notas:String(g(r,'notas')||'').trim()||null,codigo:codigo(),creado:new Date().toISOString()};nuevos.push(c);dni&&byDni.set(dni,c);byNum.set(c.num,c)}
+  const fin=pDate(g(r,'fin'));if(!fin)continue;
+  let ini=pDate(g(r,'inicio'));const dias=ini&&ini<=fin?diff(ini,fin)+1:30;if(!ini||ini>fin)ini=addD(fin,-29);
+  const pn=String(g(r,'plan')||'').trim()||'Plan importado',key=norm(pn),monto=pMonto(g(r,'monto'));
+  (planes[key]=planes[key]||{nombre:pn,dias:[],precios:[]}).dias.push(dias);monto&&planes[key].precios.push(monto);
+  if(S.mem.some(x=>x.cliente_id===c.id&&x.fin===fin))continue;
+  memb.push({id:uid(),cliente_id:c.id,key,plan_nombre:pn,inicio:ini,fin,precio:monto,creado:new Date().toISOString()});
+ }
+ return{nuevos,memb,planes,existen};
+}
+const moda=a=>{const c={};let b=a[0],n=0;a.forEach(x=>{c[x]=(c[x]||0)+1;if(c[x]>n){n=c[x];b=x}});return b};
+async function ejecutarImport(X,prog){
+ let k=0;const pid={};
+ for(const[key,p]of Object.entries(X.planes)){let ex=S.pla.find(x=>norm(x.nombre)===key);if(!ex)ex=await DB.ins('pla',{nombre:p.nombre,precio:moda(p.precios)||0,dias:moda(p.dias)||30,color:['#3ad6ff','#7c5cff','#3ddc97','#f5b544','#ff5c7a'][k++%5],activo:true});pid[key]=ex.id}
+ prog(10);await DB.insMany('cli',X.nuevos,f=>prog(10+f*50));
+ const mem=X.memb.map(({key,...m})=>Object.assign(m,{plan_id:pid[key]}));
+ await DB.insMany('mem',mem,f=>prog(60+f*25));
+ const pag=mem.filter(m=>+m.precio>0).map(m=>({id:uid(),cliente_id:m.cliente_id,membresia_id:m.id,concepto:m.plan_nombre,monto:+m.precio,metodo:'Importado',fecha:m.inicio+'T12:00:00',quien:'Importación'}));
+ await DB.insMany('pag',pag,f=>prog(85+f*15));
+ S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));S.pla.sort((a,b)=>a.precio-b.precio);S.pag.sort((a,b)=>b.fecha>a.fecha?1:-1);
+}
+function importador(){
+ if(!isAdmin())return toast('Solo el administrador puede importar');
+ const plantilla='Código,Nombres,Apellidos,DNI,Celular,Correo,Membresía,Fecha inicio,Fecha fin,Monto\n1001,María,Quispe Rojas,45879632,987654321,maria@correo.com,Mensual,01/11/2026,30/11/2026,120';
+ sheet(`<h3>📥 Trae a tus ${esc(R.clis.toLowerCase())} desde AppFit</h3><p class="mu sm">En AppFit descarga tu lista de clientes (o membresías) en Excel y suéltala aquí. Reconocemos las columnas solas y conservamos sus códigos.</p>
+ <label class="drop" id="drop"><input type="file" accept=".csv,.xlsx,.xls,.txt" hidden id="fi"><div style="font-size:40px">📄</div><b>Suelta tu Excel o CSV</b><p class="mu sm">o toca para elegirlo</p></label>
+ <p class="mu sm" style="text-align:center"><a class="grad" download="plantilla-xyro-apps.csv" href="data:text/csv;charset=utf-8,${encodeURIComponent('﻿'+plantilla)}"><b>Descargar plantilla de ejemplo</b></a></p><div id="impB" class="g imp"></div>`,(el,close)=>{
+  const dz=el.querySelector('#drop'),fi=el.querySelector('#fi');let rows=[],hdr=[],m={};
+  const abrir=async f=>{if(!f)return;dz.innerHTML='<b>Leyendo '+esc(f.name)+'…</b>';try{const all=(await leerArchivo(f)).filter(r=>r.some(c=>String(c).trim()));let hi=0,best=-1;all.slice(0,10).forEach((r,i)=>{const n=Object.keys(autoMap(r.map(String))).length;if(n>best){best=n;hi=i}});hdr=all[hi].map(String);rows=all.slice(hi+1);m=autoMap(hdr);dz.remove();pintar()}catch(e){dz.innerHTML='<b>No pudimos leer el archivo</b><p class="mu sm">'+esc(e.message)+'</p>'}};
+  fi.onchange=()=>abrir(fi.files[0]);
+  ['dragover','dragenter'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.add('on')}));dz.addEventListener('dragleave',()=>dz.classList.remove('on'));dz.addEventListener('drop',e=>{e.preventDefault();abrir(e.dataTransfer.files[0])});
+  const pintar=()=>{
+   const X=preparar(rows,m),b=el.querySelector('#impB');
+   const prev=rows.slice(0,5).map(r=>{const v=k=>m[k]!=null?esc(r[m[k]]):'';return`<tr><td>${v('num')}</td><td>${v('nombre')||v('nombres')+' '+v('apellidos')}</td><td>${v('dni')}</td><td>${v('plan')}</td><td>${v('fin')}</td></tr>`}).join('');
+   b.innerHTML=`<div class="card" style="padding:14px"><h3>✨ ${rows.length} filas leídas</h3><p class="mu sm">${X.nuevos.length} ${esc(R.clis.toLowerCase())} nuevos · ${X.existen} ya estaban · ${X.memb.length} membresías · ${Object.keys(X.planes).length} planes</p></div>
+   <details${Object.keys(m).length<3?' open':''}><summary class="mu sm" style="cursor:pointer;font-weight:700">Revisar columnas (${Object.keys(m).length} reconocidas)</summary><div class="f2" style="margin-top:10px">${CAMPOS.map(([k,l])=>`<label class="fl">${l}<select data-c="${k}"><option value="">—</option>${hdr.map((h,i)=>`<option value="${i}" ${m[k]===i?'selected':''}>${esc(h||'Columna '+(i+1))}</option>`).join('')}</select></label>`).join('')}</div></details>
+   <div class="sc"><table><tr><th>Código</th><th>Nombre</th><th>DNI</th><th>Plan</th><th>Vence</th></tr>${prev}</table></div>
+   <p class="err" hidden></p><div class="bt"><button class="btn" data-x>Cancelar</button><button class="btn p" id="go" ${X.nuevos.length||X.memb.length?'':'disabled'}>Importar ${X.nuevos.length} ${esc(R.clis.toLowerCase())}</button></div>`;
+   b.querySelectorAll('[data-c]').forEach(s=>s.onchange=()=>{s.value===''?delete m[s.dataset.c]:m[s.dataset.c]=+s.value;pintar()});
+   b.querySelector('#go').onclick=async e=>{const bt=e.target;bt.disabled=true;try{await ejecutarImport(X,pc=>bt.textContent='Importando… '+Math.round(pc)+'%');close();toast('¡'+X.nuevos.length+' '+R.clis.toLowerCase()+' importados! 🎉');confeti(60);location.hash='#/socios';go()}catch(er){const p=b.querySelector('.err');p.textContent=er.message;p.hidden=false;bt.disabled=false;bt.textContent='Reintentar'}};
+  };
+ },'wide');
 }
 
 /* ===== Carnet con QR (librería chica, solo se carga al abrirlo) ===== */
@@ -523,7 +748,7 @@ async function qrSVG(t){if(!window.qrcode)await cargaJS('https://cdnjs.cloudflar
 async function carnet(c){
  if(!c.codigo){const cd=codigo();await DB.upd('cli',c.id,{codigo:cd})}
  const e=est(c),url=new URL('carnet.html?c='+c.codigo,location.href).href;
- sheet(`<div class="carnet"><b style="position:relative">${esc(nombre())}</b><div class="qr" id="qrb"><div style="aspect-ratio:1;display:grid;place-items:center;color:#000">…</div></div><div style="position:relative"><h3>${esc(c.nombre)}</h3><p class="sm" style="opacity:.8">${e.m?esc(e.m.plan_nombre||'')+' · hasta '+fF(e.m.fin):'Sin '+esc(R.plan.toLowerCase())}</p><p class="sm" style="opacity:.6;letter-spacing:.2em">${esc(c.codigo)}</p></div></div>
+ sheet(`<div class="carnet"><b style="position:relative">${esc(nombre())}</b><div class="qr" id="qrb"><div style="aspect-ratio:1;display:grid;place-items:center;color:#000">…</div></div><div style="position:relative"><h3>${esc(c.nombre)}</h3><p class="sm" style="opacity:.8">${e.m?esc(e.m.plan_nombre||'')+' · hasta '+fF(e.m.fin):'Sin '+esc(R.plan.toLowerCase())}</p><p class="sm" style="opacity:.6;letter-spacing:.2em">${c.num?'#'+esc(c.num)+' · ':''}${esc(c.codigo)}</p></div></div>
  <p class="mu sm" style="text-align:center">Muéstralo en la entrada para marcar asistencia.</p>
  <div class="bt" style="justify-content:center">${c.telefono&&!DEMO?`<a class="btn p" target="_blank" rel="noopener" href="${waLink(c,'Hola '+c.nombre.split(' ')[0]+', este es tu carnet digital de '+nombre()+': '+url)}">📲 Enviar por WhatsApp</a>`:''}<button class="btn" data-x>Cerrar</button></div>`,async el=>{try{el.querySelector('#qrb').innerHTML=await qrSVG(c.codigo)}catch(_){el.querySelector('#qrb').innerHTML='<b style="color:#000;font-size:22px">'+esc(c.codigo)+'</b>'}});
 }
@@ -535,7 +760,7 @@ function kiosco(){
  const k=document.createElement('div');k.id='kio';
  k.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span class="mu"><b style="color:var(--tx)">${esc(nombre())}</b> · Asistencia</span><button class="btn sm" id="kx">✕ Salir</button></div>
  <div style="display:grid;align-content:center;gap:6px"><div class="clk" id="kclk"></div><p class="mu" id="kfe"></p>
-  <p style="margin-top:18px;font-weight:700">Marca tu ingreso con tu DNI${'BarcodeDetector'in window?' o tu QR':''}</p>
+  <p style="margin-top:18px;font-weight:700">Marca tu ingreso con tu DNI o código${'BarcodeDetector'in window?' o tu QR':''}</p>
   <div class="kin" id="kin"></div>
   <video id="cam" playsinline muted hidden></video>
   <div class="kpad">${[1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].map(x=>`<button data-k="${x}">${x}</button>`).join('')}</div>
@@ -570,7 +795,7 @@ function semilla(rubro){
  R.planes.forEach(([n,p,d,c])=>S.pla.push({id:uid(),nombre:n,precio:p,dias:d,color:c,activo:true}));
  const pp=S.pla.filter(p=>p.dias>1);
  for(let i=0;i<46;i++){
-  const c={id:uid(),nombre:rnd(N)+' '+rnd(A)+' '+rnd(A),dni:String(40000000+Math.floor(Math.random()*39999999)),telefono:'9'+String(Math.floor(Math.random()*1e8)).padStart(8,'0'),codigo:codigo(),creado:new Date().toISOString(),nacimiento:i===3?'1995'+H.slice(4):null};
+  const c={id:uid(),nombre:rnd(N)+' '+rnd(A)+' '+rnd(A),dni:String(40000000+Math.floor(Math.random()*39999999)),telefono:'9'+String(Math.floor(Math.random()*1e8)).padStart(8,'0'),num:String(1001+i),codigo:codigo(),creado:new Date().toISOString(),nacimiento:i===3?'1995'+H.slice(4):null};
   S.cli.push(c);const r=Math.random();if(r<.06)continue;
   const p=Math.random()<.65?pp[0]:rnd(pp),fin=addD(H,r<.2?-Math.floor(Math.random()*25)-1:r<.32?Math.floor(Math.random()*5):Math.floor(Math.random()*p.dias)),ini0=addD(fin,-p.dias+1);
   const m={id:uid(),cliente_id:c.id,plan_id:p.id,plan_nombre:p.nombre,inicio:ini0,fin,precio:p.precio};S.mem.push(m);
@@ -630,14 +855,17 @@ async function entrar(u){
  }else s=(await sb.from('sitios').select('*').eq('id',p.sitio_id).maybeSingle()).data;
  if(!s)throw new Error('No encontramos tu negocio.');
  SID=s.id;SLUG=s.slug;
- const{data:cs}=await sb.from('contenido').select('clave,valor').eq('sitio_id',SID).in('clave',['config','app','negocio']);
+ const{data:cs}=await sb.from('contenido').select('clave,valor').eq('sitio_id',SID);
  const C={};(cs||[]).forEach(r=>C[r.clave]=r.valor||{});
  const xy=(C.config&&C.config.xyros)||[];
  if(!ME.gestor&&!xy.includes('apps'))return fatal('Xyro Apps aún no está activo para tu negocio',`<a class="btn p" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero activar Xyro Apps para '+(s.negocio||s.slug))}">Activarlo por WhatsApp</a>`);
- CFG=Object.assign({rubro:'gym',nombre:(C.negocio&&C.negocio.nombre)||s.negocio||s.slug},C.app||{});R=RUBROS[CFG.rubro]||RUBROS.gym;
+ WEB=deWeb(C);
+ CFG=Object.assign({rubro:'gym',nombre:WEB.nombre||s.negocio||s.slug},C.app||{});R=RUBROS[CFG.rubro]||RUBROS.gym;
+ if(!CFG.web&&ME.gestor){try{const{data:ca}=await sb.from('clientes_agencia').select('url').ilike('url','%'+SLUG+'%').limit(1);CFG.web=ca&&ca[0]&&ca[0].url||''}catch(_){}}
  await DB.load();
  if(!ME.gestor)vigilarInactividad();
  start();
+ if(CFG.syncWeb!==false&&await syncWeb(false))go();
 }
 async function elegirSitio(){
  const{data}=await sb.from('sitios').select('slug,negocio').order('negocio');
