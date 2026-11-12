@@ -9,7 +9,7 @@
 <link rel="icon" href="../img/marca/logo-apps-app.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
-:root{--a:#3ad6ff;--b:#7c5cff;--bg:#07070d;--c1:#10101a;--c2:#161624;--ln:#ffffff14;--tx:#eef0f8;--mu:#8d8fa8;--ok:#3ddc97;--wa:#f5b544;--bad:#ff5c7a;--r:18px}
+:root{--a:#3ad6ff;--b:#7c5cff;--bg:#07070d;--c1:#141414;--c2:#1b1b1b;--ln:#ffffff14;--tx:#eef0f8;--mu:#8d8fa8;--ok:#3ddc97;--wa:#f5b544;--bad:#ff5c7a;--r:18px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);overflow:hidden}
@@ -123,7 +123,7 @@ main{overflow:auto;height:100%;position:relative}
 /* modal */
 .ov{position:fixed;inset:0;z-index:40;background:#0009;backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;animation:fd .2s}
 @keyframes fd{from{opacity:0}}
-.sh{width:min(480px,100%);max-height:92vh;overflow:auto;background:#12121d;border:1px solid #ffffff1f;border-radius:22px;padding:22px;display:grid;gap:12px;animation:pop .35s cubic-bezier(.2,1.2,.3,1);box-shadow:0 40px 120px -20px #000}
+.sh{width:min(480px,100%);max-height:92vh;overflow:auto;background:#151515;border:1px solid #ffffff1f;border-radius:22px;padding:22px;display:grid;gap:12px;animation:pop .35s cubic-bezier(.2,1.2,.3,1);box-shadow:0 40px 120px -20px #000}
 @keyframes pop{from{opacity:0;transform:translateY(30px) scale(.96)}}
 .sh h3{font-size:20px;letter-spacing:-.02em}
 .fl{display:grid;gap:5px;font-size:13px;color:var(--mu);font-weight:600}
@@ -136,7 +136,7 @@ main{overflow:auto;height:100%;position:relative}
 .sh .bt{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
 .qr{background:#fff;padding:14px;border-radius:16px;width:220px;margin:0 auto}
 .qr svg{width:100%;height:auto;display:block}
-.carnet{border-radius:22px;padding:20px;background:linear-gradient(135deg,var(--b),#1b1b2e 55%,var(--a));display:grid;gap:12px;text-align:center;position:relative;overflow:hidden}
+.carnet{border-radius:22px;padding:20px;background:linear-gradient(135deg,var(--b),#151515 55%,var(--a));display:grid;gap:12px;text-align:center;position:relative;overflow:hidden}
 .carnet::after{content:"";position:absolute;inset:-50%;background:linear-gradient(115deg,transparent 40%,#ffffff30 50%,transparent 60%);animation:sh 3.5s infinite}
 @keyframes sh{from{transform:translateX(-60%)}to{transform:translateX(60%)}}
 /* kiosco */
@@ -165,8 +165,8 @@ main{overflow:auto;height:100%;position:relative}
 #boot img{width:84px;animation:bt 1.3s ease-in-out infinite}
 @keyframes bt{50%{transform:scale(.88);filter:drop-shadow(0 0 30px var(--a))}}
 .err{color:var(--bad);font-size:14px}
-.demo{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:20;display:flex;gap:10px;align-items:center;padding:8px 8px 8px 16px;border-radius:999px;background:#12121df0;border:1px solid #ffffff22;backdrop-filter:blur(10px);font-size:13px;box-shadow:0 20px 50px -10px #000;white-space:nowrap}
-#toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-80px);z-index:90;padding:12px 18px;border-radius:14px;background:#12121d;border:1px solid #ffffff22;font-weight:700;transition:.35s cubic-bezier(.2,1.4,.3,1);box-shadow:0 20px 50px -10px #000;opacity:0;pointer-events:none}
+.demo{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:20;display:flex;gap:10px;align-items:center;padding:8px 8px 8px 16px;border-radius:999px;background:#151515f0;border:1px solid #ffffff22;backdrop-filter:blur(10px);font-size:13px;box-shadow:0 20px 50px -10px #000;white-space:nowrap}
+#toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-80px);z-index:90;padding:12px 18px;border-radius:14px;background:#151515;border:1px solid #ffffff22;font-weight:700;transition:.35s cubic-bezier(.2,1.4,.3,1);box-shadow:0 20px 50px -10px #000;opacity:0;pointer-events:none}
 #toast.on{transform:translate(-50%,0);opacity:1}
 .bn{display:none}
 .drop{display:block;border:2px dashed #ffffff26;border-radius:18px;padding:28px;text-align:center;cursor:pointer;transition:.2s}.drop:hover,.drop.on{border-color:var(--a);background:#ffffff08}
@@ -283,8 +283,10 @@ const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',as
 
 let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[]};
 const KS=['cli','pla','mem','pag','asi','pro','mov','cie'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
-const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','WhatsApp que responde, agenda, recuerda pagos y cierra ventas'],['edits','Xyro Edits','Videos y reels editados rápido para tus redes']];
-const tiene=k=>DEMO||!!(ME&&ME.gestor)||XY.includes(k);
+const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','WhatsApp que responde, agenda, recuerda pagos y cierra ventas',1],['edits','Xyro Edits','Videos y reels editados rápido para tus redes',1]];
+const PRONTO=k=>{const x=XYROS.find(y=>y[0]===k);return!!(x&&x[3])};
+const soporteURL=()=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;
+const tiene=k=>DEMO||XY.includes(k);
 const CTL=()=>tiene('control');
 const isAdmin=()=>ME&&(ME.rol==='admin'||ME.rol==='gestor');
 
@@ -336,7 +338,7 @@ const DB={
   [S.cli,S.pla,S.mem,S.pag,S.asi]=rs.map(r=>r.data||[]);
   const r2=await Promise.all([todo(()=>q('pro').order('nombre').order('id'),10000),todo(()=>q('mov').gte('t',since).order('t',{ascending:false}).order('id'),40000),q('cie').order('hasta',{ascending:false}).limit(60)]);
   NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);
-  NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;
+  NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
  },
  async stock(pid,delta,tipo,nota){
   const p=S.pro.find(x=>x.id===pid),mv={producto_id:pid,cant:delta,tipo,nota,quien:ME.nombre||ROLES[ME.rol],t:new Date().toISOString()};
@@ -436,7 +438,7 @@ const NAV=()=>(ME&&ME.rol==='cafetin'?[['tienda','🥤',tiendaN()],['caja','💰
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'../img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='../img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
-  `<div class="side-f"><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor?'<button class="btn sm" id="cambia">Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
+  `<div class="side-f"><a class="btn sm" target="_blank" rel="noopener" href="${soporteURL()}">💬 Soporte XyroStudio</a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor?'<button class="btn sm" id="cambia">Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
  $('#bn').innerHTML=n.filter(x=>['inicio','socios','kiosco','tienda','caja'].includes(x[0])).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=()=>{LS.r('xa-s');location.href='./'});
  marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent='📍 '+(SEDE?sedeN(SEDE):'Elegir sede');b.onclick=elegirSede}}
@@ -670,7 +672,7 @@ function cobroSuelto(){
  });
 }
 /* ===== Caja detallada: día, semana, mes, año ===== */
-let cjP='dia',cjD='',cjF={t:'',m:'',q:'',c:'',s:''},cjS='',NEED19=false;
+let NEED22=false,cjP='dia',cjD='',cjF={t:'',m:'',q:'',c:''},cjS='',NEED19=false;
 const MESL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const lunes=d=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()-((x.getDay()+6)%7));return ymd(x)};
 const finMes=d=>{const x=new Date(d.slice(0,8)+'01T12:00:00');x.setMonth(x.getMonth()+1);x.setDate(0);return ymd(x)};
@@ -688,12 +690,14 @@ function cjBuckets(p,d1,d2,L){
 }
 function cjBarras(B,big){const mx=Math.max(1,...B.map(b=>b.tot)),many=B.length>16;
  return`<div class="cb ${many?'many':''}">${B.map((b,i)=>`<div class="cc" title="${esc(b.l)} · ${sol(b.tot)} · ${b.n} cobros" ${b.ir?`data-ir="${b.ir}"`:''}>${!many&&b.tot?`<em>${big?sol(b.tot):Math.round(b.tot)}</em>`:''}<div class="cs" style="height:${(b.tot/mx*100).toFixed(1)}%">${b.otro?`<i style="flex:${b.otro};background:#8a8fa8"></i>`:''}${b.tienda?`<i style="flex:${b.tienda};background:var(--wa)"></i>`:''}${b.memb?`<i style="flex:${b.memb};background:var(--a)"></i>`:''}</div><small>${many&&i%2&&B.length>20?'':esc(b.l)}</small></div>`).join('')}</div>`}
+// Sede que muestra la caja: la elegida en el filtro, si no la sede de este equipo ('' = todas).
+const cjSede=()=>{if(sedesL().length<2)return'';if(!isAdmin()&&SEDE)return SEDE;const s=cjF.s;return s==='*'?'':s||SEDE||''};
 function caja(){
  if(!cjD)cjD=hoy();
  const[d1,d2]=cjRango(cjP,cjD),rx=RX&&RX.k===d1+d2;
  if(!DEMO&&d1<SINCE&&!rx){cargarRango(d1,d2);return'<div class="empty"><b>⏳</b>Cargando caja…</div>'}
  const en=s=>{const x=ymd(new Date(s));return x>=d1&&x<=d2},src=rx?RX.pag:S.pag;
- const fil=p=>(!cjF.s||String(p.sede||'')===cjF.s)&&(!cjF.t||tipoDe(p)===cjF.t)&&(!cjF.m||(p.metodo||'Otro')===cjF.m)&&(!cjF.q||(p.quien||'—')===cjF.q)&&(!cjF.c||(cjF.c==='N'?!(p.comp&&p.comp.serie):p.comp&&p.comp.tipo===cjF.c));
+ const sF=cjSede(),fil=p=>(!sF||String(p.sede||'')===sF)&&(!cjF.t||tipoDe(p)===cjF.t)&&(!cjF.m||(p.metodo||'Otro')===cjF.m)&&(!cjF.q||(p.quien||'—')===cjF.q)&&(!cjF.c||(cjF.c==='N'?!(p.comp&&p.comp.serie):p.comp&&p.comp.tipo===cjF.c));
  const qs=cjS.trim().toLowerCase(),bus=p=>{if(!qs)return true;const c=cli(p.cliente_id)||{};return[p.concepto,c.nombre,c.num,c.dni,compTxt(p.comp),p.quien].some(x=>String(x||'').toLowerCase().includes(qs))};
  const L0=src.filter(p=>en(p.fecha)).sort((a,b)=>b.fecha>a.fecha?1:-1),L=L0.filter(p=>fil(p)&&bus(p));
  const sum=a=>a.reduce((s,p)=>s+ +p.monto,0),tot=sum(L),sT=t=>sum(L.filter(p=>tipoDe(p)===t)),ef=sum(L.filter(p=>!DIG(p))),dg=tot-ef;
@@ -705,7 +709,7 @@ function caja(){
  const pm=grp(L,p=>p.metodo||'Otro',p=>+p.monto),pq=grp(L,p=>p.quien||'—',p=>+p.monto),it=[];L.forEach(p=>(p.items||[]).forEach(i=>it.push(i)));
  const tc=grp(L.filter(p=>!p.items),p=>String(p.concepto||'Pago').replace(/ \(dscto.*$/,''),p=>+p.monto).slice(0,6),tp=grp(it,i=>i.n,i=>i.c*i.p).slice(0,6);
  const opt=(k,arr)=>[...new Set(L0.map(arr))].filter(Boolean).sort();
- const CIE=(rx&&RX.cie?RX.cie:S.cie).filter(c=>{const x=c.dia||ymd(new Date(c.hasta));return x>=d1&&x<=d2});
+ const CIE=(rx&&RX.cie?RX.cie:S.cie).filter(c=>{const x=c.dia||ymd(new Date(c.hasta));return x>=d1&&x<=d2&&(!sF||!c.sede||String(c.sede)===sF)});
  const reg=cjP==='dia'?null:cjBuckets(cjP==='anio'?'anio':'mes',d1,d2,L).filter(b=>b.ir<=hoy()).reverse();
  const pct=v=>tot?Math.round(v/tot*100)+'%':'0%',TN={memb:R.plan+'s',tienda:tiendaN(),otro:'Otros'};
  setTimeout(()=>{
@@ -713,7 +717,7 @@ function caja(){
   $$('[data-cm]').forEach(b=>b.onclick=()=>{cjD=+b.dataset.cm?cjMover(cjP,cjD,+b.dataset.cm):hoy();go()});
   $$('[data-ir]').forEach(b=>b.onclick=()=>{cjD=b.dataset.ir;cjP=cjP==='anio'?'mes':'dia';go()});
   $$('[data-cf]').forEach(s=>s.onchange=()=>{cjF[s.dataset.cf]=s.value;go()});
-  const cx=$('#cjx');cx&&(cx.onclick=()=>{cjF={t:'',m:'',q:'',c:'',s:''};cjS='';go()});
+  const cx=$('#cjx');cx&&(cx.onclick=()=>{cjF={t:'',m:'',q:'',c:''};cjS='';go()});
   const sb2=$('#cjs');sb2&&(sb2.onchange=()=>{cjS=sb2.value;go()});
   const dd=$('#cjd');dd&&(dd.onchange=()=>{if(dd.value){cjD=dd.value;go()}});
   $('#cier').onclick=cierreCaja;
@@ -721,12 +725,12 @@ function caja(){
   $('#csv').onclick=()=>{const rows=[['Fecha','Hora','Tipo','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(L.map(p=>{const c=cli(p.cliente_id)||{};return[ymd(new Date(p.fecha)),fH(p.fecha),TN[tipoDe(p)],compTxt(p.comp),p.concepto||'',c.nombre||'',c.num||'',p.metodo||'',p.monto,p.quien||'']}));const b=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='caja-'+d1+(d2!==d1?'-a-'+d2:'')+'.csv';a.click()};
   $('#cprt').onclick=()=>imprimirHTML(cierreHTML({desde:new Date(d1+'T00:00:00').toISOString(),hasta:new Date(d2+'T23:59:59').toISOString(),quien:ME.nombre||ROLES[ME.rol],resumen:resumenCaja(L),reporte:cjTitulo(cjP,d1,d2)}));
  });
- const PER=[['dia','Día'],['sem','Semana'],['mes','Mes'],['anio','Año']],nf=Object.values(cjF).filter(Boolean).length+(qs?1:0);
+ const PER=[['dia','Día'],['sem','Semana'],['mes','Mes'],['anio','Año']],nf=['t','m','q','c'].filter(k=>cjF[k]).length+(qs?1:0);
  const sel=(k,l,o)=>`<label class="cjf"><span>${l}</span><select data-cf="${k}"><option value="">Todos</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${cjF[k]===v?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
- return`<div class="hi"><div><h2>Caja</h2><p class="mu">${esc(cjTitulo(cjP,d1,d2))}${d2>=hoy()&&d1<=hoy()?' · en curso':''}</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cprt">🖨️ Imprimir reporte</button><button class="btn p" id="cier">🔒 Cerrar caja</button></div></div>
+ return`<div class="hi"><div><h2>Caja${sF?' · '+esc(sedeN(sF)):sedesL().length>1?' · todas las sedes':''}</h2><p class="mu">${esc(cjTitulo(cjP,d1,d2))}${d2>=hoy()&&d1<=hoy()?' · en curso':''}</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cprt">🖨️ Imprimir reporte</button><button class="btn p" id="cier">🔒 Cerrar caja</button></div></div>
  <div class="cjbar"><div class="seg">${PER.map(([k,t])=>`<button class="${cjP===k?'on':''}" data-cp="${k}">${t}</button>`).join('')}</div>
   <div class="nav2"><button class="btn sm" data-cm="-1" aria-label="Anterior">‹</button><button class="btn sm" data-cm="0">Hoy</button><button class="btn sm" data-cm="1" aria-label="Siguiente" ${d2>=hoy()?'disabled':''}>›</button><input type="date" id="cjd" value="${cjD}" max="${hoy()}" class="chip"></div></div>
- <div class="cjfs">${sedesL().length>1?sel('s','Sede',sedesL().map(s=>[s.id,s.nombre])):''}${sel('t','Tipo',[['memb',R.plan+'s'],['tienda',tiendaN()],['otro','Otros']])}${sel('m','Método',opt('m',p=>p.metodo||'Otro').map(x=>[x,x]))}${sel('q','Registró',opt('q',p=>p.quien||'—').map(x=>[x,x]))}${sel('c','Comprobante',[['B','Boleta / N. venta'],['F','Factura'],['N','Sin comprobante']])}<label class="cjf grow"><span>Buscar</span><input id="cjs" value="${esc(cjS)}" placeholder="${esc(R.cli)}, código, concepto…"></label>${nf?`<button class="btn sm" id="cjx">✕ Quitar filtros (${nf})</button>`:''}</div>
+ <div class="cjfs">${sedesL().length>1&&isAdmin()?`<label class="cjf"><span>Sede</span><select data-cf="s">${[['*','🌎 Todas las sedes']].concat(sedesL().map(s=>[s.id,'📍 '+s.nombre])).map(([v,t])=>`<option value="${esc(v)}" ${(sF||'*')===v?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`:''}${sel('t','Tipo',[['memb',R.plan+'s'],['tienda',tiendaN()],['otro','Otros']])}${sel('m','Método',opt('m',p=>p.metodo||'Otro').map(x=>[x,x]))}${sel('q','Registró',opt('q',p=>p.quien||'—').map(x=>[x,x]))}${sel('c','Comprobante',[['B','Boleta / N. venta'],['F','Factura'],['N','Sin comprobante']])}<label class="cjf grow"><span>Buscar</span><input id="cjs" value="${esc(cjS)}" placeholder="${esc(R.cli)}, código, concepto…"></label>${nf?`<button class="btn sm" id="cjx">✕ Quitar filtros (${nf})</button>`:''}</div>
  <div class="g k4 st">
   <div class="card kpi"><i style="background:var(--a)"></i><small>Ingresos ${nf?'filtrados':'totales'}</small><b data-n="${Math.round(tot)}" data-f="s">0</b><span class="tr">${dlt} ${prev!=null?'vs '+sol(prev)+(d2>=hoy()&&d1<=hoy()&&cjP!=='dia'?' mismo tramo anterior':' período anterior'):''}</span></div>
   <div class="card kpi"><i style="background:var(--b)"></i><small>Cobros</small><b data-n="${L.length}">0</b><span class="tr">Ticket promedio ${sol(L.length?Math.round(tot/L.length*100)/100:0)}</span></div>
@@ -780,7 +784,7 @@ function ajustes(){
   <p class="mu sm" style="margin-top:6px">${CFG.sunat?'✅ Conectado a SUNAT: boletas y facturas electrónicas.':'Hoy se imprime como <b>nota de venta</b> con serie y número. Para boletas y facturas electrónicas válidas ante SUNAT, <a class="grad" target="_blank" rel="noopener" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Quiero activar boletas SUNAT en Xyro Apps para '+nombre())+'"><b>actívalo aquí</b></a>.'}</p></div>
  <div class="card"><h3>📥 Importar desde AppFit <button class="btn sm p" id="aim">Subir Excel</button></h3><p class="mu sm">Trae a tus ${esc(R.clis.toLowerCase())} con su código, DNI, celular, plan y fecha de vencimiento. Detectamos las columnas solas y no duplicamos a nadie.</p></div>
  <a class="card" href="#/equipo" style="display:block"><h3>👥 Cuentas del equipo</h3><p class="mu sm">Crea cuentas de administración, recepción y cafetín, asígnales sede y dales una clave nueva si la olvidan. <b style="color:var(--a)">Abrir Equipo →</b></p></a>
- <div class="card"><h3>🚀 Más para tu negocio</h3><div class="tl">${[['🤖','Recordatorios automáticos por WhatsApp','Xyro Bots'],['🧾','Boletas y facturas SUNAT','Facturación'],['🔳','Lector QR en la puerta','Hardware'],['🌐','Web con planes y reservas','Xyro Webs']].map(([i,t,k])=>`<a class="row" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero '+k+' para '+nombre())}"><span style="font-size:22px">${i}</span><span class="nm"><b>${t}</b><small>${k}</small></span>→</a>`).join('')}</div></div>
+ <div class="card"><h3>🚀 Más para tu negocio</h3><div class="tl">${[!CTL()&&['🥤','Punto de venta: tienda o cafetín con stock','Xyro Control'],!tiene('webs')&&['🌐','Página web conectada a tu sistema','Xyro Webs'],['🤖','Recordatorios automáticos por WhatsApp','Xyro Bots',1],['🧾','Boletas y facturas electrónicas SUNAT','Facturación',1],['🔳','Lector QR en la puerta','Hardware',1]].filter(Boolean).map(([i,t,k,pr])=>pr?`<div class="row"><span style="font-size:22px">${i}</span><span class="nm"><b>${t}</b><small>${k}</small></span><span class="pill pronto">Muy pronto</span></div>`:`<a class="row" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, quiero '+k+' para '+nombre())}"><span style="font-size:22px">${i}</span><span class="nm"><b>${t}</b><small>${k}</small></span>→</a>`).join('')}</div></div>
  </div>`;
 }
 
@@ -1084,8 +1088,8 @@ function tablaCaja(r,tk){const k=Object.keys(r),s=t=>k.reduce((a,m)=>a+r[m][t],0
 function cierreHTML(c){return`<!doctype html><html><head><meta charset="utf-8"><title>Cierre de caja</title><style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font:11.5px/1.4 "Courier New",monospace;width:74mm;margin:0 auto;padding:6px 2px;color:#000}h1{font-size:14px;text-align:center}p{margin:5px 0}table{width:100%;border-collapse:collapse;margin:8px 0}th,td{padding:2px 0;font-size:10.5px}th{border-bottom:1px dashed #000;text-align:left}.r{text-align:right}hr{border:0;border-top:1px dashed #000;margin:6px 0}</style></head><body><h1>${esc(nombre())}<br>${c.reporte?'REPORTE DE CAJA':c.auto?'CIERRE AUTOMÁTICO':'CIERRE DE CAJA'}</h1>${c.reporte?'<p style="text-align:center">'+esc(c.reporte)+'</p>':''}<hr><p>Desde: ${new Date(c.desde).toLocaleString('es-PE')}<br>Hasta: ${new Date(c.hasta).toLocaleString('es-PE')}<br>${c.reporte?'Impreso por':'Cerró'}: ${esc(c.quien||'')}</p>${tablaCaja(c.resumen||{},1)}<hr>${c.contado==null?`<p>Efectivo del ${c.reporte?'período':'día'}: S/ ${(+((c.resumen||{}).Efectivo||{}).tot||0).toFixed(2)}<br><b>Total: S/ ${totCie(c).toFixed(2)}</b></p>`:`<p>Efectivo esperado: S/ ${(+c.esperado).toFixed(2)}<br>Efectivo contado: S/ ${(+c.contado).toFixed(2)}<br><b>Diferencia: S/ ${(+c.diferencia).toFixed(2)}</b></p>`}${c.nota?'<p>Nota: '+esc(c.nota)+'</p>':''}${c.contado==null?'':'<hr><p style="text-align:center">Firma: ____________________</p>'}</body></html>`}
 function cierreCaja(){
  if(NEED17)return toast('Corre el SQL 17 en Supabase');
- const ult=S.cie.find(x=>!x.auto&&x.hasta>new Date(hoy()+'T00:00:00').toISOString()),desde=ult?ult.hasta:new Date(hoy()+'T00:00:00').toISOString(),L=S.pag.filter(p=>new Date(p.fecha)>new Date(desde)),r=resumenCaja(L),ef=(r.Efectivo||{}).tot||0,tot=L.reduce((a,p)=>a+ +p.monto,0);
- sheet(`<h3>🔒 Cierre de caja</h3><p class="mu sm">Desde ${ult?'el último cierre ('+fF(desde)+' '+fH(desde)+')':'hoy 00:00'} · ${L.length} movimientos · total ${sol(tot)}</p>
+ const sF=cjSede(),deS=x=>!sF||String(x.sede||'')===sF,ult=S.cie.find(x=>!x.auto&&(NEED22?true:deS(x))&&x.hasta>new Date(hoy()+'T00:00:00').toISOString()),desde=ult?ult.hasta:new Date(hoy()+'T00:00:00').toISOString(),L=S.pag.filter(p=>deS(p)&&new Date(p.fecha)>new Date(desde)),r=resumenCaja(L),ef=(r.Efectivo||{}).tot||0,tot=L.reduce((a,p)=>a+ +p.monto,0);
+ sheet(`<h3>🔒 Cierre de caja${sF?' · '+esc(sedeN(sF)):''}</h3><p class="mu sm">Desde ${ult?'el último cierre ('+fF(desde)+' '+fH(desde)+')':'hoy 00:00'} · ${L.length} movimientos · total ${sol(tot)}</p>
  <div class="imp"><div class="sc">${tablaCaja(r)}</div></div>
  <form class="g" id="cf" style="gap:12px"><div class="f2"><label class="fl">Fondo inicial (S/)<input id="cfo" type="number" step="any" min="0" value="${+CFG.fondo||0}"></label><label class="fl">Efectivo contado (S/)<input id="cco" type="number" step="any" min="0" required placeholder="Cuenta el cajón"></label></div>
  <div class="card" style="padding:14px;text-align:center"><small class="mu">Efectivo esperado <b id="cesp"></b></small><div id="cdif" style="font-size:24px;font-weight:800;margin-top:4px">—</div></div>
@@ -1095,7 +1099,7 @@ function cierreCaja(){
   const up=()=>{const e=(+fo.value||0)+ef;es.textContent=sol(e);if(co.value===''){dif.textContent='—';return}const d=Math.round(((+co.value)-e)*100)/100;dif.textContent=d===0?'✅ Cuadra exacto':(d>0?'⬆ Sobra ':'⚠️ Falta ')+sol(Math.abs(d));dif.style.color=d===0?'var(--ok)':d>0?'var(--wa)':'var(--bad)'};
   fo.oninput=co.oninput=up;up();setTimeout(()=>co.focus(),80);
   el.querySelector('#cf').onsubmit=async e=>{e.preventDefault();const b=el.querySelector('.btn.p');b.disabled=true;try{
-   const esp=(+fo.value||0)+ef,c=await DB.ins('cie',{desde,hasta:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol],resumen:r,esperado:esp,contado:+co.value,diferencia:Math.round((+co.value-esp)*100)/100,nota:el.querySelector('#cno').value||null,creado:new Date().toISOString()});
+   const esp=(+fo.value||0)+ef,c=await DB.ins('cie',{...(sF&&(DEMO||!NEED22)?{sede:sF}:{}),desde,hasta:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol],resumen:r,esperado:esp,contado:+co.value,diferencia:Math.round((+co.value-esp)*100)/100,nota:el.querySelector('#cno').value||null,creado:new Date().toISOString()});
    S.cie.sort((a,b)=>b.hasta>a.hasta?1:-1);if(+fo.value!==(+CFG.fondo||0))DB.cfg({fondo:+fo.value}).catch(()=>{});
    close();imprimirHTML(cierreHTML(c));toast('Caja cerrada ✓');go()}catch(er){const p=el.querySelector('.err');p.textContent=er.message;p.hidden=false;b.disabled=false}};
  },'wide');
@@ -1149,7 +1153,7 @@ function reportes(){
 }
 function mas(){
  const n=NAV().filter(x=>!['inicio','socios','kiosco','tienda','caja'].includes(x[0]));
- return`<div class="hi"><h2>Más</h2></div><div class="mas st">${n.map(([k,i,t])=>`<a class="card" href="#/${k}"><em>${i}</em>${esc(t)}</a>`).join('')}${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
+ return`<div class="hi"><h2>Más</h2></div><div class="mas st">${n.map(([k,i,t])=>`<a class="card" href="#/${k}"><em>${i}</em>${esc(t)}</a>`).join('')}<a class="card" target="_blank" rel="noopener" href="${soporteURL()}"><em>💬</em>Soporte</a>${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
 }
 
 /* ===== Mi web (Xyro Webs dentro del panel): abre el panel de la web con entrada de un clic ===== */
@@ -1171,15 +1175,15 @@ function xyros(){
  const wa=n=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, quiero activar '+n+' para '+nombre())}`;
  setTimeout(()=>{const b=$('#pwEd');b&&(b.onclick=()=>form('🌐 Panel de la web',[{k:'panelWeb',l:'Enlace del panel de su web',v:CFG.panelWeb||'',ph:'https://…/panel.html'}],async v=>{await DB.cfg({panelWeb:v.panelWeb});go();toast('Guardado ✓')}))});
  const desc=k=>k==='apps'?'Tu sistema base: '+R.clis.toLowerCase()+', '+R.plan.toLowerCase()+'s, cobros, asistencia, caja, metas y equipo.':XYROS.find(x=>x[0]===k)[2]+'.';
- const acc=k=>{if(!on(k))return isAdmin()?`<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
+ const acc=k=>{if(!on(k)&&PRONTO(k))return'';if(!on(k))return isAdmin()?`<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
   if(k==='control')return'<a class="btn sm" href="#/tienda">Abrir punto de venta</a>';
   if(k==='webs')return'<a class="btn sm" href="#/web">Editar mi web</a>'+(ME.gestor?'<button class="btn sm" id="pwEd">Enlace del panel</button>':'');
   return''};
  const pedido=ruta==='xyros'&&location.hash.indexOf('tienda')>=0;
- return`<div class="hi"><div><h2>Integraciones</h2><p class="mu">Todo tu negocio en un solo panel. Xyro Apps es la base y le sumas lo que necesites, sin instalar otras apps.</p></div></div>
+ return`<div class="hi"><div><h2>Integraciones</h2><p class="mu">Todo tu negocio en un solo panel. Xyro Apps es la base y le sumas lo que necesites, sin instalar otras apps. Actualizamos constantemente: lo que dice «Muy pronto» llega a este mismo panel.</p></div></div>
  ${pedido?`<div class="card" style="margin-bottom:12px;border-color:var(--a)">🥤 <b>El punto de venta es parte de Xyro Control.</b> <span class="mu">Actívalo para vender productos, llevar stock y ver tus márgenes aquí mismo.</span></div>`:''}
- <div class="eq st">${XYROS.map(([k,n])=>`<div class="card eqc"><img src="../img/marca/logo-${k}-app.svg" alt="" style="width:44px;height:44px;flex:none"><div class="nm"><b>${esc(n)}${k==='apps'?' <small class="mu">· base</small>':''}</b><small style="white-space:normal">${esc(desc(k))}</small></div><div class="eqa">${on(k)?'<span class="pill act">Activo</span>':'<span class="pill sin">No activo</span>'}${k==='apps'?'':acc(k)}</div></div>`).join('')}</div>
- ${ME.gestor?'<p class="mu sm" style="margin-top:12px">Como XyroStudio ves todas las funciones. Los módulos del cliente se activan en tu Panel XyroStudio → Clientes → Xyros.</p>':''}`;
+ <div class="eq st">${XYROS.map(([k,n])=>`<div class="card eqc"><img src="../img/marca/logo-${k}-app.svg" alt="" style="width:44px;height:44px;flex:none"><div class="nm"><b>${esc(n)}${k==='apps'?' <small class="mu">· base</small>':''}</b><small style="white-space:normal">${esc(desc(k))}</small></div><div class="eqa">${on(k)?'<span class="pill act">Activo</span>':PRONTO(k)?'<span class="pill pronto">Muy pronto</span>':'<span class="pill sin">No activo</span>'}${k==='apps'?'':acc(k)}</div></div>`).join('')}</div>
+ ${ME.gestor?'<p class="mu sm" style="margin-top:12px">Como XyroStudio ves lo mismo que el cliente. Sus integraciones se activan en tu Panel XyroStudio → Clientes → Xyros.</p>':''}`;
 }
 
 /* ===== Equipo: cuentas, permisos y claves (mismas cuentas que el panel de la web) ===== */
