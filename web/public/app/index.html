@@ -230,6 +230,11 @@ aside{background:#101010;backdrop-filter:none}
 .bn a.on{color:var(--a)}.bn a.on em{filter:none}
 .kpi i{display:none}.bars div.pk{background:color-mix(in srgb,var(--a) 45%,transparent)}.bn{background:#0b0b0bf5}.demo{background:#141414f5}
 .fl input:focus,.fl select:focus,.fl textarea:focus{box-shadow:none}
+
+/* Login: que no lo afecten otras clases .lg (leyendas de gráficos) y sin el fondo claro del autocompletado */
+.cen>.lg{display:grid!important;width:min(400px,100%)!important;height:auto!important;margin:0!important;border-radius:0!important;gap:14px!important;font-size:15px;justify-content:normal;flex:none;text-align:center}
+.cen>.lg .card{width:100%}.cen>.lg b{display:inline;color:inherit}.cen>.lg b::before{content:none}.cen>.lg b.grad{color:var(--a)}:root{--on:#0b0b0b}
+input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-text-fill-color:var(--tx);-webkit-box-shadow:0 0 0 1000px #151515 inset;caret-color:var(--tx);transition:background-color 9999s}
 </style>
 </head>
 <body>
