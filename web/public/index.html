@@ -105,14 +105,24 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 /* phone */
 .phone{width:min(290px,80vw);border-radius:40px;padding:10px;background:#000;box-shadow:0 0 0 1px #ffffff26,0 50px 100px -30px #000,0 0 0 6px #ffffff08}
 .scr{position:relative;height:min(530px,calc(100dvh - 250px));min-height:420px;border-radius:31px;overflow:hidden;background:#fff;color:#111}
-.wm-top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;font-weight:700;font-size:14px;background:var(--rc);color:#fff;transition:background .4s}
-.wm-hero{padding:22px 16px;background:linear-gradient(180deg,color-mix(in srgb,var(--rc) 22%,#fff),#fff);transition:background .4s}
-.wm-hero h4{margin:0 0 6px;font-size:22px;line-height:1.15}
+.brw{width:min(600px,100%);border-radius:14px;overflow:hidden;background:#fff;color:#111;box-shadow:0 0 0 1px #ffffff26,0 50px 100px -30px #000,0 0 80px -30px var(--rc)}
+.brw-bar{display:flex;align-items:center;gap:6px;padding:10px 12px;background:#1b1f2b}
+.brw-bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.brw-bar i:nth-child(2){background:#febc2e}.brw-bar i:nth-child(3){background:#28c840}
+.brw-url{flex:1;margin-left:10px;display:flex;align-items:center;gap:6px;justify-content:center;padding:5px 10px;border-radius:8px;background:#0f121a;color:#c9cede;font-size:12px}
+.brw-pg{height:min(420px,calc(100dvh - 300px));min-height:330px;overflow:hidden}
+.wm-top{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid #eee;font-size:14px}
+.wm-top b{color:var(--rc);transition:color .4s}.wm-top nav{display:flex;gap:14px;margin-left:auto;font-size:12px;color:#555}
+.wm-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:center;padding:22px 18px;background:linear-gradient(135deg,color-mix(in srgb,var(--rc) 20%,#fff),#fff);transition:background .4s}
+.wm-hero h4{margin:0 0 6px;font-size:24px;line-height:1.1}
 .wm-hero p{font-size:13px;color:#555;margin-bottom:12px}
+.wm-art{aspect-ratio:1;width:100%;max-width:140px;justify-self:end;border-radius:18px;display:grid;place-items:center;font-size:56px;background:color-mix(in srgb,var(--rc) 25%,#fff);box-shadow:0 20px 40px -20px var(--rc);transition:background .4s}
 .wm-btn{display:inline-flex;gap:6px;align-items:center;padding:9px 14px;border-radius:10px;background:var(--rc);color:#fff;font-size:13px;font-weight:700;transition:background .4s}
-.wm-list{padding:6px 16px}.wm-it{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eee;font-size:13px}
-.wm-it i{font-style:normal;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--rc) 16%,#fff);font-size:20px}
-.wm-it b{margin-left:auto}
+.wm-btn.sm{padding:6px 10px;font-size:11px}
+.wm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 18px}
+.wm-it{border:1px solid #eee;border-radius:12px;padding:10px;font-size:12px}
+.wm-it i{font-style:normal;display:grid;place-items:center;height:48px;border-radius:8px;margin-bottom:6px;background:color-mix(in srgb,var(--rc) 14%,#fff);font-size:24px}
+.wm-it span{display:block;min-height:2.4em;line-height:1.2}.wm-it b{display:block;margin-top:4px;color:var(--rc)}
+@media(max-width:600px){.wm-top nav{display:none}.wm-hero{grid-template-columns:1fr}.wm-art{display:none}.wm-grid{grid-template-columns:repeat(2,1fr)}.wm-hero h4{font-size:20px}}
 .edit{display:grid;gap:10px;padding:14px;border-radius:16px;background:#ffffff08;border:1px solid var(--line2);max-width:460px;margin-bottom:20px}
 .edit label{font-size:12px;font-weight:600;color:var(--mut)}
 .edit input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line2);background:#00000040;outline:none;margin-top:4px}
@@ -259,14 +269,16 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 <div>
 <div class="k in-1"><img class="tile" src="img/marca/logo-webs-app.svg" alt="" width="58" height="58"><div><small>Ecosistema · 1/5</small><b>Xyro Webs</b></div></div>
 <span class="pain in-1">¿Nadie te encuentra en Google?</span>
-<h2 class="in-2">Tu web, tuya.<br><span class="grad">La editas desde el celular.</span></h2>
+<h2 class="in-2">Tu web, tuya.<br><span class="grad">Abierta 24/7 para vender.</span></h2>
 <div class="edit in-3"><span class="try" style="margin:0">Pruébalo: escribe y mira tu web cambiar</span><label>Título de tu web<input id="eTit" maxlength="40"></label><div><label>Color de tu marca</label><div class="sw" id="sw"></div></div></div>
 <div class="row in-4"><a class="btn btn-a wa" data-msg="quiero una web para mi negocio" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero mi web</a><a class="btn btn-g" href="#/apps">Siguiente: Apps →</a></div>
 </div>
-<div class="vis in-3"><div class="tilt"><div class="phone"><div class="scr">
-<div class="wm-top"><span data-n>Tu negocio</span><span>☰</span></div>
-<div class="wm-hero"><h4 id="wTit"></h4><p id="wSub"></p><span class="wm-btn"><svg class="ico" style="width:14px;height:14px"><use href="#wa"/></svg><span id="wCta"></span></span></div>
-<div class="wm-list" id="wList"></div>
+<div class="vis in-3"><div class="tilt"><div class="brw">
+<div class="brw-bar"><i></i><i></i><i></i><span class="brw-url"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="wUrl">tunegocio.pe</span></span></div>
+<div class="brw-pg">
+<div class="wm-top"><b data-n>Tu negocio</b><nav><span>Inicio</span><span>Productos</span><span>Contacto</span></nav><span class="wm-btn sm"><svg class="ico" style="width:12px;height:12px"><use href="#wa"/></svg>Escríbenos</span></div>
+<div class="wm-hero"><div><h4 id="wTit"></h4><p id="wSub"></p><span class="wm-btn"><svg class="ico" style="width:14px;height:14px"><use href="#wa"/></svg><span id="wCta"></span></span></div><div class="wm-art" id="wArt"></div></div>
+<div class="wm-grid" id="wList"></div>
 </div></div></div></div>
 </div></section>
 
@@ -434,7 +446,7 @@ $('#eTit').addEventListener('input',function(e){st.tit=e.target.value;web()});
 function web(){var r=rb(),c=st.color||r.c;document.documentElement.style.setProperty('--rc',c);
  $$('#sw button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.c===c)});
  $('#wTit').textContent=st.tit!==null?st.tit:r.tit;if(st.tit===null)$('#eTit').value=r.tit;
- $('#wSub').textContent=r.sub;$('#wCta').textContent=r.cta;
+ $('#wSub').textContent=r.sub;$('#wArt').textContent=r.p[0][0];var sl=(st.nom||r.def).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'');$('#wUrl').textContent=(sl||'tunegocio')+'.pe';$('#wCta').textContent=r.cta;
  $('#wList').innerHTML=r.p.map(function(p){return '<div class="wm-it"><i>'+p[0]+'</i><span>'+esc(p[1])+'</span><b>'+money(p[2])+'</b></div>'}).join('')}
 
 /* control */
