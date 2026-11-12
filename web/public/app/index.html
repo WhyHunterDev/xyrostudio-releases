@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Xyro Apps</title>
 <meta name="description" content="Xyro Apps: socios, membresías, cobros y asistencia con QR para tu negocio. Primero Xyro Gym.">
-<meta name="theme-color" content="#07070d">
+<meta name="theme-color" content="#0b0b0b">
 <link rel="icon" href="../img/marca/logo-apps-app.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <style>
@@ -211,6 +211,24 @@ select{color-scheme:dark}select option,select optgroup{background:var(--c2);colo
  .mb div{grid-template-columns:90px 1fr 76px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* Tema sobrio, como el panel de la web: negro liso, sin degradados ni manchas de color.
+   El color de la marca solo resalta la función activa, los botones principales y los datos clave. */
+:root{--bg:#0b0b0b;--c1:#141414;--c2:#1b1b1b;--ln:#ffffff16;--tx:#f2f2f2;--mu:#9b9b9b}
+.bg{display:none}
+.grad{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:var(--a)}
+aside{background:#101010;backdrop-filter:none}
+.top{background:#0b0b0bf5}
+.nav.on{background:var(--a);color:var(--on)}
+.nav.on::before{display:none}
+.btn.p{background:var(--a);color:var(--on);box-shadow:none}
+.card,.prod,.plan{background:#141414}
+.bars div.now,.mb span i,.hm i.y{background:var(--a);box-shadow:none}
+.av{background:hsl(var(--h),35%,32%)}
+.carnet{background:#111;border:2px solid var(--a)}
+.chip.on{background:var(--a);color:var(--on);border-color:var(--a)}
+.bn a.on{color:var(--a)}.bn a.on em{filter:none}
+.kpi i{display:none}.bars div.pk{background:color-mix(in srgb,var(--a) 45%,transparent)}.bn{background:#0b0b0bf5}.demo{background:#141414f5}
+.fl input:focus,.fl select:focus,.fl textarea:focus{box-shadow:none}
 </style>
 </head>
 <body>
@@ -754,7 +772,7 @@ function ajustes(){
  <div class="card"><h3>🧾 Comprobantes <button class="btn sm" id="afi">✏️ Editar</button></h3><p class="mu sm">${CFG.ruc?'RUC '+esc(CFG.ruc)+' · ':''}Series ${esc(CFG.serieB||'B001')} / ${esc(CFG.serieF||'F001')} · ${CFG.a4?'Hoja A4':'Ticketera 80 mm'}${CFG.autoPrint?' · imprime al cobrar':''}</p>
   <p class="mu sm" style="margin-top:6px">${CFG.sunat?'✅ Conectado a SUNAT: boletas y facturas electrónicas.':'Hoy se imprime como <b>nota de venta</b> con serie y número. Para boletas y facturas electrónicas válidas ante SUNAT, <a class="grad" target="_blank" rel="noopener" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Quiero activar boletas SUNAT en Xyro Apps para '+nombre())+'"><b>actívalo aquí</b></a>.'}</p></div>
  <div class="card"><h3>📥 Importar desde AppFit <button class="btn sm p" id="aim">Subir Excel</button></h3><p class="mu sm">Trae a tus ${esc(R.clis.toLowerCase())} con su código, DNI, celular, plan y fecha de vencimiento. Detectamos las columnas solas y no duplicamos a nadie.</p></div>
- <div class="card"><h3>👥 Cuentas del equipo</h3><p class="mu sm">${DEMO?'En tu versión tendrás cuentas para recepción y administración.':'Las cuentas (admin y recepción) se crean desde tu panel. Si alguien olvida su clave, el admin le da una temporal.'}</p></div>
+ <a class="card" href="#/equipo" style="display:block"><h3>👥 Cuentas del equipo</h3><p class="mu sm">Crea cuentas de administración, recepción y cafetín, asígnales sede y dales una clave nueva si la olvidan. <b style="color:var(--a)">Abrir Equipo →</b></p></a>
  <div class="card"><h3>🚀 Más para tu negocio</h3><div class="tl">${[['🤖','Recordatorios automáticos por WhatsApp','Xyro Bots'],['🧾','Boletas y facturas SUNAT','Facturación'],['🔳','Lector QR en la puerta','Hardware'],['🌐','Web con planes y reservas','Xyro Webs']].map(([i,t,k])=>`<a class="row" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero '+k+' para '+nombre())}"><span style="font-size:22px">${i}</span><span class="nm"><b>${t}</b><small>${k}</small></span>→</a>`).join('')}</div></div>
  </div>`;
 }
@@ -800,7 +818,6 @@ function marca(){
  const r=document.documentElement.style,a=CFG.color||WEB.color||'#3ad6ff';
  r.setProperty('--a',a);r.setProperty('--b',CFG.color2||WEB.color2||(CFG.color||WEB.color?a:'#7c5cff'));
  r.setProperty('--on',lum(a)>.62?'#111':'#fff');
- if(CFG.bg)r.setProperty('--bg',CFG.bg);
 }
 const logoDe=()=>CFG.logo||WEB.logo||'';
 
