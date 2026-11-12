@@ -510,7 +510,7 @@ function shell(){
   `<div class="side-f"><a class="btn sm" target="_blank" rel="noopener" href="${soporteURL()}">💬 Soporte XyroStudio</a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor?'<button class="btn sm" id="cambia">Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
  $('#bn').innerHTML=n.filter(x=>['inicio','socios','kiosco','tienda','caja'].includes(x[0])).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=()=>{LS.r('xa-s');location.href='./'});
- marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent='📍 '+(SEDE?sedeN(SEDE):'Elegir sede');b.onclick=elegirSede}}
+ marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):isAdmin()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
  document.title=nombre()+' · Xyro Apps';
 }
 let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
@@ -579,9 +579,10 @@ function bienvenida(){
   <a class="card row" href="#/kiosco"><span class="av" style="--h:150">3</span><span class="nm"><b>Abre la asistencia en una tablet</b><small>Marcan con su DNI o el QR de su carnet</small></span>→</a>
  </div></div>`;
 }
+const enSede=x=>!SEDE||!x.sede||String(x.sede)===SEDE,cliS=()=>SEDE?S.cli.filter(enSede):S.cli;
 function filtrados(){
  const q=qtxt.trim().toLowerCase();
- return S.cli.map(c=>[c,est(c)]).filter(([c,e])=>(filtro==='todos'||e.k===filtro||(filtro==='act'&&e.k==='pronto'))&&(!q||c.nombre.toLowerCase().includes(q)||String(c.dni||'').includes(q)||String(c.telefono||'').includes(q)||String(c.num||'').toLowerCase()===q));
+ return cliS().map(c=>[c,est(c)]).filter(([c,e])=>(filtro==='todos'||e.k===filtro||(filtro==='act'&&e.k==='pronto'))&&(!q||c.nombre.toLowerCase().includes(q)||String(c.dni||'').includes(q)||String(c.telefono||'').includes(q)||String(c.num||'').toLowerCase()===q));
 }
 function lista(){
  const L=filtrados();
@@ -589,10 +590,10 @@ function lista(){
  return L.slice(0,300).map(([c,e])=>`<a class="row" href="#/socio/${c.id}">${av(c)}<span class="nm"><b>${c.num?`<span class="num">#${esc(c.num)}</span>`:''}${esc(c.nombre)}</b><small>${esc(c.dni?'DNI '+c.dni:'')}${c.dni&&e.m?' · ':''}${esc(e.m?e.m.plan_nombre||'':'')}</small></span><span class="pill ${e.k}">${e.t}</span></a>`).join('')+(L.length>300?`<p class="mu sm" style="padding:10px">Mostrando 300 de ${L.length}. Usa el buscador.</p>`:'');
 }
 function socios(){
- const E=S.cli.map(c=>est(c).k),n=k=>E.filter(x=>k==='act'?x==='act'||x==='pronto':x===k).length;
- const F=[['todos','Todos',S.cli.length],['act','Activos',n('act')],['pronto','Por vencer',n('pronto')],['venc','Vencidos',n('venc')],['sin','Sin plan',n('sin')]].concat(n('cong')?[['cong','Congelados',n('cong')]]:[]);
+ const CS=cliS(),E=CS.map(c=>est(c).k),n=k=>E.filter(x=>k==='act'?x==='act'||x==='pronto':x===k).length;
+ const F=[['todos','Todos',CS.length],['act','Activos',n('act')],['pronto','Por vencer',n('pronto')],['venc','Vencidos',n('venc')],['sin','Sin plan',n('sin')]].concat(n('cong')?[['cong','Congelados',n('cong')]]:[]);
  setTimeout(()=>{$$('.chip').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;$$('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lst').innerHTML=lista()});const s=$('#q2');s&&(s.oninput=e=>{qtxt=e.target.value;$('#q').value=qtxt;$('#lst').innerHTML=lista()})});
- return`<div class="hi"><h2>${esc(R.clis)}</h2><div style="display:flex;gap:8px">${isAdmin()?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('importar',{bubbles:true}))">📥 Importar de AppFit</button>`:''}${n('act')+n('cong')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('carnets',{bubbles:true}))">🪪 Enviar carnets</button>`:''}${n('venc')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('masivo',{bubbles:true}))">📲 Recordar a vencidos</button>`:''}</div></div>
+ return`<div class="hi"><h2>${esc(R.clis)}${sedesL().length>1?`<small class="mu" style="font-size:15px;font-weight:600;margin-left:8px">📍 ${SEDE?esc(sedeN(SEDE)):'Todas las sedes'}</small>`:''}</h2><div style="display:flex;gap:8px">${isAdmin()?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('importar',{bubbles:true}))">📥 Importar de AppFit</button>`:''}${n('act')+n('cong')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('carnets',{bubbles:true}))">🪪 Enviar carnets</button>`:''}${n('venc')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('masivo',{bubbles:true}))">📲 Recordar a vencidos</button>`:''}</div></div>
  <label class="srch" style="display:flex;width:100%;margin-bottom:12px"><span>🔎</span><input id="q2" value="${esc(qtxt)}" placeholder="Buscar por nombre, código, DNI o celular"></label>
  <div class="chips">${F.map(([k,t,c])=>`<button class="chip ${filtro===k?'on':''}" data-f="${k}">${t}<span>${c}</span></button>`).join('')}</div>
  <div class="card" style="padding:8px" id="lst">${lista()}</div>`;
@@ -601,44 +602,61 @@ document.addEventListener('importar',()=>importador());
 // ===== Carnets por WhatsApp: imagen + mensaje, solo a socios activos =====
 const CENV=()=>'xa-cenv-'+(SID||'demo'),cEnv=()=>new Set(LS.g(CENV(),[])),marcaEnv=id=>{const s=cEnv();s.add(id);LS.s(CENV(),[...s])};
 const carnetMsg=c=>{const url=new URL('carnet.html?c='+c.codigo,location.href).href;return`Hola ${c.nombre.split(' ')[0]} 👋 Este es tu carnet de ${nombre()}.\nMuestra el QR en la entrada para marcar tu asistencia${c.num?` (o marca con tu código ${c.num})`:''}.\nTambién lo abres aquí: ${url}`};
+const imgDe=src=>new Promise(r=>{if(!src)return r(null);const im=new Image();im.crossOrigin='anonymous';im.onload=()=>r(im);im.onerror=()=>r(null);im.src=src;setTimeout(()=>r(null),4000)});
 async function carnetPNG(c){
  if(!window.qrcode)await cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');
- const W=720,H=1040,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),A=getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||'#7c5cff',e=est(c),F="'Inter',system-ui,sans-serif";
- x.fillStyle='#0b0b0b';x.fillRect(0,0,W,H);x.strokeStyle=A;x.lineWidth=6;x.beginPath();x.roundRect(14,14,W-28,H-28,40);x.stroke();
- x.fillStyle=A;x.fillRect(14+40,14,W-28-80,6);
- x.textAlign='center';x.fillStyle='#fff';x.font=`800 44px ${F}`;x.fillText(nombre().slice(0,26),W/2,110);
- x.fillStyle='#9b9b9b';x.font=`600 24px ${F}`;x.fillText('CARNET DIGITAL',W/2,150);
- const q=qrcode(0,'M');q.addData(c.codigo);q.make();const n=q.getModuleCount(),S=440,cs=Math.floor(S/n),qs=cs*n,ox=(W-qs)/2,oy=200;
- x.fillStyle='#fff';x.beginPath();x.roundRect(ox-28,oy-28,qs+56,qs+56,28);x.fill();x.fillStyle='#000';
- for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(ox+k*cs,oy+r*cs,cs,cs);
- const y=oy+qs+100;x.fillStyle='#fff';x.font=`800 46px ${F}`;x.fillText(c.nombre.slice(0,28),W/2,y);
- x.fillStyle='#bdbdbd';x.font=`500 28px ${F}`;x.fillText(e.m?`${(e.m.plan_nombre||R.plan).slice(0,24)} · hasta ${fF(e.m.fin)}`:'',W/2,y+50);
- x.fillStyle=A;x.font=`800 40px ${F}`;x.fillText(c.num?'N.º '+c.num:c.codigo,W/2,y+120);
- x.fillStyle='#8a8a8a';x.font=`500 24px ${F}`;x.fillText('Muéstralo en la entrada para marcar tu asistencia',W/2,H-60);
+ const W=1080,H=1600,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),e=est(c),F="'Inter','Segoe UI',system-ui,sans-serif";
+ x.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||'#7c5cff';const A=/^#[0-9a-f]{6}$/i.test(x.fillStyle)?x.fillStyle:'#7c5cff';
+ const rr=(X,Y,w,hh,r)=>{x.beginPath();x.roundRect(X,Y,w,hh,r)};
+ const fit=(t,max,size,weight)=>{let s=size;do{x.font=`${weight} ${s}px ${F}`;s-=2}while(x.measureText(t).width>max&&s>20);return t};
+ // fondo
+ x.fillStyle='#070707';x.fillRect(0,0,W,H);
+ const g=x.createRadialGradient(W/2,380,40,W/2,380,900);g.addColorStop(0,A+'38');g.addColorStop(1,'#07070700');x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.save();x.globalAlpha=.07;x.strokeStyle=A;x.lineWidth=2;for(let k=-H;k<W;k+=46){x.beginPath();x.moveTo(k,0);x.lineTo(k+H,H);x.stroke()}x.restore();
+ // tarjeta
+ const cx0=70,cy0=70,cw=W-140,ch=H-140;x.save();x.shadowColor='#000';x.shadowBlur=60;rr(cx0,cy0,cw,ch,64);x.fillStyle='#111111';x.fill();x.restore();
+ x.lineWidth=3;x.strokeStyle=A+'aa';rr(cx0,cy0,cw,ch,64);x.stroke();
+ // cabecera con logo
+ x.save();rr(cx0,cy0,cw,300,64);x.clip();const hg=x.createLinearGradient(0,cy0,0,cy0+300);hg.addColorStop(0,A+'40');hg.addColorStop(1,'#11111100');x.fillStyle=hg;x.fillRect(cx0,cy0,cw,300);x.restore();
+ const lg=await imgDe(logoDe());let ty=cy0+120;
+ if(lg){const s=150,lx=W/2-s/2,ly=cy0+52;x.save();x.beginPath();x.arc(W/2,ly+s/2,s/2+8,0,7);x.fillStyle='#0b0b0b';x.fill();x.lineWidth=4;x.strokeStyle=A;x.stroke();x.beginPath();x.arc(W/2,ly+s/2,s/2,0,7);x.clip();const r=Math.min(s/lg.width,s/lg.height);x.drawImage(lg,W/2-lg.width*r/2,ly+s/2-lg.height*r/2,lg.width*r,lg.height*r);x.restore();ty=ly+s+70}
+ x.textAlign='center';x.fillStyle='#fff';fit(nombre().toUpperCase(),cw-120,56,900);x.fillText(nombre().toUpperCase(),W/2,ty);
+ x.fillStyle=A;x.font=`700 26px ${F}`;x.fillText('C A R N E T   D E   S O C I O',W/2,ty+46);
+ // QR
+ const q=qrcode(0,'H');q.addData(c.codigo);q.make();const n=q.getModuleCount(),S=560,cs=Math.floor(S/n),qs=cs*n,ox=Math.round((W-qs)/2),oy=ty+100,pd=36;
+ x.save();x.shadowColor=A+'88';x.shadowBlur=50;rr(ox-pd,oy-pd,qs+pd*2,qs+pd*2,40);x.fillStyle='#fff';x.fill();x.restore();
+ x.fillStyle='#000';for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect(ox+k*cs,oy+r*cs,cs,cs);
+ // datos
+ let y=oy+qs+pd+110;x.fillStyle='#fff';const nm=c.nombre.trim();fit(nm,cw-120,68,800);x.fillText(nm,W/2,y);
+ if(e.m){y+=70;const t=`${e.m.plan_nombre||R.plan} · hasta ${fF(e.m.fin)}`;x.font=`600 32px ${F}`;const tw=Math.min(cw-120,x.measureText(t).width+60);rr(W/2-tw/2,y-44,tw,64,32);x.fillStyle='#ffffff12';x.fill();x.fillStyle='#d6d6d6';x.fillText(t,W/2,y);}
+ y+=110;x.fillStyle=A;x.font=`900 84px ${F}`;x.fillText(c.num?'N.º '+c.num:c.codigo,W/2,y);
+ // pie
+ x.fillStyle='#ffffff1f';x.fillRect(cx0+80,cy0+ch-130,cw-160,2);
+ x.fillStyle='#a8a8a8';x.font=`500 30px ${F}`;x.fillText('Muestra este QR en recepción para marcar tu ingreso',W/2,cy0+ch-72);
  return new Promise(r=>cv.toBlob(r,'image/png'));
 }
 async function enviarCarnet(c){
  if(!c.codigo){await DB.upd('cli',c.id,{codigo:codigo()})}
- const msg=carnetMsg(c),b=await carnetPNG(c),f=new File([b],'carnet-'+(c.num||c.codigo)+'.png',{type:'image/png'});
+ const b=await carnetPNG(c),f=new File([b],'carnet-'+(c.num||c.codigo)+'.png',{type:'image/png'});
  // Celular: WhatsApp recibe imagen + mensaje juntos (eliges el chat). Computadora: se copia la imagen y se abre su chat con el mensaje.
- if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){try{await navigator.share({files:[f],text:msg});marcaEnv(c.id);return true}catch(er){if(er&&er.name==='AbortError')return false}}
+ if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){try{await navigator.share({files:[f]});marcaEnv(c.id);return true}catch(er){if(er&&er.name==='AbortError')return false}}
  let copiada=false;try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);copiada=true}catch(_){}
  if(!copiada){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)}
- if(c.telefono&&!DEMO){const w=window.open(waLink(c,msg),'_blank');if(!w){location.href=waLink(c,msg);return true}try{w.opener=null}catch(_){}}
+ if(c.telefono&&!DEMO){const u='https://wa.me/'+tel(c.telefono),w=window.open(u,'_blank');if(!w){location.href=u;return true}try{w.opener=null}catch(_){}}
  toast(copiada?'🖼️ Imagen copiada: pégala en el chat (Ctrl+V) y envía':'🖼️ Imagen descargada: adjúntala en el chat');marcaEnv(c.id);return true;
 }
 document.addEventListener('carnets',()=>{
  window.qrcode||cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js').catch(()=>{});let ver='pend';
- const draw=el=>{const env=cEnv(),A=S.cli.map(c=>[c,est(c)]).filter(([c,e])=>['act','pronto','cong'].includes(e.k)&&c.telefono).sort((a,b)=>(+a[0].num||1e9)-(+b[0].num||1e9)||a[0].nombre.localeCompare(b[0].nombre)),P=A.filter(([c])=>!env.has(c.id)),L=ver==='pend'?P:A.filter(([c])=>env.has(c.id)),sinT=S.cli.filter(c=>['act','pronto','cong'].includes(est(c).k)&&!c.telefono).length;
+ const draw=el=>{const env=cEnv(),A=cliS().map(c=>[c,est(c)]).filter(([c,e])=>['act','pronto','cong'].includes(e.k)&&c.telefono).sort((a,b)=>(+a[0].num||1e9)-(+b[0].num||1e9)||a[0].nombre.localeCompare(b[0].nombre)),P=A.filter(([c])=>!env.has(c.id)),L=ver==='pend'?P:A.filter(([c])=>env.has(c.id)),sinT=cliS().filter(c=>['act','pronto','cong'].includes(est(c).k)&&!c.telefono).length;
   el.querySelector('#cnb').innerHTML=`<div class="chips"><button class="chip ${ver==='pend'?'on':''}" data-cv="pend">Por enviar<span>${P.length}</span></button><button class="chip ${ver==='env'?'on':''}" data-cv="env">Enviados<span>${A.length-P.length}</span></button></div>
    <div class="tl" style="max-height:52vh;overflow:auto">${L.slice(0,300).map(([c,e])=>`<div class="row">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${c.num?'N.º '+esc(c.num)+' · ':''}${esc(e.t)}</small></span><button class="btn sm ${ver==='pend'?'p':''}" data-cs="${esc(c.id)}">${ver==='pend'?'📲 Enviar':'Reenviar'}</button></div>`).join('')||`<p class="mu" style="padding:12px">${ver==='pend'?'🎉 Ya les enviaste el carnet a todos los socios activos.':'Aún no envías ninguno.'}</p>`}</div>
    ${sinT?`<p class="mu sm" style="margin-top:8px">${sinT} socio${sinT===1?'':'s'} activo${sinT===1?'':'s'} sin celular: agrégalo en su ficha para enviarle el carnet.</p>`:''}`};
- sheet(`<h3>🪪 Enviar carnets</h3><p class="mu sm">Solo socios con ${esc(R.plan.toLowerCase())} activa. Cada carnet va como imagen con su QR y un mensaje. En el celular eliges WhatsApp y el chat; en la computadora se abre su chat y pegas la imagen (Ctrl+V).</p><div id="cnb"></div><div class="bt"><button class="btn p" data-x>Listo</button></div>`,el=>{
+ sheet(`<h3>🪪 Enviar carnets</h3><p class="mu sm">Solo socios con ${esc(R.plan.toLowerCase())} activa. Cada carnet va solo como imagen con su QR (sin enlaces). En el celular eliges WhatsApp y el chat; en la computadora se abre su chat y pegas la imagen (Ctrl+V).</p><div id="cnb"></div><div class="bt"><button class="btn p" data-x>Listo</button></div>`,el=>{
   draw(el);el.addEventListener('click',async e=>{const v=e.target.closest('[data-cv]');if(v){ver=v.dataset.cv;return draw(el)}
    const b=e.target.closest('[data-cs]');if(!b)return;const c=cli(b.dataset.cs);if(!c)return;b.disabled=true;b.textContent='…';try{await enviarCarnet(c)}catch(er){toast(er.message)}draw(el)})});
 });
 document.addEventListener('masivo',()=>{
- const L=S.cli.map(c=>[c,est(c)]).filter(x=>x[1].k==='venc'&&x[0].telefono&&x[1].d>=-60);
+ const L=cliS().map(c=>[c,est(c)]).filter(x=>x[1].k==='venc'&&x[0].telefono&&x[1].d>=-60);
  sheet(`<h3>📲 Recordatorios por WhatsApp</h3><p class="mu sm">Toca cada uno: se abre WhatsApp con el mensaje listo. Con Xyro Bots se envían solos.</p><div class="tl">${L.map(([c,e])=>`<a class="row" target="_blank" rel="noopener" href="${waLink(c,waMsg(c,e))}" onclick="this.style.opacity=.4">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${e.t}</small></span>📲</a>`).join('')||'<p class="mu">Nadie con celular registrado.</p>'}</div><div class="bt"><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Bots para enviar recordatorios automáticos')}">🤖 Automatizar con Xyro Bots</a><button class="btn p" data-x>Listo</button></div>`);
 });
 function socio(){
@@ -689,8 +707,9 @@ function nuevoCli(c){
  const f=[{k:'nombre',l:'Nombre completo',v:c&&c.nombre,req:1,ph:'Ej. María Quispe'},{k:'num',l:'Código de '+R.cli.toLowerCase(),v:c?c.num:nextNum(),half:1},{k:'dni',l:'DNI',v:c&&c.dni,half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:c&&c.telefono,half:1,t:'tel',ph:'9xx xxx xxx'},{k:'nacimiento',l:'Cumpleaños',t:'date',v:c&&c.nacimiento,half:1},{k:'email',l:'Correo',t:'email',v:c&&c.email}];
  f.unshift({k:'foto',l:'Foto (para reconocerlo en la entrada)',t:'foto',v:c&&c.foto});
  f.push({k:'notas',l:'Notas',t:'area',v:c&&c.notas});
+ if(sedesL().length>1&&(DEMO||!NEED20))f.push({k:'sede',l:'Sede del '+R.cli.toLowerCase(),t:'sel',v:c?c.sede||'':SEDE,o:[['','Todas las sedes']].concat(sedesL().map(s=>[s.id,s.nombre]))});
  form(c?'Editar '+R.cli.toLowerCase():'Nuevo '+R.cli.toLowerCase(),f,async v=>{
-  const row={nombre:v.nombre,num:v.num||null,dni:v.dni||null,telefono:v.telefono||null,nacimiento:v.nacimiento||null,email:v.email||null,notas:v.notas||null};
+  const row={nombre:v.nombre,num:v.num||null,dni:v.dni||null,telefono:v.telefono||null,nacimiento:v.nacimiento||null,email:v.email||null,notas:v.notas||null};if('sede' in v)row.sede=v.sede||'';
   if(row.dni&&S.cli.some(x=>x.dni===row.dni&&(!c||x.id!==c.id)))throw new Error('Ya existe alguien con ese DNI.');
   if(row.num&&S.cli.some(x=>x.num===row.num&&(!c||x.id!==c.id)))throw new Error('Ese código ya lo usa otra persona.');
   const ft=async id=>{if(!v.foto)return;try{await DB.upd('cli',id,{foto:await subirFoto(v.foto,id)})}catch(er){toast(er.message)}};
@@ -872,6 +891,7 @@ function ajustes(){
  const COL=[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo']];
  setTimeout(()=>{
   $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])},...(CTL()?[{k:'tienda',l:'Nombre de tu tienda',v:CFG.tienda||'',ph:R.tienda||'Cafetín'}]:[])],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
+  {const a=$('#asd');a&&(a.onclick=editSedes)}
   $('#amk').onclick=()=>form('🎨 Marca y colores',[{k:'color',l:'Color principal',t:'color',v:CFG.color||WEB.color||'#3ad6ff',half:1},{k:'color2',l:'Color secundario',t:'color',v:CFG.color2||WEB.color2||'#7c5cff',half:1},{k:'logo',l:'Logo (enlace a la imagen)',v:CFG.logo||WEB.logo||'',ph:'https://…/logo.png'},{k:'web',l:'Tu página web',v:CFG.web||'',ph:'https://tunegocio.com'}],async v=>{await DB.cfg(v);shell();go();toast('Listo, la app ya luce como tu marca ✨')});
   $('#acp').onclick=async e=>{const url=CFG.web||prompt('¿Cuál es tu página web?','https://');if(!url)return;const b=e.target;b.disabled=true;b.textContent='Leyendo tu web…';
    try{const t=await temaDeWeb(url);if(!t.color&&!t.logo)throw new Error('No encontramos colores');await DB.cfg({color:t.color||CFG.color,color2:t.color2||CFG.color2,bg:t.bg||'',logo:t.logo||CFG.logo,web:t.web,nombre:CFG.nombre||t.nombre});shell();go();confeti(40);toast('🎨 Copiamos el look de tu web')}
@@ -884,6 +904,7 @@ function ajustes(){
  const sw=(c,t)=>c?`<span title="${t}" class="sw" style="background:${esc(c)}"></span>`:'';
  return`<div class="hi"><h2>Ajustes</h2></div><div class="g st" style="max-width:720px">
  <div class="card"><h3>${R.ico} ${esc(nombre())} <button class="btn sm" id="aj">✏️ Editar</button></h3><p class="mu sm">Rubro: ${esc(R.n)} · ${S.cli.length} ${esc(R.clis.toLowerCase())} · ${S.pla.length} planes</p></div>
+ ${isAdmin()?`<div class="card"><h3>📍 Sedes <button class="btn sm" id="asd">✏️ Agregar o quitar</button></h3><p class="mu sm">${sedesL().length?sedesL().map(s=>'📍 '+esc(s.nombre)).join(' · '):'Una sola sede. Agrega más si tu negocio tiene varios locales.'}</p></div>`:''}
  <div class="card"><h3>🎨 Marca y colores <span style="display:flex;gap:6px"><button class="btn sm" id="acp">✨ Copiar de mi web</button><button class="btn sm" id="amk">✏️ Editar</button></span></h3><div style="display:flex;gap:12px;align-items:center">${logoDe()?`<img class="lgo" src="${esc(logoDe())}" alt="">`:''}${sw(CFG.color||WEB.color||'#3ad6ff','Principal')}${sw(CFG.color2||WEB.color2,'Secundario')}${sw(CFG.bg,'Fondo')}<span class="mu sm">La app usa el logo y los colores de tu web, así tu equipo y tus ${esc(R.clis.toLowerCase())} sienten que es la misma marca.</span></div></div>
  <div class="card"><h3>🌐 Tu web y tus precios <button class="btn sm" id="asy">📥 Importar planes de mi web</button></h3><p class="mu sm" style="margin-bottom:6px">Los precios de la app son <b>independientes</b>: los cambias en Planes y recepción aplica descuentos al cobrar. Importa de tu web solo cuando quieras.</p>
   <p class="mu sm">${DEMO?'En tu versión, los planes, precios y promociones que publicas en tu web pasan solos a la app.':WEB.planes.length?'Planes de tu web: '+WEB.planes.map(w=>esc(w.nombre)+' '+sol(w.ev?w.ev.precio:w.precio)+(w.ev?' 🔥':'')).join(' · '):'Tu web aún no tiene planes publicados.'}</p>
@@ -1373,11 +1394,11 @@ const sedeN=id=>{const s=sedesL().find(x=>x.id===String(id||''));return s?s.nomb
 const QUIEN=()=>ME.nombre||ROLES[ME.rol]||'';
 function initSede(){const L=sedesL(),k='xa-sede-'+(SID||'demo');if(!L.length){SEDE='';return}
  if(ME.sede&&L.some(s=>s.id===String(ME.sede))){SEDE=String(ME.sede);return}
- const g=LS.g(k,'');if(L.some(s=>s.id===g)){SEDE=g;return}
+ const g=LS.g(k,'');if(L.some(s=>s.id===g)){SEDE=g;return}if(g==='*'&&isAdmin()){SEDE='';return}
  if(L.length===1){SEDE=L[0].id;LS.s(k,SEDE);return}setTimeout(elegirSede,600)}
 function elegirSede(){const L=sedesL();if(!L.length)return;if(ME.sede&&L.some(s=>s.id===String(ME.sede)))return toast('Tu sede la asigna el administrador');
- sheet(`<h3>📍 ¿En qué sede estás?</h3><p class="mu sm">Los cobros e ingresos de este equipo se guardan en esa sede.</p><div class="g" style="gap:8px;margin-top:12px">${L.map(s=>`<button class="btn ${s.id===SEDE?'p':''}" data-sd="${esc(s.id)}" style="justify-content:flex-start;padding:14px 16px">📍 ${esc(s.nombre)}</button>`).join('')}</div>`,(el,close)=>{
-  el.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{SEDE=b.dataset.sd;LS.s('xa-sede-'+(SID||'demo'),SEDE);close();shell();go();toast('📍 '+sedeN(SEDE))})})}
+ sheet(`<h3>📍 ¿En qué sede estás?</h3><p class="mu sm">Los socios, cobros e ingresos de este equipo se guardan y se ven por sede.</p><div class="g" style="gap:8px;margin-top:12px">${L.map(s=>`<button class="btn ${s.id===SEDE?'p':''}" data-sd="${esc(s.id)}" style="justify-content:flex-start;padding:14px 16px">📍 ${esc(s.nombre)}</button>`).join('')}${isAdmin()?`<button class="btn ${!SEDE?'p':''}" data-sd="*" style="justify-content:flex-start;padding:14px 16px">🌎 Todas las sedes <small class="mu" style="margin-left:auto">solo ver</small></button>`:''}</div>${isAdmin()?'<button class="lnk" id="sdE2" style="margin-top:12px">✏️ Agregar o quitar sedes</button>':''}`,(el,close)=>{const e2=el.querySelector('#sdE2');e2&&(e2.onclick=()=>{close();editSedes()});
+  el.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{const v=b.dataset.sd;SEDE=v==='*'?'':v;LS.s('xa-sede-'+(SID||'demo'),v);close();shell();go();toast(SEDE?'📍 '+sedeN(SEDE):'🌎 Todas las sedes')})})}
 const mesR=m=>[m+'-01',finMes(m+'-01')];
 const metaDe=(s,m)=>(CFG.metas||[]).find(x=>(x.sede||'')===(s||'')&&x.mes===m);
 const bonosDe=(s,m)=>(CFG.bonos||[]).filter(b=>(!b.sede||b.sede===s)&&(!b.mes||b.mes===m)).sort((a,b)=>a.monto-b.monto);
@@ -1436,7 +1457,7 @@ function editBono(b){if(!isAdmin())return;const SD=sedesL();
  const d=$('#bDel2');d&&(d.onclick=async()=>{await DB.cfg({bonos:(CFG.bonos||[]).filter(x=>x.id!==b.id)});$('.ov').remove();go();toast('Bono eliminado')});
 }
 function editSedes(){if(!isAdmin())return;const SD=sedesL();
- form('📍 Sedes',[{k:'s',l:'Una sede por línea',t:'area',v:SD.map(s=>s.nombre).join('\n')}],async v=>{
+ form('📍 Sedes',[{k:'s',l:'Una sede por línea (borra una línea para quitarla)',t:'area',v:SD.map(s=>s.nombre).join('\n'),ph:'Manchay\nVilla María'}],async v=>{
   const ns=v.s.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,30),out=ns.map(n=>{const e=SD.find(s=>s.nombre.toLowerCase()===n.toLowerCase());return e?{id:e.id,nombre:n}:{id:norm(n).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||uid().slice(0,8),nombre:n}});
   await DB.cfg({sedes:out});if(!out.some(s=>s.id===SEDE)){SEDE='';initSede()}shell();go();toast('📍 Sedes guardadas');
  });
@@ -1447,7 +1468,7 @@ function metaMini(){const m=hoy().slice(0,7),L0=pagosMes(m);if(!L0)return'';cons
 /* Demo: dos sedes, cuatro recepcionistas, metas y bono */
 function demoMetas(){if(CFG.sedes&&CFG.sedes.length)return;CFG.sedes=[{id:'centro',nombre:'Sede Centro'},{id:'norte',nombre:'Sede Norte'}];
  const PE={centro:['Lucía Ramos','Carlos Díaz'],norte:['Mariana Soto','Jorge Paredes']},h=s=>{let x=0;for(const c of String(s))x=(x*31+c.charCodeAt(0))>>>0;return x};
- S.pag.forEach(p=>{if(p.sede)return;const k=h(p.id),sd=k%5<3?'centro':'norte';p.sede=sd;p.quien=PE[sd][(k>>3)%2]});S.asi.forEach(a=>{if(!a.sede)a.sede=h(a.id)%5<3?'centro':'norte'});
+ S.pag.forEach(p=>{if(p.sede)return;const k=h(p.id),sd=k%5<3?'centro':'norte';p.sede=sd;p.quien=PE[sd][(k>>3)%2]});S.asi.forEach(a=>{if(!a.sede)a.sede=h(a.id)%5<3?'centro':'norte'});S.cli.forEach(c=>{if(c.sede===undefined)c.sede=h(c.id)%5<3?'centro':'norte'});
  const m=hoy().slice(0,7),d=new Date(m+'-01T12:00:00');d.setMonth(d.getMonth()-1);const mp=ymd(d).slice(0,7),tot=(s,mm)=>S.pag.filter(p=>p.sede===s&&mk(p.fecha)===mm).reduce((a,p)=>a+ +p.monto,0),r100=x=>Math.max(500,Math.round(x/100)*100);
  CFG.metas=[{id:uid(),sede:'centro',mes:m,monto:r100(tot('centro',mp)*1.15),cuenta:'todo'},{id:uid(),sede:'norte',mes:m,monto:r100(tot('norte',mp)*1.15),cuenta:'todo'},{id:uid(),sede:'centro',mes:mp,monto:r100(tot('centro',mp)*0.95),cuenta:'todo'},{id:uid(),sede:'norte',mes:mp,monto:r100(tot('norte',mp)*1.1),cuenta:'todo'}];
  CFG.bonos=[{id:uid(),monto:r100((tot('centro',mp)+tot('norte',mp))/4*1.1),premio:'S/ 150 de bono',sede:'',mes:'',cuenta:'todo'}];
