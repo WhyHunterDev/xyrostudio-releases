@@ -82,7 +82,7 @@ main{overflow:auto;height:100%;position:relative}
 .row .nm small{color:var(--mu);font-size:12.5px}
 .av{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none;color:#fff;background:linear-gradient(135deg,hsl(var(--h),80%,60%),hsl(calc(var(--h) + 50),80%,45%))}
 .pill{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap}
-.pill.act{background:#3ddc971f;color:var(--ok)}.pill.pronto{background:#f5b5441f;color:var(--wa)}.pill.venc{background:#ff5c7a1f;color:var(--bad)}.pill.sin{background:#ffffff10;color:var(--mu)}
+.pill.act{background:#3ddc971f;color:var(--ok)}.pill.pronto{background:#f5b5441f;color:var(--wa)}.pill.venc{background:#ff5c7a1f;color:var(--bad)}.pill.sin{background:#ffffff10;color:var(--mu)}.pill.cong{background:#7cc8ff1f;color:#7cc8ff}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .chip{padding:8px 13px;border-radius:999px;border:1px solid var(--ln);background:#ffffff08;font-weight:600;font-size:13.5px;transition:.2s}
 .chip.on{background:var(--tx);color:#000;border-color:var(--tx)}
@@ -98,7 +98,7 @@ main{overflow:auto;height:100%;position:relative}
 .ring .rv{transition:stroke-dashoffset 1.2s cubic-bezier(.2,.8,.2,1)}
 .ring div{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
 .ring b{font-size:34px;line-height:1}.ring small{color:var(--mu);font-size:12px}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}.acts .btn{min-width:0;padding-left:8px;padding-right:8px;overflow:hidden;text-overflow:ellipsis}
 .hm{max-width:520px;display:grid;grid-template-columns:repeat(12,1fr);grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:4px}
 .hm i{aspect-ratio:1;border-radius:4px;background:#ffffff0c}
 .hm i.y{background:linear-gradient(135deg,var(--b),var(--a));box-shadow:0 0 10px -2px var(--a)}
@@ -288,7 +288,7 @@ const tel=t=>{t=String(t||'').replace(/\D/g,'');return t.length===9?'51'+t:t};
 /* ===== Datos (Supabase o demo local; misma interfaz) ===== */
 const DKEY=()=>'xa-demo-'+(CFG.rubro||'gym');
 const saveDemo=()=>LS.s(DKEY(),{S,CFG});
-const fixErr=e=>{const m=e.message||'';if(/foto|sesiones|\bdom\b|descuento|motivo|items|xa_productos|xa_movs|xa_cierres|xa_stock|row-level/i.test(m))return new Error('Falta correr el SQL 17 en Supabase.');if(/column|xa_series|xa_siguiente|schema cache/i.test(m))return new Error('Falta correr el SQL 16 en Supabase.');return e};
+const fixErr=e=>{const m=e.message||'';if(/pausas/i.test(m))return new Error('Falta correr el SQL 18 en Supabase.');if(/foto|sesiones|\bdom\b|descuento|motivo|items|xa_productos|xa_movs|xa_cierres|xa_stock|row-level/i.test(m))return new Error('Falta correr el SQL 17 en Supabase.');if(/column|xa_series|xa_siguiente|schema cache/i.test(m))return new Error('Falta correr el SQL 16 en Supabase.');return e};
 const DB={
  async load(){
   if(DEMO)return;
@@ -336,7 +336,8 @@ const DB={
 /* ===== Lógica de negocio ===== */
 const memDe=id=>{let m=null;for(const x of S.mem)if(x.cliente_id===id&&(!m||x.fin>m.fin))m=x;return m};
 const usadas=m=>S.asi.filter(a=>{if(a.cliente_id!==m.cliente_id)return false;const x=ymd(new Date(a.t));return x>=m.inicio&&x<=m.fin}).length;
-const est=c=>{const m=memDe(c.id);if(!m)return{k:'sin',t:'Sin '+R.plan.toLowerCase(),d:null,m};const d=diff(hoy(),m.fin);if(d<0)return{k:'venc',t:'Venció hace '+(-d)+' d',d,m};
+const pzs=m=>Array.isArray(m&&m.pausas)?m.pausas:[],pzAct=m=>pzs(m).find(z=>z.desde<=hoy()&&hoy()<z.hasta),pzFut=m=>pzs(m).find(z=>z.desde>hoy());
+const est=c=>{const m=memDe(c.id);if(!m)return{k:'sin',t:'Sin '+R.plan.toLowerCase(),d:null,m};const d=diff(hoy(),m.fin);{const z=pzAct(m);if(z)return{k:'cong',t:'❄️ Congelada hasta '+fF(z.hasta),d,m,pz:z}}if(d<0)return{k:'venc',t:'Venció hace '+(-d)+' d',d,m};
  if(+m.sesiones){const l=m.sesiones-usadas(m);if(l<=0)return{k:'venc',t:'Sin sesiones',d,m,l:0};if(l<=2||d<=5)return{k:'pronto',t:l+' ses. · '+(d===0?'vence hoy':d+' d'),d,m,l};return{k:'act',t:l+' de '+m.sesiones+' ses.',d,m,l}}if(d<=5)return{k:'pronto',t:d===0?'Vence hoy':'Vence en '+d+' d',d,m};return{k:'act',t:d+' días',d,m}};
 const cli=id=>S.cli.find(c=>c.id===id);
 const plan=id=>S.pla.find(p=>p.id===id);
@@ -357,6 +358,7 @@ function checkin(v){
  if(!c)return{ok:false,t:'No encontramos ese código',s:'Acércate a recepción'};
  const e=est(c),H=hoy(),nm=c.nombre.split(' ')[0],ya=S.asi.find(a=>a.cliente_id===c.id&&ymd(new Date(a.t))===H);
  if(ya)return{ok:false,warn:1,ya:1,c,t:nm+' ya marcó hoy',s:'Su ingreso quedó registrado a las '+fH(ya.t)+'. No se volvió a contar.'};
+ if(e.k==='cong')return{ok:false,warn:1,c,t:'Hola '+nm,s:'Tu '+R.plan.toLowerCase()+' está congelada hasta el '+fF(e.pz.hasta)+'. Si ya volviste, pide en recepción que la reactiven.'};
  if(e.k==='sin')return{ok:false,c,t:'Hola '+nm,s:'Aún no tienes '+R.plan.toLowerCase()+' activa. Acércate a recepción.'};
  if(e.k==='venc')return{ok:false,c,t:'Hola '+nm,s:e.l===0?'Ya usaste todas tus sesiones. Renueva en recepción.':'Tu '+R.plan.toLowerCase()+' venció el '+fF(e.m.fin)+'. Renueva en recepción.'};
  if(noLab(H)&&e.m.dom===false)return{ok:false,c,t:'Hola '+nm,s:'Tu plan no incluye '+(feriado(H)?'feriados':'domingos')+'. Consulta en recepción.'};
@@ -473,7 +475,7 @@ function lista(){
 }
 function socios(){
  const E=S.cli.map(c=>est(c).k),n=k=>E.filter(x=>k==='act'?x==='act'||x==='pronto':x===k).length;
- const F=[['todos','Todos',S.cli.length],['act','Activos',n('act')],['pronto','Por vencer',n('pronto')],['venc','Vencidos',n('venc')],['sin','Sin plan',n('sin')]];
+ const F=[['todos','Todos',S.cli.length],['act','Activos',n('act')],['pronto','Por vencer',n('pronto')],['venc','Vencidos',n('venc')],['sin','Sin plan',n('sin')]].concat(n('cong')?[['cong','Congelados',n('cong')]]:[]);
  setTimeout(()=>{$$('.chip').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;$$('.chip').forEach(x=>x.classList.toggle('on',x===b));$('#lst').innerHTML=lista()});const s=$('#q2');s&&(s.oninput=e=>{qtxt=e.target.value;$('#q').value=qtxt;$('#lst').innerHTML=lista()})});
  return`<div class="hi"><h2>${esc(R.clis)}</h2><div style="display:flex;gap:8px">${isAdmin()?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('importar',{bubbles:true}))">📥 Importar de AppFit</button>`:''}${n('venc')?`<button class="btn" onclick="this.dispatchEvent(new CustomEvent('masivo',{bubbles:true}))">📲 Recordar a vencidos</button>`:''}</div></div>
  <label class="srch" style="display:flex;width:100%;margin-bottom:12px"><span>🔎</span><input id="q2" value="${esc(qtxt)}" placeholder="Buscar por nombre, código, DNI o celular"></label>
@@ -488,12 +490,12 @@ document.addEventListener('masivo',()=>{
 function socio(){
  const c=cli(arg);if(!c)return`<div class="empty"><b>🤔</b>No encontramos a esta persona.<br><br><a class="btn" href="#/socios">Volver</a></div>`;
  const e=est(c),m=e.m,ses=m&&+m.sesiones,tot=ses?m.sesiones:m?Math.max(1,diff(m.inicio,m.fin)+1):1,lef=ses?Math.max(0,e.l||0):m?Math.max(0,Math.min(tot,e.d+1)):0,C=2*Math.PI*64;
- const col=e.k==='act'?'var(--ok)':e.k==='pronto'?'var(--wa)':'var(--bad)';
+ const col=e.k==='act'?'var(--ok)':e.k==='pronto'?'var(--wa)':e.k==='cong'?'#7cc8ff':'var(--bad)',zf=m&&pzFut(m);
  const asis=S.asi.filter(a=>a.cliente_id===c.id),dias=new Set(asis.map(a=>ymd(new Date(a.t))));
  const st=new Date();st.setDate(st.getDate()-83-st.getDay());const cells=[...Array(84)].map((_,i)=>{const d=new Date(st);d.setDate(d.getDate()+i);return dias.has(ymd(d))});
  const mems=S.mem.filter(x=>x.cliente_id===c.id).sort((a,b)=>b.fin>a.fin?1:-1),pags=S.pag.filter(p=>p.cliente_id===c.id);
  setTimeout(()=>{const r=$('.rv');r&&requestAnimationFrame(()=>r.style.strokeDashoffset=C*(1-lef/tot));
-  $('#bCob').onclick=()=>cobrar(c);$('#bCar').onclick=()=>carnet(c);$('#bEd').onclick=()=>nuevoCli(c);
+  $('#bCob').onclick=()=>cobrar(c);const bz=$('#bCon');bz&&(bz.onclick=()=>congelar(c,m));const br=$('#bRea');br&&(br.onclick=()=>reactivar(c,m));$('#bCar').onclick=()=>carnet(c);$('#bEd').onclick=()=>nuevoCli(c);
   $('#bAs').onclick=()=>{const r=checkin(c.codigo||c.dni);if(!r)return;toast(r.ok?'✅ Ingreso registrado':r.s);setTimeout(go,300)};
   const d=$('#bDel');d&&(d.onclick=async()=>{if(!confirm('¿Eliminar a '+c.nombre+' con todo su historial?'))return;try{await DB.del('cli',c.id);toast('Eliminado');location.hash='#/socios'}catch(er){toast(er.message)}});
  });
@@ -502,13 +504,13 @@ function socio(){
   ${av(c,'width:96px;height:96px;border-radius:30px;font-size:30px')}
   <div><h2 style="font-size:22px;letter-spacing:-.02em">${esc(c.nombre)}</h2><p class="mu sm">${esc([c.num&&'Código '+c.num,c.dni&&'DNI '+c.dni,c.telefono].filter(Boolean).join(' · '))}</p></div>
   <div class="ring"><svg width="150" height="150"><circle cx="75" cy="75" r="64" stroke="#ffffff10"/><circle class="rv" cx="75" cy="75" r="64" stroke="${col}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><div>${ses?`<b>${lef}</b><small>de ${m.sesiones} sesiones<br>${Math.max(0,e.d)} días</small>`:m?`<b>${Math.max(0,e.d)}</b><small>días restantes</small>`:'<b>—</b><small>sin plan</small>'}</div></div>${m&&m.dom===false?'<span class="pill sin">🚫 Sin domingos ni feriados</span>':''}
-  <span class="pill ${e.k}">${m?esc(m.plan_nombre||'')+' · ':''}${e.k==='act'?'hasta '+fF(m.fin):e.t}</span>
-  <div class="acts"><button class="btn p" id="bCob">💳 ${m?'Renovar':'Cobrar'}</button><button class="btn" id="bAs">✅ Marcar ingreso</button><button class="btn" id="bCar">🪪 Carnet QR</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:'<span></span>'}<button class="btn" id="bEd">✏️ Editar</button>${isAdmin()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
+  <span class="pill ${e.k}">${m?esc(m.plan_nombre||'')+' · ':''}${e.k==='act'?'hasta '+fF(m.fin):e.t}</span>${e.k==='cong'?`<span class="mu sm">Su ${esc(R.plan.toLowerCase())} ahora termina el ${fF(m.fin)}</span>`:''}${zf?`<span class="pill cong">❄️ Se congela del ${fF(zf.desde)} al ${fF(zf.hasta)}</span>`:''}
+  <div class="acts"><button class="btn p" id="bCob">💳 ${m?'Renovar':'Cobrar'}</button>${m&&(e.k!=='venc'||zf)?(e.k==='cong'||zf?'<button class="btn" id="bRea">▶️ Reactivar</button>':'<button class="btn" id="bCon">❄️ Congelar</button>'):''}<button class="btn" id="bAs">✅ Marcar ingreso</button><button class="btn" id="bCar">🪪 Carnet QR</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:'<span></span>'}<button class="btn" id="bEd">✏️ Editar</button>${isAdmin()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
   ${c.notas?`<p class="mu sm" style="text-align:left;width:100%">📝 ${esc(c.notas)}</p>`:''}
  </div>
  <div class="g">
   <div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
-  <div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.map(x=>`<div class="row"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${+x.sesiones?' · '+usadas(x)+'/'+x.sesiones+' sesiones':''}${+x.descuento?' · dscto. '+sol(x.descuento)+(x.motivo?' ('+esc(x.motivo)+')':''):''}${x.dom===false?' · sin domingos':''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu">Sin historial</p>'}</div></div>
+  <div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.map(x=>`<div class="row"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${+x.sesiones?' · '+usadas(x)+'/'+x.sesiones+' sesiones':''}${+x.descuento?' · dscto. '+sol(x.descuento)+(x.motivo?' ('+esc(x.motivo)+')':''):''}${x.dom===false?' · sin domingos':''}${pzs(x).length?' · ❄️ '+pzs(x).reduce((a,z)=>a+(+z.dias||0),0)+' d congelada':''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu">Sin historial</p>'}</div></div>
   <div class="card"><h3>Ingresos <span class="mu sm">${asis.length} en 5 meses</span></h3><div class="tl">${asis.slice(0,8).map(a=>`<div class="row" style="padding:8px 10px"><span class="nm"><b>${fF(a.t)} · ${fH(a.t)}</b><small>${esc(a.quien||'')}</small></span>${isAdmin()||ymd(new Date(a.t))===hoy()?`<button class="btn sm" data-da="${a.id}" title="Borrar ingreso mal marcado">🗑️</button>`:''}</div>`).join('')||'<p class="mu">Aún no tiene ingresos</p>'}</div></div>
   <div class="card"><h3>Pagos</h3><div class="tl">${pags.map(p=>`<a class="row" href="#" data-p="${p.id}"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b> 🖨️</a>`).join('')||'<p class="mu">Sin pagos recientes</p>'}</div></div>
  </div></div>`;
@@ -553,18 +555,48 @@ function cobrar(c){
    fm.querySelector('#f_metodo')||0;q('motivo').closest('label').insertAdjacentHTML('afterend','<div class="card" id="hint" style="padding:12px 14px"></div>');
    const calc=()=>{const v=val(),pr=+v.precio||0,ds=+v.descuento||0,d=Math.max(1,+v.dias||1),ini=v.inicio||ini0;
     fm.querySelector('#hint').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mu sm">Del ${fF(ini)} al ${fF(addD(ini,d-1))}${+v.sesiones?' · '+v.sesiones+' sesiones':''}${v.dom?'':' · sin domingos ni feriados'}</span><b class="grad" style="font-size:24px;white-space:nowrap">${sol(Math.max(0,pr-ds))}</b></div>${ds>0?`<small style="color:var(--wa)">Descuento ${sol(ds)} sobre ${sol(pr)}</small>`:''}`};
-   const up=()=>{const p=plan(val().plan);if(!p)return;const ev=evDe(p.nombre);q('precio').value=ev?ev.precio:p.precio;q('dias').value=p.dias;q('sesiones').value=p.sesiones||'';q('dom').checked=p.dom!==false;calc()};
-   g.addEventListener('change',up);fm.addEventListener('input',calc);fm.addEventListener('change',calc);setTimeout(up)}},
+   const up=()=>{const p=plan(val().plan);if(!p)return;const ev=evDe(p.nombre);q('precio').value=ev?ev.precio:p.precio;q('dias').value=p.dias;q('fin').value=addD(q('inicio').value||ini0,(+p.dias||1)-1);q('sesiones').value=p.sesiones||'';q('dom').checked=p.dom!==false;calc()};
+   const sc=(p,d)=>{if(p&&+p.sesiones&&+p.dias)q('sesiones').value=Math.max(1,Math.round(p.sesiones*d/p.dias))};
+   const syn=e=>{const t=e.target.id,p=plan(val().plan),v=val(),ini=v.inicio||ini0;if(t==='f_fin'&&v.fin){if(v.fin<ini){q('fin').value=ini}const d=Math.max(1,diff(ini,q('fin').value)+1);q('dias').value=d;sc(p,d)}else if((t==='f_dias'&&+v.dias)||t==='f_inicio'){const d=Math.max(1,+v.dias||1);q('fin').value=addD(ini,d-1);if(t==='f_dias')sc(p,d)}calc()};
+   g.addEventListener('change',up);fm.addEventListener('input',syn);fm.addEventListener('change',syn);setTimeout(up)}},
   {k:'precio',l:'Precio normal (S/)',t:'number',req:1,half:1},{k:'descuento',l:'Descuento (S/)',t:'number',half:1,ph:'0'},
   {k:'motivo',l:'Motivo del descuento',dl:['Promoción','Convenio empresa','Familiar','Estudiante','Reingreso','Cortesía'],ph:'Ej. Convenio empresa'},
-  {k:'dias',l:'Días',t:'number',req:1,half:1,im:'numeric'},{k:'inicio',l:'Empieza',t:'date',v:ini0,half:1},
-  {k:'sesiones',l:'Sesiones (vacío = libre)',t:'number',half:1,ph:'Libre',im:'numeric'},{k:'dom',l:'Domingos y feriados',t:'chk',v:true,half:1},
+  {k:'inicio',l:'Empieza',t:'date',v:ini0,half:1},{k:'fin',l:'Termina',t:'date',half:1},
+  {k:'dias',l:'Días',t:'number',req:1,half:1,im:'numeric'},{k:'sesiones',l:'Sesiones (vacío = ilimitadas)',t:'number',half:1,ph:'Ilimitadas',im:'numeric'},{k:'dom',l:'Entra domingos y feriados',t:'chk',v:true},
   {k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},...compFields()],async v=>{
   const p=plan(v.plan);if(!p)throw new Error('Elige un plan');const pr=+v.precio||0,ds=+v.descuento||0;
   if(ds<0||ds>pr)throw new Error('El descuento no puede ser mayor al precio.');if(ds>0&&!v.motivo)throw new Error('Escribe el motivo del descuento.');valComp(v);
   const pg=await renovar(c,p,{precio:pr,descuento:ds,motivo:v.motivo,dias:+v.dias,inicio:v.inicio||ini0,sesiones:+v.sesiones||null,dom:!!v.dom,metodo:v.metodo});
   confeti(30);go();if(pg)await finCobro(pg,v,'Cobro registrado');else toast('Registrado sin cobro ✓');
  });
+}
+/* Congelar membresía: los días congelados se suman al final */
+async function corrMem(c,m,delta,pausas){const fin0=m.fin;await DB.upd('mem',m.id,{fin:addD(fin0,delta),pausas});
+ for(const x of S.mem.filter(x=>x.cliente_id===c.id&&x.id!==m.id&&x.inicio>fin0))await DB.upd('mem',x.id,{inicio:addD(x.inicio,delta),fin:addD(x.fin,delta)})}
+function congelar(c,m){
+ if(!m)return;const H=hoy();
+ form('❄️ Congelar · '+esc(c.nombre.split(' ')[0]),[
+  {k:'desde',l:'Desde',t:'date',v:H,half:1,on:(fm,val)=>{const q=k=>fm.querySelector('#f_'+k);
+   q('motivo').closest('label').insertAdjacentHTML('afterend','<div class="card" id="hint" style="padding:12px 14px"></div>');
+   const calc=()=>{const d=Math.max(0,+val().dias||0);fm.querySelector('#hint').innerHTML=`<div class="mu sm">Ahora termina el <b>${fF(m.fin)}</b>. Con ${d} ${d===1?'día':'días'} congelada pasará a terminar el</div><b class="grad" style="font-size:22px">${fF(addD(m.fin,d))}</b>${+m.sesiones?'<div class="mu sm">Las sesiones que le quedan se guardan.</div>':''}`};
+   const syn=e=>{const t=e.target.id,v=val();if(t==='f_hasta'&&v.hasta&&v.desde){if(v.hasta<=v.desde)q('hasta').value=addD(v.desde,1);q('dias').value=diff(v.desde,q('hasta').value)}else if((t==='f_dias'&&+v.dias)||t==='f_desde'){q('hasta').value=addD(v.desde||H,Math.max(1,+v.dias||1))}calc()};
+   fm.addEventListener('input',syn);fm.addEventListener('change',syn);q('hasta').value=addD(H,15);calc()}},
+  {k:'hasta',l:'Vuelve el',t:'date',half:1},
+  {k:'dias',l:'Días congelada',t:'number',v:15,req:1,im:'numeric'},
+  {k:'motivo',l:'Motivo',dl:['Viaje','Lesión o salud','Trabajo','Estudios','Embarazo','Otro'],ph:'Ej. Viaje'}],async v=>{
+  const d=Math.round(+v.dias||0),desde=v.desde||H;
+  if(d<1)throw new Error('Pon cuántos días.');if(d>365)throw new Error('Máximo 365 días.');
+  if(desde<m.inicio||desde>m.fin)throw new Error('La fecha debe estar dentro de su '+R.plan.toLowerCase()+' ('+fF(m.inicio)+' al '+fF(m.fin)+').');
+  if(pzAct(m)||pzFut(m))throw new Error('Ya tiene un congelamiento activo.');
+  const pz=pzs(m).concat([{desde,hasta:addD(desde,d),dias:d,motivo:v.motivo||null,quien:ME.nombre||ROLES[ME.rol]||'',t:new Date().toISOString()}]);
+  await corrMem(c,m,d,pz);go();toast('❄️ Congelada '+d+' días · ahora termina el '+fF(m.fin));
+ });
+}
+async function reactivar(c,m){
+ const z=pzAct(m)||pzFut(m);if(!z)return;const H=hoy(),ini=z.desde>H?z.desde:H,q=diff(ini,z.hasta);
+ if(!confirm(z.desde>H?'¿Cancelar el congelamiento programado?':'¿Reactivar hoy? Se descuentan los '+q+' días que no usó del congelamiento.'))return;
+ try{const pz=z.desde>=H?pzs(m).filter(x=>x!==z):pzs(m).map(x=>x===z?Object.assign({},x,{hasta:H,dias:x.dias-q}):x);
+  await corrMem(c,m,-q,pz);go();toast('▶️ Reactivada · termina el '+fF(m.fin))}catch(er){toast(er.message)}
 }
 function cobroSuelto(){
  form('Nuevo cobro',[{k:'concepto',l:'Concepto',req:1,ph:'Ej. Agua, suplemento, clase extra'},{k:'monto',l:'Monto (S/)',t:'number',req:1,half:1},{k:'cliente',l:R.cli+' (opcional)',t:'sel',half:1,v:'',o:[['','—']].concat(S.cli.map(c=>[c.id,c.nombre]))},{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},...compFields()],async v=>{
