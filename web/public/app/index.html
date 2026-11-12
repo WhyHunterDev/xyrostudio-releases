@@ -149,6 +149,42 @@ main{overflow:auto;height:100%;position:relative}
 @keyframes kln{from{top:8%}to{top:92%}}
 .kcb{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
 .khint{font-size:15px;margin-top:6px}
+#kio{isolation:isolate}
+#kio>*{position:relative;z-index:1}
+#kio>#kfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#kio>.kaura{position:fixed;z-index:0;width:80vmax;height:80vmax;left:50%;top:42%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--a) 22%,transparent),transparent);filter:blur(24px);pointer-events:none;animation:kau 9s ease-in-out infinite alternate}
+#kio>.kglow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(520px circle at var(--kx,50%) var(--ky,45%),color-mix(in srgb,var(--a) 16%,transparent),transparent 60%)}
+@keyframes kau{from{transform:translate(-50%,-50%) scale(.9);opacity:.7}to{transform:translate(-50%,-54%) scale(1.08);opacity:1}}
+.khd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.kbr{display:flex;align-items:center;gap:10px;text-align:left}
+.kbr img{width:40px;height:40px;border-radius:12px;object-fit:contain;background:#ffffff0d;border:1px solid #ffffff1a;padding:4px}
+.kbr b{display:block;font-size:16px;color:var(--tx)}.kbr small{color:var(--mu);font-size:12px;display:flex;align-items:center;gap:6px}
+.kdot{width:7px;height:7px;border-radius:50%;background:#3ddc97;box-shadow:0 0 0 0 #3ddc9799;animation:kdp 2s infinite}
+@keyframes kdp{70%{box-shadow:0 0 0 8px #3ddc9700}100%{box-shadow:0 0 0 0 #3ddc9700}}
+#kio .clk{text-shadow:0 0 40px color-mix(in srgb,var(--a) 35%,transparent)}
+#kio .clk i{font-style:normal;animation:kbl 1s steps(1) infinite;color:var(--a)}
+@keyframes kbl{50%{opacity:.25}}
+.ktl{margin-top:22px;font-weight:700;font-size:17px}
+.ktl small{display:block;font-weight:500;color:var(--mu);font-size:13px;margin-top:4px}
+#kio .kin{border:1px solid #ffffff1f;border-radius:20px;background:#ffffff08;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);margin-top:14px;min-height:64px;display:grid;place-items:center;transition:border-color .25s,box-shadow .25s}
+#kio .kin:empty::before{content:"• • • •";color:#ffffff33;letter-spacing:.3em}
+#kio .kin.on{border-color:var(--a);box-shadow:0 0 0 4px color-mix(in srgb,var(--a) 18%,transparent),0 12px 40px -12px color-mix(in srgb,var(--a) 60%,transparent)}
+#kio .kin.on::after{content:"";width:3px;height:30px;background:var(--a);margin-left:6px;animation:kbl 1s steps(1) infinite;display:inline-block;vertical-align:middle}
+#kio .kin.on{display:flex;justify-content:center;align-items:center}
+#kio .kpad button{background:#ffffff0a;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid #ffffff17;transition:transform .12s,background .2s,border-color .2s,box-shadow .2s;position:relative;overflow:hidden}
+#kio .kpad button:hover{border-color:color-mix(in srgb,var(--a) 55%,transparent);box-shadow:0 8px 30px -14px var(--a);transform:translateY(-2px)}
+#kio .kpad button:active{transform:scale(.93);background:color-mix(in srgb,var(--a) 22%,transparent)}
+#kio .kpad button[data-k="✓"]{background:var(--a);color:var(--on,#0b0b0b);border-color:transparent;box-shadow:0 10px 30px -10px var(--a)}
+#kio .kpad button .rp{position:absolute;border-radius:50%;background:color-mix(in srgb,var(--a) 45%,transparent);transform:scale(0);animation:krp .5s ease-out forwards;pointer-events:none}
+@keyframes krp{to{transform:scale(3);opacity:0}}
+#kio .ken{opacity:0;animation:ken .6s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes ken{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#kio #kqr{box-shadow:0 10px 30px -10px var(--a)}
+.kft{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.kpl{display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:99px;background:#ffffff0a;border:1px solid #ffffff17;font-size:13px;color:var(--mu);backdrop-filter:blur(8px)}
+.kpl b{color:var(--tx)}
+.kcam{box-shadow:0 0 0 1px color-mix(in srgb,var(--a) 40%,transparent),0 20px 60px -20px var(--a)}
+@media (prefers-reduced-motion:reduce){#kio .ken{animation:none;opacity:1}#kio>.kaura,#kio .clk i{animation:none}}
 #kio .clk{font-size:clamp(46px,9vw,92px);font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1}
 .kpad{display:grid;grid-template-columns:repeat(3,84px);gap:12px;justify-content:center;margin:20px auto}
 .kpad button{height:72px;border-radius:20px;background:#ffffff0d;border:1px solid var(--ln);font-size:26px;font-weight:700;transition:.1s}
@@ -1402,20 +1438,21 @@ async function abrirCam(vid){
 function kiosco(){
  if($('#kio'))return;history.replaceState(null,'','#/inicio');
  const k=document.createElement('div');k.id='kio';
- k.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span class="mu"><b style="color:var(--tx)">${esc(nombre())}</b> · Asistencia</span><button class="btn sm" id="kx">✕ Salir</button></div>
- <div style="display:grid;align-content:center;gap:6px"><div class="clk" id="kclk"></div><p class="mu" id="kfe"></p>
-  <p style="margin-top:18px;font-weight:700">Marca tu ingreso con tu DNI, código o QR</p>
-  <div class="kin" id="kin"></div>
+ k.innerHTML=`<canvas id="kfx" aria-hidden="true"></canvas><div class="kaura"></div><div class="kglow"></div>
+ <div class="khd ken"><div class="kbr">${logoDe()?`<img src="${esc(logoDe())}" alt="">`:''}<span><b>${esc(nombre())}</b><small><i class="kdot"></i>Asistencia en vivo</small></span></div><button class="btn sm" id="kx">✕ Salir</button></div>
+ <div style="display:grid;align-content:center;gap:6px"><div class="clk ken" id="kclk" style="animation-delay:.08s"></div><p class="mu ken" id="kfe" style="animation-delay:.14s"></p>
+  <p class="ktl ken" style="animation-delay:.2s">¡Bienvenido! Marca tu ingreso<small>Con tu DNI, tu código o el QR de tu carnet</small></p>
+  <div class="kin ken" id="kin" style="animation-delay:.26s"></div>
   <div id="kcw" hidden><div class="kcam"><video id="cam" playsinline muted></video><i class="kfr"></i></div><p class="mu khint">Acerca el QR del carnet al recuadro</p><div class="kcb"><button class="btn" id="kflip" hidden>🔄 Cambiar cámara</button><button class="btn" id="kcoff">⌨️ Usar DNI o código</button></div></div>
-  <div class="kpad">${[1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].map(x=>`<button data-k="${x}">${x}</button>`).join('')}</div>
-  ${navigator.mediaDevices?'<button class="btn p" id="kqr" style="margin:6px auto 0">📷 Escanear QR con la cámara</button>':''}
- </div><p class="mu sm" id="kult"></p>`;
+  <div class="kpad">${[1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].map((x,i)=>`<button data-k="${x}" class="ken" style="animation-delay:${.3+i*.03}s">${x}</button>`).join('')}</div>
+  ${navigator.mediaDevices?'<button class="btn p ken" id="kqr" style="margin:6px auto 0;animation-delay:.7s">📷 Escanear QR con la cámara</button>':''}
+ </div><div class="kft ken" style="animation-delay:.75s"><span class="kpl" id="kult"></span></div>`;
  document.body.appendChild(k);
- let v='';const kin=k.querySelector('#kin'),upd=()=>kin.textContent=v;
- const tick=()=>{if(!document.body.contains(k))return;const d=new Date();k.querySelector('#kclk').textContent=pad(d.getHours())+':'+pad(d.getMinutes());k.querySelector('#kfe').textContent=d.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});setTimeout(tick,1e3*(60-d.getSeconds()))};tick();
- const ult=()=>{k.querySelector('#kult').textContent=S.asi.filter(a=>ymd(new Date(a.t))===hoy()).length+' ingresos hoy'};ult();
+ let v='';const kin=k.querySelector('#kin'),upd=()=>{kin.textContent=v;kin.classList.toggle('on',!!v)};kioFx(k);
+ const tick=()=>{if(!document.body.contains(k))return;const d=new Date();k.querySelector('#kclk').innerHTML=pad(d.getHours())+'<i>:</i>'+pad(d.getMinutes());k.querySelector('#kfe').textContent=d.toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});setTimeout(tick,1e3*(60-d.getSeconds()))};tick();
+ const ult=()=>{const n=S.asi.filter(a=>ymd(new Date(a.t))===hoy()).length;k.querySelector('#kult').innerHTML=`<i class="kdot"></i><b>${n}</b> ingreso${n===1?'':'s'} hoy`};ult();
  let lc='',lt=0;const enviar=val=>{val=String(val||'').trim().toUpperCase();if(val===lc&&Date.now()-lt<8000){v='';upd();return}lc=val;lt=Date.now();const r=checkin(val);v='';upd();if(!r)return;resultado(r);ult()};
- k.querySelector('.kpad').onclick=e=>{const b=e.target.closest('button');if(!b)return;const x=b.dataset.k;if(x==='⌫')v=v.slice(0,-1);else if(x==='✓')enviar(v);else if(v.length<12)v+=x;upd()};
+ k.querySelector('.kpad').onclick=e=>{const b=e.target.closest('button');if(!b)return;{const r=b.getBoundingClientRect(),s=Math.max(r.width,r.height),o=document.createElement('i');o.className='rp';o.style.cssText=`width:${s}px;height:${s}px;left:${(e.clientX||r.left+r.width/2)-r.left-s/2}px;top:${(e.clientY||r.top+r.height/2)-r.top-s/2}px`;b.appendChild(o);setTimeout(()=>o.remove(),520)}const x=b.dataset.k;if(x==='⌫')v=v.slice(0,-1);else if(x==='✓')enviar(v);else if(v.length<12)v+=x;upd()};
  const kd=e=>{if(!document.body.contains(k))return removeEventListener('keydown',kd);if($('.kres'))return;if(/^[0-9a-zA-Z]$/.test(e.key)&&v.length<12)v+=e.key.toUpperCase();else if(e.key==='Backspace')v=v.slice(0,-1);else if(e.key==='Enter')enviar(v);else if(e.key==='Escape')cerrar();upd()};addEventListener('keydown',kd);
  const cerrar=()=>{kStream&&kStream.getTracks().forEach(t=>t.stop());kStream=null;k.remove();go()};
  k.querySelector('#kx').onclick=cerrar;
@@ -1426,6 +1463,21 @@ function kiosco(){
  qb&&(qb.onclick=abrir);k.querySelector('#kcoff').onclick=()=>camOn(false);
  fl.onclick=async()=>{kFace=kFace==='user'?'environment':'user';LS.s('xa-cam',kFace);try{await abrirCam(vid)}catch(_){toast('No se pudo cambiar de cámara')}};
  if(LS.g('xa-camon',0)&&qb)abrir();qb&&qb.addEventListener('click',()=>LS.s('xa-camon',1));k.querySelector('#kcoff').addEventListener('click',()=>LS.s('xa-camon',0));
+}
+// Red de partículas del modo asistencia (como xyrostudio.net) con el color del negocio; se apaga sola al salir.
+function kioFx(k){
+ const cv=k.querySelector('#kfx');if(!cv)return;const cx=cv.getContext('2d'),RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ cx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||'#7c5cff';const hx=/^#[0-9a-f]{6}$/i.test(cx.fillStyle)?cx.fillStyle:'#7c5cff';
+ const C=[1,3,5].map(i=>parseInt(hx.substr(i,2),16)).join(','),DPR=Math.min(1.5,devicePixelRatio||1),m={x:-999,y:-999};let W,H,P=[];
+ const size=()=>{W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);const n=Math.round(Math.min(70,W*H/18000));P=[];for(let i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:1+Math.random()*1.2})};
+ const mv=e=>{m.x=e.clientX;m.y=e.clientY;k.style.setProperty('--kx',e.clientX+'px');k.style.setProperty('--ky',e.clientY+'px')};
+ const f=()=>{if(!document.body.contains(k)){removeEventListener('resize',size);removeEventListener('pointermove',mv);return}
+  if(!document.hidden){cx.clearRect(0,0,W,H);for(let i=0;i<P.length;i++){const p=P[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+   cx.fillStyle=`rgba(${C},.75)`;cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.3);cx.fill();
+   for(let j=i+1;j<P.length;j++){const q=P[j],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<130){cx.strokeStyle=`rgba(${C},${.15*(1-d/130)})`;cx.lineWidth=1;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}
+   const dm=Math.hypot(p.x-m.x,p.y-m.y);if(dm<170){cx.strokeStyle=`rgba(${C},${.3*(1-dm/170)})`;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(m.x,m.y);cx.stroke()}}}
+  RM||requestAnimationFrame(f)};
+ size();addEventListener('resize',size);addEventListener('pointermove',mv,{passive:true});f();
 }
 function beep(ok){try{const A=new (window.AudioContext||window.webkitAudioContext)(),o=A.createOscillator(),g=A.createGain();o.connect(g);g.connect(A.destination);o.frequency.value=ok?880:220;g.gain.setValueAtTime(.15,A.currentTime);g.gain.exponentialRampToValueAtTime(.001,A.currentTime+(ok?.35:.6));if(ok)o.frequency.setValueAtTime(1320,A.currentTime+.12);o.start();o.stop(A.currentTime+.6)}catch(_){}}
 function resultado(r){
