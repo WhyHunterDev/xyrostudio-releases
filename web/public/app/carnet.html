@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi carnet</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#07070d">
+<link rel="icon" href="../img/marca/logo-apps-app.svg" type="image/svg+xml">
+<style>
+:root{--a:#3ad6ff;--b:#7c5cff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:radial-gradient(circle at 50% 0,#1d1846,#07070d 70%);color:#eef0f8;min-height:100vh;display:grid;place-items:center;padding:20px}
+.c{width:min(360px,100%);border-radius:26px;padding:24px;background:linear-gradient(135deg,var(--b),#1b1b2e 55%,var(--a));display:grid;gap:14px;text-align:center;position:relative;overflow:hidden;box-shadow:0 40px 100px -30px var(--b);animation:in .6s cubic-bezier(.2,1.3,.3,1)}
+.c::after{content:"";position:absolute;inset:-50%;background:linear-gradient(115deg,transparent 40%,#ffffff30 50%,transparent 60%);animation:sh 3.5s infinite;pointer-events:none}
+@keyframes sh{from{transform:translateX(-60%)}to{transform:translateX(60%)}}
+@keyframes in{from{opacity:0;transform:translateY(30px) scale(.95)}}
+.qr{background:#fff;padding:14px;border-radius:18px;width:230px;margin:0 auto}
+.qr svg{width:100%;height:auto;display:block}
+h1{font-size:22px;letter-spacing:-.02em}
+.p{display:inline-block;padding:5px 12px;border-radius:999px;font-weight:700;font-size:13px;background:#0005}
+.mu{opacity:.7;font-size:13px}
+.f{margin-top:18px;text-align:center;font-size:12px;opacity:.5}
+</style>
+</head>
+<body>
+<main><div class="c" id="c"><b>Cargando tu carnet…</b></div><p class="f">Hecho con Xyro Apps · xyrostudio.net</p></main>
+<script>
+(async function(){
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const code=(new URLSearchParams(location.search).get('c')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,20);
+  const el=document.getElementById('c');
+  const js=src=>new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.head.appendChild(s)});
+  if(!code){el.innerHTML='<b>Enlace incompleto</b><p class="mu">Pide tu carnet en recepción.</p>';return}
+  try{
+    const r=await fetch('https://szvdzcaoxjstdyblhxrd.supabase.co/rest/v1/rpc/xa_carnet',{method:'POST',headers:{'Content-Type':'application/json',apikey:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'},body:JSON.stringify({p_codigo:code})});
+    const d=await r.json();
+    if(!r.ok||!d||!d.nombre){el.innerHTML='<b>Carnet no encontrado</b><p class="mu">Pide uno nuevo en recepción.</p>';return}
+    if(d.color)document.documentElement.style.setProperty('--a',d.color);
+    document.title=(d.negocio||'Mi carnet')+' · Carnet';
+    const hoy=new Date().toISOString().slice(0,10),ok=d.fin&&d.fin>=hoy;
+    const f=d.fin?new Date(d.fin+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'}):'';
+    el.innerHTML=`<b style="position:relative">${esc(d.negocio||'')}</b><div class="qr" id="q"></div><div style="position:relative;display:grid;gap:6px"><h1>${esc(d.nombre)}</h1><span class="p">${d.plan?esc(d.plan)+' · ':''}${ok?'vigente hasta '+f:d.fin?'venció el '+f:'sin plan activo'}</span><p class="mu" style="letter-spacing:.2em">${esc(code)}</p></div>`;
+    try{await js('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');const q=qrcode(0,'M');q.addData(code);q.make();document.getElementById('q').innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}
+    catch(_){document.getElementById('q').innerHTML='<b style="color:#000;font-size:24px;letter-spacing:.1em">'+esc(code)+'</b>'}
+  }catch(_){el.innerHTML='<b>Sin conexión</b><p class="mu">Revisa tu internet y vuelve a abrir el enlace.</p>'}
+})();
+</script>
+</body>
+</html>

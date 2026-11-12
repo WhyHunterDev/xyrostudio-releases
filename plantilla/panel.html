@@ -71,7 +71,7 @@ input{padding:10px 12px;border-radius:10px;border:1px solid var(--line);backgrou
       </div>
       <div class="card"><h3>Productos / servicios</h3><div id="its"></div><button class="btn g" id="add">＋ Agregar</button></div>
       <button class="btn" id="save">💾 Guardar cambios</button>
-      ${me.rol === 'admin' || me.gestor ? `<div class="card"><h3>🚀 Haz crecer tu negocio</h3><p class="mu">Tienes: ${XYROS.filter((x) => d.xyros.includes(x[0])).map((x) => x[1]).join(', ') || '—'}. Suma más con un clic:</p>
+      ${d.xyros.includes('apps') ? `<a class="card" href="https://xyrostudio.net/app/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><h3>📱 Abrir Xyro Apps</h3><p class="mu">Socios, cobros y asistencia con QR.</p></a>` : ''}${me.rol === 'admin' || me.gestor ? `<div class="card"><h3>🚀 Haz crecer tu negocio</h3><p class="mu">Tienes: ${XYROS.filter((x) => d.xyros.includes(x[0])).map((x) => x[1]).join(', ') || '—'}. Suma más con un clic:</p>
         ${XYROS.filter((x) => !d.xyros.includes(x[0])).map(([k, t, desc, emo]) => `<div class="row" style="grid-template-columns:40px 1fr auto"><span style="font-size:24px">${emo}</span><div><b>${t}</b><div class="mu">${desc}</div></div><button class="btn g" data-up="${k}">Lo quiero</button></div>`).join('') || '<p class="mu">¡Ya tienes todo el ecosistema! 🎉</p>'}</div>` : ''}
       <a class="mu" href="./" target="_blank">Ver mi web ↗</a>`;
     items();
