@@ -293,15 +293,26 @@ const tel=t=>{t=String(t||'').replace(/\D/g,'');return t.length===9?'51'+t:t};
 const DKEY=()=>'xa-demo-'+(CFG.rubro||'gym');
 const saveDemo=()=>LS.s(DKEY(),{S,CFG});
 const fixErr=e=>{const m=e.message||'';if(/gestor_(crear|listar|actualizar|reiniciar|set_activo|borrar)/i.test(m))return new Error('La gestión de cuentas aún no está activa en tu base. Avísale a XyroStudio.');if(/xa_canje|xa_pase/i.test(m))return new Error('Falta correr el SQL 21 en Supabase.');if(/\bsede\b/i.test(m))return new Error('Falta correr el SQL 20 en Supabase.');if(/xa_cierre_auto|\bauto\b|\bdia\b/i.test(m))return new Error('Falta correr el SQL 19 en Supabase.');if(/pausas/i.test(m))return new Error('Falta correr el SQL 18 en Supabase.');if(/foto|sesiones|\bdom\b|descuento|motivo|items|xa_productos|xa_movs|xa_cierres|xa_stock|row-level/i.test(m))return new Error('Falta correr el SQL 17 en Supabase.');if(/column|xa_series|xa_siguiente|schema cache/i.test(m))return new Error('Falta correr el SQL 16 en Supabase.');return e};
+// Supabase corta cada consulta en 1000 filas: se pide por páginas (4 a la vez) hasta traer todo.
+async function todo(mk,max){const PG=1000,out=[],vis=new Set;
+ for(let i=0;i<max;i+=PG*4){const rs=await Promise.all([0,1,2,3].map(k=>mk().range(i+k*PG,i+k*PG+PG-1)));let fin=false;
+  for(const r of rs){if(r.error)return{error:r.error};const d=r.data||[];for(const x of d)if(!vis.has(x.id)){vis.add(x.id);out.push(x)}if(d.length<PG)fin=true}
+  if(fin)break}
+ return{data:out}}
+// Índices para buscar socio y membresía vigente sin recorrer todo (se rehacen si cambian los datos).
+let IX=null;const ixOff=()=>{IX=null};
+const ix=()=>{if(IX&&IX.cr===S.cli&&IX.mr===S.mem&&IX.cn===S.cli.length&&IX.mn===S.mem.length)return IX;
+ const m=new Map,c=new Map;for(const x of S.mem){const q=m.get(x.cliente_id);if(!q||x.fin>q.fin)m.set(x.cliente_id,x)}for(const x of S.cli)c.set(x.id,x);
+ return IX={m,c,cr:S.cli,mr:S.mem,cn:S.cli.length,mn:S.mem.length}};
 const DB={
  async load(){
   if(DEMO)return;
   const since=new Date(Date.now()-150*864e5).toISOString();SINCE=since.slice(0,10);
   const q=t=>sb.from(T[t]).select('*').eq('sitio_id',SID);
-  const rs=await Promise.all([q('cli').order('nombre').limit(5000),q('pla').order('precio'),q('mem').order('fin',{ascending:false}).limit(10000),q('pag').gte('fecha',since).order('fecha',{ascending:false}).limit(5000),q('asi').gte('t',since).order('t',{ascending:false}).limit(20000)]);
+  const rs=await Promise.all([todo(()=>q('cli').order('nombre').order('id'),50000),q('pla').order('precio'),todo(()=>q('mem').order('fin',{ascending:false}).order('id'),100000),todo(()=>q('pag').gte('fecha',since).order('fecha',{ascending:false}).order('id'),60000),todo(()=>q('asi').gte('t',since).order('t',{ascending:false}).order('id'),150000)]);
   const e=rs.find(r=>r.error);if(e){if(/xa_|relation|schema cache/i.test(e.error.message))throw new Error('Falta activar la base de Xyro Apps (SQL 15).');throw e.error}
   [S.cli,S.pla,S.mem,S.pag,S.asi]=rs.map(r=>r.data||[]);
-  const r2=await Promise.all([q('pro').order('nombre').limit(2000),q('mov').gte('t',since).order('t',{ascending:false}).limit(3000),q('cie').order('hasta',{ascending:false}).limit(60)]);
+  const r2=await Promise.all([todo(()=>q('pro').order('nombre').order('id'),10000),todo(()=>q('mov').gte('t',since).order('t',{ascending:false}).order('id'),40000),q('cie').order('hasta',{ascending:false}).limit(60)]);
   NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);
   NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;
  },
@@ -316,9 +327,9 @@ const DB={
   row.sitio_id=SID;const{data,error}=await sb.from(T[t]).insert(row).select().single();if(error)throw fixErr(error);S[t].unshift(data);return data;
  },
  async upd(t,id,p){
-  const i=S[t].findIndex(x=>x.id===id);
+  ixOff();const i=S[t].findIndex(x=>x.id===id);
   if(!DEMO){const{error}=await sb.from(T[t]).update(p).eq('id',id);if(error)throw fixErr(error)}
-  if(i>=0)Object.assign(S[t][i],p);if(DEMO)saveDemo();
+  if(i>=0)Object.assign(S[t][i],p);ixOff();if(DEMO)saveDemo();
  },
  async insMany(t,rows,prog){
   if(!rows.length)return;
@@ -340,12 +351,12 @@ const DB={
 };
 
 /* ===== Lógica de negocio ===== */
-const memDe=id=>{let m=null;for(const x of S.mem)if(x.cliente_id===id&&(!m||x.fin>m.fin))m=x;return m};
+const memDe=id=>ix().m.get(id)||null;
 const usadas=m=>S.asi.filter(a=>{if(a.cliente_id!==m.cliente_id)return false;const x=ymd(new Date(a.t));return x>=m.inicio&&x<=m.fin}).length;
 const pzs=m=>Array.isArray(m&&m.pausas)?m.pausas:[],pzAct=m=>pzs(m).find(z=>z.desde<=hoy()&&hoy()<z.hasta),pzFut=m=>pzs(m).find(z=>z.desde>hoy());
 const est=c=>{const m=memDe(c.id);if(!m)return{k:'sin',t:'Sin '+R.plan.toLowerCase(),d:null,m};const d=diff(hoy(),m.fin);{const z=pzAct(m);if(z)return{k:'cong',t:'❄️ Congelada hasta '+fF(z.hasta),d,m,pz:z}}if(d<0)return{k:'venc',t:'Venció hace '+(-d)+' d',d,m};
  if(+m.sesiones){const l=m.sesiones-usadas(m);if(l<=0)return{k:'venc',t:'Sin sesiones',d,m,l:0};if(l<=2||d<=5)return{k:'pronto',t:l+' ses. · '+(d===0?'vence hoy':d+' d'),d,m,l};return{k:'act',t:l+' de '+m.sesiones+' ses.',d,m,l}}if(d<=5)return{k:'pronto',t:d===0?'Vence hoy':'Vence en '+d+' d',d,m};return{k:'act',t:d+' días',d,m}};
-const cli=id=>S.cli.find(c=>c.id===id);
+const cli=id=>ix().c.get(id);
 const plan=id=>S.pla.find(p=>p.id===id);
 const nombre=()=>CFG.nombre||R.demo;
 const waMsg=(c,e)=>`Hola ${String(c.nombre).split(' ')[0]} 👋, tu ${(e.m&&e.m.plan_nombre)||R.plan.toLowerCase()} en ${nombre()} ${e.d<0?'venció el':'vence el'} ${fF(e.m&&e.m.fin)}. Renueva y no pierdas el ritmo. ${R.lema}`;
@@ -411,6 +422,7 @@ function shell(){
 }
 let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
 function go(){
+ ixOff();
  const h=(location.hash||'#/inicio').slice(2).split('/');ruta=h[0]||'inicio';arg=decodeURIComponent(h[1]||'');
  if(ME&&ME.rol==='cafetin'&&!['tienda','caja','metas','mas','cuenta'].includes(ruta)){ruta='tienda';history.replaceState(null,'','#/tienda');if(cjF&&!cjF.t)cjF.t='tienda'}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
@@ -1070,7 +1082,7 @@ let rgo='mes',rd1='',rd2='',RX=null,SINCE='';
 function rango(){const H=hoy();switch(rgo){case'hoy':return[H,H];case'ayer':{const a=addD(H,-1);return[a,a]}case'7':return[addD(H,-6),H];case'30':return[addD(H,-29),H];case'mes':return[H.slice(0,8)+'01',H];case'mesp':{const d=new Date(H.slice(0,8)+'01T12:00:00');d.setDate(0);const f=ymd(d);return[f.slice(0,8)+'01',f]}default:return[rd1||addD(H,-6),rd2||H]}}
 async function cargarRango(d1,d2){
  try{const a=new Date(d1+'T00:00:00').toISOString(),b=new Date(d2+'T23:59:59').toISOString();
-  const[p,s,ci]=await Promise.all([sb.from(T.pag).select('*').eq('sitio_id',SID).gte('fecha',a).lte('fecha',b).limit(20000),sb.from(T.asi).select('*').eq('sitio_id',SID).gte('t',a).lte('t',b).limit(50000),NEED17?{data:[]}:sb.from(T.cie).select('*').eq('sitio_id',SID).gte('hasta',a).lte('desde',b).order('hasta',{ascending:false}).limit(2000)]);
+  const[p,s,ci]=await Promise.all([todo(()=>sb.from(T.pag).select('*').eq('sitio_id',SID).gte('fecha',a).lte('fecha',b).order('fecha').order('id'),200000),todo(()=>sb.from(T.asi).select('*').eq('sitio_id',SID).gte('t',a).lte('t',b).order('t').order('id'),500000),NEED17?{data:[]}:sb.from(T.cie).select('*').eq('sitio_id',SID).gte('hasta',a).lte('desde',b).order('hasta',{ascending:false}).limit(2000)]);
   if(p.error||s.error)throw p.error||s.error;RX={k:d1+d2,pag:p.data||[],asi:s.data||[],cie:ci.data||[]};go()}catch(e){toast(e.message)}
 }
 function lbar(arr,fmt){const mx=Math.max(1,...arr.map(x=>x[1]));return arr.length?`<div class="mb">${arr.map(([k,v,extra])=>`<div><span style="background:none;height:auto;overflow:visible;white-space:nowrap;text-overflow:ellipsis">${esc(k)}</span><span><i style="width:${v/mx*100}%"></i></span><b style="text-align:right">${fmt?fmt(v):v}${extra?' <small class="mu">'+extra+'</small>':''}</b></div>`).join('')}</div>`:'<p class="mu sm">Sin datos en estas fechas</p>'}
