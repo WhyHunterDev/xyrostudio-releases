@@ -235,10 +235,19 @@ aside{background:#101010;backdrop-filter:none}
 .cen>.lg{display:grid!important;width:min(400px,100%)!important;height:auto!important;margin:0!important;border-radius:0!important;gap:14px!important;font-size:15px;justify-content:normal;flex:none;text-align:center}
 .cen>.lg .card{width:100%}.cen>.lg b{display:inline;color:inherit}.cen>.lg b::before{content:none}.cen>.lg b.grad{color:var(--a)}:root{--on:#0b0b0b}
 input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-text-fill-color:var(--tx);-webkit-box-shadow:0 0 0 1000px #151515 inset;caret-color:var(--tx);transition:background-color 9999s}
+
+/* Fondo animado del login (como xyrostudio.net): red de partículas moradas, aura y brillo al mouse. Se apaga al entrar. */
+#lfx{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
+.laura{position:fixed;width:70vmax;height:70vmax;left:50%;top:50%;transform:translate(-50%,-60%);border-radius:50%;background:radial-gradient(closest-side,#7c5cff38,transparent);filter:blur(20px);z-index:0;pointer-events:none}
+.lglow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(600px circle at var(--mx,50%) var(--my,40%),#7c5cff2e,transparent 60%)}
+body.dentro #lfx,body.dentro .laura,body.dentro .lglow{display:none}
+body:not(.dentro){background:#05060a}
+.cen>.lg .card{background:#10131cd9;backdrop-filter:blur(8px);border-color:#ffffff1a}
 </style>
 </head>
 <body>
 <div class="bg"><i></i><i></i></div>
+<canvas id="lfx" aria-hidden="true"></canvas><div class="laura"></div><div class="lglow"></div>
 <div class="cen" id="boot"><img src="../img/marca/logo-apps-app.svg" alt="Xyro Apps"></div>
 <div class="cen" id="login" hidden>
   <div class="lg">
@@ -1494,5 +1503,15 @@ if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWo
 boot();
 })();
 </script>
+<script>/* Partículas del login */(function(){var cv=document.getElementById('lfx');if(!cv)return;var cx=cv.getContext('2d'),P=[],W,H,DPR=Math.min(1.5,devicePixelRatio||1),m={x:-999,y:-999},RM=matchMedia('(prefers-reduced-motion: reduce)').matches,app=document.getElementById('app');
+function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);var n=Math.round(Math.min(80,W*H/17000));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35})}
+function f(){if(app&&!app.hidden){document.body.classList.add('dentro');return}if(document.hidden){setTimeout(function(){requestAnimationFrame(f)},500);return}
+ cx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){var p=P[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;var dm=Math.hypot(p.x-m.x,p.y-m.y);if(dm<160){p.x+=(m.x-p.x)*.004;p.y+=(m.y-p.y)*.004}
+ cx.fillStyle='rgba(124,92,255,.75)';cx.beginPath();cx.arc(p.x,p.y,1.4,0,6.3);cx.fill();
+ for(var j=i+1;j<P.length;j++){var q=P[j],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<130){cx.strokeStyle='rgba(124,92,255,'+(0.18*(1-d/130))+')';cx.lineWidth=1;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}
+ if(dm<180){cx.strokeStyle='rgba(58,214,255,'+(0.35*(1-dm/180))+')';cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(m.x,m.y);cx.stroke()}}
+ if(!RM)requestAnimationFrame(f)}
+size();addEventListener('resize',size);addEventListener('pointermove',function(e){m.x=e.clientX;m.y=e.clientY;var s=document.documentElement.style;s.setProperty('--mx',e.clientX+'px');s.setProperty('--my',e.clientY+'px')},{passive:true});
+requestAnimationFrame(f)})();</script>
 </body>
 </html>
