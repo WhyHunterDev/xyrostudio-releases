@@ -146,20 +146,24 @@ th{color:var(--mu);font-size:.66rem;letter-spacing:.08em;text-transform:uppercas
 .xlogo{background:none!important;padding:0;object-fit:contain}
 .xy-grid{display:grid;gap:10px}.xy{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}.xy.on{border-color:color-mix(in srgb,var(--ac) 55%,transparent);background:rgba(124,92,255,.06)}.xy img{width:44px;height:44px;border-radius:12px}.xy small{color:var(--mu);font-size:.78rem;display:block}.xy .xp{display:flex;gap:8px;align-items:center}.xy .xp input{width:90px}.xy-tot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}.xy-tot b{font-family:var(--mono);font-size:1.3rem;color:var(--ac2)}@media(max-width:600px){.xy{grid-template-columns:40px 1fr}.xy .xp{grid-column:1/-1}}
 
-/* Tema sobrio (como el panel de Santos): negro liso, sin degradados; un solo color de acento en lo activo. */
-:root{--bg:#0b0b0b;--bg2:#101010;--card:#141414;--card2:#181818;--line:#ffffff16;--line2:#ffffff22;--mu:#9b9b9b}
+/* Fondo y colores de xyrostudio.net: negro azulado con red de partículas morada; tarjetas sólidas sin degradados. */
+:root{--bg:#05060a;--bg2:#0b0d14;--card:#10131c;--card2:#171b27;--line:#ffffff14;--line2:#ffffff24;--mu:#9aa1b5;--ac:#7c5cff}
+#fx{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
+.aura{position:fixed;width:70vmax;height:70vmax;left:50%;top:50%;transform:translate(-50%,-60%);border-radius:50%;background:radial-gradient(closest-side,#7c5cff33,transparent);filter:blur(20px);z-index:-1;pointer-events:none}
+.glow{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(600px circle at var(--mx,50%) var(--my,40%),#7c5cff2e,transparent 60%)}
+a.btn{color:var(--tx)}
 body::before,body::after{display:none}
-aside{background:#101010;backdrop-filter:none}
+aside{background:#0b0d14e6;backdrop-filter:blur(12px)}
 .btn-p,.toast,.ftabs button.on{background:var(--ac);box-shadow:none}
 .nv.on{background:var(--ac);color:#fff}.nv.on::before{display:none}
-.kpi,.panel,.cl,.fhead{background:#141414}
+.kpi,.panel,.cl,.fhead{background:#10131cd9;backdrop-filter:blur(6px)}
 .kpi::before,.kpi.g::before,.kpi.w::before{display:none}
 .tag.x{background:#ffffff12;color:var(--tx)}
 .logo,.bk-av,.fav{background:var(--ac)}
-.xy.on{background:#141414}
+.xy.on{background:#7c5cff14}
 </style>
 </head>
-<body>
+<body><canvas id="fx" aria-hidden="true"></canvas><div class="aura"></div><div class="glow"></div>
 <section id="login">
   <form id="lf" autocomplete="on">
     <img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="XyroStudio" width="52" height="52">
@@ -419,7 +423,7 @@ async function clForm(){
   return `<a class="back" data-cancel>← Volver a clientes</a>
     <div class="fhead"><div class="fav">${esc((cl.negocio||'?').trim().charAt(0).toUpperCase())}</div>
       <div class="fti"><h2>${esc(cl.negocio)}</h2><small>${esc(cl.rubro||'Cliente')}${cl.contacto?' · '+esc(cl.contacto):''}</small><div class="fchips">${chips}</div></div>
-      <div class="facts">${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">🌐 Web ↗</a>`:''}${cl.panel?`<a class="btn btn-g btn-sm" href="${esc(cl.panel)}" target="_blank" rel="noopener">🔐 Panel ↗</a>`:''}${wa?`<a class="btn btn-g btn-sm" href="https://wa.me/${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}</div></div>
+      <div class="facts">${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">🌐 Web ↗</a>`:''}${slugDe(cl.url||'')?`<button class="btn btn-p btn-sm" data-xapp="${esc(slugDe(cl.url||''))}" data-sop="${cl.id}">📱 Xyro Apps ↗</button>`:''}${wa?`<a class="btn btn-g btn-sm" href="https://wa.me/${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}</div></div>
     <nav class="ftabs">${TABS.map(([k,e,t,b])=>`<button data-ftab="${k}" class="${k===fichaTab?'on':''}">${e} ${t}${b?` <i>${b}</i>`:''}</button>`).join('')}</nav>
     <div class="fbody" data-cur="${fichaTab}"><section class="ftab" data-ft="datos">${datos}</section><section class="ftab" data-ft="xyros">${xyrosPanel(cl,cf,fi.slug)}</section>${resto}</div>`;
 }
@@ -651,12 +655,12 @@ V.backups=async ()=>{
     ${totalCopias?`<button class="btn btn-g" data-prunebackups style="margin-top:14px">🧹 Borrar copias de más de 30 días</button>`:''}</div>`;
 };
 V.soporte=async ()=>{
-  H('Modo soporte','Entra a la web de un cliente para darle soporte o ayuda.');
+  H('Modo soporte','Entra al sistema de un cliente para darle soporte o ayuda.');
   const on=cfg().soporteSinRegistro;
-  return `<div class="note">🕶️ <div><b>Soporte sin dejar rastro.</b> Cuando entras al panel de un cliente, tus cambios no aparecen en el registro de actividad de ese cliente. Tú llevas tu propio registro privado en «Mi registro».</div></div>
+  return `<div class="note">🕶️ <div><b>Soporte sin dejar rastro.</b> Cuando entras al Xyro Apps de un cliente, mirar no deja rastro en su actividad. Tú llevas tu propio registro privado en «Mi registro».</div></div>
     <div class="panel"><label class="row-sw"><span class="sw ${on?'on':''}" id="swSop"></span><span style="color:var(--tx);font-weight:600">Modo soporte silencioso activado</span></label></div>
-    <div class="panel"><h3>Accesos rápidos</h3><p class="d">Abre el panel de cualquier cliente en una pestaña nueva.</p>
-      <div class="tbl"><table><tr><th>Cliente</th><th>Estado</th><th></th></tr>${clientes.map(cl=>`<tr><td><b>${esc(cl.negocio)}</b></td><td><span class="tag ${cl.estado}">${estLabel(cl.estado)}</span></td><td style="text-align:right;white-space:nowrap">${cl.panel?`<a class="btn btn-g btn-sm" href="${esc(cl.panel)}" target="_blank" rel="noopener" data-sop="${cl.id}">Entrar al panel ↗</a>`:'<small style="color:var(--mu)">sin panel</small>'} ${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Ver web ↗</a>`:''}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Sin clientes.</td></tr>'}</table></div></div>`;
+    <div class="panel"><h3>Accesos rápidos</h3><p class="d">Entra al Xyro Apps de cualquier cliente sin contraseña, en una pestaña nueva.</p>
+      <div class="tbl"><table><tr><th>Cliente</th><th>Estado</th><th></th></tr>${clientes.map(cl=>`<tr><td><b>${esc(cl.negocio)}</b></td><td><span class="tag ${cl.estado}">${estLabel(cl.estado)}</span></td><td style="text-align:right;white-space:nowrap">${slugDe(cl.url||'')?`<button class="btn btn-p btn-sm" data-xapp="${esc(slugDe(cl.url||''))}" data-sop="${cl.id}">Entrar a su Xyro Apps ↗</button>`:'<small style="color:var(--mu)">sin Xyro Apps</small>'} ${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Ver web ↗</a>`:''}</td></tr>`).join('')||'<tr><td colspan="3" class="empty">Sin clientes.</td></tr>'}</table></div></div>`;
 };
 V.registro=async ()=>{H('Mi registro','Tu historial privado en este dispositivo.'); const L=logGet(); $('#acts').innerHTML=L.length?`<button class="btn btn-g" data-clearlog>Borrar</button>`:'';
   return `<div class="panel tbl"><table><tr><th>Fecha</th><th>Acción</th></tr>${L.map(l=>`<tr><td style="white-space:nowrap">${fecha(l.t)}</td><td>${esc(l.m)}</td></tr>`).join('')||'<tr><td colspan="2" class="empty">Sin movimientos.</td></tr>'}</table></div>`;};
@@ -683,6 +687,7 @@ document.addEventListener('click', async e=>{
   const d=el.dataset;
   try{
     if(d.v)return go(d.v);
+    if(d.sop&&d.xapp){const c=clientes.find(x=>x.id===d.sop);if(c&&cfg().soporteSinRegistro)touch(`Entró en modo soporte a ${c.negocio}`)}
     if(d.xapp){const w=window.open('about:blank','_blank');let u='../app/?s='+encodeURIComponent(d.xapp);try{const{data:c}=await sb.rpc('xa_pase');if(c)u+='#xa='+c}catch(_){}if(w){try{w.opener=null}catch(_){}w.location.href=u}else location.href=u;touch('Entró al Xyro Apps de '+d.xapp);return}
     if('logout'in d)return logout();
     if(el.id==='mb')return $('#side').classList.toggle('open');
@@ -778,5 +783,14 @@ if ('serviceWorker' in navigator) addEventListener('load', () => navigator.servi
   }
 })();
 </script>
+<script>/* Red de partículas (igual que la portada de xyrostudio.net) */(function(){
+var cv=document.getElementById('fx');if(!cv)return;var cx=cv.getContext('2d'),P=[],W,H,DPR=Math.min(1.5,devicePixelRatio||1),m={x:-999,y:-999},RM=matchMedia('(prefers-reduced-motion: reduce)').matches,run=!RM;
+function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);var n=Math.round(Math.min(70,W*H/20000));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3})}
+function f(){if(!run)return;cx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){var p=P[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+ var dm=Math.hypot(p.x-m.x,p.y-m.y);cx.fillStyle='rgba(124,92,255,.7)';cx.beginPath();cx.arc(p.x,p.y,1.4,0,6.3);cx.fill();
+ for(var j=i+1;j<P.length;j++){var q=P[j],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<130){cx.strokeStyle='rgba(124,92,255,'+(0.16*(1-d/130))+')';cx.lineWidth=1;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}
+ if(dm<180){cx.strokeStyle='rgba(124,92,255,'+(0.3*(1-dm/180))+')';cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(m.x,m.y);cx.stroke()}}requestAnimationFrame(f)}
+size();addEventListener('resize',size);addEventListener('pointermove',function(e){m.x=e.clientX;m.y=e.clientY;document.documentElement.style.setProperty('--mx',e.clientX+'px');document.documentElement.style.setProperty('--my',e.clientY+'px')},{passive:true});
+if(run)requestAnimationFrame(f);document.addEventListener('visibilitychange',function(){var r=!document.hidden&&!RM;if(r&&!run){run=true;requestAnimationFrame(f)}else run=r});})();</script>
 </body>
 </html>
