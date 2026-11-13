@@ -511,9 +511,9 @@ function form(title,fields,onSave,extra){
 
 /* ===== Navegación ===== */
 const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||String(x.sede)===SEDE)).length;
-const NAV=()=>{if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja'],['cuenta','🔐','Mi cuenta']].filter(x=>x[0]!=='tienda'||CTL());
+const NAV=()=>{if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
- return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']].concat(isAdmin()?[['equipo','👤','Equipo']].concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']].concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'../img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='../img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
@@ -527,7 +527,7 @@ let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
 function go(){
  ixOff();
  const h=(location.hash||'#/inicio').slice(2).split('/');ruta=h[0]||'inicio';arg=decodeURIComponent(h[1]||'');
- if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
+ if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta','web'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
  $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes'].includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
@@ -1427,27 +1427,22 @@ function mas(){
 }
 
 /* ===== Mi web (Xyro Webs dentro del panel): abre el panel de la web con entrada de un clic ===== */
-async function urlWeb(){const u=(CFG.panelWeb||'').split('#')[0];if(!u||DEMO)return u;try{const{data:c,error}=await sb.rpc('xa_pase');if(c)return u+'#xa='+c;if(error)reportar('pase-web',error.message)}catch(_){}return u}
 function miWeb(){
- if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
- const u=CFG.panelWeb;
- setTimeout(()=>{const n=$('#wNew');n&&(n.onclick=abrirWeb);
-  const e=$('#pwEd2');e&&(e.onclick=()=>form('🌐 Panel de la web',[{k:'panelWeb',l:'Enlace del panel de su web',v:CFG.panelWeb||'',ph:'https://…/panel.html'}],async v=>{await DB.cfg({panelWeb:v.panelWeb});go();toast('Guardado ✓')}))});
- return`<div class="card" style="text-align:center;padding:40px 24px;max-width:560px;margin:30px auto"><b style="font-size:46px">🌐</b><h2 style="margin:8px 0">Mi web</h2><p class="mu">${!u?(DEMO?'En tu versión, al tocar «Mi web» se abre el editor de tu página ya con tu sesión: inicio, planes, sedes, promos, galería y horarios.':'XyroStudio está terminando de conectar tu web. Pronto la editarás desde aquí.'):'Tu web se abre ya con tu sesión, sin volver a ingresar.'}</p><div class="eqa" style="justify-content:center;margin-top:14px">${u?'<button class="btn p" id="wNew">Abrir mi web ↗</button>':''}${ME.gestor&&!u?'<button class="btn" id="pwEd2">Poner enlace</button>':''}</div></div>`;
+ if(!DEMO){setTimeout(abrirWeb);return'<div class="empty"><b>🌐</b>Abriendo tu web…</div>'}
+ return`<div class="card" style="text-align:center;padding:40px 24px;max-width:560px;margin:30px auto"><b style="font-size:46px">🌐</b><h2 style="margin:8px 0">Mi web</h2><p class="mu">En tu versión, al tocar «Mi web» se abre el editor de tu página aquí mismo, con tu sesión: inicio, planes, sedes, promos, galería y horarios. Tu dominio queda solo para la web pública.</p></div>`;
 }
-// «Mi web» abre el panel de la web en su propia pestaña con la sesión de Xyro Apps (pase de un clic, sin login).
-function abrirWeb(){const w=window.open('about:blank','_blank');toast('🌐 Abriendo tu web…');urlWeb().then(x=>{if(w&&!w.closed){try{w.opener=null}catch(_){}w.location.href=x}else location.href=x})}
-document.addEventListener('click',e=>{const a=e.target.closest('a[href="#/web"]');if(!a||DEMO||!CFG.panelWeb||!isAdmin())return;e.preventDefault();e.stopPropagation();abrirWeb()},true);
+// «Mi web» = editor de la web dentro de Xyro Apps (mismo dominio y misma sesión: sin login ni pases).
+function abrirWeb(){location.href='web/'+(SLUG?'?s='+encodeURIComponent(SLUG):'')}
+document.addEventListener('click',e=>{const a=e.target.closest('a[href="#/web"]');if(!a||DEMO||!tiene('webs'))return;e.preventDefault();e.stopPropagation();abrirWeb()},true);
 
 /* ===== Integraciones: Xyro Apps es la base y el resto se activa en el mismo panel ===== */
 function xyros(){
  const on=k=>k==='apps'||XY.includes(k)||(DEMO&&k==='control');
  const wa=n=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, quiero activar '+n+' para '+nombre())}`;
- setTimeout(()=>{const b=$('#pwEd');b&&(b.onclick=()=>form('🌐 Panel de la web',[{k:'panelWeb',l:'Enlace del panel de su web',v:CFG.panelWeb||'',ph:'https://…/panel.html'}],async v=>{await DB.cfg({panelWeb:v.panelWeb});go();toast('Guardado ✓')}))});
  const desc=k=>k==='apps'?'Tu sistema base: '+R.clis.toLowerCase()+', '+R.plan.toLowerCase()+'s, cobros, asistencia, caja, metas y equipo.':XYROS.find(x=>x[0]===k)[2]+'.';
  const acc=k=>{if(!on(k)&&PRONTO(k))return'';if(!on(k))return isAdmin()?`<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
   if(k==='control')return'<a class="btn sm" href="#/tienda">Abrir punto de venta</a>';
-  if(k==='webs')return'<a class="btn sm" href="#/web">Editar mi web</a>'+(ME.gestor?'<button class="btn sm" id="pwEd">Enlace del panel</button>':'');
+  if(k==='webs')return'<a class="btn sm" href="#/web">Editar mi web</a>';
   return''};
  const pedido=ruta==='xyros'&&location.hash.indexOf('tienda')>=0;
  return`<div class="hi"><div><h2>Integraciones</h2><p class="mu">Todo tu negocio en un solo panel. Xyro Apps es la base y le sumas lo que necesites, sin instalar otras apps. Actualizamos constantemente: lo que dice «Muy pronto» llega a este mismo panel.</p></div></div>
