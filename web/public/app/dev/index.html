@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
+<script>/* demo: si esta versión ya no es la más nueva, abre la demo nueva */(function(){var m=location.pathname.match(/\/app\/v\/([\w-]+)\//);if(!m||!/[?&]demo=/.test(location.search))return;fetch('/app/v/versiones.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(L){if(L[0]&&L[0].id!==m[1])location.replace('/app/'+location.search+location.hash)}).catch(function(){})})()</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Xyro Apps</title>
