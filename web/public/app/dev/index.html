@@ -557,6 +557,7 @@ function form(title,fields,onSave,extra){
  const fh=f=>{const id='f_'+f.k;if(f.t==='opts')return`<div class="fl">${f.l}<div class="opts" data-k="${f.k}">${f.o.map(o=>`<button type="button" data-v="${esc(o[0])}" class="${String(o[0])===String(f.v)?'on':''}">${esc(o[1])}</button>`).join('')}</div></div>`;
   if(f.t==='sel')return`<label class="fl">${f.l}<select id="${id}">${f.o.map(o=>`<option value="${esc(o[0])}" ${String(o[0])===String(f.v)?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`;
   if(f.t==='foto')return`<div class="fl">${f.l}<div class="fo"><span class="fo-p" id="${id}_p">${f.v?`<img src="${esc(f.v)}" alt="">`:'👤'}</span><div style="display:flex;gap:8px;flex-wrap:wrap">${matchMedia('(pointer:coarse)').matches?`<label class="btn sm">📷 Tomar<input type="file" accept="image/*" capture="user" hidden id="${id}_f"></label>`:(navigator.mediaDevices?`<button type="button" class="btn sm" id="${id}_c">📷 Cámara</button>`:'')}<label class="btn sm">🖼️ Subir<input type="file" accept="image/*" hidden id="${id}_g"></label></div><input type="hidden" id="${id}" value=""></div></div>`;
+  if(f.t==='logo')return`<div class="fl">${f.l}<div class="fo"><span class="fo-p" id="${id}_p" style="border-radius:12px;background:var(--line)">${f.v?`<img src="${esc(f.v)}" alt="" style="object-fit:contain">`:'🖼️'}</span><div style="display:grid;gap:6px"><label class="btn sm">📁 Subir logo desde mi equipo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden id="${id}_g"></label><small class="mu">PNG con fondo transparente se ve mejor.</small></div></div><input id="${id}" value="${esc(f.v??'')}" placeholder="o pega un enlace https://…" style="margin-top:8px"></div>`;
   if(f.t==='chk')return`<label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx)"><input id="${id}" type="checkbox" ${f.v?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">${f.l}</label>`;
   if(f.t==='area')return`<label class="fl">${f.l}<textarea id="${id}" rows="3">${esc(f.v)}</textarea></label>`;
   return`<label class="fl">${f.l}<input id="${id}" type="${f.t||'text'}" value="${esc(f.v??'')}" ${f.req?'required':''} placeholder="${esc(f.ph||'')}" ${f.t==='number'?'step="any" min="0"':''} ${f.im?`inputmode="${f.im}"`:''} ${f.dl?`list="dl_${f.k}" autocomplete="off"`:''}>${f.dl?`<datalist id="dl_${f.k}">${f.dl.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`:''}</label>`};
@@ -565,7 +566,7 @@ function form(title,fields,onSave,extra){
   const fm=el.querySelector('form');
   fm.querySelectorAll('.opts').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));g.dispatchEvent(new Event('change'))}));
   const val=()=>{const o={};fields.forEach(f=>{if(f.t==='opts'){const b=fm.querySelector(`[data-k="${f.k}"] .on`);o[f.k]=b?b.dataset.v:''}else{const x=fm.querySelector('#f_'+f.k);o[f.k]=x?(x.type==='checkbox'?x.checked:x.value.trim()):''}});return o};
-  fields.forEach(f=>{f.on&&f.on(fm,val);f.t==='foto'&&fotoUI(fm,'f_'+f.k)});
+  fields.forEach(f=>{f.on&&f.on(fm,val);f.t==='foto'&&fotoUI(fm,'f_'+f.k);f.t==='logo'&&logoUI(fm,'f_'+f.k)});
   setTimeout(()=>{const i=fm.querySelector('input');i&&i.focus()},80);
   fm.addEventListener('submit',async e=>{e.preventDefault();const b=fm.querySelector('.btn.p');b.disabled=true;try{await onSave(val(),fm);close()}catch(er){const p=fm.querySelector('.err');p.textContent=er.message||String(er);p.hidden=false;b.disabled=false}});
  });
@@ -946,9 +947,9 @@ async function sugeridos(){try{for(const[n,pr,d,co,se]of R.planes){const r={nomb
 function editPlan(p){
  form(p?'Editar plan':'Nuevo plan',[{k:'nombre',l:'Nombre',v:p&&p.nombre,req:1,ph:'Ej. Mensual'},{k:'precio',l:'Precio (S/)',t:'number',v:p&&p.precio,req:1,half:1},{k:'dias',l:'Duración (días)',t:'number',v:p?p.dias:30,req:1,half:1},{k:'sesiones',l:'Sesiones (vacío = libre)',t:'number',v:p&&p.sesiones,half:1,ph:'Libre'},{k:'dom',l:'Incluye domingos y feriados',t:'chk',v:!p||p.dom!==false,half:1},{k:'color',l:'Color',t:'opts',v:(p&&p.color)||'#3ad6ff',o:[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo'],['#8d8fa8','Gris']]}],async v=>{
   const row={nombre:v.nombre,precio:+v.precio,dias:Math.max(1,parseInt(v.dias)||1),color:v.color,activo:true};if(v.sesiones!==''||(p&&p.sesiones))row.sesiones=parseInt(v.sesiones)||null;if(!v.dom||(p&&p.dom===false))row.dom=!!v.dom;
-  if(p)await DB.upd('pla',p.id,row);else await DB.ins('pla',row);S.pla.sort((a,b)=>a.precio-b.precio);toast('Plan guardado ✓');go();
+  if(p)await DB.upd('pla',p.id,row);else await DB.ins('pla',row);S.pla.sort((a,b)=>a.precio-b.precio);toast('Plan guardado ✓');if(CFG.syncWeb===true)aWeb(false);go();
  },p?'<button type="button" class="btn bad" id="pDel" style="margin-right:auto">Archivar</button>':'');
- const d=$('#pDel');d&&(d.onclick=async()=>{await DB.upd('pla',p.id,{activo:false});$('.ov').remove();toast('Plan archivado');go()});
+ const d=$('#pDel');d&&(d.onclick=async()=>{await DB.upd('pla',p.id,{activo:false});$('.ov').remove();toast('Plan archivado');if(CFG.syncWeb===true)aWeb(false);go()});
 }
 function nuevoCli(c){
  const P0=S.pla.filter(p=>p.activo!==false);
@@ -1145,12 +1146,12 @@ function ajustes(){
   $('#atu').onclick=()=>form('🕐 Turnos de caja',[{k:'t',l:'Un turno por línea: nombre inicio-fin',t:'area',v:turnosL().map(t=>t.n+' '+t.a+'-'+t.b).join('\n'),ph:'Mañana 06:00-14:00\nTarde 14:00-18:00\nNoche 18:00-23:00'}],async v=>{
    const L=v.t.split('\n').map(s=>s.trim().match(/^(.+?)\s+(\d{1,2}:\d{2})\s*[-–a]+\s*(\d{1,2}:\d{2})$/)).filter(Boolean).map(m=>({n:m[1].slice(0,20),a:m[2].padStart(5,'0'),b:m[3].padStart(5,'0')}));
    if(!L.length)throw new Error('Escribe así: Mañana 06:00-14:00');await DB.cfg({turnos:L.slice(0,4)});toast('Turnos guardados ✓');go()});
-  $('#amk').onclick=()=>form('🎨 Marca y colores',[{k:'color',l:'Color principal',t:'color',v:CFG.color||WEB.color||'#3ad6ff',half:1},{k:'color2',l:'Color secundario',t:'color',v:CFG.color2||WEB.color2||'#7c5cff',half:1},{k:'logo',l:'Logo (enlace a la imagen)',v:CFG.logo||WEB.logo||'',ph:'https://…/logo.png'},{k:'web',l:'Tu página web',v:CFG.web||'',ph:'https://tunegocio.com'}],async v=>{await DB.cfg(v);shell();go();toast('Listo, la app ya luce como tu marca ✨')});
+  $('#amk').onclick=()=>form('🎨 Marca y colores',[{k:'color',l:'Color principal',t:'color',v:CFG.color||WEB.color||'#3ad6ff',half:1},{k:'color2',l:'Color secundario',t:'color',v:CFG.color2||WEB.color2||'#7c5cff',half:1},{k:'logo',l:'Logo',t:'logo',v:CFG.logo||WEB.logo||''},{k:'web',l:'Tu página web',v:CFG.web||'',ph:'https://tunegocio.com'}],async v=>{await DB.cfg(v);shell();go();toast('Listo, la app ya luce como tu marca ✨')});
   $('#acp').onclick=async e=>{const url=CFG.web||prompt('¿Cuál es tu página web?','https://');if(!url)return;const b=e.target;b.disabled=true;b.textContent='Leyendo tu web…';
    try{const t=await temaDeWeb(url);if(!t.color&&!t.logo)throw new Error('No encontramos colores');await DB.cfg({color:t.color||CFG.color,color2:t.color2||CFG.color2,bg:t.bg||'',logo:t.logo||CFG.logo,web:t.web,nombre:CFG.nombre||t.nombre});shell();go();confeti(40);toast('🎨 Copiamos el look de tu web')}
    catch(er){toast('No pudimos leer tu web. Ponlo a mano en «Editar».');b.disabled=false;b.textContent='✨ Copiar de mi web'}};
-  $('#asy').onclick=async()=>{await syncWeb(true);go()};
-  const at=$('#aut');at&&(at.onchange=async()=>{await DB.cfg({syncWeb:at.checked});toast(at.checked?'Se copiarán solos ✓':'Precios independientes ✓')});
+  const asy=$('#asy');asy&&(asy.onclick=async()=>{asy.disabled=true;await aWeb(true);asy.disabled=false});
+  const at=$('#aut');at&&(at.onchange=async()=>{await DB.cfg({syncWeb:at.checked});toast(at.checked?'Tu web se actualizará sola ✓':'Enviarás los planes a mano ✓');if(at.checked)aWeb(false)});
   $('#afi').onclick=()=>form('🧾 Datos para comprobantes',[{k:'razon',l:'Razón social',v:CFG.razon||''},{k:'ruc',l:'RUC',v:CFG.ruc||'',half:1,im:'numeric'},{k:'telefono',l:'Teléfono',v:CFG.telefono||'',half:1},{k:'direccion',l:'Dirección',v:CFG.direccion||''},{k:'serieB',l:'Serie boletas',v:CFG.serieB||'B001',half:1},{k:'serieF',l:'Serie facturas',v:CFG.serieF||'F001',half:1},{k:'compDef',l:'Al cobrar, por defecto',t:'opts',v:CFG.compDef??'B',o:[['B','Boleta'],['F','Factura'],['','Sin comprobante']]},{k:'igv',l:'Mostrar IGV 18% (precios con IGV incluido)',t:'chk',v:CFG.igv},{k:'autoPrint',l:'Imprimir el ticket apenas cobro',t:'chk',v:CFG.autoPrint},{k:'a4',l:'Imprimir en hoja A4 (si no, ticketera 80 mm)',t:'chk',v:CFG.a4}],async v=>{if(v.ruc&&!/^\d{11}$/.test(v.ruc))throw new Error('El RUC tiene 11 dígitos.');v.serieB=v.serieB.toUpperCase();v.serieF=v.serieF.toUpperCase();await DB.cfg(v);go();toast('Guardado ✓')});
   $('#aim').onclick=importador;
  });
@@ -1160,9 +1161,10 @@ function ajustes(){
  <div class="card"><h3>🕐 Turnos de caja <button class="btn sm" id="atu">✏️ Editar</button></h3><p class="mu sm">${turnosL().map(t=>esc(t.n)+' '+esc(t.a)+'–'+esc(t.b)).join(' · ')}. Cada turno (recepción y ${esc(tiendaN().toLowerCase())}) cierra lo que cobró; el último hace el cierre general.</p></div>
  ${isAdmin()?`<div class="card"><h3>📍 Sedes <button class="btn sm" id="asd">✏️ Agregar o quitar</button></h3><p class="mu sm">${sedesL().length?sedesL().map(s=>'📍 '+esc(s.nombre)).join(' · '):'Una sola sede. Agrega más si tu negocio tiene varios locales.'}</p></div>`:''}
  <div class="card"><h3>🎨 Marca y colores <span style="display:flex;gap:6px"><button class="btn sm" id="acp">✨ Copiar de mi web</button><button class="btn sm" id="amk">✏️ Editar</button></span></h3><div style="display:flex;gap:12px;align-items:center">${logoDe()?`<img class="lgo" src="${esc(logoDe())}" alt="">`:''}${sw(CFG.color||WEB.color||'#3ad6ff','Principal')}${sw(CFG.color2||WEB.color2,'Secundario')}${sw(CFG.bg,'Fondo')}<span class="mu sm">La app usa el logo y los colores de tu web, así tu equipo y tus ${esc(R.clis.toLowerCase())} sienten que es la misma marca.</span></div></div>
- <div class="card"><h3>🌐 Tu web y tus precios <button class="btn sm" id="asy">📥 Importar planes de mi web</button></h3><p class="mu sm" style="margin-bottom:6px">Los precios de la app son <b>independientes</b>: los cambias en Planes y recepción aplica descuentos al cobrar. Importa de tu web solo cuando quieras.</p>
-  <p class="mu sm">${DEMO?'En tu versión, los planes, precios y promociones que publicas en tu web pasan solos a la app.':WEB.planes.length?'Planes de tu web: '+WEB.planes.map(w=>esc(w.nombre)+' '+sol(w.ev?w.ev.precio:w.precio)+(w.ev?' 🔥':'')).join(' · '):'Tu web aún no tiene planes publicados.'}</p>
-  <label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx);margin-top:8px"><input id="aut" type="checkbox" ${CFG.syncWeb===true?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">Copiar solos los cambios de precios y planes de mi web</label></div>
+ ${tiene('webs')?`<div class="card"><h3>🌐 Tus precios en tu web <button class="btn sm p" id="asy">📤 Enviar mis planes a la web</button></h3><p class="mu sm" style="margin-bottom:6px">Xyro es la base: tus planes y precios se manejan aquí y los mandas a tu web con un clic. Lo que edites en tu web (fotos, textos, promos) no se pisa.</p>
+  <p class="mu sm">${S.pla.filter(p=>p.activo!==false).length?'Planes que se publicarán: '+S.pla.filter(p=>p.activo!==false).map(p=>esc(p.nombre)+' '+sol(p.precio)).join(' · '):'Aún no tienes planes. Créalos en Planes.'}</p>
+  <label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx);margin-top:8px"><input id="aut" type="checkbox" ${CFG.syncWeb===true?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">Enviar solos a mi web los cambios de planes y precios</label></div>`
+  :`<div class="card"><h3>🌐 Tus precios en tu propia web</h3><p class="mu sm">Con Xyro Webs, los planes y precios que pones aquí aparecen solos en tu página web, con tu nombre, logo y colores. <a class="grad" href="#/xyros/demos"><b>👀 Ver demos de web →</b></a></p></div>`}
  <div class="card"><h3>🧾 Comprobantes <button class="btn sm" id="afi">✏️ Editar</button></h3><p class="mu sm">${CFG.ruc?'RUC '+esc(CFG.ruc)+' · ':''}Series ${esc(CFG.serieB||'B001')} / ${esc(CFG.serieF||'F001')} · ${CFG.a4?'Hoja A4':'Ticketera 80 mm'}${CFG.autoPrint?' · imprime al cobrar':''}</p>
   <p class="mu sm" style="margin-top:6px">${CFG.sunat?'✅ Conectado a SUNAT: boletas y facturas electrónicas.':'Hoy se imprime como <b>nota de venta</b> con serie y número. Para boletas y facturas electrónicas válidas ante SUNAT, <a class="grad" target="_blank" rel="noopener" href="https://wa.me/'+WA+'?text='+encodeURIComponent('Quiero activar boletas SUNAT en Xyro Apps para '+nombre())+'"><b>actívalo aquí</b></a>.'}</p></div>
  <div class="card"><h3>📥 Importar desde AppFit <button class="btn sm p" id="aim">Subir Excel</button></h3><p class="mu sm">Trae a tus ${esc(R.clis.toLowerCase())} con su código, DNI, celular, plan y fecha de vencimiento. Detectamos las columnas solas y no duplicamos a nadie.</p></div>
@@ -1181,7 +1183,25 @@ function deWeb(C){
  (Array.isArray(C.items)?C.items:[]).forEach(x=>{if(x&&x.nombre&&+x.precio&&/mes|plan|membres|paquete|sesion|ciclo|anual/i.test(norm(x.nombre)))pl.push({nombre:x.nombre,precio:+x.precio,dias:+x.dias||30})});
  return{nombre:n.nombre,color:mk.color||n.color||cf.color,color2:mk.color2,logo:mk.logo||n.logo,planes:pl,sedes:(Array.isArray(C.sedes)?C.sedes:[]).map(s=>({id:s.id,nombre:s.nombre}))};
 }
-const evDe=nm=>{if(CFG.syncWeb!==true)return null;const w=WEB.planes.find(x=>norm(x.nombre)===norm(nm));return w&&w.ev};
+const evDe=nm=>{if(true)return null;const w=WEB.planes.find(x=>norm(x.nombre)===norm(nm));return w&&w.ev};
+// Xyro → web: publica los planes de la app en el contenido de la web (claves 'planes' y 'pase'), conservando destacado y precio de evento.
+async function aWeb(manual){
+ if(DEMO){manual&&toast('En tu versión, tus planes pasan a tu web con un clic');return 0}
+ if(!isAdmin()||!tiene('webs')||!SID)return 0;
+ try{
+  const{data:rows}=await sb.from('contenido').select('clave,valor').eq('sitio_id',SID).in('clave',['planes','pase']);
+  const C={};(rows||[]).forEach(r=>C[r.clave]=r.valor);
+  const ant=Array.isArray(C.planes)?C.planes:[],act=S.pla.filter(p=>p.activo!==false);
+  const dia=act.find(p=>+p.dias===1||/pase|diario|d[ií]a/i.test(p.nombre));
+  const pl=act.filter(p=>p!==dia&&+p.dias>=7).map(p=>{const o=ant.find(x=>norm(x.nombre)===norm(p.nombre))||{};return{id:o.id||'x'+p.id,nombre:p.nombre,meses:Math.max(1,Math.round((+p.dias||30)/30.4)),precio:+p.precio||0,destacado:!!o.destacado,precioEvento:o.precioEvento||'',eventoTexto:o.eventoTexto||'',eventoHasta:o.eventoHasta||''}});
+  if(pl.length&&!pl.some(x=>x.destacado))pl[pl.length-1].destacado=true;
+  const up=[{sitio_id:SID,clave:'planes',valor:pl}];
+  if(dia)up.push({sitio_id:SID,clave:'pase',valor:{...(C.pase||{}),socio:+dia.precio||0,noSocio:(C.pase&&C.pase.noSocio)||+dia.precio||0}});
+  const{error}=await sb.from('contenido').upsert(up);if(error)throw error;
+  try{localStorage.setItem('ss-ping',Date.now())}catch(_){}
+  manual&&toast('📤 '+pl.length+' planes publicados en tu web ✓');return pl.length;
+ }catch(e){reportar&&reportar('aWeb',e);manual&&toast('No pude actualizar tu web. Intenta de nuevo.');return 0}
+}
 async function syncWeb(manual){
  if(!isAdmin()||!WEB.planes.length){manual&&toast(DEMO?'En tu versión se copian solos los planes de tu web':'Tu web aún no tiene planes que copiar');return 0}
  let n=0;
@@ -1358,6 +1378,24 @@ function importador(){
 /* ===== Fotos de socios (cámara o archivo, recortada a 360 px) ===== */
 function recorte(src,w,h){const s=Math.min(w,h),cv=document.createElement('canvas');cv.width=cv.height=360;cv.getContext('2d').drawImage(src,(w-s)/2,(h-s)/2,s,s,0,0,360,360);return cv.toDataURL('image/jpeg',.82)}
 function fotoDe(file){return new Promise((ok,ko)=>{const i=new Image();i.onload=()=>{ok(recorte(i,i.naturalWidth,i.naturalHeight));URL.revokeObjectURL(i.src)};i.onerror=()=>ko(new Error('Imagen no válida'));i.src=URL.createObjectURL(file)})}
+// Logo desde el equipo: se achica a 512 px (sin perder transparencia) y se sube a medios/<sitio>/xa/
+function logoUI(fm,id){
+ const g=fm.querySelector('#'+id+'_g'),i=fm.querySelector('#'+id),pv=fm.querySelector('#'+id+'_p'),sv=fm.querySelector('.btn.p');
+ const ver=u=>{pv.innerHTML=u?`<img src="${esc(u)}" alt="" style="object-fit:contain">`:'🖼️'};
+ i.addEventListener('change',()=>ver(i.value.trim()));
+ g.onchange=async()=>{const f=g.files[0];if(!f)return;if(f.size>8e6){toast('Esa imagen pesa mucho (máx. 8 MB)');return}
+  sv&&(sv.disabled=true);pv.innerHTML='⏳';
+  try{
+   let url,typ='image/png',ext='png',b=f;
+   if(f.type==='image/svg+xml'){typ=f.type;ext='svg';if(DEMO)url=URL.createObjectURL(f)}
+   else{const im=await new Promise((ok,ko)=>{const x=new Image();x.onload=()=>ok(x);x.onerror=ko;x.src=URL.createObjectURL(f)});
+    const k=Math.min(1,512/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    b=await new Promise(ok=>c.toBlob(ok,'image/png'));if(DEMO)url=c.toDataURL('image/png')}
+   if(!url){const path=SID+'/xa/logo-'+Date.now()+'.'+ext;const{error}=await sb.storage.from('medios').upload(path,b,{contentType:typ});if(error)throw error;url=sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
+   i.value=url;ver(url);toast('Logo listo ✓ Toca Guardar');
+  }catch(e){reportar&&reportar('logo',e);ver(i.value.trim());toast('No pude subir el logo. Intenta con otra imagen.')}
+  sv&&(sv.disabled=false);g.value=''};
+}
 async function subirFoto(dataUrl,cid){
  if(DEMO)return dataUrl;
  const b=await(await fetch(dataUrl)).blob(),path=SID+'/xa/'+cid+'-'+Date.now()+'.jpg';
@@ -1668,7 +1706,7 @@ function xyros(){
  const wa=n=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, quiero activar '+n+' para '+nombre())}`;
  const desc=k=>k==='apps'?'Tu sistema base: '+R.clis.toLowerCase()+', '+R.plan.toLowerCase()+'s, cobros, asistencia, caja, metas y equipo.':XYROS.find(x=>x[0]===k)[2]+'.';
  const wa2=t=>`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
- const acc=k=>{if(!on(k)&&PRONTO(k))return'';if(!on(k))return isAdmin()?`${k==='webs'?`<a class="btn sm" href="#/xyros/${arg==='demos'?'':'demos'}">${arg==='demos'?'Ocultar demos':'👀 Ver demos'}</a>`:''}<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
+ const acc=k=>{if(!on(k)&&PRONTO(k))return'';if(!on(k))return isAdmin()?`${k==='webs'||k==='control'?`<a class="btn sm" href="#/xyros/${arg==='demos'+k?'':'demos'+k}">${arg==='demos'+k?'Ocultar demos':'👀 Ver demos'}</a>`:''}<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
   if(k==='control')return'<a class="btn sm" href="#/tienda">Abrir punto de venta</a>';
   if(k==='webs')return'<a class="btn sm" href="#/web">Editar mi web</a><a class="btn sm" target="_blank" rel="noopener" href="'+wa2('Hola XyroStudio 👋 Quiero hacer cambios en la web de '+nombre())+'">✏️ Pedir cambios</a>';
   return''};
@@ -1676,7 +1714,8 @@ function xyros(){
  return`<div class="hi"><div><h2>Integraciones</h2><p class="mu">Todo tu negocio en un solo panel. Xyro Apps es la base y le sumas lo que necesites, sin instalar otras apps. Actualizamos constantemente: lo que dice «Muy pronto» llega a este mismo panel.</p></div></div>
  ${pedido?`<div class="card" style="margin-bottom:12px;border-color:var(--a)">🥤 <b>El punto de venta es parte de Xyro Control.</b> <span class="mu">Actívalo para vender productos, llevar stock y ver tus márgenes aquí mismo.</span></div>`:''}
  <div class="eq st">${XYROS.map(([k,n])=>`<div class="card eqc"><img src="/img/marca/logo-${k}-app.svg" alt="" style="width:44px;height:44px;flex:none"><div class="nm"><b>${esc(n)}${k==='apps'?' <small class="mu">· base</small>':''}</b><small style="white-space:normal">${esc(desc(k))}</small></div><div class="eqa">${on(k)?'<span class="pill act">Activo</span>':PRONTO(k)?'<span class="pill pronto">Muy pronto</span>':'<span class="pill sin">No activo</span>'}${k==='apps'?'':acc(k)}</div></div>`).join('')}</div>
- ${!on('webs')&&arg==='demos'?xyDemos(wa2):''}
+ ${!on('webs')&&(arg==='demos'||arg==='demoswebs')?xyDemos(wa2):''}
+ ${!on('control')&&arg==='demoscontrol'?xyDemoCtl(wa2):''}
  ${on('webs')&&!DEMO?xyTemas(wa2):''}
  ${ME.gestor?'<p class="mu sm" style="margin-top:12px">Como XyroStudio ves lo mismo que el cliente. Sus integraciones se activan en tu Panel XyroStudio → Clientes → Xyros.</p>':''}`;
 }
@@ -1687,6 +1726,16 @@ function xyDemos(wa2){
   <b>${n}</b><small class="mu">${d}</small><a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Vi las demos y quiero la web de '+nombre()+' con el diseño «'+n+'».')}">💬 Quiero este diseño</a></div>`).join('')}</div>
  <p class="mu sm" style="margin:14px 0 6px">Y en cada temporada tu web se viste sola:</p>
  <div class="tmx">${TEMAS_X.map(([k,e,n])=>`<a class="btn sm" target="_blank" rel="noopener" href="${demoURL('fuerza',k)}">${e} ${n}</a>`).join('')}</div></div>`;
+}
+function xyDemoCtl(wa2){
+ const t=tiendaN(),P=[['🥤','Batido de proteína',10,18,4],['🍫','Barra proteica',7,42,6],['💧','Agua 625 ml',2.5,60,1],['💊','Creatina 300 g',95,3,38]];
+ return`<div class="card" id="xyDemoCtl" style="margin-top:12px"><h3 style="margin:0 0 4px">🧾 Así funcionaría tu ${esc(t.toLowerCase())} con Xyro Control</h3><p class="mu sm" style="margin:0 0 14px">Vendes con un toque, el stock baja solo y ves cuánto ganas de verdad. Todo en este mismo panel, en la misma caja de tu negocio.</p>
+ <div class="dmx">
+  <div class="dmc"><b>⚡ Venta en 2 toques</b><div class="card" style="padding:10px;display:grid;gap:6px">${P.map(([e,n,pr,st])=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${e} ${n}</span><span><b>${sol(pr)}</b> <small class="mu">· ${st} en stock</small></span></div>`).join('')}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px"><b>Venta: 2 batidos + 1 agua</b><b style="color:var(--a)">${sol(22.5)}</b></div></div><small class="mu">Cobras en efectivo, Yape o tarjeta y sale su comprobante.</small></div>
+  <div class="dmc"><b>📦 Stock que se cuida solo</b><div class="card" style="padding:10px;display:grid;gap:8px">${P.map(([e,n,pr,st])=>`<div><div style="display:flex;justify-content:space-between"><small>${e} ${n}</small><small class="${st<5?'':'mu'}" style="${st<5?'color:var(--bad);font-weight:700':''}">${st<5?'⚠️ quedan '+st:st+' u.'}</small></div><div style="height:6px;border-radius:9px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${Math.min(100,st*1.6)}%;background:${st<5?'var(--bad)':'var(--a)'}"></i></div></div>`).join('')}</div><small class="mu">Te avisa antes de que se acabe y registra cada entrada de mercadería.</small></div>
+  <div class="dmc"><b>💰 Cuánto ganas de verdad</b><div class="card" style="padding:10px;display:grid;gap:6px">${P.map(([e,n,pr,st,co])=>`<div style="display:flex;justify-content:space-between"><small>${e} ${n}</small><small>gana <b style="color:var(--ok)">${Math.round((pr-co)/pr*100)}%</b></small></div>`).join('')}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px"><b>Ganancia del mes</b><b style="color:var(--ok)">${sol(1840)}</b></div></div><small class="mu">Márgenes por producto, cierre de caja por turno y reportes por fecha.</small></div>
+ </div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><a class="btn sm" target="_blank" rel="noopener" href="/app/?demo=gym#/tienda">🧪 Probarlo en la demo ↗</a><a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Vi la demo de Xyro Control y quiero el punto de venta para '+nombre()+'.')}">💬 Lo quiero</a></div></div>`;
 }
 function xyTemas(wa2){
  const w=CFG.web||'';if(!w)return'';
@@ -2057,7 +2106,7 @@ async function entrar(u){
  if(ME.gestor&&(!CFG.web||!CFG.panelWeb)){try{const{data:ca}=await sb.from('clientes_agencia').select('url,panel').ilike('url','%'+SLUG+'%').limit(1);const c0=ca&&ca[0]||{};CFG.web=CFG.web||c0.url||'';if(!CFG.panelWeb&&c0.panel){CFG.panelWeb=c0.panel;setTimeout(()=>DB.cfg({panelWeb:c0.panel}).catch(()=>{}),1500)}}catch(_){}}
  await DB.load();asegS();
  start();
- if(CFG.syncWeb===true&&await syncWeb(false))go();
+
 }
 async function elegirSitio(){
  const{data}=await sb.from('sitios').select('slug,negocio').order('negocio');
