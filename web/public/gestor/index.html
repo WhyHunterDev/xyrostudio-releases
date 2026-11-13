@@ -245,6 +245,7 @@ async function guardarXyros(id,slug){
   const {error}=await sb.from('clientes_agencia').update({modulos:m}).eq('id',id);
   if(error){ if(/modulos|column|schema cache/i.test(error.message)) throw new Error('Corre 14-xyros.sql en Supabase para guardar los Xyros.'); throw error; }
   if(slug) await guardarPromo(slug,{xyros:XYROS.map(([k])=>k).filter(k=>m[k].on)});
+  if(slug&&m.webs&&m.webs.on){ const w=await sembrarWeb(slug); if(w&&cl&&!webDe(cl)){ await sb.from('clientes_agencia').update({url:w}).eq('id',id); cl.url=w; } }
   touch(`Actualizó los Xyros de ${cl?cl.negocio:'un cliente'}`);
 }
 
@@ -256,8 +257,23 @@ const TEMAS=[['','Normal','✨'],['navidad','Navidad','🎄'],['halloween','Hall
 // Slug del proyecto: último tramo de la ruta (…/santos-strength/) o, si la web está en la raíz, el subdominio/dominio (panaderia.xyrostudio.net → panaderia).
 const slugDe=url=>{try{const u=new URL(url);if(u.searchParams.get('s'))return u.searchParams.get('s');const p=u.pathname.split('/').filter(Boolean).filter(x=>!/\.html?$/i.test(x));if(p.length)return p[p.length-1];const h=u.hostname.split('.').filter(x=>x!=='www');return h[0]||'';}catch(_){return '';}};
 // Web real del cliente: vacío si solo tiene Xyro Apps (enlace /app/?s= o subdominio automático slug.xyrostudio.net).
-const webDe=cl=>{const u=String(cl&&cl.url||'');if(!u)return'';try{const x=new URL(u);if(x.searchParams.get('s')||/^[^.]+\.xyrostudio\.net$/i.test(x.hostname)&&!(cl.modulos&&cl.modulos.webs&&cl.modulos.webs.on))return'';}catch(_){return''}return u};
+const webDe=cl=>{const u=String(cl&&cl.url||'');if(!u)return'';try{const x=new URL(u);if(/^\/sitio\//.test(x.pathname))return u;if(x.searchParams.get('s')||/^[^.]+\.xyrostudio\.net$/i.test(x.hostname)&&!(cl.modulos&&cl.modulos.webs&&cl.modulos.webs.on))return'';}catch(_){return''}return u};
 const appLink=s=>'https://xyrostudio.net/app/?s='+encodeURIComponent(s);
+// ---- Xyro Webs: base fija de gimnasio (/sitio/js/base.js). Al activar Webs se copia al negocio solo lo que le falta: nunca pisa lo que ya editó. ----
+const sitioWeb=s=>'https://xyrostudio.net/sitio/?s='+encodeURIComponent(s);
+let baseGymP=null;
+const baseGym=()=>baseGymP||(baseGymP=new Promise((ok,ko)=>{ if(window.XYRO_BASE_GYM)return ok(window.XYRO_BASE_GYM); const sc=document.createElement('script'); sc.src='/sitio/js/base.js?v=1'; sc.onload=()=>ok(window.XYRO_BASE_GYM); sc.onerror=()=>{baseGymP=null;ko(new Error('No cargó la base web.'))}; document.head.appendChild(sc); }));
+async function sembrarWeb(slug){
+  const {data:s}=await sb.from('sitios').select('id,negocio').eq('slug',slug).maybeSingle(); if(!s)throw new Error('No encuentro el negocio «'+slug+'».');
+  const {data:rows}=await sb.from('contenido').select('clave,valor').eq('sitio_id',s.id); const ya={}; (rows||[]).forEach(r=>ya[r.clave]=r.valor);
+  const app=ya.app||{}; if(app.rubro&&app.rubro!=='gym')return ''; // por ahora solo hay base de gimnasio
+  const B=(await baseGym())(app.nombre||s.negocio||slug), up=[];
+  Object.keys(B).forEach(k=>{ if(k==='config'){ const c=ya.config||{}; if(!c.hero)up.push({sitio_id:s.id,clave:'config',valor:{...B.config,...c}}); } else if(ya[k]===undefined)up.push({sitio_id:s.id,clave:k,valor:B[k]}); });
+  const web=app.web||sitioWeb(slug); if(!app.web)up.push({sitio_id:s.id,clave:'app',valor:{...app,web}});
+  if(up.length){ const {error}=await sb.from('contenido').upsert(up); if(error)throw error; }
+  return web;
+}
+const baseExtrasHTML=()=>{ const B=window.XYRO_BASE_GYM; if(!B)return''; return `<div class="note" style="margin-top:12px"><b>✅ Incluye la base</b><ul style="margin:6px 0 10px 18px">${B.incluye.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><b>💰 Extras (se cobran aparte)</b><ul style="margin:6px 0 0 18px">${B.extras.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`; };
 // Conecta un proyecto nuevo: crea su fila en 'sitios' si aún no existe (requiere 13-nuevos-proyectos.sql).
 async function asegurarSitio(c){
   const slug=slugDe(c.url||''); if(!slug)return;
@@ -432,6 +448,7 @@ V.alta=async ()=>{
       ${r.email?`<div class="clavebox" style="margin-top:12px"><div>🔑 Cuenta del administrador <b>${esc(r.nombre)}</b> (${esc(r.email)})</div><div class="cv"><code>${esc(r.pass)}</code><button class="btn btn-p btn-sm" data-ucopy="${esc(msg)}">📋 Copiar mensaje</button>${r.tel?`<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="https://wa.me/${esc(r.tel)}?text=${encodeURIComponent(msg)}">💬 Enviar por WhatsApp</a>`:''}</div><small>La clave se muestra una sola vez.</small></div>`
         :r.vinc?`<div class="note" style="margin-top:12px">🏢 <b>${esc(r.vinc)}</b> (${esc(r.vincE)}) ya tenía cuenta: ahora también administra este negocio con su mismo correo y clave. En su Xyro Apps toca «🏢 Cambiar negocio» para pasar de uno a otro.</div>`
         :`<div class="note" style="margin-top:12px">👤 Aún no tiene cuenta de dueño. Cuando tengas su correo, entra a su Xyro Apps → <b>Equipo</b> → «＋ Cuenta» y créala como Administrador.</div>`}
+      ${r.webB?`<div class="note" style="margin-top:12px">🌐 Su web ya está creada desde la base: <a href="${esc(r.webB)}" target="_blank" rel="noopener"><b>Ver web ↗</b></a>. El dueño la edita en su Xyro Apps → «🌐 Mi web».</div>${baseExtrasHTML()}`:''}
       ${r.aviso?`<div class="note" style="margin-top:12px">⚠️ ${esc(r.aviso)}</div>`:''}
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn btn-p" data-xapp="${esc(r.slug)}">Entrar a su Xyro Apps ↗</button><button class="btn btn-g" data-altaotro>＋ Otro negocio</button><button class="btn btn-g" data-v="clientes">Ver en Clientes</button></div></div>`; }
   const ck=(k,n)=>`<label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" data-axy="${k}">${n}</label>`;
@@ -448,7 +465,7 @@ V.alta=async ()=>{
       <label>Correo real del dueño (si ya es cliente, se le suma este negocio)<input id="aAe" type="email" maxlength="120" placeholder="dueño@gmail.com"></label>
       <label>Celular del dueño (WhatsApp)<input id="aT" inputmode="tel" placeholder="9xxxxxxxx"></label>
       <label>Web del negocio<input id="aW" type="url" placeholder="https://titangym.pe"></label>
-      <div class="full"><label>Integraciones extra</label><div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px">${ck('control','Xyro Control (punto de venta)')}${ck('webs','Xyro Webs (editor web)')}</div></div>
+      <div class="full"><label>Integraciones extra</label><div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px">${ck('control','Xyro Control (punto de venta)')}${ck('webs','Xyro Webs (web lista desde la base)')}</div></div>
       <label>Código (va en el enlace)<input id="aS" maxlength="40" placeholder="titan-gym"></label>
       <label>Color de la marca<input id="aC" type="color" value="${(PLANTILLAS.find(t=>t.k===altaPlt)||{}).color||'#7c5cff'}"></label>
       </div></details>
@@ -464,15 +481,16 @@ async function crearNegocio(){
   const {data:ya}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle(); if(ya)throw new Error('Ya existe un negocio con el código «'+slug+'». Cambia el nombre o el código en «Más opciones».');
   const {data:s,error:e1}=await sb.from('sitios').insert({slug,negocio}).select('id').single(); if(e1)throw new Error('No pude crear el negocio: '+e1.message);
   const {error:e2}=await sb.from('contenido').upsert([{sitio_id:s.id,clave:'config',valor:{xyros}},{sitio_id:s.id,clave:'app',valor:{rubro:plt.k,nombre:negocio,color:v('aC')||plt.color||'#7c5cff',...(web?{web}:{})}}]); if(e2)throw new Error('Negocio creado, pero no pude guardar sus ajustes: '+e2.message);
+  let webB='', aviso='';
+  if(xyros.includes('webs')){ try{ webB=await sembrarWeb(slug); }catch(ex){ aviso='El panel se creó, pero no pude crear su web desde la base ('+ex.message+'). Vuelve a guardar sus Xyros.'; } }
   const mm=+v('aM')||0, modulos={}; ['webs','apps','control','bots','edits'].forEach(k=>modulos[k]={on:xyros.includes(k),precio:k==='apps'&&mm?mm:null});
-  let aviso='';
-  try{ await guardar({negocio,rubro:plt.n,estado:v('aE')||'activo',pago:v('aP')||'pendiente',costo:+v('aCo')||null,soporte:mm||null,ciclo:'mensual',contacto:nombre||'',telefono:tel,url:web||appLink(slug),entregado:new Date().toISOString().slice(0,10),modulos,versiones:[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:'Xyro Apps · plantilla '+plt.n}]}); }
-  catch(ex){ aviso='El panel se creó, pero no se guardó en tu lista de clientes ('+ex.message+').'; }
+  try{ await guardar({negocio,rubro:plt.n,estado:v('aE')||'activo',pago:v('aP')||'pendiente',costo:+v('aCo')||null,soporte:mm||null,ciclo:'mensual',contacto:nombre||'',telefono:tel,url:web||webB||appLink(slug),entregado:new Date().toISOString().slice(0,10),modulos,versiones:[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:'Xyro Apps · plantilla '+plt.n}]}); }
+  catch(ex){ aviso+=(aviso?' ':'')+'El panel se creó, pero no se guardó en tu lista de clientes ('+ex.message+').'; }
   let pass='',vinc='';
   if(email){ const {data:vk,error:ev}=await sb.rpc('gestor_vincular_admin',{p_slug:slug,p_email:email}); if(!ev&&vk&&vk.ok) vinc=vk.nombre||nombre||email; }
   if(email&&!vinc){ pass=claveTemporal(); const {error:e3}=await sb.rpc('gestor_crear_usuario',{p_slug:slug,p_email:email,p_pass:pass,p_nombre:nombre||negocio,p_rol:'admin',p_sede:'todas'}); if(e3){ aviso+=(aviso?' ':'')+'No se pudo crear la cuenta del admin ('+e3.message+'). Créala en su Xyro Apps → Equipo.'; pass=''; } }
   touch(`Dio de alta a ${negocio} (${slug}) con plantilla ${plt.n}`); await cargar().catch(()=>{});
-  altaRes={negocio,slug,plt:plt.ico+' '+plt.n,nombre:nombre||negocio,email:pass?email:'',pass,vinc,vincE:vinc?email:'',xyros:xyros.map(k=>({apps:'Xyro Apps',control:'Control',webs:'Webs'}[k])),tel:tel.length===9?'51'+tel:tel,aviso};
+  altaRes={webB:web?'':webB,negocio,slug,plt:plt.ico+' '+plt.n,nombre:nombre||negocio,email:pass?email:'',pass,vinc,vincE:vinc?email:'',xyros:xyros.map(k=>({apps:'Xyro Apps',control:'Control',webs:'Webs'}[k])),tel:tel.length===9?'51'+tel:tel,aviso};
 }
 // ---- Actualizaciones: lo nuevo se prueba en /app/dev/; cada negocio cambia solo cuando se le sube (SQL 28, xa_versiones) ----
 const prox3am=()=>{const d=new Date(),t=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),8));if(t<=d)t.setUTCDate(t.getUTCDate()+1);return t}; // 3 am Lima = 8:00 UTC
