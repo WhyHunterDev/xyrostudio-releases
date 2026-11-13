@@ -1,5 +1,5 @@
 /* Xyro Bots · chat del negocio para su web.
-   Uso: <script src="https://xyrostudio.net/bot.js" data-s="slug" data-c="#f5c400" data-n="Nombre" defer></script>
+   Uso: <script src="https://xyrostudio.net/bot.js" data-s="slug" data-c="#f5c400" data-n="Nombre" data-sobre=".boton-whatsapp" defer></script>
    Responde con los datos del negocio (horarios, planes, sedes…) vía xyrostudio.net/api/bot. Sin librerías. */
 (function () {
   if (window.__xyroBot) return; window.__xyroBot = 1;
@@ -61,5 +61,7 @@
   F.onsubmit = e => { e.preventDefault(); envia(I.value); };
   $('.b').onclick = () => { pn.classList.toggle('on'); if (pn.classList.contains('on')) { pinta(); I.focus(); } };
   $('.h button').onclick = () => pn.classList.remove('on');
-  (document.body ? Promise.resolve() : new Promise(r => addEventListener('DOMContentLoaded', r))).then(() => document.body.appendChild(host));
+  // data-sobre=".selector": se pone encima de ese botón (ej. el de WhatsApp de la web) para no taparlo.
+  function ubica() { const el = ds.sobre && document.querySelector(ds.sobre); const r = el && el.getBoundingClientRect(); if (r && r.width) { host.style.bottom = Math.round(innerHeight - r.top + 12) + 'px'; host.style.right = Math.max(8, Math.round(innerWidth - r.right + (r.width - 58) / 2)) + 'px'; } }
+  (document.body ? Promise.resolve() : new Promise(r => addEventListener('DOMContentLoaded', r))).then(() => { document.body.appendChild(host); ubica(); setTimeout(ubica, 1500); addEventListener('resize', ubica); });
 })();
