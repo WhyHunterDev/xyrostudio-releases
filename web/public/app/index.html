@@ -450,12 +450,31 @@ const plan=id=>S.pla.find(p=>p.id===id);
 const nombre=()=>CFG.nombre||R.demo;
 const waMsg=(c,e)=>`Hola ${String(c.nombre).split(' ')[0]} 👋, tu ${(e.m&&e.m.plan_nombre)||R.plan.toLowerCase()} en ${nombre()} ${e.d<0?'venció el':'vence el'} ${fF(e.m&&e.m.fin)}. Renueva y no pierdas el ritmo. ${R.lema}`;
 const waLink=(c,msg)=>'https://wa.me/'+tel(c.telefono)+'?text='+encodeURIComponent(msg);
+/* ===== Pago dividido (ej. S/ 500 Yape + S/ 500 efectivo): se guardan dos cobros con la misma hora y concepto ===== */
+const SPL='➗ Pagar con dos métodos (ej. Yape + efectivo)';
+const pagoFields=totF=>[{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x]),on:(fm,val)=>{
+  const w=fm.querySelector('#f_monto2').closest('.f2'),m2=fm.querySelector('#f_monto2'),s2=fm.querySelector('#f_metodo2');w.style.display='none';
+  fm.querySelector('[data-k=metodo]').insertAdjacentHTML('afterend',`<button type="button" class="btn sm" id="spl" style="margin-top:8px">${SPL}</button><div class="sm" id="splh" style="margin-top:6px;font-weight:600"></div>`);
+  const b=fm.querySelector('#spl'),hh=fm.querySelector('#splh');
+  const up=()=>{const v=val(),x=+v.monto2||0,t=+totF(v)||0;hh.innerHTML=w.style.display==='none'||!x?'':x>=t?'<span style="color:var(--bad)">La segunda parte debe ser menor al total '+sol(t)+'</span>':`💳 ${esc(v.metodo)} ${sol(Math.round((t-x)*100)/100)} + ${esc(v.metodo2)} ${sol(x)} = <b>${sol(t)}</b>`};
+  b.onclick=()=>{const on=w.style.display==='none';w.style.display=on?'':'none';b.textContent=on?'✕ Un solo método':SPL;if(on){if(s2.value===val().metodo)s2.value=METODOS.find(x=>x!==val().metodo);setTimeout(()=>m2.focus(),50)}else m2.value='';up()};
+  fm.addEventListener('input',up);fm.addEventListener('change',up)}},
+ {k:'monto2',l:'Monto con el otro método (S/)',t:'number',half:1,ph:'Ej. 500',im:'decimal'},{k:'metodo2',l:'Otro método',t:'sel',half:1,v:'Yape',o:METODOS.map(x=>[x,x])}];
+function valSplit(v,tot){const x=+v.monto2||0;if(!x)return;if(x<0||x>=+tot)throw new Error('La segunda parte debe ser menor al total ('+sol(tot)+').');if(v.metodo2===v.metodo)throw new Error('Elige un método distinto para la segunda parte.')}
+async function pagar(row,v){
+ const x=Math.round((+(v&&v.monto2)||0)*100)/100,tot=+row.monto;row.fecha=row.fecha||new Date().toISOString();
+ if(!x||!v.metodo2||x>=tot)return DB.ins('pag',row);
+ const a=await DB.ins('pag',Object.assign({},row,{monto:Math.round((tot-x)*100)/100}));
+ await DB.ins('pag',Object.assign({},row,{monto:x,metodo:v.metodo2},row.items?{items:[]}:{}));return a;
+}
+// Partes del mismo cobro (pago dividido): misma hora, concepto y cliente.
+const grupoPag=p=>{if(!p)return[];const G=(RX&&RX.pag&&RX.pag.includes(p)?RX.pag:S.pag).filter(x=>x.fecha===p.fecha&&x.concepto===p.concepto&&(x.cliente_id||null)===(p.cliente_id||null));return G.length?G:[p]};
 async function renovar(c,p,o){
  const m=memDe(c.id),ini0=o.inicio||(m&&m.fin>=hoy()?addD(m.fin,1):hoy()),dias=Math.max(1,+o.dias||+p.dias||30),ds=+o.descuento||0,total=Math.max(0,(+o.precio||0)-ds);let pago=null;
  const row={cliente_id:c.id,plan_id:p.id,plan_nombre:p.nombre,inicio:ini0,fin:addD(ini0,dias-1),precio:total,creado:new Date().toISOString()};
  if(+o.sesiones)row.sesiones=+o.sesiones;if(o.dom===false)row.dom=false;if(ds){row.descuento=ds;row.motivo=o.motivo||null}
  const mem=await DB.ins('mem',row);
- if(total>0)pago=await DB.ins('pag',{cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre+(ds?' (dscto. '+sol(ds)+(o.motivo?' · '+o.motivo:'')+')':''),monto:total,metodo:o.metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]});
+ if(total>0)pago=await pagar({cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre+(ds?' (dscto. '+sol(ds)+(o.motivo?' · '+o.motivo:'')+')':''),monto:total,metodo:o.metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},o);
  return pago;
 }
 function checkin(v){
@@ -761,10 +780,10 @@ function cobrar(c){
   {k:'motivo',l:'Motivo del descuento',dl:['Promoción','Convenio empresa','Familiar','Estudiante','Reingreso','Cortesía'],ph:'Ej. Convenio empresa'},
   {k:'inicio',l:'Empieza',t:'date',v:ini0,half:1},{k:'fin',l:'Termina',t:'date',half:1},
   {k:'dias',l:'Días',t:'number',req:1,half:1,im:'numeric'},{k:'sesiones',l:'Sesiones (vacío = ilimitadas)',t:'number',half:1,ph:'Ilimitadas',im:'numeric'},{k:'dom',l:'Entra domingos y feriados',t:'chk',v:true},
-  {k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},...compFields()],async v=>{
+  ...pagoFields(v=>Math.max(0,(+v.precio||0)-(+v.descuento||0))),...compFields()],async v=>{
   const p=plan(v.plan);if(!p)throw new Error('Elige un plan');const pr=+v.precio||0,ds=+v.descuento||0;
-  if(ds<0||ds>pr)throw new Error('El descuento no puede ser mayor al precio.');if(ds>0&&!v.motivo)throw new Error('Escribe el motivo del descuento.');valComp(v);
-  const pg=await renovar(c,p,{precio:pr,descuento:ds,motivo:v.motivo,dias:+v.dias,inicio:v.inicio||ini0,sesiones:+v.sesiones||null,dom:!!v.dom,metodo:v.metodo});
+  if(ds<0||ds>pr)throw new Error('El descuento no puede ser mayor al precio.');if(ds>0&&!v.motivo)throw new Error('Escribe el motivo del descuento.');valComp(v);valSplit(v,pr-ds);
+  const pg=await renovar(c,p,{precio:pr,descuento:ds,motivo:v.motivo,dias:+v.dias,inicio:v.inicio||ini0,sesiones:+v.sesiones||null,dom:!!v.dom,metodo:v.metodo,monto2:v.monto2,metodo2:v.metodo2});
   confeti(30);go();if(pg)await finCobro(pg,v,'Cobro registrado');else toast('Registrado sin cobro ✓');
  });
 }
@@ -819,8 +838,8 @@ function transferir(c,m){
  });
 }
 function cobroSuelto(){
- form('Nuevo cobro',[{k:'concepto',l:'Concepto',req:1,ph:'Ej. Agua, suplemento, clase extra'},{k:'monto',l:'Monto (S/)',t:'number',req:1,half:1},{k:'cliente',l:R.cli+' (opcional)',t:'sel',half:1,v:'',o:[['','—']].concat(S.cli.map(c=>[c.id,c.nombre]))},{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},...compFields()],async v=>{
-  valComp(v);const pg=await DB.ins('pag',{concepto:v.concepto,monto:+v.monto,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]});go();await finCobro(pg,v,'Cobro registrado');
+ form('Nuevo cobro',[{k:'concepto',l:'Concepto',req:1,ph:'Ej. Agua, suplemento, clase extra'},{k:'monto',l:'Monto (S/)',t:'number',req:1,half:1},{k:'cliente',l:R.cli+' (opcional)',t:'sel',half:1,v:'',o:[['','—']].concat(S.cli.map(c=>[c.id,c.nombre]))},...pagoFields(v=>+v.monto||0),...compFields()],async v=>{
+  valComp(v);valSplit(v,+v.monto);const pg=await pagar({concepto:v.concepto,monto:+v.monto,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},v);go();await finCobro(pg,v,'Cobro registrado');
  });
 }
 /* ===== Caja detallada: día, semana, mes, año ===== */
@@ -852,6 +871,7 @@ function caja(){
  const sF=cjSede(),fil=p=>(!sF||String(p.sede||'')===sF)&&(!cjF.t||tipoDe(p)===cjF.t)&&(!cjF.m||(p.metodo||'Otro')===cjF.m)&&(!cjF.q||(p.quien||'—')===cjF.q)&&(!cjF.c||(cjF.c==='N'?!(p.comp&&p.comp.serie):p.comp&&p.comp.tipo===cjF.c));
  const qs=cjS.trim().toLowerCase(),bus=p=>{if(!qs)return true;const c=cli(p.cliente_id)||{};return[p.concepto,c.nombre,c.num,c.dni,compTxt(p.comp),p.quien].some(x=>String(x||'').toLowerCase().includes(qs))};
  const L0=src.filter(p=>en(p.fecha)).sort((a,b)=>b.fecha>a.fecha?1:-1),L=L0.filter(p=>fil(p)&&bus(p));
+ const GK={};L0.forEach(p=>{const k=p.fecha+'|'+p.concepto;GK[k]=(GK[k]||0)+1});
  const sum=a=>a.reduce((s,p)=>s+ +p.monto,0),tot=sum(L),sT=t=>sum(L.filter(p=>tipoDe(p)===t)),ef=sum(L.filter(p=>!DIG(p))),dg=tot-ef;
  const[pd1]=cjRango(cjP,cjMover(cjP,cjD,-1)),pd2=d2>=hoy()&&d1<=hoy()?[addD(pd1,diff(d1,hoy())),addD(d1,-1)].sort()[0]:addD(d1,-1),hayPrev=DEMO||pd1>=SINCE,prev=hayPrev?sum(S.pag.filter(p=>{const x=ymd(new Date(p.fecha));return x>=pd1&&x<=pd2&&fil(p)&&bus(p)})):null;
  const dlt=prev==null?'':prev===0?(tot>0?'<span class="up">▲ nuevo</span>':''):(()=>{const v=(tot-prev)/prev*100;return`<span class="${v>=0?'up':'dn'}">${v>=0?'▲':'▼'} ${Math.abs(v).toFixed(0)}%</span>`})();
@@ -896,7 +916,7 @@ function caja(){
   <div class="card"><h3>Lo que más ingresó</h3>${lbar(tc.concat(tp).sort((a,b)=>b[1]-a[1]).slice(0,7).map(([k,v,n])=>[k,v,'×'+n]),sol)}</div>
  </div>
  ${reg&&reg.length?`<div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">📒 Registro ${cjP==='anio'?'mensual':'diario'}</h3><div class="sc"><table class="tb"><tr><th>${cjP==='anio'?'Mes':'Día'}</th><th class="r">Cobros</th><th class="r">${esc(R.plan)}s</th>${CTL()?`<th class="r">${esc(tiendaN())}</th>`:''}<th class="r">Otros</th><th class="r">Efectivo</th><th class="r">Digital</th><th class="r">Total</th>${cjP==='anio'?'':'<th>Cierre</th>'}</tr>${reg.map(b=>{const cs=(rx&&RX.cie?RX.cie:S.cie).filter(c=>(c.dia||ymd(new Date(c.hasta)))===b.ir);return`<tr data-ir="${b.ir}" class="${b.tot?'':'mu'}"><td><b>${cjP==='anio'?esc(MESL[+b.ir.slice(5,7)-1]):fF(b.ir)}</b></td><td class="r">${b.n}</td><td class="r">${sol(b.memb)}</td>${CTL()?`<td class="r">${sol(b.tienda)}</td>`:''}<td class="r">${sol(b.otro)}</td><td class="r">${sol(b.ef)}</td><td class="r">${sol(b.tot-b.ef)}</td><td class="r"><b>${sol(b.tot)}</b></td>${cjP==='anio'?'':`<td>${cs.length?cs.map(c=>c.auto?'🌙':+c.diferencia===0?'✅':'⚠️').join(' '):b.ir===hoy()?'<span class="mu">abierta</span>':'—'}</td>`}</tr>`}).join('')}<tr class="ft"><td><b>Total</b></td><td class="r">${L.length}</td><td class="r">${sol(sT('memb'))}</td>${CTL()?`<td class="r">${sol(sT('tienda'))}</td>`:''}<td class="r">${sol(sT('otro'))}</td><td class="r">${sol(ef)}</td><td class="r">${sol(dg)}</td><td class="r"><b>${sol(tot)}</b></td>${cjP==='anio'?'':'<td></td>'}</tr></table></div></div>`:''}
- <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">Movimientos <span class="mu sm">${L.length}${L.length>200?' · mostrando 200':''}</span><button class="btn sm" id="csv">⬇ Excel (CSV)</button></h3><div class="tl">${L.slice(0,200).map(p=>{const c=cli(p.cliente_id),t=tipoDe(p);return`<a class="row" href="#" data-p="${p.id}">${c?av(c):`<span class="av" style="--h:${t==='tienda'?40:220}">${t==='tienda'?'🛒':'S/'}</span>`}<span class="nm"><b>${esc(p.concepto||'Pago')}${c?' · '+esc(c.nombre):''}</b><small>${cjP==='dia'?'':fF(p.fecha)+' '}${fH(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><span class="pill cjt ${t==='memb'?'act':t==='tienda'?'pronto':'sin'}">${esc(TN[t])}</span><b>${sol(p.monto)}</b></a>`}).join('')||`<div class="empty">Sin movimientos ${nf?'con estos filtros':'en este período'}</div>`}</div></div>
+ <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">Movimientos <span class="mu sm">${L.length}${L.length>200?' · mostrando 200':''}</span><button class="btn sm" id="csv">⬇ Excel (CSV)</button></h3><div class="tl">${L.slice(0,200).map(p=>{const c=cli(p.cliente_id),t=tipoDe(p);return`<a class="row" href="#" data-p="${p.id}">${c?av(c):`<span class="av" style="--h:${t==='tienda'?40:220}">${t==='tienda'?'🛒':'S/'}</span>`}<span class="nm"><b>${esc(p.concepto||'Pago')}${c?' · '+esc(c.nombre):''}</b><small>${cjP==='dia'?'':fF(p.fecha)+' '}${fH(p.fecha)} · ${esc(p.metodo||'')}${GK[p.fecha+'|'+p.concepto]>1?' · ➗ pago dividido':''}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><span class="pill cjt ${t==='memb'?'act':t==='tienda'?'pronto':'sin'}">${esc(TN[t])}</span><b>${sol(p.monto)}</b></a>`}).join('')||`<div class="empty">Sin movimientos ${nf?'con estos filtros':'en este período'}</div>`}</div></div>
  <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">🔒 Cierres de caja <span class="mu sm">${turnosOn()?'🕐 por turno · 🔒 general · ':''}🌙 automático a las 12 de la noche</span></h3><div class="tl">${CIE.map(c=>`<a class="row" href="#" data-cie="${c.id}" onclick="return false"><span class="nm"><b>${c.auto?'🌙 Cierre automático · '+fF(c.dia||c.desde):(c.turno?'🕐 '+esc(c.turno)+' · '+esc(areaN(c))+' · ':esGen(c)&&turnosOn()?'🔒 General · ':'')+fF(c.hasta)+' '+fH(c.hasta)+' · '+esc(c.quien||'')}</b><small>${c.auto?'Total '+sol(totCie(c))+' · efectivo '+sol(c.esperado):'Esperado '+sol(c.esperado)+' · contado '+sol(c.contado)}${c.nota?' · '+esc(c.nota):''}</small></span>${c.auto?`<b>${sol(totCie(c))}</b>`:`<b style="color:${+c.diferencia===0?'var(--ok)':+c.diferencia>0?'var(--wa)':'var(--bad)'}">${+c.diferencia===0?'✅ Cuadró':(+c.diferencia>0?'+':'')+sol(c.diferencia)}</b>`} 🖨️</a>`).join('')||'<p class="mu" style="padding:10px">Sin cierres en este período.</p>'}</div>${NEED19&&isAdmin()?'<p class="mu sm" style="padding:10px">Para el cierre automático de medianoche corre el SQL 19 en Supabase.</p>':''}</div>
  <p class="mu sm" style="margin-top:12px">🧾 Toca un movimiento para reimprimir su comprobante. ¿Boletas y facturas electrónicas SUNAT? <a class="grad" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero boletas SUNAT en Xyro Apps')}"><b>Actívalo aquí</b></a></p>`;
 }
@@ -1013,10 +1033,10 @@ async function emitir(p,v){
  if(!p||!v.comp)return p;
  const serie=v.comp==='F'?(CFG.serieF||'F001'):(CFG.serieB||'B001'),c=cli(p.cliente_id);
  const comp={tipo:v.comp,serie,n:await correlativo(serie),doc:v.comp==='F'?v.ruc:((c&&c.dni)||''),nombre:v.comp==='F'?v.razon:((c&&c.nombre)||'Cliente varios')};
- await DB.upd('pag',p.id,{comp});return p;
+ for(const x of grupoPag(p))await DB.upd('pag',x.id,{comp});return p;
 }
 function ticketHTML(p,a4){
- const c=cli(p.cliente_id),cp=p.comp||{},tot=+p.monto||0,igv=CFG.igv?tot-tot/1.18:0,mm=S.mem.find(x=>x.id===p.membresia_id),of=!!CFG.sunat,lg=logoDe();
+ const G=grupoPag(p),its=(G.find(x=>x.items&&x.items.length)||p).items,c=cli(p.cliente_id),cp=p.comp||{},tot=Math.round(G.reduce((a,x)=>a+(+x.monto||0),0)*100)/100,igv=CFG.igv?tot-tot/1.18:0,mm=S.mem.find(x=>x.id===p.membresia_id),of=!!CFG.sunat,lg=logoDe();
  const tit=of?(cp.tipo==='F'?'FACTURA ELECTRÓNICA':'BOLETA DE VENTA ELECTRÓNICA'):'NOTA DE VENTA';
  const css=a4?'@page{size:A4;margin:16mm}body{font:13px/1.5 Arial,sans-serif;max-width:720px;margin:0 auto;padding:10px}.h{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.bx{border:2px solid #000;border-radius:10px;padding:12px 18px;text-align:center;font-weight:700;min-width:220px}th,td{border-bottom:1px solid #ccc;padding:8px}'
   :'@page{size:80mm auto;margin:2mm}body{font:12px/1.35 "Courier New",monospace;width:74mm;margin:0 auto;padding:6px 2px}.h{text-align:center}.bx{text-align:center;font-weight:700;border-top:1px dashed #000;border-bottom:1px dashed #000;padding:4px 0;margin:6px 0}th{border-bottom:1px dashed #000}td,th{padding:3px 0}';
@@ -1024,9 +1044,9 @@ function ticketHTML(p,a4){
  <div class="h"><div>${lg?`<img src="${esc(lg)}" alt=""><br>`:''}<b style="font-size:1.15em">${esc(CFG.razon||nombre())}</b><br>${CFG.razon&&CFG.razon!==nombre()?esc(nombre())+'<br>':''}${CFG.ruc?'RUC '+esc(CFG.ruc)+'<br>':''}${CFG.direccion?esc(CFG.direccion)+'<br>':''}${CFG.telefono?'Tel. '+esc(CFG.telefono):''}</div>
  <div class="bx">${tit}<br>${esc(compTxt(cp)||'—')}</div></div>
  <p>Fecha: ${new Date(p.fecha).toLocaleString('es-PE')}<br>${cp.tipo==='F'?'RUC':'DNI'}: ${esc(cp.doc||(c&&c.dni)||'-')}<br>Cliente: ${esc(cp.nombre||(c&&c.nombre)||'Cliente varios')}${c&&c.num?'<br>Código: '+esc(c.num):''}</p>
- <table><tr><th>Cant</th><th>Descripción</th><th class="r">Importe</th></tr>${p.items?p.items.map(i=>`<tr><td>${i.c}</td><td>${esc(i.n)}<br><small>${(+i.p).toFixed(2)} c/u</small></td><td class="r">${(i.c*i.p).toFixed(2)}</td></tr>`).join(''):`<tr><td>1</td><td>${esc(p.concepto||'Servicio')}${mm?'<br><small>'+fF(mm.inicio)+' al '+fF(mm.fin)+(+mm.sesiones?' · '+mm.sesiones+' sesiones':'')+'</small>':''}</td><td class="r">${tot.toFixed(2)}</td></tr>`}</table>
+ <table><tr><th>Cant</th><th>Descripción</th><th class="r">Importe</th></tr>${its&&its.length?its.map(i=>`<tr><td>${i.c}</td><td>${esc(i.n)}<br><small>${(+i.p).toFixed(2)} c/u</small></td><td class="r">${(i.c*i.p).toFixed(2)}</td></tr>`).join(''):`<tr><td>1</td><td>${esc(p.concepto||'Servicio')}${mm?'<br><small>'+fF(mm.inicio)+' al '+fF(mm.fin)+(+mm.sesiones?' · '+mm.sesiones+' sesiones':'')+'</small>':''}</td><td class="r">${tot.toFixed(2)}</td></tr>`}</table>
  ${CFG.igv?`<p class="r">Op. gravada: S/ ${(tot-igv).toFixed(2)}<br>IGV 18%: S/ ${igv.toFixed(2)}</p>`:''}
- <p class="r t">TOTAL S/ ${tot.toFixed(2)}</p><p>${letras(tot)}</p><p>Pago: ${esc(p.metodo||'')}${p.quien?' · Atendió: '+esc(p.quien):''}</p><hr>
+ <p class="r t">TOTAL S/ ${tot.toFixed(2)}</p><p>${letras(tot)}</p><p>Pago: ${G.length>1?G.map(x=>esc(x.metodo||'')+' S/ '+(+x.monto).toFixed(2)).join(' + '):esc(p.metodo||'')}${p.quien?' · Atendió: '+esc(p.quien):''}</p><hr>
  <p class="c">${of?'Representación impresa del comprobante electrónico.':'Conserva este comprobante de tu pago.'}<br>¡Gracias por tu preferencia!</p></body></html>`;
 }
 function imprimir(p,a4){imprimirHTML(ticketHTML(p,a4))}
@@ -1202,9 +1222,9 @@ function tienda(){
 }
 function cobrarVenta(){
  const tot=carrito.reduce((a,i)=>a+i.p*i.c,0);if(!carrito.length)return;
- form('🛒 Cobrar '+sol(tot),[{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.map(x=>[x,x])},{k:'cliente',l:R.cli+' (opcional)',t:'sel',v:'',o:[['','—']].concat(S.cli.map(c=>[c.id,(c.num?'#'+c.num+' ':'')+c.nombre]))},...compFields()],async v=>{
-  valComp(v);const items=carrito.map(i=>({id:i.id,n:i.n,c:i.c,p:i.p}));
-  const pg=await DB.ins('pag',{concepto:tiendaN()+': '+items.map(i=>i.c+'× '+i.n).join(', '),items,monto:tot,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]});
+ form('🛒 Cobrar '+sol(tot),[...pagoFields(()=>tot),{k:'cliente',l:R.cli+' (opcional)',t:'sel',v:'',o:[['','—']].concat(S.cli.map(c=>[c.id,(c.num?'#'+c.num+' ':'')+c.nombre]))},...compFields()],async v=>{
+  valComp(v);valSplit(v,tot);const items=carrito.map(i=>({id:i.id,n:i.n,c:i.c,p:i.p}));
+  const pg=await pagar({concepto:tiendaN()+': '+items.map(i=>i.c+'× '+i.n).join(', '),items,monto:tot,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},v);
   for(const i of items)await DB.stock(i.id,-i.c,'venta',null);
   carrito=[];go();await finCobro(pg,v,'Venta registrada');
  });
