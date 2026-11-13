@@ -1,4 +1,4 @@
-// xyrostudio.net: sirve la web estática (public/) y, solo en /api/*, la IA del soporte.
+// xyrostudio.net: sirve la web estática (public/) y, solo en /api/*, la IA del soporte (/api/ia) y de Xyro Bots (/api/bot).
 // La clave de Anthropic vive como secreto ANTHROPIC_API_KEY en Cloudflare; nunca llega al navegador.
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -110,10 +110,124 @@ async function ia(req, env) {
   }
 }
 
+// ===== Xyro Bots: asistente del negocio para sus clientes (chat de su web; luego WhatsApp) =====
+// Público: los socios no inician sesión. Cupo y permiso en Supabase (SQL 34, xa_bot_cupo).
+// Con sesión de Xyro Apps (botón «Probar» o demo en Integraciones) usa el cupo del soporte (xa_ia_cupo).
+const BOT_SYS = `Eres el asistente virtual de un negocio en Perú (normalmente un gimnasio) y atiendes a sus clientes y a personas interesadas por chat o WhatsApp.
+- Responde en español sencillo de Perú, amable, tuteando, en 1 a 3 frases cortas, como recepción por WhatsApp. Puedes usar 1 emoji.
+- Usa SOLO los datos de la FICHA. Lo que está entre paréntesis, como «(distrito)», es un dato que el negocio aún no llenó: no lo digas ni lo inventes.
+- Si no sabes algo, o piden algo que debe hacer una persona (inscribirse, pagar, congelar, reclamos, reservar), dilo con amabilidad y pon «derivar» en true para pasarlos con recepción.
+- Precios en soles (S/). No prometas descuentos que no están en la ficha. Nunca pidas contraseñas, tarjetas ni datos sensibles.
+- Si preguntan algo ajeno al negocio, di que solo ayudas con información del negocio.`;
+const BOT_SCHEMA = {
+  type: "object", additionalProperties: false, required: ["respuesta", "derivar"],
+  properties: { respuesta: { type: "string" }, derivar: { type: "boolean" } },
+};
+const CORS = { "access-control-allow-origin": "*", "access-control-allow-methods": "POST, OPTIONS", "access-control-allow-headers": "content-type, authorization", "access-control-max-age": "86400" };
+const jc = (o, s = 200) => { const r = json(o, s); Object.entries(CORS).forEach(([k, v]) => r.headers.set(k, v)); return r; };
+const FICHAS = new Map();   // caché por slug, 5 min (ahorra consultas)
+const DIAS = { lun: "lunes", mar: "martes", mie: "miércoles", jue: "jueves", vie: "viernes", sab: "sábado", dom: "domingo" };
+
+async function ficha(env, slug) {
+  const f = FICHAS.get(slug);
+  if (f && Date.now() - f.t < 300000) return f.v;
+  const h = { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY };
+  const s = await (await fetch(`${env.SB_URL}/rest/v1/sitios?slug=eq.${encodeURIComponent(slug)}&select=id,negocio`, { headers: h })).json().catch(() => []);
+  if (!Array.isArray(s) || !s[0]) return null;
+  const claves = "config,sedes,planes,pase,notaPlanes,clases,entrenadores,cafetin,app,bot";
+  const rows = await (await fetch(`${env.SB_URL}/rest/v1/contenido?sitio_id=eq.${s[0].id}&clave=in.(${claves})&select=clave,valor`, { headers: h })).json().catch(() => []);
+  const C = {}; (Array.isArray(rows) ? rows : []).forEach(r => { C[r.clave] = r.valor; });
+  const app = C.app || {}, bot = C.bot || {}, nombre = app.nombre || s[0].negocio || slug;
+  const L = [`Negocio: ${nombre}`];
+  const sedes = Array.isArray(C.sedes) ? C.sedes : [];
+  sedes.slice(0, 6).forEach(x => L.push(`Sede ${corta(x.nombre, 60)}${x.distrito ? " (" + corta(x.distrito, 60) + ")" : ""}${x.direccion ? ", " + corta(x.direccion, 120) : ""}. Horario: ${(x.horario || []).map(hh => (hh || []).join(" ")).join("; ") || "no indicado"}.${x.whatsapp ? " WhatsApp: " + corta(x.whatsapp, 20) : ""}`));
+  const planes = Array.isArray(C.planes) ? C.planes : [];
+  if (planes.length) L.push("Planes: " + planes.slice(0, 20).map(p => `${corta(p.nombre, 50)} S/${p.precio}${p.precioEvento ? ` (promo S/${p.precioEvento}${p.eventoTexto ? " " + corta(p.eventoTexto, 60) : ""}${p.eventoHasta ? " hasta " + p.eventoHasta : ""})` : ""}`).join("; "));
+  if (C.pase && (C.pase.socio || C.pase.noSocio)) L.push(`Pase diario: S/${C.pase.noSocio ?? "-"} (socio S/${C.pase.socio ?? "-"})`);
+  if (C.notaPlanes) L.push("Nota de planes: " + corta(C.notaPlanes, 300));
+  const cfg = C.config || {};
+  if (Array.isArray(cfg.incluye) && cfg.incluye.length) L.push("Incluye: " + cfg.incluye.slice(0, 12).map(i => corta(i.t, 40) + (i.d ? " (" + corta(i.d, 60) + ")" : "")).join("; "));
+  const clases = (Array.isArray(C.clases) ? C.clases : []).filter(k => k.activo !== false).slice(0, 25);
+  if (clases.length) L.push("Clases: " + clases.map(k => `${corta(k.nombre, 40)} ${(k.dias || []).map(d => DIAS[d] || d).join("/")} ${k.hora || ""}${k.nota ? " (" + corta(k.nota, 50) + ")" : ""}`).join("; "));
+  const ent = Array.isArray(C.entrenadores) ? C.entrenadores : [];
+  if (ent.length) L.push("Entrenadores: " + ent.slice(0, 10).map(e => `${corta(e.nombre, 40)} (${corta(e.especialidad, 50)})`).join("; "));
+  if (C.cafetin && Array.isArray(C.cafetin.items) && C.cafetin.items.length) L.push("Cafetín: " + C.cafetin.items.slice(0, 20).map(i => `${corta(i.nombre, 40)} S/${i.precio}`).join("; "));
+  if (cfg.redes) L.push("Redes: " + Object.entries(cfg.redes).filter(([, v]) => v).map(([k, v]) => k + " " + corta(v, 80)).join(", "));
+  if (bot.extra) L.push("Información extra del negocio (síguela):\n" + corta(bot.extra, 3000));
+  const wa = String(bot.whatsapp || (sedes[0] && sedes[0].whatsapp) || "").replace(/\D/g, "");
+  const v = { nombre, texto: L.join("\n"), wa, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [] };
+  FICHAS.set(slug, { t: Date.now(), v });
+  if (FICHAS.size > 300) FICHAS.delete(FICHAS.keys().next().value);
+  return v;
+}
+
+async function ipHash(req) {
+  const ip = req.headers.get("cf-connecting-ip") || "";
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("xyro-bot|" + ip));
+  return [...new Uint8Array(d)].slice(0, 12).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function botApi(req, env) {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+  if (req.method !== "POST") return jc({ error: "Método no permitido" }, 405);
+  if (!env.ANTHROPIC_API_KEY) return jc({ error: "El asistente no está disponible ahora.", off: 1 }, 503);
+  const raw = await req.text();
+  if (raw.length > 12000) return jc({ error: "Mensaje muy largo" }, 413);
+  let b;
+  try { b = JSON.parse(raw); } catch { return jc({ error: "Solicitud inválida" }, 400); }
+  const slug = String(b.s || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 60);
+  const msg = corta(b.mensaje, 500).trim();
+  if (!slug || !msg) return jc({ error: "Falta el mensaje" }, 400);
+  const f = await ficha(env, slug);
+  if (!f) return jc({ error: "Negocio no encontrado" }, 404);
+
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (token) {   // prueba desde Xyro Apps (dueño/equipo con sesión)
+    if (token.length > 4000) return jc({ error: "Inicia sesión" }, 401);
+    const c = await cupo(env, token, "soporte");
+    if (c.err) return jc({ error: c.err === 401 ? "Inicia sesión" : "No se pudo revisar tu cupo" }, c.err === 401 ? 401 : 502);
+    if (!c.ok) return jc({ error: c.motivo || "Llegaste al límite de pruebas de hoy" }, 429);
+  } else {
+    const r = await fetch(env.SB_URL + "/rest/v1/rpc/xa_bot_cupo", {
+      method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY, "content-type": "application/json" },
+      body: JSON.stringify({ p_slug: slug, p_ip: await ipHash(req) }),
+    });
+    if (!r.ok) return jc({ error: "El asistente no está disponible ahora.", off: 1, wa: f.wa }, 503);
+    const c = await r.json();
+    if (!c.ok) return jc({ error: c.lim ? "Por hoy ya no puedo responder más. Escríbenos por WhatsApp 🙌" : (c.motivo || "El asistente no está activo"), off: c.lim ? 0 : 1, wa: f.wa }, c.lim ? 429 : 403);
+  }
+
+  const hist = (Array.isArray(b.historial) ? b.historial : []).slice(-8)
+    .map(h => ({ role: h && h.de === "b" ? "assistant" : "user", content: corta(h && h.t, 500) || "…" }));
+  while (hist.length && hist[0].role !== "user") hist.shift();
+  const messages = [];
+  hist.forEach(m => { const u = messages[messages.length - 1]; if (u && u.role === m.role) u.content += "\n" + m.content; else messages.push({ ...m }); });
+  if (messages.length && messages[messages.length - 1].role === "user") messages[messages.length - 1].content += "\n" + msg;
+  else messages.push({ role: "user", content: msg });
+
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
+  try {
+    const r = await client.messages.create({
+      model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 1500,
+      system: [{ type: "text", text: BOT_SYS }, { type: "text", text: "FICHA:\n" + f.texto, cache_control: { type: "ephemeral" } }],
+      messages,
+      output_config: { effort: "low", format: { type: "json_schema", schema: BOT_SCHEMA } },
+    });
+    if (r.stop_reason === "refusal" || r.stop_reason === "max_tokens") return jc({ respuesta: "Mejor te ayuda una persona de recepción 🙌", derivar: true, wa: f.wa });
+    const o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
+    return jc({ respuesta: corta(o.respuesta, 1200), derivar: !!o.derivar, wa: f.wa });
+  } catch (e) {
+    console.log("bot error", e?.status, e?.message);
+    if (e instanceof Anthropic.RateLimitError) return jc({ error: "Hay muchas consultas a la vez. Intenta en un minuto.", wa: f.wa }, 429);
+    return jc({ error: "No pude responder ahora. Escríbenos por WhatsApp 🙌", wa: f.wa }, 502);
+  }
+}
+
 export default {
   async fetch(req, env) {
     const u = new URL(req.url);
     if (u.pathname === "/api/ia") return ia(req, env);
+    if (u.pathname === "/api/bot") return botApi(req, env);
     if (u.pathname.startsWith("/api/")) return json({ error: "No existe" }, 404);
     return env.ASSETS.fetch(req);
   },

@@ -12,6 +12,8 @@
   const G = window.GYM || {}, NOM = G.nombre || '(nombre del gym)', TAG = '#' + (NOM.replace(/[^\p{L}\p{N}]+/gu, '') || 'TuGym');
   const LK = (k) => 'xg-' + (G.slug || 'demo') + '-' + k;   // claves por negocio (todos comparten el dominio)
   $('#yr').textContent = new Date().getFullYear();
+  // Xyro Bots: si el negocio lo tiene activo, aparece el chat del asistente.
+  if (G.slug && ((data.config || {}).xyros || []).includes('bots')) { const b = document.createElement('script'); b.src = '/bot.js'; b.defer = true; Object.assign(b.dataset, { s: G.slug, n: NOM, c: String(G.color || '').replace('#', '') }); document.body.appendChild(b); }
 
   // ---------- Sede elegida ----------
   let sede = 'todas';
