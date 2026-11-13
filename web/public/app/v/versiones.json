@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261113-1538",
+  "fecha": "2026-11-13 15:38",
+  "titulo": "Planes a tu web, demos de Control y logo",
+  "notas": "Planes a tu web, demos de Control y logo",
+  "cambios": [
+   "Tus planes y precios ahora se envían desde Xyro a tu web (botón «📤 Enviar mis planes a la web» o automático al guardar un plan)",
+   "Ya no se copian precios de la web hacia la app: Xyro es la base",
+   "Integraciones: Xyro Control sin activar muestra «👀 Ver demos» (venta, stock y ganancias) con «💬 Lo quiero»",
+   "Marca y colores: el logo se sube desde tu celular o PC, ya no hace falta un enlace"
+  ]
+ },
+ {
   "id": "20261113-1522",
   "fecha": "2026-11-13 15:22",
   "titulo": "Integraciones: demos de web y temas",
