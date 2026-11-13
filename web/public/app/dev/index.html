@@ -299,7 +299,7 @@ body:not(.dentro){background:#05060a}
     <img src="/img/marca/logo-apps-app.svg" alt="">
     <div><h1 style="font-size:28px;letter-spacing:-.03em">Xyro <span class="grad">Apps</span></h1><p class="mu">Entra con la cuenta de tu negocio</p></div>
     <form class="card" id="lf">
-      <label class="fl">Correo<input id="em" type="email" required maxlength="120" autocomplete="username"></label>
+      <label class="fl">Correo o usuario<input id="em" type="text" inputmode="email" autocapitalize="off" spellcheck="false" required maxlength="120" autocomplete="username" placeholder="tucorreo@gmail.com o ana@tu-negocio"></label>
       <label class="fl">Contraseña<input id="pw" type="password" required maxlength="128" autocomplete="current-password"><input id="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0"></label>
       <p class="err" id="lerr" hidden></p>
       <button class="btn p">Entrar</button>
@@ -731,9 +731,9 @@ const NAV=()=>{if(isCoach())return[['rutinas','📋',ME.rol==='nutricionista'?'P
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
-  `<div class="side-f"><a class="btn sm" target="_blank" rel="noopener" href="${soporteURL()}">💬 Soporte XyroStudio</a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor?'<button class="btn sm" id="cambia">Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
+  `<div class="side-f"><a class="btn sm" target="_blank" rel="noopener" href="${soporteURL()}">💬 Soporte XyroStudio</a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor||NEG.length>1?'<button class="btn sm" id="cambia">🏢 Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
  $('#bn').innerHTML=n.filter(x=>['inicio','socios','kiosco','tienda','caja'].includes(x[0])||(isCoach()&&x[0]==='rutinas')).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
- const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=()=>{LS.r('xa-s');location.href='/app/'});
+ const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=cambiarNegocio);
  marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):verTodas()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
  document.title=nombre()+' · Xyro Apps';
 }
@@ -1642,7 +1642,7 @@ function reportes(){
 }
 function mas(){
  const n=NAV().filter(x=>!['inicio','socios','kiosco','tienda','caja'].includes(x[0])&&!(isCoach()&&x[0]==='rutinas'));
- return`<div class="hi"><h2>Más</h2></div><div class="mas st">${n.map(([k,i,t])=>`<a class="card" href="#/${k}"><em>${i}</em>${esc(t)}</a>`).join('')}<a class="card" target="_blank" rel="noopener" href="${soporteURL()}"><em>💬</em>Soporte</a>${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
+ return`<div class="hi"><h2>Más</h2></div><div class="mas st">${n.map(([k,i,t])=>`<a class="card" href="#/${k}"><em>${i}</em>${esc(t)}</a>`).join('')}<a class="card" target="_blank" rel="noopener" href="${soporteURL()}"><em>💬</em>Soporte</a>${NEG.length>1?'<a class="card" href="#" data-cneg><em>🏢</em>Cambiar de negocio</a>':''}${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
 }
 
 /* ===== Mi web (Xyro Webs dentro del panel): abre el panel de la web con entrada de un clic ===== */
@@ -1677,6 +1677,19 @@ const PERM={admin:['👑','Todo y todas las sedes: planes, precios, reportes, aj
 const PERMC={supervisor:'Toda la venta de su sede (recepción y cafetín), reportes, solicitudes de revisión y el registro completo de cada socio',recepcion:'Socios, asistencia, cobros, venta en cafetín, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'};
 const genClave=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789',r=crypto.getRandomValues(new Uint32Array(10));return'Xa-'+[...r].map(n=>a[n%a.length]).join('')};
 const appURL=()=>location.origin+'/app/';
+// Cuentas del equipo = usuario@negocio (se guarda como usuario@negocio.xyrostudio.net; nadie externo recibe correo).
+const XDOM='.xyrostudio.net';
+const aEmail=(x,sl)=>{x=String(x||'').trim().toLowerCase();if(!x.includes('@'))return sl?x+'@'+sl+XDOM:x;const[u,d]=x.split('@');return d&&!d.includes('.')?u+'@'+d+XDOM:x};
+const verEm=e=>{e=String(e||'');return e.toLowerCase().endsWith(XDOM)&&!e.slice(e.indexOf('@')+1,-XDOM.length).includes('.')?e.slice(0,-XDOM.length):e};
+const esInterno=e=>verEm(e)!==String(e||'');
+const slugNeg=()=>SLUG||String(nombre()||'negocio').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'negocio';
+let NEG=[];
+document.addEventListener('click',e=>{if(e.target.closest('[data-cneg]')){e.preventDefault();cambiarNegocio()}});
+async function misNegocios(){if(DEMO||ME.gestor||!isAdmin())return;try{const{data,error}=await sb.rpc('xa_mis_negocios');if(!error&&Array.isArray(data)){NEG=data;if(NEG.length>1){shell();ruta==='cuenta'&&go()}}}catch(_){}}
+function cambiarNegocio(){if(ME.gestor){LS.r('xa-s');location.href='/app/';return}
+ sheet(`<h3>🏢 Tus negocios</h3><p class="mu sm">Entra al panel de cualquiera de tus negocios con tu misma cuenta.</p><div class="g" style="gap:8px;margin-top:12px">${NEG.map(n=>`<button class="btn ${n.slug===SLUG?'p':''}" data-ng="${esc(n.slug)}" style="justify-content:flex-start;padding:14px 16px">${n.slug===SLUG?'✓ ':''}${esc(n.negocio)}</button>`).join('')}</div>`,(el,close)=>{
+  el.querySelectorAll('[data-ng]').forEach(b=>b.onclick=async()=>{const s=b.dataset.ng;if(s===SLUG)return close();b.disabled=true;b.textContent='⏳ Abriendo…';
+   try{const{error}=await sb.rpc('xa_cambiar_negocio',{p_slug:s});if(error)throw error;location.href='/app/?s='+encodeURIComponent(s)}catch(er){b.disabled=false;toast(amable(er.message))}})})}
 const sedeOps=()=>sedesL().map(s=>[s.id,'📍 '+s.nombre]).concat([['todas','🌎 Todas (ve otras sedes)']]);
 const sede1=()=>SEDE||(sedesL()[0]||{}).id||'todas';
 async function eqLoad(){
@@ -1686,7 +1699,7 @@ async function eqLoad(){
 }
 const esYo=u=>u.id===ME.id||(DEMO&&u.id==='yo');
 async function eqRpc(fn,args,demo){if(DEMO){demo&&demo();return}const{error}=await sb.rpc(fn,args);if(error)throw fixErr(error)}
-const accMsg=c=>`Hola ${c.nombre} 👋 Tu acceso a ${nombre()} (Xyro Apps):\nEnlace: ${appURL()}?e=${encodeURIComponent(c.email)}\nCorreo: ${c.email}\nClave temporal: ${c.pass}\nAl entrar te pedirá crear tu propia contraseña.`;
+const accMsg=c=>`Hola ${c.nombre} 👋 Tu acceso a ${nombre()} (Xyro Apps):\nEnlace: ${appURL()}?s=${encodeURIComponent(slugNeg())}&e=${encodeURIComponent(verEm(c.email))}\n${esInterno(c.email)?'Usuario':'Correo'}: ${verEm(c.email)}\nClave temporal: ${c.pass}\nAl entrar te pedirá crear tu propia contraseña.`;
 function equipo(){
  if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
  if(!EQ){eqLoad().then(()=>{ruta==='equipo'&&go()}).catch(e=>{EQerr=e.message;EQ=[];go()});return'<div class="empty"><b>⏳</b>Cargando tu equipo…</div>'}
@@ -1708,9 +1721,9 @@ function equipo(){
   const ok=$('#eqOk');ok&&(ok.onclick=()=>{EQnew=null;go()});
   const nw=$('#eqNew');nw&&(nw.onclick=nuevaCuenta);
  });
- const box=EQnew?`<div class="card eqk" style="border-color:var(--a)"><b>🔑 ${EQnew.nuevo?'Cuenta creada':'Clave nueva'} para ${esc(EQnew.nombre)}</b><small class="mu">${esc(EQnew.email)} · clave temporal (se muestra una sola vez):</small><div><code>${esc(EQnew.pass)}</code></div>
+ const box=EQnew?`<div class="card eqk" style="border-color:var(--a)"><b>🔑 ${EQnew.nuevo?'Cuenta creada':'Clave nueva'} para ${esc(EQnew.nombre)}</b><small class="mu">${esc(verEm(EQnew.email))} · clave temporal (se muestra una sola vez):</small><div><code>${esc(EQnew.pass)}</code></div>
   <div class="eqa"><button class="btn sm p" data-cp="${esc(accMsg(EQnew))}">📋 Copiar mensaje</button><a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(accMsg(EQnew))}">💬 Enviar por WhatsApp</a><button class="btn sm" data-cp="${esc(EQnew.pass)}">Copiar clave</button><button class="btn sm" id="eqOk">Listo</button></div></div>`:'';
- const rows=EQ.map(x=>{const yo=esYo(x);return`<div class="card eqc"><span class="av" style="--h:${hue(x.nombre||x.email)}">${esc(ini(x.nombre||x.email))}</span><div class="nm"><b>${esc(x.nombre||'Sin nombre')}${yo?' <small class="mu">(tú)</small>':''}</b><small>${esc(x.email||'')}</small><small>${x.activo===false?'<span class="pill venc">Bloqueada</span>':x.debe_cambiar?'<span class="pill pronto">Clave temporal</span>':'<span class="pill act">Activa</span>'} ${esc(fd(x.ultimo_ingreso))}</small></div>
+ const rows=EQ.map(x=>{const yo=esYo(x);return`<div class="card eqc"><span class="av" style="--h:${hue(x.nombre||x.email)}">${esc(ini(x.nombre||x.email))}</span><div class="nm"><b>${esc(x.nombre||'Sin nombre')}${yo?' <small class="mu">(tú)</small>':''}</b><small>${esc(verEm(x.email))}</small><small>${x.activo===false?'<span class="pill venc">Bloqueada</span>':x.debe_cambiar?'<span class="pill pronto">Clave temporal</span>':'<span class="pill act">Activa</span>'} ${esc(fd(x.ultimo_ingreso))}</small></div>
   <div class="eqs">${yo||x.rol==='gestor'?`<span class="pill sin">${esc(ROLES[x.rol]||x.rol)}</span>${SD.length?`<span class="pill sin">📍 ${esc(x.sede&&x.sede!=='todas'?sedeN(x.sede):'Todas')}</span>`:''}`:sel(RO,x.rol,`data-er="${esc(x.id)}" aria-label="Rol"`)+(SD.length?sel(sedeOps(),x.sede,`data-es="${esc(x.id)}" aria-label="Sede"`):'')}</div>
   ${yo||x.rol==='gestor'?'':`<div class="eqa"><button class="btn sm" data-ek="${esc(x.id)}">🔑 Nueva clave</button><button class="btn sm" data-ea="${esc(x.id)}">${x.activo===false?'✅ Activar':'🔒 Bloquear'}</button><button class="btn sm bad" data-ed="${esc(x.id)}" aria-label="Borrar">✕</button></div>`}</div>`}).join('');
  return`<div class="hi"><div><h2>Equipo</h2><p class="mu">Crea las cuentas de tu equipo, elige qué puede ver cada uno y ayúdalos si olvidan su clave.</p></div><button class="btn p" id="eqNew">＋ Nueva cuenta</button></div>
@@ -1719,10 +1732,13 @@ function equipo(){
  <p class="mu sm" style="margin-top:10px">${SD.length?'Cada cuenta trabaja solo en su sede. Elige «🌎 Todas» para que también vea las otras sedes. ':''}Si tu negocio también tiene web con XyroStudio, estas cuentas entran al panel de la web con el mismo correo y clave.</p></div>`;
 }
 function nuevaCuenta(){if(!isAdmin())return;const SD=sedesL();
- form('👤 Nueva cuenta',[{k:'nombre',l:'Nombre',req:1,ph:'Ej. Ana Torres'},{k:'email',l:'Correo',t:'email',req:1,ph:'ana@correo.com'},
+ form('👤 Nueva cuenta',[{k:'nombre',l:'Nombre',req:1,ph:'Ej. Ana Torres'},{k:'email',l:'Usuario (queda usuario@'+slugNeg()+'). Solo el administrador puede usar su correo real',req:1,ph:'ana'},
   {k:'rol',l:'Rol (permisos)',t:'opts',v:'recepcion',o:Object.keys(PERMS()).map(k=>[k,PERM[k][0]+' '+ROLES[k]])}].concat(SD.length?[{k:'sede',l:'Sede',t:'sel',v:sede1(),o:sedeOps()}]:[]),async v=>{
-  const email=v.email.toLowerCase(),nm=v.nombre.slice(0,60);if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new Error('Revisa el correo.');
-  if((EQ||[]).some(x=>(x.email||'').toLowerCase()===email))throw new Error('Ese correo ya tiene cuenta.');
+  const raw=v.email.trim().toLowerCase(),nm=v.nombre.slice(0,60),real=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(raw);
+  if(real&&!esInterno(raw)&&v.rol!=='admin')throw new Error('Solo el administrador usa su correo real. Para el equipo escribe solo el usuario, ej. ana.');
+  const us=(real?raw:raw.split('@')[0]).replace(/[^a-z0-9._-]/g,'');if(!real&&us.length<2)throw new Error('Escribe un usuario (letras o números), ej. ana.');
+  const email=real?raw:us+'@'+slugNeg()+XDOM;
+  if((EQ||[]).some(x=>(x.email||'').toLowerCase()===email))throw new Error('Ese usuario ya existe en tu equipo.');
   const pass=genClave(),sede=v.sede||'todas';
   await eqRpc('gestor_crear_usuario',{p_slug:SLUG,p_email:email,p_pass:pass,p_nombre:nm,p_rol:XROL.includes(v.rol)?'recepcion':v.rol,p_sede:sede},()=>EQ.push({id:uid(),nombre:nm,email,rol:v.rol,sede,activo:true,debe_cambiar:true}));
   EQnew={nombre:nm,email,pass,nuevo:true};if(!DEMO){await eqLoad();const n=(EQ||[]).find(x=>(x.email||'').toLowerCase()===email);if(XROL.includes(v.rol)&&n){await eqRpc('xa_set_rol',{p_user:n.id,p_rol:v.rol});n.rol=v.rol}}if(ruta!=='equipo')location.hash='#/equipo';else go();confeti(30);
@@ -1731,7 +1747,8 @@ function nuevaCuenta(){if(!isAdmin())return;const SD=sedesL();
 function miCuenta(){
  setTimeout(()=>{const a=$('#ccP');a&&(a.onclick=()=>cambiarClave());const b=$('#ccO');b&&(b.onclick=salir);const c=$('#ccT');c&&(c.onclick=async()=>{if(!confirm('¿Cerrar tu sesión en todos los equipos (celulares y PCs)?'))return;try{await sb.auth.signOut({scope:'global'})}catch(_){}LS.r('xa-s');location.href='/app/'})});
  return`<div class="hi"><h2>Mi cuenta</h2></div><div class="g st" style="max-width:560px">
- <div class="card eqc"><span class="av" style="--h:${hue(ME.nombre||ME.email||'x')}">${esc(ini(ME.nombre||ME.email||'?'))}</span><div class="nm"><b>${esc(ME.nombre||'')}</b><small>${esc(DEMO?'demo@xyrostudio.net':ME.email||'')}</small><small>${esc(ROLES[ME.rol]||'')}${sedesL().length?' · 📍 '+esc(ME.sede&&ME.sede!=='todas'?sedeN(ME.sede):'Todas las sedes'):''}</small></div></div>
+ <div class="card eqc"><span class="av" style="--h:${hue(ME.nombre||ME.email||'x')}">${esc(ini(ME.nombre||ME.email||'?'))}</span><div class="nm"><b>${esc(ME.nombre||'')}</b><small>${esc(DEMO?'demo@xyrostudio.net':verEm(ME.email))}</small><small>${esc(ROLES[ME.rol]||'')}${sedesL().length?' · 📍 '+esc(ME.sede&&ME.sede!=='todas'?sedeN(ME.sede):'Todas las sedes'):''}</small></div></div>
+ ${NEG.length>1?`<div class="card"><h3>🏢 Mis negocios</h3><p class="mu sm">Tienes ${NEG.length} negocios con esta cuenta. Estás en <b>${esc(nombre())}</b>.</p><div class="eqa" style="margin-top:10px"><button class="btn p" data-cneg>Cambiar de negocio</button></div></div>`:''}
  <div class="card"><h3>🔐 Contraseña</h3><p class="mu sm">Usa una que solo tú sepas. Es la misma para el panel de tu web, si la tienes.</p><div class="eqa" style="margin-top:10px"><button class="btn p" id="ccP">Cambiar contraseña</button></div></div>
  <div class="card"><h3>🚪 Sesión</h3><p class="mu sm">Este equipo queda con la sesión abierta. Si perdiste un celular, cierra la sesión en todos.</p><div class="eqa" style="margin-top:10px">${DEMO?'<a class="btn" href="./">Salir de la demo</a>':'<button class="btn" id="ccO">Cerrar sesión</button><button class="btn bad" id="ccT">Cerrar en todos los equipos</button>'}</div></div></div>`;
 }
@@ -1954,7 +1971,7 @@ async function verVersion(){try{localStorage.setItem('xa-slug',SLUG)}catch(_){}i
   if(data!==VER){location.replace('/app/'+location.search+location.hash);return true}}catch(_){}return false}
 if(/\/app\/dev\//.test(location.pathname))addEventListener('DOMContentLoaded',()=>document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:99999;background:#f59e0b;color:#000;font:700 12px system-ui;padding:4px 12px;border-radius:99px;pointer-events:none">🧪 PANEL DE PRUEBAS · los negocios no ven esto</div>'));
 /* ===== Arranque real (Supabase) ===== */
-function start(){initSede();$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200)}
+function start(){initSede();setTimeout(misNegocios,500);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200)}
 async function salir(){try{await sb.auth.signOut()}catch(_){}LS.r('xa-s');location.href='/app/'}
 async function boot(){
  if(DEMO)return demoBoot();
@@ -1977,14 +1994,15 @@ function bloqueo(seg){const b=$('#lf .btn'),er=$('#lerr');clearInterval(lkT);let
 function login(msg){
  $('#boot').hidden=true;$('#login').hidden=false;{const e=P.get('e');if(e&&!$('#em').value)$('#em').value=e.slice(0,120);if(msg){const er=$('#lerr');er.textContent=msg;er.hidden=false}}
  $('#lf').onsubmit=async e=>{e.preventDefault();const er=$('#lerr');er.hidden=true;const b=$('#lf .btn');b.disabled=true;
-  const em=$('#em').value.trim().toLowerCase().slice(0,120),pw=$('#pw').value.slice(0,128);
+  const em=aEmail($('#em').value.slice(0,120),P.get('s')),pw=$('#pw').value.slice(0,128);if(!em.includes('@')){er.textContent='Escribe tu usuario completo, ej. ana@'+(P.get('s')||'tu-negocio')+'.';er.hidden=false;b.disabled=false;return}
   if($('#hp').value){reportar('sospechoso','Bot en el login (llenó el campo trampa) · '+em);await new Promise(r=>setTimeout(r,1500));er.textContent='Correo o contraseña incorrectos.';er.hidden=false;b.disabled=false;return}
   const w=await espera(em);if(w>0)return bloqueo(w);
   try{const{data,error}=await sb.auth.signInWithPassword({email:em,password:pw});
    if(error){if(/confirm/i.test(error.message))throw new Error('Tu correo aún no está confirmado.');if(/rate|too many|429/i.test(error.message+(error.status||''))){await fallo(em);return bloqueo(60)}
-    $('#pw').value='';const w2=await fallo(em);if(w2>0)return bloqueo(w2);throw new Error('Correo o contraseña incorrectos.')}
+    $('#pw').value='';const w2=await fallo(em);if(w2>0)return bloqueo(w2);throw new Error('Usuario o contraseña incorrectos.')}
    await entrar(data.user)}catch(x){er.textContent=amable(x.message);er.hidden=false;b.disabled=false}};
- $('#olv').onclick=()=>form('🔑 Recuperar contraseña',[{k:'e',l:'Tu correo',t:'email',v:$('#em').value.trim(),req:1}],async v=>{
+ $('#olv').onclick=()=>form('🔑 Recuperar contraseña',[{k:'e',l:'Tu correo o usuario',v:$('#em').value.trim(),req:1}],async v=>{
+  if(esInterno(aEmail(v.e,P.get('s')))||!v.e.includes('.')){sheet(`<div style="text-align:center;display:grid;gap:10px"><div style="font-size:46px">🔑</div><h3>Pídele una clave nueva a tu administrador</h3><p class="mu sm">Las cuentas del equipo (usuario@negocio) no usan correo. Tu administrador entra a <b>Equipo → 🔑 Nueva clave</b> y te da una temporal.</p><button class="btn p" data-x>Entendido</button></div>`);return}
   const{error}=await sb.auth.resetPasswordForEmail(v.e.toLowerCase(),{redirectTo:appURL()+(P.get('s')?'?s='+encodeURIComponent(P.get('s')):'')});
   if(error)throw new Error(/rate|seconds|limit/i.test(error.message)?'Ya enviamos un correo hace poco. Espera unos minutos.':amable(error.message));
   sheet(`<div style="text-align:center;display:grid;gap:10px"><div style="font-size:46px">📧</div><h3>Revisa tu correo</h3><p class="mu sm">Si <b>${esc(v.e)}</b> tiene cuenta, te llegó un enlace para crear una contraseña nueva (mira también en spam). También puedes pedirle una clave temporal a tu administrador.</p><button class="btn p" data-x>Entendido</button></div>`);
@@ -2001,7 +2019,8 @@ async function entrar(u){
   if(!slug)return elegirSitio();
   s=(await sb.from('sitios').select('*').eq('slug',slug).maybeSingle()).data;if(!s){LS.r('xa-s');return elegirSitio()}
   LS.s('xa-s',slug);
- }else s=(await sb.from('sitios').select('*').eq('id',p.sitio_id).maybeSingle()).data;
+ }else{s=(await sb.from('sitios').select('*').eq('id',p.sitio_id).maybeSingle()).data;
+  const q=P.get('s');if(s&&q&&q!==s.slug&&p.rol==='admin'){try{const{error}=await sb.rpc('xa_cambiar_negocio',{p_slug:q});if(!error){ME.rol='admin';s=(await sb.from('sitios').select('*').eq('slug',q).maybeSingle()).data||s}}catch(_){}}}
  if(!s)throw new Error('No encontramos tu negocio.');
  SID=s.id;SLUG=s.slug;
  if(await verVersion())return;
