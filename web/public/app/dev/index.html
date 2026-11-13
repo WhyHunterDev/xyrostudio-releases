@@ -335,12 +335,14 @@ const RUBROS={
  academia:{n:'Academia',ico:'🎓',cli:'Alumno',clis:'Alumnos',plan:'Mensualidad',demo:'Academia Vértice',lema:'¡A seguir aprendiendo! 📚',tienda:'Tienda',productos:[['Cuaderno','Útiles',6,3,'📒'],['Polo oficial','Ropa',35,18,'👕']],
   planes:[['Clase suelta',25,1,'#8d8fa8'],['Mensual',180,30,'#3ad6ff'],['Ciclo 4 meses',650,120,'#7c5cff']]}
 };
-const ROLES={gestor:'XyroStudio',admin:'Administrador',supervisor:'Supervisor de ventas',recepcion:'Recepción',cafetin:'Cafetín'};
+const ROLES={gestor:'XyroStudio',admin:'Administrador',supervisor:'Supervisor de ventas',recepcion:'Recepción',cafetin:'Cafetín',entrenador:'Entrenador',nutricionista:'Nutricionista'};
+const XROL=['supervisor','entrenador','nutricionista']; // se crean como recepción y luego xa_set_rol
+const isCoach=()=>ME&&(ME.rol==='entrenador'||ME.rol==='nutricionista');
 const METODOS=['Efectivo','Yape','Plin','Tarjeta','Transferencia'];
-const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',asi:'xa_asistencias',pro:'xa_productos',mov:'xa_movs',cie:'xa_cierres',sol:'xa_solicitudes'};
+const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',asi:'xa_asistencias',pro:'xa_productos',mov:'xa_movs',cie:'xa_cierres',sol:'xa_solicitudes',rut:'xa_rutinas'};
 
 let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[],sol:[]};
-const KS=['cli','pla','mem','pag','asi','pro','mov','cie','sol'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
+const KS=['cli','pla','mem','pag','asi','pro','mov','cie','sol','rut'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
 const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','WhatsApp que responde, agenda, recuerda pagos y cierra ventas',1],['edits','Xyro Edits','Videos y reels editados rápido para tus redes',1]];
 const PRONTO=k=>{const x=XYROS.find(y=>y[0]===k);return!!(x&&x[3])};
 const soporteURL=()=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;
@@ -352,7 +354,7 @@ const isSup=()=>ME&&['admin','gestor','supervisor'].includes(ME.rol);
 const puedeProd=()=>ME&&['admin','gestor','supervisor','cafetin'].includes(ME.rol);
 // Ver otras sedes: el admin siempre; el resto solo si el admin le dio «Todas» en Equipo.
 const verTodas=()=>isAdmin()||!!(ME&&(!ME.sede||ME.sede==='todas'));
-let NEED24=false,NEED26=false;
+let NEED24=false,NEED26=false,NEED29=false;
 
 /* ===== Fechas ===== */
 const pad=n=>String(n).padStart(2,'0');
@@ -404,6 +406,7 @@ const DB={
   NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);
   NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED26=!!(await sb.from(T.mem).select('cuotas').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
   {const r=await sb.from(T.sol).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(1000),r2=await sb.from(T.cie).select('area').limit(1);NEED24=!!(r.error||r2.error);S.sol=r.data||[]}
+  {const r=await sb.from(T.rut).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(5000);NEED29=!!r.error;S.rut=r.data||[]}
  },
  async stock(pid,delta,tipo,nota){
   const p=S.pro.find(x=>x.id===pid),mv={producto_id:pid,cant:delta,tipo,nota,quien:ME.nombre||ROLES[ME.rol],t:new Date().toISOString()};
@@ -559,16 +562,90 @@ function form(title,fields,onSave,extra){
  });
 }
 
+/* ===== Planes de entrenamiento y alimentación (gimnasio, SQL 29: xa_rutinas). cliente_id vacío = plantilla ===== */
+const rutOn=()=>(CFG.rubro||'gym')==='gym'&&(DEMO||!NEED29);
+const puedeTipo=t=>!ME||ME.rol!=='entrenador'&&ME.rol!=='nutricionista'?true:ME.rol==='entrenador'?t==='entreno':t==='nutri';
+const RT={entreno:{n:'Entrenamiento',ico:'🏋️',t:'Plan de entrenamiento'},nutri:{n:'Alimentación',ico:'🥗',t:'Plan de alimentación'}};
+const DIAS=[['d1','Lunes'],['d2','Martes'],['d3','Miércoles'],['d4','Jueves'],['d5','Viernes'],['d6','Sábado'],['d7','Domingo']];
+const COMIDAS=[['desayuno','🌅 Desayuno'],['media','🍎 Media mañana'],['almuerzo','🍽️ Almuerzo'],['merienda','🥤 Media tarde'],['cena','🌙 Cena']];
+const PLT={entreno:[
+ {titulo:'Principiante · cuerpo completo 3 días',datos:{objetivo:'Adaptación y técnica',d1:'Cuerpo completo A\nSentadilla con mancuerna 3x12\nPress de pecho en máquina 3x12\nJalón al pecho 3x12\nPlancha 3x30 seg\nCardio 15 min',d3:'Cuerpo completo B\nPrensa de piernas 3x12\nPress de hombros 3x12\nRemo sentado 3x12\nAbdominales 3x15\nCardio 15 min',d5:'Cuerpo completo C\nZancadas 3x10 c/pierna\nFlexiones 3x10\nCurl de bíceps 3x12\nExtensión de tríceps 3x12\nCardio 20 min',nota:'Descanso 60-90 seg entre series. Calienta 10 min antes.'}},
+ {titulo:'Hipertrofia · 5 días',datos:{objetivo:'Ganar masa muscular',d1:'Pecho y tríceps\nPress banca 4x10\nPress inclinado mancuernas 4x10\nAperturas 3x12\nFondos 3x10\nPress francés 3x12',d2:'Espalda y bíceps\nDominadas o jalón 4x10\nRemo con barra 4x10\nRemo a una mano 3x12\nCurl con barra 3x12\nCurl martillo 3x12',d3:'Piernas\nSentadilla 4x10\nPrensa 4x12\nPeso muerto rumano 3x10\nExtensión de cuádriceps 3x15\nPantorrillas 4x15',d4:'Hombros y abdomen\nPress militar 4x10\nElevaciones laterales 4x12\nPájaros 3x12\nEncogimientos 3x15\nAbdomen 3 ejercicios',d5:'Full body + cardio\nCircuito 4 vueltas\nCardio 25 min',nota:'Descanso 60-90 seg. Sube el peso cuando completes todas las repeticiones.'}}],
+ nutri:[
+ {titulo:'Bajar de grasa',datos:{objetivo:'Bajar de grasa sin perder músculo',kcal:'1800',agua:'2.5 L',desayuno:'2 huevos + 1 pan integral + café o té sin azúcar',media:'1 fruta + 10 almendras',almuerzo:'Pechuga o pescado a la plancha (150 g) + ensalada libre + 1/2 taza de arroz o quinua',merienda:'Yogur natural + avena (3 cdas)',cena:'Tortilla de verduras o atún + ensalada',nota:'Evita gaseosas, frituras y dulces. Duerme 7-8 horas.'}},
+ {titulo:'Ganar masa muscular',datos:{objetivo:'Subir de peso en músculo',kcal:'2800',agua:'3 L',desayuno:'Avena con leche y plátano + 3 huevos',media:'Pan con palta + batido de proteína o leche',almuerzo:'Arroz (1 taza) + menestra + pollo o carne (200 g) + ensalada',merienda:'Sándwich de pollo + fruta',cena:'Papa o camote + pescado o pollo (150 g) + verduras',nota:'Come cada 3-4 horas. Toma proteína después de entrenar.'}}]};
+const planesDe=(cid,tipo)=>(S.rut||[]).filter(x=>x.cliente_id===cid&&x.tipo===tipo).sort((a,b)=>b.creado>a.creado?1:-1);
+const planAct=(cid,tipo)=>planesDe(cid,tipo)[0]||null;
+const plantillas=tipo=>(S.rut||[]).filter(x=>!x.cliente_id&&x.tipo===tipo).map(x=>({id:x.id,titulo:x.titulo,datos:x.datos,propia:1})).concat(PLT[tipo]);
+const lineas=t=>String(t||'').split('\n').map(x=>x.trim()).filter(Boolean);
+function planTexto(c,p){const d=p.datos||{},n=c?c.nombre.trim().split(' ')[0]:'',L=[`${RT[p.tipo].ico} *${RT[p.tipo].t}* · ${nombre()}`,'',`Hola ${n} 👋 Este es tu plan${p.titulo?': *'+p.titulo+'*':''}`];
+ if(d.objetivo)L.push('🎯 Objetivo: '+d.objetivo);
+ if(p.tipo==='entreno')DIAS.forEach(([k,dn])=>{const l=lineas(d[k]);if(!l.length)return;L.push('',`*${dn}*${l.length>1?' · '+l[0]:''}`);(l.length>1?l.slice(1):l).forEach(x=>L.push('• '+x))});
+ else{const x=[d.kcal?'🔥 '+d.kcal+' kcal':'',d.agua?'💧 Agua: '+d.agua:''].filter(Boolean);x.length&&L.push(x.join(' · '));COMIDAS.forEach(([k,cn])=>{const l=lineas(d[k]);if(!l.length)return;L.push('',`*${cn}*`);l.forEach(y=>L.push('• '+y))})}
+ if(d.nota)L.push('','📝 '+d.nota);L.push('',`— ${p.quien||QUIEN()}, ${nombre()} 💪`);return L.join('\n')}
+function planHTML(c,p){const t=planTexto(c,p).replace(/\*([^*\n]+)\*/g,'<b>$1</b>');return`<!doctype html><meta charset="utf-8"><title>${esc(RT[p.tipo].t)}</title><style>body{font:14px/1.55 system-ui,sans-serif;max-width:640px;margin:24px auto;padding:0 16px;white-space:pre-wrap;color:#111}b{font-size:15px}</style><body>${t.split('\n').map(x=>x.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m])).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>')).join('\n')}</body>`}
+function enviarPlan(c,p){
+ const ok=!!tel(c.telefono),msg=planTexto(c,p);
+ sheet(`<div style="text-align:center;display:grid;gap:10px"><div style="font-size:44px">${RT[p.tipo].ico}</div><h3>${esc(RT[p.tipo].t)} de ${esc(c.nombre.split(' ')[0])}</h3><p class="mu sm">${p.enviado?'Enviado el '+fF(p.enviado.slice(0,10))+'. ':''}${ok?'Se abre WhatsApp con el plan listo para enviar.':'Este socio no tiene celular. Agrégalo en su ficha.'}</p></div>
+  <pre class="card sm" style="white-space:pre-wrap;max-height:40vh;overflow:auto;margin:12px 0;font:13px/1.5 system-ui">${esc(msg)}</pre>
+  <div class="bt" style="flex-wrap:wrap">${ok?`<a class="btn p" id="pwa" target="_blank" rel="noopener" href="${waLink(c,msg)}">📲 Enviar por WhatsApp</a>`:''}<button class="btn" id="pcp">📋 Copiar</button><button class="btn" id="ppr">🖨️ Imprimir / PDF</button><button class="btn" data-x>Cerrar</button></div>`,(el,close)=>{
+  const w=el.querySelector('#pwa');w&&(w.onclick=()=>{if(p.id&&S.rut.includes(p))DB.upd('rut',p.id,{enviado:new Date().toISOString()}).then(()=>go()).catch(()=>{});setTimeout(close,300)});
+  el.querySelector('#pcp').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(msg).then(()=>toast('Copiado ✓'))};
+  el.querySelector('#ppr').onclick=()=>imprimirHTML(planHTML(c,p));
+  el.querySelectorAll('[data-x]').forEach(b=>b.onclick=close)})}
+function editarPlan(c,tipo,base){
+ if(!puedeTipo(tipo))return toast('Este plan lo arma '+(tipo==='nutri'?'la nutricionista':'el entrenador'));
+ const act=base||(c?planAct(c.id,tipo):null),d=(act&&act.datos)||{},PL=plantillas(tipo);
+ const F=[{k:'plt',l:'📚 Empezar desde una plantilla',t:'sel',v:'',o:[['','— Escribir desde cero / mantener —']].concat(PL.map((x,i)=>[String(i),(x.propia?'⭐ ':'')+x.titulo])),on:(fm)=>{const s=fm.querySelector('#f_plt');s.onchange=()=>{const x=PL[+s.value];if(!x||s.value==='')return;const dd=x.datos||{};fm.querySelector('#f_titulo').value=x.titulo||'';Object.keys(dd).forEach(k=>{const e=fm.querySelector('#f_'+k);e&&(e.value=dd[k])});toast('Plantilla cargada: puedes ajustarla')}}},
+  {k:'titulo',l:c?'Nombre del plan':'Nombre de la plantilla',v:(act&&act.titulo)||'',ph:tipo==='nutri'?'Ej. Bajar de grasa':'Ej. Hipertrofia 5 días',req:!c},{k:'objetivo',l:'🎯 Objetivo',v:d.objetivo||'',ph:'Ej. Bajar 5 kg en 2 meses'}];
+ if(tipo==='entreno')DIAS.forEach(([k,dn])=>F.push({k,l:dn,t:'area',v:d[k]||''}));
+ else{F.push({k:'kcal',l:'🔥 Calorías por día',v:d.kcal||'',half:1,im:'numeric',ph:'Ej. 2000'},{k:'agua',l:'💧 Agua al día',v:d.agua||'',half:1,ph:'Ej. 2.5 L'});COMIDAS.forEach(([k,cn])=>F.push({k,l:cn,t:'area',v:d[k]||''}))}
+ F.push({k:'nota',l:'📝 Indicaciones',t:'area',v:d.nota||''});
+ if(c)F.push({k:'tpl',l:'⭐ Guardar también como plantilla del gimnasio',t:'chk',v:false});
+ form(`${RT[tipo].ico} ${c?RT[tipo].t+' · '+esc(c.nombre.split(' ')[0]):'Plantilla de '+RT[tipo].n.toLowerCase()}`,F,async v=>{
+  const datos={};F.forEach(f=>{if(!['plt','titulo','tpl'].includes(f.k)&&v[f.k])datos[f.k]=v[f.k]});
+  if(tipo==='entreno'&&!DIAS.some(([k])=>datos[k]))throw new Error('Escribe al menos un día de entrenamiento.');
+  if(tipo==='nutri'&&!COMIDAS.some(([k])=>datos[k]))throw new Error('Escribe al menos una comida.');
+  const row={cliente_id:c?c.id:null,tipo,titulo:v.titulo||null,datos,quien:QUIEN(),creado:new Date().toISOString()};
+  if(!c&&base&&base.id&&S.rut.some(x=>x.id===base.id)){await DB.upd('rut',base.id,{titulo:row.titulo,datos,quien:row.quien});toast('Plantilla guardada ✓');return go()}
+  const p=await DB.ins('rut',row);
+  if(c&&v.tpl&&v.titulo)await DB.ins('rut',{cliente_id:null,tipo,titulo:v.titulo,datos,quien:row.quien,creado:row.creado});
+  go();if(c)setTimeout(()=>enviarPlan(c,p),150);else toast('Plantilla guardada ✓');
+ });
+ setTimeout(()=>$$('.ov:last-child textarea').forEach(t=>{t.rows=tipo==='entreno'?4:2;if(tipo==='entreno'&&!t.value)t.placeholder='Pecho y tríceps\nPress banca 4x10\nAperturas 3x12'}),30);
+}
+function planCard(c){if(!rutOn())return'';const TT=['entreno','nutri'].filter(puedeTipo);
+ setTimeout(()=>$$('[data-pl]').forEach(b=>b.onclick=()=>{const[t,a]=b.dataset.pl.split('|'),p=planAct(c.id,t);a==='env'&&p?enviarPlan(c,p):editarPlan(c,t)}));
+ return`<div class="card"><h3>📋 Rutina y dieta</h3><div class="tl">${TT.map(t=>{const p=planAct(c.id,t);return`<div class="row" style="padding:8px 4px"><span class="nm"><b>${RT[t].ico} ${RT[t].n}</b><small>${p?esc(p.titulo||'Plan')+' · '+fF(p.creado.slice(0,10))+(p.enviado?' · ✅ enviado':' · sin enviar'):'Sin plan todavía'}</small></span><span style="display:flex;gap:6px">${p?`<button class="btn sm" data-pl="${t}|env">📲</button>`:''}<button class="btn sm ${p?'':'p'}" data-pl="${t}|ed">${p?'✏️ Editar':'＋ Crear'}</button></span></div>`}).join('')}</div></div>`}
+let rtT='entreno',rtQ='';
+function rutinas(){
+ if(!rutOn())return`<div class="empty"><b>📋</b>${DEMO||(CFG.rubro||'gym')!=='gym'?'Disponible para gimnasios.':'Falta activar los planes (SQL 29). Avísale a XyroStudio.'}</div>`;
+ const TT=['entreno','nutri'].filter(puedeTipo);if(!TT.includes(rtT))rtT=TT[0];
+ const E=cliS().map(c=>[c,est(c),planAct(c.id,rtT)]);
+ const rk=x=>x[1].k==='act'||x[1].k==='pronto'?0:1;E.sort((a,b)=>rk(a)-rk(b)||(!!a[2])-(!!b[2])||a[0].nombre.localeCompare(b[0].nombre));
+ const sinPlan=cliS().filter(c=>{const k=est(c).k;return(k==='act'||k==='pronto')&&!planAct(c.id,rtT)}).length,PLs=(S.rut||[]).filter(x=>!x.cliente_id&&x.tipo===rtT);
+ setTimeout(()=>{$$('[data-rtt]').forEach(b=>b.onclick=()=>{rtT=b.dataset.rtt;go()});const s=$('#rtq');s&&(s.oninput=()=>{rtQ=s.value;const l=$('#rtl');l&&(l.innerHTML=rutLista());});
+  $('#v').onclick=e=>{const b=e.target.closest('[data-rp]');if(b){const[id,a]=b.dataset.rp.split('|'),c=cli(id),p=c&&planAct(id,rtT);if(!c)return;a==='env'&&p?enviarPlan(c,p):editarPlan(c,rtT);return}
+   const t=e.target.closest('[data-tpl]');if(t){const[id,a]=t.dataset.tpl.split('|'),x=S.rut.find(r=>r.id===id);if(!x)return;if(a==='del'){if(!confirm('¿Borrar la plantilla «'+(x.titulo||'')+'»?'))return;DB.del('rut',id).then(()=>{toast('Plantilla borrada');go()}).catch(er=>toast(er.message))}else editarPlan(null,rtT,x)}}});
+ window.rutLista=()=>{const q2=rtQ.toLowerCase();return E.filter(([c])=>!q2||c.nombre.toLowerCase().includes(q2)||String(c.num||'').includes(q2)||String(c.telefono||'').includes(q2)).slice(0,80).map(([c,e,p])=>`<div class="row"><span class="nm"><b>${esc(c.nombre)}</b><small>${e.k==='act'||e.k==='pronto'?'🟢 Activo':'⚪ Inactivo'} · ${p?esc(p.titulo||'Plan')+' · '+fF(p.creado.slice(0,10))+(p.enviado?' · ✅ enviado':' · sin enviar'):'<span style="color:var(--wa)">Sin plan</span>'}</small></span><span style="display:flex;gap:6px">${p?`<button class="btn sm" data-rp="${c.id}|env" title="Enviar por WhatsApp">📲</button>`:''}<button class="btn sm ${p?'':'p'}" data-rp="${c.id}|ed">${p?'✏️':'＋ Crear'}</button></span></div>`).join('')||'<div class="empty">Sin resultados.</div>'};
+ return`<div class="hi"><h2>${TT.length>1?'Rutinas y dietas':RT[rtT].ico+' '+RT[rtT].t+'es'}</h2><p class="mu">${sinPlan?`${sinPlan} ${R.clis.toLowerCase()} activos sin ${rtT==='nutri'?'plan de alimentación':'rutina'}.`:'Todos los activos tienen su plan. 💪'}</p></div>
+ ${TT.length>1?`<div class="opts" style="margin-bottom:12px">${TT.map(t=>`<button type="button" data-rtt="${t}" class="${t===rtT?'on':''}">${RT[t].ico} ${RT[t].n}</button>`).join('')}</div>`:''}
+ <input id="rtq" class="card" style="width:100%;margin-bottom:12px" placeholder="🔎 Buscar ${R.cli.toLowerCase()} por nombre" value="${esc(rtQ)}">
+ <div class="card"><div class="tl" id="rtl">${rutLista()}</div></div>
+ <div class="card"><h3>⭐ Plantillas del gimnasio</h3><p class="mu sm">Arma una vez y úsala con cualquier ${R.cli.toLowerCase()}. También puedes guardar un plan como plantilla al crearlo.</p><div class="tl">${PLs.map(x=>`<div class="row"><span class="nm"><b>${esc(x.titulo||'Sin nombre')}</b><small>${esc((x.datos&&x.datos.objetivo)||'')}</small></span><span style="display:flex;gap:6px"><button class="btn sm" data-tpl="${x.id}|ed">✏️</button><button class="btn sm" data-tpl="${x.id}|del">🗑️</button></span></div>`).join('')||`<p class="mu sm">Aún no hay plantillas propias. Toca «＋ Plantilla». Ya tienes ${PLT[rtT].length} de ejemplo para empezar.</p>`}</div></div>`;
+}
+
 /* ===== Navegación ===== */
 const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||String(x.sede)===SEDE)).length;
-const NAV=()=>{if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
+const NAV=()=>{if(isCoach())return[['rutinas','📋',ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento'],['cuenta','🔐','Mi cuenta']];
+ if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
- return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']].concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento']].concat(rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
   `<div class="side-f"><a class="btn sm" target="_blank" rel="noopener" href="${soporteURL()}">💬 Soporte XyroStudio</a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor?'<button class="btn sm" id="cambia">Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
- $('#bn').innerHTML=n.filter(x=>['inicio','socios','kiosco','tienda','caja'].includes(x[0])).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
+ $('#bn').innerHTML=n.filter(x=>['inicio','socios','kiosco','tienda','caja'].includes(x[0])||(isCoach()&&x[0]==='rutinas')).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=()=>{LS.r('xa-s');location.href='/app/'});
  marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):verTodas()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
  document.title=nombre()+' · Xyro Apps';
@@ -578,18 +655,19 @@ function go(){
  ixOff();
  const h=(location.hash||'#/inicio').slice(2).split('/');ruta=h[0]||'inicio';arg=decodeURIComponent(h[1]||'');
  if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta','web'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
+ if(isCoach()&&!['rutinas','cuenta','mas'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
- $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes'].includes(ruta))));
+ $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
- const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes}[ruta]||inicio;
+ const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
- const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud'};
+ const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
- $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',seguimiento:'Seguimiento',solicitudes:'Solicitudes de revisión'}[ruta]||'';
+ $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',seguimiento:'Seguimiento',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
-$('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave()})[ruta]||nuevoCli)()};
+$('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave()})[ruta]||nuevoCli)()};
 $('#q').addEventListener('input',e=>{qtxt=e.target.value;if(ruta!=='socios'){location.hash='#/socios'}else{const l=$('#lst');l&&(l.innerHTML=lista())}});
 addEventListener('hashchange',go);
 addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();$('#q').focus()}});
@@ -756,7 +834,7 @@ function socio(){
   ${c.notas?`<p class="mu sm" style="text-align:left;width:100%">📝 ${esc(c.notas)}</p>`:''}
  </div>
  <div class="g">
-  ${deudaCard(c)}${solCli(c)}<div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
+  ${deudaCard(c)}${solCli(c)}${planCard(c)}<div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
   <div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.map(x=>`<div class="row"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${(x.cuotas||[]).length?' · 🗓️ '+x.cuotas.filter(q=>q.pagado).length+'/'+x.cuotas.length+' cuotas pagadas':''}${+x.sesiones?' · '+usadas(x)+'/'+x.sesiones+' sesiones':''}${+x.descuento?' · dscto. '+sol(x.descuento)+(x.motivo?' ('+esc(x.motivo)+')':''):''}${x.dom===false?' · sin domingos':''}${pzs(x).length?' · ❄️ '+pzs(x).reduce((a,z)=>a+(+z.dias||0),0)+' d congelada':''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu">Sin historial</p>'}</div></div>
   <div class="card"><h3>Ingresos <span class="mu sm">${asis.length} en 5 meses</span></h3><div class="tl">${asis.slice(0,8).map(a=>`<div class="row" style="padding:8px 10px"><span class="nm"><b>${fF(a.t)} · ${fH(a.t)}</b><small>${esc(a.quien||'')}</small></span>${isSup()||ymd(new Date(a.t))===hoy()?`<button class="btn sm" data-da="${a.id}" title="Borrar ingreso mal marcado">🗑️</button>`:''}</div>`).join('')||'<p class="mu">Aún no tiene ingresos</p>'}</div></div>
   <div class="card"><h3>Pagos</h3><div class="tl">${pags.map(p=>`<a class="row" href="#" data-p="${p.id}"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b> 🖨️</a>`).join('')||'<p class="mu">Sin pagos recientes</p>'}</div></div>
@@ -1476,7 +1554,7 @@ function reportes(){
  ${ctl?`<div class="card st" style="margin-top:14px"><h3>📊 Utilidad de ${esc(tiendaN())} <b class="grad" style="font-size:22px">${sol(util)}</b></h3><p class="mu sm">Venta menos costo de los productos con costo registrado.</p></div>`:''}`;
 }
 function mas(){
- const n=NAV().filter(x=>!['inicio','socios','kiosco','tienda','caja'].includes(x[0]));
+ const n=NAV().filter(x=>!['inicio','socios','kiosco','tienda','caja'].includes(x[0])&&!(isCoach()&&x[0]==='rutinas'));
  return`<div class="hi"><h2>Más</h2></div><div class="mas st">${n.map(([k,i,t])=>`<a class="card" href="#/${k}"><em>${i}</em>${esc(t)}</a>`).join('')}<a class="card" target="_blank" rel="noopener" href="${soporteURL()}"><em>💬</em>Soporte</a>${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
 }
 
@@ -1507,8 +1585,8 @@ function xyros(){
 
 /* ===== Equipo: cuentas, permisos y claves (mismas cuentas que el panel de la web) ===== */
 let EQ=null,EQerr='',EQnew=null;
-const PERMS=()=>Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)).map(([k,v])=>[k,CTL()&&PERMC[k]?[v[0],PERMC[k]]:v]));
-const PERM={admin:['👑','Todo y todas las sedes: planes, precios, reportes, ajustes, metas y el equipo'],supervisor:['📈','Toda la venta de su sede, reportes, solicitudes de revisión y el registro completo de cada socio'],recepcion:['🛎️','Socios, asistencia, cobros, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'],cafetin:['🥤','Vende, agrega productos, ve el stock y cierra su turno']};
+const PERMS=()=>Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)&&((k!=='entrenador'&&k!=='nutricionista')||rutOn())).map(([k,v])=>[k,CTL()&&PERMC[k]?[v[0],PERMC[k]]:v]));
+const PERM={admin:['👑','Todo y todas las sedes: planes, precios, reportes, ajustes, metas y el equipo'],supervisor:['📈','Toda la venta de su sede, reportes, solicitudes de revisión y el registro completo de cada socio'],recepcion:['🛎️','Socios, asistencia, cobros, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'],cafetin:['🥤','Vende, agrega productos, ve el stock y cierra su turno'],entrenador:['🏋️','Arma y envía los planes de entrenamiento de los socios'],nutricionista:['🥗','Arma y envía los planes de alimentación de los socios']};
 const PERMC={supervisor:'Toda la venta de su sede (recepción y cafetín), reportes, solicitudes de revisión y el registro completo de cada socio',recepcion:'Socios, asistencia, cobros, venta en cafetín, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'};
 const genClave=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789',r=crypto.getRandomValues(new Uint32Array(10));return'Xa-'+[...r].map(n=>a[n%a.length]).join('')};
 const appURL=()=>location.origin+'/app/';
@@ -1530,7 +1608,7 @@ function equipo(){
  const fd=t=>t?'Entró '+new Date(t).toLocaleDateString('es-PE',{day:'numeric',month:'short'}):'Aún no entra';
  setTimeout(()=>{const v=$('#v');if(!v||ruta!=='equipo')return;
   const u=id=>EQ.find(x=>String(x.id)===String(id));
-  const upd=async(x,ch)=>{const o={rol:x.rol,sede:x.sede};Object.assign(x,ch);try{await eqRpc('gestor_actualizar_usuario',{p_user:x.id,p_nombre:x.nombre,p_rol:x.rol==='supervisor'?'recepcion':x.rol,p_sede:x.sede||'todas'});if(x.rol==='supervisor')await eqRpc('xa_set_rol',{p_user:x.id,p_rol:'supervisor'});toast('Permisos guardados ✓')}catch(er){Object.assign(x,o);toast(er.message)}go()};
+  const upd=async(x,ch)=>{const o={rol:x.rol,sede:x.sede};Object.assign(x,ch);try{await eqRpc('gestor_actualizar_usuario',{p_user:x.id,p_nombre:x.nombre,p_rol:XROL.includes(x.rol)?'recepcion':x.rol,p_sede:x.sede||'todas'});if(XROL.includes(x.rol))await eqRpc('xa_set_rol',{p_user:x.id,p_rol:x.rol});toast('Permisos guardados ✓')}catch(er){Object.assign(x,o);toast(er.message)}go()};
   v.querySelectorAll('[data-er]').forEach(s=>s.onchange=()=>upd(u(s.dataset.er),{rol:s.value}));
   v.querySelectorAll('[data-es]').forEach(s=>s.onchange=()=>upd(u(s.dataset.es),{sede:s.value}));
   v.querySelectorAll('[data-ek]').forEach(b=>b.onclick=async()=>{const x=u(b.dataset.ek);if(!confirm(`¿Darle una clave temporal nueva a ${x.nombre}? Se cerrarán sus sesiones abiertas.`))return;const pass=genClave();
@@ -1559,8 +1637,8 @@ function nuevaCuenta(){if(!isAdmin())return;const SD=sedesL();
   const email=v.email.toLowerCase(),nm=v.nombre.slice(0,60);if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new Error('Revisa el correo.');
   if((EQ||[]).some(x=>(x.email||'').toLowerCase()===email))throw new Error('Ese correo ya tiene cuenta.');
   const pass=genClave(),sede=v.sede||'todas';
-  await eqRpc('gestor_crear_usuario',{p_slug:SLUG,p_email:email,p_pass:pass,p_nombre:nm,p_rol:v.rol==='supervisor'?'recepcion':v.rol,p_sede:sede},()=>EQ.push({id:uid(),nombre:nm,email,rol:v.rol,sede,activo:true,debe_cambiar:true}));
-  EQnew={nombre:nm,email,pass,nuevo:true};if(!DEMO){await eqLoad();const n=(EQ||[]).find(x=>(x.email||'').toLowerCase()===email);if(v.rol==='supervisor'&&n){await eqRpc('xa_set_rol',{p_user:n.id,p_rol:'supervisor'});n.rol='supervisor'}}if(ruta!=='equipo')location.hash='#/equipo';else go();confeti(30);
+  await eqRpc('gestor_crear_usuario',{p_slug:SLUG,p_email:email,p_pass:pass,p_nombre:nm,p_rol:XROL.includes(v.rol)?'recepcion':v.rol,p_sede:sede},()=>EQ.push({id:uid(),nombre:nm,email,rol:v.rol,sede,activo:true,debe_cambiar:true}));
+  EQnew={nombre:nm,email,pass,nuevo:true};if(!DEMO){await eqLoad();const n=(EQ||[]).find(x=>(x.email||'').toLowerCase()===email);if(XROL.includes(v.rol)&&n){await eqRpc('xa_set_rol',{p_user:n.id,p_rol:v.rol});n.rol=v.rol}}if(ruta!=='equipo')location.hash='#/equipo';else go();confeti(30);
  });
 }
 function miCuenta(){
@@ -1765,7 +1843,7 @@ function semilla(rubro){
 function demoBoot(){
  const rub=RUBROS[P.get('demo')]?P.get('demo'):'gym';CFG={rubro:rub};R=RUBROS[rub];XY=['apps'];
  const g=LS.g(DKEY(),null),n=P.get('n');
- const rl=P.get('rol');ME=['supervisor','recepcion','cafetin'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
+ const rl=P.get('rol');ME=['supervisor','recepcion','cafetin','entrenador','nutricionista'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz',entrenador:'Diego Salas',nutricionista:'Valeria Ríos'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
  const arrancar=()=>{
   R=RUBROS[CFG.rubro]||R;demoMetas();asegS();if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
   const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo con datos de ejemplo</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
