@@ -70,6 +70,6 @@
     };
   };
   // Qué entra en la base y qué se cobra aparte (lo muestra el Panel XyroStudio).
-  window.XYRO_BASE_GYM.incluye = ['Web tipo app con todas las secciones (inicio, planes, entrenadores, clases, nutrición, cafetín, sedes, galería, promos)', 'Nombre, logo y color del gimnasio', '3 estilos a elegir (Fuerza, Claro, Neón) y secciones que se prenden o apagan', 'Edición de textos, precios, fotos, promos y horarios desde Mi web', 'Botón de WhatsApp y métricas de visitas', 'Temas de temporada y modo mantenimiento'];
+  window.XYRO_BASE_GYM.incluye = ['Web tipo app con todas las secciones (inicio, planes, entrenadores, clases, nutrición, cafetín, sedes, galería, promos)', 'Nombre, logo y color del gimnasio', '3 diseños a elegir (Fuerza, Impacto, Comunidad) y secciones que se prenden o apagan', 'Edición de textos, precios, fotos, promos y horarios desde Mi web', 'Botón de WhatsApp y métricas de visitas', 'Temas de temporada y modo mantenimiento'];
   window.XYRO_BASE_GYM.extras = ['Diseño o estilo nuevo (otra tipografía, otro orden, efectos)', 'Secciones a medida (tienda en línea, reservas, blog…)', 'Sesión de fotos o videos producidos (Xyro Edits)', 'Dominio propio (.com / .pe) y correo', 'Migrar contenido de su web anterior'];
 })();

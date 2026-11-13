@@ -68,12 +68,23 @@
     document.body.classList.toggle('una-sede', data.sedes.length < 2);
   }
   // ---------- Estilo (plantilla) y secciones que el negocio usa ----------
-  const ESTILOS = { fuerza: '', claro: 'Plus+Jakarta+Sans:wght@500;600;700;800', neon: 'Sora:wght@600;700;800' };
+  // Diseño elegido (config.estilo): fuerza = clásico · impacto = portada dividida · comunidad = collage + barra flotante.
+  const ESTILOS = { fuerza: '', impacto: 'Oswald:wght@500;600;700', comunidad: 'Poppins:wght@500;600;700;800' };
+  let EST = 'fuerza';
   function estilo() {
     const q = new URLSearchParams(location.search).get('e'), e = ESTILOS[q] !== undefined ? q : (ESTILOS[data.config.estilo] !== undefined ? data.config.estilo : 'fuerza');
-    document.documentElement.dataset.estilo = e;
+    EST = e; document.documentElement.dataset.estilo = e;
     if (ESTILOS[e] && !document.getElementById('fEst-' + e)) { const l = document.createElement('link'); l.id = 'fEst-' + e; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + ESTILOS[e] + '&display=swap'; document.head.appendChild(l); }
-    document.querySelector('meta[name=theme-color]')?.setAttribute('content', e === 'claro' ? '#f6f4ef' : e === 'neon' ? '#070914' : '#070707');
+    // Impacto: menú a pantalla completa (en vez de pestañas)
+    if (e === 'impacto' && !$('#imMenu')) {
+      const b = document.createElement('button'); b.id = 'imMenu'; b.className = 'im-burger'; b.setAttribute('aria-label', 'Menú'); b.innerHTML = '<i></i><i></i>';
+      $('.navr').prepend(b);
+      const o = document.createElement('div'); o.id = 'imNav'; document.body.appendChild(o);
+      const pinta = () => { o.innerHTML = `<div class="wrap">${$$('#tabs a').filter((a) => ON(a.dataset.r)).map((a, i) => `<a href="${a.getAttribute('href')}"><small>${String(i + 1).padStart(2, '0')}</small>${esc(a.textContent)}</a>`).join('')}<button class="btn btn-y" data-wa>${WA}Escríbenos</button></div>`; };
+      b.onclick = () => { pinta(); document.body.classList.toggle('im-open'); };
+      o.addEventListener('click', (ev) => { if (ev.target.closest('a,button')) document.body.classList.remove('im-open'); });
+      addEventListener('hashchange', () => document.body.classList.remove('im-open'));
+    }
   }
   // config.secciones = { cafetin:false, nutricion:false, … } → esas secciones desaparecen de menús, inicio y enlaces.
   const SECC = ['planes', 'coaches', 'clases', 'nutricion', 'cafetin', 'sedes', 'galeria', 'promos'];
@@ -187,6 +198,125 @@
     </div></section>` : ''}
 
     <section class="sec"><div class="wrap"><div class="cta-band rv"><h2>Tu primer día<br>es hoy</h2><button class="btn" data-wa>${WA}Quiero inscribirme</button></div></div></section>`;
+  };
+
+
+  // =====================================================================
+  //  DISEÑOS de portada (config.estilo). Cada uno mueve todo a otra estructura;
+  //  el color siempre es el del negocio. fuerza = P.inicio (el clásico).
+  // =====================================================================
+  const INI = {};
+  const porHora = (a, b) => String(a.hora).localeCompare(String(b.hora));
+  const coachDeK = (k) => data.entrenadores.find((c) => c.id === k.coach);
+  const desde = () => { const p = [...data.planes].sort((a, b) => precioDe(a) / a.meses - precioDe(b) / b.meses)[0]; return p ? soles(Math.round(precioDe(p) / p.meses)) : ''; };
+
+  // ---------- 2) IMPACTO: portada dividida, planes y horario de hoy en la portada ----------
+  INI.impacto = async () => {
+    const c = data.config, h = c.hero, v = c.vision, hoy = hoyDia();
+    const planes = [...data.planes].sort((a, b) => a.meses - b.meses);
+    const coaches = data.entrenadores.filter(enSede).slice(0, 10);
+    const kHoy = clasesVis().filter((k) => (k.dias || []).includes(hoy)).sort(porHora);
+    const sedes = data.sedes.filter((s) => sede === 'todas' || s.id === sede);
+    const anillo = `${NOM} · Inscríbete hoy · `.toUpperCase();
+    return `
+    <header class="im-hero">
+      <div class="im-l">
+        <span class="eyebrow fade">${esc(h.eyebrow)}</span>
+        <h1 class="im-t"><span class="ln"><span>${esc(h.l1)}</span></span><span class="ln"><span class="y">${esc(h.l2)}</span></span><span class="ln"><span>${esc(h.l3)}</span></span></h1>
+        <p class="fade">${esc(h.texto)}</p>
+        <div class="ctas fade"><button class="btn btn-y" data-wa>${WA}Escríbenos</button>${ON('planes') ? '<a class="btn btn-o" href="#/planes">Ver planes</a>' : ''}</div>
+        <div class="im-stats fade">${c.stats.slice(0, 3).map((s) => `<div><b>${esc(s.n)}</b><small>${esc(s.t)}</small></div>`).join('')}</div>
+      </div>
+      <div class="im-r">
+        <img src="${esc(await U(h.imagen))}" alt="" fetchpriority="high">
+        ${ON('planes') && data.planes.length ? `<a class="im-badge" href="#/planes"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="imRing" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><text><textPath href="#imRing" textLength="486" lengthAdjust="spacing">${esc(anillo)}</textPath></text></svg><span><small>Desde</small><b>${desde()}</b><small>al mes</small></span></a>` : ''}
+      </div>
+    </header>
+
+    ${c.marquee.activo && c.marquee.mensajes.length ? `<div class="im-mq" aria-hidden="true"><div class="track">${[...c.marquee.mensajes, ...c.marquee.mensajes, ...c.marquee.mensajes].map((w) => `<span>${esc(w)}</span>`).join('')}</div></div>` : ''}
+
+    ${ON('planes') && planes.length ? `<section class="sec"><div class="wrap">
+      <div class="im-hd rv"><span class="im-n">01</span><div><span class="eyebrow">Membresías</span><h2 class="h2">Elige tu <em>plan</em></h2></div><a class="more" href="#/planes">Ver detalle →</a></div>
+      <div class="im-planes">${planes.map((p) => `<article class="im-plan rv ${p.destacado ? 'hot' : ''}">
+        ${p.destacado ? '<span class="im-tag">★ El favorito</span>' : ''}<h3>${esc(p.nombre)}</h3>
+        <div class="im-pr">${eventoOn(p) ? `<s>${soles(p.precio)}</s>` : ''}${soles(precioDe(p))}</div>
+        <small>${soles(Math.round(precioDe(p) / p.meses))} al mes</small>
+        <button class="btn ${p.destacado ? 'btn-y' : 'btn-o'}" data-wa data-plan="${esc(p.nombre)}">Lo quiero</button></article>`).join('')}</div>
+    </div></section>` : ''}
+
+    <section class="sec alt"><div class="wrap im-why">
+      <div class="im-why-l"><div class="im-hd"><span class="im-n">02</span><div><span class="eyebrow">${esc(v.eyebrow)}</span><h2 class="h2">${esc(v.titulo)} <em>${esc(v.acento)}</em></h2></div></div><p class="lead">${esc(v.texto)}</p>
+        <img src="${esc(await U(v.imagen))}" alt="" loading="lazy"></div>
+      <ol class="im-list">${(c.incluye || []).map((x, i) => `<li class="rv"><span>${String(i + 1).padStart(2, '0')}</span><div><h4>${esc(x.i || '')} ${esc(x.t)}</h4><p>${esc(x.d)}</p></div></li>`).join('')}</ol>
+    </div></section>
+
+    ${ON('coaches') && coaches.length ? `<section class="sec"><div class="wrap"><div class="im-hd rv"><span class="im-n">03</span><div><span class="eyebrow">Tu equipo</span><h2 class="h2">Nuestros <em>entrenadores</em></h2></div><a class="more" href="#/coaches">Ver todos →</a></div></div>
+      <div class="im-coaches">${(await Promise.all(coaches.map(async (k) => `<a class="im-coach rv" href="#/coach/${esc(k.id)}"><img src="${esc(await U(k.foto))}" alt="" loading="lazy" style="object-position:${esc(k.pos || '50% 30%')}"><span class="im-cv">${esc(k.nombre)}</span><small>${esc(k.especialidad)}</small></a>`))).join('')}</div>
+    </section>` : ''}
+
+    ${ON('clases') && kHoy.length ? `<section class="sec alt"><div class="wrap"><div class="im-hd rv"><span class="im-n">04</span><div><span class="eyebrow">Horario</span><h2 class="h2">Hoy en el <em>gym</em></h2></div><a class="more" href="#/clases">Semana completa →</a></div>
+      <div class="im-hoy">${kHoy.map((k) => { const co = coachDeK(k); return `<button class="im-row rv" data-clase="${esc(k.id)}" data-dia="${hoy}"><b>${esc(hora12(k.hora))}</b><span class="nm">${esc(k.nombre)}</span><span class="co">${esc(co ? co.nombre : k.profe || '')}</span><span class="go">Separar cupo →</span></button>`; }).join('')}</div>
+    </div></section>` : ''}
+
+    ${ON('sedes') ? `<section class="sec"><div class="wrap"><div class="im-hd rv"><span class="im-n">05</span><div><span class="eyebrow">Encuéntranos</span><h2 class="h2">Ven a <em>entrenar</em></h2></div></div>
+      <div class="im-sedes">${sedes.map((s) => `<div class="im-sede rv"><h3>${esc(s.nombre)}</h3><p>${esc(s.distrito)}</p><ul>${(s.horario || []).map((x) => `<li><span>${esc(x[0])}</span><b>${esc(x[1])}</b></li>`).join('')}</ul>
+        <div class="ctas"><a class="btn btn-wa" target="_blank" rel="noopener" href="${SS.waLink(s.whatsapp, `Hola ${NOM} ${s.nombre} 👋 Quiero información para inscribirme.`)}">${WA}WhatsApp</a>${s.maps ? `<a class="btn btn-o" target="_blank" rel="noopener" href="${esc(s.maps)}">Cómo llegar</a>` : ''}</div></div>`).join('')}</div>
+    </div></section>` : ''}
+
+    <section class="im-final"><div class="wrap"><h2>¿Empiezas <em>hoy?</em></h2><button class="btn btn-y" data-wa>${WA}Quiero inscribirme</button></div></section>`;
+  };
+
+  // ---------- 3) COMUNIDAD: collage, historias, «¿cuál es tu objetivo?», barra flotante ----------
+  INI.comunidad = async () => {
+    const c = data.config, h = c.hero, hoy = hoyDia();
+    const fotos = data.galeria.filter((g) => pubVis(g) && g.mediaTipo !== 'video' && enSede(g));
+    const col = [h.imagen, ...fotos.map((g) => g.media), ...data.entrenadores.map((k) => k.foto)].filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 5);
+    const promos = data.publicaciones.filter((p) => SS.vigente(p) && enSede(p)).sort((a, b) => b.creado - a.creado);
+    const hist = [...(ON('promos') ? promos.map((p) => ({ t: p.titulo.split(' ').slice(0, 2).join(' '), m: p.media, href: '#/promos' })) : []),
+      ...(ON('galeria') ? fotos.slice(0, 6).map((g) => ({ t: g.categoria || g.titulo, m: g.media, href: '#/galeria' })) : [])].slice(0, 8);
+    const kHoy = clasesVis().filter((k) => (k.dias || []).includes(hoy)).sort(porHora);
+    const coaches = data.entrenadores.filter(enSede);
+    const planes = [...data.planes].sort((a, b) => a.meses - b.meses);
+    galList = fotos;
+    const abiertoYa = (() => { try { return abierto(); } catch (_) { return false; } })();
+    return `
+    <header class="co-hero">
+      ${hist.length ? `<div class="co-stories">${(await Promise.all(hist.map(async (x) => `<a href="${x.href}" class="co-st"><i><img src="${esc(await U(x.m))}" alt="" loading="lazy"></i><span>${esc(x.t)}</span></a>`))).join('')}</div>` : ''}
+      <div class="co-collage" aria-hidden="true">${(await Promise.all(col.map(async (m, i) => `<span class="co-ph p${i}"><img src="${esc(await U(m))}" alt="" ${i ? 'loading="lazy"' : 'fetchpriority="high"'}></span>`))).join('')}</div>
+      <div class="wrap co-c">
+        <span class="co-pill ${abiertoYa ? 'on' : ''}"><i></i>${abiertoYa ? 'Abierto ahora' : 'Hoy te esperamos'}</span>
+        <h1 class="co-t">${esc(h.l1)} ${esc(h.l2)} <em>${esc(h.l3)}</em></h1>
+        <p>${esc(h.texto)}</p>
+        <div class="ctas"><button class="btn btn-y" data-wa>${WA}Únete a ${esc(NOM)}</button>${ON('planes') ? `<a class="btn btn-o" href="#/planes">Planes desde ${desde()}/mes</a>` : ''}</div>
+      </div>
+    </header>
+
+    <section class="sec"><div class="wrap co-goal">
+      <div class="rv"><span class="eyebrow">30 segundos</span><h2 class="h2">¿Cuál es tu <em>objetivo?</em></h2><p class="lead">Toca uno y te decimos cómo empezar.</p>
+        <div class="qopts co-goals"><button data-goal="definicion"><b>🔥</b>Bajar grasa</button><button data-goal="volumen"><b>💪</b>Ganar músculo</button><button data-goal="salud"><b>❤️</b>Salud y energía</button></div></div>
+      <div class="qres rv" id="qres"><p style="color:var(--mu);text-align:center">👈 Elige tu objetivo</p></div>
+    </div></section>
+
+    ${ON('coaches') && coaches.length ? `<section class="sec alt"><div class="wrap"><div class="co-hd rv"><h2 class="h2">Entrena con <em>nosotros</em></h2><a class="more" href="#/coaches">Ver equipo →</a></div>
+      <div class="co-team">${(await Promise.all(coaches.map(async (k) => `<a class="co-m rv" href="#/coach/${esc(k.id)}"><img src="${esc(await U(k.foto))}" alt="" loading="lazy" style="object-position:${esc(k.pos || '50% 30%')}"><b>${esc(k.nombre)}</b><small>${esc(k.especialidad)}</small></a>`))).join('')}</div>
+    </div></section>` : ''}
+
+    ${ON('clases') && kHoy.length ? `<section class="sec"><div class="wrap"><div class="co-hd rv"><h2 class="h2">Clases de <em>hoy</em></h2><a class="more" href="#/clases">Toda la semana →</a></div>
+      <div class="co-clases">${kHoy.map((k) => { const co = coachDeK(k); return `<button class="co-k rv" data-clase="${esc(k.id)}" data-dia="${hoy}"><span class="h">${esc(hora12(k.hora))}</span><b>${esc(k.nombre)}</b><small>${esc(co ? co.nombre : k.profe || '')}${k.duracion ? ' · ' + esc(k.duracion) + ' min' : ''}</small><span class="go">Reservar</span></button>`; }).join('')}</div>
+    </div></section>` : ''}
+
+    ${ON('galeria') && fotos.length ? `<section class="sec alt"><div class="wrap"><div class="co-hd rv"><h2 class="h2">Así se vive <em>${esc(NOM)}</em></h2><a class="more" href="#/galeria">Galería →</a></div>
+      <div class="co-mason">${(await Promise.all(fotos.slice(0, 7).map(async (g, i) => `<button class="co-g rv" data-g="${i}"><img src="${esc(await U(g.media))}" alt="" loading="lazy"><span>${esc(g.titulo || '')}</span></button>`))).join('')}</div>
+    </div></section>` : ''}
+
+    ${ON('planes') && planes.length ? `<section class="sec"><div class="wrap"><div class="co-hd rv"><h2 class="h2">Tu <em>membresía</em></h2><a class="more" href="#/planes">Comparar →</a></div>
+      <div class="co-planes">${planes.map((p) => `<div class="co-p rv ${p.destacado ? 'hot' : ''}"><div><b>${esc(p.nombre)}</b>${p.destacado ? ' <span class="tag y">Recomendado</span>' : ''}<small>${(c.incluye || []).slice(0, 2).map((x) => esc(x.t)).join(' · ')}</small></div><div class="r"><span>${soles(precioDe(p))}</span><button class="btn ${p.destacado ? 'btn-y' : 'btn-o'}" data-wa data-plan="${esc(p.nombre)}">Elegir</button></div></div>`).join('')}</div>
+    </div></section>` : ''}
+
+    ${ON('promos') && promos.length ? `<section class="sec alt"><div class="wrap"><div class="co-hd rv"><h2 class="h2">Promos y <em>eventos</em></h2><a class="more" href="#/promos">Ver todas →</a></div>
+      <div class="promos">${await promoCards(promos.slice(0, 3))}</div></div></section>` : ''}
+
+    <section class="sec"><div class="wrap"><div class="co-end rv"><h2>Tu comunidad te <em>espera</em></h2><p>${esc(data.sedes.map((s) => s.nombre + ' · ' + s.distrito).join('  |  '))}</p><button class="btn btn-y" data-wa>${WA}Escríbenos</button></div></div></section>`;
   };
 
   async function promoCards(list) {
@@ -554,7 +684,7 @@
     const tabKey = key === 'coach' ? 'coaches' : key;
     $$('#tabs a,#bbar [data-r]').forEach((a) => a.classList.toggle('on', a.dataset.r === tabKey || (a.id === 'moreBtn' && ['clases', 'nutricion', 'sedes', 'galeria', 'promos'].includes(tabKey))));
     moveInd();
-    app.innerHTML = `<div class="page">${await P[key](arg)}</div>`;
+    app.innerHTML = `<div class="page">${await (key === 'inicio' && INI[EST] ? INI[EST]() : P[key](arg))}</div>`;
     document.title = (key === 'inicio' ? '' : ({ planes: 'Planes', coaches: 'Entrenadores', coach: 'Entrenador', clases: 'Horario de clases', nutricion: 'Asesoría nutricional', cafetin: 'Cafetín fit', sedes: 'Sedes', galeria: 'Galería', promos: 'Promos' }[key] + ' · ')) + NOM;
     if (changed && !keepScroll) scrollTo(0, 0); else scrollTo(0, y);
     afterRender();
