@@ -364,7 +364,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['versiones','🚀','Actualizaciones']]],['Operación',[['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
     NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}</button>`).join('')).join('')+
@@ -423,6 +423,43 @@ const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCa
 // Plantillas de Xyro Apps por rubro (on = lista para usar).
 const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🩺',n:'Consultorio',d:'Pacientes, citas e historial',on:0},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
 let altaRes=null,altaPlt='gym';
+/* Accesos de prueba (SQL 31): enlace /app/?prueba=CODIGO con el nombre del posible cliente y vencimiento. Es la demo completa con tiempo. */
+const PR_DUR=[[60,'1 hora'],[180,'3 horas'],[1440,'1 día'],[4320,'3 días'],[10080,'7 días']];
+const prLink=c=>'https://xyrostudio.net/app/?prueba='+c;
+const prCod=()=>{const a='abcdefghijkmnpqrstuvwxyz23456789',b=crypto.getRandomValues(new Uint8Array(10));return[...b].map(x=>a[x%a.length]).join('')};
+const prFecha=d=>new Date(d).toLocaleString('es-PE',{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
+const prMsg=r=>`Hola 👋 Te dejo un acceso de prueba a Xyro Apps armado para ${r.nombre}:\n${prLink(r.codigo)}\n\nÁbrelo desde tu PC o celular y revisa todo por tu cuenta: socios, cobros, caja, cafetín, reportes, rutinas y más. Los datos son de ejemplo.\n⏳ Disponible hasta el ${prFecha(r.expira)}.\nCualquier duda, escríbenos. 💜 XyroStudio`;
+const prQueda=d=>{const m=Math.ceil((new Date(d)-Date.now())/6e4);return m<=0?'':m>=1440?Math.floor(m/1440)+' d '+Math.floor(m%1440/60)+' h':m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min'};
+const prTel=t=>{t=String(t||'').replace(/\D/g,'');return t.length===9?'51'+t:t};
+V.pruebas=async ()=>{
+  H('Accesos de prueba','Un enlace con el nombre del posible cliente para que pruebe Xyro Apps solo, por el tiempo que elijas.');
+  $('#acts').innerHTML='<button class="btn btn-g" data-v="pruebas">↻ Actualizar</button>';
+  const {data,error}=await sb.from('xa_pruebas').select('*').order('creado',{ascending:false}).limit(200);
+  if(error)return `<div class="note">🧪 Para crear accesos de prueba, corre <b>31-xyro-accesos-prueba.sql</b> en Supabase.</div>`;
+  const rows=(data||[]).map(r=>{const q=prQueda(r.expira),t=prTel(r.telefono),m=prMsg(r);
+    return `<tr><td><b>${esc(r.nombre)}</b><br><small style="color:var(--mu)">${esc(r.rubro)} · ${esc(prLink(r.codigo).replace('https://',''))}</small>${r.nota?`<br><small>${esc(r.nota)}</small>`:''}</td>
+    <td>${q?`<span class="tag activo">🟢 Quedan ${q}</span>`:'<span class="tag baja">⏹️ Terminó</span>'}<br><small style="color:var(--mu)">hasta ${esc(prFecha(r.expira))}</small></td>
+    <td>${r.aperturas?`👀 Abierto ${r.aperturas} ${r.aperturas===1?'vez':'veces'}<br><small style="color:var(--mu)">última: ${esc(prFecha(r.ultima))}</small>`:'<small style="color:var(--mu)">Aún no lo abre</small>'}</td>
+    <td style="text-align:right;white-space:nowrap"><button class="btn btn-g btn-sm" data-ucopy="${esc(m)}" title="Copiar mensaje">📋</button> <a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="${esc(prLink(r.codigo))}" title="Abrir">↗</a> <a class="btn btn-p btn-sm" target="_blank" rel="noopener" href="https://wa.me/${t}?text=${encodeURIComponent(m)}">💬</a><br>
+    <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="60" style="margin-top:6px">＋1 h</button> <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="1440" style="margin-top:6px">＋1 día</button> ${q?`<button class="btn btn-g btn-sm" data-prfin="${esc(r.codigo)}" style="margin-top:6px">⏹️ Terminar</button>`:''} <button class="btn btn-g btn-sm" data-prdel="${esc(r.codigo)}" data-n="${esc(r.nombre)}" style="margin-top:6px" title="Eliminar">🗑️</button></td></tr>`}).join('');
+  return `<div class="panel"><h3>＋ Nuevo acceso de prueba</h3><form class="form" id="prf" onsubmit="return false" style="margin-top:10px">
+    <label class="full">Nombre del negocio<input id="prN" maxlength="40" placeholder="Ej: Santos Strength"></label>
+    <label>Rubro<select id="prR"><option value="gym">🏋️ Gimnasio</option><option value="consultorio">🩺 Consultorio</option><option value="academia">🎓 Academia</option></select></label>
+    <label>Duración<select id="prD">${PR_DUR.map(([m,n])=>`<option value="${m}">${n}</option>`).join('')}</select></label>
+    <label>Celular (opcional)<input id="prT" inputmode="tel" placeholder="Para enviarlo por WhatsApp"></label>
+    <label>Color de su marca<input id="prC" type="color" value="#f5c400"></label>
+    <label class="full">Nota (opcional)<input id="prO" maxlength="120" placeholder="Ej: dueño Juan, vio la web"></label>
+    <button class="btn btn-p" data-prcrear>🧪 Crear acceso</button></form>
+    <p class="d" style="margin-top:10px">Es la demo completa con su nombre y color: todo lo de Xyro Apps y sus integraciones. No imprime ni descarga, los comprobantes dicen DEMO y al terminar el tiempo se cierra y se borra. Puedes alargarlo, terminarlo o eliminarlo cuando quieras (se corta en máx. 3 min).</p></div>
+    <div class="panel"><h3>Accesos creados</h3>${rows?`<div class="tbl" style="margin-top:10px"><table><tr><th>Negocio</th><th>Estado</th><th>Uso</th><th></th></tr>${rows}</table></div>`:'<div class="empty">Aún no creaste accesos de prueba.</div>'}</div>`;
+};
+async function prCrear(){
+  const n=$('#prN').value.trim();if(!n)throw new Error('Escribe el nombre del negocio');
+  const r={codigo:prCod(),nombre:n,rubro:$('#prR').value,color:$('#prC').value,telefono:$('#prT').value.trim()||null,nota:$('#prO').value.trim()||null,expira:new Date(Date.now()+ +$('#prD').value*6e4).toISOString()};
+  const {error}=await sb.from('xa_pruebas').insert(r);if(error)throw error;
+  touch(`Creó acceso de prueba para ${n}`);
+  try{await navigator.clipboard.writeText(prMsg(r));toast('🧪 Acceso creado. Mensaje copiado ✓')}catch(_){toast('🧪 Acceso creado ✓')}
+}
 V.accesos=async ()=>{
   H('Enviar acceso','El enlace de su Xyro Apps para cada negocio. Un clic abre su WhatsApp con el mensaje listo.');
   $('#acts').innerHTML='<button class="btn btn-g" data-v="negocios">← Xyro Apps</button>';
@@ -887,6 +924,11 @@ document.addEventListener('click', async e=>{
       ({error}=await sb.from('xa_versiones').delete().neq('clave','general').eq('fijo',false)); if(error)throw error;
       touch(`Regresó a todos a la versión ${d.vgen}`); toast('↩️ Listo. Todos vuelven a esa versión al abrir la app.'); return go('versiones'); }
     if(d.vcancel){ const {error}=await sb.from('xa_versiones').update({prog:null,prog_para:null}).eq('clave',d.vcancel); if(error)throw error; toast('Cancelado'); return go('versiones'); }
+    if('prcrear' in d){ el.disabled=true; try{ await prCrear(); return go('pruebas'); }catch(ex){ toast(ex.message); el.disabled=false; } return; }
+    if(d.prmas){ const {data:r}=await sb.from('xa_pruebas').select('expira').eq('codigo',d.prmas).single(); const base=Math.max(Date.now(),new Date(r.expira).getTime());
+      const {error}=await sb.from('xa_pruebas').update({expira:new Date(base+ +d.min*6e4).toISOString()}).eq('codigo',d.prmas); if(error)throw error; toast('⏱️ Tiempo alargado'); return go('pruebas'); }
+    if(d.prfin){ if(!confirm('¿Terminar este acceso de prueba ahora? Se cierra en su pantalla en máx. 3 minutos.'))return; const {error}=await sb.from('xa_pruebas').update({expira:new Date().toISOString()}).eq('codigo',d.prfin); if(error)throw error; toast('⏹️ Acceso terminado'); return go('pruebas'); }
+    if(d.prdel){ if(!confirm(`¿Eliminar el acceso de prueba de ${d.n}? El enlace deja de funcionar.`))return; const {error}=await sb.from('xa_pruebas').delete().eq('codigo',d.prdel); if(error)throw error; touch(`Eliminó acceso de prueba de ${d.n}`); toast('🗑️ Eliminado'); return go('pruebas'); }
     if(d.v)return go(d.v);
     if(d.xarsp){ e.preventDefault(); el.disabled=true; bkAbierto='xa-'+d.xarsp; const {error}=await sb.rpc('xa_respaldar',{p_sitio:d.xarsp}); if(error)throw error; toast('✅ Copia guardada'); return go('backups'); }
     if(d.xarest){ const ok=prompt(`Vas a dejar el Xyro Apps de ${d.n} tal como estaba en esa copia. Lo que se hizo después se reemplaza (antes se guarda una copia de cómo está ahora, por si acaso).\n\nEscribe RESTAURAR para confirmar:`); if((ok||'').trim().toUpperCase()!=='RESTAURAR')return; el.disabled=true; const {data:n,error}=await sb.rpc('xa_restaurar',{p_id:+d.xarest}); if(error)throw error; touch(`Restauró Xyro Apps de ${d.n}`); toast(`✅ Restaurado: ${n||0} registros`); return go('backups'); }

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
-<script>/* demo: si esta versión ya no es la más nueva, abre la demo nueva */(function(){var m=location.pathname.match(/\/app\/v\/([\w-]+)\//);if(!m||!/[?&]demo=/.test(location.search))return;fetch('/app/v/versiones.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(L){if(L[0]&&L[0].id!==m[1])location.replace('/app/'+location.search+location.hash)}).catch(function(){})})()</script>
+<script>/* demo: si esta versión ya no es la más nueva, abre la demo nueva */(function(){var m=location.pathname.match(/\/app\/v\/([\w-]+)\//);if(!m||!/[?&](demo|prueba)=/.test(location.search))return;fetch('/app/v/versiones.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(L){if(L[0]&&L[0].id!==m[1])location.replace('/app/'+location.search+location.hash)}).catch(function(){})})()</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Xyro Apps</title>
@@ -324,7 +324,7 @@ body:not(.dentro){background:#05060a}
 'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const P=new URLSearchParams(location.search), DEMO=P.has('demo'), WA='51936449066';
+const P=new URLSearchParams(location.search), DEMO=P.has('demo')||P.has('prueba'), WA='51936449066';
 const SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
 const LS={g(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(_){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}},r(k){try{localStorage.removeItem(k)}catch(_){}}};
 
@@ -390,7 +390,22 @@ const noLab=s=>new Date(s+'T12:00:00').getDay()===0||feriado(s);
 const tel=t=>{t=String(t||'').replace(/\D/g,'');return t.length===9?'51'+t:t};
 
 /* ===== Datos (Supabase o demo local; misma interfaz) ===== */
-const DKEY=()=>'xa-demo-'+(CFG.rubro||'gym');
+// Acceso de prueba (SQL 31): /app/?prueba=CODIGO lo crea el gestor con nombre del negocio y vencimiento. Es la demo completa, pero con tiempo.
+const PRB=(P.get('prueba')||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,24);let PRUEBA=null;
+const DKEY=()=>PRB?'xa-prueba-'+PRB:'xa-demo-'+(CFG.rubro||'gym');
+async function pruebaRPC(abrir){const r=await fetch(SB.url+'/rest/v1/rpc/xa_prueba',{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify({p_codigo:PRB,p_abrir:!!abrir})});if(!r.ok)throw new Error('prueba');return r.json()}
+function pruebaFin(x){try{LS.r(DKEY())}catch(_){}document.querySelectorAll('.ov').forEach(o=>o.remove());$('#boot').hidden=true;$('#login').hidden=true;const a=$('#app');a&&(a.hidden=true);document.querySelector('.demo')?.remove();
+ const n=(x&&x.nombre)||'tu negocio',d=document.createElement('div');d.className='cen';d.innerHTML=`<div class="lg" style="max-width:420px;text-align:center"><img src="/img/marca/logo-apps-app.svg" alt=""><h2>${x&&x.motivo==='vencido'?'⏳ Tu acceso de prueba terminó':'🔒 Este acceso de prueba no está activo'}</h2><p class="mu">Gracias por probar Xyro Apps. Si te gustó, lo dejamos listo para ${esc(n)} con tus datos reales.</p><a class="btn p" href="https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio 👋 Probé Xyro Apps para '+n+' y quiero seguir.')}" target="_blank" rel="noopener">💬 Quiero mi Xyro Apps</a></div>`;document.body.appendChild(d)}
+async function pruebaBoot(){
+ let x=null;try{x=await pruebaRPC(true)}catch(_){fatal('No pude abrir tu acceso de prueba. Revisa tu internet e intenta de nuevo.');return}
+ if(!x||!x.ok)return pruebaFin(x);
+ PRUEBA=x;PRUEBA.fin=new Date(x.expira).getTime();demoBoot();
+ const reloj=()=>{const q=PRUEBA.fin-Date.now(),b=document.querySelector('.demo span');if(q<=0)return pruebaFin({motivo:'vencido',nombre:PRUEBA.nombre});
+  if(b){const m=Math.ceil(q/6e4);b.textContent='⏳ Acceso de prueba · quedan '+(m>=1440?Math.floor(m/1440)+' d '+Math.floor(m%1440/60)+' h':m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min')}};
+ reloj();setInterval(reloj,2e4);
+ // el gestor puede terminarlo o alargarlo: se revisa cada 3 min
+ setInterval(async()=>{try{const y=await pruebaRPC(false);if(!y||!y.ok)return pruebaFin(y||{});PRUEBA.fin=new Date(y.expira).getTime();reloj()}catch(_){}},18e4);
+}
 // La demo no sirve para trabajar: se borra sola a las 24 h, no imprime ni exporta y sus comprobantes dicen DEMO.
 const DEMO_TTL=864e5;let DT=0;const saveDemo=()=>LS.s(DKEY(),{S,CFG,t:DT||(DT=Date.now())});
 const noDemo=q=>{toast('🧪 En la demo no se '+q+'. Con tu propio Xyro Apps sí ✓');return true};
@@ -2021,16 +2036,17 @@ function semilla(rubro){
  S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));S.pag.sort((a,b)=>b.fecha>a.fecha?1:-1);S.asi.sort((a,b)=>b.t>a.t?1:-1);
 }
 function demoBoot(){
- const rub=RUBROS[P.get('demo')]?P.get('demo'):'gym';CFG={rubro:rub};R=RUBROS[rub];XY=['apps'];
- let g=LS.g(DKEY(),null);const n=P.get('n');if(g&&(!g.t||Date.now()-g.t>DEMO_TTL)){LS.r(DKEY());g=null}DT=g?g.t:0;
+ if(PRB&&!PRUEBA)return pruebaBoot();
+ const pd=PRUEBA?PRUEBA.rubro:P.get('demo'),rub=RUBROS[pd]?pd:'gym';CFG={rubro:rub};R=RUBROS[rub];XY=['apps'];
+ let g=LS.g(DKEY(),null);if(g&&(!g.t||!PRUEBA&&Date.now()-g.t>DEMO_TTL)){LS.r(DKEY());g=null}DT=g?g.t:0;const n=P.get('n')||(PRUEBA&&!g?PRUEBA.nombre:null);
  const rl=P.get('rol');ME=['supervisor','recepcion','cafetin','entrenador','nutricionista'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz',entrenador:'Diego Salas',nutricionista:'Valeria Ríos'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
  const arrancar=()=>{
   R=RUBROS[CFG.rubro]||R;demoMetas();asegS();if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
   const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo de prueba · se borra en 24 h</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
-  b.querySelector('#drst').onclick=()=>{LS.r(DKEY());location.href='?demo='+CFG.rubro};
+  b.querySelector('#drst').onclick=()=>{LS.r(DKEY());location.href=PRB?'?prueba='+PRB:'?demo='+CFG.rubro};
  };
  if(g&&g.S&&!n){S=g.S;CFG=g.CFG;asegS();if(!S.pro.length&&R.productos){const keep=S;semilla(rub);keep.pro=S.pro;S=keep;saveDemo()}return arrancar()}
- if(n){CFG.nombre=n.slice(0,40);semilla(rub);saveDemo();return arrancar()}
+ if(n){CFG.nombre=n.slice(0,40);semilla(rub);if(PRUEBA){/^#[0-9a-f]{6}$/i.test(PRUEBA.color||'')&&(CFG.color=PRUEBA.color);/^https:\/\//.test(PRUEBA.logo||'')&&(CFG.logo=PRUEBA.logo)}saveDemo();return arrancar()}
  $('#boot').hidden=true;
  sheet(`<div style="text-align:center;display:grid;gap:10px"><div style="font-size:48px">${R.ico}</div><h3>Prueba Xyro Apps con <span class="grad">tu negocio</span></h3><p class="mu sm">Te armamos un sistema de ejemplo en 1 segundo.</p></div>
  <form class="g" id="dn" style="gap:12px"><label class="fl">¿Cómo se llama tu negocio?<input id="dnn" placeholder="${esc(R.demo)}" maxlength="40"></label><div class="fl">Rubro<div class="opts" id="dnr">${Object.entries(RUBROS).map(([k,r])=>`<button type="button" data-v="${k}" class="${k===rub?'on':''}">${r.ico} ${r.n}</button>`).join('')}</div></div><button class="btn p">Crear mi demo ✨</button></form>`,(el,close)=>{
