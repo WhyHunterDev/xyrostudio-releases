@@ -2,31 +2,72 @@
  {
   "id": "20261113-1354",
   "fecha": "2026-11-13 13:54",
-  "notas": "Menú lateral con barra para bajar cuando no entran todas las opciones."
+  "notas": "Menú lateral con barra para bajar cuando no entran todas las opciones.",
+  "titulo": "Menú con barra para bajar",
+  "cambios": [
+   "El menú lateral ahora se puede deslizar cuando no entran todas las opciones (se llega a «Cerrar sesión»)."
+  ]
  },
  {
   "id": "20261113-1345",
   "fecha": "2026-11-13 13:45",
-  "notas": "Entrenador y nutricionista solo crean el plan (queda listo); recepción lo envía con 1 clic desde el WhatsApp del gimnasio."
+  "notas": "Entrenador y nutricionista solo crean el plan (queda listo); recepción lo envía con 1 clic desde el WhatsApp del gimnasio.",
+  "titulo": "Planes: recepción envía, el equipo solo crea",
+  "cambios": [
+   "Entrenador y nutricionista solo crean el plan; ya no pueden enviarlo desde su WhatsApp personal.",
+   "El plan queda «🟡 listo para enviar» en la ficha del socio, con quién lo hizo.",
+   "Bandeja «📨 Listos para enviar» en Rutinas y dietas y tarjeta en Inicio.",
+   "Recepción lo envía con 1 clic desde el WhatsApp del gimnasio y queda marcado ✅ enviado."
+  ],
+  "requiere": "SQL 29"
  },
  {
   "id": "20261113-1309",
   "fecha": "2026-11-13 13:09",
-  "notas": "Rutinas y dietas se envían como ficha en imagen con el logo y colores del gimnasio y quién la elaboró."
+  "notas": "Rutinas y dietas se envían como ficha en imagen con el logo y colores del gimnasio y quién la elaboró.",
+  "titulo": "Rutinas y dietas en imagen",
+  "cambios": [
+   "La rutina y la dieta se envían como ficha en imagen con el logo y colores del gimnasio.",
+   "La ficha muestra el socio, el objetivo, cada día o comida, las indicaciones y quién la elaboró (con su rol) y la fecha.",
+   "Se puede descargar o imprimir."
+  ],
+  "requiere": "SQL 29"
  },
  {
   "id": "20261113-1257",
   "fecha": "2026-11-13 12:57",
-  "notas": "Rutinas de entrenamiento y planes de alimentación por socio, enviados por WhatsApp. Roles Entrenador y Nutricionista."
+  "notas": "Rutinas de entrenamiento y planes de alimentación por socio, enviados por WhatsApp. Roles Entrenador y Nutricionista.",
+  "titulo": "Rutinas de entrenamiento y dietas",
+  "cambios": [
+   "Nueva sección «📋 Rutinas y dietas» y tarjeta en la ficha de cada socio.",
+   "Rutina por días (lunes a domingo) y dieta por comidas, con calorías y agua.",
+   "Plantillas de ejemplo y plantillas propias del gimnasio.",
+   "Roles nuevos en Equipo: Entrenador (solo rutinas) y Nutricionista (solo dietas)."
+  ],
+  "requiere": "SQL 29"
  },
  {
   "id": "20261113-0434",
   "fecha": "2026-11-13 04:34",
-  "notas": "Mi web muestra el nombre del negocio arriba (como en Xyro Apps)"
+  "notas": "Mi web muestra el nombre del negocio arriba (como en Xyro Apps)",
+  "titulo": "Mi web con el nombre del negocio",
+  "cambios": [
+   "El editor «Mi web» muestra arriba el nombre del negocio (como Xyro Apps), en vez de «Mi web»."
+  ]
  },
  {
   "id": "20261113-0422",
   "fecha": "2026-11-13 04:22",
-  "notas": "Versión inicial: cuotas, pago dividido, roles y turnos, Mi web dentro de Xyro"
+  "notas": "Versión inicial: cuotas, pago dividido, roles y turnos, Mi web dentro de Xyro",
+  "titulo": "Versión base",
+  "cambios": [
+   "Socios, membresías, cobros con comprobante, caja, cierres y reportes.",
+   "Carnet con QR por WhatsApp, asistencia y tienda/cafetín con stock.",
+   "Sedes, metas y bonos, seguimiento, solicitudes al supervisor y cierres por turno.",
+   "Roles: administrador, supervisor, recepción y cafetín.",
+   "Pago dividido (ej. Yape + efectivo) y pagos en cuotas con recordatorio.",
+   "«Mi web» dentro de Xyro Apps, sin otro login."
+  ],
+  "requiere": "SQL 24 y 26"
  }
 ]
