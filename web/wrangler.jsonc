@@ -1,10 +1,18 @@
 {
-  // Web xyrostudio.net (estática, carpeta public/) en Cloudflare.
+  // Web xyrostudio.net (carpeta public/) + IA del soporte (src/worker.js, solo /api/*) en Cloudflare.
   // Se publica solo al hacer push a main (Cloudflare Workers Builds, carpeta web/)
+  // La clave de Anthropic va como SECRETO en Cloudflare (ANTHROPIC_API_KEY), nunca aquí.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "xyrostudio",
+  "main": "src/worker.js",
   "compatibility_date": "2026-11-03",
-  "assets": { "directory": "public" },
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+  "vars": {
+    "IA_MODELO": "claude-opus-5-5",
+    "SB_URL": "https://szvdzcaoxjstdyblhxrd.supabase.co",
+    "SB_KEY": "sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe"
+  },
   "routes": [
     { "pattern": "xyrostudio.net", "custom_domain": true },
     { "pattern": "www.xyrostudio.net", "custom_domain": true }

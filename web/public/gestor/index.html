@@ -462,7 +462,7 @@ async function prCrear(){
   try{await navigator.clipboard.writeText(prMsg(r));toast('🧪 Acceso creado. Mensaje copiado ✓')}catch(_){toast('🧪 Acceso creado ✓')}
 }
 /* Tickets de soporte (SQL 32): los negocios escriben desde Xyro Apps → Soporte. Aquí se responde, con su contexto y errores. */
-let TKG=0,tkF='pend',tkSel=null;
+let TKIA=null,TKG=0,tkF='pend',tkSel=null;
 const TKE={abierto:['Nuevo','pend'],en_proceso:['En proceso','soporte'],esperando:['Esperando al cliente','x'],resuelto:['Resuelto','activo']};
 const TKC={problema:'🐞 Algo no funciona',duda:'❓ Duda',cambio:'✏️ Pedido de cambio',pago:'💳 Pagos y plan',otro:'💬 Otro'};
 const tkPend=t=>!t.ultimo_gestor&&t.estado!=='resuelto';
@@ -498,11 +498,16 @@ async function tkVer(id){
   const kv=(k,v)=>v===undefined||v===null||v===''?'':`<tr><td style="color:var(--mu);white-space:nowrap">${k}</td><td>${esc(String(v))}</td></tr>`;
   const errL=(arr,f)=>arr&&arr.length?`<div class="tbl"><table>${arr.map(f).join('')}</table></div>`:'<p class="d">Sin errores.</p>';
   const [e]=TKE[t.estado]||[''];
+  TKIA={id:t.id,negocio:t.negocio||t.slug,asunto:t.asunto,categoria:t.categoria,prioridad:t.prioridad,estado:t.estado,quien:(t.autor_nombre||'')+(t.autor_rol?' · '+t.autor_rol:''),
+    mensajes:(M||[]).slice(-20).map(m=>({de:m.de_gestor?'XyroStudio':'cliente',texto:String(m.texto||'').slice(0,1500),captura:!!m.adjunto})),
+    contexto:{...cx,errores:undefined,navegador:String(cx.navegador||'').slice(0,160)},errores_pantalla:ER.slice(-10),
+    errores_negocio_48h:(seg.data||[]).slice(0,12).map(x=>x.detalle),errores_web_48h:(web.data||[]).slice(0,8).map(x=>x.mensaje)};
   return `<div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start" class="tkgrid">
     <div class="panel"><h3>Conversación ${t.prioridad==='urgente'?'<span class="tag baja">🔴 Urgente</span>':''}</h3>
       <div style="display:grid;gap:10px;margin-top:10px">${(M||[]).map(m=>`<div style="padding:10px 12px;border-radius:12px;border:1px solid ${m.de_gestor?'rgba(124,108,255,.5)':'var(--line)'};background:${m.de_gestor?'rgba(124,108,255,.08)':'transparent'};${m.de_gestor?'margin-left:40px':'margin-right:40px'}"><small style="color:var(--mu)">${m.de_gestor?'🟣 Tú (XyroStudio)':esc(m.autor_nombre||'Cliente')} · ${tkF2(m.creado)}</small><div style="white-space:pre-wrap;margin-top:4px">${esc(m.texto)}</div>${m.adjunto?`<a href="${esc(m.adjunto)}" target="_blank" rel="noopener"><img src="${esc(m.adjunto)}" alt="Captura" style="max-width:100%;max-height:300px;border-radius:10px;margin-top:8px"></a>`:''}</div>`).join('')}</div>
+      <div id="tkIA"></div>
       <form class="form" id="tkrf" onsubmit="return false" style="margin-top:14px"><label class="full">Tu respuesta<textarea id="tkTx" rows="4" maxlength="4000" placeholder="Escribe la respuesta para ${esc(t.autor_nombre||'el cliente')}…"></textarea></label>
-        <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-p" data-tkres="${t.id}" data-est="esperando">Responder</button><button class="btn btn-g" data-tkres="${t.id}" data-est="resuelto">Responder y marcar resuelto</button></div></form></div>
+        <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-p" data-tkres="${t.id}" data-est="esperando">Responder</button><button class="btn btn-g" data-tkres="${t.id}" data-est="resuelto">Responder y marcar resuelto</button><button class="btn btn-g" data-tkia="${t.id}" type="button">🤖 Resumen y borrador con IA</button></div></form></div>
     <div style="display:grid;gap:14px">
       <div class="panel"><h3>Estado</h3><p class="d">Ahora: <b>${esc(e)}</b></p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${Object.entries(TKE).map(([k,[n]])=>`<button class="btn ${t.estado===k?'btn-p':'btn-g'} btn-sm" data-tkest="${t.id}" data-est="${k}">${n}</button>`).join('')}</div>
         <p class="d" style="margin-top:10px">Prioridad: <button class="btn btn-g btn-sm" data-tkpri="${t.id}" data-p="${t.prioridad==='urgente'?'normal':'urgente'}">${t.prioridad==='urgente'?'🔴 Urgente → normal':'Marcar urgente'}</button></p></div>
@@ -983,6 +988,12 @@ document.addEventListener('click', async e=>{
     if(d.prfin){ if(!confirm('¿Terminar este acceso de prueba ahora? Se cierra en su pantalla en máx. 3 minutos.'))return; const {error}=await sb.from('xa_pruebas').update({expira:new Date().toISOString()}).eq('codigo',d.prfin); if(error)throw error; toast('⏹️ Acceso terminado'); return go('pruebas'); }
     if(d.prdel){ if(!confirm(`¿Eliminar el acceso de prueba de ${d.n}? El enlace deja de funcionar.`))return; const {error}=await sb.from('xa_pruebas').delete().eq('codigo',d.prdel); if(error)throw error; touch(`Eliminó acceso de prueba de ${d.n}`); toast('🗑️ Eliminado'); return go('pruebas'); }
     if(d.tkf){ tkF=d.tkf; return go('tickets'); }
+    if(d.tkia){ if(!TKIA||TKIA.id!==+d.tkia)return; el.disabled=true; const box=$('#tkIA'); box.innerHTML='<div class="panel" style="margin-top:12px"><p class="d">🤖 Leyendo el ticket…</p></div>';
+      try{ const {data:ss}=await sb.auth.getSession(); const r=await fetch('/api/ia',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+(ss&&ss.session?ss.session.access_token:'')},body:JSON.stringify({modo:'ticket',ticket:TKIA})});
+        const j=await r.json().catch(()=>({})); if(!r.ok)throw new Error(j.error||'La IA no respondió ('+r.status+')');
+        box.innerHTML=`<div class="panel" style="margin-top:12px;border-color:rgba(124,108,255,.5)"><h3>🤖 Resumen con IA</h3><p style="margin-top:6px">${esc(j.resumen||'')}</p><p class="d" style="margin-top:8px"><b>Causa probable:</b> ${esc(j.causa_probable||'')}</p>${j.prioridad_sugerida==='urgente'&&TKIA.prioridad!=='urgente'?'<p class="d" style="margin-top:6px">🔴 Sugiere marcarlo urgente.</p>':''}<p class="d" style="margin-top:6px">El borrador quedó en «Tu respuesta»: revísalo antes de enviar.</p></div>`;
+        const tx=$('#tkTx'); if(tx&&j.borrador_respuesta&&!tx.value.trim())tx.value=j.borrador_respuesta; else if(tx&&j.borrador_respuesta)tx.value+='\n\n'+j.borrador_respuesta; tx&&tx.focus();
+      }catch(ex){ box.innerHTML=''; toast(ex.message); } el.disabled=false; return; }
     if('tkback' in d){ tkSel=null; return go('tickets'); }
     if(d.tkres){ const tx=$('#tkTx').value.trim(); if(!tx)return toast('Escribe la respuesta'); el.disabled=true;
       let {error}=await sb.from('xa_ticket_msgs').insert({ticket_id:+d.tkres,autor:me.id,autor_nombre:'XyroStudio',de_gestor:true,texto:tx.slice(0,4000)}); if(error){ el.disabled=false; throw error; }

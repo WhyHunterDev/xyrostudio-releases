@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261113-1745",
+  "fecha": "2026-11-13 17:45",
+  "titulo": "Asistente con IA",
+  "notas": "Asistente con IA",
+  "cambios": [
+   "Si el asistente no encuentra la respuesta, ahora la responde una IA (con «Hazlo por mí»)",
+   "Botón «🤖 No es eso» para preguntarle a la IA",
+   "Límite de 25 preguntas a la IA por día por negocio"
+  ],
+  "requiere": "SQL 33"
+ },
+ {
   "id": "20261113-1656",
   "fecha": "2026-11-13 16:56",
   "titulo": "Asistente de soporte",
