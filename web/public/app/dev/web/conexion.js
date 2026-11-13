@@ -43,6 +43,7 @@
     let w = app.web || ''; try { if (w) { const u = new URL(w); w = /\.[a-z0-9]+$/i.test(u.pathname) ? u.href.replace(/[^/]*$/, '') : u.origin + u.pathname.replace(/\/?$/, '/'); } } catch (_) { w = ''; }
     window.SS_WEB = w;
     window.SS_LOGO = app.logo || '';
+    window.SS_NOMBRE = app.nombre || negocio || '';
     return out;
   }
   async function guardarClave(clave, valor) {
