@@ -1,5 +1,18 @@
 [
  {
+  "id": "20261113-1423",
+  "fecha": "2026-11-13 14:23",
+  "titulo": "Cuentas del equipo por negocio y dueños con varios negocios",
+  "notas": "Cuentas del equipo por negocio y dueños con varios negocios",
+  "cambios": [
+   "El equipo ahora entra con usuario@negocio (ej. ana@titan-gym). Solo el administrador usa su correo real",
+   "El login acepta el usuario o el correo; si olvidan la clave, el administrador les da una nueva",
+   "Un dueño con varios negocios cambia de uno a otro con «🏢 Cambiar negocio» sin otra cuenta",
+   "Una cuenta ya no puede pasarse a otro negocio por error"
+  ],
+  "requiere": "SQL 30"
+ },
+ {
   "id": "20261113-1354",
   "fecha": "2026-11-13 13:54",
   "notas": "Menú lateral con barra para bajar cuando no entran todas las opciones.",
