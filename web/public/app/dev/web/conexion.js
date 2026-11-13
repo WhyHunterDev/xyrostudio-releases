@@ -42,6 +42,8 @@
     const app = out.app || {};                       // ajustes de Xyro Apps: web pública y logo del negocio
     let w = app.web || ''; try { if (w) { const u = new URL(w); w = /\.[a-z0-9]+$/i.test(u.pathname) ? u.href.replace(/[^/]*$/, '') : u.origin + u.pathname.replace(/\/?$/, '/'); } } catch (_) { w = ''; }
     window.SS_WEB = w;
+    window.SS_WEBURL = app.web || '';               // enlace completo (la base Xyro Webs lleva ?s=codigo)
+    window.SS_BASE = /xyrostudio\.net\/sitio\//.test(app.web || '');   // web hecha con la base: tiene estilos y secciones
     window.SS_LOGO = app.logo || '';
     window.SS_NOMBRE = app.nombre || negocio || '';
     return out;
