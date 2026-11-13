@@ -1,5 +1,5 @@
 // Xyro Apps: red primero, caché de respaldo para abrir sin señal.
-const C = 'xyro-apps-v1';
+const C = 'xyro-apps-v2';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(C).then((c) => c.addAll(['./', '../img/marca/logo-apps-app.svg']))); });
 self.addEventListener('activate', (e) => e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((x) => x !== C).map((x) => caches.delete(x)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', (e) => {
