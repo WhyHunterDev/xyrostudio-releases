@@ -83,6 +83,7 @@ main{overflow:auto;height:100%;position:relative}
 .row .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .nm small{color:var(--mu);font-size:12.5px}
 .av{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none;color:#fff;background:linear-gradient(135deg,hsl(var(--h),80%,60%),hsl(calc(var(--h) + 50),80%,45%))}
+@keyframes xbg{0%,100%{box-shadow:0 0 0 0 var(--a)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--a) 40%,transparent)}}.xbglow{animation:xbg .7s ease 1;outline:2px solid var(--a);outline-offset:2px}
 .tkb{display:inline-block;min-width:18px;margin-left:6px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;line-height:18px;text-align:center}.tkb[hidden]{display:none}
 .pill{font-size:12px;font-weight:700;padding:4px 9px;border-radius:999px;white-space:nowrap}
 .pill.act{background:#3ddc971f;color:var(--ok)}.pill.pronto{background:#f5b5441f;color:var(--wa)}.pill.venc{background:#ff5c7a1f;color:var(--bad)}.pill.sin{background:#ffffff10;color:var(--mu)}.pill.cong{background:#7cc8ff1f;color:#7cc8ff}
@@ -1618,25 +1619,77 @@ async function subirImg(f,max,pref){if(DEMO)return'';const im=await new Promise(
  const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
  const b=await new Promise(ok=>c.toBlob(ok,'image/jpeg',.82)),path=SID+'/xa/'+pref+'-'+Date.now()+'.jpg';const{error}=await sb.storage.from('medios').upload(path,b,{contentType:'image/jpeg'});if(error)throw new Error('No se pudo subir la imagen.');
  return sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
-function nuevoTicket(){
+/* Asistente Xyro: responde dudas de uso con pasos y «Hazlo por mí» (abre la pantalla y el formulario). Solo lo que el asistente no resuelve pasa a ticket. */
+const XB=[
+ {k:'color colores logo marca tema fondo imagen',t:'Cambiar color o logo',r:'Ve a Ajustes → «🎨 Marca y colores» → ✏️ Editar. Ahí eliges tus colores y subes tu logo desde tu celular o PC.',a:['ajustes','#amk'],adm:1},
+ {k:'nombre negocio ruc razon social direccion telefono datos empresa',t:'Datos de tu negocio',r:'Ajustes → la primera tarjeta (el nombre de tu negocio) → ✏️ Editar. Ahí cambias nombre, RUC, dirección y teléfono.',a:['ajustes','#aj'],adm:1},
+ {k:'agregar socio nuevo cliente registrar inscribir alumno paciente crear socio',t:'Registrar un socio nuevo',r:'Toca «＋» arriba a la derecha (en Inicio o Socios), llena nombre y DNI y guarda. Después puedes asignarle su plan.',a:['socios','#nuevo']},
+ {k:'cuotas partes saldo deuda debe credito fraccionar',t:'Cobrar en cuotas o ver quién debe',r:'Al cobrar, toca «🗓️ Pagar en cuotas»: paga una parte hoy y el resto en cuotas. Para ver quién debe: Seguimiento → «💸 Con saldo».',a:['seguimiento']},
+ {k:'cobrar renovar pago pagar membresia mensualidad asignar plan vender plan',t:'Cobrar o renovar una membresía',r:'Abre la ficha del socio (búscalo arriba) → «💳 Renovar» o «💳 Asignar». Eliges el plan, el método de pago y guardas. Sale su comprobante.',a:['socios']},
+ {k:'descuento rebaja precio especial promocion',t:'Dar un descuento',r:'Al cobrar una membresía, cambia el precio y escribe el motivo del descuento. Queda registrado quién lo dio.',a:['socios']},
+ {k:'congelar pausar viaje lesion suspender',t:'Congelar una membresía',r:'Ficha del socio → «❄️ Congelar», eliges desde cuándo y cuántos días. Los días se suman a su fecha final. Para seguir: «▶️ Reactivar».',a:['socios']},
+ {k:'transferir pasar membresia otra persona traspaso',t:'Transferir una membresía',r:'Ficha del socio → «🔁 Transferir» y eliges a quién pasa los días que le quedan.',a:['socios']},
+ {k:'asistencia ingreso entrada marcar qr escanear kiosco puerta',t:'Marcar asistencia',r:'Toca «📷 Abrir asistencia» (en Inicio o Ajustes). El socio muestra su QR o escribes su DNI o código. También puedes marcar desde su ficha con «✅ Marcar ingreso».',a:['ajustes','#nuevo']},
+ {k:'carnet qr credencial tarjeta enviar carnets',t:'Enviar carnets con QR',r:'Socios → «🪪 Enviar carnets». Se arma una cola con los socios activos que tienen celular y los mandas por WhatsApp uno por uno. También desde la ficha: «🪪 Carnet QR».',a:['socios']},
+ {k:'plan planes precio precios crear plan tarifa mensual trimestral',t:'Crear o cambiar planes y precios',r:'Planes → «＋» para crear uno, o tócalo para cambiar su precio o días. Si no tienes ninguno, usa «✨ Cargar planes sugeridos».',a:['planes','#nuevo'],adm:1},
+ {k:'web pagina precios web publicar planes web enviar web',t:'Pasar tus planes a tu web',r:'Ajustes → «🌐 Tus precios en tu web» → «📤 Enviar mis planes a la web». Puedes activar que se actualice sola.',a:['ajustes','#asy'],adm:1},
+ {k:'comprobante boleta factura ticket imprimir serie nota de venta impresora sunat',t:'Comprobantes e impresión',r:'Ajustes → «🧾 Comprobantes» → ✏️ Editar: RUC, serie, IGV, ticket o A4 e impresión automática. La boleta electrónica SUNAT se activa con soporte.',a:['ajustes','#afi'],adm:1},
+ {k:'caja cierre cerrar turno cuadre efectivo arqueo',t:'Cerrar caja o turno',r:'Caja → «🕐 Cerrar mi turno». Ves cuánto entró por método de pago y lo cuadras. A medianoche se cierra solo lo que falte.',a:['caja','#ctur']},
+ {k:'reporte reportes excel descargar ingresos ventas mes estadisticas',t:'Ver reportes',r:'Reportes: eliges las fechas y ves ingresos, socios nuevos y asistencias. «⬇ Excel (CSV)» lo descarga.',a:['reportes']},
+ {k:'sede sedes local sucursal',t:'Agregar o quitar sedes',r:'Ajustes → «📍 Sedes» → «✏️ Agregar o quitar». Cada cuenta del equipo trabaja en su sede.',a:['ajustes','#asd'],adm:1},
+ {k:'turnos horario manana tarde noche',t:'Configurar turnos de caja',r:'Ajustes → «🕐 Turnos de caja» → ✏️ Editar.',a:['ajustes','#atu'],adm:1},
+ {k:'equipo usuario cuenta recepcionista empleado trabajador acceso permisos rol crear usuario entrenador nutricionista supervisor',t:'Crear cuentas para tu equipo',r:'Equipo → «＋ Nueva cuenta». Eliges su rol (recepción, supervisor, cafetín, entrenador…) y su sede. Entran con usuario@tu-negocio y una clave temporal.',a:['equipo','#eqNew'],adm:1},
+ {k:'contrasena clave password cambiar clave',t:'Cambiar tu contraseña',r:'Mi cuenta → «Cambiar contraseña».',a:['cuenta','#ccP']},
+ {k:'olvide olvido recuperar no puedo entrar acceso bloqueado',t:'Olvidaste tu contraseña',r:'En la pantalla de entrada toca «¿Olvidaste tu contraseña?» y te llega un correo. Si es una cuenta de tu equipo, el administrador le da una clave temporal en Equipo.'},
+ {k:'cafetin tienda producto productos stock inventario bebida suplemento vender producto',t:'Cafetín y stock',r:'Cafetín → «＋ Producto» para agregar, «📦 Stock» para entradas de mercadería. Para vender, tocas los productos y cobras.',a:['tienda','#tNew']},
+ {k:'rutina rutinas dieta dietas entrenamiento alimentacion plan nutricional',t:'Rutinas y dietas',r:'Rutinas y dietas → elige el socio o crea una plantilla. Entrenadores y nutricionistas las preparan y recepción las envía por WhatsApp.',a:['rutinas']},
+ {k:'meta metas bono bonos comision ranking',t:'Metas y bonos del equipo',r:'Metas → «🎯 ＋ Meta» para la meta del mes por sede y «🎁 ＋ Bono» para premiar a recepción.',a:['metas','#mNew'],adm:1},
+ {k:'importar excel appfit migrar subir lista pasar datos',t:'Importar tus socios desde Excel o AppFit',r:'Ajustes → «📥 Importar desde AppFit» → «Subir Excel». Acepta Excel o CSV y te muestra todo antes de guardar.',a:['ajustes','#aim'],adm:1},
+ {k:'mi web editar web fotos web textos web promociones galeria',t:'Editar tu web',r:'Menú → «🌐 Mi web». Ahí cambias textos, fotos, promos y horarios. Si quieres un cambio de diseño, pídelo como modificación.',a:['web']},
+ {k:'eliminar borrar socio quitar cliente dar de baja',t:'Eliminar un socio',r:'Ficha del socio → ✏️ Editar → «Eliminar». Solo el administrador o el supervisor pueden hacerlo.',a:['socios']},
+ {k:'vencidos vencer vencen cumpleanos seguimiento no vienen inactivos',t:'Ver vencidos, por vencer y cumpleaños',r:'Seguimiento: tienes pestañas de por vencer, vencidos, los que no vienen y cumpleaños, con botón para escribirles por WhatsApp.',a:['seguimiento']},
+ {k:'instalar app celular icono pantalla de inicio descargar app',t:'Instalar en tu celular',r:'Abre Xyro Apps en Chrome o Safari → menú del navegador → «Agregar a pantalla de inicio». Queda como una app.'},
+ {k:'cambiar negocio otro negocio varios negocios',t:'Cambiar de negocio',r:'Si administras varios negocios, abajo en el menú toca «🏢 Cambiar negocio».'},
+ {k:'robo robaron perdi perdida borre borrado datos desaparecieron hackeo daño dano malogro respaldo backup copia restaurar urgente',t:'Urgencia: datos perdidos, robo o daño',r:'Esto lo atiende una persona de inmediato. Guardamos copias diarias de tu información y podemos restaurarla. Toca «Hablar con soporte» y elige 🔴 Urgente.',urg:1}
+];
+const XQ=[['🎨 Cambiar color o logo','color logo'],['➕ Registrar socio','agregar socio'],['💳 Cobrar membresía','cobrar renovar'],['📷 Asistencia','asistencia'],['🧾 Imprimir comprobantes','comprobante imprimir'],['👥 Cuentas del equipo','equipo usuario'],['💰 Cerrar caja','cierre caja']];
+let XBH=[];
+function xbBuscar(q){const n=' '+norm(q)+' ',W=n.trim().split(' ').filter(w=>w.length>2);return XB.map(x=>{const ks=x.k.split(' ');let sc=0;ks.forEach(k=>{if(k.length>3&&n.includes(k))sc+=2});W.forEach(w=>{if(ks.some(k=>k.startsWith(w)||w.startsWith(k)&&k.length>3))sc++});x.k.split(' ').length;return[sc,x]}).filter(z=>z[0]>0).sort((a,b)=>b[0]-a[0]).map(z=>z[1])}
+function xbHacer(i){const x=XB[i];if(!x||!x.a)return;if(x.adm&&!isAdmin())return toast('Eso lo hace el administrador de tu negocio');location.hash='#/'+x.a[0];
+ if(x.a[1])setTimeout(()=>{const b=$(x.a[1]);if(!b)return;b.scrollIntoView({block:'center',behavior:'smooth'});b.classList.add('xbglow');setTimeout(()=>{b.classList.remove('xbglow');b.click()},700)},400)}
+function xbPreguntar(q){q=String(q||'').trim();if(!q)return;const R2=xbBuscar(q);XBH.push({yo:q});
+ if(!R2.length)XBH.push({no:1});else XBH.push({r:XB.indexOf(R2[0]),otros:R2.slice(1,3).map(x=>XB.indexOf(x))});XBH=XBH.slice(-12);go()}
+function xbHTML(){
+ setTimeout(()=>{const f=$('#xbF');f&&(f.onsubmit=e=>{e.preventDefault();xbPreguntar(f.q.value)});$$('[data-xbq]').forEach(b=>b.onclick=()=>xbPreguntar(b.dataset.xbq));$$('[data-xbr]').forEach(b=>b.onclick=()=>{XBH.push({r:+b.dataset.xbr,otros:[]});go()});$$('[data-xbh]').forEach(b=>b.onclick=()=>xbHacer(+b.dataset.xbh));$$('[data-xbok]').forEach(b=>b.onclick=()=>{XBH.push({ok:1});go()});$$('[data-xbt]').forEach(b=>b.onclick=()=>nuevoTicket(b.dataset.xbt));const c=$('#xbC');c&&(c.scrollTop=c.scrollHeight);const q=$('#xbF input');q&&XBH.length&&q.focus()});
+ const burb=(h,yo)=>`<div style="max-width:85%;${yo?'margin-left:auto;background:var(--a);color:var(--on,#000)':'background:#ffffff0d'};padding:10px 12px;border-radius:14px;${yo?'border-bottom-right-radius:4px':'border-bottom-left-radius:4px'}">${h}</div>`;
+ const H2=XBH.map(m=>m.yo?burb(esc(m.yo),1):m.ok?burb('¡Genial! 🙌 Si necesitas algo más, pregúntame.'):m.no?burb(`No encontré eso. Prueba con otras palabras o elige un tema de abajo. Si es algo que no funciona o un cambio que quieres, <button class="btn sm" data-xbt="">🧑‍💻 Hablar con soporte</button>`):(()=>{const x=XB[m.r];return burb(`<b>${esc(x.t)}</b><p style="margin:6px 0 0">${esc(x.r)}</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">${x.a?`<button class="btn sm p" data-xbh="${m.r}">👉 Hazlo por mí</button>`:''}${x.urg?'<button class="btn sm p" data-xbt="urgente">🔴 Hablar con soporte</button>':`<button class="btn sm" data-xbok>✅ Me sirvió</button><button class="btn sm" data-xbt="">No, hablar con soporte</button>`}</div>${m.otros&&m.otros.length?`<p class="mu sm" style="margin:10px 0 4px">¿O buscabas…?</p><div style="display:flex;gap:6px;flex-wrap:wrap">${m.otros.map(i=>`<button class="btn sm" data-xbr="${i}">${esc(XB[i].t)}</button>`).join('')}</div>`:''}`)})()).join('');
+ return`<div class="card" style="display:grid;gap:12px"><div style="display:flex;gap:10px;align-items:center"><span style="font-size:28px">🤖</span><div><b>Asistente Xyro</b><br><small class="mu">Te respondo al instante y hasta lo hago por ti.</small></div></div>
+ <div id="xbC" style="display:grid;gap:8px;max-height:420px;overflow:auto">${burb('Hola 👋 ¿Qué quieres hacer? Escríbelo con tus palabras, por ejemplo «cambiar el color» o «crear un usuario».')}${H2}</div>
+ <form id="xbF" style="display:flex;gap:8px"><input name="q" placeholder="Escribe tu pregunta…" autocomplete="off" maxlength="160" style="flex:1;min-width:0;background:#0a0a0a;border:1px solid var(--line);border-radius:12px;padding:12px 14px;color:var(--tx);font:inherit"><button class="btn p">Preguntar</button></form>
+ <div style="display:flex;gap:6px;flex-wrap:wrap">${XQ.map(([n,q])=>`<button class="btn sm" data-xbq="${esc(q)}">${n}</button>`).join('')}</div></div>`;
+}
+const TK_TIPO=[['urgente','🔴 Urgente: robo, daño, perdí información o no puedo trabajar'],['ventas','🟠 Ventas, cobros o caja con problemas'],['cambio','✏️ Quiero una modificación'],['pago','💳 Pagos y mi plan'],['duda','❓ El asistente no resolvió mi duda']];
+function nuevoTicket(tipo){
  if(DEMO)return noDemo('envían tickets');if(NEED32)return toast('El soporte por tickets aún no está activo. Escríbenos por WhatsApp.');
- form('🛟 Nuevo ticket de soporte',[{k:'cat',l:'¿Qué necesitas?',t:'opts',v:'problema',o:Object.entries(TK_CAT).filter(x=>x[0]!=='otro')},{k:'asunto',l:'Asunto',req:1,ph:'Ej. No me deja cobrar con Yape'},{k:'txt',l:'Cuéntanos qué pasó o qué necesitas',t:'area'},{k:'adj',l:'Captura de pantalla (opcional)',t:'adj'},{k:'urg',l:'Es urgente: no puedo seguir trabajando',t:'chk'}],async(v,fm)=>{
+ const ult=XBH.filter(m=>m.yo).slice(-3).map(m=>m.yo);
+ form('🧑‍💻 Hablar con soporte',[{k:'tipo',l:'¿Qué tipo de ayuda necesitas?',t:'opts',v:tipo||'ventas',o:TK_TIPO},{k:'asunto',l:'Asunto',req:1,ph:'Ej. No me deja cobrar con Yape',v:ult.length?ult[ult.length-1].slice(0,140):''},{k:'txt',l:'Cuéntanos qué pasó o qué necesitas',t:'area'},{k:'adj',l:'Captura de pantalla (opcional)',t:'adj'}],async(v,fm)=>{
   if(v.asunto.length<3)throw new Error('Escribe un asunto un poco más largo');if(!v.txt)throw new Error('Cuéntanos qué pasó');
-  const f=fm.querySelector('#f_adj').files[0],adj=f?await subirImg(f,1600,'ticket'):null;
-  const{data:t,error}=await sb.from('xa_tickets').insert({sitio_id:String(SID),slug:SLUG,negocio:nombre(),autor:ME.id,autor_nombre:QUIEN(),autor_rol:ME.rol,categoria:v.cat||'problema',prioridad:v.urg?'urgente':'normal',asunto:v.asunto.slice(0,140),contexto:tkCtx()}).select('id').single();if(error)throw error;
+  const f=fm.querySelector('#f_adj').files[0],adj=f?await subirImg(f,1600,'ticket'):null,tp=v.tipo||'ventas';
+  const cat={urgente:'problema',ventas:'problema',cambio:'cambio',pago:'pago',duda:'duda'}[tp]||'otro';
+  const{data:t,error}=await sb.from('xa_tickets').insert({sitio_id:String(SID),slug:SLUG,negocio:nombre(),autor:ME.id,autor_nombre:QUIEN(),autor_rol:ME.rol,categoria:cat,prioridad:tp==='urgente'?'urgente':'normal',asunto:v.asunto.slice(0,140),contexto:{...tkCtx(),tipo:tp,asistente:ult}}).select('id').single();if(error)throw error;
   const{error:e2}=await sb.from('xa_ticket_msgs').insert({ticket_id:t.id,autor:ME.id,autor_nombre:QUIEN(),texto:v.txt.slice(0,4000),adjunto:adj});if(e2)throw e2;
-  TK=null;toast('🛟 Ticket #'+t.id+' enviado. Te respondemos aquí mismo.');location.hash='#/soporte/'+t.id});
+  TK=null;XBH=[];toast('🛟 Ticket #'+t.id+' enviado. Te respondemos aquí mismo.');location.hash='#/soporte/'+t.id});
 }
 function tkCard(t){const[e,c]=TK_EST[t.estado]||['',''];return`<a class="card" href="#/soporte/${t.id}" style="display:flex;justify-content:space-between;gap:10px;align-items:center;text-decoration:none;color:inherit"><div style="min-width:0"><b>#${t.id} · ${esc(t.asunto)}</b><br><small class="mu">${esc(TK_CAT[t.categoria]||'')} · ${esc(t.autor_nombre||'')} · ${tkFecha(t.actualizado)}${t.prioridad==='urgente'?' · 🔴 Urgente':''}</small></div><span style="display:flex;gap:6px;align-items:center">${tkNuevo(t)?'<span class="pill venc">💬 Nueva respuesta</span>':''}<span class="pill ${c}">${e}</span></span></a>`}
 function soporte(){
- if(TK===null){tkCargar().then(()=>ruta==='soporte'&&go());return'<div class="empty"><b>🛟</b>Cargando tus tickets…</div>'}
+ if(!DEMO&&TK===null){tkCargar().then(()=>ruta==='soporte'&&go());return'<div class="empty"><b>🛟</b>Cargando…</div>'}
  if(arg)return tkDetalle(+arg);
- setTimeout(()=>{const n=$('#tkN');n&&(n.onclick=nuevoTicket)});
- const head=`<div class="hi"><div><h2>Soporte XyroStudio</h2><p class="mu">Escríbenos aquí: cada pedido queda con su número, ves en qué va y te avisamos en este mismo panel cuando respondemos.</p></div><button class="btn p" id="tkN">＋ Nuevo ticket</button></div>`;
- if(DEMO)return head+`<div class="empty"><b>🛟</b>Con tu propio Xyro Apps, aquí envías tus tickets a soporte con capturas y ves cada respuesta.<br><a class="btn sm" target="_blank" rel="noopener" href="${soporteWA()}" style="margin-top:10px">💬 Escribir por WhatsApp</a></div>`;
- if(NEED32)return head+`<div class="empty"><b>🛟</b>El soporte por tickets se está activando.<br><a class="btn sm" target="_blank" rel="noopener" href="${soporteWA()}" style="margin-top:10px">💬 Escríbenos por WhatsApp</a></div>`;
+ setTimeout(()=>{const n=$('#tkN');n&&(n.onclick=()=>nuevoTicket())});
+ const head=`<div class="hi"><div><h2>Soporte XyroStudio</h2><p class="mu">Pregúntale al asistente: responde al instante. Si es una urgencia, un problema con ventas o una modificación, habla con nuestro equipo.</p></div><button class="btn" id="tkN">🧑‍💻 Hablar con soporte</button></div>`;
+ if(DEMO)return head+xbHTML();
+ if(NEED32)return head+xbHTML()+`<div class="empty" style="margin-top:12px"><b>🛟</b>Los tickets se están activando.<br><a class="btn sm" target="_blank" rel="noopener" href="${soporteWA()}" style="margin-top:10px">💬 Escríbenos por WhatsApp</a></div>`;
  const mios=isAdmin()?TK:TK.filter(t=>t.autor===ME.id),ab=mios.filter(t=>t.estado!=='resuelto'),re=mios.filter(t=>t.estado==='resuelto');
- return head+`<div class="g st">${ab.map(tkCard).join('')||'<div class="empty"><b>🎉</b>No tienes tickets abiertos.</div>'}</div>${re.length?`<p class="mu sm" style="margin:18px 0 8px">Resueltos</p><div class="g st">${re.slice(0,30).map(tkCard).join('')}</div>`:''}`;
+ return head+xbHTML()+`${ab.length?`<p class="mu sm" style="margin:18px 0 8px">Tus tickets abiertos</p><div class="g st">${ab.map(tkCard).join('')}</div>`:''}${re.length?`<p class="mu sm" style="margin:18px 0 8px">Resueltos</p><div class="g st">${re.slice(0,30).map(tkCard).join('')}</div>`:''}`;
 }
 function tkDetalle(id){
  const t=(TK||[]).find(x=>x.id===id);if(!t)return'<div class="empty"><b>🔎</b>No encontré ese ticket. <a href="#/soporte">Volver</a></div>';
