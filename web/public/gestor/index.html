@@ -377,7 +377,7 @@ V.resumen=async ()=>{
 };
 function clCard(cl){return`<div class="cl"><div class="in"><h4>${esc(cl.negocio)} <span class="tag ${cl.estado}">${estLabel(cl.estado)}</span> <span class="tag ${cl.pago==='pagado'?'pg':'pend'}">${cl.pago==='pagado'?'Pagado':'Por cobrar'}</span></h4>
   <div class="meta"><span>${esc(cl.rubro||'—')}</span><span>${soles(cl.costo)}</span>${+cl.soporte?`<span>+ ${soles(cl.soporte)}/mes</span>`:''}${cl.entregado?`<span>Entregado ${cl.entregado}</span>`:''}</div></div>
-  <div class="acts"><button class="btn btn-g btn-sm" data-open="${cl.id}">Abrir ficha</button>${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Web ↗</a>`:''}</div></div>`;}
+  <div class="acts"><button class="btn btn-g btn-sm" data-open="${cl.id}">Abrir ficha</button>${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Web ↗</a>`:''}<button class="btn btn-g btn-sm" data-del="${cl.id}" title="Eliminar cliente">🗑️</button></div></div>`;}
 // Xyro Apps de todos tus clientes: cómo van este mes y entrar con un clic (solo tú lo ves; mirar no deja rastro).
 async function sumaPagos(sid,desde){let t=0,i=0;for(;;){const{data,error}=await sb.from('xa_pagos').select('monto').eq('sitio_id',sid).gte('fecha',desde).order('id').range(i,i+999);if(error||!data)break;data.forEach(r=>t+=+r.monto||0);if(data.length<1000)break;i+=1000}return t}
 V.negocios=async ()=>{
@@ -794,7 +794,12 @@ document.addEventListener('click', async e=>{
       if(editing==='new'){ o.versiones=[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:''}]; }
       else{ o.id=editing; }
       await guardar(o); touch(`${editing==='new'?'Agregó':'Editó'} al cliente ${o.negocio}`); let ok=true; try{ await asegurarSitio(o); }catch(_){ ok=false; } await cargar(); editing=null; if(ok)toast('Guardado ✓'); return go('clientes'); }
-    if(d.del){ const c=clientes.find(x=>x.id===d.del); if(!confirm(`¿Eliminar a ${c.negocio}? No se puede deshacer.`))return; await borrar(d.del); touch(`Eliminó al cliente ${c.negocio}`); await cargar(); editing=null; toast('Eliminado'); return go('clientes'); }
+    if(d.del){ const c=clientes.find(x=>x.id===d.del); if(!c)return; const slug=slugDe(c.url||'');
+      const {data:st}=slug?await sb.from('sitios').select('id').eq('slug',slug).maybeSingle():{data:null};
+      if(st){ const t=prompt(`Se borrará ${c.negocio} COMPLETO: su Xyro Apps (socios, pagos, caja), su web y las cuentas de su equipo. No se puede deshacer.\n\nEscribe ${slug} para confirmar:`); if(t===null)return; if(t.trim()!==slug)return toast('El código no coincide. No se borró nada.');
+        const {error}=await sb.rpc('gestor_borrar_negocio',{p_slug:slug}); if(error)return toast(/function|schema cache/i.test(error.message)?'Falta correr el SQL 27 para borrar negocios completos.':'No se pudo borrar: '+error.message); }
+      else if(!confirm(`¿Eliminar a ${c.negocio}? No se puede deshacer.`))return;
+      await borrar(d.del); touch(`Eliminó al cliente ${c.negocio}${st?' y su negocio ('+slug+')':''}`); await cargar(); editing=null; toast('Eliminado'); return go('clientes'); }
     if(d.ver){ const c=clientes.find(x=>x.id===d.ver), etq=$('#vf [data-k="etq"]').value.trim()||'Punto de respaldo', nota=$('#vf [data-k="nota"]').value.trim(); const vs=[...(c.versiones||[]),{id:crypto.randomUUID(),t:Date.now(),etq,nota}]; await guardar({id:c.id,versiones:vs}); touch(`Guardó versión «${etq}» de ${c.negocio}`); await cargar(); toast('Versión guardada ✓'); return go('clientes'); }
     if(d.rollback){ const[cid,vid]=d.rollback.split(':'),c=clientes.find(x=>x.id===cid),v=c.versiones.find(x=>x.id===vid); if(!confirm(`¿Volver a la versión «${v.etq}»? Se marcará como la actual.`))return; const vs=[...c.versiones,{id:crypto.randomUUID(),t:Date.now(),etq:'↩ '+v.etq,nota:'Restaurada'}]; await guardar({id:cid,versiones:vs}); touch(`Restauró ${c.negocio} a «${v.etq}»`); await cargar(); toast('Restaurada ✓'); return go('clientes'); }
     if(d.export){ const c=clientes.find(x=>x.id===d.export),a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(c,null,2)],{type:'application/json'})); a.download=c.negocio.replace(/\W+/g,'-')+'.json'; a.click(); return; }
