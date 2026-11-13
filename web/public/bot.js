@@ -9,7 +9,7 @@
   const col = /^#?[0-9a-f]{6}$/i.test(ds.c || '') ? '#' + ds.c.replace('#', '') : '#f5c400';
   const nom = ds.n || 'nosotros', API = 'https://xyrostudio.net/api/bot', K = 'xyro-bot-' + slug;
   let H = []; try { H = JSON.parse(sessionStorage.getItem(K) || '[]'); } catch (_) {}
-  let wa = '', ocupado = false;
+  let wa = '', ocupado = false, SD = [];
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const host = document.createElement('div'); host.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:2147483000';
   const sh = host.attachShadow({ mode: 'open' });
@@ -41,7 +41,9 @@
   const SUG = ['¿Cuánto cuesta el mes?', '¿Qué horario tienen?', '¿Dónde quedan?', '¿Qué clases hay?'];
   function pinta(pen) {
     const saludo = `¡Hola! 👋 Bienvenido a ${nom}. ¿En qué te ayudo? Precios, horarios, clases, lo que necesites.`;
-    M.innerHTML = `<div class="g bo">${esc(saludo)}</div>` + H.map(m => `<div class="g ${m.de === 'b' ? 'bo' : 'yo'}">${esc(m.t)}</div>${m.w && wa ? `<a class="w" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent('Hola ' + nom + ', vengo de su web 👋')}">💬 Hablar con recepción</a>` : ''}`).join('') + (pen ? '<div class="g bo d"><i></i><i></i><i></i></div>' : '');
+    const btn = (n, w) => `<a class="w" target="_blank" rel="noopener" href="https://wa.me/${w}?text=${encodeURIComponent('Hola ' + nom + (n ? ' (sede ' + n + ')' : '') + ', vengo de su web 👋')}">💬 Hablar con recepción${n ? ' · ' + esc(n) : ''}</a>`;
+    const links = m => { if (!m.w) return ''; const s1 = m.sede && SD.find(x => x.n === m.sede && x.wa); if (s1) return btn(s1.n, s1.wa); const con = SD.filter(x => x.wa); if (con.length > 1 && new Set(con.map(x => x.wa)).size > 1) return con.map(x => btn(x.n, x.wa)).join(''); return wa ? btn('', wa) : ''; };
+    M.innerHTML = `<div class="g bo">${esc(saludo)}</div>` + H.map(m => `<div class="g ${m.de === 'b' ? 'bo' : 'yo'}">${esc(m.t)}</div>${links(m)}`).join('') + (pen ? '<div class="g bo d"><i></i><i></i><i></i></div>' : '');
     $('.s').innerHTML = H.length ? '' : SUG.map(t => `<button>${t}</button>`).join('');
     sh.querySelectorAll('.s button').forEach(b => b.onclick = () => envia(b.textContent));
     M.scrollTop = M.scrollHeight;
@@ -54,8 +56,8 @@
     let r = {};
     try { const x = await fetch(API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ s: slug, mensaje: t, historial: hist }) }); r = await x.json().catch(() => ({})); }
     catch (_) { r = { error: 'Sin conexión. Intenta de nuevo.' }; }
-    if (r.wa) wa = r.wa;
-    H.push({ de: 'b', t: r.respuesta || r.error || 'No pude responder ahora.', w: !!(r.derivar || r.error) });
+    if (r.wa) wa = r.wa; if (Array.isArray(r.sedes)) SD = r.sedes;
+    H.push({ de: 'b', t: r.respuesta || r.error || 'No pude responder ahora.', w: !!(r.derivar || r.error), sede: r.sede || '' });
     ocupado = false; pinta(); I.focus();
   }
   F.onsubmit = e => { e.preventDefault(); envia(I.value); };
@@ -66,6 +68,8 @@
   const SEL = 'a[href*="wa.me"],a[href*="whatsapp"],a[href*="api.whatsapp"],[data-wa],.fab,[class*="whatsapp"],[id*="whatsapp"]';
   function flota(el) { for (let e = el; e && e !== document.body; e = e.parentElement) { const p = getComputedStyle(e).position; if (p === 'fixed' || p === 'sticky') return true; } return false; }
   function ubica() {
+    const en = ds.en && document.querySelector(ds.en);
+    if (en) { en.style.visibility = 'hidden'; en.style.pointerEvents = 'none'; const q = en.getBoundingClientRect(); if (q.width) { host.style.bottom = Math.round(innerHeight - q.bottom) + 'px'; host.style.right = Math.round(innerWidth - q.right + (q.width - 58) / 2) + 'px'; return; } }
     let r = null;
     const L = [...(ds.sobre ? document.querySelectorAll(ds.sobre) : []), ...document.querySelectorAll(SEL)];
     for (const el of L) { if (host.contains(el)) continue; const q = el.getBoundingClientRect(); if (q.width && q.width < 160 && q.right > innerWidth - 140 && q.bottom > innerHeight - 220 && flota(el)) { if (!r || q.top < r.top) r = q; } }

@@ -120,6 +120,7 @@ Cómo hablas:
 - Nada de frases de robot como «soy un asistente virtual», «como modelo de IA» o «¿en qué más puedo ayudarte?» al final de cada mensaje. Saluda solo al inicio de la conversación.
 - Si encaja, termina con una pregunta que acerque al cliente a venir o inscribirse («¿para cuándo te animas a empezar?», «¿te paso la ubicación?»). Menciona las promos vigentes cuando vengan al caso.
 - Emojis con moderación: a lo mucho 1 por mensaje.
+- Recepción: cuando el cliente quiera hablar con una persona, inscribirse o pagar, pon «derivar» en true. Si el negocio tiene varias sedes, pon en «sede» el nombre exacto de la sede del cliente; si aún no sabes cuál, pregúntale con amabilidad de qué sede es (y deja «sede» vacío). Con una sola sede, pon su nombre. Dile que lo pasas con recepción de esa sede por WhatsApp.
 - Si te preguntan directamente si eres un bot o una persona, sé honesto: eres el asistente automático del negocio y puedes pasarlos con recepción.
 Qué dices:
 - Usa SOLO los datos de la FICHA. Lo que está entre paréntesis, como «(distrito)», es un dato que el negocio aún no llenó: no lo digas ni lo inventes.
@@ -127,8 +128,8 @@ Qué dices:
 - Precios en soles (S/). No prometas descuentos que no están en la ficha. Nunca pidas contraseñas, tarjetas ni datos sensibles.
 - Si preguntan algo ajeno al negocio, responde con buena onda que en eso no puedes ayudar y vuelve al tema del negocio.`;
 const BOT_SCHEMA = {
-  type: "object", additionalProperties: false, required: ["respuesta", "derivar"],
-  properties: { respuesta: { type: "string" }, derivar: { type: "boolean" } },
+  type: "object", additionalProperties: false, required: ["respuesta", "derivar", "sede"],
+  properties: { respuesta: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" } },
 };
 const CORS = { "access-control-allow-origin": "*", "access-control-allow-methods": "POST, OPTIONS", "access-control-allow-headers": "content-type, authorization", "access-control-max-age": "86400" };
 const jc = (o, s = 200) => { const r = json(o, s); Object.entries(CORS).forEach(([k, v]) => r.headers.set(k, v)); return r; };
@@ -162,7 +163,8 @@ async function ficha(env, slug) {
   if (cfg.redes) L.push("Redes: " + Object.entries(cfg.redes).filter(([, v]) => v).map(([k, v]) => k + " " + corta(v, 80)).join(", "));
   if (bot.extra) L.push("Promos, reglas e información extra del negocio (síguela y úsala):\n" + corta(bot.extra, 3000));
   const wa = String(bot.whatsapp || (sedes[0] && sedes[0].whatsapp) || "").replace(/\D/g, "");
-  const v = { nombre, texto: L.join("\n"), wa, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [] };
+  const sd = sedes.slice(0, 6).map(x => ({ n: corta(x.nombre, 60), wa: String(x.whatsapp || "").replace(/\D/g, "") || wa })).filter(x => x.n);
+  const v = { nombre, texto: L.join("\n"), wa, sedes: sd, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [] };
   FICHAS.set(slug, { t: Date.now(), v });
   if (FICHAS.size > 300) FICHAS.delete(FICHAS.keys().next().value);
   return v;
@@ -222,7 +224,8 @@ async function botApi(req, env) {
     });
     if (r.stop_reason === "refusal" || r.stop_reason === "max_tokens") return jc({ respuesta: "Mejor te ayuda una persona de recepción 🙌", derivar: true, wa: f.wa });
     const o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
-    return jc({ respuesta: corta(o.respuesta, 1200), derivar: !!o.derivar, wa: f.wa });
+    const sede = f.sedes.find(x => x.n.toLowerCase() === String(o.sede || "").trim().toLowerCase()) || (f.sedes.length === 1 ? f.sedes[0] : null);
+    return jc({ respuesta: corta(o.respuesta, 1200), derivar: !!o.derivar, wa: f.wa, sede: sede ? sede.n : "", sedes: f.sedes });
   } catch (e) {
     console.log("bot error", e?.status, e?.message);
     if (e instanceof Anthropic.RateLimitError) return jc({ error: "Hay muchas consultas a la vez. Intenta en un minuto.", wa: f.wa }, 429);
