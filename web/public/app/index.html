@@ -352,7 +352,7 @@ const isSup=()=>ME&&['admin','gestor','supervisor'].includes(ME.rol);
 const puedeProd=()=>ME&&['admin','gestor','supervisor','cafetin'].includes(ME.rol);
 // Ver otras sedes: el admin siempre; el resto solo si el admin le dio «Todas» en Equipo.
 const verTodas=()=>isAdmin()||!!(ME&&(!ME.sede||ME.sede==='todas'));
-let NEED24=false;
+let NEED24=false,NEED26=false;
 
 /* ===== Fechas ===== */
 const pad=n=>String(n).padStart(2,'0');
@@ -402,7 +402,7 @@ const DB={
   [S.cli,S.pla,S.mem,S.pag,S.asi]=rs.map(r=>r.data||[]);
   const r2=await Promise.all([todo(()=>q('pro').order('nombre').order('id'),10000),todo(()=>q('mov').gte('t',since).order('t',{ascending:false}).order('id'),40000),q('cie').order('hasta',{ascending:false}).limit(60)]);
   NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);
-  NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
+  NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED26=!!(await sb.from(T.mem).select('cuotas').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
   {const r=await sb.from(T.sol).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(1000),r2=await sb.from(T.cie).select('area').limit(1);NEED24=!!(r.error||r2.error);S.sol=r.data||[]}
  },
  async stock(pid,delta,tipo,nota){
@@ -469,12 +469,42 @@ async function pagar(row,v){
 }
 // Partes del mismo cobro (pago dividido): misma hora, concepto y cliente.
 const grupoPag=p=>{if(!p)return[];const G=(RX&&RX.pag&&RX.pag.includes(p)?RX.pag:S.pag).filter(x=>x.fecha===p.fecha&&x.concepto===p.concepto&&(x.cliente_id||null)===(p.cliente_id||null));return G.length?G:[p]};
+/* ===== Cuotas: paga una parte hoy y el saldo en fechas programadas (columna cuotas jsonb de la membresía, SQL 26) ===== */
+const cuotasOn=()=>DEMO||!NEED26;
+const r2=n=>Math.round((+n||0)*100)/100;
+function planCuotas(saldo,n,cada,desde){n=Math.max(1,Math.min(12,Math.round(+n)||1));cada=Math.max(1,Math.round(+cada)||15);const base=r2(saldo/n),L=[];
+ for(let i=0;i<n;i++)L.push({n:i+1,de:n,monto:i===n-1?r2(saldo-base*(n-1)):base,vence:addD(desde||hoy(),cada*(i+1)),pagado:null});return L}
+const cuoPend=m=>(m.cuotas||[]).filter(q=>!q.pagado);
+// Saldo de un socio: cuotas sin pagar de todas sus membresías.
+function deudaDe(cid){const L=[];S.mem.forEach(m=>{if(m.cliente_id===cid)cuoPend(m).forEach(q=>L.push({m,q}))});L.sort((a,b)=>a.q.vence>b.q.vence?1:-1);
+ const tot=r2(L.reduce((a,x)=>a+ +x.q.monto,0)),venc=L.filter(x=>x.q.vence<hoy());return{L,tot,venc,vtot:r2(venc.reduce((a,x)=>a+ +x.q.monto,0)),prox:L[0]}}
+function deudores(){const o=new Map;S.mem.forEach(m=>{if(cuoPend(m).length)o.set(m.cliente_id,1)});return[...o.keys()].map(id=>cli(id)).filter(Boolean)}
+function cuotaFields(totF){return[{k:'cuo',l:'🗓️ Pagar en cuotas (deja saldo pendiente)',t:'chk',v:false,on:(fm,val)=>{
+  const w=fm.querySelector('#f_hoy').closest('.f2'),w2=fm.querySelector('#f_cada').closest('label'),ck=fm.querySelector('#f_cuo');
+  w.insertAdjacentHTML('beforebegin','<div class="card" id="cuoh" style="padding:12px 14px;display:none"></div>');const hh=fm.querySelector('#cuoh');
+  const up=()=>{const on=ck.checked;[w,w2,hh].forEach(x=>x.style.display=on?'':'none');if(!on)return;const v=val(),t=+totF(v)||0,hy=r2(+v.hoy||0),s=r2(t-hy);
+   if(!(s>0)){hh.innerHTML='<span style="color:var(--bad)">Lo que paga hoy debe ser menor al total '+sol(t)+'</span>';return}
+   const L=planCuotas(s,v.ncuo,v.cada);hh.innerHTML=`<b>Hoy ${sol(hy)}</b> · saldo ${sol(s)}<div class="sm mu" style="margin-top:4px">${L.map(q=>`Cuota ${q.n}: ${sol(q.monto)} el ${fF(q.vence)}`).join('<br>')}</div>`};
+  ck.addEventListener('change',()=>{if(ck.checked&&!fm.querySelector('#f_hoy').value){const t=+totF(val())||0;fm.querySelector('#f_hoy').value=r2(t/2)}up()});fm.addEventListener('input',up);fm.addEventListener('change',up);setTimeout(up)}},
+ {k:'hoy',l:'Paga hoy (S/)',t:'number',half:1,im:'decimal'},{k:'ncuo',l:'N.º de cuotas del saldo',t:'number',half:1,v:1,im:'numeric'},{k:'cada',l:'Cada cuántos días',t:'number',v:15,im:'numeric'}]}
+function cobrarCuota(c,m,q){
+ form('💸 Cuota '+q.n+' de '+q.de+' · '+esc(c.nombre.split(' ')[0]),[{k:'info',l:'',t:'chk',v:false,on:fm=>{const x=fm.querySelector('#f_info').closest('label');x.outerHTML=`<div class="card" style="padding:12px 14px"><b>${esc(m.plan_nombre||R.plan)}</b> · vence ${fF(q.vence)}<b class="grad" style="float:right;font-size:22px">${sol(q.monto)}</b></div>`}},...pagoFields(()=>+q.monto),...compFields()],async v=>{
+  valComp(v);valSplit(v,+q.monto);
+  const pg=await pagar({cliente_id:c.id,membresia_id:m.id,concepto:'Cuota '+q.n+'/'+q.de+' · '+(m.plan_nombre||R.plan),monto:+q.monto,metodo:v.metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},v);
+  const L=(m.cuotas||[]).map(x=>x.n===q.n?Object.assign({},x,{pagado:new Date().toISOString(),pago_id:pg.id}):x);await DB.upd('mem',m.id,{cuotas:L});
+  confeti(20);go();await finCobro(pg,v,'Cuota cobrada');
+ });
+}
+function deudaCard(c){const d=deudaDe(c.id);if(!d.L.length)return'';
+ setTimeout(()=>$$('[data-cq]').forEach(b=>b.onclick=()=>{const[mid,n]=b.dataset.cq.split('|'),m=S.mem.find(x=>x.id===mid),q=m&&(m.cuotas||[]).find(x=>String(x.n)===n);q&&cobrarCuota(c,m,q)}));
+ return`<div class="card" style="border-color:${d.venc.length?'var(--bad)':'var(--wa)'}"><h3>💸 Saldo pendiente <b style="color:${d.venc.length?'var(--bad)':'var(--wa)'}">${sol(d.tot)}</b></h3><div class="tl">${d.L.map(({m,q})=>`<div class="row" style="padding:7px 4px"><span class="nm"><b>Cuota ${q.n}/${q.de} · ${sol(q.monto)}</b><small>${esc(m.plan_nombre||'')} · ${q.vence<hoy()?'<span style="color:var(--bad)">venció el '+fF(q.vence)+'</span>':'vence el '+fF(q.vence)}</small></span><button class="btn sm p" data-cq="${esc(m.id)}|${q.n}">Cobrar</button></div>`).join('')}</div></div>`}
 async function renovar(c,p,o){
  const m=memDe(c.id),ini0=o.inicio||(m&&m.fin>=hoy()?addD(m.fin,1):hoy()),dias=Math.max(1,+o.dias||+p.dias||30),ds=+o.descuento||0,total=Math.max(0,(+o.precio||0)-ds);let pago=null;
  const row={cliente_id:c.id,plan_id:p.id,plan_nombre:p.nombre,inicio:ini0,fin:addD(ini0,dias-1),precio:total,creado:new Date().toISOString()};
  if(+o.sesiones)row.sesiones=+o.sesiones;if(o.dom===false)row.dom=false;if(ds){row.descuento=ds;row.motivo=o.motivo||null}
+ let paga=total;if(o.cuotas&&o.cuotas.length){row.cuotas=o.cuotas;paga=r2(+o.hoy||0)}
  const mem=await DB.ins('mem',row);
- if(total>0)pago=await pagar({cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre+(ds?' (dscto. '+sol(ds)+(o.motivo?' · '+o.motivo:'')+')':''),monto:total,metodo:o.metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},o);
+ if(paga>0)pago=await pagar({cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre+(ds?' (dscto. '+sol(ds)+(o.motivo?' · '+o.motivo:'')+')':'')+(row.cuotas?' · inicial':''),monto:paga,metodo:o.metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},o);
  return pago;
 }
 function checkin(v){
@@ -488,7 +518,8 @@ function checkin(v){
  if(e.k==='venc')return{ok:false,c,t:'Hola '+nm,s:e.l===0?'Ya usaste todas tus sesiones. Renueva en recepción.':'Tu '+R.plan.toLowerCase()+' venció el '+fF(e.m.fin)+'. Renueva en recepción.'};
  if(noLab(H)&&e.m.dom===false)return{ok:false,c,t:'Hola '+nm,s:'Tu plan no incluye '+(feriado(H)?'feriados':'domingos')+'. Consulta en recepción.'};
  DB.ins('asi',{cliente_id:c.id,t:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]||''}).catch(er=>toast(er.message));
- const l=e.l!=null?e.l-1:null;
+ const l=e.l!=null?e.l-1:null,dv=deudaDe(c.id);
+ if(dv.venc.length)return{ok:true,warn:1,c,t:'¡Hola, '+nm+'!',s:'⚠️ Tienes una cuota vencida de '+sol(dv.vtot)+'. Acércate a recepción.'};
  return{ok:true,c,t:'¡Hola, '+nm+'!',s:l!=null?(l>0?'Te quedan '+l+' de '+e.m.sesiones+' sesiones.':'Usaste tu última sesión. ¡Renueva!'):e.k==='pronto'?'⚠️ '+e.t+'. ¡Renueva hoy!':'Te quedan '+e.d+' días de '+R.plan.toLowerCase()+'.',warn:e.k==='pronto'||l===0};
 }
 
@@ -579,7 +610,7 @@ function inicio(){
  const lst=(arr,emp)=>arr.length?arr.slice(0,6).map(([c,e])=>`<div class="row">${av(c)}<a class="nm" href="#/socio/${c.id}"><b>${esc(c.nombre)}</b><small>${esc(e.m.plan_nombre||'')} · ${fF(e.m.fin)}</small></a><span class="pill ${e.k}">${e.t}</span>${c.telefono?`<a class="btn sm" target="_blank" rel="noopener" href="${waLink(c,waMsg(c,e))}" title="Recordar por WhatsApp">📲</a>`:''}</div>`).join(''):`<div class="empty" style="padding:20px">${emp}</div>`;
  if(!S.cli.length&&!S.pla.length){setTimeout(()=>{const w=$('#w1');w&&(w.onclick=()=>isAdmin()?sugeridos().then(()=>location.hash='#/planes'):toast('Pídele al administrador que cargue los planes'))});return bienvenida()}
  setTimeout(()=>$$('.kpi[data-f]').forEach(a=>a.addEventListener('click',()=>{filtro=a.dataset.f})));
- return`<div class="hi st"><div><p class="mu">${hr}${ME.nombre?', '+esc(ME.nombre.split(' ')[0]):''} 👋</p><h2>Así va <span class="grad">${esc(nombre())}</span> hoy</h2></div><button class="btn p" onclick="location.hash='#/kiosco'">📷 Abrir asistencia</button></div>${isSup()&&solPend()?`<a class="card" href="#/solicitudes" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;border-color:var(--wa)"><b style="font-size:22px">📨</b><span><b>${solPend()} solicitud${solPend()===1?'':'es'} por revisar</b><br><small class="mu">Recepción te pasó casos de ${esc(R.clis.toLowerCase())}</small></span></a>`:''}${metaMini()}
+ return`<div class="hi st"><div><p class="mu">${hr}${ME.nombre?', '+esc(ME.nombre.split(' ')[0]):''} 👋</p><h2>Así va <span class="grad">${esc(nombre())}</span> hoy</h2></div><button class="btn p" onclick="location.hash='#/kiosco'">📷 Abrir asistencia</button></div>${isSup()&&solPend()?`<a class="card" href="#/solicitudes" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;border-color:var(--wa)"><b style="font-size:22px">📨</b><span><b>${solPend()} solicitud${solPend()===1?'':'es'} por revisar</b><br><small class="mu">Recepción te pasó casos de ${esc(R.clis.toLowerCase())}</small></span></a>`:''}${(()=>{const D=deudores().filter(enSede).map(c=>deudaDe(c.id)),v=D.filter(d=>d.venc.length),t=r2(D.reduce((a,d)=>a+d.tot,0));return D.length?`<a class="card" href="#/seguimiento" data-segt="deuda" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;border-color:${v.length?'var(--bad)':'var(--ln)'}"><b style="font-size:22px">💸</b><span><b>${sol(t)} por cobrar en cuotas</b><br><small class="mu">${D.length} ${esc(R.clis.toLowerCase())} con saldo${v.length?' · <span style="color:var(--bad)">'+v.length+' con cuota vencida</span>':''}</small></span></a>`:''})()}${metaMini()}
  <div class="g k4 st">
   <a class="card kpi" href="#/socios" data-f="act"><i style="background:var(--ok)"></i><small>${R.clis} activos</small><b data-n="${act}">0</b><span class="tr">de ${S.cli.length} registrados</span></a>
   <a class="card kpi" href="#/socios" data-f="pronto"><i style="background:var(--wa)"></i><small>Por vencer (5 días)</small><b data-n="${pr.length}">0</b><span class="tr">recuérdales hoy</span></a>
@@ -725,8 +756,8 @@ function socio(){
   ${c.notas?`<p class="mu sm" style="text-align:left;width:100%">📝 ${esc(c.notas)}</p>`:''}
  </div>
  <div class="g">
-  ${solCli(c)}<div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
-  <div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.map(x=>`<div class="row"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${+x.sesiones?' · '+usadas(x)+'/'+x.sesiones+' sesiones':''}${+x.descuento?' · dscto. '+sol(x.descuento)+(x.motivo?' ('+esc(x.motivo)+')':''):''}${x.dom===false?' · sin domingos':''}${pzs(x).length?' · ❄️ '+pzs(x).reduce((a,z)=>a+(+z.dias||0),0)+' d congelada':''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu">Sin historial</p>'}</div></div>
+  ${deudaCard(c)}${solCli(c)}<div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
+  <div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.map(x=>`<div class="row"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${(x.cuotas||[]).length?' · 🗓️ '+x.cuotas.filter(q=>q.pagado).length+'/'+x.cuotas.length+' cuotas pagadas':''}${+x.sesiones?' · '+usadas(x)+'/'+x.sesiones+' sesiones':''}${+x.descuento?' · dscto. '+sol(x.descuento)+(x.motivo?' ('+esc(x.motivo)+')':''):''}${x.dom===false?' · sin domingos':''}${pzs(x).length?' · ❄️ '+pzs(x).reduce((a,z)=>a+(+z.dias||0),0)+' d congelada':''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu">Sin historial</p>'}</div></div>
   <div class="card"><h3>Ingresos <span class="mu sm">${asis.length} en 5 meses</span></h3><div class="tl">${asis.slice(0,8).map(a=>`<div class="row" style="padding:8px 10px"><span class="nm"><b>${fF(a.t)} · ${fH(a.t)}</b><small>${esc(a.quien||'')}</small></span>${isSup()||ymd(new Date(a.t))===hoy()?`<button class="btn sm" data-da="${a.id}" title="Borrar ingreso mal marcado">🗑️</button>`:''}</div>`).join('')||'<p class="mu">Aún no tiene ingresos</p>'}</div></div>
   <div class="card"><h3>Pagos</h3><div class="tl">${pags.map(p=>`<a class="row" href="#" data-p="${p.id}"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b> 🖨️</a>`).join('')||'<p class="mu">Sin pagos recientes</p>'}</div></div>
  </div></div>`;
@@ -780,10 +811,11 @@ function cobrar(c){
   {k:'motivo',l:'Motivo del descuento',dl:['Promoción','Convenio empresa','Familiar','Estudiante','Reingreso','Cortesía'],ph:'Ej. Convenio empresa'},
   {k:'inicio',l:'Empieza',t:'date',v:ini0,half:1},{k:'fin',l:'Termina',t:'date',half:1},
   {k:'dias',l:'Días',t:'number',req:1,half:1,im:'numeric'},{k:'sesiones',l:'Sesiones (vacío = ilimitadas)',t:'number',half:1,ph:'Ilimitadas',im:'numeric'},{k:'dom',l:'Entra domingos y feriados',t:'chk',v:true},
-  ...pagoFields(v=>Math.max(0,(+v.precio||0)-(+v.descuento||0))),...compFields()],async v=>{
+  ...(cuotasOn()?cuotaFields(v=>Math.max(0,(+v.precio||0)-(+v.descuento||0))):[]),...pagoFields(v=>{const t=Math.max(0,(+v.precio||0)-(+v.descuento||0));return v.cuo?Math.min(t,+v.hoy||0):t}),...compFields()],async v=>{
   const p=plan(v.plan);if(!p)throw new Error('Elige un plan');const pr=+v.precio||0,ds=+v.descuento||0;
-  if(ds<0||ds>pr)throw new Error('El descuento no puede ser mayor al precio.');if(ds>0&&!v.motivo)throw new Error('Escribe el motivo del descuento.');valComp(v);valSplit(v,pr-ds);
-  const pg=await renovar(c,p,{precio:pr,descuento:ds,motivo:v.motivo,dias:+v.dias,inicio:v.inicio||ini0,sesiones:+v.sesiones||null,dom:!!v.dom,metodo:v.metodo,monto2:v.monto2,metodo2:v.metodo2});
+  if(ds<0||ds>pr)throw new Error('El descuento no puede ser mayor al precio.');if(ds>0&&!v.motivo)throw new Error('Escribe el motivo del descuento.');valComp(v);
+  let cuotas=null;if(v.cuo){const hy=r2(+v.hoy||0),s=r2(pr-ds-hy);if(hy<0||!(s>0))throw new Error('Lo que paga hoy debe ser menor al total ('+sol(pr-ds)+').');cuotas=planCuotas(s,v.ncuo,v.cada);if(+v.monto2&&hy>0)valSplit(v,hy);else v.monto2=''}else valSplit(v,pr-ds);
+  const pg=await renovar(c,p,{precio:pr,descuento:ds,motivo:v.motivo,dias:+v.dias,inicio:v.inicio||ini0,sesiones:+v.sesiones||null,dom:!!v.dom,metodo:v.metodo,monto2:v.monto2,metodo2:v.metodo2,cuotas,hoy:v.hoy});
   confeti(30);go();if(pg)await finCobro(pg,v,'Cobro registrado');else toast('Registrado sin cobro ✓');
  });
 }
@@ -1352,6 +1384,7 @@ document.addEventListener('click',e=>{const v=e.target.closest('[data-vt]');if(v
 
 /* ===== Seguimiento: a quién llamar hoy, con todo su historial a la mano ===== */
 let segT='pronto';
+document.addEventListener('click',e=>{const a=e.target.closest('[data-segt]');if(a)segT=a.dataset.segt},true);
 const SEGK=()=>'xa-seg-'+(SID||'demo');
 function ultimaVisita(){const m=new Map;for(const a of S.asi){const p=m.get(a.cliente_id);if(!p||a.t>p)m.set(a.cliente_id,a.t)}return m}
 function horario(asis){if(!asis.length)return'Aún sin ingresos';const hs=Array(24).fill(0),ds=Array(7).fill(0);asis.forEach(a=>{const t=new Date(a.t);hs[t.getHours()]++;ds[t.getDay()]++});
@@ -1364,10 +1397,11 @@ function seguimiento(){
  const T0={pronto:E.filter(([c,e])=>e.m&&e.k!=='cong'&&e.k!=='venc'&&e.d>=0&&e.d<=7).sort((a,b)=>a[1].d-b[1].d),
   venc:E.filter(([c,e])=>e.k==='venc'&&e.d>=-30).sort((a,b)=>b[1].d-a[1].d),
   aus:E.filter(([c,e])=>(e.k==='act'||e.k==='pronto')&&dSin(c)>=7).sort((a,b)=>dSin(b[0])-dSin(a[0])),
+  deuda:deudores().filter(enSede).map(c=>[c,est(c)]).sort((a,b)=>{const x=deudaDe(a[0].id).prox,y=deudaDe(b[0].id).prox;return x.q.vence>y.q.vence?1:-1}),
   cum:E.filter(([c])=>{if(!c.nacimiento)return false;for(let i=0;i<7;i++)if(addD(H,i).slice(5)===c.nacimiento.slice(5))return true;return false})};
- const TT=[['pronto','⏳ Por vencer (7 días)'],['venc','🔴 Vencidos (30 días)'],['aus','💤 Sin venir (7+ días)'],['cum','🎂 Cumpleaños']],L=T0[segT]||[];
- const msg=(c,e)=>{const n=c.nombre.trim().split(' ')[0];return segT==='cum'?`¡Feliz cumpleaños ${n}! 🎉 Todo el equipo de ${nombre()} te desea un gran día.`:segT==='aus'?`Hola ${n} 👋 Te extrañamos en ${nombre()}. ¿Todo bien? Tu ${R.plan.toLowerCase()} sigue activa, ¡te esperamos!`:waMsg(c,e)};
- const sub=(c,e)=>segT==='aus'?(dSin(c)>=999?'Sin ingresos registrados':'Última visita hace '+dSin(c)+' días'):segT==='cum'?'Cumple el '+fF(H.slice(0,4)+c.nacimiento.slice(4)):e.m?`${esc(e.m.plan_nombre||'')} · ${e.k==='venc'?'venció el '+fF(e.m.fin):'vence el '+fF(e.m.fin)}`:'';
+ const TT=[['pronto','⏳ Por vencer (7 días)'],['venc','🔴 Vencidos (30 días)'],['aus','💤 Sin venir (7+ días)'],['cum','🎂 Cumpleaños']].concat(T0.deuda.length?[['deuda','💸 Con saldo']]:[]),L=T0[segT]||[];
+ const msg=(c,e)=>{const n=c.nombre.trim().split(' ')[0];if(segT==='deuda'){const d=deudaDe(c.id),q=d.prox.q;return`Hola ${n} 👋 Te recordamos tu cuota ${q.n}/${q.de} de ${sol(q.monto)} en ${nombre()}, ${q.vence<hoy()?'vencida el':'vence el'} ${fF(q.vence)}. Puedes pagarla en recepción. ¡Gracias!`}return segT==='cum'?`¡Feliz cumpleaños ${n}! 🎉 Todo el equipo de ${nombre()} te desea un gran día.`:segT==='aus'?`Hola ${n} 👋 Te extrañamos en ${nombre()}. ¿Todo bien? Tu ${R.plan.toLowerCase()} sigue activa, ¡te esperamos!`:waMsg(c,e)};
+ const sub=(c,e)=>segT==='deuda'?(()=>{const d=deudaDe(c.id),q=d.prox.q;return'Debe '+sol(d.tot)+' · '+(q.vence<hoy()?'<span style="color:var(--bad)">cuota vencida el '+fF(q.vence)+'</span>':'próxima cuota el '+fF(q.vence))})():segT==='aus'?(dSin(c)>=999?'Sin ingresos registrados':'Última visita hace '+dSin(c)+' días'):segT==='cum'?'Cumple el '+fF(H.slice(0,4)+c.nacimiento.slice(4)):e.m?`${esc(e.m.plan_nombre||'')} · ${e.k==='venc'?'venció el '+fF(e.m.fin):'vence el '+fF(e.m.fin)}`:'';
  setTimeout(()=>{$$('[data-sg]').forEach(b=>b.onclick=()=>{segT=b.dataset.sg;go()});
   $$('[data-sw]').forEach(a=>a.addEventListener('click',()=>{const o=LS.g(SEGK(),{});o[a.dataset.sw]=H;LS.s(SEGK(),o);setTimeout(go,400)}));
   $$('[data-ss]').forEach(b=>b.onclick=()=>{const c=cli(b.dataset.ss);c&&nuevaSol(c)})});
@@ -1385,7 +1419,7 @@ function verTodo(c){
   <div class="card kpi"><small>Asistencias 30 días</small><b style="font-size:20px">${a30}</b><span class="tr">${ul?'última '+fF(ul)+' '+fH(ul):'sin ingresos'}</span></div>
   <div class="card kpi"><small>Horario habitual</small><b style="font-size:14px;line-height:1.3">${esc(horario(asis))}</b></div>
  </div>
- ${c.notas?`<p class="sm" style="margin:10px 0">📝 ${esc(c.notas)}</p>`:''}${solCli(c)}
+ ${c.notas?`<p class="sm" style="margin:10px 0">📝 ${esc(c.notas)}</p>`:''}${deudaCard(c)}${solCli(c)}
  <div class="g g2" style="margin-top:10px;gap:10px"><div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.slice(0,6).map(x=>`<div class="row" style="padding:6px 4px"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${+x.descuento?' · dscto. '+sol(x.descuento):''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu sm">Sin historial</p>'}</div></div>
  <div class="card"><h3>Pagos</h3><div class="tl">${pags.slice(0,6).map(p=>`<div class="row" style="padding:6px 4px"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b></div>`).join('')||'<p class="mu sm">Sin pagos recientes</p>'}</div></div></div>
  <div class="bt"><button class="btn" id="vtN">📝 Nota</button>${isSup()?'':'<button class="btn" id="vtS">📨 Al supervisor</button>'}<a class="btn" href="#/socio/${c.id}" data-x>Ficha completa</a>${c.telefono?`<a class="btn p" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:''}</div>`,(el,close)=>{
