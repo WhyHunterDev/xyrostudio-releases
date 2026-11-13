@@ -17,3 +17,7 @@
   ! Permissions-Policy
   Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=(), usb=()
   Cache-Control: no-cache
+
+/bot.js
+  Cache-Control: no-cache
+  Access-Control-Allow-Origin: *

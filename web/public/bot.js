@@ -15,8 +15,8 @@
   const sh = host.attachShadow({ mode: 'open' });
   sh.innerHTML = `<style>
   *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  .b{width:58px;height:58px;border-radius:50%;border:0;background:${col};color:#000;font-size:26px;cursor:pointer;box-shadow:0 8px 24px #0006;transition:transform .2s}
-  .b:hover{transform:scale(1.07)}
+  .b{width:58px;height:58px;border-radius:50%;border:0;background:${col};color:#000;display:grid;place-items:center;cursor:pointer;box-shadow:0 8px 24px #0006;transition:transform .2s}
+  .b:hover{transform:scale(1.07)}.b svg{width:28px;height:28px}
   .p{position:absolute;right:0;bottom:70px;width:min(360px,calc(100vw - 32px));height:min(520px,calc(100vh - 110px));background:#0b0b0c;color:#f2f2f2;border:1px solid #262628;border-radius:18px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 18px 50px #000a}
   .p.on{display:flex;animation:in .22s ease}@keyframes in{from{opacity:0;transform:translateY(10px)}}
   .h{padding:12px 14px;border-bottom:1px solid #262628;display:flex;align-items:center;gap:10px}
@@ -36,7 +36,7 @@
   <div class="p"><div class="h"><i></i><b>${esc(nom)}</b><button aria-label="Cerrar">×</button></div><div class="m"></div>
   <div class="s"></div><form><input placeholder="Escribe tu pregunta…" maxlength="500" aria-label="Mensaje"><button>➤</button></form>
   <div class="x">Asistente automático · <a href="https://xyrostudio.net" target="_blank" rel="noopener">Xyro Bots</a></div></div>
-  <button class="b" aria-label="Abrir chat">💬</button>`;
+  <button class="b" aria-label="Abrir chat"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6.1L4.6 21l4.3-2.3c1 .2 2 .3 3.1.3 5.5 0 10-3.6 10-8s-4.5-8-10-8zm-4 9.3a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6zm4 0a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6zm4 0a1.3 1.3 0 1 1 0-2.6 1.3 1.3 0 0 1 0 2.6z"/></svg></button>`;
   const $ = s => sh.querySelector(s), pn = $('.p'), M = $('.m'), F = $('form'), I = $('input');
   const SUG = ['¿Cuánto cuesta el mes?', '¿Qué horario tienen?', '¿Dónde quedan?', '¿Qué clases hay?'];
   function pinta(pen) {
@@ -62,6 +62,15 @@
   $('.b').onclick = () => { pn.classList.toggle('on'); if (pn.classList.contains('on')) { pinta(); I.focus(); } };
   $('.h button').onclick = () => pn.classList.remove('on');
   // data-sobre=".selector": se pone encima de ese botón (ej. el de WhatsApp de la web) para no taparlo.
-  function ubica() { const el = ds.sobre && document.querySelector(ds.sobre); const r = el && el.getBoundingClientRect(); if (r && r.width) { host.style.bottom = Math.round(innerHeight - r.top + 12) + 'px'; host.style.right = Math.max(8, Math.round(innerWidth - r.right + (r.width - 58) / 2)) + 'px'; } }
-  (document.body ? Promise.resolve() : new Promise(r => addEventListener('DOMContentLoaded', r))).then(() => { document.body.appendChild(host); ubica(); setTimeout(ubica, 1500); addEventListener('resize', ubica); });
+  // Se pone encima del botón flotante de WhatsApp de la web (data-sobre o detectado solo) para no taparlo.
+  const SEL = 'a[href*="wa.me"],a[href*="whatsapp"],a[href*="api.whatsapp"],[data-wa],.fab,[class*="whatsapp"],[id*="whatsapp"]';
+  function flota(el) { for (let e = el; e && e !== document.body; e = e.parentElement) { const p = getComputedStyle(e).position; if (p === 'fixed' || p === 'sticky') return true; } return false; }
+  function ubica() {
+    let r = null;
+    const L = [...(ds.sobre ? document.querySelectorAll(ds.sobre) : []), ...document.querySelectorAll(SEL)];
+    for (const el of L) { if (host.contains(el)) continue; const q = el.getBoundingClientRect(); if (q.width && q.width < 160 && q.right > innerWidth - 140 && q.bottom > innerHeight - 220 && flota(el)) { if (!r || q.top < r.top) r = q; } }
+    if (r) { host.style.bottom = Math.round(innerHeight - r.top + 12) + 'px'; host.style.right = Math.max(8, Math.round(innerWidth - r.right + (r.width - 58) / 2)) + 'px'; }
+    else { host.style.bottom = '16px'; host.style.right = '16px'; }
+  }
+  (document.body ? Promise.resolve() : new Promise(r => addEventListener('DOMContentLoaded', r))).then(() => { document.body.appendChild(host); ubica(); setTimeout(ubica, 800); setTimeout(ubica, 2500); addEventListener('resize', ubica); addEventListener('scroll', () => { clearTimeout(ubica.t); ubica.t = setTimeout(ubica, 200); }, { passive: true }); });
 })();
