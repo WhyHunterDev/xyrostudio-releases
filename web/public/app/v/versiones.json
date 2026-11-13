@@ -1,5 +1,10 @@
 [
  {
+  "id": "20261113-0434",
+  "fecha": "2026-11-13 04:34",
+  "notas": "Mi web muestra el nombre del negocio arriba (como en Xyro Apps)"
+ },
+ {
   "id": "20261113-0422",
   "fecha": "2026-11-13 04:22",
   "notas": "Versión inicial: cuotas, pago dividido, roles y turnos, Mi web dentro de Xyro"
