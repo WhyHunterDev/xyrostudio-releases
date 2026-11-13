@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261113-1656",
+  "fecha": "2026-11-13 16:56",
+  "titulo": "Asistente de soporte",
+  "notas": "Asistente de soporte",
+  "cambios": [
+   "Nuevo: el Asistente Xyro responde al instante las dudas de uso (cambiar color, crear usuarios, cobrar, imprimir…) y con «Hazlo por mí» te lleva y abre el formulario",
+   "Solo urgencias, ventas, modificaciones y pagos pasan a un ticket con una persona"
+  ]
+ },
+ {
   "id": "20261113-1648",
   "fecha": "2026-11-13 16:48",
   "titulo": "Soporte con tickets",
