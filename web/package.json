@@ -1,0 +1,11 @@
+{
+  "name": "xyrostudio-web",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.156.0"
+  }
+}
