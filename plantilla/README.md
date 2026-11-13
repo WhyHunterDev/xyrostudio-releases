@@ -1,5 +1,7 @@
 # Plantilla de proyecto XyroStudio
 
+> **¿Gimnasio?** No uses esta carpeta: ya hay base fija en `web/public/sitio/` (xyrostudio.net/sitio/?s=slug). En el Panel XyroStudio → ＋ Nuevo negocio marca «Xyro Webs» y la web queda creada sola; el dueño la edita en Xyro Apps → «🌐 Mi web». Esta carpeta queda para rubros sin base todavía o proyectos a medida.
+
 Base para cada software/web nuevo de un cliente. Ya viene conectada al **Panel XyroStudio** (xyrostudio.net/gestor/):
 métricas (visitas y clics a WhatsApp), registro de errores, temas de temporada con promo, modo mantenimiento,
 copias de seguridad, cuentas del cliente y uso del panel. No se publica sola: está fuera de `web/`.
