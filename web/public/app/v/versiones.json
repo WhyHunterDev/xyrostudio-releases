@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261113-1648",
+  "fecha": "2026-11-13 16:48",
+  "titulo": "Soporte con tickets",
+  "notas": "Soporte con tickets",
+  "cambios": [
+   "Nuevo: «🛟 Soporte XyroStudio» abre tus tickets: escribes el problema, adjuntas una captura y ves cada respuesta aquí mismo",
+   "Te avisamos con un contador cuando soporte responde"
+  ],
+  "requiere": "SQL 32"
+ },
+ {
   "id": "20261113-1604",
   "fecha": "2026-11-13 16:04",
   "titulo": "Accesos de prueba",
