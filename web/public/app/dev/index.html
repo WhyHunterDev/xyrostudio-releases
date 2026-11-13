@@ -584,15 +584,81 @@ function planTexto(c,p){const d=p.datos||{},n=c?c.nombre.trim().split(' ')[0]:''
  else{const x=[d.kcal?'🔥 '+d.kcal+' kcal':'',d.agua?'💧 Agua: '+d.agua:''].filter(Boolean);x.length&&L.push(x.join(' · '));COMIDAS.forEach(([k,cn])=>{const l=lineas(d[k]);if(!l.length)return;L.push('',`*${cn}*`);l.forEach(y=>L.push('• '+y))})}
  if(d.nota)L.push('','📝 '+d.nota);L.push('',`— ${p.quien||QUIEN()}, ${nombre()} 💪`);return L.join('\n')}
 function planHTML(c,p){const t=planTexto(c,p).replace(/\*([^*\n]+)\*/g,'<b>$1</b>');return`<!doctype html><meta charset="utf-8"><title>${esc(RT[p.tipo].t)}</title><style>body{font:14px/1.55 system-ui,sans-serif;max-width:640px;margin:24px auto;padding:0 16px;white-space:pre-wrap;color:#111}b{font-size:15px}</style><body>${t.split('\n').map(x=>x.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m])).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>')).join('\n')}</body>`}
-function enviarPlan(c,p){
- const ok=!!tel(c.telefono),msg=planTexto(c,p);
- sheet(`<div style="text-align:center;display:grid;gap:10px"><div style="font-size:44px">${RT[p.tipo].ico}</div><h3>${esc(RT[p.tipo].t)} de ${esc(c.nombre.split(' ')[0])}</h3><p class="mu sm">${p.enviado?'Enviado el '+fF(p.enviado.slice(0,10))+'. ':''}${ok?'Se abre WhatsApp con el plan listo para enviar.':'Este socio no tiene celular. Agrégalo en su ficha.'}</p></div>
-  <pre class="card sm" style="white-space:pre-wrap;max-height:40vh;overflow:auto;margin:12px 0;font:13px/1.5 system-ui">${esc(msg)}</pre>
-  <div class="bt" style="flex-wrap:wrap">${ok?`<a class="btn p" id="pwa" target="_blank" rel="noopener" href="${waLink(c,msg)}">📲 Enviar por WhatsApp</a>`:''}<button class="btn" id="pcp">📋 Copiar</button><button class="btn" id="ppr">🖨️ Imprimir / PDF</button><button class="btn" data-x>Cerrar</button></div>`,(el,close)=>{
-  const w=el.querySelector('#pwa');w&&(w.onclick=()=>{if(p.id&&S.rut.includes(p))DB.upd('rut',p.id,{enviado:new Date().toISOString()}).then(()=>go()).catch(()=>{});setTimeout(close,300)});
-  el.querySelector('#pcp').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(msg).then(()=>toast('Copiado ✓'))};
-  el.querySelector('#ppr').onclick=()=>imprimirHTML(planHTML(c,p));
-  el.querySelectorAll('[data-x]').forEach(b=>b.onclick=close)})}
+// Ficha del plan como imagen (logo y colores del gimnasio, socio, días o comidas, quién lo hizo).
+async function planPNG(c,p){
+ const d=p.datos||{},W=1080,F="'Inter','Segoe UI',system-ui,sans-serif",lg=await imgDe(logoDe());
+ const A0=getComputedStyle(document.documentElement).getPropertyValue('--a').trim(),A=/^#[0-9a-f]{6}$/i.test(A0)?A0:'#7c5cff';
+ const sec=p.tipo==='entreno'?DIAS.map(([k,n])=>{const l=lineas(d[k]);return l.length?{n,sub:l.length>1?l[0]:'',it:l.length>1?l.slice(1):l}:null}).filter(Boolean)
+  :COMIDAS.map(([k,n])=>{const l=lineas(d[k]);return l.length?{n:n.replace(/^\S+\s/,''),sub:'',it:l}:null}).filter(Boolean);
+ const fecha=new Date(p.creado||Date.now()).toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'});
+ const draw=(H)=>{
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+  const rr=(X,Y,w,hh,r)=>{x.beginPath();x.roundRect(X,Y,w,hh,r)};
+  const font=(w,s)=>x.font=`${w} ${s}px ${F}`;
+  const wrap=(t,max)=>{const L=[];let s='';String(t).split(' ').forEach(w=>{const n=s?s+' '+w:w;if(x.measureText(n).width>max&&s){L.push(s);s=w}else s=n});s&&L.push(s);return L};
+  const fit=(t,max,size,weight)=>{let s=size;do{font(weight,s);s-=2}while(x.measureText(t).width>max&&s>20)};
+  x.fillStyle='#070707';x.fillRect(0,0,W,H);
+  const g=x.createRadialGradient(W/2,260,40,W/2,260,900);g.addColorStop(0,A+'38');g.addColorStop(1,'#07070700');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.save();x.globalAlpha=.06;x.strokeStyle=A;x.lineWidth=2;for(let k=-H;k<W;k+=46){x.beginPath();x.moveTo(k,0);x.lineTo(k+H,H);x.stroke()}x.restore();
+  const cx0=50,cw=W-100;x.save();x.shadowColor='#000';x.shadowBlur=50;rr(cx0,50,cw,H-100,56);x.fillStyle='#111111';x.fill();x.restore();
+  x.lineWidth=3;x.strokeStyle=A+'aa';rr(cx0,50,cw,H-100,56);x.stroke();
+  x.save();rr(cx0,50,cw,280,56);x.clip();const hg=x.createLinearGradient(0,50,0,330);hg.addColorStop(0,A+'40');hg.addColorStop(1,'#11111100');x.fillStyle=hg;x.fillRect(cx0,50,cw,280);x.restore();
+  // cabecera: logo + gimnasio + tipo de plan
+  let y=100;x.textAlign='center';
+  if(lg){const s=150;x.save();x.beginPath();x.arc(W/2,y+s/2,s/2+7,0,7);x.fillStyle='#0b0b0b';x.fill();x.lineWidth=4;x.strokeStyle=A;x.stroke();x.beginPath();x.arc(W/2,y+s/2,s/2,0,7);x.clip();const bx=bordes(lg),in_=s*.78,r=Math.min(in_/bx.w,in_/bx.h);x.drawImage(lg,bx.x,bx.y,bx.w,bx.h,W/2-bx.w*r/2,y+s/2-bx.h*r/2,bx.w*r,bx.h*r);x.restore();y+=s+64}else y+=40;
+  x.fillStyle='#fff';fit(nombre().toUpperCase(),cw-120,52,900);x.fillText(nombre().toUpperCase(),W/2,y);
+  x.fillStyle=A;font(800,26);x.fillText((p.tipo==='entreno'?'P L A N   D E   E N T R E N A M I E N T O':'P L A N   D E   A L I M E N T A C I Ó N'),W/2,y+46);
+  y+=100;
+  // socio
+  const X0=100,CW=W-200;x.textAlign='left';
+  const chips=[d.objetivo?'🎯 '+d.objetivo:'',d.kcal?'🔥 '+d.kcal+' kcal':'',d.agua?'💧 Agua: '+d.agua:''].filter(Boolean);
+  font(700,30);const chL=chips.flatMap(t=>wrap(t,CW-80));const sh=150+(p.titulo?50:0)+chL.length*54;
+  rr(X0,y,CW,sh,32);x.fillStyle='#ffffff0b';x.fill();
+  x.fillStyle='#9a9aa8';font(700,22);x.fillText('PREPARADO PARA',X0+36,y+50);
+  x.fillStyle='#fff';fit(c.nombre.trim(),CW-72,50,900);x.fillText(c.nombre.trim(),X0+36,y+108);
+  let yy=y+108;if(p.titulo){yy+=50;x.fillStyle='#d8d8de';font(600,32);x.fillText(p.titulo,X0+36,yy)}
+  font(700,30);chL.forEach(t=>{yy+=54;x.fillStyle=A;x.fillText(t,X0+36,yy)});
+  y+=sh+34;
+  // días / comidas
+  sec.forEach(s=>{font(400,30);const L=s.it.flatMap(t=>wrap(t,CW-110).map((z,i)=>({z,b:i===0})));const bh=96+L.length*46+20;
+   rr(X0,y,CW,bh,26);x.fillStyle='#ffffff08';x.fill();x.fillStyle=A;rr(X0,y,8,bh,4);x.fill();
+   x.fillStyle=A;font(900,34);x.fillText(s.n.toUpperCase(),X0+40,y+60);
+   if(s.sub){const w=x.measureText(s.n.toUpperCase()).width;x.fillStyle='#fff';font(700,30);const t=s.sub;let m=t;while(x.measureText(m).width>CW-110-w&&m.length>3)m=m.slice(0,-2);x.fillText((m!==t?m+'…':m),X0+40+w+18,y+60)}
+   let ly=y+60+16;font(400,30);L.forEach(o=>{ly+=46;if(o.b){x.fillStyle=A;x.beginPath();x.arc(X0+50,ly-10,6,0,7);x.fill()}x.fillStyle='#e8e8ee';x.fillText(o.z,X0+72,ly)});
+   y+=bh+22});
+  // indicaciones
+  if(d.nota){font(400,30);const L=wrap(d.nota,CW-80);const bh=86+L.length*44+10;rr(X0,y,CW,bh,26);x.fillStyle=A+'1c';x.fill();x.fillStyle=A;font(800,24);x.fillText('INDICACIONES',X0+36,y+50);font(400,30);x.fillStyle='#f0f0f4';L.forEach((t,i)=>x.fillText(t,X0+36,y+96+i*44));y+=bh+22}
+  // pie: quién lo hizo
+  y+=20;x.fillStyle='#ffffff1f';x.fillRect(X0,y,CW,2);y+=60;
+  x.fillStyle='#9a9aa8';font(600,24);x.fillText('ELABORADO POR',X0,y);x.textAlign='right';x.fillText('FECHA',X0+CW,y);
+  y+=46;x.textAlign='left';x.fillStyle='#fff';font(800,34);x.fillText(p.quien||QUIEN(),X0,y);x.textAlign='right';font(700,30);x.fillText(fecha,X0+CW,y);
+  if(d._rol){y+=38;x.textAlign='left';x.fillStyle=A;font(700,26);x.fillText(d._rol+' · '+nombre(),X0,y)}
+  y+=70;x.textAlign='center';x.fillStyle='#6f6f7c';font(500,22);x.fillText('Hecho con Xyro Apps',W/2,y);
+  return{cv,y:y+80};
+ };
+ const m=draw(6000),out=draw(Math.max(1200,m.y));
+ return new Promise(r=>out.cv.toBlob(r,'image/png'));
+}
+async function enviarPlan(c,p){
+ const ok=!!tel(c.telefono),n=c.nombre.trim().split(' ')[0],msg=`Hola ${n} 👋 Te enviamos tu ${RT[p.tipo].t.toLowerCase()} de ${nombre()} 💪 ¡A darle con todo!`;
+ toast('Preparando la ficha…');let b;try{b=await planPNG(c,p)}catch(er){return toast('No se pudo crear la imagen')}
+ const f=new File([b],(p.tipo==='entreno'?'rutina-':'dieta-')+n.toLowerCase()+'.png',{type:'image/png'}),iu=URL.createObjectURL(b);
+ const marca=()=>{if(p.id&&S.rut.includes(p))DB.upd('rut',p.id,{enviado:new Date().toISOString()}).catch(()=>{})};
+ const copia=async()=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':b})]);return true}catch(_){return false}};
+ const movil=navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent);
+ sheet(`<h3>${RT[p.tipo].ico} ${esc(RT[p.tipo].t)} de ${esc(n)}</h3><img src="${iu}" alt="" style="display:block;max-height:52vh;max-width:100%;margin:8px auto;border-radius:14px">
+  <p class="sm mu" id="peSt" style="margin:6px 0">${p.enviado?'Enviado el '+fF(p.enviado.slice(0,10))+'. ':''}${ok?(movil?'Toca enviar y elige su chat de WhatsApp.':'Se copia la imagen y se abre su chat: pégala con Ctrl + V.'):'Este socio no tiene celular: descárgala y envíala tú.'}</p>
+  <div class="bt" style="flex-wrap:wrap"><button class="btn" id="peDl">⬇️ Descargar</button><button class="btn" id="pePr">🖨️ Imprimir</button><button class="btn" data-x>Cerrar</button>${ok||movil?'<button class="btn p" id="peWa">📲 Enviar por WhatsApp</button>':''}</div>`,(el,close)=>{
+  const o=el.closest('.ov');new MutationObserver((_,mo)=>{if(!document.body.contains(o)){mo.disconnect();URL.revokeObjectURL(iu)}}).observe(document.body,{childList:true});
+  el.querySelector('#peDl').onclick=()=>{const a=document.createElement('a');a.href=iu;a.download=f.name;a.click()};
+  el.querySelector('#pePr').onclick=()=>imprimirHTML(`<!doctype html><meta charset="utf-8"><style>@page{margin:8mm}body{margin:0;text-align:center}img{max-width:100%}</style><img src="${iu}">`);
+  el.querySelectorAll('[data-x]').forEach(x=>x.onclick=close);
+  const w=el.querySelector('#peWa');w&&(w.onclick=async()=>{
+   if(movil){try{await navigator.share({files:[f],text:msg});marca();setTimeout(()=>{close();go()},200)}catch(er){}return}
+   const okc=await copia(),txt=msg.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').replace(/ +([,.!)])/g,'$1').replace(/[ \t]+/g,' ').trim(),u=waLink(c,txt),win=window.open(u,'_blank');if(!win)location.href=u;else try{win.opener=null}catch(_){}
+   marca();w.textContent='✅ Chat abierto';el.querySelector('#peSt').innerHTML=okc?'<span style="color:var(--ok)">✅ Imagen copiada: pégala en el chat con Ctrl + V y envía.</span>':'<span style="color:var(--wa)">⚠️ Descárgala y adjúntala con el clip 📎.</span>'});
+ });
+}
 function editarPlan(c,tipo,base){
  if(!puedeTipo(tipo))return toast('Este plan lo arma '+(tipo==='nutri'?'la nutricionista':'el entrenador'));
  const act=base||(c?planAct(c.id,tipo):null),d=(act&&act.datos)||{},PL=plantillas(tipo);
@@ -606,6 +672,7 @@ function editarPlan(c,tipo,base){
   const datos={};F.forEach(f=>{if(!['plt','titulo','tpl'].includes(f.k)&&v[f.k])datos[f.k]=v[f.k]});
   if(tipo==='entreno'&&!DIAS.some(([k])=>datos[k]))throw new Error('Escribe al menos un día de entrenamiento.');
   if(tipo==='nutri'&&!COMIDAS.some(([k])=>datos[k]))throw new Error('Escribe al menos una comida.');
+  datos._rol=ROLES[ME.rol]||'';
   const row={cliente_id:c?c.id:null,tipo,titulo:v.titulo||null,datos,quien:QUIEN(),creado:new Date().toISOString()};
   if(!c&&base&&base.id&&S.rut.some(x=>x.id===base.id)){await DB.upd('rut',base.id,{titulo:row.titulo,datos,quien:row.quien});toast('Plantilla guardada ✓');return go()}
   const p=await DB.ins('rut',row);
