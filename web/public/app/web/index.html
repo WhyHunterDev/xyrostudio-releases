@@ -1,136 +1,20 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mi web · Xyro Apps</title>
-<meta name="robots" content="noindex,nofollow,noarchive">
-<meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#070707">
-<link rel="icon" href="../../img/marca/logo-apps-app.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{scrollbar-width:thin;scrollbar-color:#3a3a3a transparent}
-::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#2c2c2c;border-radius:99px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-thumb:hover{background:#F5C400;background-clip:padding-box}::-webkit-scrollbar-button{display:none;height:0}::-webkit-scrollbar-corner{background:transparent}
-:root{--bg:#070707;--bg2:#0f0f0f;--card:#151515;--line:#262626;--y:#F5C400;--tx:#F4F1EA;--mu:#9a968e;--ok:#25D366;--warn:#ff9f1c;--bad:#ff4d4d;--fd:'Anton',Impact,sans-serif;--fb:'Inter',system-ui,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--tx);font:15px/1.5 var(--fb);min-height:100vh}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:0;background:none}
-a{color:inherit}
-.disp{font-family:var(--fd);font-weight:400;text-transform:uppercase;letter-spacing:.02em}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.2rem;border-radius:12px;font-weight:700;font-size:.9rem;transition:.2s;text-decoration:none}
-.btn-y{background:var(--y);color:#000}.btn-y:hover{filter:brightness(1.08)}
-.btn-g{background:#1f1f1f;border:1px solid var(--line)}.btn-g:hover{border-color:#444}
-.btn-ok{background:rgba(37,211,102,.15);color:var(--ok)}.btn-bad{background:rgba(255,77,77,.12);color:var(--bad)}
-.btn-sm{padding:.45rem .8rem;font-size:.8rem;border-radius:9px}
-.btn:disabled{opacity:.5;cursor:wait}
-input,select,textarea{width:100%;background:#0b0b0b;border:1px solid var(--line);border-radius:12px;padding:.8rem .9rem;outline:none;transition:border .2s}
-input:focus,select:focus,textarea:focus{border-color:var(--y)}
-input[type=checkbox]{width:18px;height:18px;accent-color:var(--y)}
-label{display:grid;gap:.35rem;font-size:.8rem;font-weight:600;color:var(--mu)}
-label.ck{display:flex;align-items:center;gap:.55rem;color:var(--tx);font-weight:500;font-size:.9rem}
-.hint{font-weight:400;font-size:.75rem;color:#77736b}
-/* login */
-#login{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% -20%,rgba(245,196,0,.12),transparent 60%)}
-#login form{width:min(420px,100%);display:grid;gap:1rem;background:#0d0d0d;border:1px solid var(--line);border-radius:24px;padding:32px}
-#login img{width:64px;height:64px;border-radius:50%}
-.err{color:var(--bad);font-size:.85rem}
-.lock{display:flex;gap:.5rem;align-items:center;color:var(--mu);font-size:.75rem}
-/* app */
-#app{display:none;grid-template-columns:250px 1fr;min-height:100vh}
-aside{background:var(--bg2);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:3px;position:sticky;top:0;height:100vh;overflow:auto}
-aside .brand{display:flex;gap:.6rem;align-items:center;padding:4px 8px 16px;font-size:1.05rem}
-aside .brand img{width:36px;height:36px;border-radius:50%}
-aside .brand b{color:var(--y);font-weight:400}
-.grp{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:#5f5b55;padding:12px 12px 4px}
-.nv{display:flex;gap:.7rem;align-items:center;padding:.62rem .8rem;border-radius:10px;color:var(--mu);font-weight:600;font-size:.88rem;transition:.2s;text-align:left;width:100%;text-decoration:none}
-.nv:hover{color:var(--tx);background:#161616}
-.nv.on{background:var(--y);color:#000}
-.nv .ct{margin-left:auto;background:var(--bad);color:#fff;font-size:.7rem;padding:.05rem .45rem;border-radius:999px}
-aside .me{margin-top:auto;border-top:1px solid var(--line);padding:14px 8px 0;font-size:.85rem}
-aside .me small{color:var(--mu);display:block}
-main{padding:26px clamp(16px,3vw,40px) 90px;min-width:0;max-width:1180px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:20px}
-.top h2{font-size:2.3rem;line-height:1}
-.sub{color:var(--mu);margin:-12px 0 20px;font-size:.92rem}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
-.kpi b{display:block;font-family:var(--fd);font-weight:400;font-size:2.4rem;line-height:1;color:var(--y)}
-.kpi small{color:var(--mu)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}
-.panel>h3{font-size:1rem;margin-bottom:4px}
-.panel>p.d{color:var(--mu);font-size:.85rem;margin-bottom:14px}
-details.panel>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:700}
-details.panel>summary::after{content:"＋";color:var(--y);font-size:1.2rem}
-details.panel[open]>summary::after{content:"－"}
-details.panel[open]>summary{margin-bottom:14px}
-.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.form .full{grid-column:1/-1}
-.drop{border:2px dashed var(--line);border-radius:14px;padding:16px;text-align:center;color:var(--mu);cursor:pointer;transition:.2s;position:relative;font-size:.85rem}
-.drop:hover{border-color:var(--y);color:var(--tx)}
-.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.drop .pv{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-.drop .pv img,.drop .pv video{height:90px;border-radius:8px}
-.chk{display:flex;gap:1rem;flex-wrap:wrap;margin-top:6px}
-.info{background:rgba(245,196,0,.08);border:1px solid rgba(245,196,0,.25);color:#e8dca6;border-radius:12px;padding:.8rem 1rem;font-size:.86rem;margin-bottom:16px}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.card{background:#101010;border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-.card .im{aspect-ratio:4/3;background:#1d1d1d;display:grid;place-items:center;font-size:2rem;position:relative}
-.card .im img,.card .im video{width:100%;height:100%;object-fit:cover}
-.card .im .st{position:absolute;top:8px;left:8px;margin:0}
-.card .b{padding:10px 12px;display:grid;gap:2px;flex:1}
-.card .b small{color:var(--mu);font-size:.78rem}
-.card .a{display:flex;gap:6px;padding:0 12px 12px;flex-wrap:wrap}
-.st{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .5rem;border-radius:999px;margin-left:.3rem;background:#222}
-.st.publicado{background:rgba(37,211,102,.18);color:var(--ok)}.st.pendiente{background:rgba(255,159,28,.18);color:var(--warn)}.st.vencido,.st.bloqueado{background:rgba(255,77,77,.15);color:var(--bad)}
-table{width:100%;border-collapse:collapse;font-size:.88rem}
-th,td{text-align:left;padding:.7rem .5rem;border-bottom:1px solid var(--line)}
-th{color:var(--mu);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase}
-.tbl{overflow-x:auto}
-.role{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.25rem .55rem;border-radius:999px;background:#222;white-space:nowrap}
-.role.admin{background:var(--y);color:#000}
-.sw{position:relative;width:42px;height:24px;border-radius:999px;background:#333;transition:.2s;flex:none}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}
-.sw.on{background:var(--ok)}.sw.on::after{left:21px}
-.list-ed{display:grid;gap:8px}
-.list-ed .li{display:flex;gap:8px}
-.guide{display:grid;gap:12px}
-.guide .step{display:flex;gap:14px;background:#101010;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-.guide .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--y);color:#000;font-weight:800;display:grid;place-items:center}
-.guide h4{font-size:.98rem}.guide p{color:var(--mu);font-size:.88rem}
-.pager{display:flex;justify-content:center;gap:8px;margin-top:14px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--y);color:#000;font-weight:700;padding:.8rem 1.3rem;border-radius:12px;transition:transform .35s;z-index:99;max-width:90vw}
-.toast.on{transform:translateX(-50%)}
-.mob{display:none}
-@media(max-width:900px){
-  #app{grid-template-columns:1fr}
-  aside{position:fixed;inset:0 25% 0 0;z-index:50;transform:translateX(-100%);transition:transform .35s;height:100%}
-  aside.open{transform:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.5)}
-  .mob{display:inline-flex}
-  .grid4{grid-template-columns:repeat(2,1fr)}
-  .form{grid-template-columns:1fr}
-}
-.hora12{display:flex;align-items:center;gap:6px}.hora12 select{flex:1;min-width:0}.hora12 b{color:var(--mu)}
-</style>
-</head>
-<body>
-<section id="login"><form id="loginForm"><p style="color:var(--mu)">Abriendo tu web…</p></form></section>
-
-<div id="app">
-  <aside id="side"></aside>
-  <main>
-    <div class="top"><div style="display:flex;gap:10px;align-items:center"><button class="btn btn-g btn-sm mob" id="menuBtn" aria-label="Menú">☰</button><h2 class="disp" id="vt"></h2></div><div id="topActs"></div></div>
-    <div id="view"></div>
-  </main>
-</div>
-<div class="toast" id="toast"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
-<script src="conexion.js?v=1"></script>
-<script src="store.js?v=1"></script>
-<script src="panel.js?v=1"></script>
-<style>.pw-wrap{position:relative;display:block}.pw-wrap input{width:100%;padding-right:2.6rem!important}.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none!important;border:0;cursor:pointer;font-size:1rem;line-height:1;opacity:.75;padding:6px;box-shadow:none!important}.pw-eye:hover{opacity:1}</style>
-<script>/* Ojo para ver la contraseña */(function(){function ojos(){document.querySelectorAll('input[type=password]:not([data-ojo])').forEach(function(i){i.setAttribute('data-ojo','1');var w=document.createElement('span');w.className='pw-wrap';i.parentNode.insertBefore(w,i);w.appendChild(i);var b=document.createElement('button');b.type='button';b.className='pw-eye';b.textContent='👁';b.title='Mostrar contraseña';b.setAttribute('aria-label','Mostrar contraseña');b.addEventListener('click',function(e){e.preventDefault();var s=i.type==='password';i.type=s?'text':'password';b.textContent=s?'🙈':'👁';b.title=s?'Ocultar contraseña':'Mostrar contraseña';i.focus();});w.appendChild(b);});}ojos();new MutationObserver(ojos).observe(document.body,{childList:true,subtree:true});})();</script>
-</body>
-</html>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07070d"><meta name="robots" content="noindex">
+<title>Xyro Apps</title><link rel="icon" href="/img/marca/logo-apps-app.svg"><link rel="manifest" href="/app/manifest.webmanifest">
+<style>html,body{margin:0;height:100%;background:#07070d}body{display:grid;place-items:center}img{width:56px;height:56px;opacity:.85;animation:p 1.2s ease-in-out infinite}@keyframes p{50%{opacity:.35}}</style></head>
+<body><img src="/img/marca/logo-apps-app.svg" alt="">
+<script>
+/* Xyro Apps: elige la versión que el gestor le subió a este negocio y la abre (SQL 28, xa_version). Sin respuesta usa la última conocida. */
+(async()=>{
+ const SUB='web/',FALLBACK='20261113-0422',SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
+ const g=k=>{try{return localStorage.getItem(k)||''}catch(_){return''}},P=new URLSearchParams(location.search);
+ let v=g('xa-ver')||FALLBACK;
+ if(!P.get('demo'))try{
+  const slug=P.get('s')||g('xa-slug')||null,h={apikey:SB.key,'Content-Type':'application/json'};
+  try{const t=JSON.parse(g('xyro-apps-auth')||'null');if(t&&t.access_token&&t.expires_at*1000>Date.now()+30000)h.Authorization='Bearer '+t.access_token}catch(_){}
+  const c=new AbortController();setTimeout(()=>c.abort(),2500);
+  const r=await fetch(SB.url+'/rest/v1/rpc/xa_version',{method:'POST',headers:h,body:JSON.stringify({p_slug:slug}),signal:c.signal});
+  if(r.ok){const x=await r.json();if(typeof x==='string'&&/^[\w-]+$/.test(x)){v=x;try{localStorage.setItem('xa-ver',x)}catch(_){}}}
+ }catch(_){}
+ location.replace('/app/v/'+v+'/'+SUB+location.search+location.hash);
+})();
+</script></body></html>

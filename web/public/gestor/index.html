@@ -344,7 +344,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps']]],['Operación',[['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['versiones','🚀','Actualizaciones']]],['Operación',[['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
     NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}</button>`).join('')).join('')+
@@ -440,6 +440,51 @@ async function crearNegocio(){
   touch(`Dio de alta a ${negocio} (${slug})`); await cargar().catch(()=>{});
   altaRes={negocio,slug,nombre,email,pass,xyros:xyros.map(k=>({apps:'Apps',control:'Control',webs:'Webs'}[k])),tel:tel.length===9?'51'+tel:tel,aviso};
 }
+// ---- Actualizaciones: lo nuevo se prueba en /app/dev/; cada negocio cambia solo cuando se le sube (SQL 28, xa_versiones) ----
+const prox3am=()=>{const d=new Date(),t=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),8));if(t<=d)t.setUTCDate(t.getUTCDate()+1);return t}; // 3 am Lima = 8:00 UTC
+const vEf=r=>{if(!r)return null;const ya=r.prog&&new Date(r.prog_para)<=new Date();if(!ya)return r.version;return r.fijo||!r.version||r.prog>r.version?r.prog:r.version};
+const progOn=r=>r&&r.prog&&new Date(r.prog_para)>new Date();
+let VERS=[];
+V.versiones=async ()=>{
+  H('Actualizaciones','Lo nuevo se prueba en el panel de pruebas. Los negocios no cambian hasta que tú lo subes, y nunca mientras lo están usando: toma la versión nueva al volver a abrir.');
+  $('#acts').innerHTML='<a class="btn btn-g" href="/app/dev/?demo=gym" target="_blank" rel="noopener">🧪 Panel de pruebas</a> <button class="btn btn-g" data-v="versiones">↻</button>';
+  const [vj,{data:rows,error},{data:si},{data:cs}]=await Promise.all([fetch('/app/v/versiones.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>[]),sb.from('xa_versiones').select('*'),sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,valor').eq('clave','config')]);
+  VERS=vj||[];
+  if(error)return '<div class="panel"><div class="empty">Falta correr el SQL 28 (versiones) en Supabase.</div></div>';
+  const M={};(rows||[]).forEach(r=>M[r.clave]=r);const g=M.general||{},vg=vEf(g)||(VERS.length?VERS[VERS.length-1].id:''),ult=VERS.length?VERS[0].id:'';
+  const xy={};(cs||[]).forEach(r=>xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[]);
+  const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps'));
+  const nom=id=>{const x=VERS.find(v=>v.id===id);return x?x.fecha:(id||'—')};
+  const efS=s=>{const r=M[s.id];if(!r)return vg;const v=vEf(r);return r.fijo?(v||vg):(v&&v>vg?v:vg)};
+  const pt=r=>progOn(r)?` <span class="tag pend">⏰ ${esc(nom(r.prog))} a las 3 am</span>`:'';
+  const a3=!!g.auto3am;
+  return `<div class="panel"><h3>🌎 Todos los negocios</h3>
+    <p class="d">Versión general: <b>${esc(nom(vg))}</b>${pt(g)}</p>
+    <label style="display:flex;gap:8px;align-items:center;margin:12px 0;cursor:pointer"><input type="checkbox" data-auto3am ${a3?'checked':''}> ⏰ Subir las actualizaciones a las 3 am (cuando nadie lo usa)</label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${ult&&ult>vg&&g.prog!==ult?`<button class="btn btn-p" data-vsub="general">⬆️ Subir actualización a todos${a3?' (3 am)':''}</button>`:`<span class="d">✅ La versión general está al día.</span>`}${progOn(g)?'<button class="btn btn-g btn-sm" data-vcancel="general">Cancelar lo programado</button>':''}</div></div>
+  <div class="panel"><h3>📱 Por negocio</h3><p class="d">«Subir» le pone lo último solo a ese negocio. «Volver a…» lo deja fijo en una versión anterior si algo falla.</p>
+    <div class="clients">${L.map(s=>{const r=M[s.id],v=efS(s),pend=ult&&ult>v;return`<div class="cl"><div class="in"><h4>${esc(s.negocio||s.slug)} ${pend?'<span class="tag pend">Hay actualización</span>':'<span class="tag activo">Al día</span>'}${r&&r.fijo?' <span class="tag">📌 Fijo</span>':''}${pt(r)}</h4><div class="meta"><span>Versión: ${esc(nom(v))}</span></div></div>
+      <div class="acts">${pend&&!(progOn(r)&&r.prog===ult)?`<button class="btn btn-p btn-sm" data-vsub="${s.id}">⬆️ Subir${a3?' (3 am)':''}</button>`:''}${progOn(r)?`<button class="btn btn-g btn-sm" data-vcancel="${s.id}">Cancelar</button>`:''}<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="/app/dev/?s=${encodeURIComponent(s.slug)}">🧪 Probar</a><select class="btn btn-g btn-sm" data-vfix="${s.id}" data-n="${esc(s.negocio||s.slug)}"><option value="">Volver a…</option>${VERS.map(x=>`<option value="${x.id}">${esc(x.fecha)}</option>`).join('')}${r&&r.fijo?'<option value="-">📌 Quitar fijo</option>':''}</select></div></div>`}).join('')||'<div class="empty">Aún no hay negocios con Xyro Apps.</div>'}</div></div>
+  <div class="panel"><h3>🆕 Versiones</h3>${VERS.slice(0,10).map(v=>`<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)"><b>${esc(v.fecha)}</b>${v.id>vg?' <span class="tag pend">Sin subir a todos</span>':''}<div class="d" style="margin-top:4px">${esc(v.notas)}</div></div>`).join('')||'<div class="empty">Sin versiones.</div>'}</div>`;
+};
+async function subirVersion(clave){
+  const ult=VERS.length&&VERS[0].id; if(!ult)throw new Error('No hay versiones.');
+  const {data:g}=await sb.from('xa_versiones').select('*').eq('clave','general').maybeSingle(), auto=!!(g&&g.auto3am);
+  const {data:r}=clave==='general'?{data:g}:await sb.from('xa_versiones').select('*').eq('clave',clave).maybeSingle();
+  const row={clave,actualizado:new Date().toISOString()};
+  if(auto){row.prog=ult;row.prog_para=prox3am().toISOString();}else{row.version=ult;row.prog=null;row.prog_para=null;row.fijo=false;}
+  if(!r&&auto)row.version=null;
+  const {error}=await sb.from('xa_versiones').upsert(row); if(error)throw error;
+  touch(`Subió la versión ${ult} a ${clave==='general'?'todos':'un negocio'}${auto?' (3 am)':''}`);
+  toast(auto?'⏰ Programada para las 3 am':'✅ Subida. La verán al volver a abrir la app.');
+}
+document.addEventListener('change',async e=>{const t=e.target;try{
+  if('auto3am' in t.dataset){const {error}=await sb.from('xa_versiones').upsert({clave:'general',auto3am:t.checked,actualizado:new Date().toISOString()});if(error)throw error;touch((t.checked?'Activó':'Quitó')+' las actualizaciones a las 3 am');toast(t.checked?'⏰ Las subidas quedarán para las 3 am':'Las subidas serán al instante');return go('versiones');}
+  if(t.dataset.vfix!==undefined&&t.value){const v=t.value,n=t.dataset.n;
+    if(v==='-'){const {error}=await sb.from('xa_versiones').update({fijo:false,actualizado:new Date().toISOString()}).eq('clave',t.dataset.vfix);if(error)throw error;toast('Ya no está fijo');return go('versiones');}
+    if(!confirm(`¿Dejar a ${n} fijo en la versión del ${(VERS.find(x=>x.id===v)||{}).fecha||v}? La verá al volver a abrir la app.`)){t.value='';return;}
+    const {error}=await sb.from('xa_versiones').upsert({clave:t.dataset.vfix,version:v,fijo:true,prog:null,prog_para:null,actualizado:new Date().toISOString()});if(error)throw error;touch(`Dejó a ${n} en la versión ${v}`);toast('📌 Listo');return go('versiones');}
+}catch(ex){toast(ex.message||'No se pudo')}});
 let flt='todos';
 V.clientes=async ()=>{
   H('Clientes','Cada web que creas, con su costo, soporte y versiones. Guardado en la nube.');
@@ -772,6 +817,8 @@ document.addEventListener('click', async e=>{
   try{
     if('altacrear' in d){ el.disabled=true; el.textContent='Creando…'; try{ await crearNegocio(); toast('Negocio creado ✓'); return go('alta'); }catch(ex){ toast(ex.message); el.disabled=false; el.textContent='🚀 Crear negocio'; } return; }
     if('altaotro' in d){ altaRes=null; return go('alta'); }
+    if(d.vsub){ el.disabled=true; try{ await subirVersion(d.vsub); }catch(ex){ toast(ex.message); } return go('versiones'); }
+    if(d.vcancel){ const {error}=await sb.from('xa_versiones').update({prog:null,prog_para:null}).eq('clave',d.vcancel); if(error)throw error; toast('Cancelado'); return go('versiones'); }
     if(d.v)return go(d.v);
     if(d.xarsp){ e.preventDefault(); el.disabled=true; bkAbierto='xa-'+d.xarsp; const {error}=await sb.rpc('xa_respaldar',{p_sitio:d.xarsp}); if(error)throw error; toast('✅ Copia guardada'); return go('backups'); }
     if(d.xarest){ const ok=prompt(`Vas a dejar el Xyro Apps de ${d.n} tal como estaba en esa copia. Lo que se hizo después se reemplaza (antes se guarda una copia de cómo está ahora, por si acaso).\n\nEscribe RESTAURAR para confirmar:`); if((ok||'').trim().toUpperCase()!=='RESTAURAR')return; el.disabled=true; const {data:n,error}=await sb.rpc('xa_restaurar',{p_id:+d.xarest}); if(error)throw error; touch(`Restauró Xyro Apps de ${d.n}`); toast(`✅ Restaurado: ${n||0} registros`); return go('backups'); }

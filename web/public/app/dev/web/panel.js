@@ -196,7 +196,7 @@
   const allowed = () => NAV.flatMap(([, it]) => it).filter((i) => can(i[3])).map((i) => i[0]);
   function side() {
     const pend = isAdmin() ? data.publicaciones.filter((p) => p.estado === 'pendiente').length + data.galeria.filter((g) => g.estado === 'pendiente').length : 0;
-    $('#side').innerHTML = `<div class="brand disp"><img src="${esc(window.SS_LOGO || '../../img/marca/logo-apps-app.svg')}" alt="" style="object-fit:contain"><span>Mi <b>web</b></span></div>` +
+    $('#side').innerHTML = `<div class="brand disp"><img src="${esc(window.SS_LOGO || '/img/marca/logo-apps-app.svg')}" alt="" style="object-fit:contain"><span>Mi <b>web</b></span></div>` +
       NAV.map(([g, it]) => { const v = it.filter((i) => can(i[3])); return v.length ? `<div class="grp">${g}</div>` + v.map(([id, ic, n]) => `<button class="nv ${id === view ? 'on' : ''}" data-v="${id}">${ic} ${n}${id === 'resumen' && pend ? `<span class="ct">${pend}</span>` : ''}</button>`).join('') : ''; }).join('') +
       `<a class="nv" href="../">← Volver a Xyro Apps</a>${window.SS_WEB ? `<a class="nv" href="${esc(window.SS_WEB)}" target="_blank" rel="noopener">` : '<a class="nv" hidden>'}🌐 Ver página web</a>
       <div class="me"><b>${esc(me.nombre)}</b><small>${esc(me.gestor ? 'Gestor (agencia)' : rolLabel[me.rol])} · ${esc(sedeName(me.sede))}</small></div>`;
