@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261113-1843",
+  "fecha": "2026-11-13 18:43",
+  "titulo": "Asistente más humano y con promos",
+  "notas": "Asistente más humano y con promos",
+  "cambios": [
+   "El asistente de Xyro Bots habla más natural, como una persona de recepción",
+   "En «Lo que sabe tu asistente» puedes poner tus promos y las ofrece cuando vienen al caso"
+  ]
+ },
+ {
   "id": "20261113-1826",
   "fecha": "2026-11-13 18:26",
   "titulo": "Xyro Bots: asistente para tus clientes",

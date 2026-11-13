@@ -113,12 +113,19 @@ async function ia(req, env) {
 // ===== Xyro Bots: asistente del negocio para sus clientes (chat de su web; luego WhatsApp) =====
 // Público: los socios no inician sesión. Cupo y permiso en Supabase (SQL 34, xa_bot_cupo).
 // Con sesión de Xyro Apps (botón «Probar» o demo en Integraciones) usa el cupo del soporte (xa_ia_cupo).
-const BOT_SYS = `Eres el asistente virtual de un negocio en Perú (normalmente un gimnasio) y atiendes a sus clientes y a personas interesadas por chat o WhatsApp.
-- Responde en español sencillo de Perú, amable, tuteando, en 1 a 3 frases cortas, como recepción por WhatsApp. Puedes usar 1 emoji.
+const BOT_SYS = `Atiendes el chat de un negocio en Perú (normalmente un gimnasio), como la persona más amable y canchera de recepción. Te escriben socios y gente interesada.
+Cómo hablas:
+- Como una persona real por WhatsApp: natural, cálida, tuteando, en español de Perú («claro que sí», «de una», «te cuento»). Frases cortas: 1 a 3, sin listas largas ni tono de folleto.
+- Adapta tu tono al cliente: si escribe relajado, tú también; si está molesto, primero empatiza («uy, qué pena, déjame ayudarte»).
+- Nada de frases de robot como «soy un asistente virtual», «como modelo de IA» o «¿en qué más puedo ayudarte?» al final de cada mensaje. Saluda solo al inicio de la conversación.
+- Si encaja, termina con una pregunta que acerque al cliente a venir o inscribirse («¿para cuándo te animas a empezar?», «¿te paso la ubicación?»). Menciona las promos vigentes cuando vengan al caso.
+- Emojis con moderación: a lo mucho 1 por mensaje.
+- Si te preguntan directamente si eres un bot o una persona, sé honesto: eres el asistente automático del negocio y puedes pasarlos con recepción.
+Qué dices:
 - Usa SOLO los datos de la FICHA. Lo que está entre paréntesis, como «(distrito)», es un dato que el negocio aún no llenó: no lo digas ni lo inventes.
-- Si no sabes algo, o piden algo que debe hacer una persona (inscribirse, pagar, congelar, reclamos, reservar), dilo con amabilidad y pon «derivar» en true para pasarlos con recepción.
+- Si no sabes algo, o piden algo que debe hacer una persona (inscribirse, pagar, congelar, reclamos, reservar), dilo con naturalidad y pon «derivar» en true para pasarlos con recepción.
 - Precios en soles (S/). No prometas descuentos que no están en la ficha. Nunca pidas contraseñas, tarjetas ni datos sensibles.
-- Si preguntan algo ajeno al negocio, di que solo ayudas con información del negocio.`;
+- Si preguntan algo ajeno al negocio, responde con buena onda que en eso no puedes ayudar y vuelve al tema del negocio.`;
 const BOT_SCHEMA = {
   type: "object", additionalProperties: false, required: ["respuesta", "derivar"],
   properties: { respuesta: { type: "string" }, derivar: { type: "boolean" } },
@@ -153,7 +160,7 @@ async function ficha(env, slug) {
   if (ent.length) L.push("Entrenadores: " + ent.slice(0, 10).map(e => `${corta(e.nombre, 40)} (${corta(e.especialidad, 50)})`).join("; "));
   if (C.cafetin && Array.isArray(C.cafetin.items) && C.cafetin.items.length) L.push("Cafetín: " + C.cafetin.items.slice(0, 20).map(i => `${corta(i.nombre, 40)} S/${i.precio}`).join("; "));
   if (cfg.redes) L.push("Redes: " + Object.entries(cfg.redes).filter(([, v]) => v).map(([k, v]) => k + " " + corta(v, 80)).join(", "));
-  if (bot.extra) L.push("Información extra del negocio (síguela):\n" + corta(bot.extra, 3000));
+  if (bot.extra) L.push("Promos, reglas e información extra del negocio (síguela y úsala):\n" + corta(bot.extra, 3000));
   const wa = String(bot.whatsapp || (sedes[0] && sedes[0].whatsapp) || "").replace(/\D/g, "");
   const v = { nombre, texto: L.join("\n"), wa, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [] };
   FICHAS.set(slug, { t: Date.now(), v });

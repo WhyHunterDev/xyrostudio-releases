@@ -40,7 +40,7 @@
   const $ = s => sh.querySelector(s), pn = $('.p'), M = $('.m'), F = $('form'), I = $('input');
   const SUG = ['¿Cuánto cuesta el mes?', '¿Qué horario tienen?', '¿Dónde quedan?', '¿Qué clases hay?'];
   function pinta(pen) {
-    const saludo = `¡Hola! 👋 Soy el asistente de ${nom}. Pregúntame por precios, horarios, clases o sedes.`;
+    const saludo = `¡Hola! 👋 Bienvenido a ${nom}. ¿En qué te ayudo? Precios, horarios, clases, lo que necesites.`;
     M.innerHTML = `<div class="g bo">${esc(saludo)}</div>` + H.map(m => `<div class="g ${m.de === 'b' ? 'bo' : 'yo'}">${esc(m.t)}</div>${m.w && wa ? `<a class="w" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent('Hola ' + nom + ', vengo de su web 👋')}">💬 Hablar con recepción</a>` : ''}`).join('') + (pen ? '<div class="g bo d"><i></i><i></i><i></i></div>' : '');
     $('.s').innerHTML = H.length ? '' : SUG.map(t => `<button>${t}</button>`).join('');
     sh.querySelectorAll('.s button').forEach(b => b.onclick = () => envia(b.textContent));
