@@ -53,6 +53,8 @@ async function cupo(env, token, modo) {
 }
 
 async function ia(req, env) {
+  // Chequeo simple (abrir en el navegador): dice si la clave está puesta, sin mostrarla.
+  if (req.method === "GET") return json({ ia: env.ANTHROPIC_API_KEY ? "✅ Clave puesta: la IA está lista" : "❌ Falta el secreto ANTHROPIC_API_KEY en Cloudflare", modelo: env.IA_MODELO });
   if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
   const o = req.headers.get("origin");
   if (o && !ORIGENES.includes(o)) return json({ error: "Origen no permitido" }, 403);
