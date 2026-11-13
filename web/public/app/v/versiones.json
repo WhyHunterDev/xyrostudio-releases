@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261113-1826",
+  "fecha": "2026-11-13 18:26",
+  "titulo": "Xyro Bots: asistente para tus clientes",
+  "notas": "Xyro Bots: asistente para tus clientes",
+  "cambios": [
+   "Nuevo asistente que responde a tus clientes en tu web con tus precios, horarios, clases y sedes",
+   "En Integraciones puedes probarlo con «Ver demos» antes de activarlo",
+   "Si está activo: ⚙️ Configurar asistente para poner el WhatsApp de recepción e información extra"
+  ],
+  "requiere": "SQL 34"
+ },
+ {
   "id": "20261113-1745",
   "fecha": "2026-11-13 17:45",
   "titulo": "Asistente con IA",
