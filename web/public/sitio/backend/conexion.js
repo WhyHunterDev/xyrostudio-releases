@@ -9,7 +9,7 @@
   };
   const q = new URLSearchParams(location.search);
   // Vista de plantilla para vender: /sitio/?n=Titan%20Gym&c=2563eb muestra la base con ese nombre y color (sin nube).
-  window.GYM = { slug: CONFIG.sitio, nombre: CONFIG.sitio ? '' : (q.get('n') || '').slice(0, 40), color: CONFIG.sitio ? '' : (/^[0-9a-f]{6}$/i.test(q.get('c') || '') ? '#' + q.get('c') : '') };
+  window.GYM = { slug: CONFIG.sitio, nombre: CONFIG.sitio ? '' : (q.get('n') || '').slice(0, 40), color: CONFIG.sitio ? '' : (/^[0-9a-f]{6}$/i.test(q.get('c') || '') ? '#' + q.get('c') : ''), logo: CONFIG.sitio ? '' : (/^https:\/\//.test(q.get('l') || '') ? q.get('l') : '') };
   if (!window.supabase || !CONFIG.sitio) return;
   const sb = window.supabase.createClient(CONFIG.url, CONFIG.anonKey, { auth: { storageKey: 'xyro-web-pub', persistSession: false, autoRefreshToken: false } });
   let sitioId = null;

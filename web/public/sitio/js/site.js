@@ -629,7 +629,10 @@
   }
 
   function applyTema() {
-    const c = data.config, t = (c.tema || '').toLowerCase(), cfg = TEMAS[t], root = document.documentElement;
+    // ?tema=navidad → vista previa (no cambia nada guardado). La usan las demos e Integraciones de Xyro Apps.
+    const qt = (new URLSearchParams(location.search).get('tema') || '').toLowerCase(), prev = !!TEMAS[qt];
+    const c = data.config, t = prev ? qt : (c.tema || '').toLowerCase(), cfg = TEMAS[t], root = document.documentElement;
+    if (prev && !$('#temaPrev')) { const b = document.createElement('div'); b.id = 'temaPrev'; b.textContent = '👀 Vista previa · tema ' + TEMAS[qt].nom; b.style.cssText = 'position:fixed;left:50%;top:calc(var(--nav) + 10px);transform:translateX(-50%);z-index:90;padding:.5rem 1rem;border-radius:999px;background:#000d;color:#fff;font:700 .8rem var(--fb);border:1px solid #fff3;pointer-events:none'; document.body.appendChild(b); }
     if (cfg) root.dataset.tema = t; else root.removeAttribute('data-tema');
     ['#temaDeco', '#temaRibbon', '#temaLights', '#temaPop', '#temaBadge'].forEach((s) => $(s)?.remove());
     if (fxStop) { fxStop(); fxStop = null; } clearInterval(cdTimer);
