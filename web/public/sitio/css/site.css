@@ -592,3 +592,75 @@ button.combo:hover{transform:translateY(-2px);box-shadow:0 14px 30px -14px color
 .mono{width:42px;height:42px;border-radius:12px;display:inline-grid;place-items:center;background:var(--y);color:var(--on);font:400 1.5rem/1 var(--fd);font-style:normal;flex:none}
 .sheet .hd .mono{width:46px;height:46px}
 body.una-sede #sedePill,body.una-sede .hero-side .seg{display:none}
+
+/* =====================================================================
+   ESTILOS de la base (el admin elige en Mi web → Estilo). config.estilo:
+   fuerza (por defecto: negro, letras grandes) · claro (fondo claro, elegante) · neon (azul noche con brillo)
+   ===================================================================== */
+/* ---------- CLARO ---------- */
+html[data-estilo="claro"]{--bg:#f6f4ef;--bg2:#efece5;--card:#fff;--card2:#faf8f4;--line:#e4e0d6;--line2:#d9d4c8;--tx:#16140f;--mu:#6b665c;
+  --fd:'Plus Jakarta Sans','Inter',system-ui,sans-serif;--fb:'Plus Jakarta Sans','Inter',system-ui,sans-serif;--r:24px}
+html[data-estilo="claro"] body::after{display:none}
+html[data-estilo="claro"] .h1,html[data-estilo="claro"] .h2{text-transform:none;font-weight:800;letter-spacing:-.03em;line-height:1.02}
+html[data-estilo="claro"] .h2{font-size:clamp(2.1rem,5vw,3.8rem)}
+html[data-estilo="claro"] .brand{font-family:var(--fb);font-weight:800;letter-spacing:-.01em}
+html[data-estilo="claro"] .brand b{font-weight:800}
+html[data-estilo="claro"] .nav.solid,html[data-estilo="claro"] .nav.inner{background:rgba(246,244,239,.86)}
+html[data-estilo="claro"] .nav:not(.solid):not(.inner) .brand,html[data-estilo="claro"] .nav:not(.solid):not(.inner) .tabs a:not(.on){color:#fff}
+html[data-estilo="claro"] .nav:not(.solid):not(.inner) .sedepill{color:#fff}
+html[data-estilo="claro"] .tabs{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.07)}
+html[data-estilo="claro"] .nav:not(.solid):not(.inner) .tabs{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
+html[data-estilo="claro"] .tabs a{color:#57524a}html[data-estilo="claro"] .tabs a:hover{color:#000}
+html[data-estilo="claro"] .sedepill{border-color:rgba(0,0,0,.14)}
+html[data-estilo="claro"] .btn-o{border-color:rgba(0,0,0,.2)}
+html[data-estilo="claro"] .tag{background:rgba(0,0,0,.06)}
+html[data-estilo="claro"] .chip:hover{color:#000}
+html[data-estilo="claro"] .chip.on{background:#16140f;color:#fff;border-color:#16140f}
+html[data-estilo="claro"] .bbar{background:rgba(255,255,255,.92);border-color:var(--line)}
+html[data-estilo="claro"] .bbar a,html[data-estilo="claro"] .bbar button{color:#6b665c}
+html[data-estilo="claro"] .more-sheet .box,html[data-estilo="claro"] .sheet .box,html[data-estilo="claro"] .modal .box,html[data-estilo="claro"] .sedemenu,html[data-estilo="claro"] .geonota{background:#fff;color:var(--tx)}
+html[data-estilo="claro"] .sedemenu button:hover{background:#f1eee8}
+html[data-estilo="claro"] .more-sheet .grab{background:#d9d4c8}
+html[data-estilo="claro"] .clase,html[data-estilo="claro"] .nu-pro,html[data-estilo="claro"] .nu-blk{background:#fff;color:var(--tx)}
+html[data-estilo="claro"] .cl-dia,html[data-estilo="claro"] .nu-pasos div{background:#fff;color:var(--tx)}
+html[data-estilo="claro"] .nu-ini{background:#efece5}
+html[data-estilo="claro"] .promo .media,html[data-estilo="claro"] .sede .ph,html[data-estilo="claro"] .sede .map,html[data-estilo="claro"] .modal .box .im{background:#e9e5dc}
+html[data-estilo="claro"] .cafe-status.todas{background:rgba(0,0,0,.05);color:#444}
+html[data-estilo="claro"] .cafe-cerrado b{color:#000}
+html[data-estilo="claro"] .stat,html[data-estilo="claro"] .plan:not(.hot),html[data-estilo="claro"] .pillar,html[data-estilo="claro"] .promo,html[data-estilo="claro"] .sede,html[data-estilo="claro"] .tile:not(.ytile){box-shadow:0 18px 40px -28px rgba(40,30,10,.35)}
+/* el hero queda oscuro sobre la foto (mejor lectura) y corta limpio al fondo claro */
+html[data-estilo="claro"] .hero{--tx:#f7f5f0;--mu:#d6d1c6;border-radius:0 0 34px 34px;min-height:92svh}
+html[data-estilo="claro"] .hero::before{background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,.15) 40%,rgba(0,0,0,.78))}
+html[data-estilo="claro"] .hero h1{font-family:var(--fd);font-weight:800;text-transform:none;letter-spacing:-.045em;line-height:.95;font-size:clamp(3.4rem,10vw,8.6rem)}
+html[data-estilo="claro"] .hero h1 .ol{-webkit-text-stroke:1.5px #fff}
+html[data-estilo="claro"] .hero .btn-o{border-color:rgba(255,255,255,.35);color:#fff}
+html[data-estilo="claro"] .marquee{transform:none;margin:22px 0 0;border-radius:999px;width:min(1240px,100% - 32px);margin-inline:auto}
+html[data-estilo="claro"] footer{background:#16140f;color:#efece5;--tx:#efece5;--mu:#a9a397;--line:#2c2a25}
+
+/* ---------- NEÓN ---------- */
+html[data-estilo="neon"]{--bg:#070914;--bg2:#0b0e1d;--card:#10142a;--card2:#141a33;--line:#1d2443;--line2:#283058;--tx:#eef1ff;--mu:#8f97c0;
+  --fd:'Sora','Inter',system-ui,sans-serif;--r:22px}
+html[data-estilo="neon"] body{background:radial-gradient(1200px 600px at 85% -10%,color-mix(in srgb,var(--y) 16%,transparent),transparent 60%),radial-gradient(900px 500px at -10% 40%,rgba(90,70,255,.12),transparent 60%),var(--bg);background-attachment:fixed}
+html[data-estilo="neon"] body::after{opacity:.025}
+html[data-estilo="neon"] .h1,html[data-estilo="neon"] .h2{font-weight:800;letter-spacing:-.02em;line-height:1}
+html[data-estilo="neon"] .h1 em,html[data-estilo="neon"] .h2 em,html[data-estilo="neon"] .hero h1 .y{background:linear-gradient(90deg,var(--y),var(--y2),#8b7bff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px color-mix(in srgb,var(--y) 45%,transparent))}
+html[data-estilo="neon"] .hero h1{font-family:var(--fd);font-weight:800;letter-spacing:-.04em;line-height:.92;font-size:clamp(3.4rem,11vw,9rem)}
+html[data-estilo="neon"] .hero h1 .ol{-webkit-text-stroke:1.5px color-mix(in srgb,var(--y) 70%,#fff)}
+html[data-estilo="neon"] .brand{font-family:var(--fd);font-weight:800}
+html[data-estilo="neon"] .nav.solid,html[data-estilo="neon"] .nav.inner{background:rgba(7,9,20,.78)}
+html[data-estilo="neon"] .bbar{background:rgba(12,15,32,.9)}
+html[data-estilo="neon"] .more-sheet .box,html[data-estilo="neon"] .sheet .box,html[data-estilo="neon"] .modal .box,html[data-estilo="neon"] .sedemenu{background:#0e1226}
+html[data-estilo="neon"] .clase,html[data-estilo="neon"] .nu-pro,html[data-estilo="neon"] .nu-blk{background:#10142a}
+html[data-estilo="neon"] .stat,html[data-estilo="neon"] .plan,html[data-estilo="neon"] .pillar,html[data-estilo="neon"] .promo,html[data-estilo="neon"] .sede,html[data-estilo="neon"] .tile{border:1px solid color-mix(in srgb,var(--y) 22%,var(--line));box-shadow:0 0 0 1px rgba(255,255,255,.02),0 20px 50px -30px color-mix(in srgb,var(--y) 55%,transparent)}
+html[data-estilo="neon"] .btn-y,html[data-estilo="neon"] .tabs .ind,html[data-estilo="neon"] .bbar .on{background:linear-gradient(135deg,var(--y),color-mix(in srgb,var(--y) 55%,#7b5cff));box-shadow:0 0 26px -4px color-mix(in srgb,var(--y) 70%,transparent)}
+html[data-estilo="neon"] .marquee{background:linear-gradient(90deg,var(--y),#7b5cff,var(--y));transform:none;margin:0}
+html[data-estilo="neon"] .hero::before{background:linear-gradient(180deg,rgba(7,9,20,.55),rgba(7,9,20,.1) 35%,rgba(7,9,20,.88) 80%,var(--bg)),radial-gradient(ellipse at 80% 15%,color-mix(in srgb,var(--y) 28%,transparent),transparent 55%)}
+html[data-estilo="neon"] .eyebrow::before{box-shadow:0 0 12px var(--y)}
+
+/* títulos de la fuente grande: en claro y neón van gruesos */
+html[data-estilo="claro"] #mantoScreen h1,html[data-estilo="claro"] .brand,html[data-estilo="claro"] .coach .ini,html[data-estilo="claro"] .coach h3,html[data-estilo="claro"] .combo .cp b,html[data-estilo="claro"] .combo h4,html[data-estilo="claro"] .cta-band h2,html[data-estilo="claro"] .cta-band::after,html[data-estilo="claro"] .h1,html[data-estilo="claro"] .h2,html[data-estilo="claro"] .hero h1,html[data-estilo="claro"] .marquee .track,html[data-estilo="claro"] .mcard .pr,html[data-estilo="claro"] .modal .big,html[data-estilo="claro"] .modal h3,html[data-estilo="claro"] .more-sheet a,html[data-estilo="claro"] .pase .pp b,html[data-estilo="claro"] .pase h4,html[data-estilo="claro"] .pillar i,html[data-estilo="claro"] .pinfo b,html[data-estilo="claro"] .plan .price,html[data-estilo="claro"] .plan h3,html[data-estilo="claro"] .promo h3,html[data-estilo="claro"] .pvid .ph b,html[data-estilo="claro"] .qres h3,html[data-estilo="claro"] .reel .rt,html[data-estilo="claro"] .sede .ph h3,html[data-estilo="claro"] .stat b,html[data-estilo="claro"] .tile h3,html[data-estilo="claro"] .tile.ytile .price,html[data-estilo="claro"] .tp-cd b,html[data-estilo="claro"] .tp-t,html[data-estilo="claro"] .vision-img .badge,html[data-estilo="claro"] /* Base Xyro Webs: logo de letra cuando el negocio aún no sube su logo; una sola sede = sin selector */
+.mono,html[data-estilo="neon"] #mantoScreen h1,html[data-estilo="neon"] .brand,html[data-estilo="neon"] .coach .ini,html[data-estilo="neon"] .coach h3,html[data-estilo="neon"] .combo .cp b,html[data-estilo="neon"] .combo h4,html[data-estilo="neon"] .cta-band h2,html[data-estilo="neon"] .cta-band::after,html[data-estilo="neon"] .h1,html[data-estilo="neon"] .h2,html[data-estilo="neon"] .hero h1,html[data-estilo="neon"] .marquee .track,html[data-estilo="neon"] .mcard .pr,html[data-estilo="neon"] .modal .big,html[data-estilo="neon"] .modal h3,html[data-estilo="neon"] .more-sheet a,html[data-estilo="neon"] .pase .pp b,html[data-estilo="neon"] .pase h4,html[data-estilo="neon"] .pillar i,html[data-estilo="neon"] .pinfo b,html[data-estilo="neon"] .plan .price,html[data-estilo="neon"] .plan h3,html[data-estilo="neon"] .promo h3,html[data-estilo="neon"] .pvid .ph b,html[data-estilo="neon"] .qres h3,html[data-estilo="neon"] .reel .rt,html[data-estilo="neon"] .sede .ph h3,html[data-estilo="neon"] .stat b,html[data-estilo="neon"] .tile h3,html[data-estilo="neon"] .tile.ytile .price,html[data-estilo="neon"] .tp-cd b,html[data-estilo="neon"] .tp-t,html[data-estilo="neon"] .vision-img .badge,html[data-estilo="neon"] /* Base Xyro Webs: logo de letra cuando el negocio aún no sube su logo; una sola sede = sin selector */
+.mono{font-weight:800;letter-spacing:-.02em}
+html[data-estilo="claro"] .hero{color:var(--tx)}
+html[data-estilo="claro"] .tabs a.on,html[data-estilo="claro"] .nav .tabs a.on{color:var(--on)!important}
+html[data-estilo="claro"] .chip{color:#3a362f;border-color:var(--line2)}

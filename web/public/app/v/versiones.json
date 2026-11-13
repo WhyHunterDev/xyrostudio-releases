@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261113-1455",
+  "fecha": "2026-11-13 14:55",
+  "titulo": "Mi web: estilo y secciones",
+  "notas": "Mi web: estilo y secciones",
+  "cambios": [
+   "En Mi web → Estilo y secciones: elige entre 3 estilos (Fuerza, Claro, Neón) con vista previa",
+   "Apaga las secciones que tu gym aún no tiene (cafetín, nutrición, clases…): desaparecen de la web y del panel",
+   "«Ver página web» abre tu propia web"
+  ]
+ },
+ {
   "id": "20261113-1423",
   "fecha": "2026-11-13 14:23",
   "titulo": "Cuentas del equipo por negocio y dueños con varios negocios",

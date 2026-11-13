@@ -187,7 +187,7 @@
   // ---------- Navegación ----------
   const NAV = [
     ['General', [['resumen', '📊', 'Resumen', 'all']]],
-    ['Página web', [['contenido', '🎨', 'Contenido de inicio', 'admin'], ['planes', '💳', 'Planes y precios', 'admin'], ['sedes', '📍', 'Sedes', 'admin']]],
+    ['Página web', [['diseno', '✨', 'Estilo y secciones', 'admin'], ['contenido', '🎨', 'Contenido de inicio', 'admin'], ['planes', '💳', 'Planes y precios', 'admin'], ['sedes', '📍', 'Sedes', 'admin']]],
     ['Publicar', [['promos', '📣', 'Promos y eventos', 'admin,recepcion'], ['galeria', '🎬', 'Galería', 'admin,recepcion'], ['clases', '🗓️', 'Horario de clases', 'admin,recepcion'], ['nutricion', '🥗', 'Asesoría nutricional', 'admin,recepcion'], ['coaches', '🏋️', 'Entrenadores', 'admin'], ['cafetin', '🥤', 'Cafetín', 'admin,cafetin']]],
     ['Registro', [['actividad', '🕑', 'Actividad', 'admin'], ['reclamos', '📕', 'Libro de reclamaciones', 'admin']]],
     ['Ayuda', [['guia', '📘', 'Guía de uso', 'all']]]
@@ -197,8 +197,8 @@
   function side() {
     const pend = isAdmin() ? data.publicaciones.filter((p) => p.estado === 'pendiente').length + data.galeria.filter((g) => g.estado === 'pendiente').length : 0;
     $('#side').innerHTML = `<div class="brand"><img src="${esc(window.SS_LOGO || '/img/marca/logo-apps-app.svg')}" alt="" style="object-fit:contain"><span><b>${esc(window.SS_NOMBRE || 'Mi web')}</b><small>Xyro Webs · Mi web</small></span></div>` +
-      NAV.map(([g, it]) => { const v = it.filter((i) => can(i[3])); return v.length ? `<div class="grp">${g}</div>` + v.map(([id, ic, n]) => `<button class="nv ${id === view ? 'on' : ''}" data-v="${id}">${ic} ${n}${id === 'resumen' && pend ? `<span class="ct">${pend}</span>` : ''}</button>`).join('') : ''; }).join('') +
-      `<a class="nv" href="../">← Volver a Xyro Apps</a>${window.SS_WEB ? `<a class="nv" href="${esc(window.SS_WEB)}" target="_blank" rel="noopener">` : '<a class="nv" hidden>'}🌐 Ver página web</a>
+      NAV.map(([g, it]) => { const v = it.filter((i) => can(i[3]) && !(window.SS_BASE && ((data.config || {}).secciones || {})[i[0]] === false)); return v.length ? `<div class="grp">${g}</div>` + v.map(([id, ic, n]) => `<button class="nv ${id === view ? 'on' : ''}" data-v="${id}">${ic} ${n}${id === 'resumen' && pend ? `<span class="ct">${pend}</span>` : ''}</button>`).join('') : ''; }).join('') +
+      `<a class="nv" href="../">← Volver a Xyro Apps</a>${window.SS_WEB ? `<a class="nv" href="${esc(window.SS_WEBURL || window.SS_WEB)}" target="_blank" rel="noopener">` : '<a class="nv" hidden>'}🌐 Ver página web</a>
       <div class="me"><b>${esc(me.nombre)}</b><small>${esc(me.gestor ? 'Gestor (agencia)' : rolLabel[me.rol])} · ${esc(sedeName(me.sede))}</small></div>`;
   }
   async function go(v) {
@@ -341,6 +341,29 @@
       <p class="hint" style="margin-top:4px">Déjalo en «Normal» para quitar el tema.</p>
       <button class="btn btn-y" data-savecfg="ctema" style="margin-top:14px">Guardar tema</button></details>`;
   }
+  // ---------- Estilo y secciones (solo webs hechas con la base Xyro Webs) ----------
+  const ESTILOS_W = [['fuerza', 'Fuerza', 'Negro, letras grandes en mayúsculas. Impacto total.', '#070707', '#F4F1EA', 'Anton,Impact,sans-serif', 'uppercase'],
+    ['claro', 'Claro', 'Fondo claro y elegante. Limpio y moderno.', '#f6f4ef', '#16140f', 'Plus Jakarta Sans,Inter,sans-serif', 'none'],
+    ['neon', 'Neón', 'Azul noche con brillos. Ideal para gyms modernos.', '#070914', '#eef1ff', 'Sora,Inter,sans-serif', 'uppercase']];
+  const SECC_W = [['planes', '💳 Planes y precios'], ['coaches', '🏋️ Entrenadores'], ['clases', '🗓️ Horario de clases'], ['nutricion', '🥗 Asesoría nutricional'], ['cafetin', '🥤 Cafetín'], ['sedes', '📍 Sedes'], ['galeria', '🎬 Galería'], ['promos', '📣 Promos y eventos']];
+  V.diseno = async () => {
+    const c = data.config, est = c.estilo || 'fuerza', sc = c.secciones || {}, col = getComputedStyle(document.documentElement).getPropertyValue('--y').trim() || '#f5c400';
+    const prev = (e) => { const u = window.SS_WEBURL || ''; return u ? u + (u.includes('?') ? '&' : '?') + 'e=' + e : '#'; };
+    if (!window.SS_BASE) return title('Estilo y secciones') + `<div class="panel"><p class="d">Tu web está hecha a medida, así que su diseño y sus secciones los cambia XyroStudio. Escríbenos y lo vemos contigo.</p><a class="btn btn-y" target="_blank" rel="noopener" href="https://wa.me/51936449066?text=${encodeURIComponent('Hola XyroStudio 👋 Quiero cambiar el diseño o las secciones de mi web.')}">💬 Escribir a XyroStudio</a></div>`;
+    return title('Estilo y secciones', 'Elige cómo se ve tu web y qué secciones muestra. Al guardar, tu web cambia al instante.') +
+      `<div class="panel"><h3>✨ Estilo de tu web</h3><p class="d">Toca uno para elegirlo. «Ver» abre tu web con ese estilo sin guardarlo.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px">${ESTILOS_W.map(([k, n, d, bg, tx, ff, tt]) => `<label style="display:block;cursor:pointer;border:2px solid ${k === est ? col : 'var(--line2,#2e2e2e)'};border-radius:16px;overflow:hidden">
+        <input type="radio" name="estW" value="${k}" ${k === est ? 'checked' : ''} hidden>
+        <div style="background:${bg};color:${tx};padding:16px 14px;height:118px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px${k === 'neon' ? `;background-image:radial-gradient(circle at 85% 10%,${col}55,transparent 60%)` : ''}">
+          <b style="font-family:${ff};text-transform:${tt};font-size:1.5rem;line-height:1;font-weight:800">Forja tu <span style="color:${col}">mejor</span></b>
+          <span style="display:inline-block;width:72px;height:18px;border-radius:99px;background:${col}"></span></div>
+        <div style="padding:10px 12px"><b>${k === est ? '✓ ' : ''}${n}</b><div class="d" style="font-size:.8rem;margin:2px 0 6px">${d}</div><a href="${esc(prev(k))}" target="_blank" rel="noopener" style="font-size:.8rem;font-weight:700;color:${col}">Ver ↗</a></div></label>`).join('')}</div></div>
+      <div class="panel"><h3>🧩 Secciones</h3><p class="d">Apaga lo que tu gym aún no tiene (por ejemplo, cafetín o nutrición). Desaparece de la web y de este panel; tus datos quedan guardados para cuando lo vuelvas a activar.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px">${SECC_W.map(([k, n]) => `<label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line2,#2e2e2e);border-radius:12px;cursor:pointer"><input type="checkbox" data-secw="${k}" ${sc[k] === false ? '' : 'checked'} style="width:18px;height:18px">${n}</label>`).join('')}</div>
+      <p class="hint" style="margin-top:10px">Inicio siempre se muestra. ¿Quieres una sección nueva o un diseño propio? Eso lo hacemos a medida: <a target="_blank" rel="noopener" href="https://wa.me/51936449066?text=${encodeURIComponent('Hola XyroStudio 👋 Quiero una sección o un diseño a medida para mi web.')}">escríbenos</a>.</p></div>
+      <button class="btn btn-y" data-savediseno>Guardar estilo y secciones</button>`;
+  };
+  document.addEventListener('change', (e) => { if (e.target.name === 'estW') $$('input[name=estW]').forEach((r) => { r.parentElement.style.borderColor = r.checked ? (getComputedStyle(document.documentElement).getPropertyValue('--y').trim() || '#f5c400') : 'var(--line2,#2e2e2e)'; }); });
   V.contenido = async () => {
     const c = data.config, blk = async (id, t, d, obj, f, open) => `<details class="panel" ${open ? 'open' : ''}><summary>${t}</summary><p class="d">${d}</p>${await form(obj, f, id)}<button class="btn btn-y" data-savecfg="${id}" style="margin-top:16px">Guardar</button></details>`;
     return title('Contenido de inicio', 'Toca cada bloque para editarlo. Los cambios se ven en la web al guardar.') +
@@ -485,6 +508,7 @@
       if (d.ok) { const x = list.find((y) => y.id === d.ok); x.estado = 'publicado'; await commit('Aprobado ✓', `aprobó «${DEF.nombre(x)}»`); return go(view); }
       if (d.stock) { const x = list.find((y) => y.id === d.stock); x.disponible = !x.disponible; await commit(x.disponible ? 'Marcado disponible' : 'Marcado agotado', `marcó ${x.nombre} como ${x.disponible ? 'disponible' : 'agotado'}`); return go(view); }
       if (d.savecfg) { const [fid, root] = d.savecfg.split(':'); collect($('#' + fid), root === 'cafetin' ? data.cafetin : root === 'root' ? data : data.config); await commit('Guardado ✓', 'actualizó el contenido de la web'); return; }
+      if ('savediseno' in d) { const e = ($('input[name=estW]:checked') || {}).value || 'fuerza', sc = {}; $$('[data-secw]').forEach((x) => { if (!x.checked) sc[x.dataset.secw] = false; }); data.config.estilo = e; data.config.secciones = sc; await commit('Guardado ✓ · tu web ya cambió', 'cambió el estilo y las secciones de la web'); side(); return go(view); }
       if (d.saveplan) { const p = data.planes[+d.saveplan]; collect($('#pl' + d.saveplan), p); await commit('Plan guardado ✓', `editó el plan ${p.nombre}`); return go(view); }
       if ('addplan' in d) { data.planes.push({ id: SS.uid(), nombre: 'Nuevo plan', meses: 1, precio: 0, destacado: false, precioEvento: '', eventoTexto: '', eventoHasta: '' }); await commit('Plan agregado'); return go(view); }
       if (d.delplan) { const p = data.planes[+d.delplan]; if (!confirm(`¿Eliminar el plan ${p.nombre}?`)) return; data.planes.splice(+d.delplan, 1); await commit('Plan eliminado', `eliminó el plan ${p.nombre}`); return go(view); }

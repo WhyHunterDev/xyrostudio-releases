@@ -67,6 +67,28 @@
     $('#footHor').innerHTML = hs.map((x) => `<li>${esc(x[0])} · ${esc(x[1])}</li>`).join('');
     document.body.classList.toggle('una-sede', data.sedes.length < 2);
   }
+  // ---------- Estilo (plantilla) y secciones que el negocio usa ----------
+  const ESTILOS = { fuerza: '', claro: 'Plus+Jakarta+Sans:wght@500;600;700;800', neon: 'Sora:wght@600;700;800' };
+  function estilo() {
+    const q = new URLSearchParams(location.search).get('e'), e = ESTILOS[q] !== undefined ? q : (ESTILOS[data.config.estilo] !== undefined ? data.config.estilo : 'fuerza');
+    document.documentElement.dataset.estilo = e;
+    if (ESTILOS[e] && !document.getElementById('fEst-' + e)) { const l = document.createElement('link'); l.id = 'fEst-' + e; l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=' + ESTILOS[e] + '&display=swap'; document.head.appendChild(l); }
+    document.querySelector('meta[name=theme-color]')?.setAttribute('content', e === 'claro' ? '#f6f4ef' : e === 'neon' ? '#070914' : '#070707');
+  }
+  // config.secciones = { cafetin:false, nutricion:false, … } → esas secciones desaparecen de menús, inicio y enlaces.
+  const SECC = ['planes', 'coaches', 'clases', 'nutricion', 'cafetin', 'sedes', 'galeria', 'promos'];
+  const SIN = (new URLSearchParams(location.search).get('sin') || '').split(',');   // vista previa: ?sin=cafetin,nutricion
+  const ON = (k) => !SECC.includes(k) || ((data.config.secciones || {})[k] !== false && !SIN.includes(k));
+  function secciones() {
+    const off = SECC.filter((k) => !ON(k));
+    let st = document.getElementById('seccOff'); if (!st) { st = document.createElement('style'); st.id = 'seccOff'; document.head.appendChild(st); }
+    st.textContent = off.map((k) => `a[href^="#/${k}"],[data-r="${k}"]${k === 'coaches' ? ',a[href^="#/coach/"]' : ''}`).join(',') + (off.length ? '{display:none!important}' : '')
+      + (off.some((k) => ['coaches', 'cafetin', 'sedes', 'galeria', 'planes'].includes(k)) ? '.bento{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important;grid-template-rows:auto!important}.bento .tile{min-height:260px}.bento .tile.big{grid-row:auto!important;grid-column:auto!important}' : '');
+    // barra de abajo (celular): si se quita una de las 4 fijas, sube una de «Más»
+    const bb = $('#bbar'); if (bb) bb.style.gridTemplateColumns = `repeat(${$$('#bbar > a').filter((a) => ON(a.dataset.r)).length + 1},1fr)`;
+    const mas = $$('#moreSheet a').filter((a) => ON(a.getAttribute('href').slice(2))); if ($('#moreBtn')) $('#moreBtn').style.display = mas.length ? '' : 'none';
+  }
+  estilo(); secciones();
   marca();
   function chrome() {
     $('#sedePillTx').textContent = sede === 'todas' ? 'Todas las sedes' : 'Sede ' + sedeName(sede);
@@ -155,11 +177,11 @@
       </div>
     </div></section>
 
-    ${promos.length ? `<section class="sec"><div class="wrap">
+    ${promos.length && ON('promos') ? `<section class="sec"><div class="wrap">
       <div class="row-hd"><div><span class="eyebrow rv">Lo nuevo</span><h2 class="h2 rv">Promos y <em>eventos</em></h2></div><a class="more" href="#/promos">Ver todas →</a></div>
       <div class="promos">${await promoCards(promos)}</div></div></section>` : ''}
 
-    ${reelList.length ? `<section class="sec alt"><div class="wrap">
+    ${reelList.length && ON('galeria') ? `<section class="sec alt"><div class="wrap">
       <div class="row-hd"><div><span class="eyebrow rv">${esc(c.videos.eyebrow)}</span><h2 class="h2 rv">${esc(c.videos.titulo)} <em>${esc(c.videos.acento)}</em></h2><p class="lead rv">${esc(c.videos.texto)}</p></div><a class="more" href="#/galeria">Ver galería completa →</a></div>
       ${carousel('reelTrack', await reelHTML(reelList))}
     </div></section>` : ''}
@@ -526,7 +548,7 @@
   let route = '';
   async function render(keepScroll) {
     const h = location.hash.replace(/^#\/?/, '') || 'inicio', [name, arg] = h.split('/');
-    const key = P[name] ? name : 'inicio';
+    const key = P[name] && ON(name === 'coach' ? 'coaches' : name) ? name : 'inicio';
     const y = scrollY, changed = route !== h; route = h;
     nav.classList.toggle('inner', key !== 'inicio');
     const tabKey = key === 'coach' ? 'coaches' : key;
@@ -668,5 +690,5 @@
       if (a && /wa\.me|api\.whatsapp|whatsapp\.com/i.test(a.href)) BK.metrica('whatsapp');
     }, true);
   }
-  addEventListener('storage', async (e) => { if (e.key === 'ss-ping') { data = await SS.load(); chrome(); applyTema(); render(true); } });
+  addEventListener('storage', async (e) => { if (e.key === 'ss-ping') { data = await SS.load(); estilo(); secciones(); marca(); chrome(); applyTema(); render(true); } });
 })();
