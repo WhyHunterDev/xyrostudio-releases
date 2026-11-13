@@ -230,7 +230,7 @@ async function borrar(id){ const {error}=await sb.from('clientes_agencia').delet
 // Activos -> config.xyros del sitio (la plataforma del cliente lo lee para ofrecer mejoras).
 // Precios -> clientes_agencia.modulos (privado, solo tú). Requiere 14-xyros.sql.
 const XYROS=[['webs','Xyro Webs','Web y panel editable'],['apps','Xyro Apps','Clientes, membresías y cobros'],['control','Xyro Control','Caja, inventario y reportes'],['bots','Xyro Bots','WhatsApp que atiende y vende'],['edits','Xyro Edits','Reels y videos con IA']];
-const modsDe=(cl,cf)=>{ const m=structuredClone(cl.modulos||{}); const act=(cf&&cf.xyros)||(cl.url?['webs']:[]); XYROS.forEach(([k])=>{ m[k]=m[k]||{}; if(m[k].on===undefined)m[k].on=act.includes(k); if(k==='webs'&&m[k].precio==null&&m[k].on)m[k].precio=+cl.soporte||0; }); return m; };
+const modsDe=(cl,cf)=>{ const m=structuredClone(cl.modulos||{}); const act=(cf&&cf.xyros)||(webDe(cl)?['webs']:[]); XYROS.forEach(([k])=>{ m[k]=m[k]||{}; if(m[k].on===undefined)m[k].on=act.includes(k); if(k==='webs'&&m[k].precio==null&&m[k].on)m[k].precio=+cl.soporte||0; }); return m; };
 const mensualDe=c=>{ const m=c.modulos; if(m&&Object.keys(m).length) return Object.values(m).reduce((a,x)=>a+(x&&x.on?(+x.precio||0):0),0); return c.ciclo==='mensual'?(+c.soporte||0):0; };
 function xyrosPanel(cl,cf,slug){
   const m=modsDe(cl,cf), tot=Object.values(m).reduce((a,x)=>a+(x.on?(+x.precio||0):0),0);
@@ -254,7 +254,10 @@ document.addEventListener('input',e=>{ if(e.target.dataset&&e.target.dataset.xyp
 // ---- Temas de temporada (aplica a la web del cliente) ----
 const TEMAS=[['','Normal','✨'],['navidad','Navidad','🎄'],['halloween','Halloween','🎃'],['anionuevo','Año Nuevo','🎆'],['fiestaspatrias','Fiestas Patrias','🎊'],['sanvalentin','San Valentín','❤️']];
 // Slug del proyecto: último tramo de la ruta (…/santos-strength/) o, si la web está en la raíz, el subdominio/dominio (panaderia.xyrostudio.net → panaderia).
-const slugDe=url=>{try{const u=new URL(url),p=u.pathname.split('/').filter(Boolean).filter(x=>!/\.html?$/i.test(x));if(p.length)return p[p.length-1];const h=u.hostname.split('.').filter(x=>x!=='www');return h[0]||'';}catch(_){return '';}};
+const slugDe=url=>{try{const u=new URL(url);if(u.searchParams.get('s'))return u.searchParams.get('s');const p=u.pathname.split('/').filter(Boolean).filter(x=>!/\.html?$/i.test(x));if(p.length)return p[p.length-1];const h=u.hostname.split('.').filter(x=>x!=='www');return h[0]||'';}catch(_){return '';}};
+// Web real del cliente: vacío si solo tiene Xyro Apps (enlace /app/?s= o subdominio automático slug.xyrostudio.net).
+const webDe=cl=>{const u=String(cl&&cl.url||'');if(!u)return'';try{const x=new URL(u);if(x.searchParams.get('s')||/^[^.]+\.xyrostudio\.net$/i.test(x.hostname)&&!(cl.modulos&&cl.modulos.webs&&cl.modulos.webs.on))return'';}catch(_){return''}return u};
+const appLink=s=>'https://xyrostudio.net/app/?s='+encodeURIComponent(s);
 // Conecta un proyecto nuevo: crea su fila en 'sitios' si aún no existe (requiere 13-nuevos-proyectos.sql).
 async function asegurarSitio(c){
   const slug=slugDe(c.url||''); if(!slug)return;
@@ -378,12 +381,12 @@ V.resumen=async ()=>{
 };
 function clCard(cl){return`<div class="cl"><div class="in"><h4>${esc(cl.negocio)} <span class="tag ${cl.estado}">${estLabel(cl.estado)}</span> <span class="tag ${cl.pago==='pagado'?'pg':'pend'}">${cl.pago==='pagado'?'Pagado':'Por cobrar'}</span></h4>
   <div class="meta"><span>${esc(cl.rubro||'—')}</span><span>${soles(cl.costo)}</span>${+cl.soporte?`<span>+ ${soles(cl.soporte)}/mes</span>`:''}${cl.entregado?`<span>Entregado ${cl.entregado}</span>`:''}</div></div>
-  <div class="acts"><button class="btn btn-g btn-sm" data-open="${cl.id}">Abrir ficha</button>${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Web ↗</a>`:''}<button class="btn btn-g btn-sm" data-del="${cl.id}" title="Eliminar cliente">🗑️</button></div></div>`;}
+  <div class="acts"><button class="btn btn-g btn-sm" data-open="${cl.id}">Abrir ficha</button>${webDe(cl)?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Web ↗</a>`:''}<button class="btn btn-g btn-sm" data-del="${cl.id}" title="Eliminar cliente">🗑️</button></div></div>`;}
 // Xyro Apps de todos tus clientes: cómo van este mes y entrar con un clic (solo tú lo ves; mirar no deja rastro).
 async function sumaPagos(sid,desde){let t=0,i=0;for(;;){const{data,error}=await sb.from('xa_pagos').select('monto').eq('sitio_id',sid).gte('fecha',desde).order('id').range(i,i+999);if(error||!data)break;data.forEach(r=>t+=+r.monto||0);if(data.length<1000)break;i+=1000}return t}
 V.negocios=async ()=>{
   H('Xyro Apps','Cómo van los negocios de tus clientes. Solo tú lo ves y mirar no deja rastro.');
-  $('#acts').innerHTML='<button class="btn btn-p" data-v="alta">＋ Nuevo negocio</button> <button class="btn btn-g" data-v="negocios">↻ Actualizar</button>';
+  $('#acts').innerHTML='<button class="btn btn-p" data-v="alta">＋ Nuevo negocio</button> <button class="btn btn-g" data-v="accesos">📨 Enviar acceso a todos</button> <button class="btn btn-g" data-v="negocios">↻ Actualizar</button>';
   const [{data:si},{data:cs}]=await Promise.all([sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,valor').eq('clave','config')]);
   const xy={};(cs||[]).forEach(r=>xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[]);
   const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps'));
@@ -404,6 +407,23 @@ const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCa
 // Plantillas de Xyro Apps por rubro (on = lista para usar).
 const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🩺',n:'Consultorio',d:'Pacientes, citas e historial',on:0},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
 let altaRes=null,altaPlt='gym';
+V.accesos=async ()=>{
+  H('Enviar acceso','El enlace de su Xyro Apps para cada negocio. Un clic abre su WhatsApp con el mensaje listo.');
+  $('#acts').innerHTML='<button class="btn btn-g" data-v="negocios">← Xyro Apps</button>';
+  const [{data:si},{data:cs}]=await Promise.all([sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,valor').eq('clave','config')]);
+  const xy={};(cs||[]).forEach(r=>xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[]);
+  const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps')).sort((a,b)=>(a.negocio||a.slug).localeCompare(b.negocio||b.slug));
+  if(!L.length)return '<div class="panel"><div class="empty">Aún no hay negocios con Xyro Apps.</div></div>';
+  const env=s=>{try{return localStorage.getItem('xg-acc-'+s)}catch(_){return null}};
+  const rows=L.map(s=>{const cl=clientes.find(c=>slugDe(c.url||'')===s.slug)||{},n=(cl.contacto||'').trim().split(' ')[0],tel=String(cl.telefono||'').replace(/\D/g,''),wa=tel?(tel.length===9?'51'+tel:tel):'',
+    msg=`Hola${n?' '+n:''} 👋 Este es el acceso al sistema de ${s.negocio||s.slug} (Xyro Apps):\n${appLink(s.slug)}\n\nEntra con tu correo y contraseña. Tu equipo entra con su usuario (ej. ana@${s.slug}) que tú creas en «Equipo».\nGuárdalo en favoritos o instálalo en tu celular (menú del navegador → «Agregar a pantalla de inicio»).\nCualquier duda, escríbenos. 💜 XyroStudio`,e=env(s.slug);
+    return `<tr><td><b>${esc(s.negocio||s.slug)}</b><br><small style="color:var(--mu)">${esc(appLink(s.slug).replace('https://',''))}</small></td><td>${wa?esc(cl.contacto||'')+' · '+esc(tel):'<small style="color:var(--warn)">Sin celular: elige el chat en WhatsApp</small>'}</td><td>${e?'<span class="tag activo">✅ Enviado '+esc(new Date(+e).toLocaleDateString('es-PE',{day:'numeric',month:'short'}))+'</span>':''}</td>
+      <td style="text-align:right;white-space:nowrap"><button class="btn btn-g btn-sm" data-ucopy="${esc(msg)}">📋</button> <a class="btn btn-p btn-sm" data-accenv="${esc(s.slug)}" target="_blank" rel="noopener" href="https://wa.me/${wa}?text=${encodeURIComponent(msg)}">💬 Enviar</a></td></tr>`}).join('');
+  const n=L.filter(s=>env(s.slug)).length;
+  return `<div class="panel"><p class="d">${n} de ${L.length} enviados en este equipo. WhatsApp no deja enviar a todos de golpe: toca «💬 Enviar» en cada uno y se marca solo.</p>
+    <div class="tbl" style="margin-top:10px"><table><tr><th>Negocio</th><th>Dueño</th><th></th><th></th></tr>${rows}</table></div></div>`;
+};
+document.addEventListener('click',e=>{const a=e.target.closest('[data-accenv]');if(!a)return;try{localStorage.setItem('xg-acc-'+a.dataset.accenv,Date.now())}catch(_){}setTimeout(()=>go('accesos'),400)});
 V.alta=async ()=>{
   H('Nuevo negocio','Nombre, plantilla y costo. Con un clic queda su panel de Xyro Apps listo.');
   $('#acts').innerHTML='<button class="btn btn-g" data-v="clientes">← Clientes</button>';
@@ -446,7 +466,7 @@ async function crearNegocio(){
   const {error:e2}=await sb.from('contenido').upsert([{sitio_id:s.id,clave:'config',valor:{xyros}},{sitio_id:s.id,clave:'app',valor:{rubro:plt.k,nombre:negocio,color:v('aC')||plt.color||'#7c5cff',...(web?{web}:{})}}]); if(e2)throw new Error('Negocio creado, pero no pude guardar sus ajustes: '+e2.message);
   const mm=+v('aM')||0, modulos={}; ['webs','apps','control','bots','edits'].forEach(k=>modulos[k]={on:xyros.includes(k),precio:k==='apps'&&mm?mm:null});
   let aviso='';
-  try{ await guardar({negocio,rubro:plt.n,estado:v('aE')||'activo',pago:v('aP')||'pendiente',costo:+v('aCo')||null,soporte:mm||null,ciclo:'mensual',contacto:nombre||'',telefono:tel,url:web||('https://'+slug+'.xyrostudio.net'),entregado:new Date().toISOString().slice(0,10),modulos,versiones:[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:'Xyro Apps · plantilla '+plt.n}]}); }
+  try{ await guardar({negocio,rubro:plt.n,estado:v('aE')||'activo',pago:v('aP')||'pendiente',costo:+v('aCo')||null,soporte:mm||null,ciclo:'mensual',contacto:nombre||'',telefono:tel,url:web||appLink(slug),entregado:new Date().toISOString().slice(0,10),modulos,versiones:[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:'Xyro Apps · plantilla '+plt.n}]}); }
   catch(ex){ aviso='El panel se creó, pero no se guardó en tu lista de clientes ('+ex.message+').'; }
   let pass='',vinc='';
   if(email){ const {data:vk,error:ev}=await sb.rpc('gestor_vincular_admin',{p_slug:slug,p_email:email}); if(!ev&&vk&&vk.ok) vinc=vk.nombre||nombre||email; }
@@ -528,7 +548,7 @@ async function clForm(){
   const tel=String(cl.telefono||'').replace(/\D/g,''), wa=tel?(tel.length===9?'51'+tel:tel):'';
   const chip=(t,c)=>`<span class="fchip" style="--c:${c}">${t}</span>`;
   const chips=[cl.pago==='pagado'?chip('✅ Pagado','var(--ok)'):chip('🟠 Por cobrar','var(--warn)'),
-    fi.slug?(cf&&cf.mantenimiento?chip('🛠️ Mantenimiento','var(--warn)'):chip('🟢 Web en vivo','var(--ok)')):chip('Sin URL','var(--mu)'),
+    fi.slug?(!webDe(cl)?chip('📱 Solo Xyro Apps','var(--ac)'):cf&&cf.mantenimiento?chip('🛠️ Mantenimiento','var(--warn)'):chip('🟢 Web en vivo','var(--ok)')):chip('Sin URL','var(--mu)'),
     cf&&cf.tema?chip(TEMA_NOM[cf.tema]||cf.tema,'var(--ac)'):'',
     cl.soporte?chip(`S/ ${esc(cl.soporte)} ${cl.ciclo==='anual'?'/año':cl.ciclo==='mensual'?'/mes':''}`,'var(--ac2)'):''].join('');
   const nX=XYROS.filter(([k])=>modsDe(cl,cf)[k].on).length;
@@ -537,7 +557,7 @@ async function clForm(){
   return `<a class="back" data-cancel>← Volver a clientes</a>
     <div class="fhead"><div class="fav">${esc((cl.negocio||'?').trim().charAt(0).toUpperCase())}</div>
       <div class="fti"><h2>${esc(cl.negocio)}</h2><small>${esc(cl.rubro||'Cliente')}${cl.contacto?' · '+esc(cl.contacto):''}</small><div class="fchips">${chips}</div></div>
-      <div class="facts">${cl.url?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">🌐 Web ↗</a>`:''}${slugDe(cl.url||'')?`<button class="btn btn-p btn-sm" data-xapp="${esc(slugDe(cl.url||''))}" data-sop="${cl.id}">📱 Xyro Apps ↗</button>`:''}${wa?`<a class="btn btn-g btn-sm" href="https://wa.me/${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}</div></div>
+      <div class="facts">${webDe(cl)?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">🌐 Web ↗</a>`:''}${slugDe(cl.url||'')?`<button class="btn btn-p btn-sm" data-xapp="${esc(slugDe(cl.url||''))}" data-sop="${cl.id}">📱 Xyro Apps ↗</button>`:''}${wa?`<a class="btn btn-g btn-sm" href="https://wa.me/${wa}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}</div></div>
     <nav class="ftabs">${TABS.map(([k,e,t,b])=>`<button data-ftab="${k}" class="${k===fichaTab?'on':''}">${e} ${t}${b?` <i>${b}</i>`:''}</button>`).join('')}</nav>
     <div class="fbody" data-cur="${fichaTab}"><section class="ftab" data-ft="datos">${datos}</section><section class="ftab" data-ft="xyros">${xyrosPanel(cl,cf,fi.slug)}</section>${resto}</div>`;
 }
