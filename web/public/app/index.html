@@ -335,18 +335,24 @@ const RUBROS={
  academia:{n:'Academia',ico:'🎓',cli:'Alumno',clis:'Alumnos',plan:'Mensualidad',demo:'Academia Vértice',lema:'¡A seguir aprendiendo! 📚',tienda:'Tienda',productos:[['Cuaderno','Útiles',6,3,'📒'],['Polo oficial','Ropa',35,18,'👕']],
   planes:[['Clase suelta',25,1,'#8d8fa8'],['Mensual',180,30,'#3ad6ff'],['Ciclo 4 meses',650,120,'#7c5cff']]}
 };
-const ROLES={gestor:'XyroStudio',admin:'Administrador',recepcion:'Recepción',cafetin:'Cafetín'};
+const ROLES={gestor:'XyroStudio',admin:'Administrador',supervisor:'Supervisor de ventas',recepcion:'Recepción',cafetin:'Cafetín'};
 const METODOS=['Efectivo','Yape','Plin','Tarjeta','Transferencia'];
-const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',asi:'xa_asistencias',pro:'xa_productos',mov:'xa_movs',cie:'xa_cierres'};
+const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',asi:'xa_asistencias',pro:'xa_productos',mov:'xa_movs',cie:'xa_cierres',sol:'xa_solicitudes'};
 
-let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[]};
-const KS=['cli','pla','mem','pag','asi','pro','mov','cie'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
+let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[],sol:[]};
+const KS=['cli','pla','mem','pag','asi','pro','mov','cie','sol'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
 const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','WhatsApp que responde, agenda, recuerda pagos y cierra ventas',1],['edits','Xyro Edits','Videos y reels editados rápido para tus redes',1]];
 const PRONTO=k=>{const x=XYROS.find(y=>y[0]===k);return!!(x&&x[3])};
 const soporteURL=()=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;
 const tiene=k=>DEMO||XY.includes(k);
 const CTL=()=>tiene('control');
 const isAdmin=()=>ME&&(ME.rol==='admin'||ME.rol==='gestor');
+// Supervisor de ventas: ve toda la venta de su sede, resuelve solicitudes y puede borrar. Productos: también cafetín.
+const isSup=()=>ME&&['admin','gestor','supervisor'].includes(ME.rol);
+const puedeProd=()=>ME&&['admin','gestor','supervisor','cafetin'].includes(ME.rol);
+// Ver otras sedes: el admin siempre; el resto solo si el admin le dio «Todas» en Equipo.
+const verTodas=()=>isAdmin()||!!(ME&&(!ME.sede||ME.sede==='todas'));
+let NEED24=false;
 
 /* ===== Fechas ===== */
 const pad=n=>String(n).padStart(2,'0');
@@ -397,6 +403,7 @@ const DB={
   const r2=await Promise.all([todo(()=>q('pro').order('nombre').order('id'),10000),todo(()=>q('mov').gte('t',since).order('t',{ascending:false}).order('id'),40000),q('cie').order('hasta',{ascending:false}).limit(60)]);
   NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);
   NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
+  {const r=await sb.from(T.sol).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(1000),r2=await sb.from(T.cie).select('area').limit(1);NEED24=!!(r.error||r2.error);S.sol=r.data||[]}
  },
  async stock(pid,delta,tipo,nota){
   const p=S.pro.find(x=>x.id===pid),mv={producto_id:pid,cant:delta,tipo,nota,quien:ME.nombre||ROLES[ME.rol],t:new Date().toISOString()};
@@ -404,7 +411,7 @@ const DB={
   const{data,error}=await sb.rpc('xa_stock',{pid,delta,p_tipo:tipo,p_nota:nota||null});if(error)throw fixErr(error);if(p)p.stock=data;S.mov.unshift(mv);return data;
  },
  async ins(t,row){
-  if(DEMO){if(SEDE&&(t==='pag'||t==='asi'||t==='cli')&&row.sede==null)row.sede=SEDE;row.id=row.id||uid();S[t].unshift(row);saveDemo();return row}
+  if(DEMO){if(SEDE&&(t==='pag'||t==='asi'||t==='cli')&&row.sede==null)row.sede=SEDE;if(['pag','cie','sol'].includes(t)&&!row.usuario)row.usuario=ME.id;row.id=row.id||uid();S[t].unshift(row);saveDemo();return row}
   if(SEDE&&!NEED20&&(t==='pag'||t==='asi'||t==='cli')&&row.sede==null)row.sede=SEDE;
   row.sitio_id=SID;const{data,error}=await sb.from(T[t]).insert(row).select().single();if(error)throw fixErr(error);S[t].unshift(data);return data;
  },
@@ -503,34 +510,37 @@ function form(title,fields,onSave,extra){
 }
 
 /* ===== Navegación ===== */
-const NAV=()=>(ME&&ME.rol==='cafetin'?[['tienda','🥤',tiendaN()],['caja','💰','Caja'],['metas','🎯','Metas'],['cuenta','🔐','Mi cuenta']]:[['inicio','✨','Inicio'],['socios','👥',R.clis],['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['metas','🎯','Metas'],['planes','🏷️','Planes']].concat(isAdmin()?[['reportes','📊','Reportes'],['equipo','👤','Equipo']].concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']])).filter(x=>x[0]!=='tienda'||CTL());
+const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||String(x.sede)===SEDE)).length;
+const NAV=()=>{if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja'],['cuenta','🔐','Mi cuenta']].filter(x=>x[0]!=='tienda'||CTL());
+ const np=isSup()?solPend():0;
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']].concat(isAdmin()?[['equipo','👤','Equipo']].concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'../img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='../img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
   `<div class="side-f"><a class="btn sm" target="_blank" rel="noopener" href="${soporteURL()}">💬 Soporte XyroStudio</a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor?'<button class="btn sm" id="cambia">Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
  $('#bn').innerHTML=n.filter(x=>['inicio','socios','kiosco','tienda','caja'].includes(x[0])).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=()=>{LS.r('xa-s');location.href='./'});
- marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):isAdmin()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
+ marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):verTodas()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
  document.title=nombre()+' · Xyro Apps';
 }
 let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
 function go(){
  ixOff();
  const h=(location.hash||'#/inicio').slice(2).split('/');ruta=h[0]||'inicio';arg=decodeURIComponent(h[1]||'');
- if(ME&&ME.rol==='cafetin'&&!['tienda','caja','metas','mas','cuenta'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
+ if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
- $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web'].includes(ruta))));
+ $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes'].includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='web'&&$('#wf')&&$('#v').dataset.r==='web')return; // no recargar el editor de la web mientras se usa
- const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb}[ruta]||inicio;
+ const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
- const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta'};
+ const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
- $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web'}[ruta]||'';
+ $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',seguimiento:'Seguimiento',solicitudes:'Solicitudes de revisión'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
-$('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>isAdmin()?editProd():toast('Solo el administrador crea productos'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave()})[ruta]||nuevoCli)()};
+$('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave()})[ruta]||nuevoCli)()};
 $('#q').addEventListener('input',e=>{qtxt=e.target.value;if(ruta!=='socios'){location.hash='#/socios'}else{const l=$('#lst');l&&(l.innerHTML=lista())}});
 addEventListener('hashchange',go);
 addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();$('#q').focus()}});
@@ -551,7 +561,7 @@ function inicio(){
  const lst=(arr,emp)=>arr.length?arr.slice(0,6).map(([c,e])=>`<div class="row">${av(c)}<a class="nm" href="#/socio/${c.id}"><b>${esc(c.nombre)}</b><small>${esc(e.m.plan_nombre||'')} · ${fF(e.m.fin)}</small></a><span class="pill ${e.k}">${e.t}</span>${c.telefono?`<a class="btn sm" target="_blank" rel="noopener" href="${waLink(c,waMsg(c,e))}" title="Recordar por WhatsApp">📲</a>`:''}</div>`).join(''):`<div class="empty" style="padding:20px">${emp}</div>`;
  if(!S.cli.length&&!S.pla.length){setTimeout(()=>{const w=$('#w1');w&&(w.onclick=()=>isAdmin()?sugeridos().then(()=>location.hash='#/planes'):toast('Pídele al administrador que cargue los planes'))});return bienvenida()}
  setTimeout(()=>$$('.kpi[data-f]').forEach(a=>a.addEventListener('click',()=>{filtro=a.dataset.f})));
- return`<div class="hi st"><div><p class="mu">${hr}${ME.nombre?', '+esc(ME.nombre.split(' ')[0]):''} 👋</p><h2>Así va <span class="grad">${esc(nombre())}</span> hoy</h2></div><button class="btn p" onclick="location.hash='#/kiosco'">📷 Abrir asistencia</button></div>${metaMini()}
+ return`<div class="hi st"><div><p class="mu">${hr}${ME.nombre?', '+esc(ME.nombre.split(' ')[0]):''} 👋</p><h2>Así va <span class="grad">${esc(nombre())}</span> hoy</h2></div><button class="btn p" onclick="location.hash='#/kiosco'">📷 Abrir asistencia</button></div>${isSup()&&solPend()?`<a class="card" href="#/solicitudes" style="display:flex;gap:10px;align-items:center;margin-bottom:12px;border-color:var(--wa)"><b style="font-size:22px">📨</b><span><b>${solPend()} solicitud${solPend()===1?'':'es'} por revisar</b><br><small class="mu">Recepción te pasó casos de ${esc(R.clis.toLowerCase())}</small></span></a>`:''}${metaMini()}
  <div class="g k4 st">
   <a class="card kpi" href="#/socios" data-f="act"><i style="background:var(--ok)"></i><small>${R.clis} activos</small><b data-n="${act}">0</b><span class="tr">de ${S.cli.length} registrados</span></a>
   <a class="card kpi" href="#/socios" data-f="pronto"><i style="background:var(--wa)"></i><small>Por vencer (5 días)</small><b data-n="${pr.length}">0</b><span class="tr">recuérdales hoy</span></a>
@@ -683,7 +693,7 @@ function socio(){
  const st=new Date();st.setDate(st.getDate()-83-st.getDay());const cells=[...Array(84)].map((_,i)=>{const d=new Date(st);d.setDate(d.getDate()+i);return dias.has(ymd(d))});
  const mems=S.mem.filter(x=>x.cliente_id===c.id).sort((a,b)=>b.fin>a.fin?1:-1),pags=S.pag.filter(p=>p.cliente_id===c.id);
  setTimeout(()=>{const r=$('.rv');r&&requestAnimationFrame(()=>r.style.strokeDashoffset=C*(1-lef/tot));
-  $('#bCob').onclick=()=>cobrar(c);const bz=$('#bCon');bz&&(bz.onclick=()=>congelar(c,m));const br=$('#bRea');br&&(br.onclick=()=>reactivar(c,m));const bt=$('#bTr');bt&&(bt.onclick=()=>transferir(c,m));const ra=$('#rAs');ra&&(ra.onclick=()=>cobrar(c));$('#bCar').onclick=()=>carnet(c);$('#bEd').onclick=()=>nuevoCli(c);
+  $('#bCob').onclick=()=>cobrar(c);const bz=$('#bCon');bz&&(bz.onclick=()=>congelar(c,m));const br=$('#bRea');br&&(br.onclick=()=>reactivar(c,m));const bt=$('#bTr');bt&&(bt.onclick=()=>transferir(c,m));const ra=$('#rAs');ra&&(ra.onclick=()=>cobrar(c));$('#bCar').onclick=()=>carnet(c);$('#bEd').onclick=()=>nuevoCli(c);$('#bSol').onclick=()=>nuevaSol(c);
   $('#bAs').onclick=()=>{const r=checkin(c.codigo||c.dni);if(!r)return;toast(r.ok?'✅ Ingreso registrado':r.s);setTimeout(go,300)};
   const d=$('#bDel');d&&(d.onclick=async()=>{if(!confirm('¿Eliminar a '+c.nombre+' con todo su historial?'))return;try{await DB.del('cli',c.id);toast('Eliminado');location.hash='#/socios'}catch(er){toast(er.message)}});
  });
@@ -693,13 +703,13 @@ function socio(){
   <div><h2 style="font-size:22px;letter-spacing:-.02em">${esc(c.nombre)}</h2><p class="mu sm">${esc([c.num&&'Código '+c.num,c.dni&&'DNI '+c.dni,c.telefono].filter(Boolean).join(' · '))}</p></div>
   <div class="ring" ${m?'':'id="rAs" style="cursor:pointer" title="Asignar"'}><svg width="150" height="150"><circle cx="75" cy="75" r="64" stroke="#ffffff10"/><circle class="rv" cx="75" cy="75" r="64" stroke="${col}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><div>${ses?`<b>${lef}</b><small>de ${m.sesiones} sesiones<br>${Math.max(0,e.d)} días</small>`:m?`<b>${Math.max(0,e.d)}</b><small>días restantes</small>`:'<b>＋</b><small>asignar '+esc(R.plan.toLowerCase())+'</small>'}</div></div>${m&&m.dom===false?'<span class="pill sin">🚫 Sin domingos ni feriados</span>':''}
   <span class="pill ${e.k}">${m?esc(m.plan_nombre||'')+' · ':''}${e.k==='act'?'hasta '+fF(m.fin):e.t}</span>${e.k==='cong'?`<span class="mu sm">Su ${esc(R.plan.toLowerCase())} ahora termina el ${fF(m.fin)}</span>`:''}${zf?`<span class="pill cong">❄️ Se congela del ${fF(zf.desde)} al ${fF(zf.hasta)}</span>`:''}
-  <div class="acts"><button class="btn p" id="bCob">💳 ${m?'Renovar':'Asignar '+esc(R.plan.toLowerCase())}</button>${m&&(e.k==='act'||e.k==='pronto')?'<button class="btn" id="bTr">🔁 Transferir</button>':''}${m&&(e.k!=='venc'||zf)?(e.k==='cong'||zf?'<button class="btn" id="bRea">▶️ Reactivar</button>':'<button class="btn" id="bCon">❄️ Congelar</button>'):''}<button class="btn" id="bAs">✅ Marcar ingreso</button><button class="btn" id="bCar">🪪 Carnet QR</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:'<span></span>'}<button class="btn" id="bEd">✏️ Editar</button>${isAdmin()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
+  <div class="acts"><button class="btn p" id="bCob">💳 ${m?'Renovar':'Asignar '+esc(R.plan.toLowerCase())}</button>${m&&(e.k==='act'||e.k==='pronto')?'<button class="btn" id="bTr">🔁 Transferir</button>':''}${m&&(e.k!=='venc'||zf)?(e.k==='cong'||zf?'<button class="btn" id="bRea">▶️ Reactivar</button>':'<button class="btn" id="bCon">❄️ Congelar</button>'):''}<button class="btn" id="bAs">✅ Marcar ingreso</button><button class="btn" id="bCar">🪪 Carnet QR</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:'<span></span>'}<button class="btn" id="bEd">✏️ Editar</button><button class="btn" id="bSol">📨 ${isSup()?'Solicitud':'Pasar al supervisor'}</button>${isSup()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
   ${c.notas?`<p class="mu sm" style="text-align:left;width:100%">📝 ${esc(c.notas)}</p>`:''}
  </div>
  <div class="g">
-  <div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
+  ${solCli(c)}<div class="card"><h3>Constancia · 12 semanas <span class="mu sm">${asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length} visitas este mes</span></h3><div class="hm">${cells.map(y=>`<i class="${y?'y':''}"></i>`).join('')}</div></div>
   <div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.map(x=>`<div class="row"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${+x.sesiones?' · '+usadas(x)+'/'+x.sesiones+' sesiones':''}${+x.descuento?' · dscto. '+sol(x.descuento)+(x.motivo?' ('+esc(x.motivo)+')':''):''}${x.dom===false?' · sin domingos':''}${pzs(x).length?' · ❄️ '+pzs(x).reduce((a,z)=>a+(+z.dias||0),0)+' d congelada':''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu">Sin historial</p>'}</div></div>
-  <div class="card"><h3>Ingresos <span class="mu sm">${asis.length} en 5 meses</span></h3><div class="tl">${asis.slice(0,8).map(a=>`<div class="row" style="padding:8px 10px"><span class="nm"><b>${fF(a.t)} · ${fH(a.t)}</b><small>${esc(a.quien||'')}</small></span>${isAdmin()||ymd(new Date(a.t))===hoy()?`<button class="btn sm" data-da="${a.id}" title="Borrar ingreso mal marcado">🗑️</button>`:''}</div>`).join('')||'<p class="mu">Aún no tiene ingresos</p>'}</div></div>
+  <div class="card"><h3>Ingresos <span class="mu sm">${asis.length} en 5 meses</span></h3><div class="tl">${asis.slice(0,8).map(a=>`<div class="row" style="padding:8px 10px"><span class="nm"><b>${fF(a.t)} · ${fH(a.t)}</b><small>${esc(a.quien||'')}</small></span>${isSup()||ymd(new Date(a.t))===hoy()?`<button class="btn sm" data-da="${a.id}" title="Borrar ingreso mal marcado">🗑️</button>`:''}</div>`).join('')||'<p class="mu">Aún no tiene ingresos</p>'}</div></div>
   <div class="card"><h3>Pagos</h3><div class="tl">${pags.map(p=>`<a class="row" href="#" data-p="${p.id}"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b> 🖨️</a>`).join('')||'<p class="mu">Sin pagos recientes</p>'}</div></div>
  </div></div>`;
 }
@@ -834,7 +844,7 @@ function cjBuckets(p,d1,d2,L){
 function cjBarras(B,big){const mx=Math.max(1,...B.map(b=>b.tot)),many=B.length>16;
  return`<div class="cb ${many?'many':''}">${B.map((b,i)=>`<div class="cc" title="${esc(b.l)} · ${sol(b.tot)} · ${b.n} cobros" ${b.ir?`data-ir="${b.ir}"`:''}>${!many&&b.tot?`<em>${big?sol(b.tot):Math.round(b.tot)}</em>`:''}<div class="cs" style="height:${(b.tot/mx*100).toFixed(1)}%">${b.otro?`<i style="flex:${b.otro};background:#8a8fa8"></i>`:''}${b.tienda?`<i style="flex:${b.tienda};background:var(--wa)"></i>`:''}${b.memb?`<i style="flex:${b.memb};background:var(--a)"></i>`:''}</div><small>${many&&i%2&&B.length>20?'':esc(b.l)}</small></div>`).join('')}</div>`}
 // Sede que muestra la caja: la elegida en el filtro, si no la sede de este equipo ('' = todas).
-const cjSede=()=>{if(sedesL().length<2)return'';if(!isAdmin()&&SEDE)return SEDE;const s=cjF.s;return s==='*'?'':s||SEDE||''};
+const cjSede=()=>{if(sedesL().length<2)return'';if(!verTodas()&&SEDE)return SEDE;const s=cjF.s;return s==='*'?'':s||SEDE||''};
 function caja(){
  if(!cjD)cjD=hoy();
  const[d1,d2]=cjRango(cjP,cjD),rx=RX&&RX.k===d1+d2;
@@ -863,17 +873,17 @@ function caja(){
   const cx=$('#cjx');cx&&(cx.onclick=()=>{cjF={t:'',m:'',q:'',c:''};cjS='';go()});
   const sb2=$('#cjs');sb2&&(sb2.onchange=()=>{cjS=sb2.value;go()});
   const dd=$('#cjd');dd&&(dd.onchange=()=>{if(dd.value){cjD=dd.value;go()}});
-  $('#cier').onclick=cierreCaja;
+  const ci=$('#cier');ci&&(ci.onclick=cierreCaja);const ct=$('#ctur');ct&&(ct.onclick=cerrarTurno);
   $$('[data-cie]').forEach(b=>b.onclick=()=>{const c=CIE.find(x=>x.id===b.dataset.cie);c&&imprimirHTML(cierreHTML(c))});
   $('#csv').onclick=()=>{const rows=[['Fecha','Hora','Tipo','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(L.map(p=>{const c=cli(p.cliente_id)||{};return[ymd(new Date(p.fecha)),fH(p.fecha),TN[tipoDe(p)],compTxt(p.comp),p.concepto||'',c.nombre||'',c.num||'',p.metodo||'',p.monto,p.quien||'']}));const b=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='caja-'+d1+(d2!==d1?'-a-'+d2:'')+'.csv';a.click()};
   $('#cprt').onclick=()=>imprimirHTML(cierreHTML({desde:new Date(d1+'T00:00:00').toISOString(),hasta:new Date(d2+'T23:59:59').toISOString(),quien:ME.nombre||ROLES[ME.rol],resumen:resumenCaja(L),reporte:cjTitulo(cjP,d1,d2)}));
  });
  const PER=[['dia','Día'],['sem','Semana'],['mes','Mes'],['anio','Año']],nf=['t','m','q','c'].filter(k=>cjF[k]).length+(qs?1:0);
  const sel=(k,l,o)=>`<label class="cjf"><span>${l}</span><select data-cf="${k}"><option value="">Todos</option>${o.map(([v,t])=>`<option value="${esc(v)}" ${cjF[k]===v?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
- return`<div class="hi"><div><h2>Caja${sF?' · '+esc(sedeN(sF)):sedesL().length>1?' · todas las sedes':''}</h2><p class="mu">${esc(cjTitulo(cjP,d1,d2))}${d2>=hoy()&&d1<=hoy()?' · en curso':''}</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cprt">🖨️ Imprimir reporte</button><button class="btn p" id="cier">🔒 Cerrar caja</button></div></div>
+ return`<div class="hi"><div><h2>Caja${sF?' · '+esc(sedeN(sF)):sedesL().length>1?' · todas las sedes':''}</h2><p class="mu">${esc(cjTitulo(cjP,d1,d2))}${d2>=hoy()&&d1<=hoy()?' · en curso':''}</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cprt">🖨️ Imprimir reporte</button>${turnosOn()?`<button class="btn ${isSup()?'':'p'}" id="ctur">🕐 Cerrar mi turno</button>`:''}${isSup()||!turnosOn()?`<button class="btn p" id="cier">🔒 ${turnosOn()?'Cierre general':'Cerrar caja'}</button>`:''}</div></div>
  <div class="cjbar"><div class="seg">${PER.map(([k,t])=>`<button class="${cjP===k?'on':''}" data-cp="${k}">${t}</button>`).join('')}</div>
   <div class="nav2"><button class="btn sm" data-cm="-1" aria-label="Anterior">‹</button><button class="btn sm" data-cm="0">Hoy</button><button class="btn sm" data-cm="1" aria-label="Siguiente" ${d2>=hoy()?'disabled':''}>›</button><input type="date" id="cjd" value="${cjD}" max="${hoy()}" class="chip"></div></div>
- <div class="cjfs">${sedesL().length>1&&isAdmin()?`<label class="cjf"><span>Sede</span><select data-cf="s">${[['*','🌎 Todas las sedes']].concat(sedesL().map(s=>[s.id,'📍 '+s.nombre])).map(([v,t])=>`<option value="${esc(v)}" ${(sF||'*')===v?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`:''}${sel('t','Tipo',[['memb',R.plan+'s']].concat(CTL()?[['tienda',tiendaN()]]:[],[['otro','Otros']]))}${sel('m','Método',opt('m',p=>p.metodo||'Otro').map(x=>[x,x]))}${sel('q','Registró',opt('q',p=>p.quien||'—').map(x=>[x,x]))}${sel('c','Comprobante',[['B','Boleta / N. venta'],['F','Factura'],['N','Sin comprobante']])}<label class="cjf grow"><span>Buscar</span><input id="cjs" value="${esc(cjS)}" placeholder="${esc(R.cli)}, código, concepto…"></label>${nf?`<button class="btn sm" id="cjx">✕ Quitar filtros (${nf})</button>`:''}</div>
+ <div class="cjfs">${sedesL().length>1&&verTodas()?`<label class="cjf"><span>Sede</span><select data-cf="s">${[['*','🌎 Todas las sedes']].concat(sedesL().map(s=>[s.id,'📍 '+s.nombre])).map(([v,t])=>`<option value="${esc(v)}" ${(sF||'*')===v?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`:''}${sel('t','Tipo',[['memb',R.plan+'s']].concat(CTL()?[['tienda',tiendaN()]]:[],[['otro','Otros']]))}${sel('m','Método',opt('m',p=>p.metodo||'Otro').map(x=>[x,x]))}${sel('q','Registró',opt('q',p=>p.quien||'—').map(x=>[x,x]))}${sel('c','Comprobante',[['B','Boleta / N. venta'],['F','Factura'],['N','Sin comprobante']])}<label class="cjf grow"><span>Buscar</span><input id="cjs" value="${esc(cjS)}" placeholder="${esc(R.cli)}, código, concepto…"></label>${nf?`<button class="btn sm" id="cjx">✕ Quitar filtros (${nf})</button>`:''}</div>
  <div class="g k4 st">
   <div class="card kpi"><i style="background:var(--a)"></i><small>Ingresos ${nf?'filtrados':'totales'}</small><b data-n="${Math.round(tot)}" data-f="s">0</b><span class="tr">${dlt} ${prev!=null?'vs '+sol(prev)+(d2>=hoy()&&d1<=hoy()&&cjP!=='dia'?' mismo tramo anterior':' período anterior'):''}</span></div>
   <div class="card kpi"><i style="background:var(--b)"></i><small>Cobros</small><b data-n="${L.length}">0</b><span class="tr">Ticket promedio ${sol(L.length?Math.round(tot/L.length*100)/100:0)}</span></div>
@@ -888,7 +898,7 @@ function caja(){
  </div>
  ${reg&&reg.length?`<div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">📒 Registro ${cjP==='anio'?'mensual':'diario'}</h3><div class="sc"><table class="tb"><tr><th>${cjP==='anio'?'Mes':'Día'}</th><th class="r">Cobros</th><th class="r">${esc(R.plan)}s</th>${CTL()?`<th class="r">${esc(tiendaN())}</th>`:''}<th class="r">Otros</th><th class="r">Efectivo</th><th class="r">Digital</th><th class="r">Total</th>${cjP==='anio'?'':'<th>Cierre</th>'}</tr>${reg.map(b=>{const cs=(rx&&RX.cie?RX.cie:S.cie).filter(c=>(c.dia||ymd(new Date(c.hasta)))===b.ir);return`<tr data-ir="${b.ir}" class="${b.tot?'':'mu'}"><td><b>${cjP==='anio'?esc(MESL[+b.ir.slice(5,7)-1]):fF(b.ir)}</b></td><td class="r">${b.n}</td><td class="r">${sol(b.memb)}</td>${CTL()?`<td class="r">${sol(b.tienda)}</td>`:''}<td class="r">${sol(b.otro)}</td><td class="r">${sol(b.ef)}</td><td class="r">${sol(b.tot-b.ef)}</td><td class="r"><b>${sol(b.tot)}</b></td>${cjP==='anio'?'':`<td>${cs.length?cs.map(c=>c.auto?'🌙':+c.diferencia===0?'✅':'⚠️').join(' '):b.ir===hoy()?'<span class="mu">abierta</span>':'—'}</td>`}</tr>`}).join('')}<tr class="ft"><td><b>Total</b></td><td class="r">${L.length}</td><td class="r">${sol(sT('memb'))}</td>${CTL()?`<td class="r">${sol(sT('tienda'))}</td>`:''}<td class="r">${sol(sT('otro'))}</td><td class="r">${sol(ef)}</td><td class="r">${sol(dg)}</td><td class="r"><b>${sol(tot)}</b></td>${cjP==='anio'?'':'<td></td>'}</tr></table></div></div>`:''}
  <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">Movimientos <span class="mu sm">${L.length}${L.length>200?' · mostrando 200':''}</span><button class="btn sm" id="csv">⬇ Excel (CSV)</button></h3><div class="tl">${L.slice(0,200).map(p=>{const c=cli(p.cliente_id),t=tipoDe(p);return`<a class="row" href="#" data-p="${p.id}">${c?av(c):`<span class="av" style="--h:${t==='tienda'?40:220}">${t==='tienda'?'🛒':'S/'}</span>`}<span class="nm"><b>${esc(p.concepto||'Pago')}${c?' · '+esc(c.nombre):''}</b><small>${cjP==='dia'?'':fF(p.fecha)+' '}${fH(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><span class="pill cjt ${t==='memb'?'act':t==='tienda'?'pronto':'sin'}">${esc(TN[t])}</span><b>${sol(p.monto)}</b></a>`}).join('')||`<div class="empty">Sin movimientos ${nf?'con estos filtros':'en este período'}</div>`}</div></div>
- <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">🔒 Cierres de caja <span class="mu sm">🌙 automático a las 12 de la noche</span></h3><div class="tl">${CIE.map(c=>`<a class="row" href="#" data-cie="${c.id}" onclick="return false"><span class="nm"><b>${c.auto?'🌙 Cierre automático · '+fF(c.dia||c.desde):fF(c.hasta)+' '+fH(c.hasta)+' · '+esc(c.quien||'')}</b><small>${c.auto?'Total '+sol(totCie(c))+' · efectivo '+sol(c.esperado):'Esperado '+sol(c.esperado)+' · contado '+sol(c.contado)}${c.nota?' · '+esc(c.nota):''}</small></span>${c.auto?`<b>${sol(totCie(c))}</b>`:`<b style="color:${+c.diferencia===0?'var(--ok)':+c.diferencia>0?'var(--wa)':'var(--bad)'}">${+c.diferencia===0?'✅ Cuadró':(+c.diferencia>0?'+':'')+sol(c.diferencia)}</b>`} 🖨️</a>`).join('')||'<p class="mu" style="padding:10px">Sin cierres en este período.</p>'}</div>${NEED19&&isAdmin()?'<p class="mu sm" style="padding:10px">Para el cierre automático de medianoche corre el SQL 19 en Supabase.</p>':''}</div>
+ <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">🔒 Cierres de caja <span class="mu sm">${turnosOn()?'🕐 por turno · 🔒 general · ':''}🌙 automático a las 12 de la noche</span></h3><div class="tl">${CIE.map(c=>`<a class="row" href="#" data-cie="${c.id}" onclick="return false"><span class="nm"><b>${c.auto?'🌙 Cierre automático · '+fF(c.dia||c.desde):(c.turno?'🕐 '+esc(c.turno)+' · '+esc(areaN(c))+' · ':esGen(c)&&turnosOn()?'🔒 General · ':'')+fF(c.hasta)+' '+fH(c.hasta)+' · '+esc(c.quien||'')}</b><small>${c.auto?'Total '+sol(totCie(c))+' · efectivo '+sol(c.esperado):'Esperado '+sol(c.esperado)+' · contado '+sol(c.contado)}${c.nota?' · '+esc(c.nota):''}</small></span>${c.auto?`<b>${sol(totCie(c))}</b>`:`<b style="color:${+c.diferencia===0?'var(--ok)':+c.diferencia>0?'var(--wa)':'var(--bad)'}">${+c.diferencia===0?'✅ Cuadró':(+c.diferencia>0?'+':'')+sol(c.diferencia)}</b>`} 🖨️</a>`).join('')||'<p class="mu" style="padding:10px">Sin cierres en este período.</p>'}</div>${NEED19&&isAdmin()?'<p class="mu sm" style="padding:10px">Para el cierre automático de medianoche corre el SQL 19 en Supabase.</p>':''}</div>
  <p class="mu sm" style="margin-top:12px">🧾 Toca un movimiento para reimprimir su comprobante. ¿Boletas y facturas electrónicas SUNAT? <a class="grad" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero boletas SUNAT en Xyro Apps')}"><b>Actívalo aquí</b></a></p>`;
 }
 /* Cierre automático de medianoche: el servidor lo hace con pg_cron; la app completa los días que falten. */
@@ -908,6 +918,9 @@ function ajustes(){
  setTimeout(()=>{
   $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])},...(CTL()?[{k:'tienda',l:'Nombre de tu tienda',v:CFG.tienda||'',ph:R.tienda||'Cafetín'}]:[])],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
   {const a=$('#asd');a&&(a.onclick=editSedes)}
+  $('#atu').onclick=()=>form('🕐 Turnos de caja',[{k:'t',l:'Un turno por línea: nombre inicio-fin',t:'area',v:turnosL().map(t=>t.n+' '+t.a+'-'+t.b).join('\n'),ph:'Mañana 06:00-14:00\nTarde 14:00-18:00\nNoche 18:00-23:00'}],async v=>{
+   const L=v.t.split('\n').map(s=>s.trim().match(/^(.+?)\s+(\d{1,2}:\d{2})\s*[-–a]+\s*(\d{1,2}:\d{2})$/)).filter(Boolean).map(m=>({n:m[1].slice(0,20),a:m[2].padStart(5,'0'),b:m[3].padStart(5,'0')}));
+   if(!L.length)throw new Error('Escribe así: Mañana 06:00-14:00');await DB.cfg({turnos:L.slice(0,4)});toast('Turnos guardados ✓');go()});
   $('#amk').onclick=()=>form('🎨 Marca y colores',[{k:'color',l:'Color principal',t:'color',v:CFG.color||WEB.color||'#3ad6ff',half:1},{k:'color2',l:'Color secundario',t:'color',v:CFG.color2||WEB.color2||'#7c5cff',half:1},{k:'logo',l:'Logo (enlace a la imagen)',v:CFG.logo||WEB.logo||'',ph:'https://…/logo.png'},{k:'web',l:'Tu página web',v:CFG.web||'',ph:'https://tunegocio.com'}],async v=>{await DB.cfg(v);shell();go();toast('Listo, la app ya luce como tu marca ✨')});
   $('#acp').onclick=async e=>{const url=CFG.web||prompt('¿Cuál es tu página web?','https://');if(!url)return;const b=e.target;b.disabled=true;b.textContent='Leyendo tu web…';
    try{const t=await temaDeWeb(url);if(!t.color&&!t.logo)throw new Error('No encontramos colores');await DB.cfg({color:t.color||CFG.color,color2:t.color2||CFG.color2,bg:t.bg||'',logo:t.logo||CFG.logo,web:t.web,nombre:CFG.nombre||t.nombre});shell();go();confeti(40);toast('🎨 Copiamos el look de tu web')}
@@ -920,6 +933,7 @@ function ajustes(){
  const sw=(c,t)=>c?`<span title="${t}" class="sw" style="background:${esc(c)}"></span>`:'';
  return`<div class="hi"><h2>Ajustes</h2></div><div class="g st" style="max-width:720px">
  <div class="card"><h3>${R.ico} ${esc(nombre())} <button class="btn sm" id="aj">✏️ Editar</button></h3><p class="mu sm">Rubro: ${esc(R.n)} · ${S.cli.length} ${esc(R.clis.toLowerCase())} · ${S.pla.length} planes</p></div>
+ <div class="card"><h3>🕐 Turnos de caja <button class="btn sm" id="atu">✏️ Editar</button></h3><p class="mu sm">${turnosL().map(t=>esc(t.n)+' '+esc(t.a)+'–'+esc(t.b)).join(' · ')}. Cada turno (recepción y ${esc(tiendaN().toLowerCase())}) cierra lo que cobró; el último hace el cierre general.</p></div>
  ${isAdmin()?`<div class="card"><h3>📍 Sedes <button class="btn sm" id="asd">✏️ Agregar o quitar</button></h3><p class="mu sm">${sedesL().length?sedesL().map(s=>'📍 '+esc(s.nombre)).join(' · '):'Una sola sede. Agrega más si tu negocio tiene varios locales.'}</p></div>`:''}
  <div class="card"><h3>🎨 Marca y colores <span style="display:flex;gap:6px"><button class="btn sm" id="acp">✨ Copiar de mi web</button><button class="btn sm" id="amk">✏️ Editar</button></span></h3><div style="display:flex;gap:12px;align-items:center">${logoDe()?`<img class="lgo" src="${esc(logoDe())}" alt="">`:''}${sw(CFG.color||WEB.color||'#3ad6ff','Principal')}${sw(CFG.color2||WEB.color2,'Secundario')}${sw(CFG.bg,'Fondo')}<span class="mu sm">La app usa el logo y los colores de tu web, así tu equipo y tus ${esc(R.clis.toLowerCase())} sienten que es la misma marca.</span></div></div>
  <div class="card"><h3>🌐 Tu web y tus precios <button class="btn sm" id="asy">📥 Importar planes de mi web</button></h3><p class="mu sm" style="margin-bottom:6px">Los precios de la app son <b>independientes</b>: los cambias en Planes y recepción aplica descuentos al cobrar. Importa de tu web solo cuando quieras.</p>
@@ -1181,7 +1195,7 @@ function tienda(){
   const c=$('#tCob');c&&(c.onclick=cobrarVenta);const v=$('#tVac');v&&(v.onclick=()=>{carrito=[];go()});
   const i=$('#tInv');i&&(i.onclick=()=>{modoInv=true;go()});const nw=$('#tNew');nw&&(nw.onclick=()=>editProd());
  });
- return`<div class="hi"><div><h2>${esc(tiendaN())}</h2><p class="mu">Toca un producto para venderlo. El stock baja solo.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">${isAdmin()?'<button class="btn" id="tInv">📦 Inventario</button><button class="btn" id="tNew">＋ Producto</button>':''}</div></div>
+ return`<div class="hi"><div><h2>${esc(tiendaN())}</h2><p class="mu">Toca un producto para venderlo. El stock baja solo.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">${puedeProd()?'<button class="btn" id="tInv">📦 Stock</button><button class="btn" id="tNew">＋ Producto</button>':''}</div></div>
  <div class="pos"><div>${cats.length?`<div class="chips">${['',...cats].map(c=>`<button class="chip ${c===catSel?'on':''}" data-cat="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div>`:''}
  <div class="pgr st">${L.map(p=>`<button class="prod ${+p.stock<=0?'out':''}" data-add="${p.id}"><span class="pe">${esc(p.emoji||'🛒')}</span><b>${esc(p.nombre)}</b><span class="pp">${sol(p.precio)}</span><span class="ps ${+p.stock<=+(p.minimo||0)?'low':''}">${+p.stock} en stock</span></button>`).join('')||`<div class="empty"><b>🥤</b>Aún no hay productos.${isAdmin()?'<br>Toca «＋ Producto».':''}</div>`}</div></div>
  <div class="card cart ${carrito.length?'':'vacio'}"><h3>🛒 Venta ${carrito.length?'<button class="btn sm" id="tVac">Vaciar</button>':''}</h3><div class="tl">${carrito.map((it,i)=>`<div class="row" style="padding:8px 4px"><span class="nm"><b>${esc(it.n)}</b><small>${sol(it.p)} c/u</small></span><span class="qty"><button data-q="${i}" data-d="-1">−</button><b>${it.c}</b><button data-q="${i}" data-d="1">＋</button></span><b style="min-width:64px;text-align:right">${sol(it.p*it.c)}</b></div>`).join('')||'<p class="mu sm">Toca productos para agregarlos.</p>'}</div>
@@ -1197,11 +1211,12 @@ function cobrarVenta(){
  });
 }
 function inventario(){
+ if(!puedeProd()){modoInv=false;return tienda()}
  const P=S.pro.filter(p=>p.activo!==false),bajo=P.filter(p=>+p.stock<=+(p.minimo||0));
  const val=P.reduce((a,p)=>a+(+p.stock||0)*(+p.costo||+p.precio||0),0);
  setTimeout(()=>{$('#tVen').onclick=()=>{modoInv=false;go()};$('#tNew2').onclick=()=>editProd();$$('[data-ent]').forEach(b=>b.onclick=()=>entrada(S.pro.find(p=>p.id===b.dataset.ent)));$$('[data-edp]').forEach(b=>b.onclick=()=>editProd(S.pro.find(p=>p.id===b.dataset.edp)))});
  return`<div class="hi"><div><h2>📦 Inventario</h2><p class="mu">${P.length} productos · valor en stock ${sol(val)}${bajo.length?' · <b style="color:var(--bad)">'+bajo.length+' por reponer</b>':''}</p></div><div style="display:flex;gap:8px"><button class="btn" id="tVen">← Vender</button><button class="btn p" id="tNew2">＋ Producto</button></div></div>
- <div class="g g2 st"><div class="card" style="padding:8px"><div class="tl">${P.map(p=>`<div class="row"><span style="font-size:26px;width:40px;text-align:center">${esc(p.emoji||'🛒')}</span><span class="nm"><b>${esc(p.nombre)}</b><small>${esc(p.categoria||'Sin categoría')} · venta ${sol(p.precio)}${+p.costo?' · costo '+sol(p.costo):''}</small></span><span class="pill ${+p.stock<=+(p.minimo||0)?'venc':'act'}">${+p.stock} und</span><button class="btn sm" data-ent="${p.id}" title="Entrada / ajuste">＋📦</button><button class="btn sm" data-edp="${p.id}">✏️</button></div>`).join('')||'<div class="empty">Sin productos</div>'}</div></div>
+ <div class="g g2 st"><div class="card" style="padding:8px"><div class="tl">${P.map(p=>`<div class="row"><span style="font-size:26px;width:40px;text-align:center">${esc(p.emoji||'🛒')}</span><span class="nm"><b>${esc(p.nombre)}</b><small>${esc(p.categoria||'Sin categoría')} · venta ${sol(p.precio)}${+p.costo?' · costo '+sol(p.costo):''}</small></span><span class="pill ${+p.stock<=+(p.minimo||0)?'venc':'act'}">${+p.stock} und</span><button class="btn sm" data-ent="${p.id}" title="Entrada / ajuste">＋📦</button>${isSup()?`<button class="btn sm" data-edp="${p.id}">✏️</button>`:''}</div>`).join('')||'<div class="empty">Sin productos</div>'}</div></div>
  <div class="card"><h3>Últimos movimientos</h3><div class="tl">${S.mov.slice(0,25).map(m=>{const p=S.pro.find(x=>x.id===m.producto_id);return`<div class="row" style="padding:7px 6px"><span class="nm"><b>${esc(p?p.nombre:'Producto')}</b><small>${fF(m.t)} ${fH(m.t)} · ${esc(m.tipo||'')}${m.nota?' · '+esc(m.nota):''}${m.quien?' · '+esc(m.quien):''}</small></span><b style="color:${+m.cant<0?'var(--bad)':'var(--ok)'}">${+m.cant>0?'+':''}${+m.cant}</b></div>`}).join('')||'<p class="mu sm">Sin movimientos</p>'}</div></div></div>`;
 }
 const EMOJ=['🥤','💧','🥛','☕','🍫','🍌','🥪','🥗','💊','🧴','👕','🧦','🏷️'];
@@ -1230,12 +1245,12 @@ function imprimirHTML(h){const f=document.createElement('iframe');f.style.cssTex
 function resumenCaja(L){const r={};L.forEach(p=>{const m=p.metodo||'Otro',t=tipoDe(p);r[m]=r[m]||{memb:0,tienda:0,otro:0,tot:0};r[m][t]+=+p.monto;r[m].tot+=+p.monto});return r}
 function tablaCaja(r,tk){const k=Object.keys(r),s=t=>k.reduce((a,m)=>a+r[m][t],0),f=n=>(tk?(+n).toFixed(2):sol(n));
  return`<table><tr><th>Método</th><th class="r">${esc(R.plan)}s</th>${CTL()?`<th class="r">${esc(tiendaN())}</th>`:''}<th class="r">Otros</th><th class="r">Total</th></tr>${k.map(m=>`<tr><td>${esc(m)}</td><td class="r">${f(r[m].memb)}</td>${CTL()?`<td class="r">${f(r[m].tienda)}</td>`:''}<td class="r">${f(r[m].otro)}</td><td class="r"><b>${f(r[m].tot)}</b></td></tr>`).join('')}<tr><td><b>Total</b></td><td class="r"><b>${f(s('memb'))}</b></td>${CTL()?`<td class="r"><b>${f(s('tienda'))}</b></td>`:''}<td class="r"><b>${f(s('otro'))}</b></td><td class="r"><b>${f(s('tot'))}</b></td></tr></table>`}
-function cierreHTML(c){return`<!doctype html><html><head><meta charset="utf-8"><title>Cierre de caja</title><style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font:11.5px/1.4 "Courier New",monospace;width:74mm;margin:0 auto;padding:6px 2px;color:#000}h1{font-size:14px;text-align:center}p{margin:5px 0}table{width:100%;border-collapse:collapse;margin:8px 0}th,td{padding:2px 0;font-size:10.5px}th{border-bottom:1px dashed #000;text-align:left}.r{text-align:right}hr{border:0;border-top:1px dashed #000;margin:6px 0}</style></head><body><h1>${esc(nombre())}<br>${c.reporte?'REPORTE DE CAJA':c.auto?'CIERRE AUTOMÁTICO':'CIERRE DE CAJA'}</h1>${c.reporte?'<p style="text-align:center">'+esc(c.reporte)+'</p>':''}<hr><p>Desde: ${new Date(c.desde).toLocaleString('es-PE')}<br>Hasta: ${new Date(c.hasta).toLocaleString('es-PE')}<br>${c.reporte?'Impreso por':'Cerró'}: ${esc(c.quien||'')}</p>${tablaCaja(c.resumen||{},1)}<hr>${c.contado==null?`<p>Efectivo del ${c.reporte?'período':'día'}: S/ ${(+((c.resumen||{}).Efectivo||{}).tot||0).toFixed(2)}<br><b>Total: S/ ${totCie(c).toFixed(2)}</b></p>`:`<p>Efectivo esperado: S/ ${(+c.esperado).toFixed(2)}<br>Efectivo contado: S/ ${(+c.contado).toFixed(2)}<br><b>Diferencia: S/ ${(+c.diferencia).toFixed(2)}</b></p>`}${c.nota?'<p>Nota: '+esc(c.nota)+'</p>':''}${c.contado==null?'':'<hr><p style="text-align:center">Firma: ____________________</p>'}</body></html>`}
+function cierreHTML(c){return`<!doctype html><html><head><meta charset="utf-8"><title>Cierre de caja</title><style>@page{size:80mm auto;margin:2mm}*{margin:0;padding:0;box-sizing:border-box}body{font:11.5px/1.4 "Courier New",monospace;width:74mm;margin:0 auto;padding:6px 2px;color:#000}h1{font-size:14px;text-align:center}p{margin:5px 0}table{width:100%;border-collapse:collapse;margin:8px 0}th,td{padding:2px 0;font-size:10.5px}th{border-bottom:1px dashed #000;text-align:left}.r{text-align:right}hr{border:0;border-top:1px dashed #000;margin:6px 0}</style></head><body><h1>${esc(nombre())}<br>${c.reporte?'REPORTE DE CAJA':c.auto?'CIERRE AUTOMÁTICO':c.turno?'CIERRE DE TURNO<br>'+esc(c.turno).toUpperCase()+' · '+esc(areaN(c)).toUpperCase():turnosOn()?'CIERRE GENERAL':'CIERRE DE CAJA'}</h1>${c.reporte?'<p style="text-align:center">'+esc(c.reporte)+'</p>':''}<hr><p>Desde: ${new Date(c.desde).toLocaleString('es-PE')}<br>Hasta: ${new Date(c.hasta).toLocaleString('es-PE')}<br>${c.reporte?'Impreso por':'Cerró'}: ${esc(c.quien||'')}</p>${tablaCaja(c.resumen||{},1)}<hr>${c.contado==null?`<p>Efectivo del ${c.reporte?'período':'día'}: S/ ${(+((c.resumen||{}).Efectivo||{}).tot||0).toFixed(2)}<br><b>Total: S/ ${totCie(c).toFixed(2)}</b></p>`:`<p>Efectivo esperado: S/ ${(+c.esperado).toFixed(2)}<br>Efectivo contado: S/ ${(+c.contado).toFixed(2)}<br><b>Diferencia: S/ ${(+c.diferencia).toFixed(2)}</b></p>`}${c.nota?'<p>Nota: '+esc(c.nota)+'</p>':''}${c.contado==null?'':'<hr><p style="text-align:center">Firma: ____________________</p>'}</body></html>`}
 function cierreCaja(){
  if(NEED17)return toast('Corre el SQL 17 en Supabase');
- const sF=cjSede(),deS=x=>!sF||String(x.sede||'')===sF,ult=S.cie.find(x=>!x.auto&&(NEED22?true:deS(x))&&x.hasta>new Date(hoy()+'T00:00:00').toISOString()),desde=ult?ult.hasta:new Date(hoy()+'T00:00:00').toISOString(),L=S.pag.filter(p=>deS(p)&&new Date(p.fecha)>new Date(desde)),r=resumenCaja(L),ef=(r.Efectivo||{}).tot||0,tot=L.reduce((a,p)=>a+ +p.monto,0);
- sheet(`<h3>🔒 Cierre de caja${sF?' · '+esc(sedeN(sF)):''}</h3><p class="mu sm">Desde ${ult?'el último cierre ('+fF(desde)+' '+fH(desde)+')':'hoy 00:00'} · ${L.length} movimientos · total ${sol(tot)}</p>
- <div class="imp"><div class="sc">${tablaCaja(r)}</div></div>
+ const sF=cjSede(),deS=x=>!sF||String(x.sede||'')===sF,ult=S.cie.find(x=>!x.auto&&esGen(x)&&(NEED22?true:deS(x))&&x.hasta>new Date(hoy()+'T00:00:00').toISOString()),desde=ult?ult.hasta:new Date(hoy()+'T00:00:00').toISOString(),L=S.pag.filter(p=>deS(p)&&new Date(p.fecha)>new Date(desde)),r=resumenCaja(L),ef=(r.Efectivo||{}).tot||0,tot=L.reduce((a,p)=>a+ +p.monto,0);
+ sheet(`<h3>🔒 ${turnosOn()?'Cierre general':'Cierre de caja'}${sF?' · '+esc(sedeN(sF)):''}</h3><p class="mu sm">Desde ${ult?'el último cierre ('+fF(desde)+' '+fH(desde)+')':'hoy 00:00'} · ${L.length} movimientos · total ${sol(tot)}</p>
+ <div class="imp"><div class="sc">${tablaCaja(r)}</div></div>${turnosDia(sF,desde)}
  <form class="g" id="cf" style="gap:12px"><div class="f2"><label class="fl">Fondo inicial (S/)<input id="cfo" type="number" step="any" min="0" value="${+CFG.fondo||0}"></label><label class="fl">Efectivo contado (S/)<input id="cco" type="number" step="any" min="0" required placeholder="Cuenta el cajón"></label></div>
  <div class="card" style="padding:14px;text-align:center"><small class="mu">Efectivo esperado <b id="cesp"></b></small><div id="cdif" style="font-size:24px;font-weight:800;margin-top:4px">—</div></div>
  <label class="fl">Nota<input id="cno" placeholder="Ej. Se pagó S/ 20 de agua del local"></label><p class="err" hidden></p>
@@ -1244,9 +1259,119 @@ function cierreCaja(){
   const up=()=>{const e=(+fo.value||0)+ef;es.textContent=sol(e);if(co.value===''){dif.textContent='—';return}const d=Math.round(((+co.value)-e)*100)/100;dif.textContent=d===0?'✅ Cuadra exacto':(d>0?'⬆ Sobra ':'⚠️ Falta ')+sol(Math.abs(d));dif.style.color=d===0?'var(--ok)':d>0?'var(--wa)':'var(--bad)'};
   fo.oninput=co.oninput=up;up();setTimeout(()=>co.focus(),80);
   el.querySelector('#cf').onsubmit=async e=>{e.preventDefault();const b=el.querySelector('.btn.p');b.disabled=true;try{
-   const esp=(+fo.value||0)+ef,c=await DB.ins('cie',{...(sF&&(DEMO||!NEED22)?{sede:sF}:{}),desde,hasta:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol],resumen:r,esperado:esp,contado:+co.value,diferencia:Math.round((+co.value-esp)*100)/100,nota:el.querySelector('#cno').value||null,creado:new Date().toISOString()});
+   const esp=(+fo.value||0)+ef,c=await DB.ins('cie',{...(sF&&(DEMO||!NEED22)?{sede:sF}:{}),...(DEMO||!NEED24?{area:'general'}:{}),desde,hasta:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol],resumen:r,esperado:esp,contado:+co.value,diferencia:Math.round((+co.value-esp)*100)/100,nota:el.querySelector('#cno').value||null,creado:new Date().toISOString()});
    S.cie.sort((a,b)=>b.hasta>a.hasta?1:-1);if(+fo.value!==(+CFG.fondo||0))DB.cfg({fondo:+fo.value}).catch(()=>{});
    close();imprimirHTML(cierreHTML(c));toast('Caja cerrada ✓');go()}catch(er){const p=el.querySelector('.err');p.textContent=er.message;p.hidden=false;b.disabled=false}};
+ },'wide');
+}
+
+/* ===== Turnos: cada turno cierra lo que cobró; el último hace el cierre general ===== */
+const turnosOn=()=>DEMO||(!NEED24&&!NEED17);
+const esGen=c=>!c.area||c.area==='general';
+const areaN=c=>c.area==='tienda'?tiendaN():c.area==='recepcion'?'Recepción':'General';
+const TURN0=[{n:'Mañana',a:'06:00',b:'14:00'},{n:'Noche',a:'14:00',b:'23:00'}];
+const turnosL=()=>(CFG.turnos&&CFG.turnos.length?CFG.turnos:TURN0);
+const turnoAhora=()=>{const L=turnosL(),d=new Date(),m=d.getHours()*60+d.getMinutes(),mm=s=>{const[a,b]=String(s||'0:0').split(':');return+a*60+(+b||0)};
+ return(L.find(t=>{const a=mm(t.a),b=mm(t.b);return a<=b?m>=a&&m<b:m>=a||m<b})||L.reduce((x,t)=>Math.abs(mm(t.b)-m)<Math.abs(mm(x.b)-m)?t:x,L[L.length-1])).n};
+const esMio=x=>x.usuario?String(x.usuario)===String(ME.id):(x.quien||'')===QUIEN();
+function turnosDia(sF,desde){const H=new Date(hoy()+'T00:00:00').toISOString(),L=S.cie.filter(c=>c.turno&&c.hasta>H&&c.hasta>desde&&(!sF||!c.sede||String(c.sede)===sF)).sort((a,b)=>a.hasta>b.hasta?1:-1);
+ if(!turnosOn())return'';
+ return`<div class="card" style="padding:12px;margin:10px 0"><b>🕐 Turnos cerrados hoy</b>${L.length?`<div class="tl" style="margin-top:6px">${L.map(c=>`<div class="row" style="padding:7px 4px"><span class="nm"><b>${esc(c.turno)} · ${esc(areaN(c))}</b><small>${esc(c.quien||'')} · ${fH(c.hasta)} · cobró ${sol(totCie(c))}${c.nota?' · '+esc(c.nota):''}</small></span><b style="color:${+c.diferencia===0?'var(--ok)':+c.diferencia>0?'var(--wa)':'var(--bad)'}">${+c.diferencia===0?'✅':(+c.diferencia>0?'+':'')+sol(c.diferencia)}</b></div>`).join('')}</div><p class="mu sm" style="margin-top:6px">Entregado en efectivo por los turnos: <b>${sol(L.reduce((a,c)=>a+(+c.contado||0),0))}</b></p>`:'<p class="mu sm" style="margin-top:4px">Aún nadie cerró su turno hoy.</p>'}</div>`}
+function cerrarTurno(){
+ if(!turnosOn())return toast(isAdmin()?'Corre el SQL 24 en Supabase':'Pídele al administrador que active los turnos');
+ const area=ME.rol==='cafetin'?'tienda':'recepcion',sF=SEDE,H=new Date(hoy()+'T00:00:00').toISOString();
+ const ult=S.cie.find(x=>x.turno&&esMio(x)&&x.hasta>H),desde=ult?ult.hasta:H;
+ const L=S.pag.filter(p=>esMio(p)&&(!sF||String(p.sede||'')===sF)&&new Date(p.fecha)>new Date(desde)),r=resumenCaja(L),ef=(r.Efectivo||{}).tot||0,tot=L.reduce((a,p)=>a+ +p.monto,0),TL=turnosL(),ta=turnoAhora();
+ sheet(`<h3>🕐 Cerrar mi turno${sF?' · '+esc(sedeN(sF)):''}</h3><p class="mu sm">${esc(QUIEN())} · ${area==='tienda'?esc(tiendaN()):'Recepción'} · desde ${ult?'tu cierre anterior ('+fH(desde)+')':'hoy 00:00'} · ${L.length} cobros tuyos · total ${sol(tot)}</p>
+ <div class="imp"><div class="sc">${tablaCaja(r)}</div></div>
+ <form class="g" id="tf" style="gap:12px"><div class="fl">Turno<div class="opts" id="ttn">${TL.map(t=>`<button type="button" data-v="${esc(t.n)}" class="${t.n===ta?'on':''}">${esc(t.n)} <small class="mu">${esc(t.a)}–${esc(t.b)}</small></button>`).join('')}</div></div>
+ <div class="f2"><label class="fl">Fondo con que empezaste (S/)<input id="tfo" type="number" step="any" min="0" value="${+CFG.fondo||0}"></label><label class="fl">Efectivo que entregas (S/)<input id="tco" type="number" step="any" min="0" required placeholder="Cuenta el cajón"></label></div>
+ <div class="card" style="padding:14px;text-align:center"><small class="mu">Efectivo esperado <b id="tesp"></b></small><div id="tdif" style="font-size:24px;font-weight:800;margin-top:4px">—</div></div>
+ <label class="fl">Nota para el siguiente turno<input id="tno" placeholder="Ej. Quedan S/ 50 en sencillo"></label><p class="err" hidden></p>
+ <div class="bt"><button type="button" class="btn" data-x>Cancelar</button><button class="btn p">Cerrar turno e imprimir</button></div></form>`,(el,close)=>{
+  const fo=el.querySelector('#tfo'),co=el.querySelector('#tco'),dif=el.querySelector('#tdif'),es=el.querySelector('#tesp');
+  el.querySelectorAll('#ttn button').forEach(b=>b.onclick=()=>el.querySelectorAll('#ttn button').forEach(x=>x.classList.toggle('on',x===b)));
+  const up=()=>{const e=(+fo.value||0)+ef;es.textContent=sol(e);if(co.value===''){dif.textContent='—';return}const d=Math.round(((+co.value)-e)*100)/100;dif.textContent=d===0?'✅ Cuadra exacto':(d>0?'⬆ Sobra ':'⚠️ Falta ')+sol(Math.abs(d));dif.style.color=d===0?'var(--ok)':d>0?'var(--wa)':'var(--bad)'};
+  fo.oninput=co.oninput=up;up();setTimeout(()=>co.focus(),80);
+  el.querySelector('#tf').onsubmit=async e=>{e.preventDefault();const b=el.querySelector('.btn.p');b.disabled=true;try{
+   const tb=el.querySelector('#ttn .on'),esp=(+fo.value||0)+ef,c=await DB.ins('cie',{...(sF?{sede:sF}:{}),area,turno:tb?tb.dataset.v:ta,desde,hasta:new Date().toISOString(),quien:QUIEN(),resumen:r,esperado:esp,contado:+co.value,diferencia:Math.round((+co.value-esp)*100)/100,nota:el.querySelector('#tno').value||null,creado:new Date().toISOString()});
+   S.cie.sort((a,b)=>b.hasta>a.hasta?1:-1);close();imprimirHTML(cierreHTML(c));toast('Turno cerrado ✓');go()}catch(er){const p=el.querySelector('.err');p.textContent=er.message;p.hidden=false;b.disabled=false}};
+ },'wide');
+}
+
+/* ===== Solicitudes de revisión: recepción las pasa, el supervisor las resuelve ===== */
+const MOTIVOS=['Queja o reclamo','Reembolso o devolución','Descuento especial','Cambio de plan','Congelamiento','Problema con un pago','Dar de baja / eliminar socio','Otro'];
+const solSede=x=>!SEDE||!x.sede||String(x.sede)===SEDE;
+function nuevaSol(c){
+ if(!DEMO&&NEED24)return toast(isAdmin()?'Corre el SQL 24 en Supabase':'Pídele al administrador que active las solicitudes');
+ const f=(c?[]:[{k:'q',l:R.cli+' (nombre, código o DNI)',req:1,ph:'Ej. 3401 o María Pérez'}]).concat([{k:'motivo',l:'Motivo',t:'opts',v:MOTIVOS[0],o:MOTIVOS.map(m=>[m,m])},{k:'detalle',l:'¿Qué pasó?',t:'area',req:1}]);
+ form('📨 '+(c?'Pasar al supervisor · '+c.nombre.split(' ')[0]:'Nueva solicitud'),f,async v=>{
+  let k=c;if(!k){const q=v.q.trim().toLowerCase();k=S.cli.find(x=>String(x.num||'')===q||String(x.dni||'')===q||x.codigo===v.q.trim())||S.cli.find(x=>x.nombre.toLowerCase()===q)||S.cli.find(x=>x.nombre.toLowerCase().includes(q))}
+  if(!v.detalle)throw new Error('Cuenta qué pasó.');
+  await DB.ins('sol',{cliente_id:k?k.id:null,cliente_nombre:k?k.nombre:v.q,motivo:v.motivo,detalle:v.detalle.slice(0,2000),estado:'pendiente',quien:QUIEN(),sede:SEDE||(k&&k.sede)||null,creado:new Date().toISOString()});
+  toast('📨 Enviado al supervisor');shell();go();
+ });
+}
+function solCard(x,full){const c=x.cliente_id&&cli(x.cliente_id),ok=x.estado==='resuelta';
+ return`<div class="card sol ${ok?'ok':''}"><div class="row" style="padding:0 0 8px">${c?av(c):'<span class="av" style="--h:220">?</span>'}<span class="nm">${c?`<a href="#/socio/${c.id}"><b>${esc(c.nombre)}</b></a>`:`<b>${esc(x.cliente_nombre||'Sin '+R.cli.toLowerCase())}</b>`}<small>${esc(x.quien||'')} · ${fF(x.creado)} ${fH(x.creado)}${x.sede&&sedesL().length>1?' · 📍 '+esc(sedeN(x.sede)):''}</small></span><span class="pill ${ok?'act':'pronto'}">${ok?'✅ Resuelta':'⏳ Pendiente'}</span></div>
+ <p><b>${esc(x.motivo)}</b> · ${esc(x.detalle||'')}</p>${ok?`<p class="mu sm" style="margin-top:6px">💬 ${esc(x.respuesta||'Resuelta')} — ${esc(x.resuelto_por||'')} · ${fF(x.resuelto)}</p>`:''}
+ ${full?`<div class="eqa" style="margin-top:10px">${c?`<button class="btn sm" data-vt="${esc(c.id)}">📋 Ver registro total</button>`:''}${c&&c.telefono?`<a class="btn sm" target="_blank" rel="noopener" href="${waLink(c,'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:''}${!ok&&isSup()?`<button class="btn sm p" data-rs="${esc(x.id)}">✅ Resolver</button>`:''}</div>`:''}</div>`}
+function solCli(c){const L=(S.sol||[]).filter(x=>x.cliente_id===c.id);if(!L.length)return'';return`<div class="card"><h3>📨 Solicitudes <span class="mu sm">${L.filter(x=>x.estado!=='resuelta').length} pendientes</span></h3>${L.slice(0,5).map(x=>`<p class="sm" style="margin:6px 0"><span class="pill ${x.estado==='resuelta'?'act':'pronto'}">${x.estado==='resuelta'?'✅':'⏳'}</span> <b>${esc(x.motivo)}</b> · ${esc(x.detalle||'')} <span class="mu">(${esc(x.quien||'')}, ${fF(x.creado)})</span>${x.respuesta?`<br><span class="mu">💬 ${esc(x.respuesta)}</span>`:''}</p>`).join('')}</div>`}
+let solV='pend';
+function solicitudes(){
+ if(!DEMO&&NEED24)return`<div class="empty"><b>📨</b>${isAdmin()?'Para activar las solicitudes de revisión corre el SQL 24 en Supabase.':'Pídele al administrador que active las solicitudes.'}</div>`;
+ const A=(S.sol||[]).filter(solSede),P=A.filter(x=>x.estado!=='resuelta'),L=solV==='pend'?P:A.filter(x=>x.estado==='resuelta');
+ setTimeout(()=>{$$('[data-sv]').forEach(b=>b.onclick=()=>{solV=b.dataset.sv;go()});const n=$('#solN');n&&(n.onclick=()=>nuevaSol())});
+ return`<div class="hi"><div><h2>Solicitudes de revisión</h2><p class="mu">${isSup()?'Lo que recepción te pasa: revisa el registro del '+esc(R.cli.toLowerCase())+' y resuélvelo.':'Pásale al supervisor lo que necesita su revisión: quejas, reembolsos, descuentos o bajas.'}${SEDE&&sedesL().length>1?' · 📍 '+esc(sedeN(SEDE)):''}</p></div><button class="btn p" id="solN">＋ Nueva solicitud</button></div>
+ <div class="chips"><button class="chip ${solV==='pend'?'on':''}" data-sv="pend">Pendientes<span>${P.length}</span></button><button class="chip ${solV==='res'?'on':''}" data-sv="res">Resueltas<span>${A.length-P.length}</span></button></div>
+ <div class="g st">${L.slice(0,200).map(x=>solCard(x,1)).join('')||`<div class="empty"><b>${solV==='pend'?'🎉':'📭'}</b>${solV==='pend'?'No hay nada pendiente.':'Aún no hay solicitudes resueltas.'}</div>`}</div>`;
+}
+document.addEventListener('click',e=>{const v=e.target.closest('[data-vt]');if(v){e.preventDefault();const c=cli(v.dataset.vt);c&&verTodo(c);return}
+ const r=e.target.closest('[data-rs]');if(!r||!isSup())return;e.preventDefault();const x=S.sol.find(y=>String(y.id)===r.dataset.rs);if(!x)return;
+ form('✅ Resolver · '+x.motivo,[{k:'r',l:'¿Qué se hizo? (lo verá recepción)',t:'area',req:1,ph:'Ej. Se le devolvió S/ 30 y se congeló 7 días'}],async v=>{await DB.upd('sol',x.id,{estado:'resuelta',respuesta:v.r.slice(0,2000),resuelto_por:QUIEN(),resuelto:new Date().toISOString()});toast('Solicitud resuelta ✓');shell();go()});
+});
+
+/* ===== Seguimiento: a quién llamar hoy, con todo su historial a la mano ===== */
+let segT='pronto';
+const SEGK=()=>'xa-seg-'+(SID||'demo');
+function ultimaVisita(){const m=new Map;for(const a of S.asi){const p=m.get(a.cliente_id);if(!p||a.t>p)m.set(a.cliente_id,a.t)}return m}
+function horario(asis){if(!asis.length)return'Aún sin ingresos';const hs=Array(24).fill(0),ds=Array(7).fill(0);asis.forEach(a=>{const t=new Date(a.t);hs[t.getHours()]++;ds[t.getDay()]++});
+ const h=hs.indexOf(Math.max(...hs)),f=x=>{const y=x%12||12;return y+(x<12?' am':' pm')},D=['dom','lun','mar','mié','jue','vie','sáb'],td=ds.map((n,i)=>[n,i]).filter(x=>x[0]).sort((a,b)=>b[0]-a[0]).slice(0,3).map(x=>D[x[1]]);
+ return`Suele venir de ${f(h)} a ${f(h+1)} · ${td.join(', ')}`}
+function seguimiento(){
+ if(ME.rol==='cafetin')return'<div class="empty">Sin acceso.</div>';
+ const UV=ultimaVisita(),H=hoy(),hc=LS.g(SEGK(),{}),dSin=c=>{const u=UV.get(c.id);return u?diff(ymd(new Date(u)),H):999};
+ const E=cliS().map(c=>[c,est(c)]);
+ const T0={pronto:E.filter(([c,e])=>e.m&&e.k!=='cong'&&e.k!=='venc'&&e.d>=0&&e.d<=7).sort((a,b)=>a[1].d-b[1].d),
+  venc:E.filter(([c,e])=>e.k==='venc'&&e.d>=-30).sort((a,b)=>b[1].d-a[1].d),
+  aus:E.filter(([c,e])=>(e.k==='act'||e.k==='pronto')&&dSin(c)>=7).sort((a,b)=>dSin(b[0])-dSin(a[0])),
+  cum:E.filter(([c])=>{if(!c.nacimiento)return false;for(let i=0;i<7;i++)if(addD(H,i).slice(5)===c.nacimiento.slice(5))return true;return false})};
+ const TT=[['pronto','⏳ Por vencer (7 días)'],['venc','🔴 Vencidos (30 días)'],['aus','💤 Sin venir (7+ días)'],['cum','🎂 Cumpleaños']],L=T0[segT]||[];
+ const msg=(c,e)=>{const n=c.nombre.trim().split(' ')[0];return segT==='cum'?`¡Feliz cumpleaños ${n}! 🎉 Todo el equipo de ${nombre()} te desea un gran día.`:segT==='aus'?`Hola ${n} 👋 Te extrañamos en ${nombre()}. ¿Todo bien? Tu ${R.plan.toLowerCase()} sigue activa, ¡te esperamos!`:waMsg(c,e)};
+ const sub=(c,e)=>segT==='aus'?(dSin(c)>=999?'Sin ingresos registrados':'Última visita hace '+dSin(c)+' días'):segT==='cum'?'Cumple el '+fF(H.slice(0,4)+c.nacimiento.slice(4)):e.m?`${esc(e.m.plan_nombre||'')} · ${e.k==='venc'?'venció el '+fF(e.m.fin):'vence el '+fF(e.m.fin)}`:'';
+ setTimeout(()=>{$$('[data-sg]').forEach(b=>b.onclick=()=>{segT=b.dataset.sg;go()});
+  $$('[data-sw]').forEach(a=>a.addEventListener('click',()=>{const o=LS.g(SEGK(),{});o[a.dataset.sw]=H;LS.s(SEGK(),o);setTimeout(go,400)}));
+  $$('[data-ss]').forEach(b=>b.onclick=()=>{const c=cli(b.dataset.ss);c&&nuevaSol(c)})});
+ return`<div class="hi"><div><h2>Seguimiento${SEDE&&sedesL().length>1?`<small class="mu" style="font-size:15px;font-weight:600;margin-left:8px">📍 ${esc(sedeN(SEDE))}</small>`:''}</h2><p class="mu">A quién escribirle hoy. Toca «📋 Ver todo» para ver su historial antes de hablarle.</p></div></div>
+ <div class="chips">${TT.map(([k,t])=>`<button class="chip ${segT===k?'on':''}" data-sg="${k}">${t}<span>${T0[k].length}</span></button>`).join('')}</div>
+ <div class="card" style="padding:8px"><div class="tl">${L.slice(0,200).map(([c,e])=>`<div class="row">${av(c)}<a class="nm" href="#/socio/${c.id}"><b>${c.num?`<span class="num">#${esc(c.num)}</span>`:''}${esc(c.nombre)}</b><small>${sub(c,e)}${hc[c.id]===H?' · <span style="color:var(--ok)">✓ contactado hoy</span>':hc[c.id]?' · contactado el '+fF(hc[c.id]):''}</small></a><span class="pill ${e.k}">${e.t}</span><button class="btn sm" data-vt="${esc(c.id)}">📋 Ver todo</button>${c.telefono?`<a class="btn sm p" data-sw="${esc(c.id)}" target="_blank" rel="noopener" href="${waLink(c,msg(c,e))}" title="Escribir por WhatsApp">📲</a>`:''}${isSup()?'':`<button class="btn sm" data-ss="${esc(c.id)}" title="Pasar al supervisor">📨</button>`}</div>`).join('')||'<div class="empty">🎉 Nadie en esta lista.</div>'}</div>${L.length>200?`<p class="mu sm" style="padding:10px">Mostrando 200 de ${L.length}.</p>`:''}</div>`;
+}
+function verTodo(c){
+ const e=est(c),m=e.m,asis=S.asi.filter(a=>a.cliente_id===c.id),mems=S.mem.filter(x=>x.cliente_id===c.id).sort((a,b)=>b.fin>a.fin?1:-1),pags=S.pag.filter(p=>p.cliente_id===c.id).sort((a,b)=>b.fecha>a.fecha?1:-1);
+ const tot=pags.reduce((a,p)=>a+ +p.monto,0),a30=asis.filter(a=>Date.now()-new Date(a.t)<30*864e5).length,ul=asis.reduce((x,a)=>!x||a.t>x?a.t:x,'');
+ sheet(`<div class="row" style="padding:0 0 10px">${av(c,'width:56px;height:56px;border-radius:18px')}<span class="nm"><b style="font-size:18px">${esc(c.nombre)}</b><small>${esc([c.num&&'Código '+c.num,c.dni&&'DNI '+c.dni,c.telefono,c.sede&&sedesL().length>1&&'📍 '+sedeN(c.sede)].filter(Boolean).join(' · '))}</small></span><span class="pill ${e.k}">${e.t}</span></div>
+ <div class="g k4" style="gap:8px">
+  <div class="card kpi"><small>${esc(R.plan)}</small><b style="font-size:17px">${m?esc(m.plan_nombre||''):'—'}</b><span class="tr">${m?(e.k==='venc'?'venció ':'hasta ')+fF(m.fin):'sin '+esc(R.plan.toLowerCase())}</span></div>
+  <div class="card kpi"><small>Pagó en total</small><b style="font-size:20px">${sol(tot)}</b><span class="tr">${pags.length} pagos · ${mems.length} ${esc(R.plan.toLowerCase())}s</span></div>
+  <div class="card kpi"><small>Asistencias 30 días</small><b style="font-size:20px">${a30}</b><span class="tr">${ul?'última '+fF(ul)+' '+fH(ul):'sin ingresos'}</span></div>
+  <div class="card kpi"><small>Horario habitual</small><b style="font-size:14px;line-height:1.3">${esc(horario(asis))}</b></div>
+ </div>
+ ${c.notas?`<p class="sm" style="margin:10px 0">📝 ${esc(c.notas)}</p>`:''}${solCli(c)}
+ <div class="g g2" style="margin-top:10px;gap:10px"><div class="card"><h3>${esc(R.plan)}s</h3><div class="tl">${mems.slice(0,6).map(x=>`<div class="row" style="padding:6px 4px"><span class="nm"><b>${esc(x.plan_nombre||'')}</b><small>${fF(x.inicio)} → ${fF(x.fin)}${+x.descuento?' · dscto. '+sol(x.descuento):''}</small></span><b>${sol(x.precio)}</b></div>`).join('')||'<p class="mu sm">Sin historial</p>'}</div></div>
+ <div class="card"><h3>Pagos</h3><div class="tl">${pags.slice(0,6).map(p=>`<div class="row" style="padding:6px 4px"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.quien?' · '+esc(p.quien):''}</small></span><b>${sol(p.monto)}</b></div>`).join('')||'<p class="mu sm">Sin pagos recientes</p>'}</div></div></div>
+ <div class="bt"><button class="btn" id="vtN">📝 Nota</button>${isSup()?'':'<button class="btn" id="vtS">📨 Al supervisor</button>'}<a class="btn" href="#/socio/${c.id}" data-x>Ficha completa</a>${c.telefono?`<a class="btn p" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:''}</div>`,(el,close)=>{
+  const s=el.querySelector('#vtS');s&&(s.onclick=()=>{close();nuevaSol(c)});
+  el.querySelector('#vtN').onclick=()=>{close();form('📝 Nota de seguimiento',[{k:'n',l:'Qué hablaste o qué pasó',t:'area',req:1,ph:'Ej. Llamé, renueva el lunes'}],async v=>{const t=fF(hoy())+' '+QUIEN()+': '+v.n.slice(0,300);await DB.upd('cli',c.id,{notas:(c.notas?c.notas+'\n':'')+t});toast('Nota guardada ✓');go()})};
  },'wide');
 }
 
@@ -1262,22 +1387,23 @@ function lbar(arr,fmt){const mx=Math.max(1,...arr.map(x=>x[1]));return arr.lengt
 function barras(days,ser){const n=days.length,w=Math.max(n*16,320),h=170,tot=days.map((_,i)=>ser.reduce((a,s)=>a+s[0][i],0)),mx=Math.max(1,...tot),bw=w/n;
  return`<svg class="ch" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="height:180px">${days.map((d,i)=>{let y=h;return ser.map(([v,c])=>{const hh=v[i]/mx*(h-8);y-=hh;return hh>0?`<rect x="${(i*bw+bw*.14).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*.72).toFixed(1)}" height="${hh.toFixed(1)}" rx="2" style="fill:${c}"><title>${fF(d)} · ${sol(v[i])}</title></rect>`:''}).join('')}).join('')}</svg>`}
 function reportes(){
- if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
+ if(ME.rol==='cafetin')return'<div class="empty">Sin acceso.</div>';
  const[d1,d2]=rango(),en=s=>{const x=ymd(new Date(s));return x>=d1&&x<=d2},rx=RX&&RX.k===d1+d2;
  if(!DEMO&&d1<SINCE&&!rx){cargarRango(d1,d2);return'<div class="empty"><b>⏳</b>Cargando esas fechas…</div>'}
- const PAG=(rx?RX.pag:S.pag).filter(p=>en(p.fecha)),ASI=(rx?RX.asi:S.asi).filter(a=>en(a.t)),MEM=S.mem.filter(m=>m.creado&&en(m.creado));
+ const dS=x=>!SEDE||String(x.sede||'')===SEDE,cS=id=>{const c=cli(id);return!c||enSede(c)};
+ const PAG=(rx?RX.pag:S.pag).filter(p=>en(p.fecha)&&dS(p)),ASI=(rx?RX.asi:S.asi).filter(a=>en(a.t)&&dS(a)),MEM=S.mem.filter(m=>m.creado&&en(m.creado)&&cS(m.cliente_id));
  const sum=(a,f)=>a.reduce((s,x)=>s+(+f(x)||0),0),tot=sum(PAG,p=>p.monto),tM=sum(PAG.filter(p=>tipoDe(p)==='memb'),p=>p.monto),tT=sum(PAG.filter(p=>tipoDe(p)==='tienda'),p=>p.monto),tO=tot-tM-tT;
- const nuevos=S.cli.filter(c=>c.creado&&en(c.creado)).length,ren=MEM.filter(m=>S.mem.some(x=>x.cliente_id===m.cliente_id&&x.fin<m.inicio)).length,desc=sum(MEM,m=>m.descuento);
+ const nuevos=cliS().filter(c=>c.creado&&en(c.creado)).length,ren=MEM.filter(m=>S.mem.some(x=>x.cliente_id===m.cliente_id&&x.fin<m.inicio)).length,desc=sum(MEM,m=>m.descuento);
  const ndias=diff(d1,d2)+1,days=[...Array(Math.min(ndias,186))].map((_,i)=>addD(d1,i)),by=t=>{const o={};PAG.filter(p=>tipoDe(p)===t).forEach(p=>{const k=ymd(new Date(p.fecha));o[k]=(o[k]||0)+ +p.monto});return days.map(d=>o[d]||0)};
  const grp=(arr,kf,vf)=>{const o={};arr.forEach(x=>{const k=kf(x);if(k==null)return;o[k]=(o[k]||0)+vf(x)});return Object.entries(o).sort((a,b)=>b[1]-a[1])};
  const pm=grp(PAG,p=>p.metodo||'Otro',p=>+p.monto),pq=grp(PAG,p=>p.quien||'—',p=>+p.monto),pp=grp(MEM,m=>m.plan_nombre||'Plan',()=>1),pd=grp(MEM.filter(m=>+m.descuento),m=>m.motivo||'Sin motivo',m=>+m.descuento);
  const it=[];PAG.forEach(p=>(p.items||[]).forEach(i=>it.push(i)));const top=grp(it,i=>i.n,i=>i.c*i.p).slice(0,8),uni={};it.forEach(i=>uni[i.n]=(uni[i.n]||0)+i.c);
- const util=sum(it,i=>{const pr=S.pro.find(x=>x.id===i.id);return pr&&+pr.costo?(i.p-pr.costo)*i.c:0}),ctl=XY.includes('control');
+ const util=sum(it,i=>{const pr=S.pro.find(x=>x.id===i.id);return pr&&+pr.costo?(i.p-pr.costo)*i.c:0}),ctl=XY.includes('control')&&isSup();
  const dsem=[0,0,0,0,0,0,0];ASI.forEach(a=>dsem[(new Date(a.t).getDay()+6)%7]++);
  setTimeout(()=>{$$('[data-rg]').forEach(b=>b.onclick=()=>{rgo=b.dataset.rg;go()});const a=$('#rd1'),b=$('#rd2');[a,b].forEach(x=>x&&(x.onchange=()=>{rgo='x';rd1=a.value;rd2=b.value;if(rd1>rd2)[rd1,rd2]=[rd2,rd1];go()}));
   $('#rcsv').onclick=()=>{const rows=[['Fecha','Tipo','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(PAG.map(p=>{const c=cli(p.cliente_id)||{};return[new Date(p.fecha).toLocaleString('es-PE'),{memb:R.plan,tienda:tiendaN(),otro:'Otro'}[tipoDe(p)],compTxt(p.comp),p.concepto||'',c.nombre||'',c.num||'',p.metodo||'',p.monto,p.quien||'']}));const bl=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const l=document.createElement('a');l.href=URL.createObjectURL(bl);l.download='reporte-'+d1+'-a-'+d2+'.csv';l.click()}});
  const RG=[['hoy','Hoy'],['ayer','Ayer'],['7','7 días'],['30','30 días'],['mes','Este mes'],['mesp','Mes pasado']];
- return`<div class="hi"><div><h2>Reportes</h2><p class="mu">${fF(d1)} → ${fF(d2)} · ${ndias} día${ndias===1?'':'s'}</p></div><button class="btn" id="rcsv">⬇ Excel (CSV)</button></div>
+ return`<div class="hi"><div><h2>Reportes${SEDE&&sedesL().length>1?' · '+esc(sedeN(SEDE)):sedesL().length>1?' · todas las sedes':''}</h2><p class="mu">${fF(d1)} → ${fF(d2)} · ${ndias} día${ndias===1?'':'s'}</p></div><button class="btn" id="rcsv">⬇ Excel (CSV)</button></div>
  <div class="rg chips">${RG.map(([k,t])=>`<button class="chip ${rgo===k?'on':''}" data-rg="${k}">${t}</button>`).join('')}<input type="date" id="rd1" value="${d1}" class="chip"><span class="mu">a</span><input type="date" id="rd2" value="${d2}" class="chip"></div>
  <div class="g k4 st">
   <div class="card kpi"><i style="background:var(--a)"></i><small>Ingresos totales</small><b data-n="${Math.round(tot)}" data-f="s">0</b><span class="tr">${PAG.length} cobros · ticket prom. ${sol(PAG.length?tot/PAG.length:0)}</span></div>
@@ -1333,14 +1459,16 @@ function xyros(){
 
 /* ===== Equipo: cuentas, permisos y claves (mismas cuentas que el panel de la web) ===== */
 let EQ=null,EQerr='',EQnew=null;
-const PERMS=()=>Object.fromEntries(Object.entries(PERM).filter(([k])=>k!=='cafetin'||CTL()).map(([k,v])=>[k,k==='recepcion'&&CTL()?[v[0],'Socios, asistencia, cobros, cafetín y caja de su sede']:v]));
-const PERM={admin:['👑','Todo: planes, precios, reportes, ajustes, metas y el equipo'],recepcion:['🛎️','Socios, asistencia, cobros y caja de su sede'],cafetin:['🥤','Solo cafetín, caja y metas de su sede']};
+const PERMS=()=>Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)).map(([k,v])=>[k,CTL()&&PERMC[k]?[v[0],PERMC[k]]:v]));
+const PERM={admin:['👑','Todo y todas las sedes: planes, precios, reportes, ajustes, metas y el equipo'],supervisor:['📈','Toda la venta de su sede, reportes, solicitudes de revisión y el registro completo de cada socio'],recepcion:['🛎️','Socios, asistencia, cobros, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'],cafetin:['🥤','Vende, agrega productos, ve el stock y cierra su turno']};
+const PERMC={supervisor:'Toda la venta de su sede (recepción y cafetín), reportes, solicitudes de revisión y el registro completo de cada socio',recepcion:'Socios, asistencia, cobros, venta en cafetín, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'};
 const genClave=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789',r=crypto.getRandomValues(new Uint32Array(10));return'Xa-'+[...r].map(n=>a[n%a.length]).join('')};
 const appURL=()=>location.origin+location.pathname;
-const sedeOps=()=>[['todas','Todas las sedes']].concat(sedesL().map(s=>[s.id,s.nombre]));
+const sedeOps=()=>sedesL().map(s=>[s.id,'📍 '+s.nombre]).concat([['todas','🌎 Todas (ve otras sedes)']]);
+const sede1=()=>SEDE||(sedesL()[0]||{}).id||'todas';
 async function eqLoad(){
- if(DEMO){if(!EQ){const s1=(sedesL()[0]||{}).id||'todas',ay=new Date(Date.now()-864e5).toISOString();EQ=[{id:'yo',nombre:ME.nombre,email:'admin@'+(SLUG||'negocio')+'.pe',rol:'admin',sede:'todas',activo:true,ultimo_ingreso:new Date().toISOString()},{id:'d1',nombre:'Ana Torres',email:'ana@negocio.pe',rol:'recepcion',sede:s1,activo:true,ultimo_ingreso:ay},{id:'d2',nombre:'Carlos Díaz',email:'cafe@negocio.pe',rol:'cafetin',sede:s1,activo:true,debe_cambiar:true}]}return}
- const{data,error}=await sb.rpc('gestor_listar_usuarios',{p_slug:SLUG});
+ if(DEMO){if(!EQ){const s1=(sedesL()[0]||{}).id||'todas',ay=new Date(Date.now()-864e5).toISOString();EQ=[{id:'yo',nombre:ME.nombre,email:'admin@'+(SLUG||'negocio')+'.pe',rol:'admin',sede:'todas',activo:true,ultimo_ingreso:new Date().toISOString()},{id:'d1',nombre:'Ana Torres',email:'ana@negocio.pe',rol:'recepcion',sede:s1,activo:true,ultimo_ingreso:ay},{id:'d2',nombre:'Carlos Díaz',email:'cafe@negocio.pe',rol:'cafetin',sede:s1,activo:true,debe_cambiar:true},{id:'d3',nombre:'Rosa Quispe',email:'rosa@negocio.pe',rol:'supervisor',sede:s1,activo:true,ultimo_ingreso:ay}]}return}
+ let{data,error}=await sb.rpc('xa_equipo',{p_slug:SLUG});if(error)({data,error}=await sb.rpc('gestor_listar_usuarios',{p_slug:SLUG}));
  if(error){EQerr=fixErr(error).message;EQ=[];return}EQerr='';EQ=(data||[]).filter(u=>ME.gestor||u.rol!=='gestor');
 }
 const esYo=u=>u.id===ME.id||(DEMO&&u.id==='yo');
@@ -1354,7 +1482,7 @@ function equipo(){
  const fd=t=>t?'Entró '+new Date(t).toLocaleDateString('es-PE',{day:'numeric',month:'short'}):'Aún no entra';
  setTimeout(()=>{const v=$('#v');if(!v||ruta!=='equipo')return;
   const u=id=>EQ.find(x=>String(x.id)===String(id));
-  const upd=async(x,ch)=>{const o={rol:x.rol,sede:x.sede};Object.assign(x,ch);try{await eqRpc('gestor_actualizar_usuario',{p_user:x.id,p_nombre:x.nombre,p_rol:x.rol,p_sede:x.sede||'todas'});toast('Permisos guardados ✓')}catch(er){Object.assign(x,o);toast(er.message)}go()};
+  const upd=async(x,ch)=>{const o={rol:x.rol,sede:x.sede};Object.assign(x,ch);try{await eqRpc('gestor_actualizar_usuario',{p_user:x.id,p_nombre:x.nombre,p_rol:x.rol==='supervisor'?'recepcion':x.rol,p_sede:x.sede||'todas'});if(x.rol==='supervisor')await eqRpc('xa_set_rol',{p_user:x.id,p_rol:'supervisor'});toast('Permisos guardados ✓')}catch(er){Object.assign(x,o);toast(er.message)}go()};
   v.querySelectorAll('[data-er]').forEach(s=>s.onchange=()=>upd(u(s.dataset.er),{rol:s.value}));
   v.querySelectorAll('[data-es]').forEach(s=>s.onchange=()=>upd(u(s.dataset.es),{sede:s.value}));
   v.querySelectorAll('[data-ek]').forEach(b=>b.onclick=async()=>{const x=u(b.dataset.ek);if(!confirm(`¿Darle una clave temporal nueva a ${x.nombre}? Se cerrarán sus sesiones abiertas.`))return;const pass=genClave();
@@ -1375,16 +1503,16 @@ function equipo(){
  return`<div class="hi"><div><h2>Equipo</h2><p class="mu">Crea las cuentas de tu equipo, elige qué puede ver cada uno y ayúdalos si olvidan su clave.</p></div><button class="btn p" id="eqNew">＋ Nueva cuenta</button></div>
  ${EQerr?`<div class="card" style="margin-bottom:12px">⚙️ ${esc(EQerr)}</div>`:''}${box}<div class="eq st">${rows||(EQerr?'':'<div class="empty"><b>👤</b>Aún no hay cuentas.</div>')}</div>
  <div class="card" style="margin-top:14px"><h3>🛡️ Permisos por rol</h3><div class="perm">${Object.entries(PERMS()).map(([k,[i,t]])=>`<div><span>${i}</span><span><b>${esc(ROLES[k])}</b><br><small>${esc(t)}</small></span></div>`).join('')}</div>
- <p class="mu sm" style="margin-top:10px">${SD.length?'Con una sede asignada, esa persona solo trabaja en su sede. ':''}Si tu negocio también tiene web con XyroStudio, estas cuentas entran al panel de la web con el mismo correo y clave.</p></div>`;
+ <p class="mu sm" style="margin-top:10px">${SD.length?'Cada cuenta trabaja solo en su sede. Elige «🌎 Todas» para que también vea las otras sedes. ':''}Si tu negocio también tiene web con XyroStudio, estas cuentas entran al panel de la web con el mismo correo y clave.</p></div>`;
 }
 function nuevaCuenta(){if(!isAdmin())return;const SD=sedesL();
  form('👤 Nueva cuenta',[{k:'nombre',l:'Nombre',req:1,ph:'Ej. Ana Torres'},{k:'email',l:'Correo',t:'email',req:1,ph:'ana@correo.com'},
-  {k:'rol',l:'Rol (permisos)',t:'opts',v:'recepcion',o:Object.keys(PERMS()).map(k=>[k,PERM[k][0]+' '+ROLES[k]])}].concat(SD.length?[{k:'sede',l:'Sede',t:'sel',v:SEDE||'todas',o:sedeOps()}]:[]),async v=>{
+  {k:'rol',l:'Rol (permisos)',t:'opts',v:'recepcion',o:Object.keys(PERMS()).map(k=>[k,PERM[k][0]+' '+ROLES[k]])}].concat(SD.length?[{k:'sede',l:'Sede',t:'sel',v:sede1(),o:sedeOps()}]:[]),async v=>{
   const email=v.email.toLowerCase(),nm=v.nombre.slice(0,60);if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new Error('Revisa el correo.');
   if((EQ||[]).some(x=>(x.email||'').toLowerCase()===email))throw new Error('Ese correo ya tiene cuenta.');
   const pass=genClave(),sede=v.sede||'todas';
-  await eqRpc('gestor_crear_usuario',{p_slug:SLUG,p_email:email,p_pass:pass,p_nombre:nm,p_rol:v.rol,p_sede:sede},()=>EQ.push({id:uid(),nombre:nm,email,rol:v.rol,sede,activo:true,debe_cambiar:true}));
-  EQnew={nombre:nm,email,pass,nuevo:true};if(!DEMO)await eqLoad();if(ruta!=='equipo')location.hash='#/equipo';else go();confeti(30);
+  await eqRpc('gestor_crear_usuario',{p_slug:SLUG,p_email:email,p_pass:pass,p_nombre:nm,p_rol:v.rol==='supervisor'?'recepcion':v.rol,p_sede:sede},()=>EQ.push({id:uid(),nombre:nm,email,rol:v.rol,sede,activo:true,debe_cambiar:true}));
+  EQnew={nombre:nm,email,pass,nuevo:true};if(!DEMO){await eqLoad();const n=(EQ||[]).find(x=>(x.email||'').toLowerCase()===email);if(v.rol==='supervisor'&&n){await eqRpc('xa_set_rol',{p_user:n.id,p_rol:'supervisor'});n.rol='supervisor'}}if(ruta!=='equipo')location.hash='#/equipo';else go();confeti(30);
  });
 }
 function miCuenta(){
@@ -1409,11 +1537,11 @@ const sedesL=()=>((CFG.sedes&&CFG.sedes.length?CFG.sedes:WEB.sedes)||[]).filter(
 const sedeN=id=>{const s=sedesL().find(x=>x.id===String(id||''));return s?s.nombre:(id?String(id):'Sin sede')};
 const QUIEN=()=>ME.nombre||ROLES[ME.rol]||'';
 function initSede(){const L=sedesL(),k='xa-sede-'+(SID||'demo');if(!L.length){SEDE='';return}
- if(ME.sede&&L.some(s=>s.id===String(ME.sede))){SEDE=String(ME.sede);return}
- const g=LS.g(k,'');if(L.some(s=>s.id===g)){SEDE=g;return}if(g==='*'&&isAdmin()){SEDE='';return}
+ if(!isAdmin()&&ME.sede&&L.some(s=>s.id===String(ME.sede))){SEDE=String(ME.sede);return}
+ const g=LS.g(k,'');if(L.some(s=>s.id===g)){SEDE=g;return}if(g==='*'&&verTodas()){SEDE='';return}
  if(L.length===1){SEDE=L[0].id;LS.s(k,SEDE);return}setTimeout(elegirSede,600)}
-function elegirSede(){const L=sedesL();if(!L.length)return;if(ME.sede&&L.some(s=>s.id===String(ME.sede)))return toast('Tu sede la asigna el administrador');
- sheet(`<h3>📍 ¿En qué sede estás?</h3><p class="mu sm">Los socios, cobros e ingresos de este equipo se guardan y se ven por sede.</p><div class="g" style="gap:8px;margin-top:12px">${L.map(s=>`<button class="btn ${s.id===SEDE?'p':''}" data-sd="${esc(s.id)}" style="justify-content:flex-start;padding:14px 16px">📍 ${esc(s.nombre)}</button>`).join('')}${isAdmin()?`<button class="btn ${!SEDE?'p':''}" data-sd="*" style="justify-content:flex-start;padding:14px 16px">🌎 Todas las sedes <small class="mu" style="margin-left:auto">solo ver</small></button>`:''}</div>${isAdmin()?'<button class="lnk" id="sdE2" style="margin-top:12px">✏️ Agregar o quitar sedes</button>':''}`,(el,close)=>{const e2=el.querySelector('#sdE2');e2&&(e2.onclick=()=>{close();editSedes()});
+function elegirSede(){const L=sedesL();if(!L.length)return;if(!verTodas())return toast('Tu sede la asigna el administrador');
+ sheet(`<h3>📍 ¿En qué sede estás?</h3><p class="mu sm">Los socios, cobros e ingresos de este equipo se guardan y se ven por sede.</p><div class="g" style="gap:8px;margin-top:12px">${L.map(s=>`<button class="btn ${s.id===SEDE?'p':''}" data-sd="${esc(s.id)}" style="justify-content:flex-start;padding:14px 16px">📍 ${esc(s.nombre)}</button>`).join('')}${verTodas()?`<button class="btn ${!SEDE?'p':''}" data-sd="*" style="justify-content:flex-start;padding:14px 16px">🌎 Todas las sedes <small class="mu" style="margin-left:auto">solo ver</small></button>`:''}</div>${isAdmin()?'<button class="lnk" id="sdE2" style="margin-top:12px">✏️ Agregar o quitar sedes</button>':''}`,(el,close)=>{const e2=el.querySelector('#sdE2');e2&&(e2.onclick=()=>{close();editSedes()});
   el.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{const v=b.dataset.sd;SEDE=v==='*'?'':v;LS.s('xa-sede-'+(SID||'demo'),v);close();shell();go();toast(SEDE?'📍 '+sedeN(SEDE):'🌎 Todas las sedes')})})}
 const mesR=m=>[m+'-01',finMes(m+'-01')];
 const metaDe=(s,m)=>(CFG.metas||[]).find(x=>(x.sede||'')===(s||'')&&x.mes===m);
@@ -1589,9 +1717,9 @@ function semilla(rubro){
 function demoBoot(){
  const rub=RUBROS[P.get('demo')]?P.get('demo'):'gym';CFG={rubro:rub};R=RUBROS[rub];XY=['apps'];
  const g=LS.g(DKEY(),null),n=P.get('n');
- ME={rol:'admin',nombre:'Lucía Ramos',email:'demo'};
+ const rl=P.get('rol');ME=['supervisor','recepcion','cafetin'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
  const arrancar=()=>{
-  R=RUBROS[CFG.rubro]||R;demoMetas();start();
+  R=RUBROS[CFG.rubro]||R;demoMetas();asegS();if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
   const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo con datos de ejemplo</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
   b.querySelector('#drst').onclick=()=>{LS.r(DKEY());location.href='?demo='+CFG.rubro};
  };
