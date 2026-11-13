@@ -532,7 +532,6 @@ function go(){
  $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes'].includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
- if(ruta==='web'&&$('#wf')&&$('#v').dataset.r==='web')return; // no recargar el editor de la web mientras se usa
  const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud'};
@@ -1428,17 +1427,17 @@ function mas(){
 }
 
 /* ===== Mi web (Xyro Webs dentro del panel): abre el panel de la web con entrada de un clic ===== */
-async function urlWeb(){const u=(CFG.panelWeb||'').split('#')[0];if(!u||DEMO)return u;try{const{data:c}=await sb.rpc('xa_pase');if(c)return u+'#xa='+c}catch(_){}return u}
+async function urlWeb(){const u=(CFG.panelWeb||'').split('#')[0];if(!u||DEMO)return u;try{const{data:c,error}=await sb.rpc('xa_pase');if(c)return u+'#xa='+c;if(error)reportar('pase-web',error.message)}catch(_){}return u}
 function miWeb(){
  if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
  const u=CFG.panelWeb;
- setTimeout(async()=>{const n=$('#wNew');n&&(n.onclick=async()=>{const w=window.open('about:blank','_blank');const x=await urlWeb();if(w){try{w.opener=null}catch(_){}w.location.href=x}else location.href=x});
-  const e=$('#pwEd2');e&&(e.onclick=()=>form('🌐 Panel de la web',[{k:'panelWeb',l:'Enlace del panel de su web',v:CFG.panelWeb||'',ph:'https://…/panel.html'}],async v=>{await DB.cfg({panelWeb:v.panelWeb});$('#v').dataset.r='';go();toast('Guardado ✓')}));
-  const f=$('#wf');if(f&&!f.src)f.src=await urlWeb()});
- const head=`<div class="hi"><div><h2>Mi web</h2><p class="mu">Edita tu página aquí mismo: inicio, planes, sedes, promos, galería y horarios. Lo que publicas se ve en tu web y pasa a la app.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">${u?'<button class="btn" id="wNew">Abrir en pestaña ↗</button>':''}${CFG.web?`<a class="btn" target="_blank" rel="noopener" href="${esc(CFG.web)}">Ver mi web ↗</a>`:''}${ME.gestor?'<button class="btn" id="pwEd2">Enlace del panel</button>':''}</div></div>`;
- if(!u)return head+`<div class="card" style="text-align:center;padding:30px"><b style="font-size:40px">🌐</b><p class="mu">${DEMO?'En tu versión, aquí editas tu página web sin salir de Xyro Apps.':'XyroStudio está terminando de conectar tu web. Pronto la editarás desde aquí.'}</p></div>`;
- return head+'<iframe id="wf" class="wfr" title="Panel de tu web" allow="clipboard-write"></iframe>';
+ setTimeout(()=>{const n=$('#wNew');n&&(n.onclick=abrirWeb);
+  const e=$('#pwEd2');e&&(e.onclick=()=>form('🌐 Panel de la web',[{k:'panelWeb',l:'Enlace del panel de su web',v:CFG.panelWeb||'',ph:'https://…/panel.html'}],async v=>{await DB.cfg({panelWeb:v.panelWeb});go();toast('Guardado ✓')}))});
+ return`<div class="card" style="text-align:center;padding:40px 24px;max-width:560px;margin:30px auto"><b style="font-size:46px">🌐</b><h2 style="margin:8px 0">Mi web</h2><p class="mu">${!u?(DEMO?'En tu versión, al tocar «Mi web» se abre el editor de tu página ya con tu sesión: inicio, planes, sedes, promos, galería y horarios.':'XyroStudio está terminando de conectar tu web. Pronto la editarás desde aquí.'):'Tu web se abre ya con tu sesión, sin volver a ingresar.'}</p><div class="eqa" style="justify-content:center;margin-top:14px">${u?'<button class="btn p" id="wNew">Abrir mi web ↗</button>':''}${ME.gestor&&!u?'<button class="btn" id="pwEd2">Poner enlace</button>':''}</div></div>`;
 }
+// «Mi web» abre el panel de la web en su propia pestaña con la sesión de Xyro Apps (pase de un clic, sin login).
+function abrirWeb(){const w=window.open('about:blank','_blank');toast('🌐 Abriendo tu web…');urlWeb().then(x=>{if(w&&!w.closed){try{w.opener=null}catch(_){}w.location.href=x}else location.href=x})}
+document.addEventListener('click',e=>{const a=e.target.closest('a[href="#/web"]');if(!a||DEMO||!CFG.panelWeb||!isAdmin())return;e.preventDefault();e.stopPropagation();abrirWeb()},true);
 
 /* ===== Integraciones: Xyro Apps es la base y el resto se activa en el mismo panel ===== */
 function xyros(){
@@ -1744,7 +1743,7 @@ async function boot(){
  sb=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-apps-auth'}});
  sb.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY')REC=true});
  const pm=/^#xa=([a-f0-9]{32,128})$/.exec(location.hash);
- if(pm){history.replaceState(null,'',location.pathname+location.search+'#/inicio');try{const{data:tk}=await sb.rpc('xa_canje',{p_code:pm[1]});if(tk){const{error}=await sb.auth.refreshSession({refresh_token:tk});if(error)throw error}}catch(_){await sb.auth.signOut({scope:'local'}).catch(()=>{});return login('Entra una vez con tu correo y contraseña; luego quedará abierto en este equipo.')}}
+ if(pm){history.replaceState(null,'',location.pathname+location.search+'#/inicio');try{const{data:tk}=await sb.rpc('xa_canje',{p_code:pm[1]});if(tk){const{error}=await sb.auth.refreshSession({refresh_token:tk});if(error)throw error}else throw new Error('pase vencido')}catch(er){reportar('canje',er&&er.message);await sb.auth.signOut({scope:'local'}).catch(()=>{});return login('Entra una vez con tu correo y contraseña; luego quedará abierto en este equipo.')}}
  const{data}=await sb.auth.getUser();
  if(/access_token=|error_code=|type=recovery/.test(H0)||/access_token=|error_code=/.test(location.hash))history.replaceState(null,'',location.pathname+location.search+'#/inicio');
  if(!data||!data.user)return login(/error_code=|error=/.test(H0)?'El enlace venció o ya se usó. Pide uno nuevo con «¿Olvidaste tu contraseña?».':'');
