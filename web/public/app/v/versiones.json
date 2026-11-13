@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261113-1553",
+  "fecha": "2026-11-13 15:53",
+  "titulo": "Demo sin uso real",
+  "notas": "Demo sin uso real",
+  "cambios": [
+   "La demo ya no sirve para trabajar gratis: se borra sola a las 24 horas",
+   "En la demo no se imprime ni se descargan reportes",
+   "Los comprobantes de la demo dicen «DEMO · SIN VALOR» con marca de agua"
+  ]
+ },
+ {
   "id": "20261113-1538",
   "fecha": "2026-11-13 15:38",
   "titulo": "Planes a tu web, demos de Control y logo",

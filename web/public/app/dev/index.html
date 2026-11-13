@@ -390,7 +390,9 @@ const tel=t=>{t=String(t||'').replace(/\D/g,'');return t.length===9?'51'+t:t};
 
 /* ===== Datos (Supabase o demo local; misma interfaz) ===== */
 const DKEY=()=>'xa-demo-'+(CFG.rubro||'gym');
-const saveDemo=()=>LS.s(DKEY(),{S,CFG});
+// La demo no sirve para trabajar: se borra sola a las 24 h, no imprime ni exporta y sus comprobantes dicen DEMO.
+const DEMO_TTL=864e5;let DT=0;const saveDemo=()=>LS.s(DKEY(),{S,CFG,t:DT||(DT=Date.now())});
+const noDemo=q=>{toast('🧪 En la demo no se '+q+'. Con tu propio Xyro Apps sí ✓');return true};
 const fixErr=e=>{const m=e.message||'';if(/gestor_(crear|listar|actualizar|reiniciar|set_activo|borrar)/i.test(m))return new Error('La gestión de cuentas aún no está activa en tu base. Avísale a XyroStudio.');if(/xa_canje|xa_pase/i.test(m))return new Error('Falta correr el SQL 21 en Supabase.');if(/\bsede\b/i.test(m))return new Error('Falta correr el SQL 20 en Supabase.');if(/xa_cierre_auto|\bauto\b|\bdia\b/i.test(m))return new Error('Falta correr el SQL 19 en Supabase.');if(/pausas/i.test(m))return new Error('Falta correr el SQL 18 en Supabase.');if(/foto|sesiones|\bdom\b|descuento|motivo|items|xa_productos|xa_movs|xa_cierres|xa_stock|row-level/i.test(m))return new Error('Falta correr el SQL 17 en Supabase.');if(/column|xa_series|xa_siguiente|schema cache/i.test(m))return new Error('Falta correr el SQL 16 en Supabase.');return e};
 // Supabase corta cada consulta en 1000 filas: se pide por páginas (4 a la vez) hasta traer todo.
 async function todo(mk,max){const PG=1000,out=[],vis=new Set;
@@ -1100,7 +1102,7 @@ function caja(){
   const dd=$('#cjd');dd&&(dd.onchange=()=>{if(dd.value){cjD=dd.value;go()}});
   const ci=$('#cier');ci&&(ci.onclick=cierreCaja);const ct=$('#ctur');ct&&(ct.onclick=cerrarTurno);
   $$('[data-cie]').forEach(b=>b.onclick=()=>{const c=CIE.find(x=>x.id===b.dataset.cie);c&&imprimirHTML(cierreHTML(c))});
-  $('#csv').onclick=()=>{const rows=[['Fecha','Hora','Tipo','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(L.map(p=>{const c=cli(p.cliente_id)||{};return[ymd(new Date(p.fecha)),fH(p.fecha),TN[tipoDe(p)],compTxt(p.comp),p.concepto||'',c.nombre||'',c.num||'',p.metodo||'',p.monto,p.quien||'']}));const b=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='caja-'+d1+(d2!==d1?'-a-'+d2:'')+'.csv';a.click()};
+  $('#csv').onclick=()=>{if(DEMO)return noDemo('descargan reportes');const rows=[['Fecha','Hora','Tipo','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(L.map(p=>{const c=cli(p.cliente_id)||{};return[ymd(new Date(p.fecha)),fH(p.fecha),TN[tipoDe(p)],compTxt(p.comp),p.concepto||'',c.nombre||'',c.num||'',p.metodo||'',p.monto,p.quien||'']}));const b=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='caja-'+d1+(d2!==d1?'-a-'+d2:'')+'.csv';a.click()};
   $('#cprt').onclick=()=>imprimirHTML(cierreHTML({desde:new Date(d1+'T00:00:00').toISOString(),hasta:new Date(d2+'T23:59:59').toISOString(),quien:ME.nombre||ROLES[ME.rol],resumen:resumenCaja(L),reporte:cjTitulo(cjP,d1,d2)}));
  });
  const PER=[['dia','Día'],['sem','Semana'],['mes','Mes'],['anio','Año']],nf=['t','m','q','c'].filter(k=>cjF[k]).length+(qs?1:0);
@@ -1262,17 +1264,17 @@ async function emitir(p,v){
 }
 function ticketHTML(p,a4){
  const G=grupoPag(p),its=(G.find(x=>x.items&&x.items.length)||p).items,c=cli(p.cliente_id),cp=p.comp||{},tot=Math.round(G.reduce((a,x)=>a+(+x.monto||0),0)*100)/100,igv=CFG.igv?tot-tot/1.18:0,mm=S.mem.find(x=>x.id===p.membresia_id),of=!!CFG.sunat,lg=logoDe();
- const tit=of?(cp.tipo==='F'?'FACTURA ELECTRÓNICA':'BOLETA DE VENTA ELECTRÓNICA'):'NOTA DE VENTA';
+ const tit=DEMO?'DEMO · SIN VALOR':of?(cp.tipo==='F'?'FACTURA ELECTRÓNICA':'BOLETA DE VENTA ELECTRÓNICA'):'NOTA DE VENTA';
  const css=a4?'@page{size:A4;margin:16mm}body{font:13px/1.5 Arial,sans-serif;max-width:720px;margin:0 auto;padding:10px}.h{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}.bx{border:2px solid #000;border-radius:10px;padding:12px 18px;text-align:center;font-weight:700;min-width:220px}th,td{border-bottom:1px solid #ccc;padding:8px}'
   :'@page{size:80mm auto;margin:2mm}body{font:12px/1.35 "Courier New",monospace;width:74mm;margin:0 auto;padding:6px 2px}.h{text-align:center}.bx{text-align:center;font-weight:700;border-top:1px dashed #000;border-bottom:1px dashed #000;padding:4px 0;margin:6px 0}th{border-bottom:1px dashed #000}td,th{padding:3px 0}';
- return`<!doctype html><html><head><meta charset="utf-8"><title>${esc(compTxt(cp)||'Comprobante')}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{color:#000;background:#fff}${css}img{max-height:64px;max-width:170px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin:10px 0}th{text-align:left}.r{text-align:right}p{margin:6px 0}hr{border:0;border-top:1px dashed #000;margin:8px 0}.t{font-weight:700;font-size:1.3em}.c{text-align:center}</style></head><body>
+ return`<!doctype html><html><head><meta charset="utf-8"><title>${esc(compTxt(cp)||'Comprobante')}</title><style>*{margin:0;padding:0;box-sizing:border-box}body{color:#000;background:#fff}${css}img{max-height:64px;max-width:170px;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin:10px 0}th{text-align:left}.r{text-align:right}p{margin:6px 0}hr{border:0;border-top:1px dashed #000;margin:8px 0}.t{font-weight:700;font-size:1.3em}.c{text-align:center}${DEMO?'body{position:relative}body::after{content:"DEMO  DEMO  DEMO";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font:900 64px Arial,sans-serif;color:#d00;opacity:.22;transform:rotate(-30deg);pointer-events:none;white-space:nowrap}':''}</style></head><body>
  <div class="h"><div>${lg?`<img src="${esc(lg)}" alt=""><br>`:''}<b style="font-size:1.15em">${esc(CFG.razon||nombre())}</b><br>${CFG.razon&&CFG.razon!==nombre()?esc(nombre())+'<br>':''}${CFG.ruc?'RUC '+esc(CFG.ruc)+'<br>':''}${CFG.direccion?esc(CFG.direccion)+'<br>':''}${CFG.telefono?'Tel. '+esc(CFG.telefono):''}</div>
  <div class="bx">${tit}<br>${esc(compTxt(cp)||'—')}</div></div>
  <p>Fecha: ${new Date(p.fecha).toLocaleString('es-PE')}<br>${cp.tipo==='F'?'RUC':'DNI'}: ${esc(cp.doc||(c&&c.dni)||'-')}<br>Cliente: ${esc(cp.nombre||(c&&c.nombre)||'Cliente varios')}${c&&c.num?'<br>Código: '+esc(c.num):''}</p>
  <table><tr><th>Cant</th><th>Descripción</th><th class="r">Importe</th></tr>${its&&its.length?its.map(i=>`<tr><td>${i.c}</td><td>${esc(i.n)}<br><small>${(+i.p).toFixed(2)} c/u</small></td><td class="r">${(i.c*i.p).toFixed(2)}</td></tr>`).join(''):`<tr><td>1</td><td>${esc(p.concepto||'Servicio')}${mm?'<br><small>'+fF(mm.inicio)+' al '+fF(mm.fin)+(+mm.sesiones?' · '+mm.sesiones+' sesiones':'')+'</small>':''}</td><td class="r">${tot.toFixed(2)}</td></tr>`}</table>
  ${CFG.igv?`<p class="r">Op. gravada: S/ ${(tot-igv).toFixed(2)}<br>IGV 18%: S/ ${igv.toFixed(2)}</p>`:''}
  <p class="r t">TOTAL S/ ${tot.toFixed(2)}</p><p>${letras(tot)}</p><p>Pago: ${G.length>1?G.map(x=>esc(x.metodo||'')+' S/ '+(+x.monto).toFixed(2)).join(' + '):esc(p.metodo||'')}${p.quien?' · Atendió: '+esc(p.quien):''}</p><hr>
- <p class="c">${of?'Representación impresa del comprobante electrónico.':'Conserva este comprobante de tu pago.'}<br>¡Gracias por tu preferencia!</p></body></html>`;
+ <p class="c">${DEMO?'<b>DEMO de Xyro Apps: sin validez como comprobante.</b>':of?'Representación impresa del comprobante electrónico.':'Conserva este comprobante de tu pago.'}<br>¡Gracias por tu preferencia!</p></body></html>`;
 }
 function imprimir(p,a4){imprimirHTML(ticketHTML(p,a4))}
 function listo(p,titulo){
@@ -1503,7 +1505,7 @@ function entrada(p){
 }
 
 /* ===== Cierre de caja (membresías + tienda + otros, por método) ===== */
-function imprimirHTML(h){const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.onload=()=>setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(_){toast('No se pudo imprimir')}setTimeout(()=>f.remove(),6e4)},300);f.srcdoc=h}
+function imprimirHTML(h){if(DEMO)return noDemo('imprime');const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.onload=()=>setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(_){toast('No se pudo imprimir')}setTimeout(()=>f.remove(),6e4)},300);f.srcdoc=h}
 function resumenCaja(L){const r={};L.forEach(p=>{const m=p.metodo||'Otro',t=tipoDe(p);r[m]=r[m]||{memb:0,tienda:0,otro:0,tot:0};r[m][t]+=+p.monto;r[m].tot+=+p.monto});return r}
 function tablaCaja(r,tk){const k=Object.keys(r),s=t=>k.reduce((a,m)=>a+r[m][t],0),f=n=>(tk?(+n).toFixed(2):sol(n));
  return`<table><tr><th>Método</th><th class="r">${esc(R.plan)}s</th>${CTL()?`<th class="r">${esc(tiendaN())}</th>`:''}<th class="r">Otros</th><th class="r">Total</th></tr>${k.map(m=>`<tr><td>${esc(m)}</td><td class="r">${f(r[m].memb)}</td>${CTL()?`<td class="r">${f(r[m].tienda)}</td>`:''}<td class="r">${f(r[m].otro)}</td><td class="r"><b>${f(r[m].tot)}</b></td></tr>`).join('')}<tr><td><b>Total</b></td><td class="r"><b>${f(s('memb'))}</b></td>${CTL()?`<td class="r"><b>${f(s('tienda'))}</b></td>`:''}<td class="r"><b>${f(s('otro'))}</b></td><td class="r"><b>${f(s('tot'))}</b></td></tr></table>`}
@@ -1665,7 +1667,7 @@ function reportes(){
  const util=sum(it,i=>{const pr=S.pro.find(x=>x.id===i.id);return pr&&+pr.costo?(i.p-pr.costo)*i.c:0}),ctl=XY.includes('control')&&isSup();
  const dsem=[0,0,0,0,0,0,0];ASI.forEach(a=>dsem[(new Date(a.t).getDay()+6)%7]++);
  setTimeout(()=>{$$('[data-rg]').forEach(b=>b.onclick=()=>{rgo=b.dataset.rg;go()});const a=$('#rd1'),b=$('#rd2');[a,b].forEach(x=>x&&(x.onchange=()=>{rgo='x';rd1=a.value;rd2=b.value;if(rd1>rd2)[rd1,rd2]=[rd2,rd1];go()}));
-  $('#rcsv').onclick=()=>{const rows=[['Fecha','Tipo','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(PAG.map(p=>{const c=cli(p.cliente_id)||{};return[new Date(p.fecha).toLocaleString('es-PE'),{memb:R.plan,tienda:tiendaN(),otro:'Otro'}[tipoDe(p)],compTxt(p.comp),p.concepto||'',c.nombre||'',c.num||'',p.metodo||'',p.monto,p.quien||'']}));const bl=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const l=document.createElement('a');l.href=URL.createObjectURL(bl);l.download='reporte-'+d1+'-a-'+d2+'.csv';l.click()}});
+  $('#rcsv').onclick=()=>{if(DEMO)return noDemo('descargan reportes');const rows=[['Fecha','Tipo','Comprobante','Concepto',R.cli,'Código','Método','Monto','Registró']].concat(PAG.map(p=>{const c=cli(p.cliente_id)||{};return[new Date(p.fecha).toLocaleString('es-PE'),{memb:R.plan,tienda:tiendaN(),otro:'Otro'}[tipoDe(p)],compTxt(p.comp),p.concepto||'',c.nombre||'',c.num||'',p.metodo||'',p.monto,p.quien||'']}));const bl=new Blob(['﻿'+rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'});const l=document.createElement('a');l.href=URL.createObjectURL(bl);l.download='reporte-'+d1+'-a-'+d2+'.csv';l.click()}});
  const RG=[['hoy','Hoy'],['ayer','Ayer'],['7','7 días'],['30','30 días'],['mes','Este mes'],['mesp','Mes pasado']];
  return`<div class="hi"><div><h2>Reportes${SEDE&&sedesL().length>1?' · '+esc(sedeN(SEDE)):sedesL().length>1?' · todas las sedes':''}</h2><p class="mu">${fF(d1)} → ${fF(d2)} · ${ndias} día${ndias===1?'':'s'}</p></div><button class="btn" id="rcsv">⬇ Excel (CSV)</button></div>
  <div class="rg chips">${RG.map(([k,t])=>`<button class="chip ${rgo===k?'on':''}" data-rg="${k}">${t}</button>`).join('')}<input type="date" id="rd1" value="${d1}" class="chip"><span class="mu">a</span><input type="date" id="rd2" value="${d2}" class="chip"></div>
@@ -2019,11 +2021,11 @@ function semilla(rubro){
 }
 function demoBoot(){
  const rub=RUBROS[P.get('demo')]?P.get('demo'):'gym';CFG={rubro:rub};R=RUBROS[rub];XY=['apps'];
- const g=LS.g(DKEY(),null),n=P.get('n');
+ let g=LS.g(DKEY(),null);const n=P.get('n');if(g&&(!g.t||Date.now()-g.t>DEMO_TTL)){LS.r(DKEY());g=null}DT=g?g.t:0;
  const rl=P.get('rol');ME=['supervisor','recepcion','cafetin','entrenador','nutricionista'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz',entrenador:'Diego Salas',nutricionista:'Valeria Ríos'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
  const arrancar=()=>{
   R=RUBROS[CFG.rubro]||R;demoMetas();asegS();if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
-  const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo con datos de ejemplo</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
+  const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo de prueba · se borra en 24 h</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
   b.querySelector('#drst').onclick=()=>{LS.r(DKEY());location.href='?demo='+CFG.rubro};
  };
  if(g&&g.S&&!n){S=g.S;CFG=g.CFG;asegS();if(!S.pro.length&&R.productos){const keep=S;semilla(rub);keep.pro=S.pro;S=keep;saveDemo()}return arrancar()}
