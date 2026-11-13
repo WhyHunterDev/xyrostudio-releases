@@ -152,7 +152,7 @@ th{color:var(--mu);font-size:.66rem;letter-spacing:.08em;text-transform:uppercas
 .aura{position:fixed;width:70vmax;height:70vmax;left:50%;top:50%;transform:translate(-50%,-60%);border-radius:50%;background:radial-gradient(closest-side,#7c5cff33,transparent);filter:blur(20px);z-index:-1;pointer-events:none}
 .glow{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(600px circle at var(--mx,50%) var(--my,40%),#7c5cff2e,transparent 60%)}
 a.btn{color:var(--tx);text-decoration:none}
-.vw{position:relative}.vmenu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:#111119;border:1px solid var(--line);border-radius:12px;padding:6px;min-width:210px;box-shadow:0 14px 34px rgba(0,0,0,.55)}.vmenu small{display:block;padding:6px 10px 4px;color:var(--mu,#8b8ba0);font-size:.72rem}.vmenu button{display:block;width:100%;text-align:left;padding:9px 10px;border:0;background:none;border-radius:8px;color:var(--tx);font:inherit;font-size:.86rem;cursor:pointer}.vmenu button:hover{background:rgba(124,92,255,.16)}
+.vw{position:relative}.vmenu{position:fixed;z-index:9999;max-height:60vh;overflow:auto;background:#111119;border:1px solid var(--line);border-radius:12px;padding:6px;min-width:210px;box-shadow:0 14px 34px rgba(0,0,0,.55)}.vmenu small{display:block;padding:6px 10px 4px;color:var(--mu,#8b8ba0);font-size:.72rem}.vmenu button{display:block;width:100%;text-align:left;padding:9px 10px;border:0;background:none;border-radius:8px;color:var(--tx);font:inherit;font-size:.86rem;cursor:pointer}.vmenu button:hover{background:rgba(124,92,255,.16)}
 body::before,body::after{display:none}
 aside{background:#0b0d14e6;backdrop-filter:blur(12px)}
 .btn-p,.toast,.ftabs button.on{background:var(--ac);box-shadow:none}
@@ -351,7 +351,7 @@ function side(){
     NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}</button>`).join('')).join('')+
     `<div class="me"><b>${esc(me.nombre)}</b><small>${esc(ROL_NOMBRE[me.rol]||me.rol)} · ${esc(me.email)}</small><button class="btn btn-g btn-sm" data-logout style="width:100%">Cerrar sesión</button></div>`;
 }
-async function go(v){ if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); }
+async function go(v){ document.querySelectorAll('body>.vmenu').forEach(m=>m.remove()); if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); }
 async function start(){ show('app'); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
 
 const H=(t,s)=>{$('#h').innerHTML=`<div><h1>${esc(t)}</h1>${s?`<p class="sub" style="margin:4px 0 0">${esc(s)}</p>`:''}</div>`;};
@@ -473,7 +473,8 @@ async function fijarVersion(sid,v,n){
   if(!confirm(`¿Dejar a ${n} fijo en la versión del ${(VERS.find(x=>x.id===v)||{}).fecha||v}? La verá al volver a abrir la app.`))return;
   const {error}=await sb.from('xa_versiones').upsert({clave:sid,version:v,fijo:true,prog:null,prog_para:null,actualizado:new Date().toISOString()});if(error)throw error;touch(`Dejó a ${n} en la versión ${v}`);toast('📌 Listo');
 }
-document.addEventListener('click',e=>{if(!e.target.closest('.vw'))document.querySelectorAll('.vmenu').forEach(m=>m.hidden=true)});
+document.addEventListener('click',e=>{if(!e.target.closest('.vw,.vmenu'))document.querySelectorAll('.vmenu').forEach(m=>m.hidden=true)});
+addEventListener('scroll',e=>!(e.target.closest&&e.target.closest('.vmenu'))&&document.querySelectorAll('.vmenu').forEach(m=>m.hidden=true),true);
 async function subirVersion(clave){
   const ult=VERS.length&&VERS[0].id; if(!ult)throw new Error('No hay versiones.');
   const {data:g}=await sb.from('xa_versiones').select('*').eq('clave','general').maybeSingle(), auto=!!(g&&g.auto3am);
@@ -820,7 +821,9 @@ document.addEventListener('click', async e=>{
   try{
     if('altacrear' in d){ el.disabled=true; el.textContent='Creando…'; try{ await crearNegocio(); toast('Negocio creado ✓'); return go('alta'); }catch(ex){ toast(ex.message); el.disabled=false; el.textContent='🚀 Crear negocio'; } return; }
     if('altaotro' in d){ altaRes=null; return go('alta'); }
-    if(d.vmenu){ const m=document.getElementById('vm-'+d.vmenu),o=m.hidden; document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); m.hidden=!o; return; }
+    if(d.vmenu){ const m=document.getElementById('vm-'+d.vmenu),o=m.hidden; document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); if(!o)return;
+      document.body.appendChild(m); m.hidden=false; const b=el.getBoundingClientRect(),w=m.offsetWidth,hh=m.offsetHeight;
+      m.style.left=Math.max(8,Math.min(innerWidth-w-8,b.right-w))+'px'; m.style.top=(b.bottom+6+hh>innerHeight?Math.max(8,b.top-hh-6):b.bottom+6)+'px'; return; }
     if(d.vset){ const [sid,v]=d.vset.split('|'); document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); await fijarVersion(sid,v,d.n); return go('versiones'); }
     if(d.vsub){ el.disabled=true; try{ await subirVersion(d.vsub); }catch(ex){ toast(ex.message); } return go('versiones'); }
     if(d.vcancel){ const {error}=await sb.from('xa_versiones').update({prog:null,prog_para:null}).eq('clave',d.vcancel); if(error)throw error; toast('Cancelado'); return go('versiones'); }
