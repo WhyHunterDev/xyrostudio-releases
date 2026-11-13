@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261113-1604",
+  "fecha": "2026-11-13 16:04",
+  "titulo": "Accesos de prueba",
+  "notas": "Accesos de prueba",
+  "cambios": [
+   "Nuevo: enlaces de prueba con el nombre del posible cliente y tiempo límite (se crean en el Panel XyroStudio)",
+   "Al terminar el tiempo la prueba se cierra sola y muestra «Quiero mi Xyro Apps»"
+  ],
+  "requiere": "SQL 31"
+ },
+ {
   "id": "20261113-1553",
   "fecha": "2026-11-13 15:53",
   "titulo": "Demo sin uso real",

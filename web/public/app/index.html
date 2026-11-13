@@ -9,7 +9,7 @@
  const g=k=>{try{return localStorage.getItem(k)||''}catch(_){return''}},P=new URLSearchParams(location.search);
  let v=g('xa-ver')||FALLBACK;
  // La demo siempre abre la versión más nueva (no tiene negocio real; así nadie usa una demo vieja sin protecciones).
- if(P.get('demo'))try{const r=await fetch('/app/v/versiones.json',{cache:'no-store'});const L=await r.json();if(L[0]&&/^[\w-]+$/.test(L[0].id))v=L[0].id}catch(_){}
+ if(P.get('demo')||P.get('prueba'))try{const r=await fetch('/app/v/versiones.json',{cache:'no-store'});const L=await r.json();if(L[0]&&/^[\w-]+$/.test(L[0].id))v=L[0].id}catch(_){}
  else try{
   const slug=P.get('s')||g('xa-slug')||null,h={apikey:SB.key,'Content-Type':'application/json'};
   try{const t=JSON.parse(g('xyro-apps-auth')||'null');if(t&&t.access_token&&t.expires_at*1000>Date.now()+30000)h.Authorization='Bearer '+t.access_token}catch(_){}
