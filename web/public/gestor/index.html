@@ -85,6 +85,7 @@ h1{font-size:1.95rem;line-height:1.1;font-weight:800;letter-spacing:-.025em}
 .cl .meta{color:var(--mu);font-size:.8rem;margin-top:4px;display:flex;gap:.8rem;flex-wrap:wrap;font-family:var(--mono)}
 .cl .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .tag{font-size:.63rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .5rem;border-radius:999px;background:#222233}
+.tkb{display:inline-block;min-width:18px;margin-left:4px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font-size:11px;line-height:18px;text-align:center}@media (max-width:860px){.tkgrid{grid-template-columns:1fr!important}}
 .tag.activo{background:rgba(0,230,168,.16);color:var(--ok)}.tag.soporte{background:rgba(124,108,255,.18);color:#b9adff}.tag.pausado{background:rgba(255,176,32,.16);color:var(--warn)}.tag.baja{background:rgba(255,90,106,.14);color:var(--bad)}
 .tag.pg{background:rgba(0,230,168,.16);color:var(--ok)}.tag.pend{background:rgba(255,176,32,.16);color:var(--warn)}
 .tag.x{background:linear-gradient(135deg,rgba(124,108,255,.25),rgba(0,230,168,.2));color:#d7d0ff}
@@ -364,14 +365,14 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['tickets','🎫','Tickets'],['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
-    NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}</button>`).join('')).join('')+
+    NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}${id==='tickets'&&TKG?` <b class="tkb">${TKG}</b>`:''}</button>`).join('')).join('')+
     `<div class="me"><b>${esc(me.nombre)}</b><small>${esc(ROL_NOMBRE[me.rol]||me.rol)} · ${esc(me.email)}</small><button class="btn btn-g btn-sm" data-logout style="width:100%">Cerrar sesión</button></div>`;
 }
 async function go(v){ document.querySelectorAll('body>.vmenu').forEach(m=>m.remove()); if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); }
-async function start(){ show('app'); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
+async function start(){ show('app'); setTimeout(tkCuenta,1500); setInterval(tkCuenta,120000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
 
 const H=(t,s)=>{$('#h').innerHTML=`<div><h1>${esc(t)}</h1>${s?`<p class="sub" style="margin:4px 0 0">${esc(s)}</p>`:''}</div>`;};
 
@@ -460,6 +461,57 @@ async function prCrear(){
   touch(`Creó acceso de prueba para ${n}`);
   try{await navigator.clipboard.writeText(prMsg(r));toast('🧪 Acceso creado. Mensaje copiado ✓')}catch(_){toast('🧪 Acceso creado ✓')}
 }
+/* Tickets de soporte (SQL 32): los negocios escriben desde Xyro Apps → Soporte. Aquí se responde, con su contexto y errores. */
+let TKG=0,tkF='pend',tkSel=null;
+const TKE={abierto:['Nuevo','pend'],en_proceso:['En proceso','soporte'],esperando:['Esperando al cliente','x'],resuelto:['Resuelto','activo']};
+const TKC={problema:'🐞 Algo no funciona',duda:'❓ Duda',cambio:'✏️ Pedido de cambio',pago:'💳 Pagos y plan',otro:'💬 Otro'};
+const tkPend=t=>!t.ultimo_gestor&&t.estado!=='resuelto';
+const tkF2=d=>d?new Date(d).toLocaleString('es-PE',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+async function tkCuenta(){ try{ const {count,error}=await sb.from('xa_tickets').select('id',{count:'exact',head:true}).eq('ultimo_gestor',false).neq('estado','resuelto'); if(error)return; if(count!==TKG){ const sube=count>TKG; TKG=count||0; side(); if(sube&&TKG&&view!=='tickets')toast(`🎫 Tienes ${TKG} ticket${TKG===1?'':'s'} por responder`); } }catch(_){} }
+V.tickets=async ()=>{
+  if(tkSel)return tkVer(tkSel);
+  H('Tickets de soporte','Todo lo que piden los negocios desde su Xyro Apps, con su contexto técnico.');
+  $('#acts').innerHTML='<button class="btn btn-g" data-v="tickets">↻ Actualizar</button>';
+  const {data,error}=await sb.from('xa_tickets').select('id,slug,negocio,autor_nombre,autor_rol,categoria,prioridad,asunto,estado,creado,actualizado,ultimo_gestor').order('actualizado',{ascending:false}).limit(500);
+  if(error)return `<div class="note">🎫 Para recibir tickets de soporte, corre <b>32-xyro-tickets-soporte.sql</b> en Supabase.</div>`;
+  const L=data||[],F={pend:L.filter(tkPend),esp:L.filter(t=>t.ultimo_gestor&&t.estado!=='resuelto'),res:L.filter(t=>t.estado==='resuelto'),todo:L};
+  TKG=F.pend.length; side();
+  const urg=F.pend.filter(t=>t.prioridad==='urgente').length;
+  const ch=(k,n)=>`<button class="btn ${tkF===k?'btn-p':'btn-g'} btn-sm" data-tkf="${k}">${n} · ${F[k].length}</button>`;
+  const rows=F[tkF].sort((a,b)=>(b.prioridad==='urgente'&&tkF==='pend')-(a.prioridad==='urgente'&&tkF==='pend')||new Date(b.actualizado)-new Date(a.actualizado)).map(t=>{const [e,c]=TKE[t.estado]||['',''];
+    return `<tr data-tk="${t.id}" style="cursor:pointer"><td><b>#${t.id}</b></td><td><b>${esc(t.asunto)}</b><br><small style="color:var(--mu)">${esc(TKC[t.categoria]||'')} · ${esc(t.autor_nombre||'')}${t.autor_rol?' ('+esc(t.autor_rol)+')':''}</small></td><td>${esc(t.negocio||t.slug||'')}</td><td>${t.prioridad==='urgente'?'<span class="tag baja">🔴 Urgente</span> ':''}<span class="tag ${c}">${e}</span>${tkPend(t)?' <span class="tag pend">por responder</span>':''}</td><td><small>${tkF2(t.actualizado)}</small></td></tr>`}).join('');
+  return `${urg?`<div class="note" style="border-color:#ff5c7a66;background:#ff5c7a14">🔴 <div><b>${urg} ticket${urg===1?'':'s'} urgente${urg===1?'':'s'}</b> por responder.</div></div>`:''}
+    <div class="panel"><div style="display:flex;gap:8px;flex-wrap:wrap">${ch('pend','Por responder')}${ch('esp','Esperando al cliente')}${ch('res','Resueltos')}${ch('todo','Todos')}</div>
+    ${rows?`<div class="tbl" style="margin-top:12px"><table><tr><th>#</th><th>Asunto</th><th>Negocio</th><th>Estado</th><th>Actualizado</th></tr>${rows}</table></div>`:`<div class="empty" style="margin-top:12px">${tkF==='pend'?'🎉 Nada por responder.':'Nada por aquí.'}</div>`}</div>`;
+};
+async function tkVer(id){
+  const {data:t,error}=await sb.from('xa_tickets').select('*').eq('id',id).single(); if(error||!t){ tkSel=null; return '<div class="panel"><div class="empty">No encontré ese ticket.</div></div>'; }
+  H(`#${t.id} · ${t.asunto}`,`${t.negocio||t.slug} · ${TKC[t.categoria]||''} · creado ${tkF2(t.creado)}`);
+  $('#acts').innerHTML='<button class="btn btn-g" data-tkback>← Tickets</button>'+(t.slug?` <button class="btn btn-g" data-xapp="${esc(t.slug)}">Entrar a su Xyro Apps ↗</button>`:'');
+  const d48=new Date(Date.now()-2*864e5).toISOString();
+  const [{data:M},seg,web]=await Promise.all([
+    sb.from('xa_ticket_msgs').select('*').eq('ticket_id',id).order('creado'),
+    t.slug?sb.from('xa_seguridad').select('creado,email,detalle').eq('tipo','error').eq('sitio_id',t.slug).gte('creado',d48).order('creado',{ascending:false}).limit(20):Promise.resolve({data:[]}),
+    sb.from('errores').select('creado,origen,mensaje,url').eq('sitio_id',t.sitio_id).gte('creado',d48).order('creado',{ascending:false}).limit(20)]);
+  if(!t.ultimo_gestor) sb.from('xa_tickets').update({visto_gestor:new Date().toISOString()}).eq('id',id).then(()=>{},()=>{});
+  const cx=t.contexto||{},ER=Array.isArray(cx.errores)?cx.errores:[];
+  const kv=(k,v)=>v===undefined||v===null||v===''?'':`<tr><td style="color:var(--mu);white-space:nowrap">${k}</td><td>${esc(String(v))}</td></tr>`;
+  const errL=(arr,f)=>arr&&arr.length?`<div class="tbl"><table>${arr.map(f).join('')}</table></div>`:'<p class="d">Sin errores.</p>';
+  const [e]=TKE[t.estado]||[''];
+  return `<div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start" class="tkgrid">
+    <div class="panel"><h3>Conversación ${t.prioridad==='urgente'?'<span class="tag baja">🔴 Urgente</span>':''}</h3>
+      <div style="display:grid;gap:10px;margin-top:10px">${(M||[]).map(m=>`<div style="padding:10px 12px;border-radius:12px;border:1px solid ${m.de_gestor?'rgba(124,108,255,.5)':'var(--line)'};background:${m.de_gestor?'rgba(124,108,255,.08)':'transparent'};${m.de_gestor?'margin-left:40px':'margin-right:40px'}"><small style="color:var(--mu)">${m.de_gestor?'🟣 Tú (XyroStudio)':esc(m.autor_nombre||'Cliente')} · ${tkF2(m.creado)}</small><div style="white-space:pre-wrap;margin-top:4px">${esc(m.texto)}</div>${m.adjunto?`<a href="${esc(m.adjunto)}" target="_blank" rel="noopener"><img src="${esc(m.adjunto)}" alt="Captura" style="max-width:100%;max-height:300px;border-radius:10px;margin-top:8px"></a>`:''}</div>`).join('')}</div>
+      <form class="form" id="tkrf" onsubmit="return false" style="margin-top:14px"><label class="full">Tu respuesta<textarea id="tkTx" rows="4" maxlength="4000" placeholder="Escribe la respuesta para ${esc(t.autor_nombre||'el cliente')}…"></textarea></label>
+        <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-p" data-tkres="${t.id}" data-est="esperando">Responder</button><button class="btn btn-g" data-tkres="${t.id}" data-est="resuelto">Responder y marcar resuelto</button></div></form></div>
+    <div style="display:grid;gap:14px">
+      <div class="panel"><h3>Estado</h3><p class="d">Ahora: <b>${esc(e)}</b></p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${Object.entries(TKE).map(([k,[n]])=>`<button class="btn ${t.estado===k?'btn-p':'btn-g'} btn-sm" data-tkest="${t.id}" data-est="${k}">${n}</button>`).join('')}</div>
+        <p class="d" style="margin-top:10px">Prioridad: <button class="btn btn-g btn-sm" data-tkpri="${t.id}" data-p="${t.prioridad==='urgente'?'normal':'urgente'}">${t.prioridad==='urgente'?'🔴 Urgente → normal':'Marcar urgente'}</button></p></div>
+      <div class="panel"><h3>Contexto</h3><div class="tbl"><table>${kv('Quién',(t.autor_nombre||'')+(t.autor_rol?' · '+t.autor_rol:''))}${kv('Versión',cx.version)}${kv('Pantalla',cx.ruta)}${kv('Sede',cx.sede)}${kv('Tamaño',cx.pantalla)}${kv('Internet',cx.en_linea===false?'sin conexión':'en línea')}${kv('Navegador',cx.navegador)}${kv('Hora',cx.hora&&tkF2(cx.hora))}</table></div></div>
+      <div class="panel"><h3>Errores en su pantalla</h3><p class="d">Lo último que falló en su navegador antes de escribir.</p>${errL(ER.slice().reverse(),x=>`<tr><td><small>${tkF2(x.t)}</small></td><td><small><b>${esc(x.tipo||'')}</b> ${esc(x.det||'')}<br><span style="color:var(--mu)">${esc(x.r||'')}</span></small></td></tr>`)}</div>
+      <div class="panel"><h3>Errores del negocio · 48 h</h3>${errL(seg.data,x=>`<tr><td><small>${tkF2(x.creado)}</small></td><td><small><b>Xyro Apps</b> ${esc(x.detalle||'')}${x.email?'<br><span style="color:var(--mu)">'+esc(x.email)+'</span>':''}</small></td></tr>`)}${(web.data||[]).length?errL(web.data,x=>`<tr><td><small>${tkF2(x.creado)}</small></td><td><small><b>Web</b> ${esc(x.mensaje||'')}<br><span style="color:var(--mu)">${esc(x.url||'')}</span></small></td></tr>`):''}</div>
+      <button class="btn btn-g" data-tkdel="${t.id}">🗑️ Eliminar ticket</button>
+    </div></div>`;
+}
 V.accesos=async ()=>{
   H('Enviar acceso','El enlace de su Xyro Apps para cada negocio. Un clic abre su WhatsApp con el mensaje listo.');
   $('#acts').innerHTML='<button class="btn btn-g" data-v="negocios">← Xyro Apps</button>';
@@ -476,6 +528,7 @@ V.accesos=async ()=>{
   return `<div class="panel"><p class="d">${n} de ${L.length} enviados en este equipo. WhatsApp no deja enviar a todos de golpe: toca «💬 Enviar» en cada uno y se marca solo.</p>
     <div class="tbl" style="margin-top:10px"><table><tr><th>Negocio</th><th>Dueño</th><th></th><th></th></tr>${rows}</table></div></div>`;
 };
+document.addEventListener('click',e=>{const r=e.target.closest('tr[data-tk]');if(r&&me){tkSel=+r.dataset.tk;go('tickets')}});
 document.addEventListener('click',e=>{const a=e.target.closest('[data-accenv]');if(!a)return;try{localStorage.setItem('xg-acc-'+a.dataset.accenv,Date.now())}catch(_){}setTimeout(()=>go('accesos'),400)});
 V.alta=async ()=>{
   H('Nuevo negocio','Nombre, plantilla y costo. Con un clic queda su panel de Xyro Apps listo.');
@@ -929,7 +982,16 @@ document.addEventListener('click', async e=>{
       const {error}=await sb.from('xa_pruebas').update({expira:new Date(base+ +d.min*6e4).toISOString()}).eq('codigo',d.prmas); if(error)throw error; toast('⏱️ Tiempo alargado'); return go('pruebas'); }
     if(d.prfin){ if(!confirm('¿Terminar este acceso de prueba ahora? Se cierra en su pantalla en máx. 3 minutos.'))return; const {error}=await sb.from('xa_pruebas').update({expira:new Date().toISOString()}).eq('codigo',d.prfin); if(error)throw error; toast('⏹️ Acceso terminado'); return go('pruebas'); }
     if(d.prdel){ if(!confirm(`¿Eliminar el acceso de prueba de ${d.n}? El enlace deja de funcionar.`))return; const {error}=await sb.from('xa_pruebas').delete().eq('codigo',d.prdel); if(error)throw error; touch(`Eliminó acceso de prueba de ${d.n}`); toast('🗑️ Eliminado'); return go('pruebas'); }
-    if(d.v)return go(d.v);
+    if(d.tkf){ tkF=d.tkf; return go('tickets'); }
+    if('tkback' in d){ tkSel=null; return go('tickets'); }
+    if(d.tkres){ const tx=$('#tkTx').value.trim(); if(!tx)return toast('Escribe la respuesta'); el.disabled=true;
+      let {error}=await sb.from('xa_ticket_msgs').insert({ticket_id:+d.tkres,autor:me.id,autor_nombre:'XyroStudio',de_gestor:true,texto:tx.slice(0,4000)}); if(error){ el.disabled=false; throw error; }
+      ({error}=await sb.from('xa_tickets').update({estado:d.est,visto_gestor:new Date().toISOString()}).eq('id',+d.tkres)); if(error)throw error;
+      touch(`Respondió el ticket #${d.tkres}`); toast(d.est==='resuelto'?'✅ Respondido y resuelto':'💬 Respuesta enviada'); tkCuenta(); return go('tickets'); }
+    if(d.tkest){ const {error}=await sb.from('xa_tickets').update({estado:d.est}).eq('id',+d.tkest); if(error)throw error; toast('Estado actualizado'); tkCuenta(); return go('tickets'); }
+    if(d.tkpri){ const {error}=await sb.from('xa_tickets').update({prioridad:d.p}).eq('id',+d.tkpri); if(error)throw error; return go('tickets'); }
+    if(d.tkdel){ if(!confirm(`¿Eliminar el ticket #${d.tkdel} y su conversación?`))return; const {error}=await sb.from('xa_tickets').delete().eq('id',+d.tkdel); if(error)throw error; tkSel=null; toast('🗑️ Ticket eliminado'); tkCuenta(); return go('tickets'); }
+    if(d.v){ if(d.v==='tickets'&&el.classList.contains('nv'))tkSel=null; return go(d.v); }
     if(d.xarsp){ e.preventDefault(); el.disabled=true; bkAbierto='xa-'+d.xarsp; const {error}=await sb.rpc('xa_respaldar',{p_sitio:d.xarsp}); if(error)throw error; toast('✅ Copia guardada'); return go('backups'); }
     if(d.xarest){ const ok=prompt(`Vas a dejar el Xyro Apps de ${d.n} tal como estaba en esa copia. Lo que se hizo después se reemplaza (antes se guarda una copia de cómo está ahora, por si acaso).\n\nEscribe RESTAURAR para confirmar:`); if((ok||'').trim().toUpperCase()!=='RESTAURAR')return; el.disabled=true; const {data:n,error}=await sb.rpc('xa_restaurar',{p_id:+d.xarest}); if(error)throw error; touch(`Restauró Xyro Apps de ${d.n}`); toast(`✅ Restaurado: ${n||0} registros`); return go('backups'); }
     if(d.xadl){ el.disabled=true; const {data:r,error}=await sb.from('xa_respaldos').select('creado,datos').eq('id',+d.xadl).single(); el.disabled=false; if(error)throw error; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(r.datos)],{type:'application/json'})); a.download=`xyro-apps-${d.n}-${String(r.creado).slice(0,10)}.json`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); return; }
