@@ -151,7 +151,8 @@ th{color:var(--mu);font-size:.66rem;letter-spacing:.08em;text-transform:uppercas
 #fx{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
 .aura{position:fixed;width:70vmax;height:70vmax;left:50%;top:50%;transform:translate(-50%,-60%);border-radius:50%;background:radial-gradient(closest-side,#7c5cff33,transparent);filter:blur(20px);z-index:-1;pointer-events:none}
 .glow{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(600px circle at var(--mx,50%) var(--my,40%),#7c5cff2e,transparent 60%)}
-a.btn{color:var(--tx)}
+a.btn{color:var(--tx);text-decoration:none}
+.vw{position:relative}.vmenu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:#111119;border:1px solid var(--line);border-radius:12px;padding:6px;min-width:210px;box-shadow:0 14px 34px rgba(0,0,0,.55)}.vmenu small{display:block;padding:6px 10px 4px;color:var(--mu,#8b8ba0);font-size:.72rem}.vmenu button{display:block;width:100%;text-align:left;padding:9px 10px;border:0;background:none;border-radius:8px;color:var(--tx);font:inherit;font-size:.86rem;cursor:pointer}.vmenu button:hover{background:rgba(124,92,255,.16)}
 body::before,body::after{display:none}
 aside{background:#0b0d14e6;backdrop-filter:blur(12px)}
 .btn-p,.toast,.ftabs button.on{background:var(--ac);box-shadow:none}
@@ -464,9 +465,15 @@ V.versiones=async ()=>{
     <div style="display:flex;gap:8px;flex-wrap:wrap">${ult&&ult>vg&&g.prog!==ult?`<button class="btn btn-p" data-vsub="general">⬆️ Subir actualización a todos${a3?' (3 am)':''}</button>`:`<span class="d">✅ La versión general está al día.</span>`}${progOn(g)?'<button class="btn btn-g btn-sm" data-vcancel="general">Cancelar lo programado</button>':''}</div></div>
   <div class="panel"><h3>📱 Por negocio</h3><p class="d">«Subir» le pone lo último solo a ese negocio. «Volver a…» lo deja fijo en una versión anterior si algo falla.</p>
     <div class="clients">${L.map(s=>{const r=M[s.id],v=efS(s),pend=ult&&ult>v;return`<div class="cl"><div class="in"><h4>${esc(s.negocio||s.slug)} ${pend?'<span class="tag pend">Hay actualización</span>':'<span class="tag activo">Al día</span>'}${r&&r.fijo?' <span class="tag">📌 Fijo</span>':''}${pt(r)}</h4><div class="meta"><span>Versión: ${esc(nom(v))}</span></div></div>
-      <div class="acts">${pend&&!(progOn(r)&&r.prog===ult)?`<button class="btn btn-p btn-sm" data-vsub="${s.id}">⬆️ Subir${a3?' (3 am)':''}</button>`:''}${progOn(r)?`<button class="btn btn-g btn-sm" data-vcancel="${s.id}">Cancelar</button>`:''}<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="/app/dev/?s=${encodeURIComponent(s.slug)}">🧪 Probar</a><select class="btn btn-g btn-sm" data-vfix="${s.id}" data-n="${esc(s.negocio||s.slug)}"><option value="">Volver a…</option>${VERS.map(x=>`<option value="${x.id}">${esc(x.fecha)}</option>`).join('')}${r&&r.fijo?'<option value="-">📌 Quitar fijo</option>':''}</select></div></div>`}).join('')||'<div class="empty">Aún no hay negocios con Xyro Apps.</div>'}</div></div>
+      <div class="acts">${pend&&!(progOn(r)&&r.prog===ult)?`<button class="btn btn-p btn-sm" data-vsub="${s.id}">⬆️ Subir${a3?' (3 am)':''}</button>`:''}${progOn(r)?`<button class="btn btn-g btn-sm" data-vcancel="${s.id}">Cancelar</button>`:''}<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="/app/dev/?s=${encodeURIComponent(s.slug)}">🧪 Probar</a><span class="vw"><button class="btn btn-g btn-sm" data-vmenu="${s.id}">↩️ Volver a…</button><div class="vmenu" id="vm-${s.id}" hidden><small>Dejarlo fijo en la versión del…</small>${VERS.map(x=>`<button data-vset="${s.id}|${x.id}" data-n="${esc(s.negocio||s.slug)}">${x.id===v?'✓ ':''}${esc(x.fecha)}</button>`).join('')}${r&&r.fijo?`<button data-vset="${s.id}|-" data-n="${esc(s.negocio||s.slug)}">📌 Quitar fijo</button>`:''}</div></span></div></div>`}).join('')||'<div class="empty">Aún no hay negocios con Xyro Apps.</div>'}</div></div>
   <div class="panel"><h3>🆕 Versiones</h3>${VERS.slice(0,10).map(v=>`<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)"><b>${esc(v.fecha)}</b>${v.id>vg?' <span class="tag pend">Sin subir a todos</span>':''}<div class="d" style="margin-top:4px">${esc(v.notas)}</div></div>`).join('')||'<div class="empty">Sin versiones.</div>'}</div>`;
 };
+async function fijarVersion(sid,v,n){
+  if(v==='-'){const {error}=await sb.from('xa_versiones').update({fijo:false,actualizado:new Date().toISOString()}).eq('clave',sid);if(error)throw error;toast('Ya no está fijo');return;}
+  if(!confirm(`¿Dejar a ${n} fijo en la versión del ${(VERS.find(x=>x.id===v)||{}).fecha||v}? La verá al volver a abrir la app.`))return;
+  const {error}=await sb.from('xa_versiones').upsert({clave:sid,version:v,fijo:true,prog:null,prog_para:null,actualizado:new Date().toISOString()});if(error)throw error;touch(`Dejó a ${n} en la versión ${v}`);toast('📌 Listo');
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.vw'))document.querySelectorAll('.vmenu').forEach(m=>m.hidden=true)});
 async function subirVersion(clave){
   const ult=VERS.length&&VERS[0].id; if(!ult)throw new Error('No hay versiones.');
   const {data:g}=await sb.from('xa_versiones').select('*').eq('clave','general').maybeSingle(), auto=!!(g&&g.auto3am);
@@ -480,10 +487,6 @@ async function subirVersion(clave){
 }
 document.addEventListener('change',async e=>{const t=e.target;try{
   if('auto3am' in t.dataset){const {error}=await sb.from('xa_versiones').upsert({clave:'general',auto3am:t.checked,actualizado:new Date().toISOString()});if(error)throw error;touch((t.checked?'Activó':'Quitó')+' las actualizaciones a las 3 am');toast(t.checked?'⏰ Las subidas quedarán para las 3 am':'Las subidas serán al instante');return go('versiones');}
-  if(t.dataset.vfix!==undefined&&t.value){const v=t.value,n=t.dataset.n;
-    if(v==='-'){const {error}=await sb.from('xa_versiones').update({fijo:false,actualizado:new Date().toISOString()}).eq('clave',t.dataset.vfix);if(error)throw error;toast('Ya no está fijo');return go('versiones');}
-    if(!confirm(`¿Dejar a ${n} fijo en la versión del ${(VERS.find(x=>x.id===v)||{}).fecha||v}? La verá al volver a abrir la app.`)){t.value='';return;}
-    const {error}=await sb.from('xa_versiones').upsert({clave:t.dataset.vfix,version:v,fijo:true,prog:null,prog_para:null,actualizado:new Date().toISOString()});if(error)throw error;touch(`Dejó a ${n} en la versión ${v}`);toast('📌 Listo');return go('versiones');}
 }catch(ex){toast(ex.message||'No se pudo')}});
 let flt='todos';
 V.clientes=async ()=>{
@@ -817,6 +820,8 @@ document.addEventListener('click', async e=>{
   try{
     if('altacrear' in d){ el.disabled=true; el.textContent='Creando…'; try{ await crearNegocio(); toast('Negocio creado ✓'); return go('alta'); }catch(ex){ toast(ex.message); el.disabled=false; el.textContent='🚀 Crear negocio'; } return; }
     if('altaotro' in d){ altaRes=null; return go('alta'); }
+    if(d.vmenu){ const m=document.getElementById('vm-'+d.vmenu),o=m.hidden; document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); m.hidden=!o; return; }
+    if(d.vset){ const [sid,v]=d.vset.split('|'); document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); await fijarVersion(sid,v,d.n); return go('versiones'); }
     if(d.vsub){ el.disabled=true; try{ await subirVersion(d.vsub); }catch(ex){ toast(ex.message); } return go('versiones'); }
     if(d.vcancel){ const {error}=await sb.from('xa_versiones').update({prog:null,prog_para:null}).eq('clave',d.vcancel); if(error)throw error; toast('Cancelado'); return go('versiones'); }
     if(d.v)return go(d.v);
