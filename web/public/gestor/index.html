@@ -424,7 +424,7 @@ const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCa
 const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🩺',n:'Consultorio',d:'Pacientes, citas e historial',on:0},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
 let altaRes=null,altaPlt='gym';
 /* Accesos de prueba (SQL 31): enlace /app/?prueba=CODIGO con el nombre del posible cliente y vencimiento. Es la demo completa con tiempo. */
-const PR_DUR=[[60,'1 hora'],[180,'3 horas'],[1440,'1 día'],[4320,'3 días'],[10080,'7 días']];
+const PR_DUR=[[60,'1 hora'],[180,'3 horas'],[1440,'1 día'],[4320,'3 días'],[10080,'7 días'],[21600,'15 días'],[43200,'30 días']];
 const prLink=c=>'https://xyrostudio.net/app/?prueba='+c;
 const prCod=()=>{const a='abcdefghijkmnpqrstuvwxyz23456789',b=crypto.getRandomValues(new Uint8Array(10));return[...b].map(x=>a[x%a.length]).join('')};
 const prFecha=d=>new Date(d).toLocaleString('es-PE',{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
@@ -441,7 +441,7 @@ V.pruebas=async ()=>{
     <td>${q?`<span class="tag activo">🟢 Quedan ${q}</span>`:'<span class="tag baja">⏹️ Terminó</span>'}<br><small style="color:var(--mu)">hasta ${esc(prFecha(r.expira))}</small></td>
     <td>${r.aperturas?`👀 Abierto ${r.aperturas} ${r.aperturas===1?'vez':'veces'}<br><small style="color:var(--mu)">última: ${esc(prFecha(r.ultima))}</small>`:'<small style="color:var(--mu)">Aún no lo abre</small>'}</td>
     <td style="text-align:right;white-space:nowrap"><button class="btn btn-g btn-sm" data-ucopy="${esc(m)}" title="Copiar mensaje">📋</button> <a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="${esc(prLink(r.codigo))}" title="Abrir">↗</a> <a class="btn btn-p btn-sm" target="_blank" rel="noopener" href="https://wa.me/${t}?text=${encodeURIComponent(m)}">💬</a><br>
-    <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="60" style="margin-top:6px">＋1 h</button> <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="1440" style="margin-top:6px">＋1 día</button> ${q?`<button class="btn btn-g btn-sm" data-prfin="${esc(r.codigo)}" style="margin-top:6px">⏹️ Terminar</button>`:''} <button class="btn btn-g btn-sm" data-prdel="${esc(r.codigo)}" data-n="${esc(r.nombre)}" style="margin-top:6px" title="Eliminar">🗑️</button></td></tr>`}).join('');
+    <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="60" style="margin-top:6px">＋1 h</button> <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="1440" style="margin-top:6px">＋1 día</button><button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="21600" style="margin-top:6px">＋15 días</button> ${q?`<button class="btn btn-g btn-sm" data-prfin="${esc(r.codigo)}" style="margin-top:6px">⏹️ Terminar</button>`:''} <button class="btn btn-g btn-sm" data-prdel="${esc(r.codigo)}" data-n="${esc(r.nombre)}" style="margin-top:6px" title="Eliminar">🗑️</button></td></tr>`}).join('');
   return `<div class="panel"><h3>＋ Nuevo acceso de prueba</h3><form class="form" id="prf" onsubmit="return false" style="margin-top:10px">
     <label class="full">Nombre del negocio<input id="prN" maxlength="40" placeholder="Ej: Santos Strength"></label>
     <label>Rubro<select id="prR"><option value="gym">🏋️ Gimnasio</option><option value="consultorio">🩺 Consultorio</option><option value="academia">🎓 Academia</option></select></label>
