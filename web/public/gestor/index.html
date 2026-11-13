@@ -401,45 +401,56 @@ V.negocios=async ()=>{
 };
 // ---- Alta de un negocio nuevo en 1 minuto: cliente + sitio + Xyros + ajustes de la app + cuenta del dueño ----
 const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
-const RUBROS_A=[['gym','🏋️ Gimnasio'],['consultorio','🩺 Consultorio'],['academia','🎓 Academia']];
-let altaRes=null;
+// Plantillas de Xyro Apps por rubro (on = lista para usar).
+const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🩺',n:'Consultorio',d:'Pacientes, citas e historial',on:0},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
+let altaRes=null,altaPlt='gym';
 V.alta=async ()=>{
-  H('Nuevo negocio','Crea el negocio, activa sus Xyros y su cuenta de administrador en un solo paso.');
-  $('#acts').innerHTML='<button class="btn btn-g" data-v="negocios">← Xyro Apps</button>';
-  if(altaRes){ const r=altaRes, msg=`Hola ${r.nombre} 👋 Ya tienes tu sistema de ${r.negocio} (Xyro Apps):\nEntra aquí: https://xyrostudio.net/app/?s=${r.slug}&e=${encodeURIComponent(r.email)}\nCorreo: ${r.email}\nClave temporal: ${r.pass}\nAl entrar te pedirá crear tu propia contraseña.`;
-    return `<div class="panel"><h3>✅ ${esc(r.negocio)} está listo</h3><p class="d">Código del negocio: <b>${esc(r.slug)}</b> · Xyros: ${r.xyros.map(esc).join(', ')}</p>
-      <div class="clavebox"><div>🔑 Cuenta del administrador <b>${esc(r.nombre)}</b> (${esc(r.email)})</div><div class="cv"><code>${esc(r.pass)}</code><button class="btn btn-p btn-sm" data-ucopy="${esc(msg)}">📋 Copiar mensaje</button><a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="https://wa.me/${esc(r.tel)}?text=${encodeURIComponent(msg)}">💬 Enviar por WhatsApp</a></div><small>La clave se muestra una sola vez.</small></div>
+  H('Nuevo negocio','Nombre, plantilla y costo. Con un clic queda su panel de Xyro Apps listo.');
+  $('#acts').innerHTML='<button class="btn btn-g" data-v="clientes">← Clientes</button>';
+  if(altaRes){ const r=altaRes, link=`https://xyrostudio.net/app/?s=${r.slug}${r.email?'&e='+encodeURIComponent(r.email):''}`, msg=r.email?`Hola ${r.nombre} 👋 Ya tienes tu sistema de ${r.negocio} (Xyro Apps):\nEntra aquí: ${link}\nCorreo: ${r.email}\nClave temporal: ${r.pass}\nAl entrar te pedirá crear tu propia contraseña.`:'';
+    return `<div class="panel"><h3>✅ ${esc(r.negocio)} ya tiene su panel</h3><p class="d">Plantilla ${esc(r.plt)} · Código <b>${esc(r.slug)}</b> · ${r.xyros.map(esc).join(', ')}</p>
+      ${r.email?`<div class="clavebox" style="margin-top:12px"><div>🔑 Cuenta del administrador <b>${esc(r.nombre)}</b> (${esc(r.email)})</div><div class="cv"><code>${esc(r.pass)}</code><button class="btn btn-p btn-sm" data-ucopy="${esc(msg)}">📋 Copiar mensaje</button>${r.tel?`<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="https://wa.me/${esc(r.tel)}?text=${encodeURIComponent(msg)}">💬 Enviar por WhatsApp</a>`:''}</div><small>La clave se muestra una sola vez.</small></div>`
+        :`<div class="note" style="margin-top:12px">👤 Aún no tiene cuenta de dueño. Cuando tengas su correo, entra a su Xyro Apps → <b>Equipo</b> → «＋ Cuenta» y créala como Administrador.</div>`}
       ${r.aviso?`<div class="note" style="margin-top:12px">⚠️ ${esc(r.aviso)}</div>`:''}
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn btn-p" data-xapp="${esc(r.slug)}">Entrar a su Xyro Apps ↗</button><button class="btn btn-g" data-altaotro>＋ Otro negocio</button></div></div>`; }
-  const ck=(k,n,on,dis)=>`<label class="ck" style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-axy="${k}" ${on?'checked':''} ${dis?'disabled':''}>${n}</label>`;
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><button class="btn btn-p" data-xapp="${esc(r.slug)}">Entrar a su Xyro Apps ↗</button><button class="btn btn-g" data-altaotro>＋ Otro negocio</button><button class="btn btn-g" data-v="clientes">Ver en Clientes</button></div></div>`; }
+  const ck=(k,n)=>`<label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" data-axy="${k}">${n}</label>`;
   return `<div class="panel"><form class="form" id="af" onsubmit="return false">
-    <label>Nombre del negocio<input id="aN" maxlength="60" placeholder="Ej: Titan Gym" required></label>
-    <label>Código (va en el enlace)<input id="aS" maxlength="40" placeholder="titan-gym"></label>
-    <label>Rubro<select id="aR">${RUBROS_A.map(([a,b])=>`<option value="${a}">${b}</option>`).join('')}</select></label>
-    <label>Color de la marca<input id="aC" type="color" value="#7c5cff"></label>
-    <label class="full">Web del negocio (opcional)<input id="aW" type="url" placeholder="https://titangym.pe"></label>
-    <div class="full"><label>Xyros que contrata</label><div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px">${ck('apps','Xyro Apps (base)',1,1)}${ck('control','Xyro Control')}${ck('webs','Xyro Webs')}</div></div>
-    <label>Mensualidad total (S/, privado)<input id="aM" type="number" min="0" step="any" placeholder="Ej: 89"></label><label>Celular del dueño (WhatsApp)<input id="aT" inputmode="tel" placeholder="9xxxxxxxx"></label>
-    <label>Nombre del administrador<input id="aAn" maxlength="60" placeholder="Ej: Carlos Pérez" required></label>
-    <label>Correo del administrador<input id="aAe" type="email" maxlength="120" placeholder="dueño@correo.com" required></label>
-  </form><button class="btn btn-p" data-altacrear style="margin-top:14px">🚀 Crear negocio</button></div>`;
+    <label class="full">Nombre del negocio<input id="aN" maxlength="60" placeholder="Ej: Titan Gym" required autofocus></label>
+    <div class="full"><label>Plantilla</label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:8px">${PLANTILLAS.map(t=>`<button type="button" class="cl" data-aplt="${t.k}" ${t.on?'':'disabled'} style="display:block;text-align:left;cursor:${t.on?'pointer':'not-allowed'};opacity:${t.on?1:.5};${altaPlt===t.k?'border-color:var(--p,#7c5cff);box-shadow:0 0 0 2px rgba(124,92,255,.35)':''}"><b style="font-size:1rem">${t.ico} ${t.n}</b>${t.on?(altaPlt===t.k?' <span class="tag activo">✓</span>':''):' <span class="tag">Pronto</span>'}<div class="d" style="margin-top:4px;font-size:.8rem">${t.d}</div></button>`).join('')}</div></div>
+    <label>Mensualidad (S/)<input id="aM" type="number" min="0" step="any" placeholder="Ej: 89"></label>
+    <label>Implementación (S/)<input id="aCo" type="number" min="0" step="any" placeholder="Ej: 300"></label>
+    <label>Estado<select id="aE">${estados.map(([a,b])=>`<option value="${a}">${b}</option>`).join('')}</select></label>
+    <label>Pago<select id="aP"><option value="pendiente">Por cobrar</option><option value="pagado">Pagado</option></select></label>
+    <details class="full" style="margin-top:4px"><summary style="cursor:pointer;color:var(--mu,#a3a3b5);font-size:.88rem">＋ Más opciones (dueño, integraciones, web) — puedes dejarlo para después</summary>
+      <div class="form" style="margin-top:12px">
+      <label>Nombre del dueño / admin<input id="aAn" maxlength="60" placeholder="Ej: Carlos Pérez"></label>
+      <label>Correo del admin (crea su cuenta)<input id="aAe" type="email" maxlength="120" placeholder="dueño@correo.com"></label>
+      <label>Celular del dueño (WhatsApp)<input id="aT" inputmode="tel" placeholder="9xxxxxxxx"></label>
+      <label>Web del negocio<input id="aW" type="url" placeholder="https://titangym.pe"></label>
+      <div class="full"><label>Integraciones extra</label><div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px">${ck('control','Xyro Control (punto de venta)')}${ck('webs','Xyro Webs (editor web)')}</div></div>
+      <label>Código (va en el enlace)<input id="aS" maxlength="40" placeholder="titan-gym"></label>
+      <label>Color de la marca<input id="aC" type="color" value="${(PLANTILLAS.find(t=>t.k===altaPlt)||{}).color||'#7c5cff'}"></label>
+      </div></details>
+  </form><button class="btn btn-p" data-altacrear style="margin-top:16px;font-size:1rem;padding:.8rem 1.4rem">🚀 Crear panel</button></div>`;
 };
 document.addEventListener('input',e=>{ if(e.target.id==='aN'){ const s=$('#aS'); if(s&&!s.dataset.man)s.value=slugify(e.target.value); } if(e.target.id==='aS'){ e.target.dataset.man=1; } });
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-aplt]'); if(!b||b.disabled)return; altaPlt=b.dataset.aplt; $$('[data-aplt]').forEach(x=>{const on=x===b;x.style.borderColor=on?'var(--p,#7c5cff)':'';x.style.boxShadow=on?'0 0 0 2px rgba(124,92,255,.35)':''}); });
 async function crearNegocio(){
-  const v=id=>($('#'+id)?.value||'').trim(), negocio=v('aN'), slug=slugify(v('aS')||negocio), nombre=v('aAn'), email=v('aAe').toLowerCase(), web=v('aW'), tel=v('aT').replace(/\D/g,'');
-  if(!negocio||!slug)throw new Error('Pon el nombre del negocio.'); if(!nombre||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new Error('Pon el nombre y un correo válido del administrador.');
-  const xyros=['apps',...$$('[data-axy]').filter(x=>x.checked&&x.dataset.axy!=='apps').map(x=>x.dataset.axy)];
-  const {data:ya}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle(); if(ya)throw new Error('El código «'+slug+'» ya existe. Cambia el código.');
+  const v=id=>($('#'+id)?.value||'').trim(), negocio=v('aN'), slug=slugify(v('aS')||negocio), nombre=v('aAn'), email=v('aAe').toLowerCase(), web=v('aW'), tel=v('aT').replace(/\D/g,''), plt=PLANTILLAS.find(t=>t.k===altaPlt&&t.on)||PLANTILLAS[0];
+  if(!negocio||!slug)throw new Error('Pon el nombre del negocio.');
+  if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))throw new Error('El correo del admin no es válido (o déjalo vacío).');
+  const xyros=['apps',...$$('[data-axy]').filter(x=>x.checked).map(x=>x.dataset.axy)];
+  const {data:ya}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle(); if(ya)throw new Error('Ya existe un negocio con el código «'+slug+'». Cambia el nombre o el código en «Más opciones».');
   const {data:s,error:e1}=await sb.from('sitios').insert({slug,negocio}).select('id').single(); if(e1)throw new Error('No pude crear el negocio: '+e1.message);
-  const {error:e2}=await sb.from('contenido').upsert([{sitio_id:s.id,clave:'config',valor:{xyros}},{sitio_id:s.id,clave:'app',valor:{rubro:v('aR'),nombre:negocio,color:v('aC'),...(web?{web}:{})}}]); if(e2)throw new Error('Negocio creado, pero no pude guardar sus ajustes: '+e2.message);
+  const {error:e2}=await sb.from('contenido').upsert([{sitio_id:s.id,clave:'config',valor:{xyros}},{sitio_id:s.id,clave:'app',valor:{rubro:plt.k,nombre:negocio,color:v('aC')||plt.color||'#7c5cff',...(web?{web}:{})}}]); if(e2)throw new Error('Negocio creado, pero no pude guardar sus ajustes: '+e2.message);
   const mm=+v('aM')||0, modulos={}; ['webs','apps','control','bots','edits'].forEach(k=>modulos[k]={on:xyros.includes(k),precio:k==='apps'&&mm?mm:null});
   let aviso='';
-  try{ await guardar({negocio,url:web||('https://'+slug+'.xyrostudio.net'),estado:'activo',modulos,versiones:[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:'Xyro Apps'}]}); }
-  catch(ex){ aviso='No se guardó en tu lista de clientes ('+ex.message+'). Agrégalo en Clientes.'; }
-  const pass=claveTemporal();
-  const {error:e3}=await sb.rpc('gestor_crear_usuario',{p_slug:slug,p_email:email,p_pass:pass,p_nombre:nombre,p_rol:'admin',p_sede:'todas'}); if(e3)throw new Error('Negocio creado, pero no la cuenta del administrador: '+e3.message+'. Créala desde su ficha.');
-  touch(`Dio de alta a ${negocio} (${slug})`); await cargar().catch(()=>{});
-  altaRes={negocio,slug,nombre,email,pass,xyros:xyros.map(k=>({apps:'Apps',control:'Control',webs:'Webs'}[k])),tel:tel.length===9?'51'+tel:tel,aviso};
+  try{ await guardar({negocio,rubro:plt.n,estado:v('aE')||'activo',pago:v('aP')||'pendiente',costo:+v('aCo')||null,soporte:mm||null,ciclo:'mensual',contacto:nombre||'',telefono:tel,url:web||('https://'+slug+'.xyrostudio.net'),entregado:new Date().toISOString().slice(0,10),modulos,versiones:[{id:crypto.randomUUID(),t:Date.now(),etq:'Alta del cliente',nota:'Xyro Apps · plantilla '+plt.n}]}); }
+  catch(ex){ aviso='El panel se creó, pero no se guardó en tu lista de clientes ('+ex.message+').'; }
+  let pass='';
+  if(email){ pass=claveTemporal(); const {error:e3}=await sb.rpc('gestor_crear_usuario',{p_slug:slug,p_email:email,p_pass:pass,p_nombre:nombre||negocio,p_rol:'admin',p_sede:'todas'}); if(e3){ aviso+=(aviso?' ':'')+'No se pudo crear la cuenta del admin ('+e3.message+'). Créala en su Xyro Apps → Equipo.'; pass=''; } }
+  touch(`Dio de alta a ${negocio} (${slug}) con plantilla ${plt.n}`); await cargar().catch(()=>{});
+  altaRes={negocio,slug,plt:plt.ico+' '+plt.n,nombre:nombre||negocio,email:pass?email:'',pass,xyros:xyros.map(k=>({apps:'Xyro Apps',control:'Control',webs:'Webs'}[k])),tel:tel.length===9?'51'+tel:tel,aviso};
 }
 // ---- Actualizaciones: lo nuevo se prueba en /app/dev/; cada negocio cambia solo cuando se le sube (SQL 28, xa_versiones) ----
 const prox3am=()=>{const d=new Date(),t=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),8));if(t<=d)t.setUTCDate(t.getUTCDate()+1);return t}; // 3 am Lima = 8:00 UTC
@@ -497,7 +508,7 @@ document.addEventListener('change',async e=>{const t=e.target;try{
 let flt='todos';
 V.clientes=async ()=>{
   H('Clientes','Cada web que creas, con su costo, soporte y versiones. Guardado en la nube.');
-  $('#acts').innerHTML=`<button class="btn btn-p" data-new>＋ Nuevo cliente</button>`;
+  $('#acts').innerHTML=`<button class="btn btn-p" data-v="alta">＋ Nuevo negocio</button> <button class="btn btn-g" data-new title="Cliente que solo tiene web, sin Xyro Apps">＋ Solo web</button>`;
   if(editing)return await clForm();
   const f=clientes.filter(c=>flt==='todos'||c.estado===flt);
   return `<div class="chips">${[['todos','Todos'],...estados].map(([k,n])=>`<button class="chip ${k===flt?'on':''}" data-flt="${k}">${n}</button>`).join('')}</div>
@@ -824,8 +835,8 @@ document.addEventListener('click', async e=>{
   const el=e.target.closest('button,a,[data-flt],.row-sw'); if(!el||!me)return;
   const d=el.dataset;
   try{
-    if('altacrear' in d){ el.disabled=true; el.textContent='Creando…'; try{ await crearNegocio(); toast('Negocio creado ✓'); return go('alta'); }catch(ex){ toast(ex.message); el.disabled=false; el.textContent='🚀 Crear negocio'; } return; }
-    if('altaotro' in d){ altaRes=null; return go('alta'); }
+    if('altacrear' in d){ el.disabled=true; el.textContent='Creando…'; try{ await crearNegocio(); toast('Negocio creado ✓'); return go('alta'); }catch(ex){ toast(ex.message); el.disabled=false; el.textContent='🚀 Crear panel'; } return; }
+    if('altaotro' in d){ altaRes=null; altaPlt='gym'; return go('alta'); }
     if(d.vmenu){ const m=document.getElementById('vm-'+d.vmenu),o=m.hidden; document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); if(!o)return;
       document.body.appendChild(m); m.hidden=false; const b=el.getBoundingClientRect(),w=m.offsetWidth,hh=m.offsetHeight;
       m.style.left=Math.max(8,Math.min(innerWidth-w-8,b.right-w))+'px'; m.style.top=(b.bottom+6+hh>innerHeight?Math.max(8,b.top-hh-6):b.bottom+6)+'px'; return; }
