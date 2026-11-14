@@ -415,10 +415,10 @@ async function waMedia(env, id) {   // descarga una imagen/documento de Meta (ve
 const b64 = buf => { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); };
 const PAGO_SCHEMA = {
   type: "object", additionalProperties: false,
-  required: ["es_pago", "monto", "operacion", "fecha", "metodo", "plan", "nombres", "dni", "nacimiento", "celular", "respuesta"],
+  required: ["es_pago", "monto", "operacion", "fecha", "metodo", "plan", "nombres", "dni", "nacimiento", "celular", "inicio", "nota", "respuesta"],
   properties: {
     es_pago: { type: "boolean" }, monto: { type: "string" }, operacion: { type: "string" }, fecha: { type: "string" }, metodo: { type: "string" },
-    plan: { type: "string" }, nombres: { type: "string" }, dni: { type: "string" }, nacimiento: { type: "string" }, celular: { type: "string" }, respuesta: { type: "string" },
+    plan: { type: "string" }, nombres: { type: "string" }, dni: { type: "string" }, nacimiento: { type: "string" }, celular: { type: "string" }, inicio: { type: "string" }, nota: { type: "string" }, respuesta: { type: "string" },
   },
 };
 async function waComprobante(env, e, m, nombre, responde) {
@@ -433,7 +433,7 @@ async function waComprobante(env, e, m, nombre, responde) {
       const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
       const r = await client.messages.create({
         model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 1200,
-        system: `Atiendes el WhatsApp de ${f.nombre} (Perú). El cliente envió una imagen. Decide si es un comprobante de pago (Yape, Plin, transferencia, depósito). Si lo es, lee: monto (solo número), número de operación, fecha y hora, método. De la CONVERSACIÓN saca el plan que acordaron y los datos del cliente (nombres completos, DNI, fecha de nacimiento AAAA-MM-DD, celular); deja vacío lo que no esté, nunca inventes. «respuesta»: mensaje corto y cálido por WhatsApp, tuteando. Si es pago: agradece por su nombre, di que recepción verifica el pago y que apenas se confirme le llega su código QR de acceso; si faltan datos (nombres completos, DNI o fecha de nacimiento), pídelos en el mismo mensaje. Si no es un pago: agradece y di que recepción lo revisa. Nunca confirmes que el pago ya llegó: eso lo verifica recepción.\nFICHA:\n${f.texto}`,
+        system: `Atiendes el WhatsApp de ${f.nombre} (Perú). El cliente envió una imagen. Decide si es un comprobante de pago (Yape, Plin, transferencia, depósito). Si lo es, lee: monto (solo número), número de operación, fecha y hora, método. De la CONVERSACIÓN saca el plan que acordaron y los datos del cliente (nombres completos, DNI, fecha de nacimiento AAAA-MM-DD, celular), «inicio» = día en que quiere empezar su membresía en AAAA-MM-DD si lo pidió (hoy es ${new Date(Date.now() - 18e6).toISOString().slice(0, 10)}) y «nota» = lo que recepción debe saber (ej. quiere congelar luego, lesión, horario); deja vacío lo que no esté, nunca inventes. «respuesta»: mensaje corto y cálido por WhatsApp, tuteando. Si es pago: agradece por su nombre, di que recepción verifica el pago y que apenas se confirme le llega su código QR de acceso; si faltan datos (nombres completos, DNI o fecha de nacimiento), pídelos en el mismo mensaje. Si no es un pago: agradece y di que recepción lo revisa. Nunca confirmes que el pago ya llegó: eso lo verifica recepción.\nFICHA:\n${f.texto}`,
         messages: [{ role: "user", content: [
           { type: "image", source: { type: "base64", media_type: med.tipo, data: b64(med.buf) } },
           { type: "text", text: `Celular del chat: ${/^\d+$/.test(m.from) ? m.from : "(no visible)"} · Nombre en WhatsApp: ${corta(nombre, 80) || "-"}\nCONVERSACIÓN:\n${hist || "(sin mensajes previos)"}${md.caption ? "\nTexto con la imagen: " + corta(md.caption, 300) : ""}` },
