@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261114-1430",
+  "fecha": "2026-11-14 14:30",
+  "titulo": "Cartel QR para imprimir que ahorra tinta",
+  "notas": "Cartel QR para imprimir que ahorra tinta",
+  "cambios": [
+   "«Cartel para imprimir» ahora es blanco, con poco color: gasta muy poca tinta",
+   "Nuevo botón «Versión para pantallas y redes» con el diseño oscuro"
+  ]
+ },
+ {
   "id": "20261114-1418",
   "fecha": "2026-11-14 14:18",
   "titulo": "Cartel QR de la app más bonito",
