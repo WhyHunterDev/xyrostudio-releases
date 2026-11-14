@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261113-2256",
+  "fecha": "2026-11-13 22:56",
+  "titulo": "Ventas del asistente",
+  "notas": "Ventas del asistente",
+  "cambios": [
+   "El asistente lee la captura del Yape o Plin que manda el cliente y la deja en «💳 Ventas del bot» con sus datos y el plan",
+   "Recepción revisa y toca Proceder: se crea el socio con su membresía y el asistente le manda su QR con la bienvenida",
+   "Al cobrar se puede adjuntar la foto del pago",
+   "Lo que vende el asistente suma a los ingresos y al ranking de Metas, pero no a la caja de turno de recepción",
+   "En WhatsApp ahora se ven las fotos que mandan los clientes"
+  ],
+  "requiere": "SQL 39"
+ },
+ {
   "id": "20261113-2224",
   "fecha": "2026-11-13 22:24",
   "titulo": "Asistente vendedor",
