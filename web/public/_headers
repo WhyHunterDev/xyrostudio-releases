@@ -21,3 +21,6 @@
 /bot.js
   Cache-Control: no-cache
   Access-Control-Allow-Origin: *
+
+/mi/*
+  Cache-Control: no-cache
