@@ -216,39 +216,13 @@ async function botApi(req, env) {
     if (!c.ok) return jc({ error: c.lim ? "Por hoy ya no puedo responder más. Escríbenos por WhatsApp 🙌" : (c.motivo || "El asistente no está activo"), off: c.lim ? 0 : 1, wa: f.wa }, c.lim ? 429 : 403);
   }
 
-  const hist = (Array.isArray(b.historial) ? b.historial : []).slice(-8)
-    .map(h => ({ role: h && h.de === "b" ? "assistant" : "user", content: corta(h && h.t, 500) || "…" }));
-  while (hist.length && hist[0].role !== "user") hist.shift();
-  const messages = [];
-  hist.forEach(m => { const u = messages[messages.length - 1]; if (u && u.role === m.role) u.content += "\n" + m.content; else messages.push({ ...m }); });
-  if (messages.length && messages[messages.length - 1].role === "user") messages[messages.length - 1].content += "\n" + msg;
-  else messages.push({ role: "user", content: msg });
-  const hoyL = new Date(Date.now() - 5 * 3600e3), DS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-  messages[messages.length - 1].content = `[HOY: ${DS[hoyL.getUTCDay()]} ${hoyL.toISOString().slice(0, 10)}]\n` + messages[messages.length - 1].content;
-
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
   try {
-    const r = await client.messages.create({
-      model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 1500,
-      system: [{ type: "text", text: BOT_SYS }, { type: "text", text: "FICHA:\n" + f.texto, cache_control: { type: "ephemeral" } }],
-      messages,
-      output_config: { effort: "low", format: { type: "json_schema", schema: BOT_SCHEMA } },
-    });
-    if (r.stop_reason === "refusal" || r.stop_reason === "max_tokens") return jc({ respuesta: "Mejor te ayuda una persona de recepción 🙌", derivar: true, wa: f.wa });
-    const o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
-    const sede = f.sedes.find(x => x.n.toLowerCase() === String(o.sede || "").trim().toLowerCase()) || (f.sedes.length === 1 ? f.sedes[0] : null);
+    const { o, sede } = await pensar(env, f, b.historial, msg, "web");
     const cl = o.cliente || {}, cel = String(cl.celular || "").replace(/\D/g, "");
     let guardado = false;
     if (String(cl.nombre || "").trim().length > 1 && cel.length >= 9) {
       if (token) guardado = true;   // prueba desde Xyro Apps: no se guarda
-      else {
-        const dia = /^\d{4}-\d{2}-\d{2}$/.test(cl.prueba_dia || "") ? cl.prueba_dia : null;
-        const rl = await fetch(env.SB_URL + "/rest/v1/rpc/xa_bot_lead", {
-          method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY, "content-type": "application/json" },
-          body: JSON.stringify({ p_slug: slug, p_ip: await ipHash(req), p_nombre: corta(cl.nombre, 80), p_celular: cel, p_sede: sede ? sede.n : "", p_interes: corta(cl.interes, 300), p_dia: dia, p_hora: corta(cl.prueba_hora, 20) }),
-        }).catch(() => null);
-        guardado = !!(rl && rl.ok && (await rl.json().catch(() => ({}))).ok);
-      }
+      else guardado = await guardarLead(env, slug, await ipHash(req), cl, cel, sede);
     }
     return jc({ respuesta: corta(o.respuesta, 1200), derivar: !!o.derivar, wa: f.wa, sede: sede ? sede.n : "", sedes: f.sedes, guardado });
   } catch (e) {
@@ -258,11 +232,142 @@ async function botApi(req, env) {
   }
 }
 
+// Cerebro común (web y WhatsApp): historial [{de:'u'|'b', t}] + mensaje → respuesta estructurada
+async function pensar(env, f, historial, msg, canal) {
+  const hist = (Array.isArray(historial) ? historial : []).slice(-8)
+    .map(h => ({ role: h && h.de === "b" ? "assistant" : "user", content: corta(h && h.t, 500) || "…" }));
+  while (hist.length && hist[0].role !== "user") hist.shift();
+  const messages = [];
+  hist.forEach(m => { const u = messages[messages.length - 1]; if (u && u.role === m.role) u.content += "\n" + m.content; else messages.push({ ...m }); });
+  if (messages.length && messages[messages.length - 1].role === "user") messages[messages.length - 1].content += "\n" + msg;
+  else messages.push({ role: "user", content: msg });
+  const hoyL = new Date(Date.now() - 5 * 3600e3), DS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const extra = canal === "wa" ? " · Canal: WhatsApp del negocio (ya tienes su celular; no se lo pidas, solo su nombre si hace falta). Si derivas, dile que en un momento le escribe una persona de recepción por este mismo chat." : "";
+  messages[messages.length - 1].content = `[HOY: ${DS[hoyL.getUTCDay()]} ${hoyL.toISOString().slice(0, 10)}${extra}]\n` + messages[messages.length - 1].content;
+  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
+  const r = await client.messages.create({
+    model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 1500,
+    system: [{ type: "text", text: BOT_SYS }, { type: "text", text: "FICHA:\n" + f.texto, cache_control: { type: "ephemeral" } }],
+    messages,
+    output_config: { effort: "low", format: { type: "json_schema", schema: BOT_SCHEMA } },
+  });
+  let o;
+  if (r.stop_reason === "refusal" || r.stop_reason === "max_tokens") o = { respuesta: "Mejor te ayuda una persona de recepción 🙌", derivar: true, sede: "", cliente: {} };
+  else o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
+  const sede = f.sedes.find(x => x.n.toLowerCase() === String(o.sede || "").trim().toLowerCase()) || (f.sedes.length === 1 ? f.sedes[0] : null);
+  return { o, sede };
+}
+
+async function guardarLead(env, slug, ip, cl, cel, sede) {
+  const dia = /^\d{4}-\d{2}-\d{2}$/.test(cl.prueba_dia || "") ? cl.prueba_dia : null;
+  const rl = await fetch(env.SB_URL + "/rest/v1/rpc/xa_bot_lead", {
+    method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY, "content-type": "application/json" },
+    body: JSON.stringify({ p_slug: slug, p_ip: ip, p_nombre: corta(cl.nombre, 80), p_celular: cel, p_sede: sede ? sede.n : "", p_interes: corta(cl.interes, 300), p_dia: dia, p_hora: corta(cl.prueba_hora, 20) }),
+  }).catch(() => null);
+  return !!(rl && rl.ok && (await rl.json().catch(() => ({}))).ok);
+}
+
+// ===== Xyro Bots en WhatsApp (Meta Cloud API). SQL 36. Secretos Cloudflare: WA_TOKEN, WA_APP_SECRET, WA_VERIFY, WA_CLAVE =====
+const rpcAnon = (env, fn, body) => fetch(`${env.SB_URL}/rest/v1/rpc/${fn}`, {
+  method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY, "content-type": "application/json" }, body: JSON.stringify(body),
+}).then(r => r.ok ? r.json() : null).catch(() => null);
+
+async function firmaOk(env, raw, sig) {
+  if (!env.WA_APP_SECRET || !sig || !sig.startsWith("sha256=")) return false;
+  const k = await crypto.subtle.importKey("raw", new TextEncoder().encode(env.WA_APP_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = [...new Uint8Array(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(raw)))].map(b => b.toString(16).padStart(2, "0")).join("");
+  const a = sig.slice(7);
+  if (a.length !== mac.length) return false;
+  let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ mac.charCodeAt(i);
+  return d === 0;
+}
+
+async function waEnviar(env, phoneId, to, texto) {
+  const r = await fetch(`https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}/${phoneId}/messages`, {
+    method: "POST", headers: { authorization: "Bearer " + env.WA_TOKEN, "content-type": "application/json" },
+    body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", to, type: "text", text: { preview_url: false, body: corta(texto, 4000) } }),
+  }).catch(() => null);
+  const j = r ? await r.json().catch(() => ({})) : {};
+  if (!r || !r.ok) console.log("wa enviar error", r && r.status, JSON.stringify(j.error || {}).slice(0, 300));
+  return { ok: !!(r && r.ok), id: j.messages && j.messages[0] && j.messages[0].id, error: j.error };
+}
+
+async function waProcesar(env, phoneId, m, nombre) {
+  const texto = m.type === "text" ? corta(m.text && m.text.body, 2000)
+    : m.type === "button" ? corta(m.button && m.button.text, 500)
+    : m.type === "interactive" ? corta((m.interactive.button_reply || m.interactive.list_reply || {}).title, 500)
+    : `[${m.type}]`;
+  const e = await rpcAnon(env, "xa_wa_entrante", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: m.from, p_nombre: corta(nombre, 80), p_texto: texto, p_wa_id: m.id });
+  if (!e || !e.ok || e.humano) return;   // número no vinculado, repetido o lo atiende recepción
+  const responde = async (t, derivar) => { const s = await waEnviar(env, phoneId, m.from, t); if (s.ok) await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: t, p_wa_id: s.id || null, p_derivar: !!derivar }); };
+  if (m.type !== "text" && m.type !== "button" && m.type !== "interactive") return responde("¡Gracias! Por ahora solo puedo leer mensajes de texto 🙌 Escríbeme tu consulta y te ayudo.", false);
+  const f = await ficha(env, e.slug);
+  if (!f || !env.ANTHROPIC_API_KEY) return;
+  const c = await rpcAnon(env, "xa_bot_cupo", { p_slug: e.slug, p_ip: "wa" + m.from });
+  if (!c || !c.ok) return responde("En un momento te responde una persona de recepción 🙌", true);
+  try {
+    const hist = (e.historial || []).map(x => ({ de: x.de === "cliente" ? "u" : "b", t: x.t }));
+    const { o, sede } = await pensar(env, f, hist, texto, "wa");
+    const cl = o.cliente || {};
+    const nom = String(cl.nombre || nombre || "").trim();
+    if (nom.length > 1 && (String(cl.interes || "").trim() || cl.prueba_dia)) await guardarLead(env, e.slug, "wa" + m.from, { ...cl, nombre: nom }, m.from, sede);
+    await responde(corta(o.respuesta, 1500), !!o.derivar);
+  } catch (err) {
+    console.log("wa bot error", err?.status, err?.message);
+    await responde("En un momento te responde una persona de recepción 🙌", true);
+  }
+}
+
+async function waApi(req, env, ctx) {
+  const u = new URL(req.url);
+  if (req.method === "GET") {   // verificación del webhook (Meta)
+    if (u.searchParams.get("hub.mode") === "subscribe" && env.WA_VERIFY && u.searchParams.get("hub.verify_token") === env.WA_VERIFY) return new Response(u.searchParams.get("hub.challenge") || "", { status: 200 });
+    return json({ wa: env.WA_TOKEN && env.WA_APP_SECRET && env.WA_VERIFY && env.WA_CLAVE ? "✅ WhatsApp listo" : "⏳ Faltan secretos de WhatsApp en Cloudflare" });
+  }
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  const raw = await req.text();
+  if (raw.length > 200000 || !(await firmaOk(env, raw, req.headers.get("x-hub-signature-256")))) return json({ error: "Firma inválida" }, 401);
+  let b; try { b = JSON.parse(raw); } catch { return json({ ok: true }); }
+  const tareas = [];
+  for (const en of b.entry || []) for (const ch of en.changes || []) {
+    const v = ch.value || {}, pid = v.metadata && v.metadata.phone_number_id;
+    const nombres = {}; (v.contacts || []).forEach(c => { nombres[c.wa_id] = c.profile && c.profile.name; });
+    for (const m of v.messages || []) if (pid) tareas.push(waProcesar(env, pid, m, nombres[m.from] || ""));
+  }
+  ctx.waitUntil(Promise.all(tareas).catch(e => console.log("wa", e?.message)));
+  return json({ ok: true });   // Meta pide 200 rápido
+}
+
+// Recepción responde desde Xyro Apps (con su sesión)
+async function waResponder(req, env) {
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  const o = req.headers.get("origin");
+  if (o && !ORIGENES.includes(o)) return json({ error: "Origen no permitido" }, 403);
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token || token.length > 4000) return json({ error: "Inicia sesión" }, 401);
+  if (!env.WA_TOKEN) return json({ error: "WhatsApp aún no está conectado" }, 503);
+  let b; try { b = JSON.parse(await req.text()); } catch { return json({ error: "Solicitud inválida" }, 400); }
+  const texto = corta(b.texto, 4000).trim();
+  if (!texto || !b.chat) return json({ error: "Escribe un mensaje" }, 400);
+  const r = await fetch(env.SB_URL + "/rest/v1/rpc/xa_wa_responder", {
+    method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + token, "content-type": "application/json" },
+    body: JSON.stringify({ p_chat: b.chat, p_texto: texto }),
+  });
+  if (r.status === 401) return json({ error: "Inicia sesión" }, 401);
+  const d = r.ok ? await r.json() : null;
+  if (!d || !d.ok) return json({ error: (d && d.motivo) || "No se pudo enviar" }, 403);
+  const s = await waEnviar(env, d.phone_id, d.telefono, texto);
+  if (!s.ok) return json({ error: "WhatsApp no aceptó el mensaje. Intenta de nuevo." }, 502);
+  return json({ ok: true });
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const u = new URL(req.url);
     if (u.pathname === "/api/ia") return ia(req, env);
     if (u.pathname === "/api/bot") return botApi(req, env);
+    if (u.pathname === "/api/wa") return waApi(req, env, ctx);
+    if (u.pathname === "/api/wa/responder") return waResponder(req, env);
     if (u.pathname.startsWith("/api/")) return json({ error: "No existe" }, 404);
     return env.ASSETS.fetch(req);
   },

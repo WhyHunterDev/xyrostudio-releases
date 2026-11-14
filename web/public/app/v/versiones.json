@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261113-1935",
+  "fecha": "2026-11-13 19:35",
+  "titulo": "WhatsApp del negocio",
+  "notas": "WhatsApp del negocio",
+  "cambios": [
+   "Nueva bandeja 💬 WhatsApp: ves las conversaciones del asistente y respondes tú cuando te necesitan",
+   "Botón «Devolver al bot» y aviso cuando un cliente pide recepción",
+   "Lista para conectar cuando XyroStudio vincule tu número"
+  ],
+  "requiere": "SQL 36"
+ },
+ {
   "id": "20261113-1916",
   "fecha": "2026-11-13 19:16",
   "titulo": "Atajos arriba: Asistencia y Seguimiento",
