@@ -243,6 +243,7 @@ function xyrosPanel(cl,cf,slug){
 async function guardarXyros(id,slug){
   const cl=clientes.find(c=>c.id==id), m={};
   $$('[data-xyt]').forEach(b=>{ const k=b.dataset.xyt, v=$(`[data-xyp="${k}"]`).value; m[k]={on:b.classList.contains('save'),precio:v===''?null:+v}; });
+  if(m.bots&&m.bots.on&&!(m.webs&&m.webs.on)) throw new Error('Xyro Bots necesita Xyro Webs: el asistente aprende de la web. Activa también Webs.');
   const {error}=await sb.from('clientes_agencia').update({modulos:m}).eq('id',id);
   if(error){ if(/modulos|column|schema cache/i.test(error.message)) throw new Error('Corre 14-xyros.sql en Supabase para guardar los Xyros.'); throw error; }
   if(slug) await guardarPromo(slug,{xyros:XYROS.map(([k])=>k).filter(k=>m[k].on)});

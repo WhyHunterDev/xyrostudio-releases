@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261114-0018",
+  "fecha": "2026-11-14 00:18",
+  "titulo": "Resumen de lo que sabe el asistente",
+  "notas": "Resumen de lo que sabe el asistente",
+  "cambios": [
+   "En Xyro Bots hay un resumen de todo lo que sabe el asistente (web y panel), por partes",
+   "El administrador confirma cada parte o la corrige; si algo cambia, le pide revisarlo otra vez",
+   "Xyro Bots ahora necesita Xyro Webs"
+  ]
+ },
+ {
   "id": "20261114-0009",
   "fecha": "2026-11-14 00:09",
   "titulo": "Días de prueba y menú por categorías",
