@@ -101,6 +101,35 @@ input:focus{border-color:var(--a)}
 .bar{height:10px;border-radius:99px;background:var(--c2);overflow:hidden}.bar i{display:block;height:100%;background:var(--a);border-radius:99px;transition:width 1s}
 .vacio{text-align:center;padding:34px 16px;display:grid;gap:8px;justify-items:center}
 .vacio .e{font-size:42px}
+[hidden]{display:none!important}
+/* Inicio y solicitudes */
+.qk{display:flex;gap:8px;overflow-x:auto;margin:-4px -16px 14px;padding:0 16px;scrollbar-width:none}.qk::-webkit-scrollbar{display:none}
+.qkb{flex:none;display:flex;gap:10px;align-items:center;padding:10px 14px 10px 10px;border-radius:18px;background:var(--c1);border:1px solid var(--ln);cursor:pointer;text-align:left;backdrop-filter:blur(6px)}
+.qkb svg{width:30px;height:30px;padding:6px;border-radius:11px;background:color-mix(in srgb,var(--a) 18%,transparent);color:var(--a)}
+.qkb b{display:block;font-size:13px}.qkb small{display:block;font-size:11px;color:var(--mu);max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fd{width:100%;text-align:left;cursor:pointer;color:inherit}.fd .ibox{width:44px;height:44px;border-radius:14px;font-size:21px}
+.fd.nv{border-color:color-mix(in srgb,var(--a) 70%,transparent);box-shadow:0 10px 30px -18px var(--a)}.fd.wa{border-color:#f59e0b66}
+.sec{font-weight:800;letter-spacing:.06em;margin-top:6px}
+.fl2{width:24px;height:24px;border-radius:8px;overflow:hidden;display:grid;place-items:center;background:var(--c2);font-size:13px;flex:none}.fl2 img{width:100%;height:100%;object-fit:cover}
+.hr{height:1px;background:var(--ln);margin:2px 0}
+.btn.s2{padding:11px 14px;font-size:14px;background:color-mix(in srgb,var(--a) 16%,var(--c2));color:#e4ddff}
+.pst{display:flex;gap:10px;align-items:center;width:100%;border:1px dashed color-mix(in srgb,var(--a) 55%,transparent);background:color-mix(in srgb,var(--a) 8%,transparent);border-radius:14px;padding:11px 12px;font-size:13px;font-weight:700;text-align:left;cursor:pointer;color:inherit}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--wa);flex:none}.pdot.nv{background:#ef4444;box-shadow:0 0 0 4px #ef444433}
+.sel{display:flex;gap:8px;flex-wrap:wrap}
+.opt{border:1px solid var(--ln);background:var(--c2);border-radius:99px;padding:9px 13px;font-weight:700;font-size:13px;cursor:pointer;color:inherit}
+.opt.on{background:var(--a);border-color:var(--a);color:#fff}
+.steps{display:flex;gap:6px}.steps>div{flex:1;display:grid;gap:6px;font-size:11px;font-weight:700;color:var(--mu);text-align:center}.steps i{height:5px;border-radius:9px;background:var(--c2)}.steps .on{color:var(--tx)}.steps .on i{background:var(--gr)}
+.chat{display:grid;gap:8px;max-height:46vh;overflow-y:auto;padding:2px}
+.bb{max-width:84%;padding:9px 13px;border-radius:18px;border-bottom-left-radius:6px;font-size:14px;background:var(--c2);justify-self:start;white-space:pre-wrap;word-break:break-word}
+.bb.yo{justify-self:end;background:var(--gr);color:#fff;border-radius:18px;border-bottom-right-radius:6px}
+.bb small{display:block;font-size:10.5px;opacity:.6;margin-top:3px}
+.cin{display:flex;gap:8px}.cin input{flex:1;padding:12px 14px}.cin .btn{padding:0 14px;flex:none}
+.cdt{text-align:center;min-width:54px;background:var(--c2);border-radius:14px;padding:8px 4px}.cdt b{font-size:22px;display:block;line-height:1}.cdt span{font-size:11px;color:var(--mu);text-transform:uppercase;font-weight:700}
+.np{width:100%;text-align:left;cursor:pointer;color:inherit}.dot.big{width:42px;height:42px;border-radius:14px;font-size:20px}
+.nvd{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444;vertical-align:middle}
+select{background:var(--c2);border:1px solid var(--ln);border-radius:14px;padding:14px;font-size:16px;color:var(--tx);width:100%;outline:none}
+input[type=date],input[type=time]{color-scheme:dark;min-height:50px}
+.pfl textarea{font-size:15px;line-height:1.4}
 /* Barra inferior */
 .tabs{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;background:#0b0d18e0;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:24px;padding:6px;max-width:480px;margin:0 auto}
 .tab{flex:1;border:0;background:none;border-radius:18px;padding:8px 0 6px;display:grid;gap:2px;justify-items:center;font-size:11px;font-weight:700;color:var(--mu);cursor:pointer}
@@ -225,6 +254,8 @@ const I={home:SV('<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 
  alert:SV('<path d="M12 4 2.8 19.5h18.4zM12 10v4.5M12 17.2v.01"/>'),
  chat:SV('<path d="M4 19.5 5.3 16A8 8 0 1 1 8 18.7z"/>'),
  phone:SV('<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/>'),
+ send:SV('<path d="M4.5 12 20 4.5 15.5 20l-3.2-6.3z"/><path d="m12.3 13.7 7.7-9.2"/>'),
+ inbox:SV('<path d="M3 13.5 5.5 5h13l2.5 8.5V19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13.5h5l1.5 2.5h5l1.5-2.5h5"/>'),
  refresh:SV('<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3L19.5 9M19.5 4.5V9H15"/>')};
 let sb=null,D=null,TAB='inicio',SUB=null,CUR=+(ls.g('mi-neg')||0),INSTALL=null,post=null,NEG={};
 
@@ -239,7 +270,7 @@ async function cliente(){
 async function rpc(f,a){if(DEMO)return demoRpc(f,a);const{data,error}=await sb.rpc(f,a||{});if(error)throw error;if(data&&data.error)throw data.error;return data}
 async function cargar(){
  if(DEMO){D=D||demoData();return D}
- D=await rpc('xa_yo');ls.s('mi-data',JSON.stringify(D));return D;
+ D=await rpc('xa_yo');await cargaPed();ls.s('mi-data',JSON.stringify(D));return D;
 }
 const negs=()=>(D&&D.negocios)||[];
 const N=()=>negs()[Math.min(CUR,negs().length-1)]||null;
@@ -259,11 +290,13 @@ const codigoDe=t=>{t=String(t||'').trim();const m=t.match(/[?&]c=([A-Za-z0-9]+)/
 const slugDe=t=>{const m=String(t||'').match(/[?&]n=([a-z0-9-]+)/i);return m?m[1].toLowerCase():''};
 const ERR={usuario:'Tu @usuario debe tener de 3 a 20 letras, números, punto o guion bajo.',usuario_tomado:'Ese @usuario ya lo tiene otra persona. Prueba otro.',nombre:'Escribe tu nombre.',
  celular:'Revisa tu celular (9 dígitos) o ya lo usa otra cuenta.',codigo:'Ese código no es válido. Pide ayuda en recepción.',dato:'Para confirmar que eres tú escribe tu DNI o el celular que diste en el negocio.',
+ no_socio:'Primero conecta tu membresía de este negocio.',muchos:'Ya enviaste varias solicitudes hoy. Espera la respuesta.',vacio:'Escribe un mensaje.','sin acceso':'No tienes acceso a esto.',
  otro:'Ese carnet ya está unido a otra cuenta. Pide ayuda en recepción.',espera:'Demasiados intentos. Espera un rato y vuelve a probar.',no:'Este aviso ya no está disponible.'};
 const errDe=e=>{const t=String(e&&(e.message||e.error)||e||'');for(const k in ERR)if(t===k)return ERR[k];
  if(/Invalid login/i.test(t))return 'Correo o clave incorrectos.';if(/already registered|already been registered/i.test(t))return 'Ese correo ya tiene cuenta. Toca «Entrar».';
  if(/Password should/i.test(t))return 'Tu clave debe tener al menos 6 caracteres.';if(/not confirmed/i.test(t))return 'Confirma tu correo: te enviamos un enlace.';
  if(/rate limit|security purposes/i.test(t))return 'Espera un minuto y vuelve a intentar.';if(/provider is not enabled|Unsupported provider/i.test(t))return 'El ingreso con Google se activa muy pronto. Usa tu correo por ahora.';
+ if(/^[A-ZÁÉÍÓÚÑ¿][^_{}<>]{5,120}$/.test(t)&&!/fetch|JWT|PGRST|function|column|relation|violates|syntax|permission/i.test(t))return t;
  return 'Algo falló. Revisa tu internet y vuelve a intentar.'};
 // Lo que la persona quería hacer antes de iniciar sesión (escaneó un QR o abrió un enlace).
 const pend={get(){try{return JSON.parse(ls.g('mi-pend')||'null')}catch(_){return null}},set(v){ls.s('mi-pend',v?JSON.stringify(v):null)}};
@@ -321,7 +354,7 @@ async function entrar(){
 }
 
 // ---------- Navegación ----------
-const SUBV={rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat};
+const SUBV={mi:vMi,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,pedido:vPedido};
 function pinta(){
  if(MODO==='negocio'&&NB)return pintaNeg();
  if(!D&&!(SUB&&SUB.neg))return pantallaEntrada();
@@ -331,14 +364,17 @@ function pinta(){
  else if(SUB&&SUBV[SUB])body=`<button class="back" data-back>‹ Volver</button>`+SUBV[SUB](N());
  else body=({inicio:vInicioGen,negocios:vNegocios,avisos:vAvisos,perfil:vPerfil}[TAB]||vInicioGen)();
  const T=[['inicio',I.home,'Inicio'],['negocios',I.store,'Negocios'],['scan',I.scan,''],['avisos',I.bell,'Avisos'],['perfil',I.user,'Perfil']];
- const av=((D&&D.avisos)||[]).length+((SOP||[]).filter(x=>x.respuesta&&!x.visto).length);
+ const av=((D&&D.avisos)||[]).length+((SOP||[]).filter(x=>x.respuesta&&!x.visto).length)+pedNuevos().length;
  app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
- <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===TAB&&!SUB?' on':''}" data-tab="${k}" aria-label="${k==='scan'?'Escanear QR':t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='avisos'&&av?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
+ <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===TAB?' on':''}" data-tab="${k}" aria-label="${k==='scan'?'Escanear QR':t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='avisos'&&av?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.tab==='scan')return escanear();TAB=b.dataset.tab;SUB=null;pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{vib();SUB=b.dataset.sub;pinta()});
  app.querySelectorAll('[data-neg]').forEach(b=>b.onclick=()=>abrirNeg(b.dataset.neg));
- app.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{SUB=null;pinta()});
- app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{CUR=+b.dataset.n;ls.s('mi-neg',CUR);TAB='inicio';SUB=null;pinta()});
+ app.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{SUB=typeof SUB==='string'&&SUB!=='mi'&&N()?'mi':null;pinta()});
+ app.querySelectorAll('[data-pedir]').forEach(b=>b.onclick=()=>{vib();pedirPlan(N(),b.dataset.pedir)});
+ app.querySelectorAll('[data-ped]').forEach(b=>b.onclick=()=>abrirPed(b.dataset.ped));
+ app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{vib();const[i,sb]=b.dataset.go.split('|');CUR=+i;ls.s('mi-neg',CUR);TAB='negocios';SUB=sb;window._dia=undefined;pinta();$('#sc').scrollTop=0});
+ app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{vib();CUR=+b.dataset.n;ls.s('mi-neg',CUR);TAB='negocios';SUB='mi';pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-yo]').forEach(b=>b.onclick=yaRegistrado);
  app.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>responder(b.dataset.av,b.dataset.ok==='1',b));
  app.querySelectorAll('[data-scan]').forEach(b=>b.onclick=()=>escanear());
@@ -351,26 +387,17 @@ function avisos(){return((D&&D.avisos)||[]).map(a=>`<div class="aviso"><div clas
   <div class="sp"><b>${esc(a.negocio)}</b> quiere conectar tu cuenta</div></div>
   <p class="sm">Así verás aquí tu ${a.rubro==='consultorio'?'ficha de paciente, tus citas y tu tratamiento':'membresía, días que te quedan, tu QR y tus rutinas'}. Te registraron como <b>${esc(a.nombre)}</b>${a.quien?' ('+esc(a.quien)+')':''}.</p>
   <div class="row"><button class="btn p sp" data-av="${esc(a.id)}" data-ok="1">✅ Sí, acepto</button><button class="btn" data-av="${esc(a.id)}" data-ok="0">No soy yo</button></div></div>`).join('')}
-async function responder(id,ok,b){b.disabled=true;try{await rpc('xa_yo_responder',{p_id:id,p_ok:ok});await cargar();if(ok){CUR=negs().length-1;ls.s('mi-neg',CUR);confeti();toast('🎉 ¡Listo! Ya tienes tu cuenta conectada')}pinta()}catch(e){toast(errDe(e));b.disabled=false}}
+async function responder(id,ok,b){b.disabled=true;try{await rpc('xa_yo_responder',{p_id:id,p_ok:ok});await cargar();if(ok){CUR=negs().length-1;ls.s('mi-neg',CUR);TAB='negocios';SUB='mi';confeti();toast('🎉 ¡Listo! Ya tienes tu cuenta conectada')}pinta()}catch(e){toast(errDe(e));b.disabled=false}}
 function cabeza(n){const lg=logoURL(n.logo),h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0,per=(D&&D.persona)||{};
  const sal=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches',nm=per.apodo||String(per.nombre||n.nombre||'').trim().split(' ')[0];
  return`<div class="row" style="margin-bottom:14px">${lg?`<img class="lg" style="width:46px;height:46px;border-radius:14px" src="${esc(lg)}" alt="">`:''}<div class="sp"><p class="mu sm">${sal},</p><h2>${esc(nm)} ${dental(n)?'😁':'💪'}</h2></div><button class="btn l xs" data-neg="${esc(n.slug)}" style="font-weight:700">${esc(n.negocio)} ›</button></div>`}
 
-// ---------- Inicio ----------
-function vInicioGen(){const n=N(),av=avisos();
- if(n)return barraNeg()+av+(dental(n)?vInicioDent(n):vInicio(n));
- const G=(D&&D.guardados)||[],per=(D&&D.persona)||{};
- const f0=post;post=()=>{f0&&f0();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()})};
- return`${av}<div class="g"><div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
-  <div class="card" style="text-align:center;justify-items:center;padding:26px 18px 18px;gap:12px"><div class="ibox big">${I.qr.replace('width="22" height="22"','width="40" height="40"')}</div><h2>Escanea el QR de tu negocio</h2>
-   <p class="mu sm" style="max-width:300px">Tu gym, consultorio o tienda favorita tiene su QR de Xyro. Escanéalo y mira sus promos solo por la app.</p><button class="btn p" data-scan style="width:100%">${I.scan}Escanear QR</button></div>
-  <div class="card"><div class="row"><div class="ibox">${I.id}</div><div class="sp"><h3>¿Ya eres socio o paciente?</h3><p class="mu sm">Conecta tu membresía, tu QR y tus rutinas o citas.</p></div></div><button class="btn" data-yo>Ya estoy registrado en un negocio</button></div>
-  ${G.length?`<h2 style="margin-top:6px">Tus negocios</h2>${G.map(tarjNeg).join('')}`:''}</div>`}
 const saludo=()=>{const h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0;return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
 const avatarHTML=(per,id)=>`<div class="av"${id?` id="${id}"`:''}>${/^https:\/\//.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc((String(per.nombre||'?').trim()[0]||'?').toUpperCase())}</div>`;
 function tarjNeg(g){const lg=logoURL(g.logo);
- return`<button class="card" data-neg="${esc(g.slug)}" style="text-align:left;cursor:pointer;width:100%"><div class="row"><span class="dot" style="width:46px;height:46px;font-size:22px;overflow:hidden">${lg?`<img src="${esc(lg)}" style="width:100%;height:100%;object-fit:cover" alt="">`:(g.rubro==='consultorio'?'🦷':'🏋️')}</span>
-  <div class="sp"><b>${esc(g.negocio)}</b><p class="mu xs">${g.socio?(g.rubro==='consultorio'?'Eres paciente':'Eres socio'):g.promos?`🎁 ${g.promos} promo${g.promos>1?'s':''} por la app`:'Ver promos e información'}</p></div><span class="mu">›</span></div></button>`}
+ const ma=g._i!=null&&g.rubro!=='consultorio'?memAct(g):null,mt=ma?(ma.act?'activo hasta '+fF(ma.act.fin,{day:'numeric',month:'short'}):ma.fin?'venció el '+fF(ma.fin,{day:'numeric',month:'short'}):'sin plan activo'):'';
+ return`<button class="card" ${g._i!=null?`data-n="${g._i}"`:`data-neg="${esc(g.slug)}"`} style="text-align:left;cursor:pointer;width:100%"><div class="row"><span class="dot" style="width:46px;height:46px;font-size:22px;overflow:hidden">${lg?`<img src="${esc(lg)}" style="width:100%;height:100%;object-fit:cover" alt="">`:(g.rubro==='consultorio'?'🦷':'🏋️')}</span>
+  <div class="sp"><b>${esc(g.negocio)}</b><p class="mu xs">${g.socio?(g.rubro==='consultorio'?'Eres paciente · citas y tratamiento':'Eres socio · '+mt):g.promos?`🎁 ${g.promos} promo${g.promos>1?'s':''} por la app`:'Ver promos e información'}</p></div><span class="mu">›</span></div></button>`}
 
 function anillo(rest,total,txt){const r=40,C=2*Math.PI*r,p=Math.max(0,Math.min(1,total?rest/total:0)),f0=post;
  post=()=>{f0&&f0();requestAnimationFrame(()=>requestAnimationFrame(()=>{const f=$('#rg');f&&(f.style.strokeDashoffset=C*(1-p))}))};
@@ -396,11 +423,6 @@ function vInicio(n){
    <div><span class="mu xs" style="font-weight:700">ÚLTIMA VEZ</span><b style="font-size:16px;margin-top:4px">${n.ingresos&&n.ingresos.ultimo?haceCuanto(n.ingresos.ultimo):'—'}</b></div></div>
   ${atajosPlanes(n)}</div>`}
 function haceCuanto(t){const d=dias(dLima(t),hoyL());return d<=0?'Hoy':d===1?'Ayer':'Hace '+d+' días'}
-function atajosPlanes(n){const R=n.rutinas||[],e=R.find(r=>r.tipo==='entreno'),d=R.find(r=>r.tipo==='nutri');
- const k=DIAS[(new Date(Date.now()-5*36e5).getUTCDay()+6)%7][0],l=e?lineas(e.datos&&e.datos[k]):[];
- return`<div class="card"><p class="mu xs" style="font-weight:700">HOY</p>
-  <div class="row" data-sub="rutina" style="cursor:pointer"><span style="font-size:24px">🏋️</span><div class="sp"><h3>${e?(l.length?esc(l.length>1?l[0]:'Entrenamiento'):'Día de descanso'):'Mi rutina'}</h3><p class="mu sm">${e?(l.length?(l.length>1?l.length-1:1)+' ejercicios':'Recupera y vuelve con todo'):'Aún no tienes rutina'}</p></div><span class="mu">›</span></div>
-  <div class="row" data-sub="dieta" style="cursor:pointer"><span style="font-size:24px">🥗</span><div class="sp"><h3>${d?esc(d.titulo||'Tu dieta'):'Mi dieta'}</h3><p class="mu sm">${d?(d.datos&&d.datos.kcal?esc(d.datos.kcal)+' kcal · ':'')+'Ver comidas':'Aún no tienes dieta'}</p></div><span class="mu">›</span></div></div>`}
 async function qrLib(){if(!window.qrcode)await js('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js')}
 async function dibujaQR(code,sel){const el=$(sel);if(!el||!code)return;try{await qrLib();const q=qrcode(0,'M');q.addData(code);q.make();el.innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(_){el.innerHTML=`<b style="color:#000;font-size:min(18px,4vw);letter-spacing:.06em;word-break:break-all;text-align:center">${esc(code)}</b>`}}
 function qrGrande(n){const d=document.createElement('div');d.className='qrfull';d.innerHTML=`<b style="font-size:18px">${esc(n.negocio)}</b><div id="qg"></div><b style="font-size:22px">${esc(n.nombre)}</b><p style="opacity:.6;letter-spacing:.2em">${esc(n.codigo)}</p><p style="opacity:.5;font-size:13px">Sube el brillo de tu pantalla · toca para cerrar</p>`;
@@ -408,7 +430,7 @@ function qrGrande(n){const d=document.createElement('div');d.className='qrfull';
 function waBtn(n,txt,lbl){const w=String(n.whatsapp||'').replace(/\D/g,'');if(w.length<9)return'';const num=w.length===9?'51'+w:w;return`<a class="btn" style="text-decoration:none;background:#25d36622;color:#4ade80" href="https://wa.me/${num}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">${lbl}</a>`}
 
 function vRutina(n){const e=(n.rutinas||[]).find(r=>r.tipo==='entreno');
- if(!e)return cabeza(n)+`<div class="card vacio"><span class="e">🏋️</span><h2>Aún no tienes rutina</h2><p class="mu">Cuando tu entrenador te arme una, aparecerá aquí al instante.</p>${waBtn(n,`Hola, soy ${n.nombre}. ¿Me pueden armar una rutina?`,'💬 Pedir mi rutina')}</div>`;
+ if(!e)return cabeza(n)+`<div class="card vacio"><span class="e">🏋️</span><h2>Aún no tienes rutina</h2><p class="mu">Cuando tu entrenador te arme una, aparecerá aquí al instante.</p>${pedEst(n,'entreno')}</div>`;
  const d=e.datos||{},hi=(new Date(Date.now()-5*36e5).getUTCDay()+6)%7,sel=window._dia??hi,k=DIAS[sel][0],l=lineas(d[k]);
  const f0=post;post=()=>{f0&&f0();app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{window._dia=+b.dataset.d;pinta()})};
  return cabeza(n)+`<div class="g"><div><p class="mu xs" style="font-weight:700">TU RUTINA</p><h1 style="font-size:22px">${esc(e.titulo||'Plan de entrenamiento')}</h1>${d.objetivo?`<p class="sm" style="color:var(--a);margin-top:4px">🎯 ${esc(d.objetivo)}</p>`:''}</div>
@@ -417,15 +439,127 @@ function vRutina(n){const e=(n.rutinas||[]).find(r=>r.tipo==='entreno');
    ${l.length?`${l.length>1?`<p style="font-weight:800;color:var(--a)">${esc(l[0])}</p>`:''}<div>${(l.length>1?l.slice(1):l).map((x,i)=>`<div class="li"><span class="dot">${i+1}</span><span>${esc(x)}</span></div>`).join('')}</div>`
    :'<div class="vacio" style="padding:18px"><span class="e">😴</span><p class="mu">Día de descanso. Duerme bien y toma agua.</p></div>'}</div>
   ${d.nota?`<div class="card"><p class="mu xs" style="font-weight:700">INDICACIONES</p><p>${esc(d.nota)}</p></div>`:''}
-  <p class="mu xs" style="text-align:center">Hecho por ${esc(e.quien||n.negocio)} · ${fF(e.creado)}</p></div>`}
+  <p class="mu xs" style="text-align:center">Hecho por ${esc(e.quien||n.negocio)} · ${fF(e.creado)}</p>${pedEst(n,'entreno')}</div>`}
 function vDieta(n){const e=(n.rutinas||[]).find(r=>r.tipo==='nutri');
- if(!e)return cabeza(n)+`<div class="card vacio"><span class="e">🥗</span><h2>Aún no tienes dieta</h2><p class="mu">Cuando tu nutricionista te la arme, la verás aquí.</p>${waBtn(n,`Hola, soy ${n.nombre}. Quiero un plan de alimentación.`,'💬 Pedir mi dieta')}</div>`;
+ if(!e)return cabeza(n)+`<div class="card vacio"><span class="e">🥗</span><h2>Aún no tienes dieta</h2><p class="mu">Cuando tu nutricionista te la arme, la verás aquí.</p>${pedEst(n,'nutri')}</div>`;
  const d=e.datos||{};
  return cabeza(n)+`<div class="g"><div><p class="mu xs" style="font-weight:700">TU ALIMENTACIÓN</p><h1 style="font-size:22px">${esc(e.titulo||'Plan de alimentación')}</h1>${d.objetivo?`<p class="sm" style="color:var(--a);margin-top:4px">🎯 ${esc(d.objetivo)}</p>`:''}</div>
   ${d.kcal||d.agua?`<div class="st">${d.kcal?`<div><span class="mu xs" style="font-weight:700">🔥 CALORÍAS</span><b>${esc(d.kcal)}</b></div>`:''}${d.agua?`<div><span class="mu xs" style="font-weight:700">💧 AGUA</span><b>${esc(d.agua)}</b></div>`:''}</div>`:''}
   ${COMIDAS.map(([k,i,t])=>{const l=lineas(d[k]);return l.length?`<div class="card"><div class="row"><span style="font-size:22px">${i}</span><h3 class="sp">${t}</h3></div>${l.map(x=>`<p>• ${esc(x)}</p>`).join('')}</div>`:''}).join('')}
   ${d.nota?`<div class="card"><p class="mu xs" style="font-weight:700">INDICACIONES</p><p>${esc(d.nota)}</p></div>`:''}
-  <p class="mu xs" style="text-align:center">Hecho por ${esc(e.quien||n.negocio)} · ${fF(e.creado)}</p></div>`}
+  <p class="mu xs" style="text-align:center">Hecho por ${esc(e.quien||n.negocio)} · ${fF(e.creado)}</p>${pedEst(n,'nutri')}</div>`}
+
+// ---------- Inicio: novedades, avisos y promos ----------
+let FEEDT={};
+function feedCarga(){const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.guardados)||[]).map(g=>g.slug)])].filter(s=>s&&!NEG[s]&&!FEEDT[s]).slice(0,8);
+ if(!S.length)return;S.forEach(s=>FEEDT[s]=1);
+ Promise.all(S.map(cargaNeg)).then(()=>{if(MODO==='cliente'&&TAB==='inicio'&&!SUB&&!document.querySelector('.ov,.cam,.qrfull'))pinta()})}
+function medDe(n,u){const w=WEBN;WEBN=n.web||'';const r=media(u,n.rubro);WEBN=w;return r}
+const idxCli=cid=>negs().findIndex(n=>n.cliente===cid);
+function feed(){const h=hoyL(),out=[],M=negs();
+ const fc=(ic,t,s,attr,extra,cls)=>`<button class="card fd${cls?' '+cls:''}" ${attr}><div class="row"><div class="ibox">${ic}</div><div class="sp" style="min-width:0"><b>${t}</b>${s?`<p class="mu sm">${s}</p>`:''}</div><span class="mu">›</span></div>${extra||''}</button>`;
+ // 1) Respuestas y novedades de tus solicitudes
+ const vis={};pedNuevos().forEach(p=>{vis[p.id]=1;const ul=(p.msgs||[]).slice(-1)[0],ng=esc(p.negocio||'Tu negocio');
+  out.push(p.estado==='listo'?fc('🎉',p.tipo==='entreno'?'¡Tu plan de entrenamiento llegó!':'¡Tu plan de alimentación llegó!',ng+' te lo envió a la app.',`data-ped="${esc(p.id)}"`,'','nv')
+   :p.estado==='agendado'&&ul&&/agendada/.test(ul.texto)?fc('📅','Tu cita con nutrición quedó agendada',esc(citaTxt(p.cita))+(p.cita&&p.cita.nutri_nombre?' · '+esc(p.cita.nutri_nombre):''),`data-ped="${esc(p.id)}"`,'','nv')
+   :p.estado==='cancelado'?fc('ℹ️',ng+' cerró tu solicitud','Puedes pedir otra cuando quieras.',`data-ped="${esc(p.id)}"`,'','nv')
+   :fc('💬',ng+' te escribió',ul?esc(String(ul.texto).slice(0,90)):'',`data-ped="${esc(p.id)}"`,'','nv'))});
+ // 2) Citas de nutrición que vienen
+ PEDS().filter(p=>!vis[p.id]&&p.estado==='agendado'&&p.cita&&new Date(p.cita.inicio).getTime()>Date.now()-36e5).forEach(p=>{const dd=dias(h,dLima(p.cita.inicio));
+  out.push(fc('🥗',`Cita con nutrición ${dd<=0?'hoy':dd===1?'mañana':'el '+fF(p.cita.inicio,{weekday:'long'})}`,esc(fH(p.cita.inicio))+(p.cita.nutri_nombre?' · '+esc(p.cita.nutri_nombre):'')+' · '+esc(p.negocio||''),`data-ped="${esc(p.id)}"`))});
+ M.forEach((n,i)=>{
+  if(dental(n)){const c=citasDe(n).prox[0];if(c){const dd=dias(h,dLima(c.inicio));if(dd<=7)out.push(fc('🦷',`Tu cita ${dd<=0?'es hoy':dd===1?'es mañana':'es el '+fF(c.inicio,{weekday:'long'})}`,esc(fH(c.inicio))+' · '+esc(c.servicio||'Consulta')+' · '+esc(n.negocio),`data-go="${i}|mi"`))}return}
+  // 3) Membresía por vencer o vencida
+  const{act,fin}=memAct(n);
+  if(act){const r=dias(h,act.fin);if(r<=7)out.push(fc('⏳',`Tu plan vence en ${r} día${r===1?'':'s'}`,esc(n.negocio)+' · renueva y sigue entrenando',`data-go="${i}|mi"`,'','wa'))}
+  else if(fin&&dias(fin,h)<=20)out.push(fc('🔁','Tu plan venció el '+fF(fin,{day:'numeric',month:'short'}),esc(n.negocio)+' · te esperamos de vuelta',`data-go="${i}|mi"`,'','wa'));
+  // 4) Lo de hoy
+  const e=(n.rutinas||[]).find(r=>r.tipo==='entreno');
+  if(e&&act){const k=DIAS[(new Date(Date.now()-5*36e5).getUTCDay()+6)%7][0],l=lineas(e.datos&&e.datos[k]);
+   out.push(fc('🏋️',l.length?'Hoy te toca: '+esc(l.length>1?l[0]:'entrenamiento'):'Hoy es tu día de descanso',l.length?(l.length>1?l.length-1:1)+' ejercicios · '+esc(e.titulo||'Mi rutina'):'Recupera, duerme bien y toma agua',`data-go="${i}|rutina"`))}
+  const d=(n.rutinas||[]).find(r=>r.tipo==='nutri');
+  if(d&&act&&(d.datos||{}).kcal)out.push(fc('🥗','Tu meta de hoy: '+esc(d.datos.kcal)+' kcal',(d.datos.agua?'💧 '+esc(d.datos.agua)+' de agua · ':'')+'ver tus comidas',`data-go="${i}|dieta"`));
+ });
+ return out}
+function promosFeed(){const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.guardados)||[]).map(g=>g.slug)])],P=[],B=[],h=hoyL();
+ S.forEach(s=>{const n=NEG[s];if(!n)return;
+  (n.promos||[]).filter(p=>!p.hasta||p.hasta>=h).forEach(p=>P.push({n,p}));
+  (n.publicaciones||[]).forEach(p=>B.push({n,p}))});
+ const lg=n=>{const l=logoURL(n.logo);return`<span class="fl2">${l?`<img src="${esc(l)}" alt="">`:(n.rubro==='consultorio'?'🦷':'🏋️')}</span>`};
+ return(P.length?`<p class="mu xs sec">🎁 PROMOS PARA TI</p><div class="hs">${P.slice(0,8).map(({n,p})=>`<button class="promo" data-neg="${esc(n.slug)}" style="text-align:left;cursor:pointer"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b><span class="pill" style="background:var(--a);color:#fff">Solo app</span></div><h3 style="font-size:17px">${esc(p.titulo)}</h3>${p.descripcion?`<p class="sm mu">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Hasta el ${fF(p.hasta,{day:'numeric',month:'short'})}</p>`:''}</button>`).join('')}</div>`:'')
+  +(B.length?`<p class="mu xs sec">📢 NOVEDADES</p>${B.slice(0,4).map(({n,p})=>{const im=p.media&&p.mediaTipo!=='video'?medDe(n,p.media):'';return`<button class="card fd" data-neg="${esc(n.slug)}" style="padding:0;overflow:hidden">${im?`<img src="${esc(im)}" alt="" loading="lazy" onerror="this.remove()" style="width:100%;height:160px;object-fit:cover;display:block">`:''}<div style="padding:14px;display:grid;gap:4px"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b>${p.tipo?`<span class="xs" style="font-weight:800;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}</div><h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}</div></button>`}).join('')}`:'')}
+function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||[],av=avisos();
+ feedCarga();
+ const f0=post;post=()=>{f0&&f0();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
+ const it=feed(),pr=promosFeed();
+ return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
+  ${M.length?`<div class="qk">${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}<button class="qkb" data-scan>${I.scan}<span><b>Escanear</b><small>QR de un negocio</small></span></button></div>`:''}
+  ${av}<div class="g">${it.join('')}${pr}
+  ${M.length?'':`<div class="card" style="text-align:center;justify-items:center;padding:26px 18px 18px;gap:12px"><div class="ibox big">${I.qr.replace('width="22" height="22"','width="40" height="40"')}</div><h2>Escanea el QR de tu negocio</h2>
+   <p class="mu sm" style="max-width:300px">Tu gym, consultorio o tienda favorita tiene su QR de Xyro. Escanéalo y mira sus promos solo por la app.</p><button class="btn p" data-scan style="width:100%">${I.scan}Escanear QR</button></div>
+  <div class="card"><div class="row"><div class="ibox">${I.id}</div><div class="sp"><h3>¿Ya eres socio o paciente?</h3><p class="mu sm">Conecta tu membresía, tu QR y tus rutinas o citas.</p></div></div><button class="btn" data-yo>Ya estoy registrado en un negocio</button></div>`}
+  ${M.length&&!it.length&&!pr&&!av?`<div class="card vacio"><span class="e">✨</span><h2>Todo al día</h2><p class="mu sm">Aquí verás tus promos, avisos y lo que te toca hoy.</p></div>`:''}</div>`}
+
+// ---------- Mis planes: pedir plan de entrenamiento o cita con nutrición (SQL 48) ----------
+let PEDID=null;
+const PEDS=()=>(D&&D.pedidos)||[];
+const pedDe=(n,t)=>PEDS().filter(p=>p.cliente_id===n.cliente&&p.tipo===t);
+const pedAb=(n,t)=>pedDe(n,t).find(p=>p.estado==='pendiente'||p.estado==='agendado');
+const pedNuevos=()=>PEDS().filter(p=>p.visto_persona===false);
+async function cargaPed(){if(!D)return;if(DEMO){D.pedidos=D.pedidos||[];return}try{D.pedidos=await rpc('xa_yo_plan_pedidos')||[]}catch(_){D.pedidos=D.pedidos||[]}}
+function pedPon(p){if(!p||!p.id)return;D.pedidos=[p,...PEDS().filter(x=>x.id!==p.id)]}
+const PEST={pendiente:['Enviado','wa'],agendado:['Cita agendada','ok'],listo:['Listo','ok'],cancelado:['Cancelado','ko']};
+const citaTxt=c=>c&&c.inicio?fF(c.inicio,{weekday:'long',day:'numeric',month:'short'})+' · '+fH(c.inicio):'';
+function pedLinea(p){if(p.tipo==='entreno')return p.estado==='pendiente'?'⏳ Tu entrenador está armando tu plan':p.estado==='listo'?'✅ Tu plan ya llegó':'Solicitud cancelada';
+ return p.estado==='pendiente'?'⏳ Recepción te escribirá para darte horarios':p.estado==='agendado'?'📅 Cita: '+citaTxt(p.cita)+(p.cita&&p.cita.nutri_nombre?' · '+p.cita.nutri_nombre:''):p.estado==='listo'?'✅ Tu plan de alimentación ya llegó':'Solicitud cancelada'}
+function pedEst(n,t){const p=pedAb(n,t),R=n.rutinas||[],ya=R.find(r=>r.tipo===t);
+ return p?`<button class="pst" data-ped="${esc(p.id)}"><span class="pdot${p.visto_persona===false?' nv':''}"></span><span class="sp">${esc(pedLinea(p))}</span><span class="mu">›</span></button>`
+  :`<button class="btn s2" data-pedir="${t}">${t==='entreno'?(ya?'🔄 Pedir un plan nuevo':'✍️ Solicitar plan de entrenamiento'):(ya?'📅 Cita para un plan nuevo':'📅 Solicitar cita con nutricionista')}</button>`}
+function atajosPlanes(n){const R=n.rutinas||[],e=R.find(r=>r.tipo==='entreno'),d=R.find(r=>r.tipo==='nutri');
+ const k=DIAS[(new Date(Date.now()-5*36e5).getUTCDay()+6)%7][0],l=e?lineas(e.datos&&e.datos[k]):[];
+ return`<div class="card"><p class="mu xs" style="font-weight:700">MIS PLANES</p>
+  <div class="row"${e?' data-sub="rutina" style="cursor:pointer"':''}><span style="font-size:24px">🏋️</span><div class="sp"><h3>${e?(l.length?'Hoy: '+esc(l.length>1?l[0]:'entrenamiento'):'Hoy: descanso'):'Plan de entrenamiento'}</h3><p class="mu sm">${e?esc(e.titulo||'Mi rutina')+(l.length>1?' · '+(l.length-1)+' ejercicios':''):'Aún no tienes uno. Pídelo y tu entrenador te lo arma.'}</p></div>${e?'<span class="mu">›</span>':''}</div>
+  ${pedEst(n,'entreno')}<div class="hr"></div>
+  <div class="row"${d?' data-sub="dieta" style="cursor:pointer"':''}><span style="font-size:24px">🥗</span><div class="sp"><h3>${d?esc(d.titulo||'Mi alimentación'):'Plan de alimentación'}</h3><p class="mu sm">${d?(d.datos&&d.datos.kcal?esc(d.datos.kcal)+' kcal · ':'')+'Ver comidas':'Agenda una cita con el nutricionista y recibe tu plan aquí.'}</p></div>${d?'<span class="mu">›</span>':''}</div>
+  ${pedEst(n,'nutri')}</div>`}
+function pedirPlan(n,t){if(!n)return;const ent=t==='entreno',prev=(n.rutinas||[]).find(r=>r.tipo===t),ab=pedAb(n,t);if(ab)return abrirPed(ab.id);
+ const OB=ent?['Ganar músculo','Bajar de peso','Tonificar','Ganar fuerza','Salud y energía']:['Bajar de peso','Ganar masa muscular','Comer más sano','Rendir mejor','Tengo una condición médica'];
+ const GR=ent?[['Días por semana que puedes venir','d',['2','3','4','5','6']],['Tu nivel','v',['Principiante','Intermedio','Avanzado']]]:[['¿Qué horario te acomoda para la cita?','h',['Mañana','Tarde','Noche']]];
+ const op=(g,L)=>`<div class="sel">${L.map(x=>`<button type="button" class="opt" data-g="${g}" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>`;
+ hoja(`<div style="display:grid;justify-items:center;text-align:center;gap:6px"><span style="font-size:44px">${ent?'🏋️':'🥗'}</span><h2>${ent?(prev?'Pedir un plan nuevo':'Solicitar plan de entrenamiento'):'Solicitar cita con nutricionista'}</h2>
+  <p class="mu sm" style="max-width:330px">${ent?'Tu entrenador lo recibe en su app, lo arma para ti y te llega aquí con todos tus días y ejercicios.':'Recepción te escribirá por aquí con los horarios libres. Después de tu cita, tu nutricionista te envía tu plan a la app.'}</p>
+  ${prev?`<span class="chip">📋 Tu plan anterior: ${esc(prev.titulo||'Plan')} · lo verán</span>`:''}</div>
+  <label>Tu objetivo</label>${op('o',OB)}${GR.map(([l,g,L])=>`<label>${l}</label>${op(g,L)}`).join('')}
+  <label>${ent?'¿Alguna lesión o molestia? (opcional)':'¿Alergias, algo que no comes o una condición? (opcional)'}<textarea id="pnt" rows="3" maxlength="1200" placeholder="${ent?'Ej.: me duele la rodilla al correr':'Ej.: no como pescado, tengo gastritis'}"></textarea></label>
+  <div class="msg" id="pm"></div><button class="btn p" id="pb">${ent?'Enviar a mi entrenador':'Pedir mi cita'}</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  const S={};o.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{vib();o.querySelectorAll(`.opt[data-g="${b.dataset.g}"]`).forEach(x=>x.classList.toggle('on',x===b));S[b.dataset.g]=b.dataset.v});
+  o.querySelector('#pb').onclick=async()=>{const m=o.querySelector('#pm'),b=o.querySelector('#pb');if(!S.o){m.textContent='Elige tu objetivo.';m.className='msg on';return}
+   const nota=[S.d&&'Días por semana: '+S.d,S.v&&'Nivel: '+S.v,S.h&&'Horario preferido: '+S.h,o.querySelector('#pnt').value.trim()].filter(Boolean).join('\n');
+   b.disabled=true;b.textContent='Enviando…';
+   try{const r=await rpc('xa_yo_plan_pedir',{p_cliente:n.cliente,p_tipo:t,p_objetivo:S.o,p_nota:nota||null});pedPon(r);close();confeti();toast(ent?'✅ Listo. Tu entrenador ya lo tiene.':'✅ Listo. Recepción te escribirá aquí.');abrirPed(r.id)}
+   catch(e){m.textContent=/xa_yo_plan|function|PGRST202/i.test(String(e&&(e.message||e)))?'Tu negocio aún está activando esta función. Pídelo en recepción.':errDe(e);m.className='msg on';b.disabled=false;b.textContent='Intentar de nuevo'}}})}
+function abrirPed(id){const p=PEDS().find(x=>x.id===id);if(!p)return;vib();const i=idxCli(p.cliente_id);if(i>=0){CUR=i;ls.s('mi-neg',i)}
+ PEDID=id;TAB='negocios';SUB='pedido';pinta();$('#sc')&&($('#sc').scrollTop=0);
+ if(p.visto_persona===false){p.visto_persona=true;if(!DEMO)rpc('xa_yo_plan_visto',{p_id:id}).catch(()=>{})}}
+const chatHTML=p=>{const M=p.msgs||[];if(!M.length)return`<p class="mu sm" style="text-align:center;padding:8px 4px">${p.tipo==='nutri'?'Recepción te escribirá aquí con los horarios disponibles.':'Tu entrenador te escribirá aquí si necesita saber algo más.'}</p>`;
+ return M.map(m=>`<div class="bb${m.de==='persona'?' yo':''}">${m.de==='persona'?'':`<b class="xs" style="color:#cfc6ff">${esc(m.autor||'Negocio')}</b><br>`}${esc(m.texto)}<small>${fF(m.creado,{day:'numeric',month:'short'})} · ${fH(m.creado)}</small></div>`).join('')};
+function citaBox(c){return`<div class="card" style="border-color:var(--a)"><div class="row"><div class="cdt"><b>${fF(c.inicio,{day:'numeric'})}</b><span>${fF(c.inicio,{month:'short'})}</span></div><div class="sp"><p class="mu xs" style="font-weight:700">TU CITA CON NUTRICIÓN</p><h3 style="text-transform:capitalize">${esc(fF(c.inicio,{weekday:'long'}))} · ${esc(fH(c.inicio))}</h3>${c.nutri_nombre?`<p class="mu sm">Con ${esc(c.nutri_nombre)}</p>`:''}</div></div>${c.nota?`<p class="sm">📝 ${esc(c.nota)}</p>`:''}</div>`}
+function vPedido(n){const p=PEDS().find(x=>x.id===PEDID);if(!p)return cabeza(n)+'<div class="card vacio"><span class="e">🤔</span><p class="mu">No encontramos esta solicitud.</p></div>';
+ const ent=p.tipo==='entreno',e=PEST[p.estado]||[p.estado,''],can=p.estado==='cancelado';
+ const pasos=ent?[['Enviado',1],['Armando tu plan',!can],['En tu app',p.estado==='listo']]:[['Enviado',1],['Cita agendada',['agendado','listo'].includes(p.estado)],['Plan en tu app',p.estado==='listo']];
+ const f0=post;post=()=>{f0&&f0();const c=$('#cht');c&&(c.scrollTop=c.scrollHeight);const i=$('#cmi'),s=$('#cms');
+  const env=async()=>{const t=i.value.trim();if(!t)return;s.disabled=true;try{const r=await rpc('xa_yo_plan_msg',{p_id:p.id,p_texto:t});pedPon(r);i.value='';const c2=$('#cht');c2.innerHTML=chatHTML(r);c2.scrollTop=c2.scrollHeight}catch(er){toast(errDe(er))}s.disabled=false;i.focus()};
+  s&&(s.onclick=env);i&&(i.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();env()}});
+  const x=$('#pcan');x&&(x.onclick=()=>hoja(`<h2>¿Cancelar tu solicitud?</h2><p class="mu sm">Avisaremos al negocio. Puedes pedir otra cuando quieras.</p><button class="btn p" id="cy">Sí, cancelar</button><button class="btn l" data-x>No</button>`,(o,close)=>{o.querySelector('#cy').onclick=async()=>{try{await rpc('xa_yo_plan_cancelar',{p_id:p.id});p.estado='cancelado';close();pinta();toast('Solicitud cancelada')}catch(er){toast(errDe(er))}}}))};
+ return cabeza(n)+`<div class="g"><div class="row"><div class="sp"><p class="mu xs" style="font-weight:700">${ent?'PLAN DE ENTRENAMIENTO':'NUTRICIÓN'}</p><h2>${ent?'Tu solicitud de plan':'Tu cita con nutrición'}</h2></div><span class="pill ${e[1]}">${e[0]}</span></div>
+  <div class="steps">${pasos.map(([t,on])=>`<div class="${on?'on':''}"><i></i>${t}</div>`).join('')}</div>
+  ${!ent&&p.cita&&p.estado!=='cancelado'?citaBox(p.cita):''}
+  ${p.estado==='listo'?`<button class="btn p" data-sub="${ent?'rutina':'dieta'}">${ent?'💪 Ver mi plan de entrenamiento':'🥗 Ver mi plan de alimentación'}</button>`:''}
+  <div class="card"><p class="mu xs" style="font-weight:700">LO QUE PEDISTE</p><p><b>🎯 ${esc(p.objetivo||'—')}</b></p>${p.nota?`<p class="sm mu" style="white-space:pre-wrap">${esc(p.nota)}</p>`:''}<p class="mu xs">Enviado el ${fF(p.creado,{day:'numeric',month:'short'})} · ${fH(p.creado)}</p></div>
+  <div class="card"><p class="mu xs" style="font-weight:700">CHAT CON ${esc(String(p.negocio||n.negocio).toUpperCase())}</p><div class="chat" id="cht">${chatHTML(p)}</div>
+   ${can?'':`<div class="cin"><input id="cmi" placeholder="Escribe un mensaje…" maxlength="1000" enterkeyhint="send" autocomplete="off"><button class="btn p" id="cms" aria-label="Enviar">${I.send}</button></div>`}</div>
+  ${['pendiente','agendado'].includes(p.estado)?'<button class="btn l" id="pcan">Cancelar solicitud</button>':''}</div>`}
+function vMi(n){return n?barraNeg()+(dental(n)?vInicioDent(n):vInicio(n)):''}
 
 // ---------- Consultorio ----------
 const EST={agendada:['Agendada',''],confirmada:['Confirmada','ok'],llego:['En consulta','ok'],atendida:['Atendida',''],no_vino:['No asististe','ko']};
@@ -461,7 +595,7 @@ function vTrat(n){const L=n.presupuestos||[];
 // ---------- Negocios ----------
 function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
  return`<div class="g"><h1>Negocios</h1>
-  ${M.length?`<p class="mu xs" style="font-weight:700">DONDE ERES ${M.some(n=>n.rubro==='consultorio')?'CLIENTE':'SOCIO'}</p>${M.map(n=>tarjNeg({...n,socio:1})).join('')}`:''}
+  ${M.length?`<p class="mu xs" style="font-weight:700">DONDE ERES ${M.some(n=>n.rubro==='consultorio')?'CLIENTE':'SOCIO'}</p>${M.map((n,i)=>tarjNeg({...n,socio:1,_i:i})).join('')}`:''}
   <p class="mu xs" style="font-weight:700;margin-top:4px">GUARDADOS</p>${G.length?G.map(tarjNeg).join(''):'<p class="mu sm">Aún no guardas negocios. Escanea su QR para ver sus promos.</p>'}
   <button class="btn p" data-scan>${I.scan}Escanear QR de un negocio</button>
   <button class="btn" data-yo>${I.id}Ya estoy registrado en un negocio</button>
@@ -475,7 +609,7 @@ function vNegocio(slug){const n=NEG[slug];
  const PR=(n.promos||[]).filter(p=>!p.hasta||p.hasta>=hoyL()),PB=n.publicaciones||[],PL=(n.planes||[]).filter(p=>p.nombre),SE=n.sedes||[],CL=n.clases||[];
  const red=n.redes||{},RD=[['instagram','📸 Instagram'],['tiktok','🎵 TikTok'],['facebook','👍 Facebook']].filter(([k])=>red[k]);
  const ev=p=>+p.precioEvento&&(!p.eventoHasta||p.eventoHasta>=hoyL());
- const f0=post;post=()=>{f0&&f0();if(cov){const t=new Image();t.onerror=()=>{const c=$('.cover');c&&(c.style.background='linear-gradient(135deg,var(--a),#05060a)')};t.src=cov}const g=$('#gd');g&&(g.onclick=()=>guardarNeg(slug,!n.guardado));const s=$('#sv');s&&(s.onclick=()=>{CUR=mi;ls.s('mi-neg',mi);TAB='inicio';SUB=null;pinta()})};
+ const f0=post;post=()=>{f0&&f0();if(cov){const t=new Image();t.onerror=()=>{const c=$('.cover');c&&(c.style.background='linear-gradient(135deg,var(--a),#05060a)')};t.src=cov}const g=$('#gd');g&&(g.onclick=()=>guardarNeg(slug,!n.guardado));const s=$('#sv');s&&(s.onclick=()=>{CUR=mi;ls.s('mi-neg',mi);TAB='negocios';SUB='mi';pinta()})};
  return`<div class="nwrap"><button class="back fl" data-back aria-label="Volver">‹</button>
  <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:'background:linear-gradient(135deg,var(--a),#000)'}"></div>
  <div class="nhead">${lg?`<img class="lg" src="${esc(lg)}" alt="">`:`<div class="lg" style="display:grid;place-items:center;font-size:34px">${rub==='consultorio'?'🦷':'🏋️'}</div>`}
@@ -584,7 +718,7 @@ async function nCargar(){const r=await nrpc('xa_neg',{p_slug:NSLUG});if(!r||r.er
 const nDent=()=>NB&&NB.rubro==='consultorio';
 const ROLN={gestor:'XyroStudio',admin:'Administrador',supervisor:'Supervisor',recepcion:'Recepción',cafetin:'Cafetín',entrenador:'Entrenador',nutricionista:'Nutricionista',profesional:'Profesional'};
 async function modoNegocio(silencio){
- if(DEMO){MODO='negocio';NB=demoNB();NTAB='resumen';return pinta()}
+ if(DEMO){MODO='negocio';NB=demoNB();NTAB=nCoach()?'pedidos':'resumen';NPED=null;pinta();nPedCarga().then(()=>{if(MODO==='negocio')pinta()});return}
  try{await cliNeg();
   const{data:{session}}=await sb2.auth.getSession();
   if(session){NSB=sb2;try{await nCargar();return entrarNeg()}catch(_){}}
@@ -594,7 +728,7 @@ async function modoNegocio(silencio){
  if(silencio){MODO='cliente';ls.s('mi-modo',null);return false}
  loginNegocio();
 }
-function entrarNeg(){MODO='negocio';ls.s('mi-modo','negocio');NTAB='resumen';NRES=null;pinta();return true}
+function entrarNeg(){MODO='negocio';ls.s('mi-modo','negocio');NTAB=nCoach()?'pedidos':'resumen';NRES=null;NPED=null;pinta();nPedCarga().then(()=>{if(MODO==='negocio')pinta()});return true}
 function modoCliente(){vib();MODO='cliente';ls.s('mi-modo',null);if(D)return pinta();pantallaEntrada()}
 function loginNegocio(){hoja(`<div style="display:grid;justify-items:center;gap:8px;text-align:center"><div class="ibox big">${I.brief.replace('width="22" height="22"','width="34" height="34"')}</div><h2>Entrar a mi negocio</h2>
   <p class="mu sm" style="max-width:320px">Para dueños y personal autorizado. Usa la misma cuenta de tu panel Xyro Apps.</p></div>
@@ -614,11 +748,14 @@ function loginNegocio(){hoja(`<div style="display:grid;justify-items:center;gap:
   catch(er){say(er.message&&!/fetch|JWT|PGRST/i.test(er.message)?er.message:errDe(er));b.disabled=false;b.textContent='Entrar'}}})}
 
 function pintaNeg(){acento();
- const dn=nDent(),T=[['resumen',I.chart,'Resumen'],['socios',I.users,dn?'Pacientes':'Socios'],['scan',I.scan,''],['hoy',dn?I.cal:I.pulse,dn?'Agenda':'Hoy'],['mas',I.grid,'Más']];
- const body=NB&&NB.gestor&&!NSLUG?nGestor():({resumen:nResumen,socios:nSocios,hoy:nHoy,mas:nMas}[NTAB]||nResumen)();
+ const dn=nDent(),pe=nPedOn(),T=nCoach()?[['pedidos',I.inbox,'Solicitudes'],['socios',I.users,'Socios'],['mas',I.grid,'Más']]
+  :[['resumen',I.chart,'Resumen'],['socios',I.users,dn?'Pacientes':'Socios'],['scan',I.scan,''],pe?['pedidos',I.inbox,'Solicitudes']:['hoy',dn?I.cal:I.pulse,dn?'Agenda':'Hoy'],['mas',I.grid,'Más']];
+ if(nCoach()&&['resumen','hoy'].includes(NTAB))NTAB='pedidos';
+ const tk=NTAB==='ped'||NTAB==='plan'?'pedidos':NTAB==='hoy'&&pe?'resumen':NTAB,pn=pe&&NPED?nPedN():0;
+ const body=NB&&NB.gestor&&!NSLUG?nGestor():({resumen:nResumen,socios:nSocios,hoy:nHoy,mas:nMas,pedidos:nPedidos,ped:nPed,plan:nPlan}[NTAB]||nResumen)();
  app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
- <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===NTAB?' on':''}" data-nt="${k}" aria-label="${k==='scan'?(dn?'Buscar por QR':'Marcar ingreso con QR'):t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}</button>`).join('')}</nav>`;
- app.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.nt==='scan')return nScan();NTAB=b.dataset.nt;pinta();$('#sc').scrollTop=0});
+ <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===tk?' on':''}" data-nt="${k}" aria-label="${k==='scan'?(dn?'Buscar por QR':'Marcar ingreso con QR'):t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='pedidos'&&pn?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
+ app.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.nt==='scan')return nScan();NTAB=b.dataset.nt;if(NTAB==='pedidos')nPedCarga().then(()=>{if(NTAB==='pedidos')pinta()});pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-cli]').forEach(b=>b.onclick=()=>nFicha(NRES&&NRES.find(x=>x.id===b.dataset.cli)));
  app.querySelectorAll('[data-ntgo]').forEach(b=>b.onclick=()=>{NTAB=b.dataset.ntgo;pinta()});
  app.querySelectorAll('[data-nscan]').forEach(b=>b.onclick=nScan);
@@ -638,6 +775,8 @@ function nResumen(){if(!NB)return'';const dn=nDent(),C=NB.citas||[],h=new Date()
   ${NB.plata&&sem.length?`<div class="card"><div class="row"><b class="sp">Últimos 7 días</b><span class="mu xs">${money(sem.reduce((a,x)=>a+(+x.v||0),0))}</span></div>
    <div class="bars">${sem.map((x,i)=>`<div><i style="height:${Math.max(4,Math.round((+x.v||0)/mx*100))}%" class="${i===sem.length-1?'on':''}"></i><span>${'DLMMJVS'[new Date(x.d+'T12:00:00').getDay()]}</span></div>`).join('')}</div></div>`:''}
   ${dn?'':`<button class="btn p" data-nscan>${I.scan}Marcar ingreso con QR</button>`}
+  ${nPedOn()&&NPED&&nPedN()?`<button class="card fd nv" data-ntgo="pedidos"><div class="row"><div class="ibox">${I.inbox}</div><div class="sp"><b>${nPedN()} solicitud${nPedN()>1?'es':''} desde la app</b><p class="mu sm">Planes y citas de nutrición que piden tus socios</p></div><span class="mu">›</span></div></button>`:''}
+  ${!dn&&nPedOn()?`<button class="btn" data-ntgo="hoy">${I.pulse}${NB.plata?'Caja e ingresos de hoy':'Quién vino hoy'}</button>`:''}
   <div class="card"><div class="row"><div class="ibox">${I.phone}</div><div class="sp"><b>Mi Xyro</b><p class="mu sm">${NB.seguidores||0} te guardaron · ${NB.en_app||0} ${dn?'pacientes':'socios'} con su app</p></div></div></div>
   ${dn&&C.length?`<h2>Citas de hoy</h2><div class="card">${C.slice(0,6).map(nCita).join('')}</div>`:''}
   ${!dn&&(NB.por_vencer||[]).length?`<h2>Por vencer esta semana</h2><div class="card">${NB.por_vencer.slice(0,8).map(x=>`<div class="li"><span class="dot">${esc((x.nombre||'?')[0])}</span><span class="sp"><b>${esc(x.nombre)}</b><br><span class="mu xs">${esc(x.plan||'Membresía')} · vence ${fF(x.fin,{day:'numeric',month:'short'})}</span></span>${x.tel?`<a class="btn sm wa" href="https://wa.me/51${cel(x.tel)}?text=${encodeURIComponent('Hola '+String(x.nombre).split(' ')[0]+', tu membresía en '+NB.negocio+' vence el '+fF(x.fin,{day:'numeric',month:'long'})+'. ¿Te la renovamos? 💪')}" target="_blank" rel="noopener">${I.chat}</a>`:''}</div>`).join('')}</div>`:''}
@@ -699,15 +838,113 @@ async function cambiarNeg(){
 function nGestor(){const L=NB.negocios||[];
  post=()=>app.querySelectorAll('[data-gs]').forEach(b=>b.onclick=async()=>{NSLUG=b.dataset.gs;ls.s('mi-nslug',NSLUG);try{await nCargar();NTAB='resumen';pinta()}catch(e){toast(errDe(e))}});
  return`<div class="hdr"><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">XYROSTUDIO</p><h1>Elige un negocio</h1></div></div><div class="g">${L.map(x=>`<button class="card" data-gs="${esc(x.slug)}" style="text-align:left;width:100%;cursor:pointer"><b>${esc(x.negocio)}</b><span class="mu xs">${esc(x.slug)}</span></button>`).join('')}</div>`}
+// ---------- Solicitudes desde la app: planes y citas de nutrición (SQL 48) ----------
+let NPED=null,NPID=null,NPF='abiertos',NPX=false;
+const nRol=()=>NB&&NB.rol,nCoach=()=>['entrenador','nutricionista'].includes(nRol()),nRecep=()=>['gestor','admin','supervisor','recepcion'].includes(nRol());
+const nPuedePlan=p=>['gestor','admin','supervisor'].includes(nRol())||(nRol()==='entrenador'&&p.tipo==='entreno')||(nRol()==='nutricionista'&&p.tipo==='nutri');
+const nPedOn=()=>NB&&!nDent()&&['gestor','admin','supervisor','recepcion','entrenador','nutricionista'].includes(nRol());
+async function nPedCarga(){if(!nPedOn())return NPED=[];try{NPED=await nrpc('xa_neg_pedidos',{p_slug:NSLUG,p_todos:false})||[];NPX=false}catch(e){NPED=NPED||[];NPX=true}return NPED}
+const nPorAtender=p=>p.estado!=='cancelado'&&(p.visto_negocio===false||(p.estado==='pendiente'&&(p.tipo==='entreno'?nRol()!=='recepcion':nRecep()))||(p.estado==='agendado'&&nRol()==='nutricionista'));
+const nPedN=()=>(NPED||[]).filter(nPorAtender).length;
+const NPE={pendiente:['Nuevo','#f59e0b'],agendado:['Cita agendada','#3ad6ff'],listo:['Plan enviado','#22c55e'],cancelado:['Cancelado','#ef4444']};
+function nPedPon(p){if(!p||!p.id)return;const o=(NPED||[]).find(x=>x.id===p.id);if(o){Object.assign(o,p)}else(NPED=NPED||[]).unshift(p)}
+function nPedidos(){if(NPED==null){nPedCarga().then(()=>{if(MODO==='negocio'&&NTAB==='pedidos')pinta()});return`${nHead('SOLICITUDES')}<div class="card vacio"><span class="e">⏳</span></div>`}
+ const L=(NPED||[]).filter(p=>NPF==='todos'||p.estado==='pendiente'||p.estado==='agendado'||p.visto_negocio===false);
+ const sub=nRol()==='entrenador'?'Planes de entrenamiento que te pidieron tus socios.':nRol()==='nutricionista'?'Tus citas agendadas y los planes que debes enviar.':'Planes y citas que piden tus socios desde Mi Xyro.';
+ post=()=>{app.querySelectorAll('[data-npf]').forEach(b=>b.onclick=()=>{NPF=b.dataset.npf;pinta()});app.querySelectorAll('[data-np]').forEach(b=>b.onclick=()=>nAbrirPed(b.dataset.np))};
+ return`${nHead('SOLICITUDES DESDE LA APP')}<div class="g"><p class="mu sm">${sub}</p>
+  <div class="sel"><button class="opt${NPF==='abiertos'?' on':''}" data-npf="abiertos">Por atender${nPedN()?' · '+nPedN():''}</button><button class="opt${NPF==='todos'?' on':''}" data-npf="todos">Todas</button></div>
+  ${NPX?`<div class="card"><p class="sm">⚙️ Esta función se activa cuando XyroStudio termina de instalarla en tu negocio.</p></div>`:''}
+  ${L.length?L.map(p=>{const e=NPE[p.estado]||[p.estado,'var(--mu)'],nv=nPorAtender(p);return`<button class="card np" data-np="${esc(p.id)}"><div class="row"><span class="dot big">${p.tipo==='entreno'?'🏋️':'🥗'}</span><div class="sp" style="min-width:0"><b>${esc(p.cliente_nombre||'Socio')}</b>${nv?' <span class="nvd"></span>':''}<p class="mu xs">${p.tipo==='entreno'?'Plan de entrenamiento':'Cita y plan de nutrición'} · ${haceCuanto(p.creado).toLowerCase()}</p></div><span class="xs" style="font-weight:800;color:${e[1]};text-align:right">${e[0]}</span></div>
+    ${p.objetivo?`<p class="sm">🎯 ${esc(p.objetivo)}</p>`:''}${p.estado==='agendado'&&p.cita?`<p class="sm" style="color:#7dd3fc">📅 ${esc(citaTxt(p.cita))}${p.cita.nutri_nombre?' · '+esc(p.cita.nutri_nombre):''}</p>`:''}</button>`}).join('')
+   :`<div class="card vacio"><span class="e">📥</span><h2>Todo atendido</h2><p class="mu sm" style="max-width:300px">Cuando un socio pida su plan o una cita con nutrición desde su app Mi Xyro, te llegará aquí.</p></div>`}</div>`}
+function nAbrirPed(id){vib();NPID=id;NTAB='ped';pinta();$('#sc')&&($('#sc').scrollTop=0);const p=(NPED||[]).find(x=>x.id===id);
+ if(p&&p.visto_negocio===false){p.visto_negocio=true;nrpc('xa_neg_pedido_visto',{p_id:id}).catch(()=>{})}}
+const nChat=p=>{const M=p.msgs||[];if(!M.length)return`<p class="mu sm" style="text-align:center;padding:8px 4px">${p.tipo==='nutri'&&p.estado==='pendiente'?'Escríbele los horarios libres para su cita.':'Aún no hay mensajes.'}</p>`;
+ return M.map(m=>`<div class="bb${m.de==='negocio'?' yo':''}"><b class="xs" style="color:${m.de==='negocio'?'#fff':'#cfc6ff'};opacity:.85">${esc(m.de==='negocio'?(m.autor||'Negocio'):(p.persona_nombre||p.cliente_nombre||'Socio'))}</b><br>${esc(m.texto)}<small>${fF(m.creado,{day:'numeric',month:'short'})} · ${fH(m.creado)}</small></div>`).join('')};
+function planResumen(r){const d=r.datos||{};if(r.tipo==='nutri'||COMIDAS.some(([k])=>d[k]))return COMIDAS.filter(([k])=>d[k]).map(([k,i,t])=>`<p class="sm">${i} <b>${t}:</b> ${esc(lineas(d[k]).join(', '))}</p>`).join('')+(d.kcal?`<p class="sm">🔥 ${esc(d.kcal)} kcal</p>`:'');
+ return DIAS.filter(([k])=>d[k]).map(([k,,t])=>{const l=lineas(d[k]);return`<p class="sm"><b>${t}:</b> ${esc(l.length>1?l[0]+' · '+(l.length-1)+' ejercicios':l[0]||'')}</p>`}).join('')}
+function nPed(){const p=(NPED||[]).find(x=>x.id===NPID);if(!p){NTAB='pedidos';return nPedidos()}
+ const e=NPE[p.estado]||[p.estado,'var(--mu)'],ent=p.tipo==='entreno',pv=(p.planes||[])[0],ab=['pendiente','agendado'].includes(p.estado),m=p.membresia;
+ post=()=>{const c=$('#ncht');c&&(c.scrollTop=c.scrollHeight);const i=$('#ncm'),s=$('#ncs'),q=x=>$(x);
+  const env=async()=>{const t=i.value.trim();if(!t)return;s.disabled=true;try{const r=await nrpc('xa_neg_pedido_msg',{p_id:p.id,p_texto:t});nPedPon(r);i.value='';const c2=$('#ncht');c2.innerHTML=nChat(p);c2.scrollTop=c2.scrollHeight}catch(er){toast(errDe(er))}s.disabled=false;i.focus()};
+  s&&(s.onclick=env);i&&(i.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();env()}});
+  q('#npb')&&(q('#npb').onclick=()=>{NTAB='pedidos';pinta()});q('#nag')&&(q('#nag').onclick=()=>nAgendar(p));q('#npl')&&(q('#npl').onclick=()=>{NTAB='plan';pinta();$('#sc').scrollTop=0});
+  q('#npv')&&(q('#npv').onclick=()=>{const b=$('#npvx');b.hidden=!b.hidden});
+  q('#ncan')&&(q('#ncan').onclick=()=>hoja(`<h2>¿Cerrar esta solicitud?</h2><p class="mu sm">El socio verá que se cerró y podrá pedir otra.</p><button class="btn p" id="cy">Sí, cerrar</button><button class="btn l" data-x>No</button>`,(o,close)=>{o.querySelector('#cy').onclick=async()=>{try{await nrpc('xa_neg_pedido_cancelar',{p_id:p.id});p.estado='cancelado';close();pinta()}catch(er){toast(errDe(er))}}}))};
+ return`<button class="back" id="npb">‹ Solicitudes</button><div class="g">
+  <div class="row"><div class="av" style="width:56px;height:56px;font-size:22px;border-radius:18px">${esc((p.cliente_nombre||'?')[0])}</div><div class="sp" style="min-width:0"><h2 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.cliente_nombre||'Socio')}</h2>
+   <p class="mu xs">${p.cliente_num?'N.º '+esc(p.cliente_num)+' · ':''}${m&&m.fin?esc(m.plan||'Plan')+(m.fin<hoyL()?' · venció ':' · hasta ')+fF(m.fin,{day:'numeric',month:'short'}):'Sin membresía'}</p></div><span class="xs" style="font-weight:800;color:${e[1]}">${e[0]}</span></div>
+  ${!ent&&p.cita&&p.estado!=='cancelado'?citaBox(p.cita).replace('TU CITA CON NUTRICIÓN','CITA DE NUTRICIÓN')+(p.cita.por?`<p class="mu xs" style="margin-top:-6px;text-align:right">Agendó: ${esc(p.cita.por)}</p>`:''):''}
+  <div class="card"><p class="mu xs" style="font-weight:700">${ent?'LO QUE PIDE':'LO QUE QUIERE LOGRAR'}</p><p><b>🎯 ${esc(p.objetivo||'—')}</b></p>${p.nota?`<p class="sm" style="white-space:pre-wrap">${esc(p.nota)}</p>`:''}<p class="mu xs">Lo pidió ${haceCuanto(p.creado).toLowerCase()} · ${fH(p.creado)}</p></div>
+  <div class="card"><div class="row"><p class="mu xs sp" style="font-weight:700">${ent?'PLAN ANTERIOR':'¿YA TENÍA PLAN?'}</p>${pv?'<button class="btn l xs" id="npv">Ver</button>':''}</div>
+   ${pv?`<p><b>${esc(pv.titulo||'Plan')}</b></p><p class="mu xs">Por ${esc(pv.quien||'—')} · ${fF(pv.creado,{day:'numeric',month:'short',year:'numeric'})}</p><div id="npvx" hidden class="g" style="gap:4px">${planResumen({tipo:p.tipo,datos:pv.datos})}</div>`:`<p class="sm">${ent?'Es su primer plan de entrenamiento.':'No, es su primer plan de alimentación.'}</p>`}</div>
+  ${p.estado!=='cancelado'&&nPuedePlan(p)&&(ent||p.estado!=='pendiente')?`<button class="btn p" id="npl">${ent?'✍️ Armar y enviar su plan':'🥗 Crear su plan de alimentación'}${p.estado==='listo'?' (otro)':''}</button>`:''}
+  ${!ent&&ab&&nRecep()?`<button class="btn${p.estado==='pendiente'?' p':''}" id="nag">📅 ${p.estado==='agendado'?'Cambiar la cita':'Agendar su cita con nutrición'}</button>`:''}
+  ${ent&&p.estado==='pendiente'&&nRol()==='recepcion'?'<p class="mu sm" style="text-align:center">🏋️ Le llegó al entrenador en su app. Puedes escribirle al socio si hace falta.</p>':''}
+  ${!ent&&p.estado==='pendiente'&&nRol()==='nutricionista'?'<p class="mu sm" style="text-align:center">Recepción está coordinando la cita.</p>':''}
+  <div class="card"><p class="mu xs" style="font-weight:700">CHAT CON EL SOCIO · LO VE EN SU APP</p><div class="chat" id="ncht">${nChat(p)}</div>
+   ${p.estado==='cancelado'?'':`<div class="cin"><input id="ncm" placeholder="${!ent&&p.estado==='pendiente'?'Ej.: Tenemos jueves 5 pm o viernes 7 pm':'Escribe un mensaje…'}" maxlength="1000" enterkeyhint="send" autocomplete="off"><button class="btn p" id="ncs" aria-label="Enviar">${I.send}</button></div>`}</div>
+  ${p.cliente_tel?`<a class="btn" href="https://wa.me/51${cel(p.cliente_tel)}" target="_blank" rel="noopener" style="text-decoration:none;color:var(--tx)">${I.chat}Escribir por WhatsApp</a>`:''}
+  ${ab&&nRecep()?'<button class="btn l" id="ncan">Cerrar solicitud</button>':''}</div>`}
+async function nAgendar(p){let L=[];try{L=await nrpc('xa_neg_nutris',{p_slug:NSLUG})||[]}catch(_){}
+ const c=p.cita||{},d0=c.inicio?dLima(c.inicio):hoyL(),h0=c.inicio?new Date(c.inicio).toLocaleTimeString('en-GB',{timeZone:'America/Lima',hour:'2-digit',minute:'2-digit'}):'17:00';
+ hoja(`<h2>📅 Cita de nutrición</h2><p class="mu sm">Para <b>${esc(p.cliente_nombre||'el socio')}</b>. Le llega a su app y a la cuenta del nutricionista con todo lo que pidió.</p>
+  <div class="row"><label class="sp">Día<input id="ad" type="date" min="${hoyL()}" value="${d0}"></label><label class="sp">Hora<input id="ah" type="time" step="900" value="${h0}"></label></div>
+  <label>Nutricionista${L.length?`<select id="an">${L.map(x=>`<option value="${esc(x.id)}"${x.id===c.nutri?' selected':''}>${esc(x.nombre)}</option>`).join('')}</select>`:'<p class="sm" style="color:var(--wa)">Aún no hay cuentas de nutricionista. Créalas en el panel → Equipo. La cita se guarda igual.</p>'}</label>
+  <label>Nota para el nutricionista (opcional)<input id="ao" maxlength="300" value="${esc(c.nota||'')}" placeholder="Ej.: traer sus análisis"></label>
+  <div class="msg" id="am"></div><button class="btn p" id="ab">Guardar y avisar al socio</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  o.querySelector('#ab').onclick=async()=>{const d=o.querySelector('#ad').value,h=o.querySelector('#ah').value,m=o.querySelector('#am'),b=o.querySelector('#ab');if(!d||!h){m.textContent='Elige el día y la hora.';m.className='msg on';return}
+   const ini=new Date(d+'T'+h+':00-05:00');if(ini.getTime()<Date.now()-6e4){m.textContent='Esa hora ya pasó.';m.className='msg on';return}
+   b.disabled=true;try{const an=o.querySelector('#an'),r=await nrpc('xa_neg_pedido_agendar',{p_id:p.id,p_inicio:ini.toISOString(),p_nutri:an?an.value:null,p_nota:o.querySelector('#ao').value.trim()||null});nPedPon(r);close();toast('✅ Cita agendada. Ya le llegó al socio.');pinta()}
+   catch(er){m.textContent=errDe(er);m.className='msg on';b.disabled=false}}})}
+const PLTE=[['Cuerpo completo · 3 días',{d1:'Cuerpo completo A\nSentadilla 4x10\nPress banca 4x10\nRemo con barra 4x10\nPlancha 3x40 seg',d3:'Cuerpo completo B\nPeso muerto rumano 4x10\nPress militar 4x10\nJalón al pecho 4x10\nZancadas 3x12',d5:'Cuerpo completo C\nPrensa 4x12\nPress inclinado 4x10\nRemo en máquina 4x12\nCardio 20 min'}],
+ ['Torso / pierna · 4 días',{d1:'Torso\nPress banca 4x8\nRemo con barra 4x8\nPress militar 3x10\nCurl + tríceps 3x12',d2:'Pierna\nSentadilla 4x8\nPeso muerto rumano 4x10\nPrensa 3x12\nPantorrillas 4x15',d4:'Torso\nPress inclinado 4x10\nJalón al pecho 4x10\nElevaciones laterales 3x15\nFondos 3x10',d5:'Pierna\nHip thrust 4x10\nZancadas 3x12\nCurl femoral 3x12\nAbdomen 3x15'}],
+ ['Hipertrofia · 5 días',{d1:'Pecho y tríceps\nPress banca 4x10\nPress inclinado mancuernas 4x10\nAperturas 3x12\nFondos 3x10',d2:'Espalda y bíceps\nJalón al pecho 4x10\nRemo con barra 4x10\nCurl con barra 3x12',d3:'Piernas\nSentadilla 4x10\nPrensa 4x12\nPeso muerto rumano 3x10',d4:'Hombros y abdomen\nPress militar 4x10\nElevaciones laterales 3x15\nPlancha 3x45 seg',d5:'Cuerpo completo\nPeso muerto 4x8\nDominadas 3x8\nCardio 20 min'}]];
+function nPlan(){const p=(NPED||[]).find(x=>x.id===NPID);if(!p){NTAB='pedidos';return nPedidos()}
+ const ent=p.tipo==='entreno',pv=(p.planes||[])[0],F=ent?DIAS.map(([k,,t])=>[k,'',t]):COMIDAS;
+ post=()=>{const q=x=>$(x),fill=d=>{F.forEach(([k])=>{const t=q('#pf-'+k);t&&(t.value=d[k]||'')});['kcal','agua','nota'].forEach(k=>{const t=q('#pf-'+k);t&&d[k]!=null&&(t.value=d[k])})};
+  q('#ppb')&&(q('#ppb').onclick=()=>{NTAB='ped';pinta()});q('#pcp')&&(q('#pcp').onclick=()=>{fill(pv.datos||{});toast('📋 Copiado. Ajusta lo que quieras.')});
+  app.querySelectorAll('[data-plt]').forEach(b=>b.onclick=()=>{const x=PLTE[+b.dataset.plt];fill(x[1]);q('#pf-t').value=x[0];toast('✨ Plantilla lista. Ajústala a '+String(p.cliente_nombre||'').split(' ')[0])});
+  q('#pse').onclick=async()=>{const b=q('#pse'),D2={objetivo:q('#pf-o').value.trim()};F.forEach(([k])=>{const v=q('#pf-'+k).value.trim();if(v)D2[k]=v});['kcal','agua','nota'].forEach(k=>{const t=q('#pf-'+k);t&&t.value.trim()&&(D2[k]=t.value.trim())});
+   if(!F.some(([k])=>D2[k])){return toast(ent?'Escribe al menos un día de entrenamiento.':'Escribe al menos una comida.')}
+   b.disabled=true;b.textContent='Enviando…';try{const r=await nrpc('xa_neg_pedido_plan',{p_id:p.id,p_titulo:q('#pf-t').value.trim(),p_datos:D2});nPedPon(r);confeti();toast('📲 Enviado. Ya lo tiene en su app.');NTAB='ped';pinta()}
+   catch(er){toast(errDe(er));b.disabled=false;b.textContent='📲 Enviar a su app'}}};
+ return`<button class="back" id="ppb">‹ Volver</button><div class="g"><div><p class="mu xs" style="font-weight:700">${ent?'PLAN DE ENTRENAMIENTO':'PLAN DE ALIMENTACIÓN'} PARA</p><h2>${esc(p.cliente_nombre||'Socio')}</h2><p class="sm" style="color:var(--a)">🎯 ${esc(p.objetivo||'')}</p>${p.nota?`<p class="mu xs" style="white-space:pre-wrap">${esc(p.nota)}</p>`:''}</div>
+  ${pv||ent?`<div class="sel">${pv?'<button class="opt" id="pcp">📋 Copiar su plan anterior</button>':''}${ent?PLTE.map((x,i)=>`<button class="opt" data-plt="${i}">✨ ${esc(x[0])}</button>`).join(''):''}</div>`:''}
+  <div class="card"><label>Nombre del plan<input id="pf-t" maxlength="120" placeholder="${ent?'Ej.: Fuerza · 4 días':'Ej.: Definición 1,800 kcal'}"></label><label>Objetivo<input id="pf-o" maxlength="160" value="${esc(p.objetivo||'')}"></label>
+   ${ent?'':`<div class="row"><label class="sp">Calorías al día<input id="pf-kcal" inputmode="numeric" maxlength="10" placeholder="1800"></label><label class="sp">Agua<input id="pf-agua" maxlength="20" placeholder="2.5 L"></label></div>`}</div>
+  <p class="mu xs">${ent?'En cada día: la primera línea es lo que trabaja (ej. «Piernas») y luego un ejercicio por línea. Deja vacío el día de descanso.':'Una comida o porción por línea. Deja vacía la comida que no aplique.'}</p>
+  ${F.map(([k,i,t])=>`<label class="pfl">${i?i+' ':''}${t}<textarea id="pf-${k}" rows="${ent?4:3}" placeholder="${ent?(k==='d1'?'Piernas\nSentadilla 4x10\nPrensa 4x12':''):(k==='desayuno'?'Avena con fruta\n2 huevos':'')}"></textarea></label>`).join('')}
+  <label>Indicaciones (opcional)<textarea id="pf-nota" rows="2" maxlength="600" placeholder="${ent?'Descansa 60–90 seg entre series.':'Toma agua antes de cada comida.'}"></textarea></label>
+  <button class="btn p" id="pse">📲 Enviar a su app</button><p class="mu xs" style="text-align:center">Le llega al instante como ficha en Mi Xyro. Ya no hace falta mandar imágenes por WhatsApp.</p></div>`}
+function demoPeds(){const t=m=>new Date(Date.now()-m*6e4).toISOString(),man=new Date(Date.now()+864e5);man.setUTCHours(22,0,0,0);const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+ return[{id:'q1',tipo:'entreno',estado:'pendiente',cliente_nombre:'Lucía Fernández',cliente_num:112,cliente_tel:'936449066',persona_nombre:'Lucía',objetivo:'Bajar de peso',nota:'Días por semana: 4\nNivel: Principiante\nMe molesta un poco la rodilla derecha',creado:t(25),visto_negocio:false,msgs:[],planes:[],membresia:{plan:'Mensual',fin:ad(20)}},
+  {id:'q2',tipo:'nutri',estado:'pendiente',cliente_nombre:'Jorge Ramírez',cliente_num:87,cliente_tel:'936449066',persona_nombre:'Jorge',objetivo:'Ganar masa muscular',nota:'Horario preferido: Tarde\nNo como pescado',creado:t(70),visto_negocio:false,msgs:[{de:'persona',texto:'Hola, ¿puede ser esta semana?',creado:t(65)}],
+   planes:[{titulo:'Volumen 2,600 kcal',quien:'Lic. Andrea Ruiz',creado:ad(-120),datos:{kcal:'2600',desayuno:'Avena con plátano\n3 huevos',almuerzo:'Arroz + pollo 200 g\nEnsalada',cena:'Camote + carne'}}],membresia:{plan:'Trimestral',fin:ad(45)}},
+  {id:'q3',tipo:'nutri',estado:'agendado',asignado:'n1',cliente_nombre:'Ana Quispe',cliente_num:301,cliente_tel:'936449066',persona_nombre:'Ana',objetivo:'Bajar de peso',nota:'Horario preferido: Tarde',creado:t(60*26),visto_negocio:true,
+   cita:{inicio:man.toISOString(),nutri:'n1',nutri_nombre:'Lic. Andrea Ruiz',nota:'Traer sus análisis de sangre',por:'Rosa (recepción)'},msgs:[{de:'negocio',autor:'Rosa',texto:'Hola Ana 👋 tenemos mañana 5 pm o el viernes 7 pm. ¿Cuál te acomoda?',creado:t(60*25)},{de:'persona',texto:'Mañana 5 pm 🙌',creado:t(60*24)},{de:'negocio',autor:'Rosa',texto:'📅 Tu cita quedó agendada para mañana a las 5:00 pm con Lic. Andrea Ruiz.',creado:t(60*24-2)}],planes:[],membresia:{plan:'Mensual',fin:ad(4)}},
+  {id:'q4',tipo:'entreno',estado:'listo',cliente_nombre:'Marco Díaz',cliente_num:19,persona_nombre:'Marco',objetivo:'Ganar fuerza',nota:'Días por semana: 5',creado:t(60*50),visto_negocio:true,msgs:[{de:'negocio',autor:'Coach Diego',texto:'💪 Tu plan de entrenamiento ya está en tu app.',creado:t(60*30)}],planes:[{titulo:'Fuerza 5 días',quien:'Coach Diego',creado:t(60*30),datos:{d1:'Pierna\nSentadilla 5x5'}}],membresia:{plan:'Semestral',fin:ad(63)}}]}
+function demoPedNeg(f,a){const r=nRol();NPED=NPED||null;
+ if(f==='xa_neg_pedidos'){const L=window._dpn||(window._dpn=demoPeds());return L.filter(p=>(r!=='entrenador'||p.tipo==='entreno')&&(r!=='nutricionista'||(p.tipo==='nutri'&&['agendado','listo'].includes(p.estado))))}
+ const p=(window._dpn||[]).find(x=>x.id===a.p_id),nm=NB.nombre||'Tú';
+ if(f==='xa_neg_pedido_msg'){p.msgs.push({de:'negocio',autor:nm,texto:a.p_texto,creado:new Date().toISOString()});return p}
+ if(f==='xa_neg_nutris')return[{id:'n1',nombre:'Lic. Andrea Ruiz'}];
+ if(f==='xa_neg_pedido_agendar'){p.estado='agendado';p.cita={inicio:a.p_inicio,nutri:a.p_nutri,nutri_nombre:a.p_nutri?'Lic. Andrea Ruiz':null,nota:a.p_nota,por:nm};p.msgs.push({de:'negocio',autor:nm,texto:'📅 Tu cita quedó agendada para el '+fF(a.p_inicio,{day:'numeric',month:'short'})+' a las '+fH(a.p_inicio)+'.',creado:new Date().toISOString()});return p}
+ if(f==='xa_neg_pedido_plan'){p.estado='listo';p.planes=[{titulo:a.p_titulo||(p.tipo==='entreno'?'Plan de entrenamiento':'Plan de alimentación'),quien:nm,creado:new Date().toISOString(),datos:a.p_datos},...(p.planes||[])];p.msgs.push({de:'negocio',autor:nm,texto:p.tipo==='entreno'?'💪 Tu plan de entrenamiento ya está en tu app.':'🥗 Tu plan de alimentación ya está en tu app.',creado:new Date().toISOString()});return p}
+ if(f==='xa_neg_pedido_visto'||f==='xa_neg_pedido_cancelar')return null;
+ throw 'demo'}
+
 function demoNB(){const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)},t=m=>new Date(Date.now()-m*6e4).toISOString(),dn=DEMO==='negocio-dental';
- const base={slug:'demo',negocio:dn?'Sonrisa Dental':'Fuerza Gym',logo:null,rubro:dn?'consultorio':'gym',rol:'admin',nombre:'Carlos',plata:true,mios:2,asis_hoy:86,activos:412,clientes:538,nuevos_mes:23,seguidores:57,en_app:31,
+ const dr=['recepcion','entrenador','nutricionista','supervisor'].includes(P.get('rol'))?P.get('rol'):'admin';
+ const base={slug:'demo',negocio:dn?'Sonrisa Dental':'Fuerza Gym',logo:null,rubro:dn?'consultorio':'gym',rol:dr,nombre:{recepcion:'Rosa',entrenador:'Coach Diego',nutricionista:'Lic. Andrea Ruiz',supervisor:'Paola'}[dr]||'Carlos',plata:['admin','supervisor'].includes(dr),mios:2,asis_hoy:86,activos:412,clientes:538,nuevos_mes:23,seguidores:57,en_app:31,
   ing_hoy:1840,cobros_hoy:11,ing_mes:38250,metodos:{yape:980,efectivo:560,plin:300},semana:[1520,2210,1380,2640,1960,980,1840].map((v,i)=>({d:ad(i-6),v})),
   por_vencer:[['Lucía Fernández',1,'Mensual'],['Jorge Ramírez',2,'Trimestral'],['Ana Quispe',4,'Mensual'],['Diego Salazar',6,'Semestral']].map(([nombre,d,plan])=>({nombre,fin:ad(d),plan,tel:'936449066'})),
   ultimos:[['Valeria Torres',3],['Marco Díaz',9],['Sofía Rojas',14],['Luis Paredes',22],['Camila Vega',31]].map(([nombre,m])=>({nombre,t:t(m),quien:'Recepción'})),
   pagos:[['Lucía Fernández',99,'yape','Mensual'],['Marco Díaz',260,'efectivo','Trimestral'],['Sofía Rojas',12,'plin','Cafetín']].map(([nombre,monto,metodo,concepto],i)=>({nombre,monto,metodo,concepto,f:t(20+i*35)}))};
  if(dn)base.citas=[[9,'Valeria Torres','Curación con resina','atendida'],[10,'Pedro Gómez','Control y limpieza','llego'],[11.5,'Rosa Medina','Evaluación','confirmada'],[16,'Javier Soto','Blanqueamiento','agendada']].map(([hh,nombre,servicio,estado])=>{const x=new Date();x.setUTCHours(Math.floor(hh)+5,(hh%1)*60,0,0);return{inicio:x.toISOString(),dur:45,nombre,servicio,estado,prof:'Dra. Lucía Ramos'}});
  return base}
-async function demoNegRpc(f,a){const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+async function demoNegRpc(f,a){if(/pedido|xa_neg_nutris/.test(f))return demoPedNeg(f,a);const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
  const L=[['Valeria Torres',28,248],['Lucía Fernández',1,112],['Jorge Ramírez',-3,87],['Ana Quispe',4,301],['Marco Díaz',63,19]].map(([nombre,d,num],i)=>({id:'c'+i,nombre,num,plan:d>40?'Semestral':'Mensual',inicio:ad(d-30),fin:ad(d),codigo:'DEMO'+num,tel:'936449066',ultima:new Date(Date.now()-(i+1)*864e5).toISOString(),app:i%2===0}));
  if(f==='xa_neg')return NB||demoNB();
  if(f==='xa_neg_buscar'){const q=a.p_q.toLowerCase();return L.filter(x=>x.nombre.toLowerCase().includes(q)||String(x.num)===q||x.codigo.toLowerCase()===q)}
@@ -747,9 +984,14 @@ function demoBoth(){const h=hoyL(),ad=(d,n)=>{const x=new Date(d+'T12:00:00');x.
   citas:[{inicio:at(3,10),dur:45,prof:'Dra. Lucía Ramos',servicio:'Curación con resina',estado:'confirmada'},{inicio:at(24,16),dur:30,prof:'Dra. Lucía Ramos',servicio:'Control y limpieza',estado:'agendada'},{inicio:at(-12,11),dur:60,prof:'Dra. Lucía Ramos',servicio:'Evaluación y radiografía',estado:'atendida'}],
   presupuestos:[{estado:'aceptado',prof:'Dra. Lucía Ramos',creado:ad(h,-12),descuento:30,items:[{t:'Profilaxis y destartraje',m:120,h:1},{t:'Curación con resina',p:'16',m:150,h:1},{t:'Curación con resina',p:'26',m:150},{t:'Blanqueamiento',m:450}],pagos:[{monto:300}]}]};
  return{gym,den}}
+function demoPedUsr(){const t=m=>new Date(Date.now()-m*6e4).toISOString(),c=new Date(Date.now()+2*864e5);c.setUTCHours(23,0,0,0);
+ return[{id:'u1',cliente_id:'d1',slug:'demo-gym',negocio:'Fuerza Gym',tipo:'nutri',estado:'agendado',objetivo:'Bajar de peso',nota:'Horario preferido: Tarde',creado:t(60*20),actualizado:t(30),visto_persona:false,
+  cita:{inicio:c.toISOString(),nutri_nombre:'Lic. Andrea Ruiz',nota:'Ven con ropa cómoda, te tomamos medidas.'},
+  msgs:[{de:'negocio',autor:'Rosa · Recepción',texto:'¡Hola Vale! 👋 Para tu cita con nutrición tenemos pasado mañana a las 6 pm o el sábado 10 am. ¿Cuál te acomoda?',creado:t(60*19)},{de:'persona',texto:'Pasado mañana 6 pm porfa 🙌',creado:t(60*18)},{de:'negocio',autor:'Rosa · Recepción',texto:'📅 Tu cita quedó agendada para el '+fF(c.toISOString(),{weekday:'long',day:'numeric'})+' a las 6:00 pm con Lic. Andrea Ruiz.',creado:t(30)}]}]}
 function demoData(){const{gym,den}=demoBoth(),dent=DEMO==='consultorio';
  return{persona:{nombre:'Valeria Torres',apodo:'Vale',usuario:'vale.fit',idn:48203716,email:'vale@gmail.com',celular:'987654321'},
   negocios:[dent?den:gym],guardados:[{slug:'demo-cafe',negocio:'Nativa Café',color:'#16a34a',rubro:'gym',promos:1}],
+  pedidos:dent?[]:demoPedUsr(),
   avisos:[{id:'av1',negocio:dent?'Fuerza Gym':'Sonrisa Dental',color:dent?'#e11d48':'#0ea5e9',rubro:dent?'gym':'consultorio',nombre:'Valeria Torres',quien:'Recepción'}]}}
 function demoNeg(slug){const g=slug==='demo-gym'?{negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym'}:slug==='demo-dental'?{negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio'}:{negocio:'Nativa Café',color:'#16a34a',rubro:'gym'};
  return{slug,...g,whatsapp:'936449066',guardado:true,socio:negs().some(n=>n.slug===slug),
@@ -758,18 +1000,31 @@ function demoNeg(slug){const g=slug==='demo-gym'?{negocio:'Fuerza Gym',color:'#e
   planes:g.rubro==='consultorio'?[{nombre:'Limpieza dental',precio:80},{nombre:'Blanqueamiento',precio:450,destacado:true},{nombre:'Ortodoncia',precio:3500}]:[{nombre:'1 mes',precio:100,meses:1},{nombre:'3 meses',precio:270,meses:3},{nombre:'1 año',precio:900,meses:12,destacado:true,precioEvento:750,eventoTexto:'Solo este mes'}],
   sedes:[{nombre:'Sede principal',distrito:'Miraflores · Lima',foto:'img/interior.webp',horario:[['Lunes a sábado','6:00 am – 10:00 pm'],['Domingos','8:00 am – 1:00 pm']]}],
   clases:g.rubro==='consultorio'?[]:[{nombre:'Funcional',dias:['lun','mie','vie'],hora:'07:00'},{nombre:'Cardio intenso',dias:['mar','jue'],hora:'19:00'}],redes:{instagram:'@xyrostudio'}}}
+function demoPlanRpc(f,a){const now=new Date().toISOString();
+ if(f==='xa_yo_plan_pedir'){const n=negs().find(x=>x.cliente===a.p_cliente)||{},p={id:'u'+Date.now(),cliente_id:a.p_cliente,slug:n.slug,negocio:n.negocio,tipo:a.p_tipo,estado:'pendiente',objetivo:a.p_objetivo,nota:a.p_nota,creado:now,actualizado:now,visto_persona:true,msgs:[]};
+  setTimeout(()=>{p.msgs.push(a.p_tipo==='nutri'?{de:'negocio',autor:'Rosa · Recepción',texto:'¡Hola! 👋 Tenemos jueves 6 pm o sábado 10 am con la nutricionista. ¿Cuál te acomoda?',creado:new Date().toISOString()}:{de:'negocio',autor:'Coach Diego',texto:'¡Recibido! 💪 Hoy te lo armo y te llega aquí.',creado:new Date().toISOString()});
+   if(SUB==='pedido'&&PEDID===p.id){const c=$('#cht');c&&(c.innerHTML=chatHTML(p),c.scrollTop=c.scrollHeight)}else{p.visto_persona=false;if(!document.querySelector('.ov'))pinta()}vib()},4500);return p}
+ const p=PEDS().find(x=>x.id===a.p_id);
+ if(f==='xa_yo_plan_msg'){p.msgs.push({de:'persona',texto:a.p_texto,creado:now});return p}
+ if(f==='xa_yo_plan_cancelar'){p.estado='cancelado';return null}
+ return null}
 async function demoRpc(f,a){
  if(f==='xa_yo')return D;
  if(f==='xa_yo_negocio')return demoNeg(a.p_slug);
  if(f==='xa_yo_guardar'){toast('En la demo no se guarda de verdad');return true}
  if(f==='xa_yo_responder'){const av=D.avisos.shift(),{gym,den}=demoBoth();if(a.p_ok)D.negocios.push(av.rubro==='consultorio'?den:gym);return{ok:true}}
+ if(/^xa_yo_plan/.test(f))return demoPlanRpc(f,a);
  if(f==='xa_yo_editar')return{...D.persona,nombre:a.p_nombre,apodo:a.p_apodo,usuario:a.p_usuario,celular:a.p_celular};
  throw 'codigo'}
 
 // ---------- Arranque ----------
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();INSTALL=e});
 if('serviceWorker' in navigator&&!DEMO)navigator.serviceWorker.register('/mi/sw.js').catch(()=>{});
-setInterval(async()=>{if(document.hidden||!D||DEMO||MODO!=='cliente'||document.querySelector('.ov,.cam'))return;const a0=JSON.stringify(D.avisos||[]);try{await cargar();if(JSON.stringify(D.avisos||[])!==a0){pinta();if((D.avisos||[]).length){vib();toast('🔔 Tienes un aviso nuevo')}}}catch(_){}},30000);
+setInterval(async()=>{if(document.hidden||!D||DEMO||MODO!=='cliente'||document.querySelector('.ov,.cam'))return;const a0=JSON.stringify(D.avisos||[]),p0=JSON.stringify(PEDS());try{await cargar();const pc=JSON.stringify(PEDS())!==p0;
+  if(pc&&SUB==='pedido'){const p=PEDS().find(x=>x.id===PEDID),c=$('#cht');if(p&&c){c.innerHTML=chatHTML(p);c.scrollTop=c.scrollHeight;if(p.visto_persona===false){p.visto_persona=true;rpc('xa_yo_plan_visto',{p_id:p.id}).catch(()=>{})}}}
+  else if(JSON.stringify(D.avisos||[])!==a0||pc){pinta();if(pc&&pedNuevos().length){vib();toast('💬 Tienes una respuesta nueva')}else if((D.avisos||[]).length){vib();toast('🔔 Tienes un aviso nuevo')}}}catch(_){}},30000);
+setInterval(async()=>{if(document.hidden||DEMO||MODO!=='negocio'||!NB||!nPedOn()||document.querySelector('.ov,.cam'))return;const n0=nPedN(),j0=JSON.stringify(NPED||[]);await nPedCarga();if(JSON.stringify(NPED||[])===j0)return;
+ if(NTAB==='ped'){const p=(NPED||[]).find(x=>x.id===NPID),c=$('#ncht');if(p&&c){c.innerHTML=nChat(p);c.scrollTop=c.scrollHeight}}else if(NTAB!=='plan')pinta();if(nPedN()>n0){vib();toast('📥 Nueva solicitud desde la app')}},30000);
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&D&&!DEMO&&!document.querySelector('.ov,.cam')){try{await cargar();pinta()}catch(_){}}});
 (async()=>{
  if(DEMO){D=demoData();CUR=0;if(/^negocio/.test(DEMO))return modoNegocio();return pinta()}
