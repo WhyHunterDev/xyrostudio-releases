@@ -545,7 +545,7 @@ V.negocios=async ()=>{
 // ---- Alta de un negocio nuevo en 1 minuto: cliente + sitio + Xyros + ajustes de la app + cuenta del dueño ----
 const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
 // Plantillas de Xyro Apps por rubro (on = lista para usar).
-const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🩺',n:'Consultorio',d:'Pacientes, agenda por especialista, historia clínica privada y caja',on:1,color:'#14b8a6'},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
+const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🦷',n:'Consultorio dental',d:'Pacientes, agenda por odontólogo, odontograma, presupuestos con abonos e historia clínica',on:1,color:'#14b8a6'},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
 let altaRes=null,altaPlt='gym';
 /* Accesos de prueba (SQL 31): enlace /app/?prueba=CODIGO con el nombre del posible cliente y vencimiento. Es la demo completa con tiempo. */
 const PR_DUR=[[60,'1 hora'],[180,'3 horas'],[1440,'1 día'],[4320,'3 días'],[10080,'7 días'],[21600,'15 días'],[43200,'30 días']];

@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261114-0323",
+  "fecha": "2026-11-14 03:23",
+  "titulo": "Consultorio dental: solo lo que usa una clínica dental",
+  "notas": "Consultorio dental: solo lo que usa una clínica dental",
+  "cambios": [
+   "Se quitó todo lo de gimnasio en consultorios: asistencia, carnets, membresías, metas, rutinas, días de prueba y bot",
+   "Odontograma por paciente: tocas la pieza y marcas caries, obturado, endodoncia, corona, extraído o implante",
+   "Presupuestos de tratamiento con abonos, saldo y envío por WhatsApp (se arman solos desde el odontograma)",
+   "Seguimiento dental: pacientes por volver, con saldo, tratamientos sin cita y presupuestos sin respuesta",
+   "Lista de tratamientos y precios"
+  ],
+  "requiere": "SQL 44"
+ },
+ {
   "id": "20261114-0307",
   "fecha": "2026-11-14 03:07",
   "titulo": "Consultorios: agenda de citas e historia clínica",
