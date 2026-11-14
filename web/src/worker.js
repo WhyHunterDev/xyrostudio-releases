@@ -336,6 +336,11 @@ async function waApi(req, env, ctx) {
       const ver = await fetch(g, { headers: h }).then(r => r.json()).catch(e => ({ e: e.message }));
       return json({ sub, ver, ultimo: globalThis.WA_ULT || null });
     }
+    if (env.WA_VERIFY && u.searchParams.get("diag") === env.WA_VERIFY && u.searchParams.get("app")) {   // diagnóstico: ¿WA_APP_SECRET coincide con la app? (token de app = id|secreto)
+      const id = encodeURIComponent(u.searchParams.get("app")), s = (env.WA_APP_SECRET || "");
+      const r = await fetch(`https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}/${id}/subscriptions?access_token=${id}|${encodeURIComponent(s)}`).then(r => r.json()).catch(e => ({ e: e.message }));
+      return json({ largo: s.length, espacios: s !== s.trim(), r });
+    }
     if (env.WA_VERIFY && u.searchParams.get("diag") === env.WA_VERIFY && u.searchParams.get("pid")) {   // diagnóstico: mensaje simulado de un número falso
       const r = await waProcesar(env, u.searchParams.get("pid"), { from: u.searchParams.get("from") || "51900000000", id: "diag-" + Date.now(), type: "text", text: { body: u.searchParams.get("t") || "hola, cuánto cuesta el mes?" } }, "Prueba XyroStudio");
       return json({ paso: r });
