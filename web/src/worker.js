@@ -121,6 +121,8 @@ Cómo hablas:
 - Si encaja, termina con una pregunta que acerque al cliente a venir o inscribirse («¿para cuándo te animas a empezar?», «¿te paso la ubicación?»). Menciona las promos vigentes cuando vengan al caso.
 - Emojis con moderación: a lo mucho 1 por mensaje.
 - Recepción: cuando el cliente quiera hablar con una persona, inscribirse o pagar, pon «derivar» en true. Si el negocio tiene varias sedes, pon en «sede» el nombre exacto de la sede del cliente; si aún no sabes cuál, pregúntale con amabilidad de qué sede es (y deja «sede» vacío). Con una sola sede, pon su nombre. Dile que lo pasas con recepción de esa sede por WhatsApp.
+- Interesados (si la FICHA dice «Captar interesados: sí»): cuando alguien muestre interés en inscribirse o venir, pídele con naturalidad su nombre y celular para que recepción le escriba (no los pidas de entrada ni más de una vez si no quiere). Cuando ya tengas nombre Y celular, llena «cliente» con ellos y con «interes» (qué busca, en pocas palabras: plan, horario, objetivo). Mientras no los tengas, deja «cliente» con textos vacíos. Nunca inventes datos.
+- Clase de prueba (solo si la FICHA lo permite): ofrécela a quien duda o es nuevo. Acuerda día y hora dentro del horario indicado; pon «prueba_dia» en formato AAAA-MM-DD (usa la fecha de HOY para calcular «mañana», «el lunes»…) y «prueba_hora» como 7:00 pm. Confírmale el día, la hora y la sede, y dile que recepción le escribirá para confirmar.
 - Si te preguntan directamente si eres un bot o una persona, sé honesto: eres el asistente automático del negocio y puedes pasarlos con recepción.
 Qué dices:
 - Usa SOLO los datos de la FICHA. Lo que está entre paréntesis, como «(distrito)», es un dato que el negocio aún no llenó: no lo digas ni lo inventes.
@@ -128,8 +130,14 @@ Qué dices:
 - Precios en soles (S/). No prometas descuentos que no están en la ficha. Nunca pidas contraseñas, tarjetas ni datos sensibles.
 - Si preguntan algo ajeno al negocio, responde con buena onda que en eso no puedes ayudar y vuelve al tema del negocio.`;
 const BOT_SCHEMA = {
-  type: "object", additionalProperties: false, required: ["respuesta", "derivar", "sede"],
-  properties: { respuesta: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" } },
+  type: "object", additionalProperties: false, required: ["respuesta", "derivar", "sede", "cliente"],
+  properties: {
+    respuesta: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" },
+    cliente: {   // datos del interesado: vacíos hasta que los dé
+      type: "object", additionalProperties: false, required: ["nombre", "celular", "interes", "prueba_dia", "prueba_hora"],
+      properties: { nombre: { type: "string" }, celular: { type: "string" }, interes: { type: "string" }, prueba_dia: { type: "string" }, prueba_hora: { type: "string" } },
+    },
+  },
 };
 const CORS = { "access-control-allow-origin": "*", "access-control-allow-methods": "POST, OPTIONS", "access-control-allow-headers": "content-type, authorization", "access-control-max-age": "86400" };
 const jc = (o, s = 200) => { const r = json(o, s); Object.entries(CORS).forEach(([k, v]) => r.headers.set(k, v)); return r; };
@@ -161,6 +169,8 @@ async function ficha(env, slug) {
   if (ent.length) L.push("Entrenadores: " + ent.slice(0, 10).map(e => `${corta(e.nombre, 40)} (${corta(e.especialidad, 50)})`).join("; "));
   if (C.cafetin && Array.isArray(C.cafetin.items) && C.cafetin.items.length) L.push("Cafetín: " + C.cafetin.items.slice(0, 20).map(i => `${corta(i.nombre, 40)} S/${i.precio}`).join("; "));
   if (cfg.redes) L.push("Redes: " + Object.entries(cfg.redes).filter(([, v]) => v).map(([k, v]) => k + " " + corta(v, 80)).join(", "));
+  L.push("Captar interesados: " + (bot.captar === false ? "no" : "sí"));
+  L.push(bot.prueba ? "Clase de prueba gratis: sí" + (bot.pruebaTxt ? " (" + corta(bot.pruebaTxt, 200) + ")" : " (dentro del horario de atención)") : "Clase de prueba gratis: no ofrecer");
   if (bot.extra) L.push("Promos, reglas e información extra del negocio (síguela y úsala):\n" + corta(bot.extra, 3000));
   const wa = String(bot.whatsapp || (sedes[0] && sedes[0].whatsapp) || "").replace(/\D/g, "");
   const sd = sedes.slice(0, 6).map(x => ({ n: corta(x.nombre, 60), wa: String(x.whatsapp || "").replace(/\D/g, "") || wa })).filter(x => x.n);
@@ -213,6 +223,8 @@ async function botApi(req, env) {
   hist.forEach(m => { const u = messages[messages.length - 1]; if (u && u.role === m.role) u.content += "\n" + m.content; else messages.push({ ...m }); });
   if (messages.length && messages[messages.length - 1].role === "user") messages[messages.length - 1].content += "\n" + msg;
   else messages.push({ role: "user", content: msg });
+  const hoyL = new Date(Date.now() - 5 * 3600e3), DS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  messages[messages.length - 1].content = `[HOY: ${DS[hoyL.getUTCDay()]} ${hoyL.toISOString().slice(0, 10)}]\n` + messages[messages.length - 1].content;
 
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
   try {
@@ -225,7 +237,20 @@ async function botApi(req, env) {
     if (r.stop_reason === "refusal" || r.stop_reason === "max_tokens") return jc({ respuesta: "Mejor te ayuda una persona de recepción 🙌", derivar: true, wa: f.wa });
     const o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
     const sede = f.sedes.find(x => x.n.toLowerCase() === String(o.sede || "").trim().toLowerCase()) || (f.sedes.length === 1 ? f.sedes[0] : null);
-    return jc({ respuesta: corta(o.respuesta, 1200), derivar: !!o.derivar, wa: f.wa, sede: sede ? sede.n : "", sedes: f.sedes });
+    const cl = o.cliente || {}, cel = String(cl.celular || "").replace(/\D/g, "");
+    let guardado = false;
+    if (String(cl.nombre || "").trim().length > 1 && cel.length >= 9) {
+      if (token) guardado = true;   // prueba desde Xyro Apps: no se guarda
+      else {
+        const dia = /^\d{4}-\d{2}-\d{2}$/.test(cl.prueba_dia || "") ? cl.prueba_dia : null;
+        const rl = await fetch(env.SB_URL + "/rest/v1/rpc/xa_bot_lead", {
+          method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY, "content-type": "application/json" },
+          body: JSON.stringify({ p_slug: slug, p_ip: await ipHash(req), p_nombre: corta(cl.nombre, 80), p_celular: cel, p_sede: sede ? sede.n : "", p_interes: corta(cl.interes, 300), p_dia: dia, p_hora: corta(cl.prueba_hora, 20) }),
+        }).catch(() => null);
+        guardado = !!(rl && rl.ok && (await rl.json().catch(() => ({}))).ok);
+      }
+    }
+    return jc({ respuesta: corta(o.respuesta, 1200), derivar: !!o.derivar, wa: f.wa, sede: sede ? sede.n : "", sedes: f.sedes, guardado });
   } catch (e) {
     console.log("bot error", e?.status, e?.message);
     if (e instanceof Anthropic.RateLimitError) return jc({ error: "Hay muchas consultas a la vez. Intenta en un minuto.", wa: f.wa }, 429);
