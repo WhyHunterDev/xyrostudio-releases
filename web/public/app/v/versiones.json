@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261113-2350",
+  "fecha": "2026-11-13 23:50",
+  "titulo": "Tomar chat en WhatsApp",
+  "notas": "Tomar chat en WhatsApp",
+  "cambios": [
+   "Cada persona de recepción puede tomar un chat: solo ella escribe ahí",
+   "Si el cliente espera más de 2 minutos sin respuesta, otra persona de recepción puede entrar"
+  ],
+  "requiere": "SQL 40"
+ },
+ {
   "id": "20261113-2340",
   "fecha": "2026-11-13 23:40",
   "titulo": "Fecha de inicio en ventas del asistente",
