@@ -1,5 +1,18 @@
 [
  {
+  "id": "20261114-0219",
+  "fecha": "2026-11-14 02:19",
+  "titulo": "Mi plan XyroStudio y avisos de pago",
+  "notas": "Mi plan XyroStudio y avisos de pago",
+  "cambios": [
+   "Cada negocio ve «💳 Mi plan XyroStudio»: cuánto paga, cuándo vence y tus datos de Yape, Plin y cuenta",
+   "5 días antes de vencer (y si ya venció) les sale un aviso en su panel",
+   "Suben la captura del pago: la IA la lee y, si el monto y el N.º de operación cuadran, su plan se renueva solo",
+   "Lo que no cuadra te llega al gestor → 💳 Cobros para confirmar o rechazar"
+  ],
+  "requiere": "SQL 42"
+ },
+ {
   "id": "20261114-0204",
   "fecha": "2026-11-14 02:04",
   "titulo": "Lo delicado lo configura XyroStudio",

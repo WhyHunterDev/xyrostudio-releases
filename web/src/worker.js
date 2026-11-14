@@ -634,6 +634,44 @@ async function waVerMedia(req, env) {
   return new Response(m.buf, { headers: { "content-type": m.tipo, "cache-control": "private, max-age=3600" } });
 }
 
+// App «💳 Mi plan XyroStudio» (SQL 42): el admin del negocio sube la captura de su pago a XyroStudio; la IA la lee y la RPC renueva si cuadra.
+const XPAGO_SCHEMA = { type: "object", additionalProperties: false, required: ["es_pago", "monto", "operacion", "fecha", "metodo", "destinatario", "destino_ok"],
+  properties: { es_pago: { type: "boolean" }, monto: { type: "string" }, operacion: { type: "string" }, fecha: { type: "string" }, metodo: { type: "string" }, destinatario: { type: "string" }, destino_ok: { type: "boolean" } } };
+async function xyroPago(req, env) {
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token || token.length > 4000) return json({ error: "Inicia sesión" }, 401);
+  if (!env.ANTHROPIC_API_KEY || !env.WA_CLAVE) return json({ error: "La verificación no está disponible ahora." }, 503);
+  let b; try { b = JSON.parse(await req.text()); } catch { return json({ error: "Solicitud inválida" }, 400); }
+  const sitio = String(b.sitio || "").slice(0, 80), foto = String(b.foto || "");
+  if (!sitio || !foto.startsWith(env.SB_URL + "/storage/v1/object/public/medios/" + sitio + "/")) return json({ error: "Imagen inválida" }, 400);
+  const H = { apikey: env.SB_KEY, authorization: "Bearer " + token, "content-type": "application/json" };
+  const cfg = await fetch(env.SB_URL + "/rest/v1/xa_xyro_cobro?id=eq.1&select=*", { headers: H }).then(r => r.ok ? r.json() : null).catch(() => null);
+  if (!cfg) return json({ error: "Inicia sesión" }, 401);
+  const C = cfg[0] || {};
+  let d = { es_pago: false, monto: "", operacion: "", fecha: "", metodo: "", destinatario: "", destino_ok: true, lectura: "sin leer" };
+  try {
+    const im = await fetch(foto);
+    const tipo = (im.headers.get("content-type") || "").split(";")[0];
+    const buf = im.ok ? await im.arrayBuffer() : null;
+    if (buf && /^image\/(jpeg|png|webp|gif)$/.test(tipo) && buf.byteLength < 4.5e6) {
+      const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
+      const r = await client.messages.create({
+        model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 600,
+        system: `Revisas comprobantes de pago en Perú (Yape, Plin, transferencia, depósito). Lee de la imagen: monto (solo número), número de operación, fecha y hora, método y a quién se pagó (destinatario). «destino_ok» = true si el destinatario coincide con alguno de estos datos de XyroStudio (o si la imagen no muestra el destinatario): titular «${corta(C.titular || "", 80)}», Yape ${corta(C.yape || "-", 20)}, Plin ${corta(C.plin || "-", 20)}, cuenta ${corta(C.cuenta || "-", 30)}, CCI ${corta(C.cci || "-", 30)}. Los números pueden verse en parte (ej. ***066). Hoy es ${new Date(Date.now() - 18e6).toISOString().slice(0, 10)}. Deja vacío lo que no se vea; nunca inventes.`,
+        messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: tipo, data: b64(buf) } }, { type: "text", text: "Lee este comprobante." }] }],
+        output_config: { effort: "low", format: { type: "json_schema", schema: XPAGO_SCHEMA } },
+      });
+      if (r.stop_reason !== "refusal" && r.stop_reason !== "max_tokens") d = { ...JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join("")), lectura: "ia" };
+    }
+  } catch (err) { console.log("xyro pago ia", err?.status, err?.message); }
+  const r = await fetch(env.SB_URL + "/rest/v1/rpc/xa_xyro_pago", { method: "POST", headers: H, body: JSON.stringify({ p_clave: env.WA_CLAVE, p_sitio: sitio, p_foto: foto, p_datos: d }) }).catch(() => null);
+  if (!r || !r.ok) return json({ error: r && r.status === 404 ? "Muy pronto podrás pagar desde aquí." : "No se pudo guardar tu pago. Intenta otra vez." }, 502);
+  const o = await r.json().catch(() => null);
+  if (!o) return json({ error: "No se pudo guardar tu pago." }, 502);
+  return json(o, o.ok ? 200 : 403);
+}
+
 export default {
   async fetch(req, env, ctx) {
     const u = new URL(req.url);
@@ -644,6 +682,7 @@ export default {
     if (u.pathname === "/api/wa/media") return waVerMedia(req, env);
     if (u.pathname === "/api/bot/doc") return botDoc(req, env);
     if (u.pathname === "/api/bot/reglas") return botReglas(req, env);
+    if (u.pathname === "/api/xyro/pago") return xyroPago(req, env);
     if (u.pathname.startsWith("/api/")) return json({ error: "No existe" }, 404);
     return env.ASSETS.fetch(req);
   },
