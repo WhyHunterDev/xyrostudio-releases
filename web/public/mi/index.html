@@ -77,7 +77,7 @@ input:focus{border-color:var(--a)}
 .ring{width:96px;height:96px;position:relative;flex:none}
 .ring svg{transform:rotate(-90deg)}.ring circle{fill:none;stroke-width:9}
 .ring .bk{stroke:var(--c2)}.ring .fg{stroke:url(#rgg);stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.2,1,.3,1)}
-.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;line-height:1;text-align:center}
+.ring b{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;font-size:24px;line-height:1;text-align:center}
 .ring b small{display:block;font-size:10px;color:var(--mu);font-weight:600;margin-top:2px}
 .st{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .st>div{background:var(--c1);border:1px solid var(--ln);border-radius:18px;padding:14px}
@@ -114,7 +114,7 @@ input:focus{border-color:var(--a)}
 @keyframes up{from{transform:translateY(40px);opacity:.3}}
 .qrfull{position:fixed;inset:0;background:#fff;z-index:10;display:grid;place-items:center;gap:16px;align-content:center;color:#000;text-align:center;padding:20px}
 .qrfull svg{width:min(80vw,420px);height:auto}
-.demo{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom));right:18px;z-index:5;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;background:var(--wa);color:#000}
+.demo{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:18px;opacity:.85;z-index:5;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;background:var(--wa);color:#000}
 .pronto{border-style:dashed}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--c2);border:1px solid var(--ln);padding:10px 16px;border-radius:14px;font-size:14px;z-index:11;animation:in .3s}
 .cover{position:relative;margin:calc(-14px - env(safe-area-inset-top)) -16px 0;height:230px;background:var(--c1) center/cover no-repeat}
@@ -147,6 +147,28 @@ input:focus{border-color:var(--a)}
 .gbtn{background:#fff;color:#111}
 .seg{display:grid;grid-template-columns:1fr 1fr;background:var(--c1);border-radius:14px;padding:4px;gap:4px}
 .seg button{border:0;background:none;border-radius:11px;padding:10px;font-weight:800;color:var(--mu);cursor:pointer}.seg button.on{background:var(--c2);color:var(--tx)}
+
+/* Barra de 5: escanear siempre al centro */
+.tab.scan{flex:0 0 72px}
+/* Modo negocio */
+.nh{display:flex;gap:12px;align-items:center;margin-bottom:16px}.nh h1{line-height:1.15}
+.nlg{width:48px;height:48px;border-radius:15px;background:var(--c2);display:grid;place-items:center;font-size:22px;overflow:hidden;flex:none;border:1px solid var(--ln)}.nlg img{width:100%;height:100%;object-fit:cover}
+.kps{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kp{background:var(--c1);border:1px solid var(--ln);border-radius:20px;padding:14px;display:grid;gap:4px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);min-width:0}
+.kp>span:first-child{display:flex;gap:6px;align-items:center;font-weight:700}.kp>span:first-child svg{width:15px;height:15px;color:var(--a)}
+.kp b{font-size:clamp(19px,5.6vw,24px);letter-spacing:-.02em;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:110px;align-items:end}.bars div{display:grid;grid-template-rows:1fr auto;height:100%;gap:6px;justify-items:center}
+.bars i{align-self:end;width:100%;max-width:30px;border-radius:8px 8px 4px 4px;background:color-mix(in srgb,var(--a) 35%,transparent)}.bars i.on{background:var(--gr)}.bars span{font-size:11px;color:var(--mu);font-weight:700}
+.btn.sm{width:40px;height:40px;padding:0;flex:none;border-radius:13px}.btn.wa{background:#16a34a22;color:#22c55e}
+.srch{display:flex;gap:10px;align-items:center;background:var(--c1);border:1px solid var(--ln);border-radius:16px;padding:0 14px}.srch svg{color:var(--mu);flex:none}.srch input{border:0;background:none;padding:14px 0;width:100%}
+.li.cl{width:100%;background:none;border:0;border-top:1px solid var(--ln);color:inherit;text-align:left;cursor:pointer;align-items:center}.li.cl:first-child{border-top:0}
+.tm{flex:none;min-width:64px;text-align:center;padding:6px 8px;border-radius:10px;background:color-mix(in srgb,var(--a) 18%,transparent);color:#cfc6ff;font-weight:800;font-size:12px;white-space:nowrap}
+.mts{display:flex;gap:6px;flex-wrap:wrap}.resp{border-left:3px solid var(--a);padding:6px 0 6px 12px;display:grid;gap:2px}
+.res{position:fixed;inset:0;z-index:60;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;padding:24px;color:#fff;animation:in .25s;transition:opacity .35s}
+.res.ok{background:radial-gradient(circle at 50% 40%,#16a34a,#052e16 75%)}.res.w{background:radial-gradient(circle at 50% 40%,#d97706,#3b1d02 75%)}.res.ko{background:radial-gradient(circle at 50% 40%,#dc2626,#3b0606 75%)}.res.out{opacity:0}
+.res .rc{width:110px;height:110px;border-radius:50%;background:#ffffff26;display:grid;place-items:center;margin-bottom:8px}.res .rc svg{width:60px;height:60px;stroke-width:2.6}.res h2{font-size:28px}.res p{max-width:300px;opacity:.9}
+textarea{width:100%;font:inherit;color:var(--tx);background:var(--c2);border:1px solid var(--ln);border-radius:14px;padding:12px;resize:vertical}
+@media (max-width:360px){.tab{font-size:10px}.tab.scan{flex:0 0 62px}.tab.scan .fab{width:52px;height:52px}.kps{gap:8px}.kp{padding:12px}}
 </style>
 </head>
 <body>
@@ -188,7 +210,22 @@ const I={home:SV('<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 
  map:SV('<path d="M9 4.5 3.5 6.5v13l5.5-2 6 2 5.5-2v-13l-5.5 2z"/><path d="M9 4.5v13M15 6.5v13"/>'),
  trophy:SV('<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H4.5v1A3.5 3.5 0 0 0 8 10.5M16 6h3.5v1a3.5 3.5 0 0 1-3.5 3.5M12 13v4M8.5 20.5h7M10 17h4v3.5h-4z"/>'),
  cal:SV('<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/>'),
- dumb:SV('<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>')};
+ dumb:SV('<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>'),
+ bell:SV('<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15zM10 20.5a2.2 2.2 0 0 0 4 0"/>'),
+ chart:SV('<path d="M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6M20 16V6"/>'),
+ users:SV('<circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 20c.9-3.3 3.5-5 6.5-5s5.6 1.7 6.5 5M15.5 5.2a3.5 3.5 0 0 1 0 6.6M18 15.3c1.7.7 2.9 2.2 3.5 4.7"/>'),
+ cash:SV('<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v.01M18 14.5v.01"/>'),
+ pulse:SV('<path d="M3 12h4l2.5-6 5 12 2.5-6h4"/>'),
+ grid:SV('<rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/>'),
+ brief:SV('<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7V5.5A1.5 1.5 0 0 1 10 4h4a1.5 1.5 0 0 1 1.5 1.5V7M3 12.5h18"/>'),
+ help:SV('<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17v.01"/>'),
+ search:SV('<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>'),
+ check:SV('<path d="m5 12.5 4.5 4.5L19 7.5"/>'),
+ x:SV('<path d="M6 6l12 12M18 6 6 18"/>'),
+ alert:SV('<path d="M12 4 2.8 19.5h18.4zM12 10v4.5M12 17.2v.01"/>'),
+ chat:SV('<path d="M4 19.5 5.3 16A8 8 0 1 1 8 18.7z"/>'),
+ phone:SV('<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/>'),
+ refresh:SV('<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3L19.5 9M19.5 4.5V9H15"/>')};
 let sb=null,D=null,TAB='inicio',SUB=null,CUR=+(ls.g('mi-neg')||0),INSTALL=null,post=null,NEG={};
 
 // ---------- Conexión ----------
@@ -246,11 +283,13 @@ function pantallaEntrada(msg,modo){
    <button class="btn p" id="lb">${modo==='crear'?'Crear mi cuenta':'Entrar'}</button>
    ${modo==='entrar'?'<button type="button" class="btn l" id="olv">¿Olvidaste tu clave?</button>':''}
   </form>
+  <button type="button" class="btn l" id="lneg" style="color:var(--tx)">${I.brief}Soy un negocio · entrar a mi panel</button>
   <p class="mu xs" style="text-align:center">¿Quieres verla antes? <a href="?demo=1" style="color:var(--a)">Mira la demo</a> · Hecho por XyroStudio</p>
  </div></div>`;
  const m=$('#lm'),say=(t,ok)=>{m.textContent=t;m.className='msg on'+(ok?' ok':'')};if(msg)say(msg);
  const sv=ls.g('mi-email');if(sv)$('#le').value=sv;
  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>pantallaEntrada('',b.dataset.m));
+ $('#lneg').onclick=()=>modoNegocio();
  $('#gg').onclick=async()=>{try{await cliente();const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:HOME}});if(error)throw error}catch(e){say(errDe(e))}};
  const o=$('#olv');o&&(o.onclick=async()=>{const em=$('#le').value.trim();if(!/@/.test(em))return say('Escribe tu correo y vuelve a tocar «¿Olvidaste tu clave?».');
   try{await cliente();const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:HOME});if(error)throw error;say('📩 Te enviamos un correo para crear una clave nueva.',1)}catch(e){say(errDe(e))}});
@@ -270,6 +309,7 @@ function nuevaClave(){hoja(`<h2>🔑 Crea tu clave nueva</h2><input id="nc" type
 async function entrar(){
  try{await cargar()}catch(e){const c=ls.g('mi-data');if(c){D=JSON.parse(c);toast('Sin conexión: mostrando lo último guardado')}else return pantallaEntrada('Sin conexión. Revisa tu internet.')}
  history.replaceState(0,'','/mi/'+(DEMO?'?demo='+DEMO:''));
+ if(!DEMO){rpc('xa_yo_ping',{p_equipo:equipo()}).catch(()=>{});cargaSop().then(()=>{if(MODO==='cliente'&&!document.querySelector('.ov,.cam'))pinta()})}
  const p=pend.get();pend.set(null);
  if(p&&p.n){await guardarNeg(p.n,true);TAB='negocios';SUB={neg:p.n}}
  else if(p&&p.c){pinta();return conCodigo(p.c)}
@@ -279,16 +319,17 @@ async function entrar(){
 // ---------- Navegación ----------
 const SUBV={rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat};
 function pinta(){
+ if(MODO==='negocio'&&NB)return pintaNeg();
  if(!D&&!(SUB&&SUB.neg))return pantallaEntrada();
  if(TAB==='inicio'&&N())acento(N());else if(SUB&&SUB.neg&&NEG[SUB.neg])acento(NEG[SUB.neg]);else acento(null);
  let body;
  if(SUB&&SUB.neg)body=vNegocio(SUB.neg);
  else if(SUB&&SUBV[SUB])body=`<button class="back" data-back>‹ Volver</button>`+SUBV[SUB](N());
- else body=({inicio:vInicioGen,negocios:vNegocios,perfil:vPerfil}[TAB]||vInicioGen)();
- const T=[['inicio',I.home,'Inicio'],['negocios',I.store,'Negocios'],['scan',I.scan,''],['perfil',I.user,'Perfil']];
- const av=((D&&D.avisos)||[]).length;
+ else body=({inicio:vInicioGen,negocios:vNegocios,avisos:vAvisos,perfil:vPerfil}[TAB]||vInicioGen)();
+ const T=[['inicio',I.home,'Inicio'],['negocios',I.store,'Negocios'],['scan',I.scan,''],['avisos',I.bell,'Avisos'],['perfil',I.user,'Perfil']];
+ const av=((D&&D.avisos)||[]).length+((SOP||[]).filter(x=>x.respuesta&&!x.visto).length);
  app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
- <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===TAB&&!SUB?' on':''}" data-tab="${k}" aria-label="${k==='scan'?'Escanear QR':t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='inicio'&&av?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
+ <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===TAB&&!SUB?' on':''}" data-tab="${k}" aria-label="${k==='scan'?'Escanear QR':t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='avisos'&&av?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.tab==='scan')return escanear();TAB=b.dataset.tab;SUB=null;pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{vib();SUB=b.dataset.sub;pinta()});
  app.querySelectorAll('[data-neg]').forEach(b=>b.onclick=()=>abrirNeg(b.dataset.neg));
@@ -296,7 +337,8 @@ function pinta(){
  app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{CUR=+b.dataset.n;ls.s('mi-neg',CUR);TAB='inicio';SUB=null;pinta()});
  app.querySelectorAll('[data-yo]').forEach(b=>b.onclick=yaRegistrado);
  app.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>responder(b.dataset.av,b.dataset.ok==='1',b));
- app.querySelectorAll('[data-scan]').forEach(b=>b.onclick=escanear);
+ app.querySelectorAll('[data-scan]').forEach(b=>b.onclick=()=>escanear());
+ app.querySelectorAll('#ayu').forEach(b=>b.onclick=ayuda);
  const f=post;post=null;f&&f();
 }
 function barraNeg(){const L=negs();if(L.length<2)return'';
@@ -471,8 +513,8 @@ function conCodigo(code){yaRegistrado();setTimeout(()=>{const d=document.querySe
 
 // ---------- Escáner ----------
 let camStream=null;
-async function escanear(){
- const o=document.createElement('div');o.className='cam';o.innerHTML=`<video playsinline muted autoplay></video><div class="mk"></div><div class="bt"><b style="text-shadow:0 2px 10px #000">Apunta al QR del negocio</b><p class="msg" id="cmm"></p><button class="btn" id="cx">Cerrar</button></div>`;
+async function escanear(onCode,txt){
+ const o=document.createElement('div');o.className='cam';o.innerHTML=`<video playsinline muted autoplay></video><div class="mk"></div><div class="bt"><b style="text-shadow:0 2px 10px #000">${esc(txt||'Apunta al QR del negocio')}</b><p class="msg" id="cmm"></p><button class="btn" id="cx">Cerrar</button></div>`;
  document.body.appendChild(o);const v=o.querySelector('video'),m=o.querySelector('#cmm');let vivo=true;
  const fin=()=>{vivo=false;try{camStream&&camStream.getTracks().forEach(t=>t.stop())}catch(_){}camStream=null;o.remove()};
  o.querySelector('#cx').onclick=fin;
@@ -484,6 +526,7 @@ async function escanear(){
  const leer=async()=>{if(!vivo)return;let t='';
   try{if(det){const r=await det.detect(v);t=r[0]&&r[0].rawValue||''}
    else if(window.jsQR&&v.videoWidth){const w=480,h=Math.round(v.videoHeight*w/v.videoWidth);cv.width=w;cv.height=h;cx.drawImage(v,0,0,w,h);const r=jsQR(cx.getImageData(0,0,w,h).data,w,h);t=r&&r.data||''}}catch(_){}
+  if(t&&onCode){if(t===escanear.u&&Date.now()-escanear.t<3500){setTimeout(leer,250);return}escanear.u=t;escanear.t=Date.now();vib();if(await onCode(t)){fin();return}setTimeout(leer,900);return}
   if(t){const s=slugDe(t),c=/[?&]c=/.test(t)?codigoDe(t):'';
    if(s){vib();fin();await abrirNeg(s);if(D&&NEG[s]&&!NEG[s].guardado&&!NEG[s].socio)guardarNeg(s,true);return}
    if(c){vib();fin();return conCodigo(c)}
@@ -494,13 +537,15 @@ async function escanear(){
 
 // ---------- Perfil ----------
 function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim()[0]||'?';
- const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);const s=$('#salir');s&&(s.onclick=salir);$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
+ const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=()=>modoNegocio();const s=$('#salir');s&&(s.onclick=salir);$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
  return`<div class="g"><div class="row"><div class="av">${/^https:\/\//.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
    <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p></div></div>
   <button class="btn" id="ed">✏️ Editar mi perfil</button>
   <div class="idbox"><span class="mu xs" style="font-weight:700;display:inline-flex;gap:6px;align-items:center;justify-content:center;color:var(--a)">${I.id}ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><p class="mu xs">Es tuyo y nunca cambia. Dáselo a recepción para que conecten tu membresía a esta app.</p><button class="btn" id="cpi">📋 Copiar mi ID</button></div>
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
   ${esApp()?'':`<button class="btn p" id="inst">📲 Instalar en mi celular</button>`}
+  <div class="card"><div class="row"><div class="ibox">${I.brief}</div><div class="sp"><h3>¿Tienes un negocio?</h3><p class="mu sm">Dueños y personal autorizado: mira ventas, ingresos y socios, y marca asistencias desde aquí.</p></div></div><button class="btn" id="mneg">Entrar a mi negocio</button></div>
+  <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
   <div class="card pronto"><div class="row"><div class="ibox">${I.trophy}</div><div class="sp"><h3>Muy pronto: puntos y premios</h3><p class="mu sm">Suma puntos cada vez que vas a tus negocios y canjéalos por premios.</p></div></div></div>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio</p></div>`}
@@ -522,6 +567,169 @@ async function salir(){try{await sb.auth.signOut()}catch(_){}ls.s('mi-data',null
 function confeti(){const C=['#fff',getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||ACC,'#facc15'];for(let i=0;i<40;i++){const d=document.createElement('i');const x=Math.random()*100,dl=Math.random()*.3;
  d.style.cssText=`position:fixed;z-index:20;top:-10px;left:${x}vw;width:8px;height:12px;border-radius:2px;background:${C[i%3]};pointer-events:none;transition:transform 1.4s cubic-bezier(.2,.8,.3,1) ${dl}s,opacity 1.4s ${dl}s`;
  document.body.appendChild(d);requestAnimationFrame(()=>{d.style.transform=`translate(${(Math.random()-.5)*120}px,${60+Math.random()*40}vh) rotate(${Math.random()*720}deg)`;d.style.opacity='0'});setTimeout(()=>d.remove(),2000)}}
+
+// ---------- Modo negocio (dueños y personal autorizado) ----------
+// Usa la MISMA sesión del panel Xyro Apps (storageKey xyro-apps-auth): si ya entró al panel en este equipo, entra directo.
+let MODO=ls.g('mi-modo')==='negocio'?'negocio':'cliente',sb2=null,NSB=null,NB=null,NTAB='resumen',NSLUG=ls.g('mi-nslug')||null,NQ='',NRES=null,NT=0;
+const XDOM='.xyrostudio.net',aEmail=x=>{x=String(x||'').trim().toLowerCase();if(!x.includes('@'))return x;const[u,d]=x.split('@');return d.includes('.')?x:u+'@'+d+XDOM};
+async function cliNeg(){if(sb2)return sb2;await cliente();sb2=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-apps-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});return sb2}
+async function nrpc(f,a){if(DEMO)return demoNegRpc(f,a);const{data,error}=await NSB.rpc(f,a||{});if(error)throw error;return data}
+async function nCargar(){const r=await nrpc('xa_neg',{p_slug:NSLUG});if(!r||r.error)throw new Error('sin_negocio');NB=r;return r}
+const nDent=()=>NB&&NB.rubro==='consultorio';
+const ROLN={gestor:'XyroStudio',admin:'Administrador',supervisor:'Supervisor',recepcion:'Recepción',cafetin:'Cafetín',entrenador:'Entrenador',nutricionista:'Nutricionista',profesional:'Profesional'};
+async function modoNegocio(silencio){
+ if(DEMO){MODO='negocio';NB=demoNB();NTAB='resumen';return pinta()}
+ try{await cliNeg();
+  const{data:{session}}=await sb2.auth.getSession();
+  if(session){NSB=sb2;try{await nCargar();return entrarNeg()}catch(_){}}
+  const{data:{session:s1}}=await sb.auth.getSession();
+  if(s1){NSB=sb;try{await nCargar();return entrarNeg()}catch(_){}}
+ }catch(_){}
+ if(silencio){MODO='cliente';ls.s('mi-modo',null);return false}
+ loginNegocio();
+}
+function entrarNeg(){MODO='negocio';ls.s('mi-modo','negocio');NTAB='resumen';NRES=null;pinta();return true}
+function modoCliente(){vib();MODO='cliente';ls.s('mi-modo',null);if(D)return pinta();pantallaEntrada()}
+function loginNegocio(){hoja(`<div style="display:grid;justify-items:center;gap:8px;text-align:center"><div class="ibox big">${I.brief.replace('width="22" height="22"','width="34" height="34"')}</div><h2>Entrar a mi negocio</h2>
+  <p class="mu sm" style="max-width:320px">Para dueños y personal autorizado. Usa la misma cuenta de tu panel Xyro Apps.</p></div>
+ <form class="g" id="nf"><label>Usuario o correo<input id="ne" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="recepcion@tunegocio o tu correo" required></label>
+ <label>Clave<input id="np" type="password" autocomplete="current-password" required></label><input id="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0" aria-hidden="true">
+ <div class="msg" id="nm"></div><button class="btn p" id="nb">Entrar</button><button type="button" class="btn l" data-x>Cancelar</button></form>`,(o,close)=>{
+ const m=o.querySelector('#nm'),say=t=>{m.textContent=t;m.className='msg on'};
+ o.querySelector('#nf').onsubmit=async e=>{e.preventDefault();if(o.querySelector('#hp').value)return;const b=o.querySelector('#nb'),em=aEmail(o.querySelector('#ne').value),pw=o.querySelector('#np').value;
+  if(!/@/.test(em))return say('Escribe tu usuario completo (ej. recepcion@tunegocio) o tu correo.');
+  b.disabled=true;b.textContent='Un momento…';
+  try{await cliNeg();let w=0;try{const{data}=await sb2.rpc('xa_login_espera',{p_email:em});w=data|0}catch(_){}
+   if(w>0)throw new Error('Demasiados intentos. Espera '+Math.ceil(w/60)+' min y vuelve a intentar.');
+   const{error}=await sb2.auth.signInWithPassword({email:em,password:pw});
+   if(error){try{await sb2.rpc('xa_login_fallo',{p_email:em,p_ua:navigator.userAgent.slice(0,200)})}catch(_){}throw new Error('Usuario o clave incorrectos.')}
+   NSB=sb2;try{await nCargar()}catch(_){throw new Error('Esta cuenta no tiene un negocio en Xyro Apps.')}
+   close();entrarNeg();toast('👋 Hola, '+(NB.nombre||ROLN[NB.rol]||''))}
+  catch(er){say(er.message&&!/fetch|JWT|PGRST/i.test(er.message)?er.message:errDe(er));b.disabled=false;b.textContent='Entrar'}}})}
+
+function pintaNeg(){acento();
+ const dn=nDent(),T=[['resumen',I.chart,'Resumen'],['socios',I.users,dn?'Pacientes':'Socios'],['scan',I.scan,''],['hoy',dn?I.cal:I.pulse,dn?'Agenda':'Hoy'],['mas',I.grid,'Más']];
+ const body=NB&&NB.gestor&&!NSLUG?nGestor():({resumen:nResumen,socios:nSocios,hoy:nHoy,mas:nMas}[NTAB]||nResumen)();
+ app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
+ <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===NTAB?' on':''}" data-nt="${k}" aria-label="${k==='scan'?(dn?'Buscar por QR':'Marcar ingreso con QR'):t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}</button>`).join('')}</nav>`;
+ app.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.nt==='scan')return nScan();NTAB=b.dataset.nt;pinta();$('#sc').scrollTop=0});
+ app.querySelectorAll('[data-cli]').forEach(b=>b.onclick=()=>nFicha(NRES&&NRES.find(x=>x.id===b.dataset.cli)));
+ app.querySelectorAll('[data-ntgo]').forEach(b=>b.onclick=()=>{NTAB=b.dataset.ntgo;pinta()});
+ app.querySelectorAll('[data-nscan]').forEach(b=>b.onclick=nScan);
+ const f=post;post=null;f&&f();
+}
+function nHead(sub){const lg=logoURL(NB.logo);
+ return`<div class="nh"><span class="nlg">${lg?`<img src="${esc(lg)}" alt="">`:(nDent()?'🦷':'🏋️')}</span><div class="sp" style="min-width:0"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">${esc(sub||'MODO NEGOCIO')}</p><h1 style="font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(NB.negocio)}</h1>
+  <p class="xs" style="color:#cfc6ff;font-weight:700">${esc(ROLN[NB.rol]||NB.rol)}${NB.sede?' · '+esc(NB.sede):''}</p></div></div>`}
+const kpi=(l,v,s,ic)=>`<div class="kp"><span class="mu xs">${ic||''}${l}</span><b>${v}</b>${s?`<span class="mu xs">${s}</span>`:''}</div>`;
+function nResumen(){if(!NB)return'';const dn=nDent(),C=NB.citas||[],h=new Date().toLocaleDateString('es-PE',{timeZone:'America/Lima',weekday:'short',day:'numeric',month:'short'});
+ const sem=NB.semana||[],mx=Math.max(1,...sem.map(x=>+x.v||0));
+ return`${nHead(h.toUpperCase())}<div class="g">
+  <div class="kps">${NB.plata?kpi('Ingresos de hoy',money(NB.ing_hoy||0),(NB.cobros_hoy||0)+' cobro'+(NB.cobros_hoy==1?'':'s'),I.cash):''}
+   ${dn?kpi('Citas de hoy',C.length,C.filter(c=>c.estado==='atendida').length+' atendidas',I.cal):kpi('Ingresos al local',NB.asis_hoy||0,'personas hoy',I.pulse)}
+   ${dn?kpi('Pacientes',NB.clientes||0,'+'+(NB.nuevos_mes||0)+' este mes',I.users):kpi('Socios activos',NB.activos||0,'de '+(NB.clientes||0)+' registrados',I.users)}
+   ${NB.plata?kpi('Ingresos del mes',money(NB.ing_mes||0),'',I.chart):kpi('Nuevos este mes',NB.nuevos_mes||0,'',I.chart)}</div>
+  ${NB.plata&&sem.length?`<div class="card"><div class="row"><b class="sp">Últimos 7 días</b><span class="mu xs">${money(sem.reduce((a,x)=>a+(+x.v||0),0))}</span></div>
+   <div class="bars">${sem.map((x,i)=>`<div><i style="height:${Math.max(4,Math.round((+x.v||0)/mx*100))}%" class="${i===sem.length-1?'on':''}"></i><span>${'DLMMJVS'[new Date(x.d+'T12:00:00').getDay()]}</span></div>`).join('')}</div></div>`:''}
+  ${dn?'':`<button class="btn p" data-nscan>${I.scan}Marcar ingreso con QR</button>`}
+  <div class="card"><div class="row"><div class="ibox">${I.phone}</div><div class="sp"><b>Mi Xyro</b><p class="mu sm">${NB.seguidores||0} te guardaron · ${NB.en_app||0} ${dn?'pacientes':'socios'} con su app</p></div></div></div>
+  ${dn&&C.length?`<h2>Citas de hoy</h2><div class="card">${C.slice(0,6).map(nCita).join('')}</div>`:''}
+  ${!dn&&(NB.por_vencer||[]).length?`<h2>Por vencer esta semana</h2><div class="card">${NB.por_vencer.slice(0,8).map(x=>`<div class="li"><span class="dot">${esc((x.nombre||'?')[0])}</span><span class="sp"><b>${esc(x.nombre)}</b><br><span class="mu xs">${esc(x.plan||'Membresía')} · vence ${fF(x.fin,{day:'numeric',month:'short'})}</span></span>${x.tel?`<a class="btn sm wa" href="https://wa.me/51${cel(x.tel)}?text=${encodeURIComponent('Hola '+String(x.nombre).split(' ')[0]+', tu membresía en '+NB.negocio+' vence el '+fF(x.fin,{day:'numeric',month:'long'})+'. ¿Te la renovamos? 💪')}" target="_blank" rel="noopener">${I.chat}</a>`:''}</div>`).join('')}</div>`:''}
+ </div>`}
+const CEST={agendada:['Agendada','var(--mu)'],confirmada:['Confirmada','#22c55e'],llego:['Llegó','#3ad6ff'],atendida:['Atendida','#a78bfa'],no_vino:['No vino','#ef4444']};
+const nCita=c=>{const e=CEST[c.estado]||[c.estado,'var(--mu)'];return`<div class="li"><span class="tm">${fH(c.inicio).replace(/\s?a\.\s?m\./,' am').replace(/\s?p\.\s?m\./,' pm')}</span><span class="sp"><b>${esc(c.nombre||'Paciente')}</b><br><span class="mu xs">${esc(c.servicio||'Cita')}${c.prof?' · '+esc(c.prof):''}</span></span><span class="xs" style="font-weight:700;color:${e[1]}">${e[0]}</span></div>`};
+function estCli(x){const h=hoyL();if(!x.fin)return['Sin plan','var(--mu)'];if(x.fin<h)return['Venció '+fF(x.fin,{day:'numeric',month:'short'}),'#ef4444'];if(x.inicio>h)return['Empieza '+fF(x.inicio,{day:'numeric',month:'short'}),'#f59e0b'];const d=dias(h,x.fin);return[d<=5?'Vence en '+d+' d':'Activo hasta '+fF(x.fin,{day:'numeric',month:'short'}),d<=5?'#f59e0b':'#22c55e']}
+function nSocios(){const dn=nDent();
+ post=()=>{const q=$('#nq');if(!q)return;q.focus();q.oninput=()=>{NQ=q.value;clearTimeout(NT);NT=setTimeout(nBuscar,300)}};
+ return`${nHead(dn?'PACIENTES':'SOCIOS')}<div class="g"><div class="srch">${I.search}<input id="nq" value="${esc(NQ)}" placeholder="Nombre, N.º, DNI o código" autocomplete="off" enterkeyhint="search"></div>
+  <div id="nl">${nLista()}</div></div>`}
+function nLista(){if(NRES==null)return`<div class="card vacio" style="text-align:center"><p class="mu sm">Escribe al menos 2 letras para buscar.</p></div>`;
+ if(!NRES.length)return`<div class="card" style="text-align:center"><p class="mu sm">No encontramos a nadie con «${esc(NQ)}».</p></div>`;
+ return`<div class="card" style="padding:4px 16px">${NRES.map(x=>{const e=estCli(x);return`<button class="li cl" data-cli="${esc(x.id)}"><span class="dot">${esc((x.nombre||'?')[0])}</span><span class="sp"><b>${esc(x.nombre)}</b>${x.app?` <span title="Tiene Mi Xyro" style="color:var(--a)">●</span>`:''}<br><span class="mu xs">${x.num?'N.º '+esc(x.num)+' · ':''}${esc(x.plan||'')}</span></span><span class="xs" style="font-weight:700;color:${e[1]};text-align:right">${e[0]}</span></button>`}).join('')}</div>`}
+async function nBuscar(){const q=NQ.trim();if(q.length<2){NRES=null}else{try{NRES=await nrpc('xa_neg_buscar',{p_q:q,p_slug:NSLUG})||[]}catch(e){NRES=[];toast(errDe(e))}}
+ const l=$('#nl');if(!l)return;l.innerHTML=nLista();l.querySelectorAll('[data-cli]').forEach(b=>b.onclick=()=>nFicha(NRES.find(x=>x.id===b.dataset.cli)))}
+function nFicha(x){if(!x)return;const e=estCli(x),dn=nDent();
+ hoja(`<div style="display:grid;justify-items:center;gap:6px;text-align:center"><div class="av" style="width:72px;height:72px;font-size:28px">${/^https:\/\//.test(x.foto||'')?`<img src="${esc(x.foto)}" alt="">`:esc((x.nombre||'?')[0])}</div><h2>${esc(x.nombre)}</h2>
+  <span class="pill" style="color:${e[1]}">${e[0]}</span></div>
+  <div class="card" style="gap:6px">${x.num?`<p class="sm"><span class="mu">N.º</span> <b>${esc(x.num)}</b></p>`:''}${x.plan?`<p class="sm"><span class="mu">${dn?'Tratamiento':'Plan'}</span> <b>${esc(x.plan)}</b></p>`:''}${x.dni?`<p class="sm"><span class="mu">DNI</span> ${esc(x.dni)}</p>`:''}
+   <p class="sm"><span class="mu">Última visita</span> ${x.ultima?fF(x.ultima,{day:'numeric',month:'short'})+' · '+fH(x.ultima):'—'}</p><p class="sm"><span class="mu">Mi Xyro</span> ${x.app?'✅ Conectado':'Sin conectar'}</p></div>
+  ${!dn&&x.codigo?`<button class="btn p" id="fck">${I.check}Marcar ingreso ahora</button>`:''}
+  ${x.tel?`<a class="btn" href="https://wa.me/51${cel(x.tel)}" target="_blank" rel="noopener" style="text-decoration:none;color:var(--tx)">${I.chat}Escribir por WhatsApp</a>`:''}
+  <button class="btn l" data-x>Cerrar</button>`,(o,close)=>{const b=o.querySelector('#fck');b&&(b.onclick=async()=>{close();await nCheck(x.codigo)})})}
+async function nCheck(code){try{const r=await nrpc('xa_neg_checkin',{p_codigo:code,p_slug:NSLUG});nResultado(r);if(r&&r.ok&&NB){NB.asis_hoy=(NB.asis_hoy||0)+1;(NB.ultimos=NB.ultimos||[]).unshift({t:new Date().toISOString(),nombre:r.nombre,quien:'app'})}return r}catch(e){toast(errDe(e))}}
+function nResultado(r){if(!r)return;const ok=r.ok,w=r.warn&&ok,d=document.createElement('div');d.className='res '+(ok?(w?'w':'ok'):r.warn?'w':'ko');
+ d.innerHTML=`<div class="rc">${ok?I.check:r.warn?I.alert:I.x}</div><h2>${esc(r.t||'')}</h2>${r.nombre?`<b>${esc(r.nombre)}</b>`:''}<p>${esc(r.s||'')}</p>`;document.body.appendChild(d);
+ try{navigator.vibrate&&navigator.vibrate(ok?[20]:[60,40,60])}catch(_){}setTimeout(()=>d.classList.add('out'),2300);setTimeout(()=>d.remove(),2700)}
+function nScan(){const dn=nDent();
+ escanear(async t=>{const v=(/[?&]c=([A-Za-z0-9_-]+)/.exec(t)||[])[1]||t.trim();
+  if(dn){NQ=v;NTAB='socios';await nBuscar();pinta();if(NRES&&NRES.length===1)nFicha(NRES[0]);return true}
+  await nCheck(v);return false},dn?'Apunta al QR del paciente':'Apunta al QR del socio · se marca solo')}
+function nHoy(){const dn=nDent();
+ if(dn){const C=NB.citas||[];return`${nHead('AGENDA DE HOY')}<div class="g">${C.length?`<div class="card">${C.map(nCita).join('')}</div>`:`<div class="card" style="text-align:center"><p class="mu sm">No hay citas para hoy.</p></div>`}<a class="btn" href="${panelURL()}" style="text-decoration:none;color:var(--tx)">${I.cal}Ver agenda completa en el panel</a></div>`}
+ const U=NB.ultimos||[],PG=NB.pagos||[],MT=NB.metodos||{};
+ return`${nHead('HOY')}<div class="g">
+  ${NB.plata?`<div class="card"><div class="row"><b class="sp">Caja de hoy</b><b style="color:#cfc6ff">${money(NB.ing_hoy||0)}</b></div>${Object.keys(MT).length?`<div class="mts">${Object.entries(MT).map(([k,v])=>`<span class="pill">${esc(k)} · ${money(v)}</span>`).join('')}</div>`:''}
+   ${PG.length?PG.map(p=>`<div class="li"><span class="dot">${I.cash}</span><span class="sp"><b>${esc(p.nombre||p.concepto||'Venta')}</b><br><span class="mu xs">${fH(p.f)} · ${esc(p.concepto||'')}${p.metodo?' · '+esc(p.metodo):''}</span></span><b>${money(p.monto)}</b></div>`).join(''):'<p class="mu sm">Aún no hay cobros hoy.</p>'}</div>`:''}
+  <div class="card"><div class="row"><b class="sp">Ingresos al local</b><span class="pill">${NB.asis_hoy||0}</span></div>
+   ${U.length?U.map(a=>`<div class="li"><span class="dot">${esc((a.nombre||'?')[0])}</span><span class="sp"><b>${esc(a.nombre)}</b><br><span class="mu xs">${fH(a.t)}${a.quien?' · '+esc(a.quien):''}</span></span></div>`).join(''):'<p class="mu sm">Nadie ha marcado ingreso hoy todavía.</p>'}</div></div>`}
+const panelURL=()=>'/app/'+(NB&&NB.rol==='gestor'&&NB.slug?'?s='+encodeURIComponent(NB.slug):'');
+function nMas(){
+ post=()=>{const q=s=>$(s);q('#nmc')&&(q('#nmc').onclick=modoCliente);q('#nso')&&(q('#nso').onclick=async()=>{if(DEMO)return location.href='/mi/';try{await NSB.auth.signOut()}catch(_){}NB=null;NSB=null;modoCliente()});
+  q('#ncb')&&(q('#ncb').onclick=cambiarNeg);q('#nrf')&&(q('#nrf').onclick=async()=>{try{await nCargar();pinta();toast('✅ Actualizado')}catch(e){toast(errDe(e))}})};
+ return`${nHead('MÁS')}<div class="g">
+  <a class="btn p" href="${DEMO?'/app/?demo='+(nDent()?'consultorio':'gym'):panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel completo</a>
+  <p class="mu xs" style="text-align:center;margin-top:-4px">Cobrar, crear socios, caja, reportes y todo lo demás. Entra sin volver a escribir tu clave.</p>
+  <button class="btn" id="nrf">${I.refresh}Actualizar datos</button>
+  ${(NB.mios||0)>1||NB.rol==='gestor'?`<button class="btn" id="ncb">${I.store}Cambiar de negocio</button>`:''}
+  <div class="card"><div class="row"><div class="ibox">${I.user}</div><div class="sp"><b>Mi cuenta personal</b><p class="mu sm">Tus membresías, QR, promos y negocios guardados.</p></div></div><button class="btn" id="nmc">Volver a mi cuenta personal</button></div>
+  <button class="btn l" id="nso">Cerrar sesión del negocio</button>
+  <p class="mu xs" style="text-align:center">Mi Xyro · Modo negocio · XyroStudio</p></div>`}
+async function cambiarNeg(){
+ if(NB.rol==='gestor'){NSLUG=null;ls.s('mi-nslug',null);try{await nCargar()}catch(_){}return pinta()}
+ try{const L=DEMO?[{slug:'a',negocio:NB.negocio},{slug:'b',negocio:'Fuerza Gym · Surco'}]:(await NSB.rpc('xa_mis_negocios')).data||[];
+  hoja(`<h2>Cambiar de negocio</h2>${L.map(x=>`<button class="btn" data-cs="${esc(x.slug)}">${esc(x.negocio)}</button>`).join('')}<button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+   o.querySelectorAll('[data-cs]').forEach(b=>b.onclick=async()=>{if(DEMO){close();return toast('En la demo no se cambia de verdad')}
+    try{const{error}=await NSB.rpc('xa_cambiar_negocio',{p_slug:b.dataset.cs});if(error)throw error;await nCargar();close();NRES=null;NTAB='resumen';pinta();toast('🏢 '+NB.negocio)}catch(e){toast(errDe(e))}})})}catch(e){toast(errDe(e))}}
+function nGestor(){const L=NB.negocios||[];
+ post=()=>app.querySelectorAll('[data-gs]').forEach(b=>b.onclick=async()=>{NSLUG=b.dataset.gs;ls.s('mi-nslug',NSLUG);try{await nCargar();NTAB='resumen';pinta()}catch(e){toast(errDe(e))}});
+ return`<div class="hdr"><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">XYROSTUDIO</p><h1>Elige un negocio</h1></div></div><div class="g">${L.map(x=>`<button class="card" data-gs="${esc(x.slug)}" style="text-align:left;width:100%;cursor:pointer"><b>${esc(x.negocio)}</b><span class="mu xs">${esc(x.slug)}</span></button>`).join('')}</div>`}
+function demoNB(){const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)},t=m=>new Date(Date.now()-m*6e4).toISOString(),dn=DEMO==='negocio-dental';
+ const base={slug:'demo',negocio:dn?'Sonrisa Dental':'Fuerza Gym',logo:null,rubro:dn?'consultorio':'gym',rol:'admin',nombre:'Carlos',plata:true,mios:2,asis_hoy:86,activos:412,clientes:538,nuevos_mes:23,seguidores:57,en_app:31,
+  ing_hoy:1840,cobros_hoy:11,ing_mes:38250,metodos:{yape:980,efectivo:560,plin:300},semana:[1520,2210,1380,2640,1960,980,1840].map((v,i)=>({d:ad(i-6),v})),
+  por_vencer:[['Lucía Fernández',1,'Mensual'],['Jorge Ramírez',2,'Trimestral'],['Ana Quispe',4,'Mensual'],['Diego Salazar',6,'Semestral']].map(([nombre,d,plan])=>({nombre,fin:ad(d),plan,tel:'936449066'})),
+  ultimos:[['Valeria Torres',3],['Marco Díaz',9],['Sofía Rojas',14],['Luis Paredes',22],['Camila Vega',31]].map(([nombre,m])=>({nombre,t:t(m),quien:'Recepción'})),
+  pagos:[['Lucía Fernández',99,'yape','Mensual'],['Marco Díaz',260,'efectivo','Trimestral'],['Sofía Rojas',12,'plin','Cafetín']].map(([nombre,monto,metodo,concepto],i)=>({nombre,monto,metodo,concepto,f:t(20+i*35)}))};
+ if(dn)base.citas=[[9,'Valeria Torres','Curación con resina','atendida'],[10,'Pedro Gómez','Control y limpieza','llego'],[11.5,'Rosa Medina','Evaluación','confirmada'],[16,'Javier Soto','Blanqueamiento','agendada']].map(([hh,nombre,servicio,estado])=>{const x=new Date();x.setUTCHours(Math.floor(hh)+5,(hh%1)*60,0,0);return{inicio:x.toISOString(),dur:45,nombre,servicio,estado,prof:'Dra. Lucía Ramos'}});
+ return base}
+async function demoNegRpc(f,a){const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+ const L=[['Valeria Torres',28,248],['Lucía Fernández',1,112],['Jorge Ramírez',-3,87],['Ana Quispe',4,301],['Marco Díaz',63,19]].map(([nombre,d,num],i)=>({id:'c'+i,nombre,num,plan:d>40?'Semestral':'Mensual',inicio:ad(d-30),fin:ad(d),codigo:'DEMO'+num,tel:'936449066',ultima:new Date(Date.now()-(i+1)*864e5).toISOString(),app:i%2===0}));
+ if(f==='xa_neg')return NB||demoNB();
+ if(f==='xa_neg_buscar'){const q=a.p_q.toLowerCase();return L.filter(x=>x.nombre.toLowerCase().includes(q)||String(x.num)===q||x.codigo.toLowerCase()===q)}
+ if(f==='xa_neg_checkin'){const x=L.find(y=>y.codigo===String(a.p_codigo).toUpperCase())||L[0];if(x.fin<h)return{ok:false,nombre:x.nombre,t:'Hola '+x.nombre.split(' ')[0],s:'Su membresía venció el '+fF(x.fin,{day:'numeric',month:'short'})+'. Debe renovar.'};
+  return{ok:true,nombre:x.nombre,t:'¡Hola, '+x.nombre.split(' ')[0]+'!',s:'Le quedan '+dias(h,x.fin)+' días de '+x.plan+'.',warn:dias(h,x.fin)<=5}}
+ throw 'demo'}
+
+// ---------- Avisos y ayuda (modo cliente) ----------
+let SOP=null;
+async function cargaSop(){if(DEMO){SOP=SOP||[{id:'s1',texto:'¿Cómo conecto mi membresía?',estado:'respondido',respuesta:'Dale tu ID de cuenta a recepción y acepta el aviso que te llega. ¡Listo! 🙌',visto:false,creado:new Date(Date.now()-864e5).toISOString()}];return SOP}
+ try{SOP=await rpc('xa_yo_mis_reportes')||[]}catch(_){SOP=SOP||[]}return SOP}
+function vAvisos(){const G=((D&&D.guardados)||[]).filter(g=>g.promos),S=SOP||[],av=avisos();
+ if(SOP==null)cargaSop().then(()=>{if(TAB==='avisos'&&MODO==='cliente'&&!SUB)pinta()});
+ return`<div class="hdr"><div class="sp"><h1>Avisos</h1><p class="mu sm">Lo nuevo de tus negocios y de XyroStudio.</p></div></div><div class="g">
+  ${av}
+  ${G.length?`<p class="mu xs" style="font-weight:700">PROMOS POR LA APP</p>${G.map(g=>`<button class="card" data-neg="${esc(g.slug)}" style="text-align:left;width:100%;cursor:pointer"><div class="row"><div class="ibox">${I.gift}</div><div class="sp"><b>${esc(g.negocio)}</b><p class="mu sm">${g.promos} promo${g.promos>1?'s':''} solo por usar Mi Xyro</p></div><span class="mu">›</span></div></button>`).join('')}`:''}
+  ${S.length?`<p class="mu xs" style="font-weight:700">AYUDA</p>${S.map(s=>`<div class="card"><p class="mu xs">${fF(s.creado,{day:'numeric',month:'short'})} · ${s.respuesta?'<span style="color:#22c55e">Respondido</span>':'En revisión'}</p><p class="sm">${esc(s.texto)}</p>${s.respuesta?`<div class="resp"><b class="xs" style="color:var(--a)">XyroStudio</b><p class="sm">${esc(s.respuesta)}</p></div>`:''}</div>`).join('')}`:''}
+  ${!av&&!G.length&&!S.length?`<div class="card" style="text-align:center;justify-items:center;padding:28px 18px"><div class="ibox big">${I.bell.replace('width="22" height="22"','width="36" height="36"')}</div><h2>Todo al día</h2><p class="mu sm" style="max-width:280px">Aquí verás cuando un negocio quiera conectar tu cuenta, sus promos y las respuestas de soporte.</p></div>`:''}
+  <button class="btn" id="ayu">${I.help}Necesito ayuda</button></div>`}
+function ayuda(){hoja(`<h2>🛟 ¿En qué te ayudamos?</h2><p class="mu sm">Cuéntanos qué pasó. Te respondemos aquí, en Avisos.</p><textarea id="at" rows="4" maxlength="1500" placeholder="Ej.: No me aparece mi membresía"></textarea><div class="msg" id="am"></div><button class="btn p" id="ab">Enviar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+ o.querySelector('#ab').onclick=async()=>{const t=o.querySelector('#at').value.trim(),m=o.querySelector('#am');if(t.length<4){m.textContent='Escribe un poco más.';m.className='msg on';return}
+  if(DEMO){close();return toast('En la demo no se envía de verdad')}
+  try{await rpc('xa_yo_reportar',{p_tipo:'ayuda',p_texto:t,p_ctx:ctxApp()});close();SOP=null;toast('✅ Enviado. Te respondemos en Avisos.');if(TAB==='avisos')pinta()}catch(e){m.textContent=errDe(e);m.className='msg on'}}})}
+const equipo=()=>{const u=navigator.userAgent;return(/iPhone|iPad/i.test(u)?'iPhone':/Android/i.test(u)?'Android':/Windows/i.test(u)?'PC Windows':/Mac/i.test(u)?'Mac':'Otro')+(esApp()?' · app':' · web')};
+const ctxApp=()=>({v:'mi',equipo:equipo(),ruta:TAB+(SUB?'/'+(SUB.neg||SUB):''),pantalla:innerWidth+'x'+innerHeight});
+let nErr=0;function repErr(msg){if(DEMO||!sb||!D||nErr>=3)return;nErr++;try{sb.rpc('xa_yo_reportar',{p_tipo:'error',p_texto:String(msg).slice(0,500),p_ctx:ctxApp()}).then(()=>{},()=>{})}catch(_){}}
+addEventListener('error',e=>{if(e.message)repErr(e.message+' @'+(e.filename||'').split('/').pop()+':'+(e.lineno||''))});
+addEventListener('unhandledrejection',e=>{const r=e.reason;if(r&&r.message)repErr(r.message)});
 
 // ---------- Demo ----------
 function demoBoth(){const h=hoyL(),ad=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)},at=(n,hh)=>{const x=new Date(Date.now()+n*864e5);x.setUTCHours(hh+5,0,0,0);return x.toISOString()};
@@ -557,10 +765,11 @@ addEventListener('beforeinstallprompt',e=>{e.preventDefault();INSTALL=e});
 if('serviceWorker' in navigator&&!DEMO)navigator.serviceWorker.register('/mi/sw.js').catch(()=>{});
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&D&&!DEMO&&!document.querySelector('.ov,.cam')){try{await cargar();pinta()}catch(_){}}});
 (async()=>{
- if(DEMO){D=demoData();CUR=0;return pinta()}
+ if(DEMO){D=demoData();CUR=0;if(/^negocio/.test(DEMO))return modoNegocio();return pinta()}
  const n=(P.get('n')||'').toLowerCase().replace(/[^a-z0-9-]/g,''),c=codigoDe(P.get('c')||'');
  const cache=ls.g('mi-data');if(cache&&!n&&!c&&!/[#&?](access_token|code)=/.test(location.href)){try{D=JSON.parse(cache);pinta()}catch(_){}}
  try{await cliente()}catch(_){if(!D)pantallaEntrada('Sin conexión. Revisa tu internet.');return}
+ if(MODO==='negocio'&&!n&&!c&&await modoNegocio(true))return;
  const{data:{session}}=await sb.auth.getSession();
  if(!session){
   D=null;ls.s('mi-data',null);
