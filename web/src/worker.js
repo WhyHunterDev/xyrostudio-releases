@@ -283,6 +283,12 @@ async function firmaOk(env, raw, sig) {
 }
 
 async function waEnviar(env, phoneId, to, texto) {
+  const r1 = await waEnviar1(env, phoneId, to, texto);
+  // Número de prueba de Meta: solo acepta números de la lista permitida (no IDs de usuario). WA_PRUEBA_TEL = tu celular para probar.
+  if (!r1.ok && r1.error && r1.error.code === 131030 && env.WA_PRUEBA_TEL && !/^\d+$/.test(to)) return waEnviar1(env, phoneId, String(env.WA_PRUEBA_TEL).replace(/\D/g, ""), texto);
+  return r1;
+}
+async function waEnviar1(env, phoneId, to, texto) {
   const r = await fetch(`https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}/${phoneId}/messages`, {
     method: "POST", headers: { authorization: "Bearer " + env.WA_TOKEN, "content-type": "application/json" },
     body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", ...(/^\d+$/.test(to) ? { to } : { recipient: to }), type: "text", text: { preview_url: false, body: corta(texto, 4000) } }),
