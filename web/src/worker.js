@@ -298,23 +298,23 @@ async function waProcesar(env, phoneId, m, nombre) {
     : m.type === "interactive" ? corta((m.interactive.button_reply || m.interactive.list_reply || {}).title, 500)
     : `[${m.type}]`;
   const e = await rpcAnon(env, "xa_wa_entrante", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: m.from, p_nombre: corta(nombre, 80), p_texto: texto, p_wa_id: m.id });
-  if (!e || !e.ok || e.humano) return;   // número no vinculado, repetido o lo atiende recepción
-  const responde = async (t, derivar) => { const s = await waEnviar(env, phoneId, m.from, t); if (s.ok) await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: t, p_wa_id: s.id || null, p_derivar: !!derivar }); };
+  if (!e || !e.ok || e.humano) return "entrante:" + (e ? (e.motivo || (e.humano ? "humano" : "?")) : "null (WA_CLAVE o SQL 36)");   // número no vinculado, repetido o lo atiende recepción
+  const responde = async (t, derivar) => { const s = await waEnviar(env, phoneId, m.from, t); if (!s.ok) return "enviar:" + JSON.stringify(s.error || {}).slice(0, 200); await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: t, p_wa_id: s.id || null, p_derivar: !!derivar }); return "ok"; };
   if (m.type !== "text" && m.type !== "button" && m.type !== "interactive") return responde("¡Gracias! Por ahora solo puedo leer mensajes de texto 🙌 Escríbeme tu consulta y te ayudo.", false);
   const f = await ficha(env, e.slug);
-  if (!f || !env.ANTHROPIC_API_KEY) return;
+  if (!f || !env.ANTHROPIC_API_KEY) return "ficha:" + (f ? "sin ANTHROPIC_API_KEY" : "no encontrada " + e.slug);
   const c = await rpcAnon(env, "xa_bot_cupo", { p_slug: e.slug, p_ip: "wa" + m.from });
-  if (!c || !c.ok) return responde("En un momento te responde una persona de recepción 🙌", true);
+  if (!c || !c.ok) return "cupo:" + JSON.stringify(c) + " " + await responde("En un momento te responde una persona de recepción 🙌", true);
   try {
     const hist = (e.historial || []).map(x => ({ de: x.de === "cliente" ? "u" : "b", t: x.t }));
     const { o, sede } = await pensar(env, f, hist, texto, "wa");
     const cl = o.cliente || {};
     const nom = String(cl.nombre || nombre || "").trim();
     if (nom.length > 1 && (String(cl.interes || "").trim() || cl.prueba_dia)) await guardarLead(env, e.slug, "wa" + m.from, { ...cl, nombre: nom }, m.from, sede);
-    await responde(corta(o.respuesta, 1500), !!o.derivar);
+    return await responde(corta(o.respuesta, 1500), !!o.derivar);
   } catch (err) {
     console.log("wa bot error", err?.status, err?.message);
-    await responde("En un momento te responde una persona de recepción 🙌", true);
+    return "ia:" + (err?.message || "") + " " + await responde("En un momento te responde una persona de recepción 🙌", true);
   }
 }
 
@@ -334,7 +334,8 @@ async function waApi(req, env, ctx) {
     const nombres = {}; (v.contacts || []).forEach(c => { nombres[c.wa_id] = c.profile && c.profile.name; });
     for (const m of v.messages || []) if (pid) tareas.push(waProcesar(env, pid, m, nombres[m.from] || ""));
   }
-  ctx.waitUntil(Promise.all(tareas).catch(e => console.log("wa", e?.message)));
+  if (req.headers.get("x-xyro-diag") === "1") return json({ ok: true, pasos: await Promise.all(tareas).catch(e => ["error " + e?.message]) });   // diagnóstico (requiere firma válida)
+  ctx.waitUntil(Promise.all(tareas).then(x => console.log("wa", JSON.stringify(x))).catch(e => console.log("wa", e?.message)));
   return json({ ok: true });   // Meta pide 200 rápido
 }
 
