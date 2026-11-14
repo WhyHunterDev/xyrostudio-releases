@@ -11,6 +11,7 @@
   "vars": {
     "IA_MODELO": "claude-opus-5-5",
     "BOT_MODELO": "claude-haiku-5-5",
+    "WA_PRUEBA_TEL": "51936449066",
     "SB_URL": "https://szvdzcaoxjstdyblhxrd.supabase.co",
     "SB_KEY": "sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe"
   },
