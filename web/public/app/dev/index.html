@@ -1058,8 +1058,8 @@ function inicioDent(){
  const H=hoy(),mes=H.slice(0,7),ing=S.pag.filter(p=>mk(p.fecha)===mes).reduce((a,p)=>a+ +p.monto,0),d30=[...Array(30)].map((_,i)=>addD(H,i-29)),porD={};S.pag.forEach(p=>{const k=ymd(new Date(p.fecha));porD[k]=(porD[k]||0)+ +p.monto});
  const SAL=S.pre.filter(p=>preSal(p)>0&&p.estado!=='pendiente'),porCob=SAL.reduce((a,p)=>a+preSal(p),0),nuevos=S.cli.filter(c=>(c.creado||'').slice(0,7)===mes).length,cv=citVivas(H).filter(x=>!miProf()||x.prof===miProf().id);
  const M=citIx(),vol=S.cli.filter(c=>{const o=M.get(c.id)||{};return o.u&&!o.p&&diff(ymd(new Date(o.u.inicio)),H)>=180}),nh=new Date().getHours(),hr=nh<12?'Buenos días':nh<19?'Buenas tardes':'Buenas noches';
- if(!S.cli.length&&!profsL().length)return`<div class="empty"><b>🦷</b>Bienvenido a ${esc(nombre())}.<br>Empieza agregando a tus especialistas y tus tratamientos.<br><br>${isAdmin()?'<button class="btn p" onclick="editProfs()">👩‍⚕️ Agregar especialistas</button> <a class="btn" href="#/planes">🦷 Tratamientos</a>':''}</div>`;
- return`<div class="hi st"><div><p class="mu">${hr}${ME.nombre?', '+esc(ME.nombre.split(' ')[0]):''} 👋</p><h2>Así va <span class="grad">${esc(nombre())}</span> hoy</h2></div></div>
+ if(!S.cli.length&&!profsL().length)return`<div class="empty"><b>🦷</b>Bienvenido a ${esc(nombre())}.<br>Empieza agregando a tus especialistas y tus tratamientos.<br><br>${isAdmin()?'<button class="btn p" data-eprofs>👩‍⚕️ Agregar especialistas</button> <a class="btn" href="#/planes">🦷 Tratamientos</a>':''}</div>`;
+ return`<div class="hi st"><div><p class="mu">${hr}${ME.nombre?', '+esc(ME.nombre.split(' ')[0]):''} 👋</p><h2>Así va <span class="grad">${esc(nombre())}</span> hoy</h2></div><button class="btn" data-paso>🚶 Cobro al paso</button></div>
  ${citHoyCard()}
  <div class="g k4 st">
   <a class="card kpi" href="#/agenda" onclick="agD=''"><i style="background:var(--a)"></i><small>Citas de hoy</small><b data-n="${cv.length}">0</b><span class="tr">${cv.filter(x=>x.estado==='atendida').length} atendidas</span></a>
@@ -1262,12 +1262,12 @@ function go(){
  if((ruta==='whatsapp'||ruta==='ventasbot')&&!waVer())ruta='inicio';
  const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${ruta!=='miplan'?planAviso():''}${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
- const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:citOn()?'🗓️ Cita':(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:R.citas?'＋ Tratamiento':'＋ Plan',caja:'＋ Cobro',ajustes:R.citas?'🗓️ Cita':'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket',agenda:'＋ Cita'};
+ const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:citOn()?'🗓️ Cita':(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:R.citas?'＋ Tratamiento':'＋ Plan',caja:R.citas?'🚶 Cobro al paso':'＋ Cobro',ajustes:R.citas?'🗓️ Cita':'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket',agenda:'＋ Cita'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
  $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:R.citas?'Tratamientos y precios':'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',pruebas:'Días de prueba',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio',agenda:'Agenda'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
-$('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&(citOn()?nuevaCita({c}):cobrar(c))},planes:()=>isAdmin()?(R.citas?editTrat():editPlan()):toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:()=>R.citas?nuevaCita():kiosco(),tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket(),agenda:()=>nuevaCita()})[ruta]||nuevoCli)()};
+$('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&(citOn()?nuevaCita({c}):cobrar(c))},planes:()=>isAdmin()?(R.citas?editTrat():editPlan()):toast('Solo el administrador edita planes'),caja:()=>R.citas?cobroPaso():cobroSuelto(),ajustes:()=>R.citas?nuevaCita():kiosco(),tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket(),agenda:()=>nuevaCita()})[ruta]||nuevoCli)()};
 $('#q').addEventListener('input',e=>{qtxt=e.target.value;if(ruta!=='socios'){location.hash='#/socios'}else{const l=$('#lst');l&&(l.innerHTML=lista())}});
 addEventListener('hashchange',go);
 addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();if(ruta!=='socios')location.hash='#/socios';setTimeout(()=>{const s=$('#q2');s&&s.focus()},80)}});
@@ -1556,6 +1556,20 @@ function cobroSuelto(){
   valComp(v);valSplit(v,+v.monto);const pg=await pagar({concepto:v.concepto,monto:+v.monto,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},v);go();await finCobro(pg,v,'Cobro registrado');
  });
 }
+// Cobro al paso (dental): alguien que no es paciente entra por una curación, extracción, etc. Entra directo a caja.
+function cobroPaso(){
+ const SV=S.pla.filter(p=>p.activo!==false),PF=profsL().filter(p=>p.activo!==false),mp=miProf();
+ form('🚶 Cobro al paso',[{k:'trat',l:'Tratamiento',t:'sel',v:'',o:[['','Otro (escribe abajo)']].concat(SV.map(p=>[p.id,p.nombre+' · '+sol(p.precio)])),on:(fm)=>{const s=fm.querySelector('#f_trat');s&&s.addEventListener('change',()=>{const p=plan(s.value);if(!p)return;const c=fm.querySelector('#f_concepto'),m=fm.querySelector('#f_monto');if(c)c.value=p.nombre;if(m){m.value=p.precio;m.dispatchEvent(new Event('input',{bubbles:true}))}})}},
+  {k:'concepto',l:'¿Qué se le hizo?',req:1,ph:'Ej. Curación, extracción, consulta'},{k:'monto',l:'Monto (S/)',t:'number',req:1,half:1,im:'decimal'},
+  ...(PF.length>1?[{k:'prof',l:'Lo atendió',t:'sel',half:1,v:mp?mp.id:'',o:[['','—']].concat(PF.map(p=>[p.id,p.n]))}]:[]),
+  {k:'nom',l:'Nombre (opcional · no se guarda como paciente)',ph:'Ej. Juan Pérez'},
+  ...pagoFields(v=>+v.monto||0),...compFields()],async v=>{
+  valComp(v);valSplit(v,+v.monto);const pr=v.prof?profN(v.prof):(PF.length===1?PF[0].n:'');
+  const con=v.concepto.trim()+' · Al paso'+(v.nom?' · '+v.nom.trim():'')+(pr?' · '+pr:'');
+  const pg=await pagar({concepto:con.slice(0,200),monto:+v.monto,metodo:v.metodo,cliente_id:null,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},v);go();await finCobro(pg,v,'Cobro al paso registrado');
+ });
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-paso]'))cobroPaso();else if(e.target.closest('[data-eprofs]'))editProfs()});
 /* ===== Caja detallada: día, semana, mes, año ===== */
 let NEED22=false,cjP='dia',cjD='',cjF={t:'',m:'',q:'',c:''},cjS='',NEED19=false;
 const MESL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
