@@ -1,5 +1,14 @@
 [
  {
+  "id": "20261113-2046",
+  "fecha": "2026-11-13 20:46",
+  "titulo": "WhatsApp: clientes con usuario",
+  "notas": "WhatsApp: clientes con usuario",
+  "cambios": [
+   "La bandeja muestra bien a clientes que usan nombre de usuario de WhatsApp"
+  ]
+ },
+ {
   "id": "20261113-1935",
   "fecha": "2026-11-13 19:35",
   "titulo": "WhatsApp del negocio",
