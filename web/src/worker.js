@@ -331,7 +331,7 @@ async function waApi(req, env, ctx) {
       return json({ sub, ver, ultimo: globalThis.WA_ULT || null });
     }
     if (env.WA_VERIFY && u.searchParams.get("diag") === env.WA_VERIFY && u.searchParams.get("pid")) {   // diagnóstico: mensaje simulado de un número falso
-      const r = await waProcesar(env, u.searchParams.get("pid"), { from: "51900000000", id: "diag-" + Date.now(), type: "text", text: { body: u.searchParams.get("t") || "hola, cuánto cuesta el mes?" } }, "Prueba XyroStudio");
+      const r = await waProcesar(env, u.searchParams.get("pid"), { from: u.searchParams.get("from") || "51900000000", id: "diag-" + Date.now(), type: "text", text: { body: u.searchParams.get("t") || "hola, cuánto cuesta el mes?" } }, "Prueba XyroStudio");
       return json({ paso: r });
     }
     return json({ wa: env.WA_TOKEN && env.WA_APP_SECRET && env.WA_VERIFY && env.WA_CLAVE ? "✅ WhatsApp listo" : "⏳ Faltan secretos de WhatsApp en Cloudflare" });
