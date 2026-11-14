@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261113-2334",
+  "fecha": "2026-11-13 23:34",
+  "titulo": "Fotos y videos del gym",
+  "notas": "Fotos y videos del gym",
+  "cambios": [
+   "En Xyro Bots → Cómo vende puedes subir fotos y videos del gym, de todas las sedes o de una en específico",
+   "Si el cliente pide ver el gym, el asistente le manda los de su sede por WhatsApp"
+  ]
+ },
+ {
   "id": "20261113-2306",
   "fecha": "2026-11-13 23:06",
   "titulo": "Borrador de promos especiales",

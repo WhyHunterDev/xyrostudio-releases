@@ -159,6 +159,7 @@ Cómo hablas:
   Reglas de precio: NUNCA bajes del «mínimo» de la FICHA ni digas que existe un mínimo. NUNCA digas que una promo «terminó», «ya no está» o «había antes». No regales la rebaja de entrada: primero valor, luego rebaja parcial, y el mínimo solo para cerrar el plan largo. Las «Promos especiales» de la FICHA úsalas SOLO cuando se cumple su «Solo si» y siempre «solo por hoy»; son la única excepción al mínimo (pueden estar por debajo). Si no se cumple su condición, no las menciones. Si pide menos del mínimo, no lo aceptes: insiste con cariño en tu mejor precio y su objetivo; si insiste mucho, pon «derivar» en true. Ejemplo de tono: «Bien, mira, por lo general nuestros precios son fijos, pero me caes bien y como empiezas la próxima semana con todo, hoy te dejo el de 3 meses en S/350 para que ya seas parte de la familia. ¿Qué te parece?».
   Deja «luego» siempre vacío. Sin Modo vendedor, da los precios directo.
 - Documentos (contrato, reglamento): si la FICHA trae «DOCUMENTOS», guíate de lo que dicen para responder dudas sobre condiciones, normas, congelamientos, devoluciones, horarios, etc., citándolos con tus palabras. Si el cliente pide ver el contrato o el reglamento (por ejemplo antes de pagar), pon en «documento» el código exacto del documento (el del plan que conversan si hay varios contratos) y dile que se lo envías por aquí; si no, deja «documento» vacío. Nunca inventes cláusulas: si el documento no lo dice, o hay un reclamo, una excusa o un problema que no entiendes, dilo con amabilidad y pon «derivar» en true para que intervenga recepción.
+- Fotos y videos: si la FICHA trae «FOTOS Y VIDEOS» y el cliente pide ver el gym, fotos, videos, las máquinas o una sede, pon en «media» los códigos (hasta 3, separados por coma) de la sede que le interesa o los generales, y dile que se los envías por aquí. Si no hay de lo que pide, dilo con naturalidad e invítalo a venir a conocerlo. Si no los pide, deja «media» vacío.
 - Si te preguntan directamente si eres un bot o una persona, sé honesto: eres el asistente automático del negocio y puedes pasarlos con recepción.
 Qué dices:
 - Usa SOLO los datos de la FICHA. Lo que está entre paréntesis, como «(distrito)», es un dato que el negocio aún no llenó: no lo digas ni lo inventes.
@@ -166,9 +167,9 @@ Qué dices:
 - Precios en soles (S/). No prometas descuentos que no están en la ficha. Nunca pidas contraseñas, tarjetas ni datos sensibles.
 - Si preguntan algo ajeno al negocio, responde con buena onda que en eso no puedes ayudar y vuelve al tema del negocio.`;
 const BOT_SCHEMA = {
-  type: "object", additionalProperties: false, required: ["respuesta", "luego", "documento", "derivar", "sede", "cliente"],
+  type: "object", additionalProperties: false, required: ["respuesta", "luego", "documento", "media", "derivar", "sede", "cliente"],
   properties: {
-    respuesta: { type: "string" }, luego: { type: "string" }, documento: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" },
+    respuesta: { type: "string" }, luego: { type: "string" }, documento: { type: "string" }, media: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" },
     cliente: {   // datos del interesado: vacíos hasta que los dé
       type: "object", additionalProperties: false, required: ["nombre", "celular", "interes", "prueba_dia", "prueba_hora"],
       properties: { nombre: { type: "string" }, celular: { type: "string" }, interes: { type: "string" }, prueba_dia: { type: "string" }, prueba_hora: { type: "string" } },
@@ -208,7 +209,7 @@ async function ficha(env, slug) {
   L.push("Captar interesados: " + (bot.captar === false ? "no" : "sí"));
   L.push(bot.prueba ? "Clase de prueba gratis: sí" + (bot.pruebaTxt ? " (" + corta(bot.pruebaTxt, 200) + ")" : " (dentro del horario de atención)") : "Clase de prueba gratis: no ofrecer");
   if (bot.extra) L.push("Promos, reglas e información extra del negocio (síguela y úsala):\n" + corta(bot.extra, 3000));
-  let vdocs = [];
+  let vdocs = [], vmed = [];
   const vt = env.WA_CLAVE ? await rpcAnon(env, "xa_bot_ventas_de", { p_clave: env.WA_CLAVE, p_slug: slug }) : null;   // SQL 38: privado (mínimos, promos especiales)
   if (vt && typeof vt === "object") {
     if (vt.modo === "vendedor") {
@@ -224,12 +225,18 @@ async function ficha(env, slug) {
       docs.forEach(d => L.push(`[${d.id}] ${corta(d.n, 80)}${d.plan ? " (plan " + corta(d.plan, 50) + ")" : ""}${d.texto ? ":\n" + corta(d.texto, 6000) : ""}`));
       vdocs = docs.map(d => ({ id: String(d.id), n: corta(d.n, 80), url: String(d.url) }));
     }
+    const med = (Array.isArray(vt.medios) ? vt.medios : []).filter(d => d && d.id && d.url).slice(0, 30);
+    if (med.length) {
+      L.push("FOTOS Y VIDEOS (para enviar usa su código en «media»):");
+      med.forEach(d => L.push(`[${d.id}] ${d.tipo === "video" ? "video" : "foto"}: ${corta(d.n, 80)}${d.sede ? " (sede " + corta(d.sede, 50) + ")" : ""}`));
+      vmed = med.map(d => ({ id: String(d.id), tipo: d.tipo === "video" ? "video" : "image", n: corta(d.n, 80), url: String(d.url) }));
+    }
     const pg = [vt.yape && "Yape " + corta(vt.yape, 20), vt.plin && "Plin " + corta(vt.plin, 20), vt.titular && "a nombre de " + corta(vt.titular, 80), vt.cuenta && "Transferencia: " + corta(vt.cuenta, 300)].filter(Boolean);
     if (pg.length) L.push("Medios de pago: " + pg.join(" · "));
   }
   const wa = String(bot.whatsapp || (sedes[0] && sedes[0].whatsapp) || "").replace(/\D/g, "");
   const sd = sedes.slice(0, 6).map(x => ({ n: corta(x.nombre, 60), wa: String(x.whatsapp || "").replace(/\D/g, "") || wa })).filter(x => x.n);
-  const v = { nombre, texto: L.join("\n"), wa, sedes: sd, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [], docs: vdocs };
+  const v = { nombre, texto: L.join("\n"), wa, sedes: sd, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [], docs: vdocs, medios: vmed };
   FICHAS.set(slug, { t: Date.now(), v });
   if (FICHAS.size > 300) FICHAS.delete(FICHAS.keys().next().value);
   return v;
@@ -312,6 +319,8 @@ async function pensar(env, f, historial, msg, canal) {
   if (o.luego && canal === "web") { o.respuesta += "\n\n" + o.luego; o.luego = ""; }
   const doc = o.documento && (f.docs || []).find(d => d.id === String(o.documento).trim());
   o.doc = doc || null;
+  o.med = String(o.media || "").split(",").map(x => x.trim()).filter(Boolean).slice(0, 3).map(id => (f.medios || []).find(d => d.id === id)).filter(Boolean);
+  if (o.med.length && canal === "web") o.respuesta += "\n\n" + o.med.map(d => (d.tipo === "video" ? "🎬 " : "📸 ") + d.n + ": " + d.url).join("\n");
   if (doc && canal === "web") o.respuesta += `\n\n📄 ${doc.n}: ${doc.url}`;
   const sede = f.sedes.find(x => x.n.toLowerCase() === String(o.sede || "").trim().toLowerCase()) || (f.sedes.length === 1 ? f.sedes[0] : null);
   return { o, sede };
@@ -350,7 +359,7 @@ async function waEnviar(env, phoneId, to, texto, img, doc) {
 async function waEnviar1(env, phoneId, to, texto, img, doc) {
   const r = await fetch(`https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}/${phoneId}/messages`, {
     method: "POST", headers: { authorization: "Bearer " + env.WA_TOKEN, "content-type": "application/json" },
-    body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", ...(/^\d+$/.test(to) ? { to } : { recipient: to }), ...(doc ? { type: "document", document: { link: doc.link, filename: doc.filename, caption: corta(texto, 500) } } : img ? { type: "image", image: { link: img, caption: corta(texto, 1000) } } : { type: "text", text: { preview_url: false, body: corta(texto, 4000) } }) }),
+    body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", ...(/^\d+$/.test(to) ? { to } : { recipient: to }), ...(doc ? { type: doc.type || "document", [doc.type || "document"]: { link: doc.link, ...(doc.filename ? { filename: doc.filename } : {}), caption: corta(texto, 500) } } : img ? { type: "image", image: { link: img, caption: corta(texto, 1000) } } : { type: "text", text: { preview_url: false, body: corta(texto, 4000) } }) }),
   }).catch(() => null);
   const j = r ? await r.json().catch(() => ({})) : {};
   if (!r || !r.ok) console.log("wa enviar error", r && r.status, JSON.stringify(j.error || {}).slice(0, 300));
@@ -382,6 +391,7 @@ async function waProcesar(env, phoneId, m, nombre) {
     const nom = String(cl.nombre || nombre || "").trim();
     if (nom.length > 1 && (String(cl.interes || "").trim() || cl.prueba_dia)) await guardarLead(env, e.slug, "wa" + m.from, { ...cl, nombre: nom }, /^\d+$/.test(m.from) ? m.from : String(cl.celular || ""), sede);
     const p1 = await responde(corta(o.respuesta, 1500), !!o.derivar && !o.luego);
+    if (p1 === "ok") for (const d of o.med || []) { const sm = await waEnviar(env, phoneId, m.from, d.n, null, { type: d.tipo, link: d.url }); if (sm.ok) await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: (d.tipo === "video" ? "🎬 " : "📸 ") + d.n, p_wa_id: sm.id || null, p_derivar: false }); }
     if (o.doc && p1 === "ok") { const sd = await waEnviar(env, phoneId, m.from, o.doc.n, null, { link: o.doc.url, filename: o.doc.n.replace(/[^\w áéíóúñÁÉÍÓÚÑ.-]/g, "").slice(0, 60) + ".pdf" }); if (sd.ok) await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: "📄 " + o.doc.n, p_wa_id: sd.id || null, p_derivar: false }); }
     if (!o.luego || p1 !== "ok") return p1;
     await new Promise(r => setTimeout(r, 12000));   // «déjame consultarlo»: pausa corta y responde
