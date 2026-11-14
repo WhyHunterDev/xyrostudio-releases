@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261114-0009",
+  "fecha": "2026-11-14 00:09",
+  "titulo": "Días de prueba y menú por categorías",
+  "notas": "Días de prueba y menú por categorías",
+  "cambios": [
+   "Nueva sección Días de prueba: el asistente o recepción agendan solo en los días, horarios y cupos que pone el administrador",
+   "Se guarda nombre, sede, día, hora, objetivo, si es su primera vez y cómo nos conoció; marcas si vino y si se inscribió",
+   "El menú ahora va agrupado: Ventas, Gimnasio, Resultados y Configuración"
+  ],
+  "requiere": "SQL 41"
+ },
+ {
   "id": "20261114-0000",
   "fecha": "2026-11-14 00:00",
   "titulo": "Recepción solo apoya al asistente",

@@ -123,7 +123,7 @@ Cómo hablas:
 - Recepción: cuando el cliente quiera hablar con una persona, inscribirse o pagar, pon «derivar» en true (en Modo vendedor NO: la inscripción y el pago los llevas tú hasta recibir el comprobante y sus datos; deriva solo si pide una persona o algo que no puedes resolver). Si el negocio tiene varias sedes, pon en «sede» el nombre exacto de la sede del cliente; si aún no sabes cuál, pregúntale con amabilidad de qué sede es (y deja «sede» vacío). Con una sola sede, pon su nombre. Dile que lo pasas con recepción de esa sede (por WhatsApp solo si el canal es la web; si ya están en WhatsApp, que le escriben por este mismo chat).
 - Dudas al inscribirse (que empiece otro día, congelar, horarios, contrato): respóndelas tú con la FICHA y los DOCUMENTOS y sigue con la venta; no derives por eso. Si quiere empezar otro día, dile que sí, que su membresía empieza ese día y que lo anotas al registrarlo. Si algo no está en la FICHA ni en los documentos, di que recepción se lo confirma al activar su acceso, sin cortar la venta.
 - Interesados (si la FICHA dice «Captar interesados: sí»): cuando alguien muestre interés en inscribirse o venir, pídele con naturalidad su nombre y celular para que recepción le escriba (no los pidas de entrada ni más de una vez si no quiere). Cuando ya tengas nombre Y celular, llena «cliente» con ellos y con «interes» (qué busca, en pocas palabras: plan, horario, objetivo). Mientras no los tengas, deja «cliente» con textos vacíos. Nunca inventes datos.
-- Clase de prueba (solo si la FICHA lo permite): ofrécela a quien duda o es nuevo. Acuerda día y hora dentro del horario indicado; pon «prueba_dia» en formato AAAA-MM-DD (usa la fecha de HOY para calcular «mañana», «el lunes»…) y «prueba_hora» como 7:00 pm. Confírmale el día, la hora y la sede, y dile que recepción le escribirá para confirmar.
+- Día de prueba (solo si la FICHA lo permite): ofrécelo a quien duda o es nuevo. Si la FICHA trae «DÍAS DE PRUEBA DISPONIBLES», agenda SOLO en uno de esos días, en esa sede y con una hora dentro de su rango; si pide otro día u hora, dile con amabilidad qué días hay. Antes de agendar consigue su nombre, su objetivo (bajar de peso, ganar masa, salud…), si es su primera vez entrenando y la sede. Pon «prueba_dia» en AAAA-MM-DD (usa la fecha de HOY para calcular «mañana», «el lunes»…), «prueba_hora» como 7:00 pm, «objetivo» y «experiencia» («primera vez» o lo que ya entrenó). Confírmale día, hora y sede, y que traiga ropa cómoda y su DNI.
 - MODO VENDEDOR (solo si la FICHA dice «Modo vendedor: sí»): vendes como la mejor recepcionista: un amigo buena onda que conversa, una pregunta a la vez, mensajes cortos, y siempre busca cerrar HOY.
   REGLAS DURAS DEL MODO VENDEDOR (mandan sobre todo lo demás):
   • NUNCA listes varios planes con sus precios. NUNCA menciones el pase diario salvo que lo pidan por nombre.
@@ -173,8 +173,8 @@ const BOT_SCHEMA = {
   properties: {
     respuesta: { type: "string" }, luego: { type: "string" }, documento: { type: "string" }, media: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" },
     cliente: {   // datos del interesado: vacíos hasta que los dé
-      type: "object", additionalProperties: false, required: ["nombre", "celular", "interes", "prueba_dia", "prueba_hora"],
-      properties: { nombre: { type: "string" }, celular: { type: "string" }, interes: { type: "string" }, prueba_dia: { type: "string" }, prueba_hora: { type: "string" } },
+      type: "object", additionalProperties: false, required: ["nombre", "celular", "interes", "objetivo", "experiencia", "prueba_dia", "prueba_hora"],
+      properties: { nombre: { type: "string" }, celular: { type: "string" }, interes: { type: "string" }, objetivo: { type: "string" }, experiencia: { type: "string" }, prueba_dia: { type: "string" }, prueba_hora: { type: "string" } },
     },
   },
 };
@@ -209,7 +209,14 @@ async function ficha(env, slug) {
   if (C.cafetin && Array.isArray(C.cafetin.items) && C.cafetin.items.length) L.push("Cafetín: " + C.cafetin.items.slice(0, 20).map(i => `${corta(i.nombre, 40)} S/${i.precio}`).join("; "));
   if (cfg.redes) L.push("Redes: " + Object.entries(cfg.redes).filter(([, v]) => v).map(([k, v]) => k + " " + corta(v, 80)).join(", "));
   L.push("Captar interesados: " + (bot.captar === false ? "no" : "sí"));
-  L.push(bot.prueba ? "Clase de prueba gratis: sí" + (bot.pruebaTxt ? " (" + corta(bot.pruebaTxt, 200) + ")" : " (dentro del horario de atención)") : "Clase de prueba gratis: no ofrecer");
+  L.push(bot.prueba ? "Día de prueba gratis: sí" + (bot.pruebaTxt ? " (" + corta(bot.pruebaTxt, 200) + ")" : "") : "Día de prueba gratis: no ofrecer");
+  const reglas = bot.prueba && Array.isArray(bot.pruebas) ? bot.pruebas.filter(r => r && Array.isArray(r.dias) && r.dias.length).slice(0, 12) : [];
+  if (reglas.length) {
+    const oc = env.WA_CLAVE ? await rpcAnon(env, "xa_pruebas_ocupadas", { p_clave: env.WA_CLAVE, p_slug: slug }) : null;
+    const disp = pruebaDias(reglas, Array.isArray(oc) ? oc : [], 10);
+    L.push("DÍAS DE PRUEBA DISPONIBLES (agenda solo aquí):" + (disp.length ? "" : " ninguno por ahora: no agendes, toma sus datos y dile que recepción le escribe."));
+    disp.slice(0, 30).forEach(d => L.push(`- ${d.txt} (${d.dia})${d.sede ? " · Sede " + corta(d.sede, 50) : ""} · de ${d.desde} a ${d.hasta}${d.quedan != null ? " · quedan " + d.quedan : ""}`));
+  }
   if (bot.extra) L.push("Promos, reglas e información extra del negocio (síguela y úsala):\n" + corta(bot.extra, 3000));
   let vdocs = [], vmed = [];
   const vt = env.WA_CLAVE ? await rpcAnon(env, "xa_bot_ventas_de", { p_clave: env.WA_CLAVE, p_slug: slug }) : null;   // SQL 38: privado (mínimos, promos especiales)
@@ -238,7 +245,7 @@ async function ficha(env, slug) {
   }
   const wa = String(bot.whatsapp || (sedes[0] && sedes[0].whatsapp) || "").replace(/\D/g, "");
   const sd = sedes.slice(0, 6).map(x => ({ n: corta(x.nombre, 60), wa: String(x.whatsapp || "").replace(/\D/g, "") || wa })).filter(x => x.n);
-  const v = { nombre, texto: L.join("\n"), wa, sedes: sd, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [], docs: vdocs, medios: vmed };
+  const v = { nombre, texto: L.join("\n"), wa, sedes: sd, pruebas: reglas, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [], docs: vdocs, medios: vmed };
   FICHAS.set(slug, { t: Date.now(), v });
   if (FICHAS.size > 300) FICHAS.delete(FICHAS.keys().next().value);
   return v;
@@ -286,7 +293,7 @@ async function botApi(req, env) {
     let guardado = false;
     if (String(cl.nombre || "").trim().length > 1 && cel.length >= 9) {
       if (token) guardado = true;   // prueba desde Xyro Apps: no se guarda
-      else guardado = await guardarLead(env, slug, await ipHash(req), cl, cel, sede);
+      else guardado = await guardarLead(env, slug, await ipHash(req), cl, cel, sede, f, "bot-web");
     }
     return jc({ respuesta: corta(o.respuesta, 1200), derivar: !!o.derivar, wa: f.wa, sede: sede ? sede.n : "", sedes: f.sedes, guardado });
   } catch (e) {
@@ -328,11 +335,46 @@ async function pensar(env, f, historial, msg, canal) {
   return { o, sede };
 }
 
-async function guardarLead(env, slug, ip, cl, cel, sede) {
-  const dia = /^\d{4}-\d{2}-\d{2}$/.test(cl.prueba_dia || "") ? cl.prueba_dia : null;
+// Días de prueba: reglas del admin {sede, dias:[0-6 (0=domingo)], desde:"07:00", hasta:"21:00", cupo}
+const DSEM = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+const minDe = h => { const m = String(h || "").toLowerCase().match(/(\d{1,2})(?::(\d{2}))?\s*(a\.?\s*m|p\.?\s*m)?/); if (!m) return null; let x = +m[1] % 24; if (m[3] && m[3][0] === "p" && x < 12) x += 12; if (m[3] && m[3][0] === "a" && x === 12) x = 0; return x * 60 + (+m[2] || 0); };
+const h12 = h => { const n = minDe(h); if (n == null) return h; const x = Math.floor(n / 60), mm = String(n % 60).padStart(2, "0"); return `${x % 12 || 12}:${mm} ${x < 12 ? "am" : "pm"}`; };
+function pruebaDias(reglas, oc, n) {
+  const hoy = new Date(Date.now() - 18e6), out = [];
+  for (let i = 0; i < n; i++) {
+    const d = new Date(hoy.getTime() + i * 864e5), iso = d.toISOString().slice(0, 10), wd = d.getUTCDay();
+    for (const r of reglas) {
+      if (!r.dias.map(Number).includes(wd)) continue;
+      if (i === 0 && minDe(r.hasta) != null && minDe(r.hasta) <= d.getUTCHours() * 60 + d.getUTCMinutes() + 60) continue;   // hoy ya casi cerró
+      const usado = oc.filter(o => o.dia === iso && String(o.sede || "") === String(r.sede || "")).reduce((a, o) => a + (+o.n || 0), 0);
+      const cupo = +r.cupo || 0;
+      if (cupo && usado >= cupo) continue;
+      out.push({ dia: iso, txt: `${DSEM[wd]} ${iso.slice(8, 10)}/${iso.slice(5, 7)}`, sede: r.sede || "", desde: h12(r.desde || "06:00"), hasta: h12(r.hasta || "21:00"), quedan: cupo ? cupo - usado : null, r });
+    }
+  }
+  return out;
+}
+function pruebaRegla(reglas, dia, hora, sede) {   // regla que permite ese día/hora/sede, o null
+  if (!reglas || !reglas.length) return { cupo: 0 };
+  const wd = new Date(dia + "T12:00:00Z").getUTCDay(), m = minDe(hora);
+  return reglas.find(r => r.dias.map(Number).includes(wd) && (!r.sede || !sede || String(r.sede).toLowerCase() === String(sede).toLowerCase())
+    && (m == null || ((minDe(r.desde) ?? 0) <= m && m <= (minDe(r.hasta) ?? 1439)))) || null;
+}
+async function guardarLead(env, slug, ip, cl, cel, sede, f, origen) {
+  let dia = /^\d{4}-\d{2}-\d{2}$/.test(cl.prueba_dia || "") ? cl.prueba_dia : null, cupo = 0;
+  if (dia) { const r = pruebaRegla(f && f.pruebas, dia, cl.prueba_hora, sede ? sede.n : ""); if (!r) dia = null; else cupo = +r.cupo || 0; }
   const rl = await fetch(env.SB_URL + "/rest/v1/rpc/xa_bot_lead", {
     method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY, "content-type": "application/json" },
-    body: JSON.stringify({ p_slug: slug, p_ip: ip, p_nombre: corta(cl.nombre, 80), p_celular: cel, p_sede: sede ? sede.n : "", p_interes: corta(cl.interes, 300), p_dia: dia, p_hora: corta(cl.prueba_hora, 20) }),
+    body: JSON.stringify({ p_slug: slug, p_ip: ip, p_nombre: corta(cl.nombre, 80), p_celular: cel, p_sede: sede ? sede.n : "", p_interes: corta(cl.interes, 300), p_dia: dia, p_hora: dia ? corta(cl.prueba_hora, 20) : "",
+      p_objetivo: corta(cl.objetivo, 200), p_experiencia: corta(cl.experiencia, 100), p_origen: origen || "bot-web", p_cupo: cupo }),
+  }).catch(() => null);
+  if (rl && rl.status === 404) return guardarLead0(env, slug, ip, cl, cel, sede, dia);   // sin SQL 41
+  return !!(rl && rl.ok && (await rl.json().catch(() => ({}))).ok);
+}
+async function guardarLead0(env, slug, ip, cl, cel, sede, dia) {
+  const rl = await fetch(env.SB_URL + "/rest/v1/rpc/xa_bot_lead", {
+    method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + env.SB_KEY, "content-type": "application/json" },
+    body: JSON.stringify({ p_slug: slug, p_ip: ip, p_nombre: corta(cl.nombre, 80), p_celular: cel, p_sede: sede ? sede.n : "", p_interes: corta([cl.interes, cl.objetivo].filter(Boolean).join(" · "), 300), p_dia: dia, p_hora: corta(cl.prueba_hora, 20) }),
   }).catch(() => null);
   return !!(rl && rl.ok && (await rl.json().catch(() => ({}))).ok);
 }
@@ -392,7 +434,7 @@ async function waProcesar(env, phoneId, m, nombre) {
     const { o, sede } = await pensar(env, f, hist, texto, /^\d+$/.test(m.from) ? "wa" : "wa-id");
     const cl = o.cliente || {};
     const nom = String(cl.nombre || nombre || "").trim();
-    if (nom.length > 1 && (String(cl.interes || "").trim() || cl.prueba_dia)) await guardarLead(env, e.slug, "wa" + m.from, { ...cl, nombre: nom }, /^\d+$/.test(m.from) ? m.from : String(cl.celular || ""), sede);
+    if (nom.length > 1 && (String(cl.interes || "").trim() || cl.prueba_dia)) await guardarLead(env, e.slug, "wa" + m.from, { ...cl, nombre: nom }, /^\d+$/.test(m.from) ? m.from : String(cl.celular || ""), sede, f, "bot-wa");
     const p1 = await responde(corta(o.respuesta, 1500), !!o.derivar && !o.luego);
     if (p1 === "ok") for (const d of o.med || []) { const sm = await waEnviar(env, phoneId, m.from, d.n, null, { type: d.tipo, link: d.url }); if (sm.ok) await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: (d.tipo === "video" ? "🎬 " : "📸 ") + d.n, p_wa_id: sm.id || null, p_derivar: false }); }
     if (o.doc && p1 === "ok") { const sd = await waEnviar(env, phoneId, m.from, o.doc.n, null, { link: o.doc.url, filename: o.doc.n.replace(/[^\w áéíóúñÁÉÍÓÚÑ.-]/g, "").slice(0, 60) + ".pdf" }); if (sd.ok) await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: "📄 " + o.doc.n, p_wa_id: sd.id || null, p_derivar: false }); }
