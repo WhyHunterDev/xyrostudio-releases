@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261113-1916",
+  "fecha": "2026-11-13 19:16",
+  "titulo": "Atajos arriba: Asistencia y Seguimiento",
+  "notas": "Atajos arriba: Asistencia y Seguimiento",
+  "cambios": [
+   "Arriba ahora tienes los botones 📷 Asistencia y 📌 Seguimiento para llegar en un toque",
+   "Se quitó el buscador de arriba: para buscar socios usa el buscador de la pantalla Socios (o Ctrl+K)"
+  ]
+ },
+ {
   "id": "20261113-1915",
   "fecha": "2026-11-13 19:15",
   "titulo": "Arreglo: botones de la ficha del socio",

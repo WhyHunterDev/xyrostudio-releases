@@ -41,7 +41,7 @@ main{overflow:auto;height:100%;position:relative}
 .top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:14px 26px;background:linear-gradient(#07070df2,#07070d99);backdrop-filter:blur(14px);border-bottom:1px solid var(--ln)}
 .top h1{font-size:19px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top .sp{flex:1}
-.srch{display:flex;align-items:center;gap:8px;background:#ffffff0a;border:1px solid var(--ln);border-radius:12px;padding:8px 12px;width:min(300px,40vw)}
+.qk{display:flex;gap:8px}.qk a.on{background:var(--a);color:#000;border-color:var(--a)}.srch{display:flex;align-items:center;gap:8px;background:#ffffff0a;border:1px solid var(--ln);border-radius:12px;padding:8px 12px;width:min(300px,40vw)}
 .srch input{background:none;border:0;outline:0;width:100%}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;font-weight:700;background:#ffffff10;border:1px solid var(--ln);transition:.2s;white-space:nowrap}
 .btn:hover{background:#ffffff1a;transform:translateY(-1px)}
@@ -254,7 +254,7 @@ select{color-scheme:dark}select option,select optgroup{background:var(--c2);colo
  .bn a em{font-style:normal;font-size:20px}
  .bn a.on{color:var(--tx)}.bn a.on em{filter:drop-shadow(0 0 8px var(--a))}
  .top{padding:12px 16px}.v{padding:18px 16px 120px}
- .srch{display:none}
+ .srch{display:none}.qk{display:none!important}
  .kpi b{font-size:26px}
  .demo{bottom:78px;font-size:12px}
  .f2{grid-template-columns:1fr}
@@ -316,7 +316,7 @@ body:not(.dentro){background:#05060a}
 <div id="app" hidden>
   <aside id="side"></aside>
   <main id="main">
-    <header class="top"><h1 id="tt"></h1><button class="btn sm sedeb" id="sedeB" hidden></button><div class="sp"></div><label class="srch"><span>🔎</span><input id="q" placeholder="Buscar por nombre o DNI" autocomplete="off"></label><button class="btn p" id="nuevo">＋ <span id="nuevoT">Nuevo</span></button></header>
+    <header class="top"><h1 id="tt"></h1><button class="btn sm sedeb" id="sedeB" hidden></button><div class="sp"></div><input id="q" type="hidden"><nav class="qk" id="qk"></nav><button class="btn p" id="nuevo">＋ <span id="nuevoT">Nuevo</span></button></header>
     <div id="v"></div>
   </main>
   <nav class="bn" id="bn"></nav>
@@ -769,6 +769,7 @@ function shell(){
  $('#bn').innerHTML=n.filter(x=>['inicio','socios','kiosco','tienda','caja'].includes(x[0])||(isCoach()&&x[0]==='rutinas')).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=cambiarNegocio);
  marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):verTodas()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
+ {const q=$('#qk');q&&(q.innerHTML=n.filter(x=>x[0]==='kiosco'||x[0]==='seguimiento').sort((a,b)=>a[0]==='kiosco'?-1:1).map(([k,i,t])=>`<a class="btn" href="#/${k}" data-k="${k}">${i} ${esc(t)}</a>`).join(''))}
  document.title=nombre()+' · Xyro Apps';
 }
 let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
@@ -778,7 +779,7 @@ function go(){
  if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta','web','soporte'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
  if(isCoach()&&!['rutinas','cuenta','mas','soporte'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
- $$('.nav,.bn a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
+ $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
@@ -792,7 +793,7 @@ function go(){
 $('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket()})[ruta]||nuevoCli)()};
 $('#q').addEventListener('input',e=>{qtxt=e.target.value;if(ruta!=='socios'){location.hash='#/socios'}else{const l=$('#lst');l&&(l.innerHTML=lista())}});
 addEventListener('hashchange',go);
-addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();$('#q').focus()}});
+addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();if(ruta!=='socios')location.hash='#/socios';setTimeout(()=>{const s=$('#q2');s&&s.focus()},80)}});
 
 /* ===== Vistas ===== */
 function inicio(){
