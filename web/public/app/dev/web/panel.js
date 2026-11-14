@@ -315,7 +315,8 @@
   V.clases = async () => { data.clases = data.clases || []; DEF = DEFS.clases; return title('Horario de clases', 'Funcional, baile, crossfit… Agrega cada clase con su profesor, días y hora. Aparece en la web en la pestaña Clases.') + await crudList(DEFS.clases); };
   V.nutricion = async () => { data.nutricion = data.nutricion || []; DEF = DEFS.nutricion; return title('Asesoría nutricional', 'Pon los días y horas en que atiende la nutricionista en cada sede. En la web la gente elige un turno y separa su cupo por WhatsApp con la sede.') + await crudList(DEFS.nutricion); };
   V.coaches = crudView('coaches', 'Entrenadores', 'Cada entrenador tiene su propia página con fotos y video.');
-  V.sedes = crudView('sedes', 'Sedes', 'Agrega, edita o elimina sedes. Cada una tiene su WhatsApp de recepción.');
+  const sedesCrud = crudView('sedes', 'Sedes', 'Agrega, edita o elimina sedes. Cada una tiene su WhatsApp de recepción.');
+  V.sedes = async () => me.gestor ? sedesCrud() : title('Sedes', 'Tus sedes, su dirección y su WhatsApp los configura XyroStudio.') + `<div class="panel">${(data.sedes || []).map((x) => `<p style="margin:0 0 8px">📍 <b>${esc(x.nombre || '')}</b>${x.direccion ? ' · ' + esc(x.direccion) : ''}</p>`).join('') || '<p class="d">Aún no hay sedes.</p>'}<a class="btn btn-y" href="../#/soporte">🛟 Pedir cambio en Soporte</a></div>`;
   let cafeTab = 'cafe';
   V.cafetin = async () => {
     DEF = DEFS[cafeTab];
@@ -355,7 +356,7 @@
   V.diseno = async () => {
     const c = data.config, est = c.estilo || 'fuerza', sc = c.secciones || {}, col = getComputedStyle(document.documentElement).getPropertyValue('--y').trim() || '#f5c400';
     const prev = (e) => { const u = window.SS_WEBURL || ''; return u ? u + (u.includes('?') ? '&' : '?') + 'e=' + e : '#'; };
-    if (!window.SS_BASE) return title('Diseño y secciones') + `<div class="panel"><p class="d">Tu web está hecha a medida, así que su diseño y sus secciones los cambia XyroStudio. Escríbenos y lo vemos contigo.</p><a class="btn btn-y" target="_blank" rel="noopener" href="https://wa.me/51936449066?text=${encodeURIComponent('Hola XyroStudio 👋 Quiero cambiar el diseño o las secciones de mi web.')}">💬 Escribir a XyroStudio</a></div>`;
+    if (!window.SS_BASE || !me.gestor) return title('Diseño y secciones') + `<div class="panel"><p class="d">El diseño, las secciones, el orden, los colores, el logo, el dominio y el SEO de tu web los configura XyroStudio, para que siempre se vea profesional. Pídelo en Soporte y lo dejamos listo.</p><a class="btn btn-y" href="../#/soporte">🛟 Pedir cambio en Soporte</a></div>`;
     return title('Diseño y secciones', 'Elige cómo se ve tu web y qué secciones muestra. Al guardar, tu web cambia al instante.') +
       `<div class="panel"><h3>✨ Diseño de tu web</h3><p class="d">3 diseños distintos: cambia cómo se ordena todo, no solo el color (el color es el de tu marca). Toca uno para elegirlo; «Ver» abre tu web con ese diseño sin guardarlo.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px">${ESTILOS_W.map(([k, n, d]) => `<label style="display:block;cursor:pointer;border:2px solid ${k === est ? col : 'var(--line2,#2e2e2e)'};border-radius:16px;overflow:hidden">
