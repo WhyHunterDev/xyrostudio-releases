@@ -378,6 +378,7 @@ async function waProcesar(env, phoneId, m, nombre) {
   m.from = m.from || m.from_user_id;   // usuarios con nombre de usuario de WhatsApp: llega su ID (p. ej. PE.123…) en vez del número
   if (!m.from) return "sin remitente";
   const e = await rpcAnon(env, "xa_wa_entrante", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: m.from, p_nombre: corta(nombre, 80), p_texto: texto, p_wa_id: m.id });
+  if (e && e.ok && e.humano && (m.type === "image" || m.type === "document")) return waComprobante(env, e, m, nombre, async () => "humano");   // aunque atienda recepción, el pago va a «Ventas del bot» (sin responder: responde recepción)
   if (!e || !e.ok || e.humano) return "entrante:" + (e ? (e.motivo || (e.humano ? "humano" : "?")) : "null (WA_CLAVE o SQL 36)");   // número no vinculado, repetido o lo atiende recepción
   const responde = async (t, derivar) => { const s = await waEnviar(env, phoneId, m.from, t); if (!s.ok) return "enviar:" + JSON.stringify(s.error || {}).slice(0, 200); await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: t, p_wa_id: s.id || null, p_derivar: !!derivar }); return "ok"; };
   if (m.type === "image" || m.type === "document") return waComprobante(env, e, m, nombre, responde);
