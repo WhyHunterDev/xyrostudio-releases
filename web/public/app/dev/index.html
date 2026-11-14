@@ -294,6 +294,7 @@ body:not(.dentro){background:#05060a}
 .cen>.lg .card{background:#10131cd9;backdrop-filter:blur(8px);border-color:#ffffff1a}
 .wag{display:grid;grid-template-columns:minmax(260px,360px) 1fr;gap:12px;align-items:start}.wac.on{background:#ffffff0d;border-radius:10px}.wac small.mu{white-space:nowrap}.wac .nm small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}.wach{padding:0;overflow:hidden}.wach .btg{max-width:78%}.wabk{display:none}.wnb{display:inline-block;min-width:18px;padding:0 6px;border-radius:9px;background:var(--a);color:#000;font-size:11px;text-align:center;vertical-align:middle}.btg.yo.wabot{background:#2a2a2e;color:inherit}.btg.yo.waequipo{background:var(--a);color:#000}.wa0{display:grid;place-items:center;min-height:300px;text-align:center}@media(max-width:820px){.wag{grid-template-columns:1fr}.wag.sel>.card:first-child{display:none}.wag:not(.sel)>.wach{display:none}.wabk{display:inline-flex}}
 .btw{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0b0b0c;max-width:380px}.bth{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.bth i{width:9px;height:9px;border-radius:50%;background:var(--ok,#22c55e)}.bth small{color:var(--ok,#22c55e);margin-left:auto}.btc{height:300px;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:7px}.btg{max-width:85%;padding:8px 11px;border-radius:13px;font-size:14px;line-height:1.4;white-space:pre-wrap}.btg.bo{background:#1b1b1d;align-self:flex-start;border-bottom-left-radius:4px}.btg.yo{background:var(--bc);color:#000;align-self:flex-end;border-bottom-right-radius:4px}.bts{display:flex;flex-wrap:wrap;gap:6px;padding:0 10px 8px}.btf{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line)}.btf input{flex:1;min-width:0;background:#151517;border:1px solid var(--line);color:inherit;border-radius:10px;padding:9px 10px;font:inherit}
+.wim{display:block;max-width:220px;max-height:300px;border-radius:10px;margin:4px 0;cursor:zoom-in;object-fit:cover}.vbc{margin-bottom:10px}.vbg{display:grid;grid-template-columns:180px 1fr;gap:14px}.vbg .wim{max-width:180px;width:180px}.vb0 small{font-size:13px}.vb0{height:200px;display:grid;place-items:center;text-align:center;background:#151517;border:1px dashed var(--line);font-size:34px;cursor:default}@media(max-width:560px){.vbg{grid-template-columns:1fr}.vbg .wim{width:100%;max-width:100%}}
 </style>
 </head>
 <body>
@@ -436,7 +437,7 @@ const DB={
   [S.cli,S.pla,S.mem,S.pag,S.asi]=rs.map(r=>r.data||[]);
   const r2=await Promise.all([todo(()=>q('pro').order('nombre').order('id'),10000),todo(()=>q('mov').gte('t',since).order('t',{ascending:false}).order('id'),40000),q('cie').order('hasta',{ascending:false}).limit(60)]);
   NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);
-  NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED26=!!(await sb.from(T.mem).select('cuotas').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
+  NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED39=!!(await sb.from(T.pag).select('foto_pago').limit(1)).error;NEED26=!!(await sb.from(T.mem).select('cuotas').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
   {const r=await sb.from(T.sol).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(1000),r2=await sb.from(T.cie).select('area').limit(1);NEED24=!!(r.error||r2.error);S.sol=r.data||[]}
   {const r=await sb.from(T.rut).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(5000);NEED29=!!r.error;S.rut=r.data||[]}
  },
@@ -494,9 +495,10 @@ const pagoFields=totF=>[{k:'metodo',l:'Método',t:'opts',v:'Efectivo',o:METODOS.
   const up=()=>{const v=val(),x=+v.monto2||0,t=+totF(v)||0;hh.innerHTML=w.style.display==='none'||!x?'':x>=t?'<span style="color:var(--bad)">La segunda parte debe ser menor al total '+sol(t)+'</span>':`💳 ${esc(v.metodo)} ${sol(Math.round((t-x)*100)/100)} + ${esc(v.metodo2)} ${sol(x)} = <b>${sol(t)}</b>`};
   b.onclick=()=>{const on=w.style.display==='none';w.style.display=on?'':'none';b.textContent=on?'✕ Un solo método':SPL;if(on){if(s2.value===val().metodo)s2.value=METODOS.find(x=>x!==val().metodo);setTimeout(()=>m2.focus(),50)}else m2.value='';up()};
   fm.addEventListener('input',up);fm.addEventListener('change',up)}},
- {k:'monto2',l:'Monto con el otro método (S/)',t:'number',half:1,ph:'Ej. 500',im:'decimal'},{k:'metodo2',l:'Otro método',t:'sel',half:1,v:'Yape',o:METODOS.map(x=>[x,x])}];
+ {k:'monto2',l:'Monto con el otro método (S/)',t:'number',half:1,ph:'Ej. 500',im:'decimal'},{k:'metodo2',l:'Otro método',t:'sel',half:1,v:'Yape',o:METODOS.map(x=>[x,x])}].concat(DEMO||!NEED39?[{k:'fpago',l:'📎 Foto del pago (captura de Yape, Plin o transferencia) · opcional',t:'adj'}]:[]);
 function valSplit(v,tot){const x=+v.monto2||0;if(!x)return;if(x<0||x>=+tot)throw new Error('La segunda parte debe ser menor al total ('+sol(tot)+').');if(v.metodo2===v.metodo)throw new Error('Elige un método distinto para la segunda parte.')}
 async function pagar(row,v){
+ const fi=document.querySelector('#f_fpago');if(fi&&fi.files&&fi.files[0]&&!row.foto_pago&&!DEMO&&!NEED39){try{row.foto_pago=await subirImg(fi.files[0],1400,'pago')}catch(er){toast(er.message)}}
  const x=Math.round((+(v&&v.monto2)||0)*100)/100,tot=+row.monto;row.fecha=row.fecha||new Date().toISOString();
  if(!x||!v.metodo2||x>=tot)return DB.ins('pag',row);
  const a=await DB.ins('pag',Object.assign({},row,{monto:Math.round((tot-x)*100)/100}));
@@ -539,7 +541,7 @@ async function renovar(c,p,o){
  if(+o.sesiones)row.sesiones=+o.sesiones;if(o.dom===false)row.dom=false;if(ds){row.descuento=ds;row.motivo=o.motivo||null}
  let paga=total;if(o.cuotas&&o.cuotas.length){row.cuotas=o.cuotas;paga=r2(+o.hoy||0)}
  const mem=await DB.ins('mem',row);
- if(paga>0)pago=await pagar({cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre+(ds?' (dscto. '+sol(ds)+(o.motivo?' · '+o.motivo:'')+')':'')+(row.cuotas?' · inicial':''),monto:paga,metodo:o.metodo,fecha:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]},o);
+ if(paga>0)pago=await pagar({cliente_id:c.id,membresia_id:mem.id,concepto:p.nombre+(ds?' (dscto. '+sol(ds)+(o.motivo?' · '+o.motivo:'')+')':'')+(row.cuotas?' · inicial':''),monto:paga,metodo:o.metodo,fecha:new Date().toISOString(),quien:o.quien||ME.nombre||ROLES[ME.rol],...(o.extra||{})},o);
  return pago;
 }
 function checkin(v){
@@ -762,7 +764,7 @@ const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||
 const NAV=()=>{if(isCoach())return[['rutinas','📋',ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento'],['cuenta','🔐','Mi cuenta']];
  if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
- return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
@@ -780,16 +782,16 @@ function go(){
  if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta','web','soporte'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
  if(isCoach()&&!['rutinas','cuenta','mas','soporte'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
- $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
+ $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp','ventasbot'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
- if(ruta==='whatsapp'&&!waVer())ruta='inicio';
- const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista}[ruta]||inicio;
+ if((ruta==='whatsapp'||ruta==='ventasbot')&&!waVer())ruta='inicio';
+ const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
- $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',seguimiento:'Seguimiento',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio'}[ruta]||'';
+ $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
 $('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket()})[ruta]||nuevoCli)()};
@@ -1309,7 +1311,7 @@ function listo(p,titulo){
  const msg=c?`Hola ${c.nombre.split(' ')[0]} 👋, gracias por tu pago de ${sol(p.monto)} en ${nombre()}: ${p.concepto||''}${mm?' del '+fF(mm.inicio)+' al '+fF(mm.fin):''}.${p.comp&&p.comp.serie?' Comprobante '+compTxt(p.comp)+'.':''}${c.num?' Tu código de socio: '+c.num+'.':''} ${R.lema}`:'';
  sheet(`<div style="text-align:center;display:grid;gap:4px"><div style="font-size:42px">✅</div><h3>${esc(titulo)}</h3><p class="mu sm">${sol(p.monto)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}</p></div>
  <iframe class="tk" title="Comprobante"></iframe>
- <div class="bt" style="justify-content:center;flex-wrap:wrap"><button class="btn p" id="pt">🖨️ Ticket</button><button class="btn" id="pa">📄 A4</button>${c&&c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,msg)}">📲 WhatsApp</a>`:''}<button class="btn" data-x>Listo</button></div>`,el=>{el.querySelector('.tk').srcdoc=ticketHTML(p,false);el.querySelector('#pt').onclick=()=>imprimir(p,false);el.querySelector('#pa').onclick=()=>imprimir(p,true)});
+ <div class="bt" style="justify-content:center;flex-wrap:wrap"><button class="btn p" id="pt">🖨️ Ticket</button><button class="btn" id="pa">📄 A4</button>${c&&c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,msg)}">📲 WhatsApp</a>`:''}${p.foto_pago?`<a class="btn" target="_blank" rel="noopener" href="${esc(p.foto_pago)}">📎 Foto del pago</a>`:''}<button class="btn" data-x>Listo</button></div>`,el=>{el.querySelector('.tk').srcdoc=ticketHTML(p,false);el.querySelector('#pt').onclick=()=>imprimir(p,false);el.querySelector('#pa').onclick=()=>imprimir(p,true)});
 }
 async function finCobro(p,v,titulo){
  if(p&&v.comp)await emitir(p,v);
@@ -1564,7 +1566,7 @@ const TURN0=[{n:'Mañana',a:'06:00',b:'14:00'},{n:'Noche',a:'14:00',b:'23:00'}];
 const turnosL=()=>(CFG.turnos&&CFG.turnos.length?CFG.turnos:TURN0);
 const turnoAhora=()=>{const L=turnosL(),d=new Date(),m=d.getHours()*60+d.getMinutes(),mm=s=>{const[a,b]=String(s||'0:0').split(':');return+a*60+(+b||0)};
  return(L.find(t=>{const a=mm(t.a),b=mm(t.b);return a<=b?m>=a&&m<b:m>=a||m<b})||L.reduce((x,t)=>Math.abs(mm(t.b)-m)<Math.abs(mm(x.b)-m)?t:x,L[L.length-1])).n};
-const esMio=x=>x.usuario?String(x.usuario)===String(ME.id):(x.quien||'')===QUIEN();
+const esMio=x=>x.quien!==BOTQ&&(x.usuario?String(x.usuario)===String(ME.id):(x.quien||'')===QUIEN());
 function turnosDia(sF,desde){const H=new Date(hoy()+'T00:00:00').toISOString(),L=S.cie.filter(c=>c.turno&&c.hasta>H&&c.hasta>desde&&(!sF||!c.sede||String(c.sede)===sF)).sort((a,b)=>a.hasta>b.hasta?1:-1);
  if(!turnosOn())return'';
  return`<div class="card" style="padding:12px;margin:10px 0"><b>🕐 Turnos cerrados hoy</b>${L.length?`<div class="tl" style="margin-top:6px">${L.map(c=>`<div class="row" style="padding:7px 4px"><span class="nm"><b>${esc(c.turno)} · ${esc(areaN(c))}</b><small>${esc(c.quien||'')} · ${fH(c.hasta)} · cobró ${sol(totCie(c))}${c.nota?' · '+esc(c.nota):''}</small></span><b style="color:${+c.diferencia===0?'var(--ok)':+c.diferencia>0?'var(--wa)':'var(--bad)'}">${+c.diferencia===0?'✅':(+c.diferencia>0?'+':'')+sol(c.diferencia)}</b></div>`).join('')}</div><p class="mu sm" style="margin-top:6px">Entregado en efectivo por los turnos: <b>${sol(L.reduce((a,c)=>a+(+c.contado||0),0))}</b></p>`:'<p class="mu sm" style="margin-top:4px">Aún nadie cerró su turno hoy.</p>'}</div>`}
@@ -1976,12 +1978,12 @@ function waDemo(){const m=n=>new Date(Date.now()-n*6e4).toISOString(),C=[
  w2:[{de:'cliente',texto:'Hola, cuánto cuesta el mes?',creado:m(30)},{de:'bot',texto:'¡Hola Jorge! 👋 El plan mensual está en S/ 120 y te da acceso libre a sala y clases. ¿Te gustaría venir a una clase de prueba gratis?',creado:m(29)},{de:'cliente',texto:'Sí, mañana en la noche',creado:m(26)},{de:'bot',texto:'¡Genial! Te esperamos mañana a las 7 pm 💪',creado:m(25)}],
  w3:[{de:'cliente',texto:'¿Abren los feriados?',creado:m(60*30+2)},{de:'bot',texto:'Los feriados abrimos de 8 am a 1 pm 😊',creado:m(60*30+1)},{de:'cliente',texto:'Gracias 🙌',creado:m(60*30)}]};return C}
 async function waIni(){if(!waVer())return;
- if(DEMO){WAN=[{phone_id:'demo',numero:'51987654321'}];WAC=waDemo();shell();ruta==='whatsapp'&&go();return}
+ if(DEMO){WAN=[{phone_id:'demo',numero:'51987654321'}];WAC=waDemo();VB=VB||vbDemo();shell();ruta==='whatsapp'&&go();return}
  try{const{data,error}=await sb.from('xa_wa_numeros').select('phone_id,numero,activo').eq('sitio_id',String(SID));if(error)throw error;WAN=(data||[]).filter(x=>x.activo)}catch(e){WAN=[];NEED36=true}
- if(!WAN.length)return;await waChats();shell();ruta==='whatsapp'&&go();clearInterval(WAT);WAT=setInterval(waTick,2e4)}
+ if(!WAN.length)return;await waChats();await vbCargar();shell();ruta==='whatsapp'&&go();clearInterval(WAT);WAT=setInterval(waTick,2e4)}
 async function waChats(){const{data,error}=await sb.from('xa_wa_chats').select('*').eq('sitio_id',String(SID)).order('ultimo',{ascending:false}).limit(200);if(!error)WAC=data||[]}
 async function waMsgs(id){if(DEMO)return;const{data,error}=await sb.from('xa_wa_msgs').select('id,de,texto,creado').eq('chat_id',id).order('creado',{ascending:false}).limit(150);if(!error)WAM[id]=(data||[]).reverse()}
-async function waTick(){if(document.hidden||DEMO)return;const p0=waPend(),f0=(WAC||[]).map(c=>c.id+c.ultimo).join();try{await waChats();if(ruta==='whatsapp'&&arg)await waMsgs(arg)}catch(_){return}
+async function waTick(){if(document.hidden||DEMO)return;const p0=waPend(),v0=vbPend(),f0=(WAC||[]).map(c=>c.id+c.ultimo).join();try{await waChats();await vbCargar();if(vbPend()!==v0){shell();if(vbPend()>v0)toast('💳 El asistente vendió: hay un pago por confirmar');if(ruta==='ventasbot')go()}if(ruta==='whatsapp'&&arg)await waMsgs(arg)}catch(_){return}
  const f1=(WAC||[]).map(c=>c.id+c.ultimo).join();if(waPend()!==p0)shell();if(f1!==f0){if(waPend()>p0)toast('💬 Un cliente de WhatsApp te necesita');if(ruta==='whatsapp'&&!(document.activeElement&&document.activeElement.id==='waT'))go()}}
 async function waSet(c,o){Object.assign(c,o);go();shell();if(DEMO)return;const{error}=await sb.from('xa_wa_chats').update(o).eq('id',c.id);if(error){toast('No se pudo guardar');reportar('wa',error)}}
 async function waEnviar(c,t){t=String(t||'').trim();if(!t)return;
@@ -2002,19 +2004,78 @@ function waVista(){
  const L=WAC.filter(x=>waF==='todos'||(waF==='pend'?x.pendiente:waF==='yo'?x.humano:!x.humano));
  setTimeout(()=>{$$('[data-wf]').forEach(b=>b.onclick=()=>{waF=b.dataset.wf;go()});
   const f=$('#waF');f&&(f.onsubmit=e=>{e.preventDefault();waEnviar(c,f.t.value)});const ta=$('#waT');ta&&ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();f.requestSubmit()}});
-  const hb=$('#waH');hb&&(hb.onclick=()=>waSet(c,c.humano?{humano:false,pendiente:false}:{humano:true}));const ms=$('#waMs');ms&&(ms.scrollTop=ms.scrollHeight)});
- const fila=x=>`<a class="row wac ${x.id===arg?'on':''}" href="#/whatsapp/${esc(x.id)}"><span class="av" style="display:grid;place-items:center">${x.pendiente?'🙋':x.humano?'👤':'🤖'}</span><span class="nm"><b>${esc(x.nombre||waTel(x.telefono))}${x.no_leidos?` <span class="wnb">${x.no_leidos}</span>`:''}</b><small>${x.pendiente?'<b style="color:var(--bad)">Te necesita · </b>':''}${esc(x.ultimo_txt||'')}</small></span><small class="mu">${waHora(x.ultimo)}</small></a>`;
+  const hb=$('#waH');hb&&(hb.onclick=()=>waSet(c,c.humano?{humano:false,pendiente:false}:{humano:true}));const ms=$('#waMs');ms&&(ms.scrollTop=ms.scrollHeight);medCargar()});
+ const fila=x=>`<a class="row wac ${x.id===arg?'on':''}" href="#/whatsapp/${esc(x.id)}"><span class="av" style="display:grid;place-items:center">${x.pendiente?'🙋':x.humano?'👤':'🤖'}</span><span class="nm"><b>${esc(x.nombre||waTel(x.telefono))}${x.no_leidos?` <span class="wnb">${x.no_leidos}</span>`:''}</b><small>${x.pendiente?'<b style="color:var(--bad)">Te necesita · </b>':''}${esc((x.ultimo_txt||'').replace(/\[img:\d+\]/g,''))}</small></span><small class="mu">${waHora(x.ultimo)}</small></a>`;
  const lista=`<div class="card" style="padding:8px"><div class="chips" style="margin:0 0 6px">${[['todos','Todos'],['pend','🙋 Te necesitan'],['yo','👤 Atiendes tú'],['bot','🤖 Atiende el bot']].map(([k,t])=>`<button class="chip ${waF===k?'on':''}" data-wf="${k}">${t}${k==='pend'&&waPend()?`<span>${waPend()}</span>`:''}</button>`).join('')}</div><div class="tl">${L.map(fila).join('')||'<div class="empty">No hay conversaciones aquí.</div>'}</div></div>`;
  const M=c&&(WAM[c.id]||[]),vt=c&&waVentana(c);
  const chat=c?`<div class="card wach"><div class="bth"><a class="btn sm wabk" href="#/whatsapp">←</a><b>${esc(c.nombre||'Cliente')}</b><small class="mu" style="color:inherit">${esc(waTel(c.telefono))}</small><button class="btn sm" id="waH" style="margin-left:auto">${c.humano?'🤖 Devolver al bot':'🙋 Atender yo'}</button></div>
   <p class="mu sm" style="margin:6px 12px 0">${c.humano?'👤 Atiende recepción: el bot no responde en este chat.':'🤖 Responde el asistente. Si escribes, el chat pasa a recepción.'}</p>
-  <div class="btc" id="waMs" style="height:min(52vh,460px)">${M?M.map(m=>`<div class="btg ${m.de==='cliente'?'bo':'yo wa'+m.de}">${esc(m.texto)}<small style="display:block;opacity:.6;font-size:11px;margin-top:3px">${m.de==='bot'?'🤖 Asistente · ':m.de==='equipo'?'👤 Recepción · ':''}${waHora(m.creado)}</small></div>`).join(''):'<div class="mu">Cargando…</div>'}</div>
+  <div class="btc" id="waMs" style="height:min(52vh,460px)">${M?M.map(m=>`<div class="btg ${m.de==='cliente'?'bo':'yo wa'+m.de}">${waTxt(m.texto)}<small style="display:block;opacity:.6;font-size:11px;margin-top:3px">${m.de==='bot'?'🤖 Asistente · ':m.de==='equipo'?'👤 Recepción · ':''}${waHora(m.creado)}</small></div>`).join(''):'<div class="mu">Cargando…</div>'}</div>
   ${vt?`<form class="btf" id="waF"><textarea id="waT" name="t" rows="2" maxlength="4000" placeholder="Escribe tu respuesta…" style="flex:1;min-width:0;background:#151517;border:1px solid var(--line);color:inherit;border-radius:10px;padding:9px 10px;font:inherit;resize:none"></textarea><button class="btn p" id="waB">Enviar</button></form>`:`<p class="sm" style="margin:0;padding:10px 12px;border-top:1px solid var(--line)">⏳ Pasaron más de 24 horas desde su último mensaje. WhatsApp no deja escribirle hasta que el cliente vuelva a escribir. ${/^\d+$/.test(c.telefono)?`<a target="_blank" rel="noopener" href="https://wa.me/${esc(c.telefono)}">Abrir en WhatsApp ↗</a>`:''}</p>`}</div>`
   :`<div class="card wach wa0 mu">💬<br>Elige una conversación.<br><small>El asistente responde solo; aquí ves todo y entras cuando te necesitan.</small></div>`;
  return`<div class="hi"><div><h2>💬 WhatsApp</h2><p class="mu">Conversaciones del WhatsApp de ${esc(nombre())}. 🙋 = el asistente pasó el chat a recepción.</p></div></div><div class="wag ${c?'sel':''}">${lista}${chat}</div>`}
 async function waVincular(){form('🔗 Vincular WhatsApp (solo XyroStudio)',[{k:'pid',l:'Phone number ID (Meta → WhatsApp → Configuración de la API)',v:'',ph:'123456789012345'},{k:'num',l:'Número (con 51)',v:'',ph:'51987654321'}],async v=>{
  if(DEMO)return toast('Demo: no se guarda');if(!/^\d{6,30}$/.test(String(v.pid||'').trim()))throw new Error('Phone number ID inválido');
  const{error}=await sb.rpc('xa_wa_vincular',{p_slug:SLUG,p_phone_id:String(v.pid).trim(),p_numero:String(v.num||'')});if(error)throw error;WAN=null;await waIni();go();toast('✅ WhatsApp vinculado')})}
+/* ===== Ventas del asistente (SQL 39, xa_ventas_bot): la captura del pago llega por WhatsApp → recepción toca Proceder → socio + membresía + QR por WhatsApp ===== */
+const BOTQ='Asistente 🤖';
+let VB=null,NEED39=false;const MED={};
+const vbPend=()=>(VB||[]).filter(v=>v.estado==='pendiente').length;
+function vbDemo(){const t=n=>new Date(Date.now()-n*6e4).toISOString();return[
+ {id:'vb1',chat_id:'w2',estado:'pendiente',creado:t(4),datos:{nombres:'Francisco Rojas Lazo',dni:'71234567',nacimiento:'1998-04-12',celular:'51955333444',plan:'1 año',monto:'700',metodo:'Yape',operacion:'04815162',fecha:'hoy 9:41 pm',lectura:'asistente'}},
+ {id:'vb2',chat_id:'w3',estado:'aprobada',creado:t(60*26),revisado_por:'Recepción',datos:{nombres:'Valeria Soto',plan:'3 meses',monto:'350',metodo:'Plin',operacion:'99120031'}}]}
+async function vbCargar(){if(DEMO){VB=VB||vbDemo();return}try{const{data,error}=await sb.from('xa_ventas_bot').select('*').eq('sitio_id',String(SID)).order('creado',{ascending:false}).limit(100);if(error)throw error;VB=data||[];NEED39=false}catch(e){VB=[];NEED39=true}}
+async function waMed(id){if(MED[id])return MED[id];const{data}=await sb.auth.getSession(),tk=data&&data.session&&data.session.access_token;
+ const r=await fetch('/api/wa/media?id='+encodeURIComponent(id),{headers:{authorization:'Bearer '+tk}});if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error||'No se pudo cargar la imagen');
+ const b=await r.blob();return MED[id]={b,u:URL.createObjectURL(b)}}
+function medCargar(){$$('img[data-wm]').forEach(async im=>{if(im.dataset.ok)return;im.dataset.ok=1;im.onclick=()=>im.src&&open(im.src);
+ try{im.src=(await waMed(im.dataset.wm)).u}catch(e){const x=document.createElement('small');x.className='mu';x.textContent='🖼️ '+e.message;im.replaceWith(x)}})}
+const waTxt=t=>esc(t).replace(/\[img:(\d+)\]/g,(_,id)=>DEMO?'':`<img data-wm="${id}" class="wim" alt="Imagen">`);
+async function waBot(chat,texto,imagen,humano){if(DEMO)return true;const{data}=await sb.auth.getSession(),tk=data&&data.session&&data.session.access_token;
+ const r=await fetch('/api/wa/responder',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tk},body:JSON.stringify({chat,texto,imagen:imagen||null,bot:true,humano:!!humano})});
+ const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw new Error(j.error||'No se pudo enviar por WhatsApp');return true}
+const sinT=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function vbPlan(t,P){t=sinT(t);if(!t)return P[P.length-1];const n=P.find(p=>t.includes(sinT(p.nombre))||sinT(p.nombre).includes(t));if(n)return n;
+ const d=/ano|anual|12/.test(t)?365:/6|semes/.test(t)?180:/3|trimes/.test(t)?90:/mes|mensual/.test(t)?30:0;if(!d)return P[P.length-1];
+ return P.slice().sort((a,b)=>Math.abs((+a.dias||0)-d)-Math.abs((+b.dias||0)-d))[0]}
+function vbVista(){if(!VB){setTimeout(async()=>{await vbCargar();ruta==='ventasbot'&&go()});return'<div class="card mu">Cargando…</div>'}
+ if(NEED39&&!DEMO)return'<div class="empty"><b>💳</b>Falta activar las ventas del asistente (SQL 39). Avísale a XyroStudio.</div>';
+ setTimeout(()=>{medCargar();$$('[data-vbok]').forEach(b=>b.onclick=()=>vbProceder(VB.find(x=>x.id===b.dataset.vbok)));$$('[data-vbno]').forEach(b=>b.onclick=()=>vbRechazar(VB.find(x=>x.id===b.dataset.vbno)))});
+ const P=VB.filter(v=>v.estado==='pendiente'),H=VB.filter(v=>v.estado!=='pendiente').slice(0,30),mes=hoy().slice(0,7),vm=S.pag.filter(p=>p.quien===BOTQ&&String(p.fecha).slice(0,7)===mes);
+ const dato=(k,v)=>v?`<div class="sm"><span class="mu">${k}:</span> <b>${esc(v)}</b></div>`:'';
+ const card=v=>{const d=v.datos||{},c=(WAC||[]).find(x=>x.id===v.chat_id);return`<div class="card vbc"><div class="vbg">${v.media_id&&!DEMO?`<img data-wm="${esc(v.media_id)}" class="wim" alt="Comprobante">`:`<div class="wim vb0">🧾<br><small class="mu">${DEMO?'Captura de Yape (demo)':'Sin imagen'}</small></div>`}
+  <div style="display:grid;gap:3px;align-content:start"><b style="font-size:17px">${esc(d.nombres||c&&c.nombre||'Cliente')}</b><small class="mu">${fF(v.creado)} ${fH(v.creado)}${v.revisado_por?' · '+(v.estado==='aprobada'?'✅ ':'❌ ')+esc(v.revisado_por):''}</small>
+  ${d.alerta?`<div class="sm" style="color:var(--bad)">⚠️ ${esc(d.alerta)}</div>`:''}${d.lectura&&d.lectura!=='asistente'&&v.estado==='pendiente'?'<div class="sm" style="color:var(--wa)">El asistente no pudo leer la imagen: revísala tú.</div>':''}
+  ${dato('Plan',d.plan)}${dato('Monto',d.monto&&'S/ '+d.monto)}${dato('Método',d.metodo)}${dato('N.º de operación',d.operacion)}${dato('Fecha del pago',d.fecha)}${dato('DNI',d.dni)}${dato('Nacimiento',d.nacimiento&&fF(d.nacimiento))}${dato('Celular',d.celular)}${dato('Motivo',d.motivo)}
+  <div class="bt" style="justify-content:flex-start;flex-wrap:wrap;margin-top:6px">${v.estado==='pendiente'?`<button class="btn sm p" data-vbok="${v.id}">✅ Proceder</button><button class="btn sm" data-vbno="${v.id}">❌ Rechazar</button>`:v.cliente_id&&cli(v.cliente_id)?`<a class="btn sm" href="#/socio/${esc(v.cliente_id)}">👤 Ver ficha</a>`:''}${v.chat_id?`<a class="btn sm" href="#/whatsapp/${esc(v.chat_id)}">💬 Ver chat</a>`:''}</div></div></div></div>`};
+ return`<div class="hi"><div><h2>💳 Ventas del asistente</h2><p class="mu">Cuando un cliente paga por WhatsApp, el asistente guarda aquí la captura y sus datos. Revisa que el pago haya llegado y toca <b>Proceder</b>: se crea el ${esc(R.cli.toLowerCase())} con su ${esc(R.plan.toLowerCase())} y le llega su QR con la bienvenida.</p></div></div>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px"><div class="card" style="display:grid;gap:4px"><small class="mu">🤖 Vendió este mes</small><b style="font-size:24px">${sol(vm.reduce((a,p)=>a+ +p.monto,0))}</b><small class="mu">${vm.length} ${vm.length===1?'venta':'ventas'} · suma a tus ingresos, no a la caja de turno de recepción</small></div><div class="card" style="display:grid;gap:4px"><small class="mu">Por confirmar</small><b style="font-size:24px">${P.length}</b></div></div>
+ ${P.length?P.map(card).join(''):'<div class="empty"><b>✅</b>No hay pagos por confirmar.</div>'}
+ ${H.length?`<h3 style="margin:18px 0 8px">Revisadas</h3>${H.map(card).join('')}`:''}`}
+function vbProceder(v){if(!v)return;const d=v.datos||{},P0=S.pla.filter(p=>p.activo!==false);if(!P0.length){toast('Primero crea un plan');return}
+ const pl=vbPlan(d.plan,P0),tel=String(d.celular||'').replace(/\D/g,''),c0=S.cli.find(x=>d.dni&&String(x.dni||'')===String(d.dni))||(tel.length>=9?S.cli.find(x=>String(x.telefono||'').replace(/\D/g,'').slice(-9)===tel.slice(-9)):null);
+ const M=METODOS.find(x=>sinT(x)===sinT(d.metodo))||METODOS.find(x=>/yape/i.test(x))||METODOS[0];
+ form('✅ Proceder venta del asistente',[{k:'nombre',l:'Nombre completo'+(c0?' (ya está registrado: se renueva)':''),v:c0?c0.nombre:d.nombres||'',req:1},{k:'dni',l:'DNI',v:c0&&c0.dni||d.dni||'',half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:c0&&c0.telefono||tel,half:1,t:'tel'},
+  {k:'nacimiento',l:'Cumpleaños',t:'date',v:c0&&c0.nacimiento||(/^\d{4}-\d{2}-\d{2}$/.test(d.nacimiento||'')?d.nacimiento:''),half:1},{k:'inicio',l:'Empieza',t:'date',v:hoy(),half:1},
+  {k:'plan',l:R.plan,t:'sel',v:pl.id,o:P0.map(p=>[p.id,p.nombre+' · '+sol(p.precio)])},{k:'monto',l:'Monto pagado (S/)',t:'number',req:1,half:1,im:'decimal',v:String(d.monto||'').replace(/[^\d.]/g,'')},{k:'metodo',l:'Método',t:'sel',half:1,v:M,o:METODOS.map(x=>[x,x])},
+  {k:'operacion',l:'N.º de operación',v:d.operacion||''},{k:'enviar',l:'📲 Enviarle su QR de acceso y la bienvenida por WhatsApp',t:'chk',v:!!v.chat_id}],async x=>{
+  const p=plan(x.plan),monto=r2(+x.monto);if(!p)throw new Error('Elige un plan');if(!(monto>0))throw new Error('Pon el monto que pagó.');
+  if(x.dni&&S.cli.some(y=>y.dni===x.dni&&(!c0||y.id!==c0.id)))throw new Error('Ya existe otra persona con ese DNI.');
+  let foto='';if(v.media_id&&!DEMO){try{const m=await waMed(v.media_id);foto=await subirImg(new File([m.b],'pago.jpg',{type:m.b.type||'image/jpeg'}),1400,'pago')}catch(_){}}
+  let c=c0;if(c){const u={};['dni','telefono','nacimiento'].forEach(k=>{if(x[k]&&!c[k])u[k]=x[k]});if(Object.keys(u).length)await DB.upd('cli',c.id,u)}
+  else c=await DB.ins('cli',{nombre:x.nombre,dni:x.dni||null,telefono:x.telefono||null,nacimiento:x.nacimiento||null,num:nextNum(),codigo:codigo(),notas:'✍️ Firmar contrato en su primer día (vendido por el asistente).',creado:new Date().toISOString()});
+  const pg=await renovar(c,p,{precio:Math.max(+p.precio,monto),descuento:r2(Math.max(0,+p.precio-monto)),motivo:monto<+p.precio?'Promo del asistente':'',dias:+p.dias,inicio:x.inicio||hoy(),sesiones:+p.sesiones||null,dom:p.dom!==false,metodo:x.metodo,quien:BOTQ,extra:foto?{foto_pago:foto}:{}});
+  const dd={...d,nombres:x.nombre,dni:x.dni,nacimiento:x.nacimiento,celular:x.telefono,monto:String(monto),metodo:x.metodo,operacion:x.operacion,plan:p.nombre};
+  const up={estado:'aprobada',cliente_id:String(c.id),pago_id:pg?String(pg.id):null,foto:foto||null,revisado_por:QUIEN(),revisado:new Date().toISOString(),datos:dd};
+  if(!DEMO){const{error}=await sb.from('xa_ventas_bot').update(up).eq('id',v.id);if(error)throw error}Object.assign(v,up);
+  let env='';if(x.enviar&&v.chat_id){const m=memDe(c.id),txt=`¡Bienvenido a la familia ${nombre()}, ${c.nombre.split(' ')[0]}! 🎉\nTu pago está confirmado: ${p.nombre}${m?' del '+fF(m.inicio)+' al '+fF(m.fin):''}.\nEste es tu código de acceso: muéstralo en recepción cada vez que vengas.\nEn tu primer día acércate a recepción para firmar tu contrato ✍️\nSi quieres, mándanos una foto tuya para tu ficha (es opcional) 📸`;
+   try{let img='';if(!DEMO){const b=await carnetPNG(c);img=await subirImg(new File([b],'qr.png',{type:'image/png'}),1080,'qr')}await waBot(v.chat_id,txt,img);env=DEMO?' (demo: no se envía el QR)':' y le llegó su QR'}catch(er){env='. No se pudo enviar el QR por WhatsApp: '+er.message}}
+  confeti(30);shell();go();toast('🤖 Venta registrada'+env)})}
+function vbRechazar(v){if(!v)return;form('❌ Rechazar pago',[{k:'motivo',l:'Motivo',dl:['El pago no llegó','Monto incompleto','Captura repetida','No es un comprobante'],ph:'Ej. El pago no llegó',req:1},{k:'avisar',l:'📲 Avisarle por WhatsApp (el chat pasa a recepción)',t:'chk',v:!!v.chat_id}],async x=>{
+ const up={estado:'rechazada',revisado_por:QUIEN(),revisado:new Date().toISOString(),datos:{...(v.datos||{}),motivo:x.motivo}};
+ if(!DEMO){const{error}=await sb.from('xa_ventas_bot').update(up).eq('id',v.id);if(error)throw error}Object.assign(v,up);
+ if(x.avisar&&v.chat_id){const n=String((v.datos||{}).nombres||'').split(' ')[0];try{await waBot(v.chat_id,`Hola${n?' '+n:''} 😊 Revisamos tu pago y no pudimos confirmarlo (${x.motivo}). En un momento te escribe recepción por aquí para ayudarte.`,'',true)}catch(er){toast(er.message)}}
+ shell();go();toast('Pago rechazado')})}
 function botEditar(){form('🤖 Lo que sabe tu asistente',[{k:'whatsapp',l:'WhatsApp de recepción (si una sede no tiene el suyo en Mi web → Sedes)',v:botWA(),ph:'51987654321'},{k:'captar',l:'🧲 Pedir nombre y celular a los interesados (llegan a Seguimiento → Interesados)',t:'chk',v:!BOT||BOT.captar!==false},{k:'prueba',l:'🎟️ Ofrecer clase de prueba gratis y agendarla',t:'chk',v:!!(BOT&&BOT.prueba)},{k:'pruebaTxt',l:'Días y horas para la clase de prueba',v:(BOT&&BOT.pruebaTxt)||'',ph:'Lunes a viernes de 6 a 9 pm, sábados 9 a 12'},{k:'extra',l:'Promos e información extra (el asistente las ofrece cuando vengan al caso)',t:'area',rows:5,v:(BOT&&BOT.extra)||'',ph:'Promo diciembre: matrícula gratis y 3 meses a S/ 250 hasta el 31.\nAceptamos Yape, Plin y tarjeta.\nHay estacionamiento frente al local.'}],async v=>{
  const val={...(BOT||{}),whatsapp:String(v.whatsapp||'').replace(/\D/g,'').slice(0,15),extra:String(v.extra||'').slice(0,3000),captar:!!v.captar,prueba:!!v.prueba,pruebaTxt:String(v.pruebaTxt||'').slice(0,200)};
  if(DEMO){BOT=val;go();return toast('Demo: no se guarda')}

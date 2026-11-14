@@ -306,16 +306,16 @@ async function firmaOk(env, raw, sig) {
   return d === 0;
 }
 
-async function waEnviar(env, phoneId, to, texto) {
-  const r1 = await waEnviar1(env, phoneId, to, texto);
+async function waEnviar(env, phoneId, to, texto, img) {
+  const r1 = await waEnviar1(env, phoneId, to, texto, img);
   // Número de prueba de Meta: solo acepta números de la lista permitida (no IDs de usuario). WA_PRUEBA_TEL = tu celular para probar.
-  if (!r1.ok && r1.error && r1.error.code === 131030 && env.WA_PRUEBA_TEL && !/^\d+$/.test(to)) return waEnviar1(env, phoneId, String(env.WA_PRUEBA_TEL).replace(/\D/g, ""), texto);
+  if (!r1.ok && r1.error && r1.error.code === 131030 && env.WA_PRUEBA_TEL && !/^\d+$/.test(to)) return waEnviar1(env, phoneId, String(env.WA_PRUEBA_TEL).replace(/\D/g, ""), texto, img);
   return r1;
 }
-async function waEnviar1(env, phoneId, to, texto) {
+async function waEnviar1(env, phoneId, to, texto, img) {
   const r = await fetch(`https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}/${phoneId}/messages`, {
     method: "POST", headers: { authorization: "Bearer " + env.WA_TOKEN, "content-type": "application/json" },
-    body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", ...(/^\d+$/.test(to) ? { to } : { recipient: to }), type: "text", text: { preview_url: false, body: corta(texto, 4000) } }),
+    body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", ...(/^\d+$/.test(to) ? { to } : { recipient: to }), ...(img ? { type: "image", image: { link: img, caption: corta(texto, 1000) } } : { type: "text", text: { preview_url: false, body: corta(texto, 4000) } }) }),
   }).catch(() => null);
   const j = r ? await r.json().catch(() => ({})) : {};
   if (!r || !r.ok) console.log("wa enviar error", r && r.status, JSON.stringify(j.error || {}).slice(0, 300));
@@ -326,13 +326,15 @@ async function waProcesar(env, phoneId, m, nombre) {
   const texto = m.type === "text" ? corta(m.text && m.text.body, 2000)
     : m.type === "button" ? corta(m.button && m.button.text, 500)
     : m.type === "interactive" ? corta((m.interactive.button_reply || m.interactive.list_reply || {}).title, 500)
+    : m.type === "image" && m.image ? `[📷 imagen][img:${m.image.id}]` + (m.image.caption ? " " + corta(m.image.caption, 500) : "")
+    : m.type === "document" && m.document ? `[📄 ${corta(m.document.filename || "documento", 60)}][img:${m.document.id}]`
     : `[${m.type}]`;
   m.from = m.from || m.from_user_id;   // usuarios con nombre de usuario de WhatsApp: llega su ID (p. ej. PE.123…) en vez del número
   if (!m.from) return "sin remitente";
   const e = await rpcAnon(env, "xa_wa_entrante", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: m.from, p_nombre: corta(nombre, 80), p_texto: texto, p_wa_id: m.id });
   if (!e || !e.ok || e.humano) return "entrante:" + (e ? (e.motivo || (e.humano ? "humano" : "?")) : "null (WA_CLAVE o SQL 36)");   // número no vinculado, repetido o lo atiende recepción
   const responde = async (t, derivar) => { const s = await waEnviar(env, phoneId, m.from, t); if (!s.ok) return "enviar:" + JSON.stringify(s.error || {}).slice(0, 200); await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: t, p_wa_id: s.id || null, p_derivar: !!derivar }); return "ok"; };
-  if (m.type === "image" || m.type === "document") return responde("¡Recibido! 🙌 Recepción revisa tu pago y en un momento te confirma por aquí.", true);
+  if (m.type === "image" || m.type === "document") return waComprobante(env, e, m, nombre, responde);
   if (m.type !== "text" && m.type !== "button" && m.type !== "interactive") return responde("¡Gracias! Por ahora solo puedo leer mensajes de texto 🙌 Escríbeme tu consulta y te ayudo.", false);
   const f = await ficha(env, e.slug);
   if (!f || !env.ANTHROPIC_API_KEY) return "ficha:" + (f ? "sin ANTHROPIC_API_KEY" : "no encontrada " + e.slug);
@@ -352,6 +354,54 @@ async function waProcesar(env, phoneId, m, nombre) {
     console.log("wa bot error", err?.status, err?.message);
     return "ia:" + (err?.message || "") + " " + await responde("En un momento te responde una persona de recepción 🙌", true);
   }
+}
+
+// ===== Comprobantes de pago por WhatsApp (SQL 39): el asistente lee la captura y la deja en «🤖 Ventas del bot» =====
+async function waMedia(env, id) {   // descarga una imagen/documento de Meta (vence a los 30 días)
+  const g = await fetch(`https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}/${encodeURIComponent(id)}`, { headers: { authorization: "Bearer " + env.WA_TOKEN } }).then(r => r.ok ? r.json() : null).catch(() => null);
+  if (!g || !g.url) return null;
+  const r = await fetch(g.url, { headers: { authorization: "Bearer " + env.WA_TOKEN } }).catch(() => null);
+  if (!r || !r.ok) return null;
+  return { tipo: g.mime_type || r.headers.get("content-type") || "application/octet-stream", buf: await r.arrayBuffer() };
+}
+const b64 = buf => { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); };
+const PAGO_SCHEMA = {
+  type: "object", additionalProperties: false,
+  required: ["es_pago", "monto", "operacion", "fecha", "metodo", "plan", "nombres", "dni", "nacimiento", "celular", "respuesta"],
+  properties: {
+    es_pago: { type: "boolean" }, monto: { type: "string" }, operacion: { type: "string" }, fecha: { type: "string" }, metodo: { type: "string" },
+    plan: { type: "string" }, nombres: { type: "string" }, dni: { type: "string" }, nacimiento: { type: "string" }, celular: { type: "string" }, respuesta: { type: "string" },
+  },
+};
+async function waComprobante(env, e, m, nombre, responde) {
+  const md = m.image || m.document || {};
+  const f = await ficha(env, e.slug);
+  let o = null;
+  try {
+    const med = md.id ? await waMedia(env, md.id) : null;
+    const img = med && /^image\/(jpeg|png|webp|gif)$/.test(med.tipo) && med.buf.byteLength < 4.5e6;
+    if (img && f && env.ANTHROPIC_API_KEY) {
+      const hist = (e.historial || []).slice(-16).map(x => (x.de === "cliente" ? "Cliente: " : "Negocio: ") + corta(x.t, 400)).join("\n");
+      const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
+      const r = await client.messages.create({
+        model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 1200,
+        system: `Atiendes el WhatsApp de ${f.nombre} (Perú). El cliente envió una imagen. Decide si es un comprobante de pago (Yape, Plin, transferencia, depósito). Si lo es, lee: monto (solo número), número de operación, fecha y hora, método. De la CONVERSACIÓN saca el plan que acordaron y los datos del cliente (nombres completos, DNI, fecha de nacimiento AAAA-MM-DD, celular); deja vacío lo que no esté, nunca inventes. «respuesta»: mensaje corto y cálido por WhatsApp, tuteando. Si es pago: agradece por su nombre, di que recepción verifica el pago y que apenas se confirme le llega su código QR de acceso; si faltan datos (nombres completos, DNI o fecha de nacimiento), pídelos en el mismo mensaje. Si no es un pago: agradece y di que recepción lo revisa. Nunca confirmes que el pago ya llegó: eso lo verifica recepción.\nFICHA:\n${f.texto}`,
+        messages: [{ role: "user", content: [
+          { type: "image", source: { type: "base64", media_type: med.tipo, data: b64(med.buf) } },
+          { type: "text", text: `Celular del chat: ${/^\d+$/.test(m.from) ? m.from : "(no visible)"} · Nombre en WhatsApp: ${corta(nombre, 80) || "-"}\nCONVERSACIÓN:\n${hist || "(sin mensajes previos)"}${md.caption ? "\nTexto con la imagen: " + corta(md.caption, 300) : ""}` },
+        ] }],
+        output_config: { effort: "low", format: { type: "json_schema", schema: PAGO_SCHEMA } },
+      });
+      if (r.stop_reason !== "refusal" && r.stop_reason !== "max_tokens") o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
+    }
+  } catch (err) { console.log("wa comprobante error", err?.status, err?.message); }
+  const pdf = m.type === "document";
+  if (o && !o.es_pago) return responde(corta(o.respuesta, 1000) || "¡Gracias! 🙌 Recepción lo revisa en un momento.", true);
+  const { respuesta, es_pago, ...datos } = o || {};
+  if (!datos.celular && /^\d+$/.test(m.from)) datos.celular = m.from;
+  const v = await rpcAnon(env, "xa_bot_venta", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_media: md.id || null, p_datos: { ...datos, lectura: o ? "asistente" : pdf ? "pdf" : "sin leer" } });
+  if (!v || !v.ok) return responde("¡Recibido! 🙌 Recepción revisa tu pago y en un momento te confirma por aquí.", true);
+  return responde(corta(respuesta, 1000) || "¡Recibido! 🙌 Recepción verifica tu pago y apenas se confirme te llega tu código de acceso.", false);
 }
 
 async function waApi(req, env, ctx) {
@@ -403,16 +453,31 @@ async function waResponder(req, env) {
   let b; try { b = JSON.parse(await req.text()); } catch { return json({ error: "Solicitud inválida" }, 400); }
   const texto = corta(b.texto, 4000).trim();
   if (!texto || !b.chat) return json({ error: "Escribe un mensaje" }, 400);
-  const r = await fetch(env.SB_URL + "/rest/v1/rpc/xa_wa_responder", {
+  const img = typeof b.imagen === "string" && b.imagen.startsWith(env.SB_URL + "/storage/v1/object/public/") ? b.imagen : null;   // solo imágenes de nuestro storage (QR, carnet)
+  const r = await fetch(env.SB_URL + "/rest/v1/rpc/" + (b.bot ? "xa_wa_bot_envia" : "xa_wa_responder"), {
     method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + token, "content-type": "application/json" },
-    body: JSON.stringify({ p_chat: b.chat, p_texto: texto }),
+    body: JSON.stringify(b.bot ? { p_chat: b.chat, p_texto: texto, p_humano: !!b.humano } : { p_chat: b.chat, p_texto: texto }),
   });
   if (r.status === 401) return json({ error: "Inicia sesión" }, 401);
   const d = r.ok ? await r.json() : null;
   if (!d || !d.ok) return json({ error: (d && d.motivo) || "No se pudo enviar" }, 403);
-  const s = await waEnviar(env, d.phone_id, d.telefono, texto);
+  const s = await waEnviar(env, d.phone_id, d.telefono, texto, img);
   if (!s.ok) return json({ error: "WhatsApp no aceptó el mensaje. Intenta de nuevo." }, 502);
   return json({ ok: true });
+}
+
+// App: ver una imagen que llegó por WhatsApp (comprobante, foto). Solo el equipo del negocio (RPC xa_wa_media_ok).
+async function waVerMedia(req, env) {
+  const u = new URL(req.url), id = u.searchParams.get("id") || "";
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!/^\d{5,40}$/.test(id) || !token || token.length > 4000) return json({ error: "Solicitud inválida" }, 400);
+  const ok = await fetch(env.SB_URL + "/rest/v1/rpc/xa_wa_media_ok", {
+    method: "POST", headers: { apikey: env.SB_KEY, authorization: "Bearer " + token, "content-type": "application/json" }, body: JSON.stringify({ p_media: id }),
+  }).then(r => r.ok ? r.json() : false).catch(() => false);
+  if (ok !== true) return json({ error: "Sin acceso" }, 403);
+  const m = await waMedia(env, id);
+  if (!m) return json({ error: "La imagen ya no está disponible en WhatsApp (dura 30 días)" }, 404);
+  return new Response(m.buf, { headers: { "content-type": m.tipo, "cache-control": "private, max-age=3600" } });
 }
 
 export default {
@@ -422,6 +487,7 @@ export default {
     if (u.pathname === "/api/bot") return botApi(req, env);
     if (u.pathname === "/api/wa") return waApi(req, env, ctx);
     if (u.pathname === "/api/wa/responder") return waResponder(req, env);
+    if (u.pathname === "/api/wa/media") return waVerMedia(req, env);
     if (u.pathname.startsWith("/api/")) return json({ error: "No existe" }, 404);
     return env.ASSETS.fetch(req);
   },
