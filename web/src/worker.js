@@ -635,6 +635,55 @@ async function waVerMedia(req, env) {
   return new Response(m.buf, { headers: { "content-type": m.tipo, "cache-control": "private, max-age=3600" } });
 }
 
+// Gestor: pone el logo, la info, la descripción, la dirección y la web del negocio en su perfil de WhatsApp (el nombre visible lo aprueba Meta aparte).
+async function waPerfil(req, env) {
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token || token.length > 4000) return json({ error: "Inicia sesión" }, 401);
+  if (!env.WA_TOKEN) return json({ error: "WhatsApp no está configurado" }, 503);
+  const raw = await req.text();
+  if (raw.length > 8e6) return json({ error: "El logo pesa mucho" }, 413);
+  let b; try { b = JSON.parse(raw); } catch { return json({ error: "Solicitud inválida" }, 400); }
+  const H = { apikey: env.SB_KEY, authorization: "Bearer " + token };
+  const u = await fetch(env.SB_URL + "/auth/v1/user", { headers: H }).then(r => r.ok ? r.json() : null).catch(() => null);
+  if (!u || !u.id) return json({ error: "Inicia sesión" }, 401);
+  const pf = await fetch(`${env.SB_URL}/rest/v1/perfiles?id=eq.${u.id}&select=rol`, { headers: H }).then(r => r.ok ? r.json() : []).catch(() => []);
+  if (!pf[0] || pf[0].rol !== "gestor") return json({ error: "Solo XyroStudio" }, 403);
+  const nums = await fetch(`${env.SB_URL}/rest/v1/xa_wa_numeros?sitio_id=eq.${encodeURIComponent(String(b.sitio || ""))}&activo=eq.true&select=phone_id`, { headers: H }).then(r => r.ok ? r.json() : []).catch(() => []);
+  if (!nums.length) return json({ error: "Este negocio no tiene un número de WhatsApp vinculado" }, 404);
+  const G = `https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}`, W = { authorization: "Bearer " + env.WA_TOKEN };
+  let handle = null, fotoErr = null;
+  if (typeof b.foto === "string" && b.foto.length > 100) {
+    try {
+      const bin = atob(b.foto.replace(/^data:image\/\w+;base64,/, "")), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      if (bytes.length > 5e6) throw new Error("logo de más de 5 MB");
+      let app = env.WA_APP_ID;
+      if (!app) { const d = await fetch(`${G}/debug_token?input_token=${encodeURIComponent(env.WA_TOKEN)}`, { headers: W }).then(r => r.json()).catch(() => ({})); app = d.data && d.data.app_id; }
+      if (!app) throw new Error("sin ID de la app de Meta");
+      const ses = await fetch(`${G}/${app}/uploads?file_name=logo.jpg&file_length=${bytes.length}&file_type=image/jpeg`, { method: "POST", headers: W }).then(r => r.json());
+      if (!ses.id) throw new Error((ses.error && ses.error.message) || "no se abrió la subida");
+      const up = await fetch(`${G}/${ses.id}`, { method: "POST", headers: { authorization: "OAuth " + env.WA_TOKEN, file_offset: "0" }, body: bytes }).then(r => r.json());
+      if (!up.h) throw new Error((up.error && up.error.message) || "no se subió el logo");
+      handle = up.h;
+    } catch (e) { fotoErr = String(e.message || e).slice(0, 200); console.log("wa perfil foto", fotoErr); }
+  }
+  const webs = (Array.isArray(b.websites) ? b.websites : []).map(x => String(x || "").trim()).filter(x => /^https?:\/\/\S+$/.test(x)).slice(0, 2).map(x => x.slice(0, 256));
+  const body = { messaging_product: "whatsapp" };
+  if (String(b.about || "").trim()) body.about = corta(b.about, 139);
+  if (String(b.description || "").trim()) body.description = corta(b.description, 512);
+  if (String(b.address || "").trim()) body.address = corta(b.address, 256);
+  if (/^\S+@\S+\.\S+$/.test(String(b.email || "").trim())) body.email = String(b.email).trim().slice(0, 128);
+  if (webs.length) body.websites = webs;
+  if (handle) body.profile_picture_handle = handle;
+  const res = [];
+  for (const n of nums) {
+    const r = await fetch(`${G}/${n.phone_id}/whatsapp_business_profile`, { method: "POST", headers: { ...W, "content-type": "application/json" }, body: JSON.stringify(body) }).then(r => r.json()).catch(e => ({ error: { message: String(e) } }));
+    res.push({ phone_id: n.phone_id, ok: !!r.success, error: r.error && r.error.message });
+  }
+  return json({ ok: res.some(x => x.ok), foto: !!handle, fotoErr, res });
+}
+
 // App «💳 Mi plan XyroStudio» (SQL 42): el admin del negocio sube la captura de su pago a XyroStudio; la IA la lee y la RPC renueva si cuadra.
 const XPAGO_SCHEMA = { type: "object", additionalProperties: false, required: ["es_pago", "monto", "operacion", "fecha", "metodo", "destinatario", "destino_ok"],
   properties: { es_pago: { type: "boolean" }, monto: { type: "string" }, operacion: { type: "string" }, fecha: { type: "string" }, metodo: { type: "string" }, destinatario: { type: "string" }, destino_ok: { type: "boolean" } } };
@@ -684,6 +733,7 @@ export default {
     if (u.pathname === "/api/bot/doc") return botDoc(req, env);
     if (u.pathname === "/api/bot/reglas") return botReglas(req, env);
     if (u.pathname === "/api/xyro/pago") return xyroPago(req, env);
+    if (u.pathname === "/api/wa/perfil") return waPerfil(req, env);
     if (u.pathname.startsWith("/api/")) return json({ error: "No existe" }, 404);
     return env.ASSETS.fetch(req);
   },
