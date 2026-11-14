@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mi Xyro</title>
 <meta name="description" content="Tu gimnasio, tu consultorio y más en tu celular: tu QR de entrada, tu plan, tus rutinas y tus citas.">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#05060a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Mi Xyro">
@@ -15,12 +15,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="apple-touch-icon" href="/img/logo.png">
 <style>
-:root{--a:#7c5cff;--bg:#000;--c1:#0d0d0f;--c2:#151518;--ln:#ffffff14;--tx:#f2f2f5;--mu:#9a9aa6;--ok:#22c55e;--wa:#f59e0b;--ko:#ef4444}
+:root{--a:#7c5cff;--a2:#3ad6ff;--gr:linear-gradient(135deg,#7c5cff,#5b7cff 55%,#3ab8ff);--bg:#05060a;--c1:#0f1220d9;--c2:#1a1e2e;--ln:#ffffff17;--tx:#f2f2f5;--mu:#9a9aa6;--ok:#22c55e;--wa:#f59e0b;--ko:#ef4444}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--tx)}
 body{font:15px/1.45 "Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 button,input{font:inherit;color:inherit}
-#app{position:fixed;inset:0;display:flex;flex-direction:column}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;z-index:1}
+/* Fondo Xyro (igual que el panel): red de partículas moradas, aura y brillo al tocar. Color fijo, no editable. */
+#fx{position:fixed;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
+.fxa{position:fixed;width:80vmax;height:80vmax;left:50%;top:0;transform:translate(-50%,-55%);border-radius:50%;background:radial-gradient(closest-side,#7c5cff40,transparent);filter:blur(20px);z-index:0;pointer-events:none}
+.fxg{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(520px circle at var(--mx,50%) var(--my,30%),#7c5cff26,transparent 60%)}
+.card,.carnet,.st>div,.plan,.neg,.idbox,.aviso,.promo{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .scr{flex:1;overflow-y:auto;padding:calc(14px + env(safe-area-inset-top)) 16px 110px;-webkit-overflow-scrolling:touch}
 .in{animation:in .45s cubic-bezier(.2,1,.3,1)}
 @keyframes in{from{opacity:0;transform:translateY(14px)}}
@@ -31,7 +36,7 @@ h3{font-size:15px}
 .card{background:var(--c1);border:1px solid var(--ln);border-radius:22px;padding:16px;display:grid;gap:10px}
 .g{display:grid;gap:12px}.row{display:flex;gap:10px;align-items:center}.sp{flex:1}
 .btn{border:0;border-radius:16px;padding:14px 16px;font-weight:800;background:var(--c2);cursor:pointer;display:flex;gap:8px;align-items:center;justify-content:center;transition:transform .15s}
-.btn:active{transform:scale(.97)}.btn.p{background:var(--a);color:#fff}.btn.l{background:none;color:var(--mu);font-weight:600;padding:8px}
+.btn:active{transform:scale(.97)}.btn.p{background:var(--gr);color:#fff;box-shadow:0 10px 26px -12px #7c5cff}.btn.l{background:none;color:var(--mu);font-weight:600;padding:8px}
 .btn[disabled]{opacity:.5}
 label{display:grid;gap:6px;font-size:13px;color:var(--mu);font-weight:600}
 input{background:var(--c2);border:1px solid var(--ln);border-radius:14px;padding:14px;font-size:16px;outline:none;width:100%}
@@ -62,7 +67,7 @@ input:focus{border-color:var(--a)}
 @keyframes pu{50%{transform:scale(1.08);opacity:0}}
 /* Carnet */
 .carnet{position:relative;border-radius:26px;padding:20px;background:var(--c1);border:1px solid var(--ln);overflow:hidden;display:grid;gap:14px;justify-items:center;text-align:center}
-.carnet::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--a)}
+.carnet::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--gr)}
 .carnet::after{content:"";position:absolute;inset:-60%;background:linear-gradient(115deg,transparent 45%,#ffffff12 50%,transparent 55%);animation:sh 4s infinite;pointer-events:none}
 @keyframes sh{from{transform:translateX(-50%)}to{transform:translateX(50%)}}
 .qr{overflow:hidden;background:#fff;padding:12px;border-radius:18px;width:min(230px,62vw);cursor:pointer}
@@ -71,7 +76,7 @@ input:focus{border-color:var(--a)}
 .pill.ok{color:var(--ok)}.pill.wa{color:var(--wa)}.pill.ko{color:var(--ko)}
 .ring{width:96px;height:96px;position:relative;flex:none}
 .ring svg{transform:rotate(-90deg)}.ring circle{fill:none;stroke-width:9}
-.ring .bk{stroke:var(--c2)}.ring .fg{stroke:var(--a);stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.2,1,.3,1)}
+.ring .bk{stroke:var(--c2)}.ring .fg{stroke:url(#rgg);stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.2,1,.3,1)}
 .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:24px;line-height:1;text-align:center}
 .ring b small{display:block;font-size:10px;color:var(--mu);font-weight:600;margin-top:2px}
 .st{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
@@ -97,7 +102,7 @@ input:focus{border-color:var(--a)}
 .vacio{text-align:center;padding:34px 16px;display:grid;gap:8px;justify-items:center}
 .vacio .e{font-size:42px}
 /* Barra inferior */
-.tabs{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;background:#0d0d0fe8;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:24px;padding:6px;max-width:480px;margin:0 auto}
+.tabs{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;background:#0b0d18e0;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:24px;padding:6px;max-width:480px;margin:0 auto}
 .tab{flex:1;border:0;background:none;border-radius:18px;padding:8px 0 6px;display:grid;gap:2px;justify-items:center;font-size:11px;font-weight:700;color:var(--mu);cursor:pointer}
 .tab svg{width:23px;height:23px;opacity:.55;transition:.2s}.tab{position:relative}.tab b.dt{position:absolute;top:6px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#ef4444;border:2px solid #0d0d0f}
 .tab.on{color:var(--tx)}.tab.on svg{opacity:1;color:var(--a)}
@@ -113,7 +118,7 @@ input:focus{border-color:var(--a)}
 .pronto{border-style:dashed}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--c2);border:1px solid var(--ln);padding:10px 16px;border-radius:14px;font-size:14px;z-index:11;animation:in .3s}
 .cover{position:relative;margin:calc(-14px - env(safe-area-inset-top)) -16px 0;height:230px;background:var(--c1) center/cover no-repeat}
-.cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0006 0,transparent 35%,transparent 55%,#000 100%)}
+.cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0006 0,transparent 35%,transparent 55%,var(--bg) 100%)}
 .nhead{position:relative;z-index:1;margin-top:-52px;display:grid;gap:6px;justify-items:center;text-align:center}
 .back.fl{position:absolute;z-index:3;top:0;left:0;width:40px;height:40px;padding:0;justify-content:center;border-radius:14px;background:#0008;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:22px;border:1px solid #ffffff22}
 .nwrap{position:relative}
@@ -131,7 +136,7 @@ input:focus{border-color:var(--a)}
 .av img{width:100%;height:100%;object-fit:cover}
 .aviso{margin-bottom:14px;border:1px solid var(--a);background:var(--c1);border-radius:22px;padding:16px;display:grid;gap:10px;animation:in .5s}
 .back{display:inline-flex;gap:6px;align-items:center;border:0;background:none;color:var(--mu);font-weight:700;padding:4px 0 12px;cursor:pointer}
-.tab.scan{flex:0 0 76px}.tab.scan .fab{width:58px;height:58px;margin-top:-30px;border-radius:20px;background:var(--a);color:#fff;display:grid;place-items:center;box-shadow:0 12px 30px -8px var(--a),0 0 0 6px #000}.tab.scan .fab svg{opacity:1;width:26px;height:26px}
+.tab.scan{flex:0 0 76px}.tab.scan .fab{width:58px;height:58px;margin-top:-30px;border-radius:20px;background:var(--gr);color:#fff;display:grid;place-items:center;box-shadow:0 12px 30px -8px var(--a),0 0 0 6px var(--bg)}.tab.scan .fab svg{opacity:1;width:26px;height:26px}
 .btn svg{width:20px;height:20px}
 .cam{position:fixed;inset:0;background:#000;z-index:12;display:grid}
 .cam video{width:100%;height:100%;object-fit:cover}
@@ -145,6 +150,7 @@ input:focus{border-color:var(--a)}
 </style>
 </head>
 <body>
+<canvas id="fx" aria-hidden="true"></canvas><div class="fxa"></div><div class="fxg"></div>
 <div id="app"><div class="scr"><div class="hero" style="justify-items:center"><div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width="48" height="48" alt=""></div></div></div></div>
 <script>
 /* Mi Xyro · app de las personas en el ecosistema Xyro (SQL 45 + 46).
@@ -202,7 +208,7 @@ const negs=()=>(D&&D.negocios)||[];
 const N=()=>negs()[Math.min(CUR,negs().length-1)]||null;
 const dental=n=>(n||N()||{}).rubro==='consultorio';
 const ACC='#7c5cff';
-function acento(n){const c=n&&n.color&&/^#[0-9a-f]{6}$/i.test(n.color)?n.color:ACC;document.documentElement.style.setProperty('--a',c)}
+function acento(){document.documentElement.style.setProperty('--a',ACC)} /* Mi Xyro usa siempre el morado Xyro: el color del negocio no lo cambia */
 const logoURL=l=>l&&(/^https:\/\//.test(l)||l.startsWith('/'))?l:'';
 const media=(u,rub)=>!u?'':/^https:\/\//.test(u)||u.startsWith('/')?u:(rub==='consultorio'?'/consultorio/':'/sitio/')+u.replace(/^\.?\//,'');
 function memAct(n){const h=hoyL(),L=(n.membresias||[]).slice().sort((a,b)=>a.inicio>b.inicio?1:-1);
@@ -225,7 +231,7 @@ const pend={get(){try{return JSON.parse(ls.g('mi-pend')||'null')}catch(_){return
 const LOGO='<div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width="48" height="48" alt=""></div>';
 function pantallaEntrada(msg,modo){
  acento(null);const p=pend.get();modo=modo||'entrar';
- app.innerHTML=`<div class="aur"><i></i><i></i></div><div class="scr"><div class="hero in">
+ app.innerHTML=`<div class="scr"><div class="hero in">
   <div class="top">${LOGO}<span class="eyb">MI XYRO</span><h1>${p&&p.negocio?`Guarda <span style="color:var(--a)">${esc(p.negocio)}</span> en tu app`:'Tus negocios favoritos,<br>en tu celular'}</h1>
    <p class="mu">Todo lo de tu gym, tu consultorio y tus lugares favoritos en un solo lugar.</p>
    <div class="chips"><span class="chip">${I.gift}Promos</span><span class="chip">${I.qr}Tu QR</span><span class="chip">${I.dumb}Rutinas</span><span class="chip">${I.cal}Citas</span></div></div>
@@ -317,12 +323,12 @@ function vInicioGen(){const n=N(),av=avisos();
 const saludo=()=>{const h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0;return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
 const avatarHTML=(per,id)=>`<div class="av"${id?` id="${id}"`:''}>${/^https:\/\//.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc((String(per.nombre||'?').trim()[0]||'?').toUpperCase())}</div>`;
 function tarjNeg(g){const lg=logoURL(g.logo);
- return`<button class="card" data-neg="${esc(g.slug)}" style="text-align:left;cursor:pointer;width:100%;border-left:4px solid ${esc(/^#[0-9a-f]{6}$/i.test(g.color||'')?g.color:ACC)}"><div class="row"><span class="dot" style="width:46px;height:46px;font-size:22px;overflow:hidden">${lg?`<img src="${esc(lg)}" style="width:100%;height:100%;object-fit:cover" alt="">`:(g.rubro==='consultorio'?'🦷':'🏋️')}</span>
+ return`<button class="card" data-neg="${esc(g.slug)}" style="text-align:left;cursor:pointer;width:100%"><div class="row"><span class="dot" style="width:46px;height:46px;font-size:22px;overflow:hidden">${lg?`<img src="${esc(lg)}" style="width:100%;height:100%;object-fit:cover" alt="">`:(g.rubro==='consultorio'?'🦷':'🏋️')}</span>
   <div class="sp"><b>${esc(g.negocio)}</b><p class="mu xs">${g.socio?(g.rubro==='consultorio'?'Eres paciente':'Eres socio'):g.promos?`🎁 ${g.promos} promo${g.promos>1?'s':''} por la app`:'Ver promos e información'}</p></div><span class="mu">›</span></div></button>`}
 
 function anillo(rest,total,txt){const r=40,C=2*Math.PI*r,p=Math.max(0,Math.min(1,total?rest/total:0)),f0=post;
  post=()=>{f0&&f0();requestAnimationFrame(()=>requestAnimationFrame(()=>{const f=$('#rg');f&&(f.style.strokeDashoffset=C*(1-p))}))};
- return`<div class="ring"><svg viewBox="0 0 96 96" width="96" height="96"><circle class="bk" cx="48" cy="48" r="${r}"/><circle class="fg" id="rg" cx="48" cy="48" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><b>${txt}</b></div>`}
+ return`<div class="ring"><svg viewBox="0 0 96 96" width="96" height="96"><defs><linearGradient id="rgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#3ab8ff"/></linearGradient></defs><circle class="bk" cx="48" cy="48" r="${r}"/><circle class="fg" id="rg" cx="48" cy="48" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><b>${txt}</b></div>`}
 function vInicio(n){
  const{act,sig,fin}=memAct(n),h=hoyL(),sl=saldo(n);
  const rest=act?dias(h,act.fin):0,tot=act?Math.max(1,dias(act.inicio,act.fin)):1;
@@ -566,5 +572,16 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
  await entrar();
 })();
 </script>
+<script>/* Partículas Xyro */(function(){var cv=document.getElementById('fx');if(!cv)return;var cx=cv.getContext('2d'),P=[],W,H,DPR=Math.min(1.5,devicePixelRatio||1),m={x:-999,y:-999},RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);var n=Math.round(Math.min(70,W*H/14000));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3})}
+function f(){if(document.hidden){setTimeout(function(){requestAnimationFrame(f)},600);return}
+ cx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){var p=P[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;var dm=Math.hypot(p.x-m.x,p.y-m.y);if(dm<160){p.x+=(m.x-p.x)*.004;p.y+=(m.y-p.y)*.004}
+ cx.fillStyle='rgba(124,92,255,.75)';cx.beginPath();cx.arc(p.x,p.y,1.4,0,6.3);cx.fill();
+ for(var j=i+1;j<P.length;j++){var q=P[j],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<120){cx.strokeStyle='rgba(124,92,255,'+(0.2*(1-d/120))+')';cx.lineWidth=1;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}
+ if(dm<170){cx.strokeStyle='rgba(58,214,255,'+(0.35*(1-dm/170))+')';cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(m.x,m.y);cx.stroke()}}
+ if(!RM)requestAnimationFrame(f)}
+size();addEventListener('resize',size);addEventListener('pointermove',function(e){m.x=e.clientX;m.y=e.clientY;var s=document.documentElement.style;s.setProperty('--mx',e.clientX+'px');s.setProperty('--my',e.clientY+'px')},{passive:true});
+addEventListener('pointerdown',function(e){m.x=e.clientX;m.y=e.clientY},{passive:true});
+requestAnimationFrame(f)})();</script>
 </body>
 </html>
