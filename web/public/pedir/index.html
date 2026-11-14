@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pedir desde mi mesa</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#07070b">
+<link rel="icon" href="/img/marca/logo-apps-app.svg" type="image/svg+xml">
+<style>
+:root{--a:#7c5cff;--bg:#07070b;--c:#111118;--c2:#17171f;--ln:#ffffff14;--tx:#f1f1f6;--mu:#9a9aae;--ok:#22c55e;--wa:#f59e0b;--bad:#ef4444}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea{font:inherit;color:var(--tx);background:var(--c2);border:1px solid var(--ln);border-radius:14px;padding:12px 14px;width:100%;outline:none}
+input:focus,textarea:focus{border-color:var(--a)}
+.w{max-width:560px;margin:0 auto;padding:16px 16px 120px}
+.hd{display:flex;align-items:center;gap:12px;padding:6px 0 14px;animation:in .5s both}
+.lg{width:52px;height:52px;border-radius:50%;background:var(--c2);display:grid;place-items:center;font-weight:900;font-size:22px;overflow:hidden;flex:none;box-shadow:0 0 0 2px var(--a)}
+.lg img{width:100%;height:100%;object-fit:cover}
+.hd h1{font-size:19px;letter-spacing:-.02em;line-height:1.15}.mu{color:var(--mu)}.sm{font-size:13px}.xs{font-size:12px}
+.mesa{margin-left:auto;text-align:center;padding:8px 14px;border-radius:16px;border:1px solid var(--ln);background:var(--c)}
+.mesa b{display:block;font-size:24px;font-weight:900;line-height:1}.mesa span{font-size:10px;letter-spacing:.12em;color:var(--mu);font-weight:700}
+.bn{border-radius:18px;padding:14px 16px;background:var(--c);border:1px solid var(--ln);margin-bottom:12px;animation:in .4s both}
+.bn.cl{border-color:#ef444466}
+.chips{display:flex;gap:8px;overflow:auto;padding:4px 0 12px;position:sticky;top:0;background:linear-gradient(var(--bg) 80%,#07070b00);z-index:3;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid var(--ln);background:var(--c);font-weight:600;font-size:14px}
+.chip.on{background:var(--a);border-color:var(--a);color:#fff}
+.cat{font-size:12px;letter-spacing:.1em;font-weight:800;color:var(--mu);margin:14px 2px 8px;text-transform:uppercase}
+.L{display:grid;gap:10px}
+.p{display:flex;gap:12px;align-items:center;padding:12px;border-radius:18px;background:var(--c);border:1px solid var(--ln);animation:in .45s both}
+.p .e{width:58px;height:58px;border-radius:16px;background:var(--c2);display:grid;place-items:center;font-size:30px;flex:none}
+.p .t{flex:1;min-width:0}.p .t b{display:block}.p .pr{font-weight:800;margin-top:2px}
+.p.ag{opacity:.45}.p.ag .pr::after{content:" · Agotado";color:var(--bad);font-weight:700}
+.add{width:42px;height:42px;border-radius:14px;background:var(--a);color:#fff;font-size:24px;font-weight:700;display:grid;place-items:center;flex:none;transition:transform .15s}
+.add:active{transform:scale(.88)}.add:disabled{background:var(--c2);color:var(--mu)}
+.q{display:flex;align-items:center;gap:4px;background:var(--c2);border-radius:14px;padding:3px;flex:none}
+.q button{width:36px;height:36px;border-radius:11px;font-size:20px;font-weight:700}.q button:last-child{background:var(--a);color:#fff}.q b{min-width:22px;text-align:center}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(#07070b00,var(--bg) 35%);z-index:5;display:flex;justify-content:center}
+.bar button{width:min(528px,100%);display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 20px;border-radius:20px;background:var(--a);color:#fff;font-weight:800;font-size:16px;box-shadow:0 18px 50px -14px var(--a);animation:up .35s cubic-bezier(.2,1.3,.3,1)}
+.bar .n{background:#ffffff30;border-radius:999px;padding:2px 10px;font-size:14px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border-radius:18px;background:var(--c2);border:1px solid var(--ln);font-weight:700}
+.btn.p{background:var(--a);border-color:var(--a);color:#fff}.btn:disabled{opacity:.5}
+.ov{position:fixed;inset:0;background:#000a;z-index:10;display:flex;align-items:flex-end;justify-content:center;animation:fd .2s}
+.sh{width:min(560px,100%);max-height:92vh;overflow:auto;background:var(--c);border-radius:26px 26px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom));display:grid;gap:12px;animation:up .3s cubic-bezier(.2,1.2,.3,1);border:1px solid var(--ln);border-bottom:0}
+.sh h2{font-size:20px}.rw{display:flex;gap:10px;align-items:center}.rw .t{flex:1;min-width:0}
+.tot{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;padding-top:6px;border-top:1px dashed var(--ln)}.tot b{font-size:26px;font-weight:900}
+.ord{border-radius:20px;padding:16px;background:var(--c);border:1px solid var(--ln);display:grid;gap:10px;margin-bottom:12px;animation:in .4s both}
+.ord.servido{border-color:var(--a);box-shadow:0 10px 40px -20px var(--a)}
+.stp{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;position:relative}
+.stp div{display:grid;justify-items:center;gap:4px;text-align:center;font-size:11px;color:var(--mu);font-weight:600;position:relative}
+.stp i{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--c2);border:2px solid var(--ln);font-style:normal;font-size:14px;z-index:1}
+.stp div::before{content:"";position:absolute;top:15px;left:-50%;width:100%;height:2px;background:var(--ln)}.stp div:first-child::before{display:none}
+.stp .on{color:var(--tx)}.stp .on i{background:var(--a);border-color:var(--a)}.stp .on::before{background:var(--a)}
+.stp .now i{animation:pu 1.4s infinite}
+.pg{background:#ffffff0a;border-radius:14px;padding:10px 12px;font-size:14px}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#fff;color:#111;padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;z-index:20;box-shadow:0 10px 30px #0008;animation:up .3s;max-width:90vw;text-align:center}
+.vac{text-align:center;padding:50px 20px;display:grid;gap:10px;justify-items:center}.vac .e{font-size:52px}
+.ft{text-align:center;font-size:12px;color:var(--mu);margin-top:28px;display:flex;gap:6px;align-items:center;justify-content:center}
+.ft img{width:18px;height:18px}.ft b{background:linear-gradient(90deg,#a48bff,#3ad6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.demo{position:fixed;bottom:10px;left:10px;background:var(--wa);color:#111;font-weight:800;font-size:11px;padding:3px 9px;border-radius:999px;z-index:30}
+.bump{animation:bp .35s}
+.cf{position:fixed;top:-10px;width:9px;height:14px;z-index:40;border-radius:2px;animation:cf 1.6s ease-in forwards}
+@keyframes in{from{opacity:0;transform:translateY(14px)}}@keyframes up{from{transform:translateY(60px);opacity:0}}@keyframes fd{from{opacity:0}}
+@keyframes pu{0%,100%{box-shadow:0 0 0 0 var(--a)}50%{box-shadow:0 0 0 8px #0000}}@keyframes bp{40%{transform:scale(1.06)}}
+@keyframes cf{to{transform:translateY(105vh) rotate(720deg);opacity:.6}}
+</style>
+</head>
+<body>
+<div class="w" id="app"><div class="vac"><span class="e">⏳</span><p class="mu">Cargando el menú…</p></div></div>
+<script>
+(function(){
+const SB='https://szvdzcaoxjstdyblhxrd.supabase.co',KEY='sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe';
+const Q=new URLSearchParams(location.search),DEMO=Q.has('demo'),SLUG=(Q.get('s')||'').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,60),MESA=Math.max(0,parseInt(Q.get('m'),10)||0);
+const app=document.getElementById('app'),$=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sol=n=>'S/ '+(+n||0).toFixed(2);
+const ls={g(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(_){return d}},s(k,v){try{localStorage.setItem(k,v)}catch(_){}}};
+const vib=()=>{try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}};
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)};
+let TOK=ls.g('xp-tok','');if(!/^[A-Za-z0-9_-]{16,64}$/.test(TOK)){TOK=Array.from(crypto.getRandomValues(new Uint8Array(18)),b=>'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789_-'[b%58]).join('');ls.s('xp-tok',TOK)}
+// Si la persona tiene sesión en la app Mi Xyro, el pedido queda en su historial
+function token(){try{const a=JSON.parse(localStorage.getItem('xyro-mi-auth')||'null');if(a&&a.access_token&&(a.expires_at||0)*1000>Date.now()+6e4)return a.access_token}catch(_){}return null}
+async function rpc(f,b){const t=token(),h={'Content-Type':'application/json',apikey:KEY};if(t)h.Authorization='Bearer '+t;
+ let r=await fetch(SB+'/rest/v1/rpc/'+f,{method:'POST',headers:h,body:JSON.stringify(b)});
+ if(r.status===401&&t){delete h.Authorization;r=await fetch(SB+'/rest/v1/rpc/'+f,{method:'POST',headers:h,body:JSON.stringify(b)})}
+ const d=await r.json().catch(()=>null);if(!r.ok){const m=(d&&(d.message||d.hint))||'';throw new Error(m==='cerrado'?'cerrado':/^[A-ZÁÉÍÓÚÑ¡¿]/.test(m)&&!/function|schema|relation|permission|JWT/i.test(m)?m:'No pudimos conectar. Intenta otra vez.')}return d}
+
+// ---------- Demo para mostrar a negocios ----------
+const DP=[['Batidos','🥤','Batido de proteína',12,'Whey + leche o agua'],['Batidos','🍌','Batido plátano y avena',10,'Ideal antes de entrenar'],['Combos','🎁','Combo post-entreno',18,'Batido + barra de proteína'],['Combos','☕','Combo mañanero',11,'Café americano + sándwich'],['Bebidas','💧','Agua 625 ml',2.5,''],['Bebidas','⚡','Bebida isotónica',5,''],['Bebidas','☕','Café americano',6,''],['Snacks','🍫','Barra proteica',7,'20 g de proteína'],['Snacks','🥪','Sándwich de pollo',9,'Pan integral'],['Snacks','🥗','Bowl de frutas',8,'De temporada']];
+let DEMO_ORD=[];
+async function api(f,b){if(!DEMO)return rpc(f,b);await new Promise(r=>setTimeout(r,350));
+ if(f==='xa_mesa_menu')return{negocio:Q.get('n')||'Tu Gimnasio',tienda:'Cafetín',mesa:MESA||3,abierto:true,desde:'07:00',hasta:'21:00',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],agotado:i===5}))};
+ if(f==='xa_mesa_pedir'){const it=b.p_items.map(x=>{const p=DP[+x.id.slice(1)];return{id:x.id,n:p[2],c:x.c,p:p[3],e:p[1]}}),o={id:'o'+Date.now(),num:DEMO_ORD.length+7,mesa:b.p_mesa,items:it,total:it.reduce((a,i)=>a+i.p*i.c,0),estado:'nuevo',creado:new Date().toISOString(),t0:Date.now()};DEMO_ORD.unshift(o);return o}
+ if(f==='xa_mesa_mios'){DEMO_ORD.forEach(o=>{if(o.estado==='cancelado')return;const s=(Date.now()-o.t0)/1e3;o.estado=s>30?'servido':s>12?'preparando':'nuevo'});return DEMO_ORD}
+ if(f==='xa_mesa_cancelar_mio'){const o=DEMO_ORD.find(x=>x.id===b.p_id);if(o.estado!=='nuevo')throw new Error('Ya lo están preparando. Pide el cambio en el cafetín.');o.estado='cancelado';return o}}
+
+let M=null,CART=[],CAT='',MIOS=[],ENV=false;
+const tot=()=>CART.reduce((a,i)=>a+i.p*i.c,0),cnt=()=>CART.reduce((a,i)=>a+i.c,0);
+const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+function horario(){if(!M.desde||!M.hasta)return'';const d=Array.isArray(M.dias)&&M.dias.length&&M.dias.length<7?' · '+M.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'';return M.desde+' a '+M.hasta+d}
+function err(e,t,s){app.innerHTML=`<div class="vac"><span class="e">${e}</span><h2>${esc(t)}</h2><p class="mu sm" style="max-width:320px">${s||''}</p></div>${pie()}`}
+const pie=()=>`<p class="ft"><img src="/img/marca/logo-xyrostudio-app.svg" alt="">Hecho con <b>XyroStudio</b></p>`;
+async function init(){
+ if(!DEMO&&(!SLUG||!MESA))return err('🪑','Escanea el QR de tu mesa','Este enlace está incompleto. Usa la cámara de tu celular con el QR pegado en tu mesa.');
+ try{M=await api('xa_mesa_menu',{p_slug:SLUG,p_mesa:MESA})}catch(e){return err('📶','No pudimos abrir el menú',esc(e.message))}
+ if(!M||M.error==='negocio')return err('🔎','No encontramos este negocio','Vuelve a escanear el QR de tu mesa.');
+ if(M.color&&/^#[0-9a-f]{6}$/i.test(M.color))document.documentElement.style.setProperty('--a',M.color);
+ if(M.error==='off')return err('🍽️','Pedidos por QR no disponibles',esc(M.negocio)+' aún no recibe pedidos desde la mesa. Pide directo en el cafetín.');
+ if(M.error==='mesa')return err('🪑','Esta mesa no existe','Vuelve a escanear el QR de tu mesa o pregunta en el cafetín.');
+ document.title=(M.tienda||'Cafetín')+' · '+M.negocio;
+ try{CART=JSON.parse(sessionStorage.getItem('xp-cart-'+SLUG)||'[]')}catch(_){CART=[]}
+ CART=CART.filter(i=>M.productos.some(p=>p.id===i.id&&!p.agotado));
+ await cargarMios();pinta();setInterval(async()=>{if(document.hidden)return;const j=JSON.stringify(MIOS);await cargarMios();if(JSON.stringify(MIOS)!==j){avisos(j);pinta()}},DEMO?4000:8000);
+}
+async function cargarMios(){try{MIOS=(await api('xa_mesa_mios',{p_token:TOK})||[]).filter(o=>o.estado!=='cancelado'||Date.now()-new Date(o.cambio||o.creado)<3e5)}catch(_){}}
+function avisos(j){let A=[];try{A=JSON.parse(j)||[]}catch(_){}MIOS.forEach(o=>{const a=A.find(x=>x.id===o.id);if(!a||a.estado===o.estado)return;vib();
+ toast(o.estado==='preparando'?'👨‍🍳 Ya están preparando tu pedido':o.estado==='servido'?'🍽️ ¡Tu pedido va a tu mesa!':o.estado==='pagado'?'✅ Pago confirmado. ¡Gracias!':o.estado==='cancelado'?'Tu pedido se canceló':'')})}
+const PASOS=[['nuevo','📨','Recibido'],['preparando','👨‍🍳','Preparando'],['servido','🍽️','Servido'],['pagado','✅','Pagado']];
+function ordHTML(o){const k=PASOS.findIndex(p=>p[0]===o.estado);
+ return`<div class="ord ${o.estado}"><div class="rw"><div class="t"><b>Pedido #${o.num}</b> <span class="mu xs">· Mesa ${o.mesa}</span><p class="mu xs">${(o.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ')}</p></div><b>${sol(o.total)}</b></div>
+ ${o.estado==='cancelado'?'<p class="sm" style="color:var(--bad)">Pedido cancelado</p>':`<div class="stp">${PASOS.map((p,i)=>`<div class="${i<=k?'on':''} ${i===k&&k<3?'now':''}"><i>${p[1]}</i>${p[2]}</div>`).join('')}</div>`}
+ ${o.estado==='servido'?`<div class="pg">💰 Cuando termines, acércate al ${esc((M.tienda||'cafetín').toLowerCase())} y paga <b>${sol(o.total)}</b>. Di tu mesa: <b>${o.mesa}</b>.</div>`:''}
+ ${o.estado==='nuevo'?`<button class="btn" data-cx="${esc(o.id)}" style="padding:10px">Cancelar pedido</button>`:''}</div>`}
+function pinta(){
+ const P=M.productos||[],cats=[...new Set(P.map(p=>p.categoria||'Otros'))],L=P.filter(p=>!CAT||(p.categoria||'Otros')===CAT),ab=M.abierto,act=MIOS.filter(o=>!['pagado','cancelado'].includes(o.estado)),deuda=act.reduce((a,o)=>a+ +o.total,0);
+ const lg=/^https:\/\//.test(M.logo||'')?`<img src="${esc(M.logo)}" alt="" onerror="this.remove()">`:esc(String(M.negocio||'?').trim()[0]||'?');
+ const it=p=>{const c=(CART.find(i=>i.id===p.id)||{}).c||0;return`<div class="p ${p.agotado?'ag':''}"><span class="e">${esc(p.emoji||'🛒')}</span><div class="t"><b>${esc(p.nombre)}</b>${p.detalle?`<span class="mu xs">${esc(p.detalle)}</span>`:''}<div class="pr">${sol(p.precio)}</div></div>
+  ${c?`<div class="q"><button data-d="${esc(p.id)}" aria-label="Quitar">−</button><b>${c}</b><button data-a="${esc(p.id)}" aria-label="Agregar">＋</button></div>`:`<button class="add" data-a="${esc(p.id)}" ${p.agotado||!ab?'disabled':''} aria-label="Agregar">＋</button>`}</div>`};
+ const grupos=CAT?[[CAT,L]]:cats.map(c=>[c,L.filter(p=>(p.categoria||'Otros')===c)]);
+ app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="hd"><div class="lg">${lg}</div><div><h1>${esc(M.negocio)}</h1><p class="mu sm">${esc(M.tienda||'Cafetín')}${M.yo?' · Hola, '+esc(String(M.yo).split(' ')[0]):''}</p></div><div class="mesa"><span>MESA</span><b>${M.mesa}</b></div></div>
+ ${ab?'':`<div class="bn cl"><b>🔒 ${M.pausa?'Pedidos en pausa por ahora':'Cerrado ahora'}</b><p class="mu sm">${M.pausa?'Pide directo en el '+esc((M.tienda||'cafetín').toLowerCase())+'.':'Puedes ver el menú. Recibimos pedidos de '+esc(horario())+'.'}</p></div>`}
+ ${act.length?`<p class="cat">Tus pedidos${deuda?' · por pagar '+sol(deuda):''}</p>${act.map(ordHTML).join('')}`:''}${MIOS.filter(o=>o.estado==='pagado').slice(0,1).map(ordHTML).join('')}
+ ${cats.length>1?`<div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div>`:''}
+ ${P.length?grupos.map(([c,G])=>G.length?`${cats.length>1?`<p class="cat">${esc(c)}</p>`:''}<div class="L">${G.map(it).join('')}</div>`:'').join(''):'<div class="vac"><span class="e">🥤</span><p class="mu">Aún no hay productos en el menú.</p></div>'}
+ ${pie()}${cnt()?`<div class="bar"><button id="ver"><span class="n">${cnt()}</span><span>Ver mi pedido</span><span>${sol(tot())}</span></button></div>`:''}`;
+ app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{CAT=b.dataset.c;pinta()});
+ app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>mover(b.dataset.a,1));
+ app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>mover(b.dataset.d,-1));
+ app.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>cancelar(b.dataset.cx));
+ const v=$('#ver');v&&(v.onclick=carrito);
+}
+function guarda(){try{sessionStorage.setItem('xp-cart-'+SLUG,JSON.stringify(CART))}catch(_){}}
+function mover(id,d){const p=M.productos.find(x=>x.id===id);if(!p)return;if(d>0&&!M.abierto)return toast('Ahora no recibimos pedidos');vib();
+ const i=CART.find(x=>x.id===id);if(i){i.c=Math.min(20,i.c+d);if(i.c<=0)CART=CART.filter(x=>x!==i)}else if(d>0)CART.push({id,n:p.nombre,p:+p.precio,e:p.emoji,c:1});
+ guarda();const y=scrollY;pinta();scrollTo(0,y);const b=$('#ver');b&&d>0&&b.classList.add('bump')}
+function carrito(){const o=document.createElement('div');o.className='ov';
+ const draw=()=>{if(!CART.length){o.remove();pinta();return}
+  o.innerHTML=`<div class="sh"><div class="rw"><h2 class="t">🛒 Tu pedido · Mesa ${M.mesa}</h2><button data-x style="font-size:22px;padding:4px 8px" aria-label="Cerrar">✕</button></div>
+  ${CART.map(i=>`<div class="rw"><span style="font-size:24px">${esc(i.e||'🛒')}</span><div class="t"><b>${esc(i.n)}</b><p class="mu xs">${sol(i.p)} c/u</p></div><div class="q"><button data-d="${esc(i.id)}">−</button><b>${i.c}</b><button data-a="${esc(i.id)}">＋</button></div></div>`).join('')}
+  <input id="nm" maxlength="60" placeholder="Tu nombre (para llevártelo a la mesa)" value="${esc(ls.g('xp-nom','')||M.yo||'')}">
+  <textarea id="nt" rows="2" maxlength="200" placeholder="Nota (opcional): sin azúcar, con hielo…"></textarea>
+  <div class="tot"><span class="mu">Total</span><b>${sol(tot())}</b></div><p class="mu xs" style="text-align:center">Pagas al terminar, en el ${esc((M.tienda||'cafetín').toLowerCase())}.</p>
+  <button class="btn p" id="go">Hacer pedido · ${sol(tot())}</button></div>`;
+  o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.id===b.dataset.a);i.c=Math.min(20,i.c+1);guarda();keep(draw)});
+  o.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.id===b.dataset.d);i.c--;if(i.c<=0)CART=CART.filter(x=>x!==i);guarda();keep(draw)});
+  o.querySelector('#go').onclick=enviar};
+ const keep=f=>{const a=o.querySelector('#nm').value,b=o.querySelector('#nt').value;f();const x=o.querySelector('#nm'),y=o.querySelector('#nt');x&&(x.value=a);y&&(y.value=b)};
+ o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]')){o.remove();pinta()}};
+ document.body.appendChild(o);draw();
+ async function enviar(){if(ENV)return;const b=o.querySelector('#go'),nm=o.querySelector('#nm').value.trim(),nt=o.querySelector('#nt').value.trim();ENV=true;b.disabled=true;b.textContent='Enviando…';
+  try{const r=await api('xa_mesa_pedir',{p_slug:SLUG,p_mesa:M.mesa,p_items:CART.map(i=>({id:i.id,c:i.c})),p_nombre:nm||null,p_nota:nt||null,p_token:TOK});
+   if(nm)ls.s('xp-nom',nm);CART=[];guarda();o.remove();MIOS.unshift(r);confeti();toast('🎉 ¡Pedido enviado! Te avisamos aquí');pinta();scrollTo({top:0,behavior:'smooth'})}
+  catch(e){if(e.message==='cerrado'){M.abierto=false;o.remove();pinta();toast('Ahora no recibimos pedidos')}else{toast(e.message);if(/acabó|disponible/i.test(e.message))try{M=Object.assign(M,await api('xa_mesa_menu',{p_slug:SLUG,p_mesa:MESA}))}catch(_){}}
+   b.disabled=false;b.textContent='Hacer pedido · '+sol(tot())}ENV=false}}
+async function cancelar(id){if(!confirm('¿Cancelar este pedido?'))return;try{await api('xa_mesa_cancelar_mio',{p_token:TOK,p_id:id});await cargarMios();pinta();toast('Pedido cancelado')}catch(e){toast(e.message)}}
+function confeti(){const C=['#fff',getComputedStyle(document.documentElement).getPropertyValue('--a').trim(),'#facc15','#3ad6ff'];for(let i=0;i<36;i++){const d=document.createElement('i');d.className='cf';d.style.left=Math.random()*100+'vw';d.style.background=C[i%C.length];d.style.animationDelay=Math.random()*.3+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}}
+init();
+})();
+</script>
+</body>
+</html>

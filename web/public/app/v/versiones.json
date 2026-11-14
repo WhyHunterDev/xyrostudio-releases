@@ -1,5 +1,21 @@
 [
  {
+  "id": "20261114-1740",
+  "fecha": "2026-11-14 17:40",
+  "titulo": "Pedidos por QR desde la mesa del cafetín",
+  "notas": "Pedidos por QR desde la mesa del cafetín",
+  "cambios": [
+   "Los socios escanean el QR de su mesa, eligen del cafetín y piden desde su celular",
+   "Nueva sección Pedidos de mesa: nuevos, preparando y por cobrar, con aviso sonoro",
+   "Mesas y horario configurables; QR de cada mesa para imprimir en blanco con tu logo",
+   "Cobro por mesa con comprobante; queda en la caja y en el historial del socio"
+  ],
+  "requiere": "SQL 50",
+  "rubros": [
+   "gym"
+  ]
+ },
+ {
   "id": "20261114-1531",
   "fecha": "2026-11-14 15:31",
   "titulo": "Pedidos de planes desde la app",

@@ -423,6 +423,7 @@ const PD_BASE=[
  {titulo:'Revisar saldo de Anthropic (IA y bots)',detalle:'console.anthropic.com → Billing. Si baja de US$ 2, recarga para que el bot no se apague.',cat:'pagos',fecha:'2026-12-01',cada:'mes'},
  {titulo:'Confirmar SQL pendientes en Supabase',detalle:'Revisa que corriste 28, 29, 31, 32, 33, 35 y 37.',cat:'web',fecha:'2026-11-15',cada:''},
  {titulo:'Agregar xyrostudio.net/gestor/ en Supabase → Auth → Redirect URLs',detalle:'Para que «olvidé mi contraseña» del panel funcione.',cat:'seguridad',fecha:'',cada:''},
+ {titulo:'Pedidos por QR para cafeterías y comida rápida',detalle:'Llevar los pedidos por QR de mesa del cafetín del gym a un ecosistema propio de comidas y bebidas (cafeterías, comida rápida, juguerías): menú con fotos, pedidos súper rápidos, cocina, delivery y para llevar.',cat:'otro',fecha:'2026-12-15',cada:''},
  {titulo:'Formalizar la empresa (RUC 20)',detalle:'SAC unipersonal o EIRL con contador, cuando factures más o un gym grande pida factura de empresa.',cat:'legal',fecha:'',cada:''}];
 async function pdCargar(){if(PD)return PD;
  const{data,error}=await sb.from('xa_pendientes').select('*').order('hecho').order('fecha',{ascending:true,nullsFirst:false}).limit(500);
