@@ -1101,7 +1101,7 @@ function socioDent(){
   <div><h2 style="font-size:22px;letter-spacing:-.02em">${esc(c.nombre)}</h2><p class="mu sm">${esc([c.num&&'Historia N.º '+c.num,c.dni&&'DNI '+c.dni,edad(c.nacimiento),c.telefono].filter(Boolean).join(' · '))}</p></div>
   ${F.alergias&&hcVer()?`<div class="hca" style="width:100%">⚠️ Alergias: <b>${esc(F.alergias)}</b></div>`:''}
   ${sal?`<span class="pill" style="background:#f5b54422;color:var(--wa);font-size:14px">💸 Saldo pendiente ${sol(sal)}</span>`:''}
-  <div class="acts"><button class="btn p" data-ag="${c.id}">🗓️ Agendar cita</button>${isProf()?'':'<button class="btn" id="bCo">💳 Cobrar</button>'}<button class="btn" data-pr="new|${c.id}">📋 Presupuesto</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,'Hola '+c.nombre.split(' ')[0]+' 😊, te escribimos de '+nombre()+'.')}">📲 WhatsApp</a>`:''}<button class="btn" data-app="${c.id}">📱 Su app</button><button class="btn" id="bEd">✏️ Editar</button>${isAdmin()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
+  <div class="acts"><button class="btn p" data-ag="${c.id}">🗓️ Agendar cita</button>${isProf()?'':'<button class="btn" id="bCo">💳 Cobrar</button>'}<button class="btn" data-pr="new|${c.id}">📋 Presupuesto</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,'Hola '+c.nombre.split(' ')[0]+' 😊, te escribimos de '+nombre()+'.')}">📲 WhatsApp</a>`:''}<button class="btn" data-app="${c.id}">📱 Conectar a su app</button><button class="btn" id="bEd">✏️ Editar</button>${isAdmin()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
   ${c.notas?`<p class="mu sm" style="text-align:left;width:100%">📝 ${esc(c.notas)}</p>`:''}
  </div>
  <div class="g">${citCard(c)}${odoCard(c)}${presCard(c)}${hcCard(c)}
@@ -1237,8 +1237,8 @@ const NAV=()=>{let n=NAV0();if(R.citas&&!isProf()){n=n.filter(x=>!DENT_OFF.inclu
 const NAV0=()=>{if(isProf())return[['agenda','🗓️','Mi agenda'],['socios','👥',R.clis],['cuenta','🔐','Mi cuenta']];if(isCoach())return[['rutinas','📋',ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento'],['cuenta','🔐','Mi cuenta']];
  if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
- return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']],!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
-const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento']],['gym','🏋️','Gimnasio',['rutinas','tienda','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['miapp','📱','App de clientes'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']],!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento','miapp']],['gym','🏋️','Gimnasio',['rutinas','tienda','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
 function navGrupos(n){const top=[],G=NAVG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));n.forEach(x=>{const g=NAVG.findIndex(g=>g[3].includes(x[0]));(g<0||n.length<=8?top:G[g].L).push(x)});const G2=G.filter(g=>g.L.length);G2.filter(g=>g.L.length===1).forEach(g=>top.push(g.L[0]));return{top,G:G2.filter(g=>g.L.length>1)}}
 const navNum=t=>{const m=String(t).match(/\((\d+)\)\s*$/);return m?+m[1]:0};
 function shell(){
@@ -1267,11 +1267,11 @@ function go(){
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
  if((ruta==='whatsapp'||ruta==='ventasbot')&&!waVer())ruta='inicio';
- const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda}[ruta]||inicio;
+ const V={miapp:miApp,inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${ruta!=='miplan'?planAviso():''}${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:citOn()?'🗓️ Cita':(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:R.citas?'＋ Tratamiento':'＋ Plan',caja:R.citas?'🚶 Cobro al paso':'＋ Cobro',ajustes:R.citas?'🗓️ Cita':'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket',agenda:'＋ Cita'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
- $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:R.citas?'Tratamientos y precios':'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',pruebas:'Días de prueba',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio',agenda:'Agenda'}[ruta]||'';
+ $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:R.citas?'Tratamientos y precios':'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',miapp:'App de clientes',pruebas:'Días de prueba',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio',agenda:'Agenda'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
 $('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&(citOn()?nuevaCita({c}):cobrar(c))},planes:()=>isAdmin()?(R.citas?editTrat():editPlan()):toast('Solo el administrador edita planes'),caja:()=>R.citas?cobroPaso():cobroSuelto(),ajustes:()=>R.citas?nuevaCita():kiosco(),tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket(),agenda:()=>nuevaCita()})[ruta]||nuevoCli)()};
@@ -1440,7 +1440,7 @@ function socio(){
   <div><h2 style="font-size:22px;letter-spacing:-.02em">${esc(c.nombre)}</h2><p class="mu sm">${esc([c.num&&'Código '+c.num,c.dni&&'DNI '+c.dni,c.telefono].filter(Boolean).join(' · '))}</p></div>
   <div class="ring" ${m?'':'id="rAs" style="cursor:pointer" title="Asignar"'}><svg width="150" height="150"><circle cx="75" cy="75" r="64" stroke="#ffffff10"/><circle class="rv" cx="75" cy="75" r="64" stroke="${col}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><div>${ses?`<b>${lef}</b><small>de ${m.sesiones} sesiones<br>${Math.max(0,e.d)} días</small>`:m?`<b>${Math.max(0,e.d)}</b><small>días restantes</small>`:'<b>＋</b><small>asignar '+esc(R.plan.toLowerCase())+'</small>'}</div></div>${m&&m.dom===false?'<span class="pill sin">🚫 Sin domingos ni feriados</span>':''}
   <span class="pill ${e.k}">${m?esc(m.plan_nombre||'')+' · ':''}${e.k==='act'?'hasta '+fF(m.fin):e.t}</span>${e.k==='cong'?`<span class="mu sm">Su ${esc(R.plan.toLowerCase())} ahora termina el ${fF(m.fin)}</span>`:''}${zf?`<span class="pill cong">❄️ Se congela del ${fF(zf.desde)} al ${fF(zf.hasta)}</span>`:''}
-  <div class="acts"><button class="btn p" id="bCob">💳 ${m?'Renovar':'Asignar '+esc(R.plan.toLowerCase())}</button>${m&&(e.k==='act'||e.k==='pronto')?'<button class="btn" id="bTr">🔁 Transferir</button>':''}${m&&(e.k!=='venc'||zf)?(e.k==='cong'||zf?'<button class="btn" id="bRea">▶️ Reactivar</button>':'<button class="btn" id="bCon">❄️ Congelar</button>'):''}<button class="btn" id="bAs">✅ Marcar ingreso</button><button class="btn" id="bCar">🪪 Carnet QR</button><button class="btn" data-app="${c.id}">📱 Su app</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:''}<button class="btn" id="bEd">✏️ Editar</button><button class="btn" id="bSol">📨 ${isSup()?'Solicitud':'Pasar al supervisor'}</button>${isSup()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
+  <div class="acts"><button class="btn p" id="bCob">💳 ${m?'Renovar':'Asignar '+esc(R.plan.toLowerCase())}</button>${m&&(e.k==='act'||e.k==='pronto')?'<button class="btn" id="bTr">🔁 Transferir</button>':''}${m&&(e.k!=='venc'||zf)?(e.k==='cong'||zf?'<button class="btn" id="bRea">▶️ Reactivar</button>':'<button class="btn" id="bCon">❄️ Congelar</button>'):''}<button class="btn" id="bAs">✅ Marcar ingreso</button><button class="btn" id="bCar">🪪 Carnet QR</button><button class="btn" data-app="${c.id}">📱 Conectar a su app</button>${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,m?waMsg(c,e):'Hola '+c.nombre.split(' ')[0]+' 👋')}">📲 WhatsApp</a>`:''}<button class="btn" id="bEd">✏️ Editar</button><button class="btn" id="bSol">📨 ${isSup()?'Solicitud':'Pasar al supervisor'}</button>${isSup()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
   ${c.notas?`<p class="mu sm" style="text-align:left;width:100%">📝 ${esc(c.notas)}</p>`:''}
  </div>
  <div class="g">
@@ -1466,11 +1466,11 @@ function editPlan(p){
  },p?'<button type="button" class="btn bad" id="pDel" style="margin-right:auto">Archivar</button>':'');
  const d=$('#pDel');d&&(d.onclick=async()=>{await DB.upd('pla',p.id,{activo:false});$('.ov').remove();toast('Plan archivado');if(CFG.syncWeb===true)aWeb(false);go()});
 }
-function nuevoCli(c){
+function nuevoCli(c,pre){const X=c||pre||null;
  const P0=S.pla.filter(p=>p.activo!==false);
- const f=[{k:'nombre',l:'Nombre completo',v:c&&c.nombre,req:1,ph:'Ej. María Quispe'},{k:'num',l:R.citas?'N.º de historia':'Código de '+R.cli.toLowerCase(),v:c?c.num:nextNum(),half:1},{k:'dni',l:'DNI',v:c&&c.dni,half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:c&&c.telefono,half:1,t:'tel',ph:'9xx xxx xxx'},{k:'nacimiento',l:'Cumpleaños',t:'date',v:c&&c.nacimiento,half:1},{k:'email',l:'Correo',t:'email',v:c&&c.email}];
- if(!R.citas)f.unshift({k:'foto',l:'Foto (para reconocerlo en la entrada)',t:'foto',v:c&&c.foto});
- f.push({k:'notas',l:'Notas',t:'area',v:c&&c.notas});
+ const f=[{k:'nombre',l:'Nombre completo',v:X&&X.nombre,req:1,ph:'Ej. María Quispe'},{k:'num',l:R.citas?'N.º de historia':'Código de '+R.cli.toLowerCase(),v:c?c.num:nextNum(),half:1},{k:'dni',l:'DNI',v:X&&X.dni,half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:X&&X.telefono,half:1,t:'tel',ph:'9xx xxx xxx'},{k:'nacimiento',l:'Cumpleaños',t:'date',v:X&&X.nacimiento,half:1},{k:'email',l:'Correo',t:'email',v:X&&X.email}];
+ if(!R.citas)f.unshift({k:'foto',l:'Foto (para reconocerlo en la entrada)',t:'foto',v:X&&X.foto});
+ f.push({k:'notas',l:'Notas',t:'area',v:X&&X.notas});
  if(sedesL().length>1&&(DEMO||!NEED20))f.push({k:'sede',l:'Sede del '+R.cli.toLowerCase(),t:'sel',v:c?c.sede||'':SEDE,o:[['','Todas las sedes']].concat(sedesL().map(s=>[s.id,s.nombre]))});
  form(c?'Editar '+R.cli.toLowerCase():'Nuevo '+R.cli.toLowerCase(),f,async v=>{
   const row={nombre:v.nombre,num:v.num||null,dni:v.dni||null,telefono:v.telefono||null,nacimiento:v.nacimiento||null,email:v.email||null,notas:v.notas||null};if('sede' in v)row.sede=v.sede||'';
@@ -1479,7 +1479,7 @@ function nuevoCli(c){
   const ft=async id=>{if(!v.foto)return;try{await DB.upd('cli',id,{foto:await subirFoto(v.foto,id)})}catch(er){toast(er.message)}};
   if(c){await DB.upd('cli',c.id,row);await ft(c.id);toast('Guardado ✓');return go()}
   const n=await DB.ins('cli',Object.assign(row,{codigo:codigo(),creado:new Date().toISOString()}));await ft(n.id);
-  S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));confeti(24);location.hash='#/socio/'+n.id;toast('¡Listo! '+n.nombre.split(' ')[0]+' ya está en '+nombre()+' 🎉');
+  S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));confeti(24);location.hash='#/socio/'+n.id;if(pre&&pre.idn&&!DEMO)yoRpc('xa_yo_pedir',{p_cliente:n.id,p_idn:+pre.idn,p_quien:QUIEN()}).then(()=>toast('📱 Le llegó el aviso a su app para aceptar')).catch(er=>toast(er.message));toast('¡Listo! '+n.nombre.split(' ')[0]+' ya está en '+nombre()+' 🎉');
   if(R.citas&&citOn())setTimeout(()=>nuevaCita({c:n}),450);else if(S.pla.some(p=>p.activo!==false))setTimeout(()=>cobrar(n),450);
  });
 }
@@ -2988,17 +2988,98 @@ async function carnet(c){
  <div class="bt" style="justify-content:center">${c.telefono||DEMO?`<button class="btn p" id="cEnv">📲 Enviar por WhatsApp</button>`:''}<button class="btn" id="cDl">⬇️ Imagen</button><button class="btn" data-x>Cerrar</button></div>`,async el=>{const be=el.querySelector('#cEnv');be&&(be.onclick=()=>enviarCarnet(c).catch(er=>toast(er.message)));el.querySelector('#cDl').onclick=async()=>{const b=await carnetPNG(c),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='carnet-'+(c.num||c.codigo)+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)};try{el.querySelector('#qrb').innerHTML=await qrSVG(c.codigo)}catch(_){el.querySelector('#qrb').innerHTML='<b style="color:#000;font-size:22px">'+esc(c.codigo)+'</b>'}});
 }
 
-/* ===== Mi Xyro: app del socio/paciente en su celular (xyrostudio.net/mi/, SQL 45) ===== */
-const appLinkSocio=c=>'https://xyrostudio.net/mi/?c='+c.codigo;
-const appMsg=c=>`¡Hola ${c.nombre.trim().split(' ')[0]}! 👋 Ahora tienes ${nombre()} en tu celular: ${R.citas?'tus citas y tu tratamiento':'tu QR de entrada, tu plan, tus rutinas y tu dieta'} 📲\n\nEntra aquí y crea tu cuenta con tu celular (10 segundos):\n${appLinkSocio(c)}\n\nLuego toca «Instalar» y queda como una app más.`;
-async function invitarApp(c){
- if(DEMO)return sheet(`<h3>📱 App del ${esc(R.cli.toLowerCase())}</h3><p class="mu">Cada ${esc(R.cli.toLowerCase())} recibe un enlace por WhatsApp, crea su cuenta con su celular y ve ${R.citas?'sus citas y su tratamiento':'su QR, su plan, sus rutinas y su dieta'} en su celular.</p><div class="bt"><a class="btn p" href="/mi/?demo=${R.citas?'consultorio':'1'}" target="_blank" rel="noopener">👀 Ver cómo se ve</a><button class="btn" data-x>Cerrar</button></div>`);
- if(!c.codigo){const cd=codigo();await DB.upd('cli',c.id,{codigo:cd});c.codigo=cd}
- const msg=appMsg(c);
- if(c.telefono){const u=waLink(c,msg),w=window.open(u,'_blank');if(!w)location.href=u;else try{w.opener=null}catch(_){}return}
- try{await navigator.clipboard.writeText(msg);toast('📋 Enlace copiado: pégalo en su chat')}catch(_){sheet(`<h3>📱 Enlace de su app</h3><p class="sm" style="word-break:break-all">${esc(appLinkSocio(c))}</p><div class="bt"><button class="btn" data-x>Cerrar</button></div>`)}
+/* ===== Mi Xyro: app de los clientes (xyrostudio.net/mi/, SQL 45/46) =====
+   La persona se registra con Google o correo y tiene un ID de cuenta fijo. El negocio la conecta a su ficha con ese ID
+   (`conectarApp` → xa_yo_pedir) y ella acepta en su app. Quien escanea el QR del negocio lo guarda y aparece en «App de clientes». */
+const miLink=()=>'https://xyrostudio.net/mi/?n='+encodeURIComponent(SLUG||'demo');
+const appDesc=()=>R.citas?'sus citas y su tratamiento':'su membresía, su QR de entrada, sus rutinas y su dieta';
+async function yoRpc(f,a){const{data,error}=await sb.rpc(f,a);
+ if(error){if(/function|schema cache|does not exist/i.test(error.message||''))throw new Error('Falta activar la app de clientes (SQL 46). Avísale a XyroStudio.');throw new Error('No se pudo. Revisa tu internet.')}
+ if(data&&data.error)throw new Error({id:'No existe una cuenta con ese ID. Pídele que lo revise en su app: Perfil → ID de cuenta.'}[data.error]||'No se pudo.');return data}
+const avatar=(x,sz)=>`<span style="width:${sz||44}px;height:${sz||44}px;border-radius:14px;background:var(--a);color:#000;display:grid;place-items:center;font-weight:900;overflow:hidden;flex:none">${/^https:\/\//.test(x.foto||'')?`<img src="${esc(x.foto)}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover" alt="">`:esc(String(x.nombre||'?').trim()[0]||'?')}</span>`;
+const appMsgDescarga=c=>`¡Hola ${String(c.nombre||'').trim().split(' ')[0]}! 👋 Descarga la app de ${nombre()} y ten en tu celular ${appDesc().replace(/^su /,'tu ').replace(/ su /g,' tu ').replace(/sus /g,'tus ')} 📲\n\n${miLink()}\n\nCrea tu cuenta con Google o tu correo, entra a Perfil y pásanos tu «ID de cuenta» para conectarte.`;
+async function conectarApp(c){
+ let st={};if(!DEMO){try{st=await yoRpc('xa_yo_estado',{p_cliente:c.id})}catch(e){return toast(e.message)}}
+ const n1=esc(c.nombre.split(' ')[0]);
+ if(st.conectado){const x=st.conectado;return sheet(`<h3>📱 App de ${n1}</h3><div class="row" style="gap:12px;align-items:center;margin:10px 0">${avatar(x)}<div><b>✅ Conectado</b><p class="mu sm">@${esc(x.usuario||'')} · ${esc(x.nombre||'')}</p></div></div><p class="mu sm">Ya ve en su celular ${appDesc()}. Todo lo que registres aquí le aparece al instante.</p><div class="bt"><button class="btn bad" id="yD">Desconectar</button><button class="btn" data-x>Cerrar</button></div>`,(el,close)=>{
+  el.querySelector('#yD').onclick=async()=>{try{await yoRpc('xa_yo_desconectar',{p_cliente:c.id});close();toast('Desconectado')}catch(e){toast(e.message)}}})}
+ const pe=st.pendiente;
+ sheet(`<h3>📱 Conectar a la app del ${esc(R.cli.toLowerCase())}</h3>
+  ${pe?`<p class="sm" style="color:var(--wa);margin:6px 0">⏳ Esperando que @${esc(pe.usuario||'')} acepte en su app. Si se equivocó de ID, escribe otro.</p>`:`<p class="mu sm">Pídele a ${n1} su <b>ID de cuenta</b>: en su app, Perfil → «ID de cuenta» (8 números).</p>`}
+  <div class="row" style="gap:8px;margin-top:10px"><input id="yI" class="card" inputmode="numeric" maxlength="9" placeholder="Ingresar ID de cuenta" style="flex:1;min-width:0;margin:0;padding:12px 14px;font-size:20px;letter-spacing:.1em"><button class="btn p" id="yB">Buscar</button></div>
+  <div id="yR" style="margin-top:12px"></div>
+  <details style="margin-top:12px"><summary class="mu sm" style="cursor:pointer">¿Aún no tiene la app?</summary><p class="mu sm" style="margin:8px 0">Envíale el enlace para descargarla. Al entrar, guarda tu negocio y ve tus promos.</p><button class="btn" id="yW">${c.telefono?'📲 Enviar por WhatsApp':'📋 Copiar mensaje'}</button></details>
+  <div class="bt"><button class="btn" data-x>Cerrar</button></div>`,(el,close)=>{
+  const I=el.querySelector('#yI'),Rr=el.querySelector('#yR');I.oninput=()=>{I.value=I.value.replace(/\D/g,'').slice(0,8)};
+  el.querySelector('#yW').onclick=async()=>{const m=appMsgDescarga(c);if(c.telefono&&!DEMO){const u=waLink(c,m),w=window.open(u,'_blank');if(!w)location.href=u;else try{w.opener=null}catch(_){}}else{try{await navigator.clipboard.writeText(m);toast('📋 Mensaje copiado')}catch(_){toast(miLink())}}};
+  const buscar=async()=>{const id=I.value;if(id.length!==8){Rr.innerHTML='<p class="sm" style="color:var(--bad)">El ID tiene 8 números.</p>';return}
+   Rr.innerHTML='<p class="mu sm">Buscando…</p>';let x=null;
+   try{x=DEMO?{nombre:c.nombre,usuario:String(c.nombre).split(' ')[0].toLowerCase()+'.fit',apodo:''}:await yoRpc('xa_yo_buscar',{p_cliente:c.id,p_idn:+id})}catch(e){Rr.innerHTML=`<p class="sm" style="color:var(--bad)">${esc(e.message)}</p>`;return}
+   if(!x){Rr.innerHTML='<p class="sm" style="color:var(--bad)">No existe una cuenta con ese ID. Pídele que lo revise en su app.</p>';return}
+   Rr.innerHTML=`<div class="card" style="display:grid;gap:10px"><div class="row" style="gap:12px;align-items:center">${avatar(x)}<div><b>${esc(x.nombre||'')}</b>${x.apodo?` <span class="mu sm">«${esc(x.apodo)}»</span>`:''}<p class="mu sm">@${esc(x.usuario||'')}</p></div></div>
+    <p class="sm">¿Registrar a <b>${esc(x.nombre||'')}</b> en ${esc(nombre())} en la app como <b>${esc(c.nombre)}</b>?</p><div class="bt" style="margin:0"><button class="btn p" id="yS">Sí, registrar</button><button class="btn" id="yN">No</button></div></div>`;
+   Rr.querySelector('#yN').onclick=()=>{Rr.innerHTML='';I.value='';I.focus()};
+   Rr.querySelector('#yS').onclick=async()=>{try{if(!DEMO)await yoRpc('xa_yo_pedir',{p_cliente:c.id,p_idn:+id,p_quien:QUIEN()});confeti(20);
+    Rr.innerHTML=`<div class="card"><b>📨 ¡Listo! Le llegó un aviso a su app.</b><p class="mu sm">Cuando toque «Sí, acepto» verá ${appDesc()}.</p></div>`;DEMO&&toast('En la demo no se envía de verdad')}catch(e){toast(e.message)}}};
+  el.querySelector('#yB').onclick=buscar;I.onkeydown=e=>{if(e.key==='Enter')buscar()};setTimeout(()=>I.focus(),80);
+ });
 }
-document.addEventListener('click',e=>{const b=e.target.closest('[data-app]');if(!b)return;const c=cli(b.dataset.app);c&&invitarApp(c).catch(er=>toast(er.message))});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-app]');if(!b)return;const c=cli(b.dataset.app);c&&conectarApp(c).catch(er=>toast(er.message))});
+
+// Vista «📱 App de clientes»: QR del negocio, promos solo para la app y quién te guardó.
+let SEG=null;
+function miApp(){
+ const PR=CFG.promosApp||[];
+ setTimeout(async()=>{
+  try{$('#maQ').innerHTML=await qrSVG(miLink())}catch(_){$('#maQ').innerHTML='<p style="color:#000">'+esc(miLink())+'</p>'}
+  $('#maC').onclick=async()=>{try{await navigator.clipboard.writeText(miLink());toast('📋 Enlace copiado')}catch(_){toast(miLink())}};
+  $('#maP').onclick=()=>cartelApp().catch(e=>toast(e.message));
+  const nb=$('#maN');nb&&(nb.onclick=()=>editPromo());$$('[data-pe]').forEach(b=>b.onclick=()=>editPromo(+b.dataset.pe));
+  if(SEG===null){try{SEG=DEMO?segDemo():await yoRpc('xa_yo_seguidores',{p_slug:SLUG})}catch(e){SEG=[];$('#maS').innerHTML=`<p class="mu sm">${esc(e.message)}</p>`;return}}
+  pintaSeg();
+ });
+ return`<div class="hi"><div><h2>📱 App de clientes</h2><p class="mu">Tus clientes descargan <b>Mi Xyro</b>, escanean tu QR y guardan tu negocio: ven tus promos y, si los conectas a su ficha, ${appDesc()}.</p></div></div>
+ <div class="g2" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+  <div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center"><h3>Tu QR para la app</h3><div id="maQ" style="background:#fff;padding:14px;border-radius:18px;width:220px"></div><p class="mu sm">Pégalo en recepción, en el espejo o en tus redes. Al escanearlo, te guardan en su app.</p>
+   <div class="bt" style="justify-content:center;margin:0"><button class="btn p" id="maP">🖨️ Cartel para imprimir</button><button class="btn" id="maC">📋 Copiar enlace</button></div></div>
+  <div class="card" style="display:grid;gap:10px"><div class="row" style="justify-content:space-between"><h3>🎁 Promos solo por la app</h3>${isAdmin()?'<button class="btn sm p" id="maN">＋ Nueva</button>':''}</div>
+   ${PR.length?PR.map((p,i)=>`<div class="row" style="gap:10px;align-items:flex-start;border-top:1px solid var(--ln);padding-top:10px"><div style="flex:1"><b>${esc(p.titulo)}</b>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}<p class="mu sm">${p.hasta?(p.hasta<hoy()?'⛔ Venció el ':'Hasta el ')+fF(p.hasta):'Sin fecha de fin'}</p></div>${isAdmin()?`<button class="btn sm" data-pe="${i}">✏️</button>`:''}</div>`).join(''):'<p class="mu sm">Aún no tienes promos. Una promo solo por la app hace que más gente te guarde (ej. «Inscripción gratis por la app»).</p>'}</div>
+ </div>
+ <div class="card" style="margin-top:14px"><h3>👥 Te guardaron en su app</h3><div id="maS"><p class="mu sm">Cargando…</p></div></div>`}
+function pintaSeg(){const el=$('#maS');if(!el)return;const L=SEG||[];
+ el.innerHTML=L.length?`<div class="tl">${L.map((x,i)=>`<div class="row" style="gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln)">${avatar(x,40)}<div style="flex:1;min-width:0"><b>${esc(x.nombre||'')}</b> <span class="mu sm">@${esc(x.usuario||'')}</span><p class="mu sm">${[x.celular,x.email].filter(Boolean).map(esc).join(' · ')} · ${fF(String(x.creado).slice(0,10))}</p></div>
+   ${x.cliente&&cli(x.cliente)?`<a class="btn sm" href="#/socio/${x.cliente}">✅ ${esc(cli(x.cliente).nombre.split(' ')[0])}</a>`:`<button class="btn sm" data-sc="${i}">🔗 Conectar</button>`}</div>`).join('')}</div>`
+  :'<p class="mu sm">Aún nadie. Comparte tu QR: cuando alguien lo escanee aparecerá aquí con su nombre y contacto.</p>';
+ $$('[data-sc]').forEach(b=>b.onclick=()=>segConectar(L[+b.dataset.sc]))}
+function segConectar(x){
+ sheet(`<h3>🔗 Conectar a ${esc(x.nombre||'')}</h3><p class="mu sm">Elige su ficha. Si aún no está registrado, créalo y se conecta solo.</p><input id="sq" class="card" style="width:100%;margin:10px 0" placeholder="Buscar por nombre o DNI"><div id="sl" class="tl" style="max-height:40vh;overflow:auto"></div>
+  <div class="bt"><button class="btn p" id="sN">＋ Registrar como nuevo ${esc(R.cli.toLowerCase())}</button><button class="btn" data-x>Cerrar</button></div>`,(el,close)=>{
+  const q=el.querySelector('#sq'),L=el.querySelector('#sl'),dr=()=>{const t=norm(q.value||x.nombre||'');const M=S.cli.filter(c=>norm(c.nombre).includes(t)||String(c.dni||'').includes(q.value)).slice(0,20);
+   L.innerHTML=M.map(c=>`<a href="#" class="row" data-c="${c.id}" style="padding:8px 0"><span>${esc(c.nombre)}</span><small class="mu">${esc(c.dni||'')}</small></a>`).join('')||'<p class="mu sm">Sin resultados.</p>';
+   L.querySelectorAll('[data-c]').forEach(a=>a.onclick=async e=>{e.preventDefault();const c=cli(a.dataset.c);try{if(!DEMO)await yoRpc('xa_yo_pedir',{p_cliente:c.id,p_idn:+x.idn,p_quien:QUIEN()});close();confeti(20);toast('📨 Le llegó el aviso a su app para aceptar')}catch(er){toast(er.message)}})};
+  q.value=String(x.nombre||'').trim().split(' ')[0];q.oninput=dr;dr();
+  el.querySelector('#sN').onclick=()=>{close();nuevoCli(null,{nombre:x.nombre,telefono:x.celular,email:x.email,idn:x.idn})}})}
+function editPromo(i){const p=i!=null?(CFG.promosApp||[])[i]:null;
+ form(p?'Editar promo':'Nueva promo para la app',[{k:'titulo',l:'Título',v:p&&p.titulo,req:1,ph:'Ej. Inscripción gratis por la app'},{k:'descripcion',l:'Detalle',t:'area',v:p&&p.descripcion,ph:'Ej. Muestra la app en recepción al matricularte.'},{k:'hasta',l:'Válida hasta (opcional)',t:'date',v:p&&p.hasta}],async v=>{
+  const L=(CFG.promosApp||[]).slice(),o={titulo:String(v.titulo).slice(0,80),descripcion:String(v.descripcion||'').slice(0,300),hasta:v.hasta||''};
+  if(p)L[i]=o;else L.unshift(o);await DB.cfg({promosApp:L.slice(0,10)});toast('🎁 Promo publicada en la app');go()},
+  p?'<button type="button" class="btn bad" id="pDel">🗑️ Quitar</button>':'');
+ setTimeout(()=>{const d=$('#pDel');d&&(d.onclick=async()=>{const L=(CFG.promosApp||[]).slice();L.splice(i,1);await DB.cfg({promosApp:L});d.closest('.ov').remove();toast('Promo quitada');go()})})}
+async function cartelApp(){
+ if(!window.qrcode)await cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');
+ const W=1240,H=1754,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),F="'Inter','Segoe UI',system-ui,sans-serif";
+ const A0=getComputedStyle(document.documentElement).getPropertyValue('--a').trim(),A=/^#[0-9a-f]{6}$/i.test(A0)?A0:'#7c5cff',lg=await imgDe(logoDe());
+ x.fillStyle='#070707';x.fillRect(0,0,W,H);x.fillStyle=A;x.fillRect(0,0,W,16);x.textAlign='center';
+ let y=170;if(lg){const s=200,r=Math.min(s/lg.width,s/lg.height);x.drawImage(lg,W/2-lg.width*r/2,y-40,lg.width*r,lg.height*r);y+=230}
+ x.fillStyle='#fff';x.font=`900 84px ${F}`;x.fillText(nombre().toUpperCase(),W/2,y);
+ x.fillStyle=A;x.font=`800 54px ${F}`;x.fillText('¡Guárdanos en tu app!',W/2,y+90);
+ const q=qrcode(0,'M');q.addData(miLink());q.make();const n=q.getModuleCount(),cs=Math.floor(700/n),qs=cs*n,ox=(W-qs)/2,oy=y+160;
+ x.fillStyle='#fff';x.beginPath();x.roundRect(ox-50,oy-50,qs+100,qs+100,48);x.fill();x.fillStyle='#000';
+ for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))x.fillRect(ox+c*cs,oy+r*cs,cs,cs);
+ y=oy+qs+150;x.fillStyle='#fff';x.font=`700 46px ${F}`;x.fillText('1. Escanea con la cámara de tu celular',W/2,y);x.fillText('2. Crea tu cuenta en Mi Xyro',W/2,y+70);x.fillText('3. Mira nuestras promos solo por la app 🎁',W/2,y+140);
+ x.fillStyle='#8a8a96';x.font=`500 30px ${F}`;x.fillText(miLink().replace('https://',''),W/2,H-80);
+ const b=await new Promise(ok=>cv.toBlob(ok,'image/png')),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='qr-app-'+(SLUG||'negocio')+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)}
+function segDemo(){const c=S.cli[0];return[{idn:48203716,nombre:'Valeria Torres',usuario:'vale.fit',email:'vale@gmail.com',celular:'987654321',creado:new Date().toISOString(),cliente:c&&c.id},{idn:51830472,nombre:'Diego Ramírez',usuario:'diegor',email:'diego.r@gmail.com',celular:'',creado:new Date(Date.now()-864e5).toISOString()},{idn:60192837,nombre:'Lucía Fernández',usuario:'lu.fer',email:'lucia@hotmail.com',celular:'912345678',creado:new Date(Date.now()-3*864e5).toISOString()}]}
 
 /* ===== Kiosco de asistencia (tablet en la entrada) ===== */
 let kStream=null,qrGen=0,kFace=null;

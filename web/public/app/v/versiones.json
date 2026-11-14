@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261114-1319",
+  "fecha": "2026-11-14 13:19",
+  "titulo": "App de clientes Mi Xyro",
+  "notas": "App de clientes Mi Xyro",
+  "cambios": [
+   "Nuevo «📱 App de clientes» en Ventas: tu QR para que te guarden en la app (con cartel para imprimir), promos solo por la app y la lista de quiénes te guardaron.",
+   "En la ficha, «📱 Conectar a su app»: escribes el ID de cuenta del cliente, confirmas y a él le llega un aviso para aceptar. Luego ve en su celular su membresía, QR, rutinas o citas."
+  ],
+  "requiere": "SQL 46"
+ },
+ {
   "id": "20261114-1256",
   "fecha": "2026-11-14 12:56",
   "titulo": "App para tus socios y pacientes",

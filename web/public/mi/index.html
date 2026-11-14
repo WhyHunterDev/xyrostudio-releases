@@ -94,204 +94,234 @@ input:focus{border-color:var(--a)}
 .demo{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom));right:18px;z-index:5;font-size:11px;font-weight:800;padding:4px 10px;border-radius:99px;background:var(--wa);color:#000}
 .pronto{border-style:dashed}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--c2);border:1px solid var(--ln);padding:10px 16px;border-radius:14px;font-size:14px;z-index:11;animation:in .3s}
+.cover{position:relative;margin:-14px -16px 0;height:210px;background:var(--c1) center/cover no-repeat;border-bottom:1px solid var(--ln)}
+.cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0000 30%,#000 100%)}
+.nhead{position:relative;z-index:1;margin-top:-46px;display:grid;gap:8px}
+.nhead .lg{width:76px;height:76px;border-radius:22px;border:3px solid #000;background:var(--c2)}
+.promo{border-radius:22px;padding:16px;background:var(--c1);border:1px solid var(--a);position:relative;overflow:hidden;display:grid;gap:6px}
+.promo::before{content:"";position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;background:var(--a);opacity:.18}
+.promo img{width:calc(100% + 32px);margin:-16px -16px 6px;max-height:200px;object-fit:cover}
+.hs{display:flex;gap:10px;overflow-x:auto;margin:0 -16px;padding:0 16px;scrollbar-width:none;scroll-snap-type:x mandatory}.hs::-webkit-scrollbar{display:none}
+.hs>*{flex:none;width:78%;scroll-snap-align:start}
+.plan{background:var(--c1);border:1px solid var(--ln);border-radius:20px;padding:16px;display:grid;gap:4px}
+.plan.dest{border-color:var(--a)}.plan b.pr{font-size:26px;letter-spacing:-.02em}
+.idbox{border-radius:24px;padding:20px;background:var(--c1);border:1px solid var(--a);text-align:center;display:grid;gap:8px}
+.idbox b{font-size:34px;letter-spacing:.12em;font-variant-numeric:tabular-nums}
+.av{width:64px;height:64px;border-radius:22px;background:var(--a);display:grid;place-items:center;font-size:26px;font-weight:900;color:#fff;overflow:hidden;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.aviso{margin-bottom:14px;border:1px solid var(--a);background:var(--c1);border-radius:22px;padding:16px;display:grid;gap:10px;animation:in .5s}
+.back{display:inline-flex;gap:6px;align-items:center;border:0;background:none;color:var(--mu);font-weight:700;padding:4px 0 12px;cursor:pointer}
+.tab.scan span{width:46px;height:46px;margin-top:-22px;border-radius:16px;background:var(--a);display:grid;place-items:center;filter:none;opacity:1;box-shadow:0 10px 30px -8px var(--a);font-size:22px}
+.cam{position:fixed;inset:0;background:#000;z-index:12;display:grid}
+.cam video{width:100%;height:100%;object-fit:cover}
+.cam .mk{position:absolute;left:50%;top:45%;width:min(70vw,300px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:28px;box-shadow:0 0 0 100vmax #000a;border:3px solid var(--a)}
+.cam .mk::after{content:"";position:absolute;left:8%;right:8%;height:3px;background:var(--a);top:10%;animation:scan 2s ease-in-out infinite alternate;box-shadow:0 0 18px var(--a)}
+@keyframes scan{to{top:88%}}
+.cam .bt{position:absolute;left:16px;right:16px;bottom:calc(24px + env(safe-area-inset-bottom));display:grid;gap:10px;text-align:center}
+.gbtn{background:#fff;color:#111}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--c1);border-radius:14px;padding:4px;gap:4px}
+.seg button{border:0;background:none;border-radius:11px;padding:10px;font-weight:800;color:var(--mu);cursor:pointer}.seg button.on{background:var(--c2);color:var(--tx)}
 </style>
 </head>
 <body>
 <div id="app"><div class="scr"><div class="hero" style="justify-items:center"><div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width="48" height="48" alt=""></div></div></div></div>
 <script>
-/* Mi Xyro · app de socios y pacientes de los negocios con Xyro Apps (SQL 45: xa_yo*, xa_personas, xa_yo_socios).
-   La persona entra con celular + clave (cuenta <cel>@socio.xyrostudio.net, sin correo). Fases futuras: mapa, promos, puntos. */
+/* Mi Xyro · app de las personas en el ecosistema Xyro (SQL 45 + 46).
+   Cuenta con Google o correo; perfil con @usuario e ID fijo; guarda negocios escaneando su QR (/mi/?n=slug);
+   el negocio la conecta a su ficha con el ID y la persona acepta (aviso). Fases futuras: mapa, puntos, sorteos. */
 'use strict';
 const SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
-const DOM='@socio.xyrostudio.net',P=new URLSearchParams(location.search);
+const P=new URLSearchParams(location.search),HOME=location.origin+'/mi/';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ls={g(k){try{return localStorage.getItem(k)}catch(_){return null}},s(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(_){}}};
 const cel=t=>String(t||'').replace(/\D/g,'').slice(-9);
-const hoyL=()=>new Date(Date.now()-5*36e5).toISOString().slice(0,10); // Lima
+const hoyL=()=>new Date(Date.now()-5*36e5).toISOString().slice(0,10);
+const dLima=t=>new Date(new Date(t).getTime()-5*36e5).toISOString().slice(0,10);
 const fF=(d,o)=>new Date(String(d).length===10?d+'T12:00:00-05:00':d).toLocaleDateString('es-PE',{timeZone:'America/Lima',...(o||{day:'numeric',month:'short',year:'numeric'})});
 const fH=d=>new Date(d).toLocaleTimeString('es-PE',{timeZone:'America/Lima',hour:'numeric',minute:'2-digit'});
 const dias=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
 const money=n=>'S/ '+(Math.round(+n*100)/100).toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:2});
 const js=src=>new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.head.appendChild(s)});
-const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)};
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)};
+const vib=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}};
 const DIAS=[['d1','L','Lunes'],['d2','M','Martes'],['d3','M','Miércoles'],['d4','J','Jueves'],['d5','V','Viernes'],['d6','S','Sábado'],['d7','D','Domingo']];
 const COMIDAS=[['desayuno','🌅','Desayuno'],['media','🍎','Media mañana'],['almuerzo','🍽️','Almuerzo'],['merienda','🥤','Media tarde'],['cena','🌙','Cena']];
 const lineas=t=>String(t||'').split('\n').map(x=>x.trim()).filter(Boolean);
+const idTxt=n=>String(n||'').replace(/(\d{4})(\d{4})/,'$1 $2');
 const DEMO=P.get('demo');
-let sb=null,D=null,TAB='inicio',CUR=+(ls.g('mi-neg')||0),INSTALL=null;
+let sb=null,D=null,TAB='inicio',SUB=null,CUR=+(ls.g('mi-neg')||0),INSTALL=null,post=null,NEG={};
 
-// ---------- Datos ----------
+// ---------- Conexión ----------
 async function cliente(){
  if(sb)return sb;
  await js('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js');
- sb=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-mi-auth',persistSession:true,autoRefreshToken:true}});
+ sb=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-mi-auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ sb.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY')setTimeout(nuevaClave,300)});
  return sb;
 }
+async function rpc(f,a){if(DEMO)return demoRpc(f,a);const{data,error}=await sb.rpc(f,a||{});if(error)throw error;if(data&&data.error)throw data.error;return data}
 async function cargar(){
- if(DEMO){D=demoData();return D}
- const{data,error}=await sb.rpc('xa_yo');
- if(error)throw error;
- if(!data)return null;
- D=data;ls.s('mi-data',JSON.stringify(data));return D;
+ if(DEMO){D=D||demoData();return D}
+ D=await rpc('xa_yo');ls.s('mi-data',JSON.stringify(D));return D;
 }
 const negs=()=>(D&&D.negocios)||[];
 const N=()=>negs()[Math.min(CUR,negs().length-1)]||null;
 const dental=n=>(n||N()||{}).rubro==='consultorio';
-function acento(n){const c=n&&n.color&&/^#[0-9a-f]{6}$/i.test(n.color)?n.color:'#7c5cff';document.documentElement.style.setProperty('--a',c)}
+const ACC='#7c5cff';
+function acento(n){const c=n&&n.color&&/^#[0-9a-f]{6}$/i.test(n.color)?n.color:ACC;document.documentElement.style.setProperty('--a',c)}
 const logoURL=l=>l&&(/^https:\/\//.test(l)||l.startsWith('/'))?l:'';
+const media=(u,rub)=>!u?'':/^https:\/\//.test(u)||u.startsWith('/')?u:(rub==='consultorio'?'/consultorio/':'/sitio/')+u.replace(/^\.?\//,'');
 function memAct(n){const h=hoyL(),L=(n.membresias||[]).slice().sort((a,b)=>a.inicio>b.inicio?1:-1);
- const act=L.find(m=>m.inicio<=h&&m.fin>=h)||null,sig=L.find(m=>m.inicio>h)||null,ult=L[L.length-1]||null;
- return{act,sig,ult,fin:L.reduce((a,m)=>m.fin>a?m.fin:a,'')}}
+ return{act:L.find(m=>m.inicio<=h&&m.fin>=h)||null,sig:L.find(m=>m.inicio>h)||null,fin:L.reduce((a,m)=>m.fin>a?m.fin:a,'')}}
 function saldo(n){let t=0,v=null;(n.membresias||[]).forEach(m=>(m.cuotas||[]).forEach(q=>{if(!q.pagado){t+= +q.monto||0;if(!v||q.vence<v)v=q.vence}}));return{t,v}}
+const codigoDe=t=>{t=String(t||'').trim();const m=t.match(/[?&]c=([A-Za-z0-9]+)/);return(m?m[1]:t).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,20)};
+const slugDe=t=>{const m=String(t||'').match(/[?&]n=([a-z0-9-]+)/i);return m?m[1].toLowerCase():''};
+const ERR={usuario:'Tu @usuario debe tener de 3 a 20 letras, números, punto o guion bajo.',usuario_tomado:'Ese @usuario ya lo tiene otra persona. Prueba otro.',nombre:'Escribe tu nombre.',
+ celular:'Revisa tu celular (9 dígitos) o ya lo usa otra cuenta.',codigo:'Ese código no es válido. Pide ayuda en recepción.',dato:'Para confirmar que eres tú escribe tu DNI o el celular que diste en el negocio.',
+ otro:'Ese carnet ya está unido a otra cuenta. Pide ayuda en recepción.',espera:'Demasiados intentos. Espera un rato y vuelve a probar.',no:'Este aviso ya no está disponible.'};
+const errDe=e=>{const t=String(e&&(e.message||e.error)||e||'');for(const k in ERR)if(t===k)return ERR[k];
+ if(/Invalid login/i.test(t))return 'Correo o clave incorrectos.';if(/already registered|already been registered/i.test(t))return 'Ese correo ya tiene cuenta. Toca «Entrar».';
+ if(/Password should/i.test(t))return 'Tu clave debe tener al menos 6 caracteres.';if(/not confirmed/i.test(t))return 'Confirma tu correo: te enviamos un enlace.';
+ if(/rate limit|security purposes/i.test(t))return 'Espera un minuto y vuelve a intentar.';if(/provider is not enabled|Unsupported provider/i.test(t))return 'El ingreso con Google se activa muy pronto. Usa tu correo por ahora.';
+ return 'Algo falló. Revisa tu internet y vuelve a intentar.'};
+// Lo que la persona quería hacer antes de iniciar sesión (escaneó un QR o abrió un enlace).
+const pend={get(){try{return JSON.parse(ls.g('mi-pend')||'null')}catch(_){return null}},set(v){ls.s('mi-pend',v?JSON.stringify(v):null)}};
 
-// ---------- Entrada ----------
-function pantallaEntrada(msg){
- acento(null);
- app.innerHTML=`<div class="scr"><div class="hero in">
-  <div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width="48" height="48" alt=""></div>
-  <div class="g" style="gap:6px"><h1>Tu gym, tu consultorio y más,<br>en tu celular.</h1><p class="mu">Tu QR de entrada, tu plan, tus rutinas y tus citas en un solo lugar.</p></div>
-  <form class="g" id="fl" autocomplete="on">
-   <label>Celular<input id="lc" inputmode="numeric" autocomplete="tel" placeholder="9XX XXX XXX" maxlength="15" required></label>
-   <label>Clave<input id="lp" type="password" autocomplete="current-password" required minlength="6"></label>
+// ---------- Entrada (Google o correo) ----------
+const LOGO='<div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width="48" height="48" alt=""></div>';
+function pantallaEntrada(msg,modo){
+ acento(null);const p=pend.get();modo=modo||'entrar';
+ app.innerHTML=`<div class="scr"><div class="hero in">${LOGO}
+  <div class="g" style="gap:6px"><h1>${p&&p.negocio?`Guarda <span style="color:var(--a)">${esc(p.negocio)}</span> en tu app`:'Tus negocios favoritos,<br>en tu celular.'}</h1>
+   <p class="mu">Promos solo por la app, tu QR de entrada, tu plan, tus rutinas y tus citas en un solo lugar.</p></div>
+  <button class="btn gbtn" id="gg"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar con Google</button>
+  <div class="row mu xs"><span class="sp" style="height:1px;background:var(--ln)"></span>o con tu correo<span class="sp" style="height:1px;background:var(--ln)"></span></div>
+  <div class="seg"><button data-m="entrar" class="${modo==='entrar'?'on':''}">Entrar</button><button data-m="crear" class="${modo==='crear'?'on':''}">Crear cuenta</button></div>
+  <form class="g" id="fl">
+   ${modo==='crear'?'<label>Tu nombre<input id="ln" autocomplete="name" required maxlength="80"></label>':''}
+   <label>Correo<input id="le" type="email" autocomplete="email" inputmode="email" required></label>
+   <label>Clave<input id="lp" type="password" autocomplete="${modo==='crear'?'new-password':'current-password'}" required minlength="6" placeholder="${modo==='crear'?'Mínimo 6 caracteres':''}"></label>
    <div class="msg" id="lm"></div>
-   <button class="btn p" id="lb">Entrar</button>
+   <button class="btn p" id="lb">${modo==='crear'?'Crear mi cuenta':'Entrar'}</button>
+   ${modo==='entrar'?'<button type="button" class="btn l" id="olv">¿Olvidaste tu clave?</button>':''}
   </form>
-  <div class="card" style="gap:6px"><h3>¿Primera vez?</h3><p class="mu sm">Abre el enlace que te envió tu gimnasio o consultorio, o escribe aquí el código de tu carnet.</p>
-   <div class="row"><input id="lk" placeholder="Código del carnet" style="text-transform:uppercase" maxlength="20"><button class="btn" id="lkb">Ir</button></div></div>
   <p class="mu xs" style="text-align:center">¿Quieres verla antes? <a href="?demo=1" style="color:var(--a)">Mira la demo</a> · Hecho por XyroStudio</p>
  </div></div>`;
- const m=$('#lm');if(msg){m.textContent=msg;m.classList.add('on')}
- const sv=ls.g('mi-cel');if(sv)$('#lc').value=sv;
- $('#lkb').onclick=()=>{const k=codigoDe($('#lk').value);if(k)location.href='?c='+k};
- $('#fl').onsubmit=async e=>{e.preventDefault();const c=cel($('#lc').value),p=$('#lp').value,b=$('#lb');m.className='msg';
-  if(c.length!==9||c[0]!=='9'){m.textContent='Escribe tu celular de 9 dígitos.';m.classList.add('on');return}
-  b.disabled=true;b.textContent='Entrando…';
-  try{await cliente();const em=c+DOM;
-   const w=await rpc0('xa_login_espera',{p_email:em});if(w>0)throw{u:`Demasiados intentos. Espera ${Math.ceil(w/60)} min.`};
-   const{error}=await sb.auth.signInWithPassword({email:em,password:p});
-   if(error){rpc0('xa_login_fallo',{p_email:em,p_ua:navigator.userAgent.slice(0,200)});throw{u:'Celular o clave incorrectos. ¿La olvidaste? Abre otra vez el enlace de tu negocio y crea una nueva.'}}
-   ls.s('mi-cel',c);await entrar();
-  }catch(er){m.textContent=er&&er.u||'Sin conexión. Revisa tu internet.';m.classList.add('on');b.disabled=false;b.textContent='Entrar'}};
+ const m=$('#lm'),say=(t,ok)=>{m.textContent=t;m.className='msg on'+(ok?' ok':'')};if(msg)say(msg);
+ const sv=ls.g('mi-email');if(sv)$('#le').value=sv;
+ app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>pantallaEntrada('',b.dataset.m));
+ $('#gg').onclick=async()=>{try{await cliente();const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:HOME}});if(error)throw error}catch(e){say(errDe(e))}};
+ const o=$('#olv');o&&(o.onclick=async()=>{const em=$('#le').value.trim();if(!/@/.test(em))return say('Escribe tu correo y vuelve a tocar «¿Olvidaste tu clave?».');
+  try{await cliente();const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:HOME});if(error)throw error;say('📩 Te enviamos un correo para crear una clave nueva.',1)}catch(e){say(errDe(e))}});
+ $('#fl').onsubmit=async e=>{e.preventDefault();const em=$('#le').value.trim().toLowerCase(),pw=$('#lp').value,b=$('#lb');m.className='msg';
+  b.disabled=true;const t0=b.textContent;b.textContent='Un momento…';
+  try{await cliente();ls.s('mi-email',em);
+   if(modo==='crear'){const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{nombre:$('#ln').value.trim()},emailRedirectTo:HOME}});if(error)throw error;
+    if(!data.session){say(`📩 Te enviamos un correo a ${em}. Ábrelo y toca el enlace para activar tu cuenta.`,1);b.disabled=false;b.textContent=t0;return}}
+   else{const{error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)throw error}
+   await entrar();
+  }catch(er){say(errDe(er));b.disabled=false;b.textContent=t0}};
 }
-async function rpc0(f,a){try{const{data,error}=await sb.rpc(f,a);return error?0:(data|0)}catch(_){return 0}}
-const codigoDe=t=>{t=String(t||'').trim();const m=t.match(/[?&]c=([A-Za-z0-9]+)/);return(m?m[1]:t).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,20)};
-const ERR={celular:'Escribe tu celular de 9 dígitos (empieza con 9).',clave:'Tu clave debe tener al menos 6 caracteres.',codigo:'Ese enlace no es válido. Pide uno nuevo en recepción.',
- dato:'Ese celular no es el que diste en el negocio. Usa ese número o escribe tu DNI.',otro:'Este carnet ya está unido a otra cuenta. Pide ayuda en recepción.',
- equipo:'Ese número es de una cuenta del equipo del negocio. Usa tu celular personal.',reset:'Para crear una clave nueva escribe tu DNI.',espera:'Demasiados intentos. Espera un rato y vuelve a probar.'};
-const errDe=e=>{const t=String(e&&(e.message||e.error)||e||'');for(const k in ERR)if(t===k||t.includes(k))return ERR[k];return 'Algo falló. Revisa tu internet y vuelve a intentar.'};
+function nuevaClave(){hoja(`<h2>🔑 Crea tu clave nueva</h2><input id="nc" type="password" minlength="6" placeholder="Mínimo 6 caracteres" autocomplete="new-password"><div class="msg" id="ncm"></div><button class="btn p" id="ncb">Guardar</button>`,(o,close)=>{
+ o.querySelector('#ncb').onclick=async()=>{const v=o.querySelector('#nc').value;if(v.length<6){const m=o.querySelector('#ncm');m.textContent='Mínimo 6 caracteres.';m.className='msg on';return}
+  const{error}=await sb.auth.updateUser({password:v});if(error){const m=o.querySelector('#ncm');m.textContent=errDe(error);m.className='msg on';return}close();toast('✅ Clave guardada');entrar()}})}
 
-async function pantallaInvitacion(code){
- app.innerHTML='<div class="scr"><div class="hero" style="justify-items:center"><div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width="48" height="48" alt=""></div></div></div>';
- let inv=null;
- try{await cliente();const{data,error}=await sb.rpc('xa_yo_invitacion',{p_codigo:code});if(error)throw error;inv=data}
- catch(e){return pantallaEntrada(errDe(e)==ERR.espera?ERR.espera:'No pudimos abrir tu invitación. Revisa tu internet.')}
- if(!inv)return pantallaEntrada(ERR.codigo);
- const{data:{session}}=await sb.auth.getSession();
- if(session){const r=await sb.rpc('xa_yo_vincular',{p_codigo:code});if(r.data&&r.data.ok){history.replaceState(0,'','./');toast('✅ '+inv.negocio+' agregado');return entrar(inv.negocio)}}
- acento(inv);const lg=logoURL(inv.logo),dent=inv.rubro==='consultorio';
- app.innerHTML=`<div class="scr"><div class="hero in">
-  ${lg?`<img class="lg" src="${esc(lg)}" alt="">`:`<div class="orb" style="font-size:36px">${dent?'🦷':'🏋️'}</div>`}
-  <div class="g" style="gap:6px"><p class="mu sm" style="font-weight:700;color:var(--a)">${esc(inv.negocio)}</p>
-   <h1>Hola ${esc(inv.nombre)} 👋<br>${inv.cuenta?'Entra a tu app':'Crea tu cuenta'}</h1>
-   <p class="mu">${dent?'Tus citas y tu tratamiento':'Tu QR de entrada, tu plan, tus rutinas y tu dieta'} siempre en tu celular. Solo te toma 10 segundos.</p></div>
-  <form class="g" id="fi">
-   <label>Tu celular<input id="ic" inputmode="numeric" autocomplete="tel" placeholder="El que diste en ${dent?'el consultorio':'recepción'}" maxlength="15" required></label>
-   <label id="idw" style="${inv.pide_dni?'':'display:none'}">DNI<input id="id" inputmode="numeric" maxlength="12" placeholder="Tu número de DNI"></label>
-   <label>${inv.cuenta?'Tu clave (o crea una nueva)':'Crea una clave'}<input id="ip" type="password" autocomplete="new-password" minlength="6" required placeholder="Mínimo 6 caracteres"></label>
-   <div class="msg" id="im"></div>
-   <button class="btn p" id="ib">${inv.cuenta?'Entrar':'Crear mi cuenta'}</button>
-  </form>
-  <p class="mu xs" style="text-align:center">Tus datos solo los ve ${esc(inv.negocio)}. XyroStudio no los vende ni comparte.</p>
- </div></div>`;
- const m=$('#im'),b=$('#ib');
- $('#fi').onsubmit=async e=>{e.preventDefault();m.className='msg';const c=cel($('#ic').value),p=$('#ip').value,dni=$('#id').value.replace(/\D/g,'')||null,em=c+DOM;
-  if(c.length!==9||c[0]!=='9'){m.textContent=ERR.celular;m.classList.add('on');return}
-  if(p.length<6){m.textContent=ERR.clave;m.classList.add('on');return}
-  b.disabled=true;b.textContent='Un momento…';
-  try{
-   // ¿Ya tiene cuenta con esa clave? Entra y suma este negocio.
-   let ok=false;if(inv.cuenta){const r=await sb.auth.signInWithPassword({email:em,password:p});ok=!r.error}
-   if(ok){const r=await sb.rpc('xa_yo_vincular',{p_codigo:code,p_dni:dni});if(r.error)throw r.error;if(r.data&&r.data.error)throw r.data.error}
-   else{const r=await sb.rpc('xa_yo_registro',{p_codigo:code,p_cel:c,p_pass:p,p_nombre:null,p_dni:dni});if(r.error)throw r.error;if(r.data&&r.data.error)throw r.data.error;
-    const s=await sb.auth.signInWithPassword({email:em,password:p});if(s.error)throw s.error}
-   ls.s('mi-cel',c);history.replaceState(0,'','./');await entrar(inv.negocio);
-  }catch(er){const k=String(er&&er.message||er);if(k==='dato'||k==='reset')$('#idw').style.display='';
-   m.textContent=errDe(er);m.classList.add('on');b.disabled=false;b.textContent=inv.cuenta?'Entrar':'Crear mi cuenta'}};
-}
-
-async function entrar(negocio){
+async function entrar(){
  try{await cargar()}catch(e){const c=ls.g('mi-data');if(c){D=JSON.parse(c);toast('Sin conexión: mostrando lo último guardado')}else return pantallaEntrada('Sin conexión. Revisa tu internet.')}
- if(!D){await sb.auth.signOut();return pantallaEntrada('Tu cuenta aún no tiene negocios. Abre el enlace que te envió tu negocio.')}
- if(negocio){const i=negs().findIndex(n=>n.negocio===negocio);if(i>=0)CUR=i}
+ history.replaceState(0,'','/mi/'+(DEMO?'?demo='+DEMO:''));
+ const p=pend.get();pend.set(null);
+ if(p&&p.n){await guardarNeg(p.n,true);TAB='negocios';SUB={neg:p.n}}
+ else if(p&&p.c){pinta();return conCodigo(p.c)}
  pinta();
 }
 
-// ---------- App ----------
-const TABS=()=>dental()?[['inicio','🏠','Inicio'],['citas','📅','Citas'],['trat','🦷','Tratamiento'],['perfil','👤','Perfil']]
- :[['inicio','🏠','Inicio'],['rutina','🏋️','Rutina'],['dieta','🥗','Dieta'],['perfil','👤','Perfil']];
+// ---------- Navegación ----------
+const SUBV={rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat};
 function pinta(){
- const n=N();acento(n);if(!TABS().some(t=>t[0]===TAB))TAB='inicio';
- const V={inicio:vInicio,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,perfil:vPerfil}[TAB]||vInicio;
- app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${barraNeg()}${n?V(n):vSin()}</div></div>
- <nav class="tabs">${TABS().map(([k,i,t])=>`<button class="tab${k===TAB?' on':''}" data-t="${k}"><span>${i}</span>${t}</button>`).join('')}</nav>`;
- app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{TAB=b.dataset.t;pinta();try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}});
- app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{CUR=+b.dataset.n;ls.s('mi-neg',CUR);pinta()});
- app.querySelectorAll('[data-add]').forEach(b=>b.onclick=agregar);
- post&&post();post=null;
+ if(!D&&!(SUB&&SUB.neg))return pantallaEntrada();
+ if(TAB==='inicio'&&N())acento(N());else if(SUB&&SUB.neg&&NEG[SUB.neg])acento(NEG[SUB.neg]);else acento(null);
+ let body;
+ if(SUB&&SUB.neg)body=vNegocio(SUB.neg);
+ else if(SUB&&SUBV[SUB])body=`<button class="back" data-back>‹ Volver</button>`+SUBV[SUB](N());
+ else body=({inicio:vInicioGen,negocios:vNegocios,perfil:vPerfil}[TAB]||vInicioGen)();
+ const T=[['inicio','🏠','Inicio'],['negocios','🏢','Negocios'],['scan','📷',''],['perfil','👤','Perfil']];
+ const av=((D&&D.avisos)||[]).length;
+ app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
+ <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===TAB&&!SUB?' on':''}" data-tab="${k}"><span>${i}</span>${t}${k==='inicio'&&av?' 🔴':''}</button>`).join('')}</nav>`;
+ app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.tab==='scan')return escanear();TAB=b.dataset.tab;SUB=null;pinta();$('#sc').scrollTop=0});
+ app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{vib();SUB=b.dataset.sub;pinta()});
+ app.querySelectorAll('[data-neg]').forEach(b=>b.onclick=()=>abrirNeg(b.dataset.neg));
+ app.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{SUB=null;pinta()});
+ app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{CUR=+b.dataset.n;ls.s('mi-neg',CUR);TAB='inicio';SUB=null;pinta()});
+ app.querySelectorAll('[data-yo]').forEach(b=>b.onclick=yaRegistrado);
+ app.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>responder(b.dataset.av,b.dataset.ok==='1',b));
+ app.querySelectorAll('[data-scan]').forEach(b=>b.onclick=escanear);
+ const f=post;post=null;f&&f();
 }
-let post=null;
 function barraNeg(){const L=negs();if(L.length<2)return'';
- return`<div class="negs">${L.map((n,i)=>{const lg=logoURL(n.logo);return`<button class="neg${i===CUR?' on':''}" data-n="${i}" style="${i===CUR?'':''}"><i>${lg?`<img src="${esc(lg)}" alt="">`:(n.rubro==='consultorio'?'🦷':'🏋️')}</i>${esc(n.negocio)}</button>`}).join('')}<button class="neg" data-add><i>＋</i>Agregar</button></div>`}
-function vSin(){return`<div class="vacio"><span class="e">🔗</span><h2>Aún no tienes negocios</h2><p class="mu">Abre el enlace que te envió tu gimnasio o consultorio.</p><button class="btn p" data-add>Tengo un código</button></div>`}
-function cabeza(n){const lg=logoURL(n.logo),h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0;
- const sal=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches';
- return`<div class="row" style="margin-bottom:14px">${lg?`<img class="lg" style="width:46px;height:46px;border-radius:14px" src="${esc(lg)}" alt="">`:''}<div class="sp"><p class="mu sm">${sal},</p><h2>${esc(String(n.nombre||'').trim().split(' ')[0])} ${dental(n)?'😁':'💪'}</h2></div><span class="mu xs" style="text-align:right;font-weight:700">${esc(n.negocio)}</span></div>`}
+ return`<div class="negs">${L.map((n,i)=>{const lg=logoURL(n.logo);return`<button class="neg${i===CUR?' on':''}" data-n="${i}"><i>${lg?`<img src="${esc(lg)}" alt="">`:(n.rubro==='consultorio'?'🦷':'🏋️')}</i>${esc(n.negocio)}</button>`}).join('')}</div>`}
+function avisos(){return((D&&D.avisos)||[]).map(a=>`<div class="aviso"><div class="row"><span class="dot" style="width:42px;height:42px;font-size:20px;overflow:hidden">${logoURL(a.logo)?`<img src="${esc(logoURL(a.logo))}" style="width:100%;height:100%;object-fit:cover" alt="">`:'🔔'}</span>
+  <div class="sp"><b>${esc(a.negocio)}</b> quiere conectar tu cuenta</div></div>
+  <p class="sm">Así verás aquí tu ${a.rubro==='consultorio'?'ficha de paciente, tus citas y tu tratamiento':'membresía, días que te quedan, tu QR y tus rutinas'}. Te registraron como <b>${esc(a.nombre)}</b>${a.quien?' ('+esc(a.quien)+')':''}.</p>
+  <div class="row"><button class="btn p sp" data-av="${esc(a.id)}" data-ok="1">✅ Sí, acepto</button><button class="btn" data-av="${esc(a.id)}" data-ok="0">No soy yo</button></div></div>`).join('')}
+async function responder(id,ok,b){b.disabled=true;try{await rpc('xa_yo_responder',{p_id:id,p_ok:ok});await cargar();if(ok){CUR=negs().length-1;ls.s('mi-neg',CUR);confeti();toast('🎉 ¡Listo! Ya tienes tu cuenta conectada')}pinta()}catch(e){toast(errDe(e));b.disabled=false}}
+function cabeza(n){const lg=logoURL(n.logo),h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0,per=(D&&D.persona)||{};
+ const sal=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches',nm=per.apodo||String(per.nombre||n.nombre||'').trim().split(' ')[0];
+ return`<div class="row" style="margin-bottom:14px">${lg?`<img class="lg" style="width:46px;height:46px;border-radius:14px" src="${esc(lg)}" alt="">`:''}<div class="sp"><p class="mu sm">${sal},</p><h2>${esc(nm)} ${dental(n)?'😁':'💪'}</h2></div><button class="btn l xs" data-neg="${esc(n.slug)}" style="font-weight:700">${esc(n.negocio)} ›</button></div>`}
 
-function anillo(rest,total,txt){const r=40,C=2*Math.PI*r,p=Math.max(0,Math.min(1,total?rest/total:0));
- post=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{const f=$('#rg');f&&(f.style.strokeDashoffset=C*(1-p))}));
+// ---------- Inicio ----------
+function vInicioGen(){const n=N(),av=avisos();
+ if(n)return barraNeg()+av+(dental(n)?vInicioDent(n):vInicio(n));
+ const G=(D&&D.guardados)||[],per=(D&&D.persona)||{};
+ return`${av}<div class="g"><div><p class="mu sm">Hola,</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'👋')} 👋</h1></div>
+  <div class="card" style="text-align:center;justify-items:center;padding:24px 16px;border-color:var(--a)"><span style="font-size:46px">📷</span><h2>Escanea el QR de tu negocio</h2>
+   <p class="mu sm">Tu gimnasio, consultorio o tienda favorita tiene su QR de Xyro. Escanéalo y guárdalo para ver sus promos.</p><button class="btn p" data-scan style="width:100%">Escanear QR</button></div>
+  <div class="card"><div class="row"><span style="font-size:26px">🎟️</span><div class="sp"><h3>¿Ya eres socio o paciente?</h3><p class="mu sm">Conecta tu membresía, tu QR y tus rutinas o citas.</p></div></div><button class="btn" data-yo>Ya estoy registrado en un negocio</button></div>
+  ${G.length?`<h2 style="margin-top:6px">Tus negocios</h2>${G.map(tarjNeg).join('')}`:''}</div>`}
+function tarjNeg(g){const lg=logoURL(g.logo);
+ return`<button class="card" data-neg="${esc(g.slug)}" style="text-align:left;cursor:pointer;width:100%;border-left:4px solid ${esc(/^#[0-9a-f]{6}$/i.test(g.color||'')?g.color:ACC)}"><div class="row"><span class="dot" style="width:46px;height:46px;font-size:22px;overflow:hidden">${lg?`<img src="${esc(lg)}" style="width:100%;height:100%;object-fit:cover" alt="">`:(g.rubro==='consultorio'?'🦷':'🏋️')}</span>
+  <div class="sp"><b>${esc(g.negocio)}</b><p class="mu xs">${g.socio?(g.rubro==='consultorio'?'Eres paciente':'Eres socio'):g.promos?`🎁 ${g.promos} promo${g.promos>1?'s':''} por la app`:'Ver promos e información'}</p></div><span class="mu">›</span></div></button>`}
+
+function anillo(rest,total,txt){const r=40,C=2*Math.PI*r,p=Math.max(0,Math.min(1,total?rest/total:0)),f0=post;
+ post=()=>{f0&&f0();requestAnimationFrame(()=>requestAnimationFrame(()=>{const f=$('#rg');f&&(f.style.strokeDashoffset=C*(1-p))}))};
  return`<div class="ring"><svg viewBox="0 0 96 96" width="96" height="96"><circle class="bk" cx="48" cy="48" r="${r}"/><circle class="fg" id="rg" cx="48" cy="48" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><b>${txt}</b></div>`}
-
 function vInicio(n){
- if(dental(n))return vInicioDent(n);
  const{act,sig,fin}=memAct(n),h=hoyL(),sl=saldo(n);
  const rest=act?dias(h,act.fin):0,tot=act?Math.max(1,dias(act.inicio,act.fin)):1;
  const pill=act?(rest<=5?`<span class="pill wa">⏳ Vence en ${rest} día${rest===1?'':'s'}</span>`:`<span class="pill ok">● Activo hasta ${fF(act.fin,{day:'numeric',month:'short'})}</span>`)
   :fin?`<span class="pill ko">● Venció el ${fF(fin)}</span>`:`<span class="pill">Sin plan activo</span>`;
- post=null;const qr=`<div class="qr" id="qr" title="Toca para agrandar"></div>`;
- const html=`${cabeza(n)}<div class="g">
+ const f0=post;post=()=>{f0&&f0();dibujaQR(n.codigo,'#qr');const q=$('#qr');q&&(q.onclick=()=>qrGrande(n))};
+ return`${cabeza(n)}<div class="g">
   <div class="carnet"><div class="row" style="width:100%"><b class="sm" style="text-align:left">${esc(n.negocio)}</b><span class="sp"></span>${n.num?`<span class="mu xs">N.º ${esc(n.num)}</span>`:''}</div>
-   ${qr}<div class="g" style="gap:6px;justify-items:center"><h2>${esc(n.nombre)}</h2>${pill}</div>
+   <div class="qr" id="qr" title="Toca para agrandar"></div><div class="g" style="gap:6px;justify-items:center"><h2>${esc(n.nombre)}</h2>${pill}</div>
    <p class="mu xs">Muestra este QR en recepción para marcar tu ingreso</p></div>
-  <div class="card"><div class="row">${anillo(rest,tot,act?`${rest}<small>días</small>`:'0<small>días</small>')}<div class="sp g" style="gap:4px">
+  <div class="card"><div class="row">${anillo(rest,tot,`${act?rest:0}<small>días</small>`)}<div class="sp g" style="gap:4px">
    <p class="mu xs" style="font-weight:700">TU PLAN</p><h3 style="font-size:18px">${esc(act?act.plan_nombre||'Plan':'Sin plan activo')}</h3>
    <p class="mu sm">${act?`Del ${fF(act.inicio,{day:'numeric',month:'short'})} al ${fF(act.fin)}`:'Renueva en recepción y sigue entrenando.'}</p>
    ${act&&(act.pausas||[]).length?`<p class="sm" style="color:var(--a)">❄️ Tuvo ${act.pausas.length} congelamiento${act.pausas.length>1?'s':''}</p>`:''}
    ${sig?`<p class="sm" style="color:var(--ok)">➡️ Luego sigue: ${esc(sig.plan_nombre||'Plan')} hasta ${fF(sig.fin,{day:'numeric',month:'short'})}</p>`:''}</div></div>
-   ${!act||rest<=5?waBtn(n,act?`Hola, soy ${n.nombre}. Quiero renovar mi plan.`:`Hola, soy ${n.nombre}. Quiero renovar mi plan.`,'🔁 Renovar por WhatsApp'):''}</div>
+   ${!act||rest<=5?waBtn(n,`Hola, soy ${n.nombre}. Quiero renovar mi plan.`,'🔁 Renovar por WhatsApp'):''}</div>
   ${sl.t>0?`<div class="card" style="border-color:#f59e0b55"><div class="row"><span style="font-size:24px">💸</span><div class="sp"><h3>Saldo pendiente: ${money(sl.t)}</h3><p class="mu sm">Próxima cuota: ${fF(sl.v)}</p></div></div></div>`:''}
   <div class="st"><div><span class="mu xs" style="font-weight:700">INGRESOS 30 DÍAS</span><b>${(n.ingresos&&n.ingresos.mes)|0}</b></div>
    <div><span class="mu xs" style="font-weight:700">ÚLTIMA VEZ</span><b style="font-size:16px;margin-top:4px">${n.ingresos&&n.ingresos.ultimo?haceCuanto(n.ingresos.ultimo):'—'}</b></div></div>
-  ${atajosPlanes(n)}
- </div>`;
- const a0=post;post=()=>{a0&&a0();dibujaQR(n.codigo,'#qr');const q=$('#qr');q&&(q.onclick=()=>qrGrande(n))};
- return html;
-}
-function haceCuanto(t){const d=dias(new Date(new Date(t).getTime()-5*36e5).toISOString().slice(0,10),hoyL());return d<=0?'Hoy':d===1?'Ayer':'Hace '+d+' días'}
-function atajosPlanes(n){const R=n.rutinas||[],e=R.find(r=>r.tipo==='entreno'),d=R.find(r=>r.tipo==='nutri');if(!e&&!d)return'';
+  ${atajosPlanes(n)}</div>`}
+function haceCuanto(t){const d=dias(dLima(t),hoyL());return d<=0?'Hoy':d===1?'Ayer':'Hace '+d+' días'}
+function atajosPlanes(n){const R=n.rutinas||[],e=R.find(r=>r.tipo==='entreno'),d=R.find(r=>r.tipo==='nutri');
  const k=DIAS[(new Date(Date.now()-5*36e5).getUTCDay()+6)%7][0],l=e?lineas(e.datos&&e.datos[k]):[];
- return`<div class="card"><p class="mu xs" style="font-weight:700">HOY</p>${e?`<div class="row" data-t="rutina" style="cursor:pointer"><span style="font-size:24px">🏋️</span><div class="sp"><h3>${l.length?esc(l.length>1?l[0]:'Entrenamiento'):'Día de descanso'}</h3><p class="mu sm">${l.length?(l.length>1?l.length-1:1)+' ejercicios':'Recupera y vuelve con todo'}</p></div><span class="mu">›</span></div>`:''}
-  ${d?`<div class="row" data-t="dieta" style="cursor:pointer"><span style="font-size:24px">🥗</span><div class="sp"><h3>${esc(d.titulo||'Tu dieta')}</h3><p class="mu sm">${d.datos&&d.datos.kcal?esc(d.datos.kcal)+' kcal · ':''}Ver comidas</p></div><span class="mu">›</span></div>`:''}</div>`}
+ return`<div class="card"><p class="mu xs" style="font-weight:700">HOY</p>
+  <div class="row" data-sub="rutina" style="cursor:pointer"><span style="font-size:24px">🏋️</span><div class="sp"><h3>${e?(l.length?esc(l.length>1?l[0]:'Entrenamiento'):'Día de descanso'):'Mi rutina'}</h3><p class="mu sm">${e?(l.length?(l.length>1?l.length-1:1)+' ejercicios':'Recupera y vuelve con todo'):'Aún no tienes rutina'}</p></div><span class="mu">›</span></div>
+  <div class="row" data-sub="dieta" style="cursor:pointer"><span style="font-size:24px">🥗</span><div class="sp"><h3>${d?esc(d.titulo||'Tu dieta'):'Mi dieta'}</h3><p class="mu sm">${d?(d.datos&&d.datos.kcal?esc(d.datos.kcal)+' kcal · ':'')+'Ver comidas':'Aún no tienes dieta'}</p></div><span class="mu">›</span></div></div>`}
 async function qrLib(){if(!window.qrcode)await js('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js')}
-async function dibujaQR(code,sel){const el=$(sel);if(!el||!code)return;try{await qrLib();const q=qrcode(0,'M');q.addData(code);q.make();el.innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(_){el.innerHTML=`<b style="color:#000;font-size:22px;letter-spacing:.1em">${esc(code)}</b>`}}
+async function dibujaQR(code,sel){const el=$(sel);if(!el||!code)return;try{await qrLib();const q=qrcode(0,'M');q.addData(code);q.make();el.innerHTML=q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(_){el.innerHTML=`<b style="color:#000;font-size:18px;letter-spacing:.08em">${esc(code)}</b>`}}
 function qrGrande(n){const d=document.createElement('div');d.className='qrfull';d.innerHTML=`<b style="font-size:18px">${esc(n.negocio)}</b><div id="qg"></div><b style="font-size:22px">${esc(n.nombre)}</b><p style="opacity:.6;letter-spacing:.2em">${esc(n.codigo)}</p><p style="opacity:.5;font-size:13px">Sube el brillo de tu pantalla · toca para cerrar</p>`;
  d.onclick=()=>d.remove();document.body.appendChild(d);dibujaQR(n.codigo,'#qg')}
-function waBtn(n,txt,lbl){const w=cel(n.whatsapp);if(w.length<9)return'';return`<a class="btn" style="text-decoration:none;background:#25d36622;color:#4ade80" href="https://wa.me/51${w}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">${lbl}</a>`}
+function waBtn(n,txt,lbl){const w=String(n.whatsapp||'').replace(/\D/g,'');if(w.length<9)return'';const num=w.length===9?'51'+w:w;return`<a class="btn" style="text-decoration:none;background:#25d36622;color:#4ade80" href="https://wa.me/${num}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">${lbl}</a>`}
 
 function vRutina(n){const e=(n.rutinas||[]).find(r=>r.tipo==='entreno');
  if(!e)return cabeza(n)+`<div class="card vacio"><span class="e">🏋️</span><h2>Aún no tienes rutina</h2><p class="mu">Cuando tu entrenador te arme una, aparecerá aquí al instante.</p>${waBtn(n,`Hola, soy ${n.nombre}. ¿Me pueden armar una rutina?`,'💬 Pedir mi rutina')}</div>`;
  const d=e.datos||{},hi=(new Date(Date.now()-5*36e5).getUTCDay()+6)%7,sel=window._dia??hi,k=DIAS[sel][0],l=lineas(d[k]);
- post=()=>app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{window._dia=+b.dataset.d;pinta()});
+ const f0=post;post=()=>{f0&&f0();app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{window._dia=+b.dataset.d;pinta()})};
  return cabeza(n)+`<div class="g"><div><p class="mu xs" style="font-weight:700">TU RUTINA</p><h1 style="font-size:22px">${esc(e.titulo||'Plan de entrenamiento')}</h1>${d.objetivo?`<p class="sm" style="color:var(--a);margin-top:4px">🎯 ${esc(d.objetivo)}</p>`:''}</div>
   <div class="days">${DIAS.map(([kk,ab],i)=>`<button class="day${i===sel?' on':''}${i===hi?' hoy':''}${lineas(d[kk]).length?'':' vac'}" data-d="${i}">${ab}</button>`).join('')}</div>
   <div class="card"><div class="row"><h2 class="sp">${DIAS[sel][2]}</h2>${sel===hi?'<span class="pill ok">Hoy</span>':''}</div>
@@ -299,7 +329,6 @@ function vRutina(n){const e=(n.rutinas||[]).find(r=>r.tipo==='entreno');
    :'<div class="vacio" style="padding:18px"><span class="e">😴</span><p class="mu">Día de descanso. Duerme bien y toma agua.</p></div>'}</div>
   ${d.nota?`<div class="card"><p class="mu xs" style="font-weight:700">INDICACIONES</p><p>${esc(d.nota)}</p></div>`:''}
   <p class="mu xs" style="text-align:center">Hecho por ${esc(e.quien||n.negocio)} · ${fF(e.creado)}</p></div>`}
-
 function vDieta(n){const e=(n.rutinas||[]).find(r=>r.tipo==='nutri');
  if(!e)return cabeza(n)+`<div class="card vacio"><span class="e">🥗</span><h2>Aún no tienes dieta</h2><p class="mu">Cuando tu nutricionista te la arme, la verás aquí.</p>${waBtn(n,`Hola, soy ${n.nombre}. Quiero un plan de alimentación.`,'💬 Pedir mi dieta')}</div>`;
  const d=e.datos||{};
@@ -319,14 +348,14 @@ function citasDe(n){const now=Date.now(),L=(n.citas||[]).slice().sort((a,b)=>a.i
  return{prox:L.filter(c=>new Date(c.inicio).getTime()+(c.dur||30)*6e4>now&&['agendada','confirmada','llego'].includes(c.estado)),pas:L.filter(c=>new Date(c.inicio).getTime()<=now).reverse()}}
 function presu(p){const tot=(p.items||[]).reduce((a,i)=>a+(+i.m||0),0)-(+p.descuento||0),pag=(p.pagos||[]).reduce((a,x)=>a+(+x.monto||0),0),h=(p.items||[]).filter(i=>i.h).length;return{tot,pag,h,n:(p.items||[]).length}}
 function vInicioDent(n){const{prox,pas}=citasDe(n),p=(n.presupuestos||[]).find(x=>['pendiente','aceptado'].includes(x.estado));
- const ul=pas.find(c=>c.estado==='atendida'),mes=ul?dias(new Date(new Date(ul.inicio).getTime()-5*36e5).toISOString().slice(0,10),hoyL()):null;
+ const ul=pas.find(c=>c.estado==='atendida'),mes=ul?dias(dLima(ul.inicio),hoyL()):null;
  let html=cabeza(n)+'<div class="g">';
- if(prox[0]){const c=prox[0],dd=dias(hoyL(),new Date(new Date(c.inicio).getTime()-5*36e5).toISOString().slice(0,10));
-  html+=`<p class="mu xs" style="font-weight:700">TU PRÓXIMA CITA · ${dd<=0?'HOY':dd===1?'MAÑANA':'EN '+dd+' DÍAS'}</p>${citaCard(c,n,1)}`}
+ if(prox[0]){const c=prox[0],dd=dias(hoyL(),dLima(c.inicio));html+=`<p class="mu xs" style="font-weight:700">TU PRÓXIMA CITA · ${dd<=0?'HOY':dd===1?'MAÑANA':'EN '+dd+' DÍAS'}</p>${citaCard(c,n,1)}`}
  else html+=`<div class="card vacio"><span class="e">📅</span><h2>No tienes citas pendientes</h2><p class="mu">${mes!=null&&mes>150?'Ya pasaron más de 5 meses desde tu última visita. ¡Toca tu control!':'Agenda tu próxima visita cuando quieras.'}</p>${waBtn(n,`Hola, soy ${n.nombre}. Quiero agendar una cita.`,'📅 Agendar por WhatsApp')}</div>`;
- if(p){const x=presu(p);html+=`<div class="card" data-t="trat" style="cursor:pointer"><div class="row"><span style="font-size:24px">🦷</span><div class="sp"><h3>Tu tratamiento</h3><p class="mu sm">${x.h} de ${x.n} procedimientos hechos</p></div><span class="mu">›</span></div><div class="bar"><i style="width:${x.n?Math.round(x.h/x.n*100):0}%"></i></div></div>`}
- html+=`<div class="carnet" style="padding:16px"><div class="row" style="width:100%"><div class="qr" id="qr" style="width:86px;padding:6px;border-radius:12px"></div><div class="sp" style="text-align:left"><p class="mu xs" style="font-weight:700">PACIENTE</p><h3>${esc(n.nombre)}</h3><p class="mu xs">${n.num?'Ficha N.º '+esc(n.num)+' · ':''}Muéstralo al llegar</p></div></div></div></div>`;
- post=()=>{dibujaQR(n.codigo,'#qr');const q=$('#qr');q&&(q.onclick=()=>qrGrande(n))};
+ html+=`<div class="card"><div class="row" data-sub="citas" style="cursor:pointer"><span style="font-size:24px">📅</span><div class="sp"><h3>Mis citas</h3><p class="mu sm">${prox.length} próxima${prox.length===1?'':'s'} · ${pas.length} anteriores</p></div><span class="mu">›</span></div>`;
+ if(p){const x=presu(p);html+=`<div class="row" data-sub="trat" style="cursor:pointer"><span style="font-size:24px">🦷</span><div class="sp"><h3>Mi tratamiento</h3><p class="mu sm">${x.h} de ${x.n} procedimientos hechos</p></div><span class="mu">›</span></div><div class="bar"><i style="width:${x.n?Math.round(x.h/x.n*100):0}%"></i></div>`}
+ html+=`</div><div class="carnet" style="padding:16px"><div class="row" style="width:100%"><div class="qr" id="qr" style="width:86px;padding:6px;border-radius:12px"></div><div class="sp" style="text-align:left"><p class="mu xs" style="font-weight:700">PACIENTE</p><h3>${esc(n.nombre)}</h3><p class="mu xs">${n.num?'Ficha N.º '+esc(n.num)+' · ':''}Muéstralo al llegar</p></div></div></div></div>`;
+ const f0=post;post=()=>{f0&&f0();dibujaQR(n.codigo,'#qr');const q=$('#qr');q&&(q.onclick=()=>qrGrande(n))};
  return html}
 function vCitas(n){const{prox,pas}=citasDe(n);
  return cabeza(n)+`<div class="g"><h2>Próximas</h2>${prox.length?prox.map((c,i)=>citaCard(c,n,!i)).join(''):`<div class="card vacio"><span class="e">📅</span><p class="mu">No tienes citas pendientes.</p>${waBtn(n,`Hola, soy ${n.nombre}. Quiero agendar una cita.`,'📅 Agendar por WhatsApp')}</div>`}
@@ -340,58 +369,164 @@ function vTrat(n){const L=n.presupuestos||[];
    <div class="row"><span class="sp"><b>Total ${money(x.tot)}</b></span><span class="sm" style="color:var(--ok)">Pagado ${money(x.pag)}</span></div>
    <div class="bar"><i style="width:${pct}%"></i></div>${x.tot-x.pag>0?`<p class="mu sm">Te falta ${money(x.tot-x.pag)}</p>`:'<p class="sm" style="color:var(--ok)">✅ Pagado por completo</p>'}</div>`}).join('')}</div>`}
 
+// ---------- Negocios ----------
+function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
+ return`<div class="g"><h1>Negocios</h1>
+  ${M.length?`<p class="mu xs" style="font-weight:700">DONDE ERES ${M.some(n=>n.rubro==='consultorio')?'CLIENTE':'SOCIO'}</p>${M.map(n=>tarjNeg({...n,socio:1})).join('')}`:''}
+  <p class="mu xs" style="font-weight:700;margin-top:4px">GUARDADOS</p>${G.length?G.map(tarjNeg).join(''):'<p class="mu sm">Aún no guardas negocios. Escanea su QR para ver sus promos.</p>'}
+  <button class="btn p" data-scan>📷 Escanear QR de un negocio</button>
+  <button class="btn" data-yo>🎟️ Ya estoy registrado en un negocio</button>
+  <div class="card pronto"><div class="row"><span style="font-size:26px">🗺️</span><div class="sp"><h3>Muy pronto: negocios cerca de ti</h3><p class="mu sm">Un mapa con los negocios Xyro a tu alrededor y sus promos por usar la app.</p></div></div></div></div>`}
+async function abrirNeg(slug){vib();SUB={neg:slug};TAB='negocios';if(!NEG[slug]){app.querySelector('#sc')&&($('#sc').innerHTML='<div class="vacio"><span class="e">⏳</span></div>');await cargaNeg(slug)}pinta();$('#sc')&&($('#sc').scrollTop=0)}
+async function cargaNeg(slug){try{const d=await rpc('xa_yo_negocio',{p_slug:slug});if(d)NEG[slug]=d}catch(_){}}
+function vNegocio(slug){const n=NEG[slug];
+ if(!n)return`<button class="back" data-back>‹ Volver</button><div class="card vacio"><span class="e">🤔</span><h2>No encontramos este negocio</h2><p class="mu">Revisa tu internet o escanea otra vez su QR.</p></div>`;
+ const rub=n.rubro,lg=logoURL(n.logo),mi=negs().findIndex(x=>x.slug===slug),sesion=!!D;
+ const cov=media((n.clinica&&n.clinica.hero)||((n.publicaciones||[]).find(p=>p.media&&p.mediaTipo!=='video')||{}).media||((n.sedes||[])[0]||{}).foto||'',rub);
+ const PR=(n.promos||[]).filter(p=>!p.hasta||p.hasta>=hoyL()),PB=n.publicaciones||[],PL=(n.planes||[]).filter(p=>p.nombre),SE=n.sedes||[],CL=n.clases||[];
+ const red=n.redes||{},RD=[['instagram','📸 Instagram'],['tiktok','🎵 TikTok'],['facebook','👍 Facebook']].filter(([k])=>red[k]);
+ const ev=p=>+p.precioEvento&&(!p.eventoHasta||p.eventoHasta>=hoyL());
+ const f0=post;post=()=>{f0&&f0();const g=$('#gd');g&&(g.onclick=()=>guardarNeg(slug,!n.guardado));const s=$('#sv');s&&(s.onclick=()=>{CUR=mi;ls.s('mi-neg',mi);TAB='inicio';SUB=null;pinta()})};
+ return`<button class="back" data-back>‹ Volver</button>
+ <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:'background:linear-gradient(135deg,var(--a),#000)'}"></div>
+ <div class="nhead">${lg?`<img class="lg" src="${esc(lg)}" alt="">`:`<div class="lg" style="display:grid;place-items:center;font-size:34px">${rub==='consultorio'?'🦷':'🏋️'}</div>`}
+  <h1>${esc(n.negocio)}</h1>${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div>
+ <div class="g" style="margin-top:14px">
+  ${mi>=0?`<button class="btn p" id="sv">${rub==='consultorio'?'🦷 Ver mis citas y tratamiento':'🎟️ Ver mi membresía y mi QR'}</button>`
+   :`<div class="row">${sesion?`<button class="btn ${n.guardado?'':'p'} sp" id="gd">${n.guardado?'✓ Guardado':'＋ Guardar negocio'}</button>`:`<button class="btn p sp" id="gd">＋ Guardar en mi app</button>`}${waBtn(n,'Hola, los vi en la app Mi Xyro. Quiero información.','💬')}</div>
+   <button class="btn" data-yo>🎟️ Ya estoy registrado en este negocio</button>`}
+  ${PR.length?`<h2>🎁 Promos por usar la app</h2>${PR.map(p=>`<div class="promo"><span class="pill" style="background:var(--a);color:#fff;justify-self:start">Solo en la app</span><h2>${esc(p.titulo)}</h2>${p.descripcion?`<p class="sm">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Válido hasta el ${fF(p.hasta)}</p>`:''}<p class="mu xs">Muestra esta pantalla en ${rub==='consultorio'?'el consultorio':'recepción'}.</p></div>`).join('')}`:''}
+  ${PB.length?`<h2>📢 Novedades</h2><div class="hs">${PB.map(p=>`<div class="card" style="padding:0;overflow:hidden">${p.media&&p.mediaTipo!=='video'?`<img src="${esc(media(p.media,rub))}" alt="" loading="lazy" style="width:100%;height:150px;object-fit:cover">`:''}<div style="padding:14px;display:grid;gap:4px">${p.tipo?`<span class="mu xs" style="font-weight:700;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}<h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}${p.fin?`<p class="mu xs">Hasta el ${fF(p.fin)}</p>`:''}</div></div>`).join('')}</div>`:''}
+  ${PL.length?`<h2>${rub==='consultorio'?'🦷 Tratamientos':'💪 Planes'}</h2><div class="hs">${PL.map(p=>`<div class="plan${p.destacado?' dest':''}">${p.destacado?'<span class="pill" style="background:var(--a);color:#fff;justify-self:start">⭐ Recomendado</span>':''}<h3>${esc(p.nombre)}</h3>
+    ${+p.precio?(ev(p)?`<p class="mu sm" style="text-decoration:line-through">${money(p.precio)}</p><b class="pr" style="color:var(--a)">${money(p.precioEvento)}</b>${p.eventoTexto?`<p class="xs" style="color:var(--a)">${esc(p.eventoTexto)}</p>`:''}`:`<b class="pr">${rub==='consultorio'?'<span class="mu sm">Desde </span>':''}${money(p.precio)}</b>`):''}
+    ${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}${+p.meses?`<p class="mu xs">${p.meses} mes${p.meses>1?'es':''}</p>`:''}</div>`).join('')}</div>`:''}
+  ${CL.length?`<h2>🔥 Clases</h2><div class="card">${CL.slice(0,10).map(c=>`<div class="li"><span class="dot">⏰</span><span class="sp"><b>${esc(c.nombre)}</b><br><span class="mu xs">${esc((c.dias||[]).join(' · '))} ${c.hora?'· '+esc(c.hora):''}</span></span></div>`).join('')}</div>`:''}
+  ${SE.length?`<h2>📍 ${SE.length>1?'Sedes':'Dónde estamos'}</h2>${SE.map(s=>`<div class="card">${s.foto?`<img src="${esc(media(s.foto,rub))}" alt="" loading="lazy" style="width:calc(100% + 32px);margin:-16px -16px 4px;height:140px;object-fit:cover;border-radius:22px 22px 0 0">`:''}<h3>${esc(s.nombre||'Sede')}</h3>${s.direccion||s.distrito?`<p class="mu sm">${esc([s.direccion,s.distrito].filter(Boolean).join(' · '))}</p>`:''}
+    ${(s.horario||[]).filter(h=>Array.isArray(h)).map(h=>`<p class="sm"><b>${esc(h[0])}</b> <span class="mu">${esc(h[1]||'')}</span></p>`).join('')}
+    <a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="${esc(/^https:\/\//.test(s.maps||'')?s.maps:'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(n.negocio+' '+(s.direccion||s.distrito||'')))}">🧭 Cómo llegar</a></div>`).join('')}`:''}
+  ${RD.length||n.web?`<div class="row" style="flex-wrap:wrap">${RD.map(([k,t])=>`<a class="btn" style="text-decoration:none;flex:1" target="_blank" rel="noopener" href="${esc(/^https?:/.test(red[k])?red[k]:'https://'+k+'.com/'+String(red[k]).replace(/^@/,''))}">${t}</a>`).join('')}${n.web&&/^https:\/\//.test(n.web)?`<a class="btn" style="text-decoration:none;flex:1" target="_blank" rel="noopener" href="${esc(n.web)}">🌐 Web</a>`:''}</div>`:''}
+  ${!PR.length&&!PB.length&&!PL.length&&!SE.length?'<div class="card vacio"><span class="e">✨</span><p class="mu">Este negocio aún está preparando sus promos para la app.</p></div>':''}
+ </div>`}
+async function guardarNeg(slug,on){
+ if(!D){const n=NEG[slug];pend.set({n:slug,negocio:n&&n.negocio});return pantallaEntrada('','crear')}
+ try{await rpc('xa_yo_guardar',{p_slug:slug,p_on:on});if(!NEG[slug])await cargaNeg(slug);if(NEG[slug])NEG[slug].guardado=on;await cargar();if(on){vib();toast('✅ '+((NEG[slug]||{}).negocio||'Negocio')+' guardado');confeti()}pinta()}catch(e){toast(errDe(e))}}
+
+// ---------- «Ya estoy registrado»: ID de cuenta o código del carnet ----------
+function yaRegistrado(){const per=(D&&D.persona)||{};
+ if(!D){pend.set(null);return pantallaEntrada('Primero crea tu cuenta y luego conecta tu membresía.','crear')}
+ hoja(`<h2>🎟️ Conecta tu cuenta con tu negocio</h2>
+  <div class="idbox"><span class="mu xs" style="font-weight:700">TU ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><button class="btn" id="cp">📋 Copiar</button></div>
+  <ol class="sm" style="margin-left:18px;display:grid;gap:6px"><li>Dale este número a recepción.</li><li>Ellos lo escriben en su panel y tocan <b>«Conectar»</b>.</li><li>Aquí te llega un aviso: toca <b>«Sí, acepto»</b> y listo ✨</li></ol>
+  <details><summary class="mu sm" style="cursor:pointer">¿Tienes el código de tu carnet?</summary><div class="g" style="margin-top:10px"><input id="kc" placeholder="Código del carnet" style="text-transform:uppercase" maxlength="20"><input id="kd" inputmode="numeric" placeholder="Tu DNI o celular registrado"><div class="msg" id="km"></div><button class="btn p" id="kb">Conectar con el código</button></div></details>
+  <button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  o.querySelector('#cp').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}};
+  o.querySelector('#kb').onclick=async()=>{const k=codigoDe(o.querySelector('#kc').value),d=o.querySelector('#kd').value.replace(/\D/g,''),m=o.querySelector('#km');
+   if(k.length<8){m.textContent='Revisa el código.';m.className='msg on';return}
+   try{await rpc('xa_yo_vincular',{p_codigo:k,p_dni:d.length>=8&&d[0]!=='9'||d.length===8?d:null,p_cel:d.length===9&&d[0]==='9'?d:null});close();await cargar();CUR=negs().length-1;ls.s('mi-neg',CUR);TAB='inicio';SUB=null;confeti();pinta();toast('🎉 ¡Conectado!')}
+   catch(e){m.textContent=errDe(e);m.className='msg on'}}})}
+function conCodigo(code){yaRegistrado();setTimeout(()=>{const d=document.querySelector('details');d&&(d.open=true);const i=$('#kc');i&&(i.value=code)},50)}
+
+// ---------- Escáner ----------
+let camStream=null;
+async function escanear(){
+ const o=document.createElement('div');o.className='cam';o.innerHTML=`<video playsinline muted autoplay></video><div class="mk"></div><div class="bt"><b style="text-shadow:0 2px 10px #000">Apunta al QR del negocio</b><p class="msg" id="cmm"></p><button class="btn" id="cx">Cerrar</button></div>`;
+ document.body.appendChild(o);const v=o.querySelector('video'),m=o.querySelector('#cmm');let vivo=true;
+ const fin=()=>{vivo=false;try{camStream&&camStream.getTracks().forEach(t=>t.stop())}catch(_){}camStream=null;o.remove()};
+ o.querySelector('#cx').onclick=fin;
+ try{camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});v.srcObject=camStream;await v.play()}
+ catch(_){m.textContent='No pudimos abrir tu cámara. Dale permiso o abre la cámara de tu celular y escanea el QR.';m.className='msg on';return}
+ let det=null;if('BarcodeDetector' in window){try{det=new BarcodeDetector({formats:['qr_code']})}catch(_){}}
+ if(!det){try{if(!window.jsQR)await js('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js')}catch(_){}}
+ const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
+ const leer=async()=>{if(!vivo)return;let t='';
+  try{if(det){const r=await det.detect(v);t=r[0]&&r[0].rawValue||''}
+   else if(window.jsQR&&v.videoWidth){const w=480,h=Math.round(v.videoHeight*w/v.videoWidth);cv.width=w;cv.height=h;cx.drawImage(v,0,0,w,h);const r=jsQR(cx.getImageData(0,0,w,h).data,w,h);t=r&&r.data||''}}catch(_){}
+  if(t){const s=slugDe(t),c=/[?&]c=/.test(t)?codigoDe(t):'';
+   if(s){vib();fin();await abrirNeg(s);if(D&&NEG[s]&&!NEG[s].guardado&&!NEG[s].socio)guardarNeg(s,true);return}
+   if(c){vib();fin();return conCodigo(c)}
+   m.textContent='Ese QR no es de un negocio Xyro.';m.className='msg on'}
+  setTimeout(leer,250)};
+ leer();
+}
+
 // ---------- Perfil ----------
-function vPerfil(n){const per=(D&&D.persona)||{};
- post=()=>{const i=$('#inst');i&&(i.onclick=instalar);const s=$('#salir');s&&(s.onclick=salir);app.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>quitar(+b.dataset.q))};
- return`<div class="g"><div class="row" style="margin-bottom:4px"><div class="orb" style="width:58px;height:58px;border-radius:18px;font-size:26px">👤</div><div class="sp"><h2>${esc(per.nombre||'')}</h2><p class="mu sm">📱 ${esc(String(per.celular||'').replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p></div></div>
-  <div class="card"><p class="mu xs" style="font-weight:700">MIS NEGOCIOS</p>${negs().map((x,i)=>{const lg=logoURL(x.logo);return`<div class="li" style="align-items:center"><span class="dot" style="overflow:hidden">${lg?`<img src="${esc(lg)}" style="width:100%;height:100%;object-fit:cover" alt="">`:(x.rubro==='consultorio'?'🦷':'🏋️')}</span><span class="sp"><b>${esc(x.negocio)}</b><br><span class="mu xs">${x.rubro==='consultorio'?'Paciente':'Socio'}${x.num?' N.º '+esc(x.num):''}</span></span>${DEMO?'':`<button class="btn l xs" data-q="${i}">Quitar</button>`}</div>`}).join('')}
-   <button class="btn" data-add>＋ Agregar otro negocio</button></div>
-  ${n&&cel(n.whatsapp).length>=9?`<div class="card"><p class="mu xs" style="font-weight:700">¿NECESITAS ALGO?</p>${waBtn(n,`Hola, soy ${n.nombre}. `,'💬 Escribir a '+esc(n.negocio))}</div>`:''}
+function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim()[0]||'?';
+ const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);const s=$('#salir');s&&(s.onclick=salir);$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
+ return`<div class="g"><div class="row"><div class="av">${/^https:\/\//.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
+   <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p></div></div>
+  <button class="btn" id="ed">✏️ Editar mi perfil</button>
+  <div class="idbox"><span class="mu xs" style="font-weight:700">🆔 ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><p class="mu xs">Es tuyo y nunca cambia. Dáselo a recepción para que conecten tu membresía a esta app.</p><button class="btn" id="cpi">📋 Copiar mi ID</button></div>
+  <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
   ${esApp()?'':`<button class="btn p" id="inst">📲 Instalar en mi celular</button>`}
-  <div class="card pronto"><div class="row"><span style="font-size:26px">🗺️</span><div class="sp"><h3>Muy pronto</h3><p class="mu sm">Descubre negocios cerca de ti con promos solo por usar la app, suma puntos y canjéalos.</p></div></div></div>
-  ${DEMO?'<a class="btn" href="./" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
+  <div class="card pronto"><div class="row"><span style="font-size:26px">🏆</span><div class="sp"><h3>Muy pronto: puntos y premios</h3><p class="mu sm">Suma puntos cada vez que vas a tus negocios y canjéalos por premios.</p></div></div></div>
+  ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio</p></div>`}
+function editarPerfil(){const per=(D&&D.persona)||{};
+ hoja(`<h2>✏️ Mi perfil</h2><label>Nombre<input id="pn" value="${esc(per.nombre||'')}" maxlength="80"></label><label>Apodo <span class="mu xs">(opcional, así te saludamos)</span><input id="pa" value="${esc(per.apodo||'')}" maxlength="40"></label>
+  <label>Tu @usuario<div class="row"><span style="font-weight:800;color:var(--a)">@</span><input id="pu" value="${esc(per.usuario||'')}" maxlength="20" autocapitalize="off" spellcheck="false"></div></label>
+  <label>Celular <span class="mu xs">(opcional)</span><input id="pc" inputmode="numeric" value="${esc(per.celular||'')}" maxlength="12" placeholder="9XX XXX XXX"></label>
+  <div class="msg" id="pm"></div><button class="btn p" id="pg">Guardar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  const u=o.querySelector('#pu');u.oninput=()=>{u.value=u.value.toLowerCase().replace(/[^a-z0-9_.]/g,'')};
+  o.querySelector('#pg').onclick=async()=>{const m=o.querySelector('#pm');
+   try{const r=await rpc('xa_yo_editar',{p_nombre:o.querySelector('#pn').value,p_apodo:o.querySelector('#pa').value,p_usuario:u.value,p_celular:o.querySelector('#pc').value.replace(/\D/g,'')});D.persona=r;close();pinta();toast('✅ Perfil guardado')}
+   catch(e){m.textContent=errDe(e);m.className='msg on'}}})}
 const esApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone;
 async function instalar(){if(INSTALL){INSTALL.prompt();await INSTALL.userChoice.catch(()=>0);INSTALL=null;return}
  const ios=/iPhone|iPad/i.test(navigator.userAgent);
  hoja(`<h2>📲 Instalar Mi Xyro</h2>${ios?'<p>1. Toca <b>Compartir</b> ⬆️ abajo en Safari.</p><p>2. Elige <b>«Agregar a inicio»</b>.</p>':'<p>1. Abre el menú <b>⋮</b> de Chrome.</p><p>2. Toca <b>«Instalar app»</b> o «Agregar a pantalla principal».</p>'}<p class="mu sm">Quedará como una app más, con tu QR listo aunque no tengas señal.</p><button class="btn p" data-x>Entendido</button>`)}
 function hoja(h,fn){const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="sh">${h}</div>`;const close=()=>o.remove();o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))close()};document.body.appendChild(o);fn&&fn(o,close);return close}
-function agregar(){
- if(DEMO)return toast('En la demo no se agregan negocios');
- hoja(`<h2>＋ Agregar negocio</h2><p class="mu sm">Escribe el código de tu carnet o pega el enlace que te enviaron.</p><input id="ak" placeholder="Código o enlace" style="text-transform:uppercase"><input id="ad" inputmode="numeric" placeholder="Tu DNI" style="display:none"><div class="msg" id="am"></div><button class="btn p" id="ab">Agregar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
-  const m=o.querySelector('#am'),b=o.querySelector('#ab');
-  b.onclick=async()=>{const k=codigoDe(o.querySelector('#ak').value),dni=o.querySelector('#ad').value.replace(/\D/g,'')||null;if(k.length<8){m.textContent='Revisa el código.';m.className='msg on';return}
-   b.disabled=true;try{const r=await sb.rpc('xa_yo_vincular',{p_codigo:k,p_dni:dni});if(r.error)throw r.error;if(r.data&&r.data.error)throw r.data.error;
-    close();await cargar();CUR=negs().length-1;ls.s('mi-neg',CUR);TAB='inicio';pinta();toast('✅ Negocio agregado')}
-   catch(er){if(String(er&&er.message||er)==='dato')o.querySelector('#ad').style.display='';m.textContent=errDe(er);m.className='msg on';b.disabled=false}}})}
-function quitar(i){const x=negs()[i];if(!x)return;hoja(`<h2>¿Quitar ${esc(x.negocio)}?</h2><p class="mu">Solo se quita de tu app. Tu membresía y tus datos en el negocio siguen igual.</p><button class="btn" id="qy" style="color:var(--ko)">Sí, quitar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
- o.querySelector('#qy').onclick=async()=>{await sb.rpc('xa_yo_quitar',{p_cliente:x.cliente});close();CUR=0;ls.s('mi-neg',0);await cargar();pinta()}})}
-async function salir(){try{await sb.auth.signOut()}catch(_){}ls.s('mi-data',null);ls.s('mi-neg',null);D=null;pantallaEntrada()}
+async function salir(){try{await sb.auth.signOut()}catch(_){}ls.s('mi-data',null);ls.s('mi-neg',null);D=null;NEG={};TAB='inicio';SUB=null;pantallaEntrada()}
+function confeti(){const C=['#fff',getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||ACC,'#facc15'];for(let i=0;i<40;i++){const d=document.createElement('i');const x=Math.random()*100,dl=Math.random()*.3;
+ d.style.cssText=`position:fixed;z-index:20;top:-10px;left:${x}vw;width:8px;height:12px;border-radius:2px;background:${C[i%3]};pointer-events:none;transition:transform 1.4s cubic-bezier(.2,.8,.3,1) ${dl}s,opacity 1.4s ${dl}s`;
+ document.body.appendChild(d);requestAnimationFrame(()=>{d.style.transform=`translate(${(Math.random()-.5)*120}px,${60+Math.random()*40}vh) rotate(${Math.random()*720}deg)`;d.style.opacity='0'});setTimeout(()=>d.remove(),2000)}}
 
 // ---------- Demo ----------
-function demoData(){const h=hoyL(),ad=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)},at=(n,hh)=>{const x=new Date(Date.now()+n*864e5);x.setUTCHours(hh+5,0,0,0);return x.toISOString()};
- const gym={cliente:'d1',negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym',nombre:'Valeria Torres',num:248,codigo:'DEMO248XYRO',whatsapp:'936449066',
+function demoBoth(){const h=hoyL(),ad=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)},at=(n,hh)=>{const x=new Date(Date.now()+n*864e5);x.setUTCHours(hh+5,0,0,0);return x.toISOString()};
+ const gym={cliente:'d1',slug:'demo-gym',negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym',nombre:'Valeria Torres',num:248,codigo:'DEMO248XYRO',whatsapp:'936449066',
   membresias:[{plan_nombre:'Trimestral',inicio:ad(h,-62),fin:ad(h,28),pausas:[]}],ingresos:{mes:17,ultimo:new Date(Date.now()-864e5).toISOString()},
   rutinas:[{tipo:'entreno',titulo:'Hipertrofia · 5 días',quien:'Coach Diego',creado:ad(h,-9),datos:{objetivo:'Ganar masa muscular',d1:'Pecho y tríceps\nPress banca 4x10\nPress inclinado mancuernas 4x10\nAperturas 3x12\nFondos 3x10',d2:'Espalda y bíceps\nJalón al pecho 4x10\nRemo con barra 4x10\nCurl con barra 3x12\nCurl martillo 3x12',d3:'Piernas\nSentadilla 4x10\nPrensa 4x12\nPeso muerto rumano 3x10\nPantorrillas 4x15',d4:'Hombros y abdomen\nPress militar 4x10\nElevaciones laterales 3x15\nPlancha 3x45 seg',d5:'Cuerpo completo\nPeso muerto 4x8\nDominadas 3x8\nZancadas 3x12\nCardio 20 min',nota:'Descansa 60–90 seg entre series. Toma 3 L de agua.'}},
    {tipo:'nutri',titulo:'Ganar masa muscular',quien:'Lic. Andrea',creado:ad(h,-9),datos:{objetivo:'Subir de peso en músculo',kcal:'2800',agua:'3 L',desayuno:'Avena con leche y plátano\n3 huevos',media:'Pan con palta\nBatido de proteína',almuerzo:'Arroz (1 taza) + menestra\nPollo o carne (200 g)\nEnsalada',merienda:'Sándwich de pollo\nFruta',cena:'Camote + pescado (150 g)\nVerduras',nota:'Come cada 3–4 horas.'}}]};
- const den={cliente:'d2',negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio',nombre:'Valeria Torres',num:91,codigo:'DEMO091XYRO',whatsapp:'936449066',membresias:[],rutinas:[],
+ const den={cliente:'d2',slug:'demo-dental',negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio',nombre:'Valeria Torres',num:91,codigo:'DEMO091XYRO',whatsapp:'936449066',membresias:[],rutinas:[],
   citas:[{inicio:at(3,10),dur:45,prof:'Dra. Lucía Ramos',servicio:'Curación con resina',estado:'confirmada'},{inicio:at(24,16),dur:30,prof:'Dra. Lucía Ramos',servicio:'Control y limpieza',estado:'agendada'},{inicio:at(-12,11),dur:60,prof:'Dra. Lucía Ramos',servicio:'Evaluación y radiografía',estado:'atendida'}],
   presupuestos:[{estado:'aceptado',prof:'Dra. Lucía Ramos',creado:ad(h,-12),descuento:30,items:[{t:'Profilaxis y destartraje',m:120,h:1},{t:'Curación con resina',p:'16',m:150,h:1},{t:'Curación con resina',p:'26',m:150},{t:'Blanqueamiento',m:450}],pagos:[{monto:300}]}]};
- return{persona:{nombre:'Valeria Torres',celular:'987654321'},negocios:DEMO==='consultorio'?[den,gym]:[gym,den]}}
+ return{gym,den}}
+function demoData(){const{gym,den}=demoBoth(),dent=DEMO==='consultorio';
+ return{persona:{nombre:'Valeria Torres',apodo:'Vale',usuario:'vale.fit',idn:48203716,email:'vale@gmail.com',celular:'987654321'},
+  negocios:[dent?den:gym],guardados:[{slug:'demo-cafe',negocio:'Nativa Café',color:'#16a34a',rubro:'gym',promos:1}],
+  avisos:[{id:'av1',negocio:dent?'Fuerza Gym':'Sonrisa Dental',color:dent?'#e11d48':'#0ea5e9',rubro:dent?'gym':'consultorio',nombre:'Valeria Torres',quien:'Recepción'}]}}
+function demoNeg(slug){const g=slug==='demo-gym'?{negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym'}:slug==='demo-dental'?{negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio'}:{negocio:'Nativa Café',color:'#16a34a',rubro:'gym'};
+ return{slug,...g,whatsapp:'936449066',guardado:true,socio:negs().some(n=>n.slug===slug),
+  promos:[{titulo:g.rubro==='consultorio'?'Limpieza a S/ 59 por la app':'Inscripción gratis + 1 semana extra',descripcion:'Solo para quienes nos guardaron en Mi Xyro.',hasta:''}],
+  publicaciones:[{tipo:'Promo',titulo:'Reto 30 días',descripcion:'Únete al reto y gana un mes gratis.',media:'img/clase.webp',fin:''}],
+  planes:g.rubro==='consultorio'?[{nombre:'Limpieza dental',precio:80},{nombre:'Blanqueamiento',precio:450,destacado:true},{nombre:'Ortodoncia',precio:3500}]:[{nombre:'1 mes',precio:100,meses:1},{nombre:'3 meses',precio:270,meses:3},{nombre:'1 año',precio:900,meses:12,destacado:true,precioEvento:750,eventoTexto:'Solo este mes'}],
+  sedes:[{nombre:'Sede principal',distrito:'Miraflores · Lima',foto:'img/interior.webp',horario:[['Lunes a sábado','6:00 am – 10:00 pm'],['Domingos','8:00 am – 1:00 pm']]}],
+  clases:g.rubro==='consultorio'?[]:[{nombre:'Funcional',dias:['lun','mie','vie'],hora:'07:00'},{nombre:'Cardio intenso',dias:['mar','jue'],hora:'19:00'}],redes:{instagram:'@xyrostudio'}}}
+async function demoRpc(f,a){
+ if(f==='xa_yo')return D;
+ if(f==='xa_yo_negocio')return demoNeg(a.p_slug);
+ if(f==='xa_yo_guardar'){toast('En la demo no se guarda de verdad');return true}
+ if(f==='xa_yo_responder'){const av=D.avisos.shift(),{gym,den}=demoBoth();if(a.p_ok)D.negocios.push(av.rubro==='consultorio'?den:gym);return{ok:true}}
+ if(f==='xa_yo_editar')return{...D.persona,nombre:a.p_nombre,apodo:a.p_apodo,usuario:a.p_usuario,celular:a.p_celular};
+ throw 'codigo'}
 
 // ---------- Arranque ----------
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();INSTALL=e});
 if('serviceWorker' in navigator&&!DEMO)navigator.serviceWorker.register('/mi/sw.js').catch(()=>{});
+document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&D&&!DEMO&&!document.querySelector('.ov,.cam')){try{await cargar();pinta()}catch(_){}}});
 (async()=>{
  if(DEMO){D=demoData();CUR=0;return pinta()}
- const code=codigoDe(P.get('c')||'');
- // Muestra lo último guardado al instante (el QR funciona sin señal) y luego actualiza.
- const cache=ls.g('mi-data');if(cache&&!code){try{D=JSON.parse(cache);pinta()}catch(_){}}
+ const n=(P.get('n')||'').toLowerCase().replace(/[^a-z0-9-]/g,''),c=codigoDe(P.get('c')||'');
+ const cache=ls.g('mi-data');if(cache&&!n&&!c&&!/[#&?](access_token|code)=/.test(location.href)){try{D=JSON.parse(cache);pinta()}catch(_){}}
  try{await cliente()}catch(_){if(!D)pantallaEntrada('Sin conexión. Revisa tu internet.');return}
- if(code&&code.length>=8)return pantallaInvitacion(code);
  const{data:{session}}=await sb.auth.getSession();
- if(!session){ls.s('mi-data',null);return pantallaEntrada()}
- try{await cargar();if(!D)return pantallaEntrada('Tu cuenta aún no tiene negocios.');pinta()}catch(_){if(!D)pantallaEntrada('Sin conexión. Revisa tu internet.')}
+ if(!session){
+  D=null;ls.s('mi-data',null);
+  if(n){await cargaNeg(n);if(NEG[n]){pend.set({n,negocio:NEG[n].negocio});SUB={neg:n};TAB='negocios';return pinta()}}
+  if(c&&c.length>=8){pend.set({c});return pantallaEntrada('Crea tu cuenta (o entra) para conectar tu carnet.','crear')}
+  return pantallaEntrada();
+ }
+ if(n)pend.set({n});else if(c&&c.length>=8)pend.set({c});
+ await entrar();
 })();
 </script>
 </body>
