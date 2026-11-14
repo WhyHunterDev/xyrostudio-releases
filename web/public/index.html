@@ -234,6 +234,32 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 .hint{position:fixed;right:20px;bottom:calc(var(--dock) + 4px);z-index:20;font-size:12px;color:var(--mut)}
 .hint kbd{font:inherit;padding:2px 6px;border-radius:5px;border:1px solid var(--line2)}
 @media(max-width:900px){.hint{display:none}}
+/* listos por rubro */
+.lst{width:min(1200px,100%);display:grid;gap:14px}
+.lst-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.lst-h h2{font-size:clamp(28px,3.6vw,48px)}
+.lst-g{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rx{position:relative;border-radius:24px;padding:20px;background:var(--panel);border:1px solid var(--line2);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
+.rx::before{content:"";position:absolute;inset:-40% -20% auto auto;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 30%,transparent),transparent);pointer-events:none;animation:rxp 6s ease-in-out infinite alternate}
+@keyframes rxp{to{transform:translate(-18%,14%) scale(1.15)}}
+.rx:hover{transform:translateY(-4px);border-color:var(--rc);box-shadow:0 24px 60px -30px var(--rc)}
+.rx-t{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.rx-t i{font-style:normal;font-size:28px;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:color-mix(in srgb,var(--rc) 22%,#000);box-shadow:0 0 0 1px #ffffff1a,0 0 30px -8px var(--rc)}
+.rx-t b{display:block;font-size:22px;line-height:1.1}.rx-t small{color:var(--mut);font-size:13px}
+.rx-tag{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;background:#3ddc9722;color:#3ddc97;white-space:nowrap}
+.rx ul{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:7px}
+.rx li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.35}
+.rx li img{width:24px;height:24px;border-radius:7px;flex:none;margin-top:1px}
+.rx li b{font-weight:600}.rx li em{font-style:normal;font-size:11px;padding:2px 7px;border-radius:99px;background:#f5b54422;color:#f5b544;margin-left:4px;white-space:nowrap}
+.rx .row{display:flex;gap:8px;flex-wrap:wrap}.rx .btn{padding:10px 14px;font-size:14px}
+.lst-p{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-radius:16px;background:#ffffff08;border:1px dashed var(--line2);font-size:14px}
+.lst-p span{padding:5px 11px;border-radius:99px;background:#ffffff0d}
+@media(max-width:900px){.lst-g{grid-template-columns:1fr}}
+@media(max-width:600px){.rx-t{flex-wrap:wrap}.rx-t>div{flex:1}.rx-tag{margin-left:64px}}
+.fab{position:fixed;right:18px;bottom:calc(var(--dock,96px) + 14px);z-index:40;display:flex;align-items:center;gap:10px;padding:12px 18px 12px 14px;border-radius:99px;background:var(--wa);color:#04210f;font-weight:700;font-size:15px;box-shadow:0 14px 40px -12px #25d366;animation:fb 2.6s ease-in-out infinite}
+.fab .ico{width:22px;height:22px}
+@keyframes fb{0%,100%{box-shadow:0 0 0 0 #25d36666,0 14px 40px -12px #25d366}50%{box-shadow:0 0 0 12px #25d36600,0 14px 40px -12px #25d366}}
+@media(max-width:600px){.fab span{display:none}.fab{padding:14px;right:14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01s!important}}
 </style></head>
 <body>
@@ -242,7 +268,7 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 
 <header class="top">
 <a class="logo" href="#/" aria-label="XyroStudio, inicio"><img class="tile" src="img/marca/logo-xyrostudio-app.svg" alt="" width="32" height="32"><span><b>Xyro</b>Studio</span></a>
-<nav class="tnav" aria-label="Secciones"><a href="#/" data-v="home">Inicio</a><a href="#/webs" data-v="webs">Ecosistema</a><a href="#/arma" data-v="arma">Arma el tuyo</a><a href="#/resultados" data-v="resultados">Resultados</a></nav>
+<nav class="tnav" aria-label="Secciones"><a href="#/" data-v="home">Inicio</a><a href="#/negocios" data-v="negocios">Gimnasios y clínicas</a><a href="#/webs" data-v="webs">Ecosistema</a><a href="#/arma" data-v="arma">Arma el tuyo</a><a href="#/resultados" data-v="resultados">Resultados</a></nav>
 <a class="btn btn-p wa" data-msg="quiero mejorar mi negocio" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg><span>Hablemos</span></a>
 </header>
 
@@ -253,7 +279,7 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 <div>
 <span class="eti in-1"><i></i>Ecosistema digital · Hecho en Lima</span>
 <h1 id="h1"></h1>
-<p class="lead mut in-2">Webs, apps, control, bots y contenido con IA conectados entre sí. Elige tu negocio y entra a ver cómo funcionaría.</p>
+<p class="lead mut in-2">Webs, apps, control, bots y contenido con IA conectados entre sí. <a href="#/negocios" style="color:var(--tx);font-weight:700;text-decoration:underline;text-decoration-color:var(--cy);text-underline-offset:4px">Ya listos para gimnasios y consultorios dentales →</a></p>
 <div class="in-3"><div class="pick" id="rubros" role="group" aria-label="Tu rubro"></div>
 <div class="inrow"><input id="nom" maxlength="28" placeholder="Nombre de tu negocio" autocomplete="off" aria-label="Nombre de tu negocio"><a class="btn btn-p" href="#/webs">Entrar al ecosistema →</a></div></div>
 </div>
@@ -263,6 +289,27 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 </div></div>
 </div>
 </section>
+
+<!-- LISTOS POR RUBRO -->
+<section class="view" data-v="negocios" aria-label="Sistemas listos por rubro"><div class="lst">
+<div class="lst-h in-1"><div><span class="eti"><i></i>Listos para usar · demo en vivo</span><h2 style="margin-top:12px">Tu sistema ya está hecho.<br><span class="grad">Pruébalo hoy, gratis.</span></h2></div>
+<p class="mut" style="max-width:380px">Elige tu rubro, entra a la demo con datos de ejemplo y escríbenos por WhatsApp: te lo dejamos funcionando con tu nombre, tu logo y tus precios.</p></div>
+<div class="lst-g">
+<div class="rx in-2" style="--rc:#ef4444"><div class="rx-t"><i>🏋️</i><div><b>Gimnasios</b><small>Socios, cobros, asistencia y web que vende</small></div><span class="rx-tag">● Disponible</span></div>
+<ul><li><img src="img/marca/logo-apps-app.svg" alt=""><span><b>Xyro Apps:</b> socios y membresías, asistencia con QR, cuotas, caja y boletas, rutinas y dietas, metas de recepción por sede.</span></li>
+<li><img src="img/marca/logo-control-app.svg" alt=""><span><b>Xyro Control:</b> cafetín y tienda con stock que avisa y cuánto ganas de verdad.</span></li>
+<li><img src="img/marca/logo-webs-app.svg" alt=""><span><b>Xyro Webs:</b> web con 3 diseños, planes y horarios siempre al día desde tu app.</span></li>
+<li><img src="img/marca/logo-bots-app.svg" alt=""><span><b>Xyro Bots:</b> asistente que vende y agenda clases de prueba por WhatsApp. <em>Pronto</em></span></li></ul>
+<div class="row"><a class="btn btn-a" style="--acc:#ef4444" href="app/?demo=gym" target="_blank" rel="noopener">▶ Probar demo</a><a class="btn btn-g" href="sitio/?n=Tu%20Gym&amp;c=ef4444" target="_blank" rel="noopener">Ver web de ejemplo</a><a class="btn btn-wa wa" data-msg="quiero el sistema para mi gimnasio (Xyro Gym)" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg>Consultar</a></div></div>
+<div class="rx in-3" style="--rc:#14b8a6"><div class="rx-t"><i>🦷</i><div><b>Consultorios dentales</b><small>Agenda, odontograma y pacientes que vuelven</small></div><span class="rx-tag">● Nuevo</span></div>
+<ul><li><img src="img/marca/logo-apps-app.svg" alt=""><span><b>Xyro Apps:</b> agenda por odontólogo, odontograma, historia clínica privada, presupuestos con abonos, cobro al paso y pacientes por volver.</span></li>
+<li><img src="img/marca/logo-control-app.svg" alt=""><span><b>Xyro Control:</b> venta de productos e insumos (resinas, anestesia) con stock y márgenes.</span></li>
+<li><img src="img/marca/logo-webs-app.svg" alt=""><span><b>Xyro Webs:</b> web de tu clínica con especialistas y reserva de cita que llega a tu WhatsApp.</span></li>
+<li><img src="img/marca/logo-bots-app.svg" alt=""><span><b>Xyro Bots:</b> agenda citas 24 h y recuerda la cita un día antes. <em>Pronto</em></span></li></ul>
+<div class="row"><a class="btn btn-a" style="--acc:#14b8a6" href="app/?demo=consultorio" target="_blank" rel="noopener">▶ Probar demo</a><a class="btn btn-g" href="consultorio/?n=Tu%20Cl%C3%ADnica&amp;c=14b8a6" target="_blank" rel="noopener">Ver web de ejemplo</a><a class="btn btn-wa wa" data-msg="quiero el sistema para mi consultorio dental (Xyro Dental)" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg>Consultar</a></div></div>
+</div>
+<div class="lst-p in-4"><b>🔜 Próximos rubros:</b><span>🎓 Academias</span><span>🍽️ Restaurantes</span><span>🛒 Bodegas</span><span>💇 Salones</span><a class="btn btn-g wa" style="padding:8px 14px;font-size:13px;margin-left:auto" data-msg="quiero un sistema para mi rubro, ¿cuándo estará listo?" href="https://wa.me/51936449066" target="_blank" rel="noopener">¿Tu rubro no está? Escríbenos</a></div>
+</div></section>
 
 <!-- WEBS -->
 <section class="view" data-v="webs" aria-label="Xyro Webs"><div class="wrap wd">
@@ -288,9 +335,9 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 <div class="k in-1"><img class="tile" src="img/marca/logo-apps-app.svg" alt="" width="58" height="58"><div><small>Ecosistema · 2/5</small><b>Xyro Apps</b></div></div>
 <span class="pain in-1">¿Clientes que olvidan pagar?</span>
 <h2 class="in-2">Tus clientes y cobros,<br><span class="grad">en orden y en automático.</span></h2>
-<p class="mut in-2" style="max-width:520px">Sistemas listos por una mensualidad: membresías, recordatorios, asistencia con QR y boletas SUNAT. Primero llega <b style="color:var(--tx)">Xyro Gym</b>.</p>
+<p class="mut in-2" style="max-width:520px">Sistemas listos por una mensualidad: membresías, recordatorios, asistencia con QR y boletas SUNAT. Ya listos: <b style="color:var(--tx)">Xyro Gym</b> y <b style="color:var(--tx)">Xyro Dental</b>.</p>
 <div class="bens in-3"><span>Recordatorios por WhatsApp</span><span>Asistencia con QR</span><span>Boletas y facturas</span></div>
-<div class="row in-4"><a class="btn btn-a" href="app/?demo=gym">Probar Xyro Gym en vivo</a><a class="btn btn-g wa" data-msg="quiero un sistema de clientes y cobros" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero mi app</a><a class="btn btn-g" href="#/control">Siguiente: Control →</a></div>
+<div class="row in-4"><a class="btn btn-a" href="app/?demo=gym">Probar Xyro Gym</a><a class="btn btn-g" href="app/?demo=consultorio">Probar Xyro Dental</a><a class="btn btn-g wa" data-msg="quiero un sistema de clientes y cobros" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero mi app</a><a class="btn btn-g" href="#/control">Siguiente: Control →</a></div>
 </div>
 <div class="vis in-3"><div class="tilt"><div class="dash"><div class="toast" id="aToast"></div>
 <span class="try">Toca los botones</span>
@@ -377,8 +424,9 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 </div></section>
 </main>
 
+<a class="fab wa" data-msg="quiero consultar por sus sistemas" href="https://wa.me/51936449066" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg class="ico"><use href="#wa"/></svg><span>¿Consultas? Escríbenos</span></a>
 <nav class="dock" id="dock" aria-label="Navegación"></nav>
-<div class="hint">Usa <kbd>←</kbd> <kbd>→</kbd> para recorrer</div>
+<div class="hint" style="display:none">Usa <kbd>←</kbd> <kbd>→</kbd> para recorrer</div>
 
 <script>
 (function(){
@@ -392,8 +440,8 @@ clinica:{n:'Clínica',def:'Clínica Sonrisas',em:'🦷',c:'#0ea5e9',tit:'Tu sonr
 restaurante:{n:'Restaurante',def:'Sabor Norteño',em:'🍽️',c:'#dc2626',tit:'El sabor del norte en Lima',sub:'Menú del día, carta completa y delivery a tu casa.',cta:'Ver carta y pedir',hor:'de 12:00 m. a 10:00 p. m.',ped:'tu pedido',o:'Hacer pedido',p:[['🐟','Ceviche',28],['🥩','Lomo saltado',30],['🍹','Chicha morada',6],['🍛','Menú del día',15]],promo:['Ceviche + chicha','Menú a S/ 15']}
 };
 var D=[['webs','Webs','#7c5cff'],['apps','Apps','#3ad6ff'],['control','Control','#f5b544'],['bots','Bots','#3ddc97'],['edits','Edits','#b06bff']];
-var ORDER=['home','webs','apps','control','bots','edits','arma','resultados'];
-var ACC={home:'#7c5cff',arma:'#7c5cff',resultados:'#3ad6ff'};D.forEach(function(d){ACC[d[0]]=d[2]});
+var ORDER=['home','negocios','webs','apps','control','bots','edits','arma','resultados'];
+var ACC={home:'#7c5cff',negocios:'#14b8a6',arma:'#7c5cff',resultados:'#3ad6ff'};D.forEach(function(d){ACC[d[0]]=d[2]});
 var st={r:'panaderia',nom:'',v:'home',color:null,tit:null,sel:{webs:1,bots:1}};
 function rb(){return R[st.r]}function name(){return st.nom||rb().def}
 function money(v){return 'S/ '+v.toFixed(2)}
@@ -410,7 +458,7 @@ function orbit(t){var w=orb.clientWidth,cx=w/2,cy=w/2,rx=w*.44,ry=w*.44*Math.cos
 (function oloop(t){if(st.v==='home'&&!document.hidden)orbit(t||0);else oLast=0;requestAnimationFrame(oloop)})();
 
 /* dock */
-var dock=$('#dock');var DK=[['home','Inicio','<img src="img/marca/logo-xyrostudio-app.svg" alt="" width="46" height="46">']].concat(D.map(function(d){return [d[0],'Xyro '+d[1],'<img src="img/marca/logo-'+d[0]+'-app.svg" alt="" width="46" height="46">']})).concat([['sep'],['arma','Arma tu ecosistema','<span class="tx">🧩</span>'],['resultados','Resultados','<span class="tx" style="background:linear-gradient(135deg,#f5b544,#ef4444)">🏆</span>']]);
+var dock=$('#dock');var DK=[['home','Inicio','<img src="img/marca/logo-xyrostudio-app.svg" alt="" width="46" height="46">'],['negocios','Listos para tu rubro','<span class="tx" style="background:linear-gradient(135deg,#ef4444,#14b8a6)">⭐</span>']].concat(D.map(function(d){return [d[0],'Xyro '+d[1],'<img src="img/marca/logo-'+d[0]+'-app.svg" alt="" width="46" height="46">']})).concat([['sep'],['arma','Arma tu ecosistema','<span class="tx">🧩</span>'],['resultados','Resultados','<span class="tx" style="background:linear-gradient(135deg,#f5b544,#ef4444)">🏆</span>']]);
 DK.forEach(function(k){if(k[0]==='sep'){var s=document.createElement('span');s.className='sep';dock.appendChild(s);return}var b=document.createElement('button');b.type='button';b.dataset.go=k[0];b.setAttribute('aria-label',k[1]);b.innerHTML=k[2]+'<span class="lb">'+k[1]+'</span>';dock.appendChild(b)});
 var dbs=$$('.dock button');
 if(matchMedia('(hover:hover)').matches&&!RM){dock.addEventListener('mousemove',function(e){dbs.forEach(function(b){var r=b.getBoundingClientRect(),d=Math.abs(e.clientX-(r.left+r.width/2));var s=Math.max(1,1.55-d/110);b.style.transform='scale('+s+') translateY('+(-(s-1)*14)+'px)'})});dock.addEventListener('mouseleave',function(){dbs.forEach(function(b){b.style.transform=''})})}
@@ -437,7 +485,7 @@ $('main').addEventListener('touchend',function(e){if(!tx0)return;var dx=e.change
 var ch=$('#rubros');Object.keys(R).forEach(function(k){var b=document.createElement('button');b.className='chip';b.type='button';b.dataset.r=k;b.textContent=R[k].em+' '+R[k].n;b.onclick=function(){st.r=k;st.color=null;st.tit=null;all()};ch.appendChild(b)});
 $('#nom').addEventListener('input',function(e){st.nom=e.target.value.trim();names();web();wa();eco()});
 function names(){$$('[data-n]').forEach(function(e){e.textContent=name()})}
-function wa(){$$('.wa').forEach(function(a){var m='Hola XyroStudio, '+(a.dataset.msg||'quiero información');if(a.id==='sWa')m='Hola XyroStudio, quiero armar mi ecosistema con: '+selNames().join(', ');m+='. Mi negocio: '+name()+' ('+rb().n.toLowerCase()+')';a.href='https://wa.me/'+WA+'?text='+encodeURIComponent(m)})}
+function wa(){$$('.wa').forEach(function(a){var m='Hola XyroStudio, '+(a.dataset.msg||'quiero información');if(a.id==='sWa')m='Hola XyroStudio, quiero armar mi ecosistema con: '+selNames().join(', ');if(!a.closest('.lst')&&!a.classList.contains('fab'))m+='. Mi negocio: '+name()+' ('+rb().n.toLowerCase()+')';else m+='.';a.href='https://wa.me/'+WA+'?text='+encodeURIComponent(m)})}
 
 /* web */
 var COLS=['#f59e0b','#ef4444','#16a34a','#0ea5e9','#7c5cff','#111827'];
