@@ -1,5 +1,14 @@
 [
  {
+  "id": "20261114-0232",
+  "fecha": "2026-11-14 02:32",
+  "titulo": "Logo y datos del negocio en WhatsApp",
+  "notas": "Logo y datos del negocio en WhatsApp",
+  "cambios": [
+   "XyroStudio puede poner el logo, la info, la descripción, la dirección y la web del negocio en su perfil de WhatsApp con un clic (Xyro Bots → 🪪 Poner logo y datos en WhatsApp)"
+  ]
+ },
+ {
   "id": "20261114-0224",
   "fecha": "2026-11-14 02:24",
   "titulo": "Aviso de pago también para el supervisor",
