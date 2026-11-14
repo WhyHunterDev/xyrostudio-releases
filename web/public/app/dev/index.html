@@ -1928,15 +1928,39 @@ function xyDemoBot(wa2){
  return`<div class="card" style="margin-top:12px"><h3 style="margin:0 0 4px">🤖 Así atendería tu asistente</h3><p class="mu sm" style="margin:0 0 14px">Escríbele como si fueras un cliente de ${esc(nombre())}. Responde al instante con tus precios, horarios, clases y sedes, de día y de noche. Lo que no sabe se lo pasa a recepción por WhatsApp.</p>
  <div class="dmx" style="align-items:start"><div>${botChat()}</div><div class="dmc"><b>Qué hace por ti</b><small class="mu">• Contesta las preguntas de siempre sin que recepción deje lo que está haciendo.<br>• Usa los datos de tu web y tus planes: si cambias un precio, el asistente ya lo sabe.<br>• Aparece como burbuja de chat en tu web.<br>• Pronto también en el WhatsApp de tu negocio.</small>
  <a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Probé el asistente y quiero Xyro Bots para '+nombre()+'.')}">💬 Lo quiero</a></div></div></div>`}
-async function botCargar(){try{const{data}=await sb.from('contenido').select('valor').eq('sitio_id',SID).eq('clave','bot').maybeSingle();BOT=(data&&data.valor)||{}}catch(e){BOT={};reportar('bot',e)}ruta==='bots'&&go()}
-function misBots(){if(!BOT&&DEMO)BOT={};if(!BOT){setTimeout(botCargar);return'<div class="card mu">Cargando…</div>'}
+async function botCargar(){try{const{data}=await sb.from('contenido').select('valor').eq('sitio_id',SID).eq('clave','bot').maybeSingle();BOT=(data&&data.valor)||{}}catch(e){BOT={};reportar('bot',e)}
+ if(isAdmin()){try{const{data,error}=await sb.from('xa_bot_ventas').select('datos').eq('sitio_id',String(SID)).maybeSingle();if(error)throw error;VTA=(data&&data.datos)||{}}catch(e){VTA={};NEED38=true}}ruta==='bots'&&go()}
+/* Ventas del bot (SQL 38, xa_bot_ventas: privado, solo admin): modo vendedor, plan objetivo, mínimos, promos especiales, medios de pago */
+let VTA=null,NEED38=false;
+function vtaCard(){if(!isAdmin())return'';const v=VTA||{},mins=Object.entries(v.minimos||{}).filter(([,x])=>+x>0);
+ return`<div class="card"><h3 style="margin:0 0 6px">🎯 Cómo vende</h3>${NEED38&&!DEMO?'<p class="sm" style="margin:0 0 8px">⚠️ Falta activar esta parte (SQL 38). Avísale a XyroStudio.</p>':''}
+ <p class="sm" style="margin:0 0 4px"><b>Modo:</b> ${v.modo==='vendedor'?'🎯 Vendedor: pregunta, recomienda, maneja objeciones y cierra':'💬 Da los precios directo'}</p>
+ ${v.modo==='vendedor'?`<p class="sm" style="margin:0 0 4px"><b>Plan objetivo:</b> ${esc(v.meta||'—')}</p><p class="sm" style="margin:0 0 4px"><b>Precios mínimos:</b> ${mins.length?mins.map(([k,x])=>esc(k)+' '+sol(+x)).join(' · '):'— (no baja precios)'}</p><p class="sm" style="margin:0 0 4px;white-space:pre-wrap"><b>Promos especiales:</b> ${esc(v.especiales||'—')}</p>`:''}
+ <p class="sm" style="margin:0 0 10px"><b>Medios de pago:</b> ${esc([v.yape&&'Yape '+v.yape,v.plin&&'Plin '+v.plin,v.cuenta&&'Transferencia'].filter(Boolean).join(' · ')||'—')}</p>
+ <p class="mu sm" style="margin:0 0 8px">🔒 Solo tú (admin) ves esto. El asistente nunca le dice al cliente cuál es tu mínimo.</p>
+ <button class="btn sm p" id="vtEd">🎯 Configurar ventas</button></div>`}
+function botVentas(){const v=VTA||{},P=(S.pla||[]).filter(p=>p.activo!==false).sort((a,b)=>(+a.dias||0)-(+b.dias||0));
+ const F=[{k:'modo',l:'Cómo responde cuando preguntan precios',t:'opts',v:v.modo||'directo',o:[['vendedor','🎯 Vendedor (como tu mejor recepcionista)'],['directo','💬 Precio directo']]},
+  {k:'meta',l:'Plan al que apunta siempre',t:'sel',v:v.meta||(P[P.length-1]||{}).nombre||'',o:[['','— Ninguno —']].concat(P.map(p=>[p.nombre,p.nombre+' · '+sol(p.precio)]))}];
+ P.forEach((p,i)=>F.push({k:'m'+i,l:`Mínimo «${esc(p.nombre)}» (normal ${sol(p.precio)})`,t:'number',half:1,im:'decimal',v:(v.minimos||{})[p.nombre]||'',ph:'Sin rebaja'}));
+ if(P.length%2)F.push({k:'_x',l:'',t:'hidden',half:1,v:''});
+ F.push({k:'especiales',l:'Promos especiales y cuándo darlas (solo si pagan hoy)',t:'area',rows:4,v:v.especiales||'',ph:'2 personas, 3 meses: S/ 700 los dos.\n1 año a S/ 500 solo si ya viene decidido por el año y paga hoy.\n6 meses a S/ 400 en casos especiales.'},
+  {k:'yape',l:'Yape',half:1,v:v.yape||'',ph:'987654321',im:'tel'},{k:'plin',l:'Plin',half:1,v:v.plin||'',ph:'987654321',im:'tel'},
+  {k:'titular',l:'A nombre de',v:v.titular||'',ph:'Nombre que ve el cliente al pagar'},
+  {k:'cuenta',l:'Cuenta para transferencia',t:'area',rows:2,v:v.cuenta||'',ph:'BCP 191-1234567-0-12 · CCI 002-191-001234567012-55'});
+ form('🎯 Cómo vende tu asistente',F,async x=>{
+  const minimos={};P.forEach((p,i)=>{const n=+x['m'+i];if(n>0){if(n>+p.precio)throw new Error('El mínimo de «'+p.nombre+'» no puede ser mayor que su precio');minimos[p.nombre]=n}});
+  const d={modo:x.modo==='vendedor'?'vendedor':'directo',meta:String(x.meta||'').slice(0,60),minimos,especiales:String(x.especiales||'').slice(0,1500),yape:String(x.yape||'').replace(/[^\d ]/g,'').slice(0,20),plin:String(x.plin||'').replace(/[^\d ]/g,'').slice(0,20),titular:String(x.titular||'').slice(0,80),cuenta:String(x.cuenta||'').slice(0,300)};
+  if(DEMO){VTA=d;go();return toast('Demo: no se guarda')}
+  const{error}=await sb.from('xa_bot_ventas').upsert({sitio_id:String(SID),datos:d,actualizado:new Date().toISOString()});if(error)throw error;VTA=d;NEED38=false;go();toast('🎯 Guardado. El asistente vende así en unos minutos')})}
+function misBots(){if(!BOT&&DEMO){BOT={};VTA=VTA||{}}if(!BOT){setTimeout(botCargar);return'<div class="card mu">Cargando…</div>'}
  const tag=`<script src="https://xyrostudio.net/bot.js" data-s="${SLUG}" data-n="${esc(nombre())}" data-c="${String(CFG.color||'').replace('#','')}" defer><\/script>`;
- setTimeout(()=>{const e=$('#btEd');e&&(e.onclick=botEditar);const wv=$('#waVin');wv&&(wv.onclick=waVincular);const cp=$('#btCp');cp&&(cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(tag).then(()=>toast('📋 Código copiado'))})});
+ setTimeout(()=>{const e=$('#btEd');e&&(e.onclick=botEditar);const ve=$('#vtEd');ve&&(ve.onclick=botVentas);const wv=$('#waVin');wv&&(wv.onclick=waVincular);const cp=$('#btCp');cp&&(cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(tag).then(()=>toast('📋 Código copiado'))})});
  return`<div class="hi"><div><h2>🤖 Tu asistente</h2><p class="mu">Atiende a tus clientes en tu web las 24 horas con tus precios, horarios, clases y sedes. Lo que no sabe lo pasa a recepción por WhatsApp.</p></div></div>
  <div class="dmx" style="align-items:start"><div><h3 style="margin:0 0 8px">Pruébalo</h3>${botChat()}<small class="mu">Las pruebas cuentan en tu cupo diario del soporte.</small></div>
  <div style="display:grid;gap:12px"><div class="card"><h3 style="margin:0 0 6px">Lo que sabe</h3><p class="mu sm" style="margin:0 0 8px">Toma los datos de tu web (planes, sedes, horarios, clases, cafetín). Si cambias algo en Mi web o envías tus planes a la web, se entera en unos minutos.</p>
   <p class="sm" style="margin:0 0 4px"><b>WhatsApp de recepción:</b> ${esc(botWA()||'—')}</p><p class="sm" style="margin:0 0 4px"><b>Interesados:</b> ${BOT.captar===false?'no los pide':'pide nombre y celular → <a href="#/seguimiento" data-segt="int">🧲 ver interesados</a>'}</p><p class="sm" style="margin:0 0 4px"><b>Clase de prueba:</b> ${BOT.prueba?'la ofrece y la agenda'+(BOT.pruebaTxt?' ('+esc(BOT.pruebaTxt)+')':''):'no la ofrece'}</p><p class="sm" style="margin:0 0 10px;white-space:pre-wrap"><b>Promos e info extra:</b> ${esc(BOT.extra||'— (promos, formas de pago, estacionamiento, lo que quieras que sepa)')}</p>
-  <button class="btn sm p" id="btEd">✏️ Editar lo que sabe</button></div>
+  <button class="btn sm p" id="btEd">✏️ Editar lo que sabe</button></div>${vtaCard()}
   <div class="card"><h3 style="margin:0 0 6px">Dónde aparece</h3><p class="mu sm" style="margin:0 0 8px">${CFG.web&&/\/sitio\//.test(CFG.web)?'✅ Ya aparece solo en tu web.':'En tu web con Xyro Webs aparece solo. Para otra web, pega este código antes de &lt;/body&gt;:'}</p>
   <code class="sm" style="display:block;word-break:break-all;padding:8px;border:1px solid var(--line);border-radius:8px">${esc(tag)}</code><button class="btn sm" id="btCp" style="margin-top:8px">📋 Copiar código</button>
   <p class="mu sm" style="margin:10px 0 0">📱 WhatsApp del negocio: ${waOn()?'✅ conectado ('+esc(WAN.map(n=>n.numero||n.phone_id).join(', '))+'). Las conversaciones están en <a href="#/whatsapp">💬 WhatsApp</a>.':'muy pronto. Te avisaremos para conectarlo.'}</p>${ME.gestor?'<button class="btn sm" id="waVin" style="margin-top:8px">🔗 Vincular número de WhatsApp (XyroStudio)</button>':''}</div></div></div>`}
