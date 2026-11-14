@@ -2254,15 +2254,15 @@ function xyTemas(wa2){
 
 /* ===== Mi plan XyroStudio (SQL 42): el negocio paga a XyroStudio por Yape/Plin/transferencia, sube la captura y la IA la verifica (/api/xyro/pago). ===== */
 let XP=null,XPC={},XPP=[],NEED42=false,xpCarg=false;
-async function xpCargar(){if(DEMO||!SID||!isAdmin()||xpCarg)return;xpCarg=true;
+async function xpCargar(){if(DEMO||!SID||!isSup()||xpCarg)return;xpCarg=true;
  try{const[a,b,c]=await Promise.all([sb.from('xa_xyro_plan').select('*').eq('sitio_id',String(SID)).maybeSingle(),sb.from('xa_xyro_cobro').select('*').eq('id',1).maybeSingle(),sb.from('xa_xyro_pagos').select('id,monto,estado,motivo,creado,vence_nuevo,autor_nombre').eq('sitio_id',String(SID)).order('creado',{ascending:false}).limit(12)]);
   if(a.error){NEED42=true;XP={};return}XP=a.data||{};XPC=b.data||{};XPP=c.data||[]}catch(_){XP=XP||{}}finally{xpCarg=false}}
 const xpF=d=>d?new Date(d+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'}):'—';
 const xpDias=()=>XP&&XP.vence&&XP.activo!==false&&+XP.monto>0?Math.round((new Date(XP.vence+'T12:00:00')-new Date(hoy()+'T12:00:00'))/864e5):null;
 const xpRevisando=()=>XPP.some(x=>x.estado==='revisar');
-function planAviso(){const d=xpDias();if(d==null||d>5)return'';const rv=xpRevisando();
+function planAviso(){const d=xpDias();if(d==null||d>5||!isSup())return'';const rv=xpRevisando(),adm=isAdmin();
  const t=rv?'⏳ Recibimos tu pago del plan XyroStudio y lo estamos revisando.':d<0?`🔴 Tu plan XyroStudio venció hace ${-d} día${d===-1?'':'s'}. Paga hoy para no perder el servicio.`:d===0?'🔴 Tu plan XyroStudio vence hoy.':`🟠 Tu plan XyroStudio vence en ${d} día${d===1?'':'s'} (${xpF(XP.vence)}).`;
- return`<a class="card" href="#/miplan" style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px;text-decoration:none;color:inherit;border-color:${rv?'var(--line)':d<=0?'var(--bad)':'#f5b544'}"><b class="sm">${t}</b>${rv?'':'<span class="btn sm p">💳 Pagar</span>'}</a>`}
+ return`<${adm?'a href="#/miplan"':'div'} class="card" style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px;text-decoration:none;color:inherit;border-color:${rv?'var(--line)':d<=0?'var(--bad)':'#f5b544'}"><b class="sm">${t}${adm||rv?'':' Avísale al administrador.'}</b>${rv||!adm?'':'<span class="btn sm p">💳 Pagar</span>'}</${adm?'a':'div'}>`}
 function miPlan(){if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
  if(DEMO)return'<div class="empty"><b>💳</b>Aquí verás tu plan de XyroStudio y podrás pagarlo con Yape o transferencia.</div>';
  if(XP===null){xpCargar().then(()=>ruta==='miplan'&&go());return'<div class="empty"><b>💳</b>Cargando…</div>'}
