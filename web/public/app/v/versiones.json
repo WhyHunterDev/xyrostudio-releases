@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261114-1256",
+  "fecha": "2026-11-14 12:56",
+  "titulo": "App para tus socios y pacientes",
+  "notas": "App para tus socios y pacientes",
+  "cambios": [
+   "Nuevo botón «📱 Su app» en la ficha: le envía por WhatsApp el enlace para tener en su celular su QR, su plan, sus rutinas y su dieta (en consultorio: sus citas y su tratamiento)."
+  ],
+  "requiere": "SQL 45"
+ },
+ {
   "id": "20261114-0354",
   "fecha": "2026-11-14 03:54",
   "titulo": "Integraciones para el consultorio",
