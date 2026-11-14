@@ -132,7 +132,7 @@ Cómo hablas:
   5) Si pide rebaja: «por lo general nuestros precios son fijos, pero sinceramente me caes bien y sé que vas a entrenar con todo». Conecta con su objetivo y su motivo (ej. «se viene el verano y uno quiere verse bien, ¿verdad?»). Luego ofrece «una súper promo solo por hoy» en ese plan: una rebaja PARCIAL (más o menos la mitad entre el precio normal y el mínimo, en número redondo), «para que ya seas parte de la familia (negocio)».
   6) Si se anima o pregunta por un plan más largo, celébralo («¡esa es la actitud!») y dale el plan largo con el mejor precio permitido (puede ser el mínimo) solo por decidir hoy, mostrando cuánto ahorra.
   7) Cierre: «excelente decisión, (nombre)», envía los medios de pago de la FICHA y pídele el comprobante del pago por aquí junto con sus nombres completos, DNI, fecha de nacimiento y celular. Dile que apenas recepción verifique el pago le llega su código QR de acceso.
-  Reglas de precio: NUNCA bajes del «mínimo» de la FICHA ni digas que existe un mínimo. NUNCA digas que una promo «terminó», «ya no está» o «había antes». No regales la rebaja de entrada: primero valor, luego rebaja parcial, y el mínimo solo para cerrar el plan largo. Las «Promos especiales» de la FICHA úsalas solo en el caso que dicen y siempre «solo por hoy». Si pide menos del mínimo, no lo aceptes: insiste con cariño en tu mejor precio y su objetivo; si insiste mucho, pon «derivar» en true. Ejemplo de tono: «Bien, mira, por lo general nuestros precios son fijos, pero me caes bien y como empiezas la próxima semana con todo, hoy te dejo el de 3 meses en S/350 para que ya seas parte de la familia. ¿Qué te parece?».
+  Reglas de precio: NUNCA bajes del «mínimo» de la FICHA ni digas que existe un mínimo. NUNCA digas que una promo «terminó», «ya no está» o «había antes». No regales la rebaja de entrada: primero valor, luego rebaja parcial, y el mínimo solo para cerrar el plan largo. Las «Promos especiales» de la FICHA úsalas SOLO cuando se cumple su «Solo si» y siempre «solo por hoy»; son la única excepción al mínimo (pueden estar por debajo). Si no se cumple su condición, no las menciones. Si pide menos del mínimo, no lo aceptes: insiste con cariño en tu mejor precio y su objetivo; si insiste mucho, pon «derivar» en true. Ejemplo de tono: «Bien, mira, por lo general nuestros precios son fijos, pero me caes bien y como empiezas la próxima semana con todo, hoy te dejo el de 3 meses en S/350 para que ya seas parte de la familia. ¿Qué te parece?».
   Deja «luego» siempre vacío. Sin Modo vendedor, da los precios directo.
 - Documentos (contrato, reglamento): si la FICHA trae «DOCUMENTOS», guíate de lo que dicen para responder dudas sobre condiciones, normas, congelamientos, devoluciones, horarios, etc., citándolos con tus palabras. Si el cliente pide ver el contrato o el reglamento (por ejemplo antes de pagar), pon en «documento» el código exacto del documento (el del plan que conversan si hay varios contratos) y dile que se lo envías por aquí; si no, deja «documento» vacío. Nunca inventes cláusulas: si el documento no lo dice, o hay un reclamo, una excusa o un problema que no entiendes, dilo con amabilidad y pon «derivar» en true para que intervenga recepción.
 - Si te preguntan directamente si eres un bot o una persona, sé honesto: eres el asistente automático del negocio y puedes pasarlos con recepción.
@@ -509,6 +509,38 @@ async function botDoc(req, env) {
   }
 }
 
+// App: el dueño escribe sus promos especiales como quiera y la IA las deja en reglas cortas y claras (el dueño las revisa). Cupo del soporte.
+const REGLAS_SCHEMA = { type: "object", additionalProperties: false, required: ["reglas"], properties: { reglas: { type: "array", items: {
+  type: "object", additionalProperties: false, required: ["promo", "precio", "cuando"], properties: { promo: { type: "string" }, precio: { type: "string" }, cuando: { type: "string" } } } } } };
+async function botReglas(req, env) {
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  const token = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  if (!token || token.length > 4000) return json({ error: "Inicia sesión" }, 401);
+  if (!env.ANTHROPIC_API_KEY) return json({ error: "La IA no está disponible ahora." }, 503);
+  let b; try { b = JSON.parse(await req.text()); } catch { return json({ error: "Solicitud inválida" }, 400); }
+  const t = corta(b.texto, 4000).trim();
+  if (t.length < 8) return json({ error: "Escribe tus promos en el borrador" }, 400);
+  const c = await cupo(env, token, "soporte");
+  if (c.err) return json({ error: c.err === 401 ? "Inicia sesión" : "No se pudo revisar tu cupo" }, c.err === 401 ? 401 : 502);
+  if (!c.ok) return json({ error: c.motivo || "Llegaste al límite de hoy" }, 429);
+  try {
+    const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
+    const r = await client.messages.create({
+      model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 1500,
+      system: "Ordenas las promos especiales que escribió el dueño de un gimnasio para que su asistente de ventas las aplique sin confundirse. Una regla por promo. «promo»: qué es, corto (ej. «Plan 1 año»). «precio»: el precio final en S/ y para cuántas personas (ej. «S/ 500» o «S/ 650 por las 2 personas»). «cuando»: la condición exacta en una frase corta, siempre incluye «paga hoy» si el dueño lo pide. Fiel a lo que escribió: no inventes promos, precios ni condiciones; si algo no está claro, ponlo tal cual. Español de Perú.",
+      messages: [{ role: "user", content: `Planes del gym: ${corta(b.planes, 600) || "-"}\nBORRADOR DEL DUEÑO:\n${t}` }],
+      output_config: { effort: "low", format: { type: "json_schema", schema: REGLAS_SCHEMA } },
+    });
+    const o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
+    const L = (o.reglas || []).slice(0, 12).map((x, i) => `🎁 ${i + 1}. ${corta(x.promo, 80)} → ${corta(x.precio, 60)}\n   Solo si: ${corta(x.cuando, 200)}`);
+    if (!L.length) return json({ error: "No encontré promos en el borrador" }, 422);
+    return json({ reglas: L.join("\n") });
+  } catch (e) {
+    console.log("bot reglas error", e?.status, e?.message);
+    return json({ error: "No se pudo ordenar ahora. Intenta de nuevo." }, 502);
+  }
+}
+
 // App: ver una imagen que llegó por WhatsApp (comprobante, foto). Solo el equipo del negocio (RPC xa_wa_media_ok).
 async function waVerMedia(req, env) {
   const u = new URL(req.url), id = u.searchParams.get("id") || "";
@@ -532,6 +564,7 @@ export default {
     if (u.pathname === "/api/wa/responder") return waResponder(req, env);
     if (u.pathname === "/api/wa/media") return waVerMedia(req, env);
     if (u.pathname === "/api/bot/doc") return botDoc(req, env);
+    if (u.pathname === "/api/bot/reglas") return botReglas(req, env);
     if (u.pathname.startsWith("/api/")) return json({ error: "No existe" }, 404);
     return env.ASSETS.fetch(req);
   },
