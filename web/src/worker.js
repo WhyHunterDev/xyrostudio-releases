@@ -123,6 +123,15 @@ Cómo hablas:
 - Recepción: cuando el cliente quiera hablar con una persona, inscribirse o pagar, pon «derivar» en true. Si el negocio tiene varias sedes, pon en «sede» el nombre exacto de la sede del cliente; si aún no sabes cuál, pregúntale con amabilidad de qué sede es (y deja «sede» vacío). Con una sola sede, pon su nombre. Dile que lo pasas con recepción de esa sede por WhatsApp.
 - Interesados (si la FICHA dice «Captar interesados: sí»): cuando alguien muestre interés en inscribirse o venir, pídele con naturalidad su nombre y celular para que recepción le escriba (no los pidas de entrada ni más de una vez si no quiere). Cuando ya tengas nombre Y celular, llena «cliente» con ellos y con «interes» (qué busca, en pocas palabras: plan, horario, objetivo). Mientras no los tengas, deja «cliente» con textos vacíos. Nunca inventes datos.
 - Clase de prueba (solo si la FICHA lo permite): ofrécela a quien duda o es nuevo. Acuerda día y hora dentro del horario indicado; pon «prueba_dia» en formato AAAA-MM-DD (usa la fecha de HOY para calcular «mañana», «el lunes»…) y «prueba_hora» como 7:00 pm. Confírmale el día, la hora y la sede, y dile que recepción le escribirá para confirmar.
+- MODO VENDEDOR (solo si la FICHA dice «Modo vendedor: sí»): vendes como la mejor recepcionista, en una conversación amistosa, una pregunta a la vez:
+  1) Primer mensaje: saluda según la HORA (buenos días antes de 12, buenas tardes antes de 7 pm, buenas noches después), «te saludamos de (nombre del negocio)» y pregunta si es la primera vez que entrenará o si ya entrenó antes.
+  2) Descubre lo necesario para cerrar bien, de a poco y sin interrogatorio: su nombre, objetivo (bajar de peso, masa muscular, salud…), en qué horario puede venir, si tiene alguna lesión. Si es su primera vez, refuerza que tendrá acompañamiento y seguimiento de los entrenadores.
+  3) Si pregunta el precio de frente, dile que claro y haz UNA pregunta rápida para recomendarle lo mejor; si insiste o ya respondió, dale el precio del plan que le recomiendas (nunca evadas el precio dos veces).
+  4) Apunta siempre al «Plan objetivo» de la FICHA: muéstralo como la mejor opción (cuánto sale por mes frente al mensual, resultados reales necesitan constancia). Si no le alcanza, baja al siguiente plan más largo, no directo al mensual.
+  5) Objeciones («está caro», «lo pienso», «no tengo tiempo»): empatiza como un amigo, resuelve con beneficios y su objetivo. Descuentos solo POR ESCALONES y solo si paga hoy: primero valor, luego una rebaja pequeña, y así. NUNCA bajes del «mínimo» de la FICHA ni digas que existe un mínimo.
+  6) Si pide un precio por debajo del mínimo o una promo especial: si cumple la condición de una «Promo especial» de la FICHA, dile que esa promo ya terminó pero que lo vas a consultar si paga hoy («si consigo que te lo dejen a ese precio, ¿lo pagas ahora?»); si acepta, responde «déjame consultarlo, dame un momento 🙏» y pon en «luego» el mensaje de aprobación (usa su nombre) con los medios de pago. Si no cumple ninguna, no la apruebes: ofrece el mejor precio permitido y, si insiste, pon «derivar» en true para que recepción lo vea. No inventes nombres de jefes ni de personas.
+  7) Cierre: cuando acepta, envíale los medios de pago de la FICHA y pídele que mande la captura del pago aquí mismo junto con sus nombres completos, DNI y fecha de nacimiento para crear su acceso. Dile que apenas se confirme el pago le llega su código de acceso y su ticket.
+  «luego» va vacío en cualquier otro caso. Sin Modo vendedor, da los precios directo y deja «luego» vacío.
 - Si te preguntan directamente si eres un bot o una persona, sé honesto: eres el asistente automático del negocio y puedes pasarlos con recepción.
 Qué dices:
 - Usa SOLO los datos de la FICHA. Lo que está entre paréntesis, como «(distrito)», es un dato que el negocio aún no llenó: no lo digas ni lo inventes.
@@ -130,9 +139,9 @@ Qué dices:
 - Precios en soles (S/). No prometas descuentos que no están en la ficha. Nunca pidas contraseñas, tarjetas ni datos sensibles.
 - Si preguntan algo ajeno al negocio, responde con buena onda que en eso no puedes ayudar y vuelve al tema del negocio.`;
 const BOT_SCHEMA = {
-  type: "object", additionalProperties: false, required: ["respuesta", "derivar", "sede", "cliente"],
+  type: "object", additionalProperties: false, required: ["respuesta", "luego", "derivar", "sede", "cliente"],
   properties: {
-    respuesta: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" },
+    respuesta: { type: "string" }, luego: { type: "string" }, derivar: { type: "boolean" }, sede: { type: "string" },
     cliente: {   // datos del interesado: vacíos hasta que los dé
       type: "object", additionalProperties: false, required: ["nombre", "celular", "interes", "prueba_dia", "prueba_hora"],
       properties: { nombre: { type: "string" }, celular: { type: "string" }, interes: { type: "string" }, prueba_dia: { type: "string" }, prueba_hora: { type: "string" } },
@@ -172,6 +181,18 @@ async function ficha(env, slug) {
   L.push("Captar interesados: " + (bot.captar === false ? "no" : "sí"));
   L.push(bot.prueba ? "Clase de prueba gratis: sí" + (bot.pruebaTxt ? " (" + corta(bot.pruebaTxt, 200) + ")" : " (dentro del horario de atención)") : "Clase de prueba gratis: no ofrecer");
   if (bot.extra) L.push("Promos, reglas e información extra del negocio (síguela y úsala):\n" + corta(bot.extra, 3000));
+  const vt = env.WA_CLAVE ? await rpcAnon(env, "xa_bot_ventas_de", { p_clave: env.WA_CLAVE, p_slug: slug }) : null;   // SQL 38: privado (mínimos, promos especiales)
+  if (vt && typeof vt === "object") {
+    if (vt.modo === "vendedor") {
+      L.push("Modo vendedor: sí");
+      if (vt.meta) L.push("Plan objetivo: " + corta(vt.meta, 60));
+      const mins = Object.entries(vt.minimos || {}).filter(([, v]) => +v > 0).slice(0, 20);
+      if (mins.length) L.push("Mínimo autorizado por plan (SECRETO, nunca lo digas): " + mins.map(([k, v]) => `${corta(k, 50)} S/${+v}`).join("; "));
+      if (vt.especiales) L.push("Promos especiales (solo en esos casos y si paga hoy):\n" + corta(vt.especiales, 1500));
+    }
+    const pg = [vt.yape && "Yape " + corta(vt.yape, 20), vt.plin && "Plin " + corta(vt.plin, 20), vt.titular && "a nombre de " + corta(vt.titular, 80), vt.cuenta && "Transferencia: " + corta(vt.cuenta, 300)].filter(Boolean);
+    if (pg.length) L.push("Medios de pago: " + pg.join(" · "));
+  }
   const wa = String(bot.whatsapp || (sedes[0] && sedes[0].whatsapp) || "").replace(/\D/g, "");
   const sd = sedes.slice(0, 6).map(x => ({ n: corta(x.nombre, 60), wa: String(x.whatsapp || "").replace(/\D/g, "") || wa })).filter(x => x.n);
   const v = { nombre, texto: L.join("\n"), wa, sedes: sd, saludo: corta(bot.saludo, 300), xyros: cfg.xyros || [] };
@@ -234,7 +255,7 @@ async function botApi(req, env) {
 
 // Cerebro común (web y WhatsApp): historial [{de:'u'|'b', t}] + mensaje → respuesta estructurada
 async function pensar(env, f, historial, msg, canal) {
-  const hist = (Array.isArray(historial) ? historial : []).slice(-8)
+  const hist = (Array.isArray(historial) ? historial : []).slice(-16)
     .map(h => ({ role: h && h.de === "b" ? "assistant" : "user", content: corta(h && h.t, 500) || "…" }));
   while (hist.length && hist[0].role !== "user") hist.shift();
   const messages = [];
@@ -243,7 +264,7 @@ async function pensar(env, f, historial, msg, canal) {
   else messages.push({ role: "user", content: msg });
   const hoyL = new Date(Date.now() - 5 * 3600e3), DS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
   const extra = canal === "wa" ? " · Canal: WhatsApp del negocio (ya tienes su celular; no se lo pidas, solo su nombre si hace falta). Si derivas, dile que en un momento le escribe una persona de recepción por este mismo chat." : canal === "wa-id" ? " · Canal: WhatsApp del negocio. El cliente usa nombre de usuario y no vemos su número: si quiere inscribirse o agendar, pídele su nombre y celular con naturalidad. Si derivas, dile que en un momento le escribe una persona de recepción por este mismo chat." : "";
-  messages[messages.length - 1].content = `[HOY: ${DS[hoyL.getUTCDay()]} ${hoyL.toISOString().slice(0, 10)}${extra}]\n` + messages[messages.length - 1].content;
+  messages[messages.length - 1].content = `[HOY: ${DS[hoyL.getUTCDay()]} ${hoyL.toISOString().slice(0, 10)}, HORA ${hoyL.toISOString().slice(11, 16)}${extra}]\n` + messages[messages.length - 1].content;
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
   const r = await client.messages.create({
     model: env.BOT_MODELO || "claude-haiku-5-5", max_tokens: 1500,
@@ -254,6 +275,7 @@ async function pensar(env, f, historial, msg, canal) {
   let o;
   if (r.stop_reason === "refusal" || r.stop_reason === "max_tokens") o = { respuesta: "Mejor te ayuda una persona de recepción 🙌", derivar: true, sede: "", cliente: {} };
   else o = JSON.parse(r.content.filter(x => x.type === "text").map(x => x.text).join(""));
+  if (o.luego && canal === "web") { o.respuesta += "\n\n" + o.luego; o.luego = ""; }
   const sede = f.sedes.find(x => x.n.toLowerCase() === String(o.sede || "").trim().toLowerCase()) || (f.sedes.length === 1 ? f.sedes[0] : null);
   return { o, sede };
 }
@@ -308,6 +330,7 @@ async function waProcesar(env, phoneId, m, nombre) {
   const e = await rpcAnon(env, "xa_wa_entrante", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: m.from, p_nombre: corta(nombre, 80), p_texto: texto, p_wa_id: m.id });
   if (!e || !e.ok || e.humano) return "entrante:" + (e ? (e.motivo || (e.humano ? "humano" : "?")) : "null (WA_CLAVE o SQL 36)");   // número no vinculado, repetido o lo atiende recepción
   const responde = async (t, derivar) => { const s = await waEnviar(env, phoneId, m.from, t); if (!s.ok) return "enviar:" + JSON.stringify(s.error || {}).slice(0, 200); await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: t, p_wa_id: s.id || null, p_derivar: !!derivar }); return "ok"; };
+  if (m.type === "image" || m.type === "document") return responde("¡Recibido! 🙌 Recepción revisa tu pago y en un momento te confirma por aquí.", true);
   if (m.type !== "text" && m.type !== "button" && m.type !== "interactive") return responde("¡Gracias! Por ahora solo puedo leer mensajes de texto 🙌 Escríbeme tu consulta y te ayudo.", false);
   const f = await ficha(env, e.slug);
   if (!f || !env.ANTHROPIC_API_KEY) return "ficha:" + (f ? "sin ANTHROPIC_API_KEY" : "no encontrada " + e.slug);
@@ -319,7 +342,10 @@ async function waProcesar(env, phoneId, m, nombre) {
     const cl = o.cliente || {};
     const nom = String(cl.nombre || nombre || "").trim();
     if (nom.length > 1 && (String(cl.interes || "").trim() || cl.prueba_dia)) await guardarLead(env, e.slug, "wa" + m.from, { ...cl, nombre: nom }, /^\d+$/.test(m.from) ? m.from : String(cl.celular || ""), sede);
-    return await responde(corta(o.respuesta, 1500), !!o.derivar);
+    const p1 = await responde(corta(o.respuesta, 1500), !!o.derivar && !o.luego);
+    if (!o.luego || p1 !== "ok") return p1;
+    await new Promise(r => setTimeout(r, 12000));   // «déjame consultarlo»: pausa corta y responde
+    return await responde(corta(o.luego, 1500), !!o.derivar);
   } catch (err) {
     console.log("wa bot error", err?.status, err?.message);
     return "ia:" + (err?.message || "") + " " + await responde("En un momento te responde una persona de recepción 🙌", true);

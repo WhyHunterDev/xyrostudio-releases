@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261113-2224",
+  "fecha": "2026-11-13 22:24",
+  "titulo": "Asistente vendedor",
+  "notas": "Asistente vendedor",
+  "cambios": [
+   "El asistente puede vender como tu mejor recepcionista: saluda, pregunta, recomienda el plan largo, maneja objeciones y cierra",
+   "Nuevo «🎯 Cómo vende» en Xyro Bots: plan objetivo, precio mínimo por plan, promos especiales y medios de pago (solo lo ve el admin)",
+   "Si el cliente manda la captura del pago, el chat pasa a recepción"
+  ],
+  "requiere": "SQL 38"
+ },
+ {
   "id": "20261113-2046",
   "fecha": "2026-11-13 20:46",
   "titulo": "WhatsApp: clientes con usuario",
