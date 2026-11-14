@@ -322,6 +322,12 @@ async function waApi(req, env, ctx) {
   const u = new URL(req.url);
   if (req.method === "GET") {   // verificación del webhook (Meta)
     if (u.searchParams.get("hub.mode") === "subscribe" && env.WA_VERIFY && u.searchParams.get("hub.verify_token") === env.WA_VERIFY) return new Response(u.searchParams.get("hub.challenge") || "", { status: 200 });
+    if (env.WA_VERIFY && u.searchParams.get("diag") === env.WA_VERIFY && u.searchParams.get("waba")) {   // diagnóstico: suscripción de la cuenta de WhatsApp a la app
+      const w = encodeURIComponent(u.searchParams.get("waba")), g = `https://graph.facebook.com/${env.WA_GRAPH || "v24.0"}/${w}/subscribed_apps`, h = { authorization: "Bearer " + env.WA_TOKEN };
+      const sub = u.searchParams.get("sub") === "1" ? await fetch(g, { method: "POST", headers: h }).then(r => r.json()).catch(e => ({ e: e.message })) : null;
+      const ver = await fetch(g, { headers: h }).then(r => r.json()).catch(e => ({ e: e.message }));
+      return json({ sub, ver, ultimo: globalThis.WA_ULT || null });
+    }
     if (env.WA_VERIFY && u.searchParams.get("diag") === env.WA_VERIFY && u.searchParams.get("pid")) {   // diagnóstico: mensaje simulado de un número falso
       const r = await waProcesar(env, u.searchParams.get("pid"), { from: "51900000000", id: "diag-" + Date.now(), type: "text", text: { body: u.searchParams.get("t") || "hola, cuánto cuesta el mes?" } }, "Prueba XyroStudio");
       return json({ paso: r });
@@ -330,8 +336,9 @@ async function waApi(req, env, ctx) {
   }
   if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
   const raw = await req.text();
-  if (raw.length > 200000 || !(await firmaOk(env, raw, req.headers.get("x-hub-signature-256")))) { console.log("wa firma inválida", raw.length, !!req.headers.get("x-hub-signature-256")); return json({ error: "Firma inválida" }, 401); }
+  if (raw.length > 200000 || !(await firmaOk(env, raw, req.headers.get("x-hub-signature-256")))) { console.log("wa firma inválida", raw.length, !!req.headers.get("x-hub-signature-256")); globalThis.WA_ULT = "firma inválida " + new Date().toISOString(); return json({ error: "Firma inválida" }, 401); }
   console.log("wa webhook", raw.length);
+  globalThis.WA_ULT = new Date().toISOString();
   let b; try { b = JSON.parse(raw); } catch { return json({ ok: true }); }
   const tareas = [];
   for (const en of b.entry || []) for (const ch of en.changes || []) {
