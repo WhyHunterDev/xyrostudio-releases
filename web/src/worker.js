@@ -322,6 +322,10 @@ async function waApi(req, env, ctx) {
   const u = new URL(req.url);
   if (req.method === "GET") {   // verificación del webhook (Meta)
     if (u.searchParams.get("hub.mode") === "subscribe" && env.WA_VERIFY && u.searchParams.get("hub.verify_token") === env.WA_VERIFY) return new Response(u.searchParams.get("hub.challenge") || "", { status: 200 });
+    if (env.WA_VERIFY && u.searchParams.get("diag") === env.WA_VERIFY && u.searchParams.get("pid")) {   // diagnóstico: mensaje simulado de un número falso
+      const r = await waProcesar(env, u.searchParams.get("pid"), { from: "51900000000", id: "diag-" + Date.now(), type: "text", text: { body: u.searchParams.get("t") || "hola, cuánto cuesta el mes?" } }, "Prueba XyroStudio");
+      return json({ paso: r });
+    }
     return json({ wa: env.WA_TOKEN && env.WA_APP_SECRET && env.WA_VERIFY && env.WA_CLAVE ? "✅ WhatsApp listo" : "⏳ Faltan secretos de WhatsApp en Cloudflare" });
   }
   if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
