@@ -1944,6 +1944,11 @@ function vtaCard(){if(!isAdmin())return'';const v=VTA||{},mins=Object.entries(v.
  <h3 style="margin:16px 0 6px">📄 Contratos y reglamento</h3><p class="mu sm" style="margin:0 0 8px">El asistente se guía de lo que dicen para responder dudas, y si el cliente pide verlos se los manda por WhatsApp. Lo que no entienda se lo pasa a recepción.</p>
  ${(v.docs||[]).map(d=>`<div class="row" style="padding:6px 0"><span class="nm"><b>${d.tipo==='reglamento'?'📘':'📄'} ${esc(d.n)}</b><small>${d.plan?'Plan '+esc(d.plan):d.tipo==='reglamento'?'Reglamento':'Todas las membresías'}${d.texto?' · ✅ leído':' · ⚠️ sin leer'}</small></span><a class="btn sm" target="_blank" rel="noopener" href="${esc(d.url)}">Ver</a><button class="btn sm" data-dcdel="${esc(d.id)}">🗑️</button></div>`).join('')||'<p class="sm mu" style="margin:0 0 8px">Aún no subes documentos.</p>'}
  <button class="btn sm" id="dcAdd">＋ Subir contrato o reglamento (PDF)</button></div>`}
+async function reglasIA(t){const P=(S.pla||[]).filter(p=>p.activo!==false).map(p=>p.nombre+' S/'+p.precio).join('; ');
+ if(DEMO)return t.split(/\n|\.\s+/).map(x=>x.trim()).filter(x=>x.length>3).map((x,i)=>'🎁 '+(i+1)+'. '+x.replace(/^./,c=>c.toUpperCase())).join('\n');
+ const{data}=await sb.auth.getSession(),tk=data&&data.session&&data.session.access_token;
+ const r=await fetch('/api/bot/reglas',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tk},body:JSON.stringify({texto:t.slice(0,4000),planes:P})}),j=await r.json().catch(()=>({}));
+ if(!r.ok||!j.reglas)throw new Error(j.error||'No se pudo ordenar');return j.reglas}
 async function vtaGuardar(d){if(DEMO){VTA=d;go();return}const{error}=await sb.from('xa_bot_ventas').upsert({sitio_id:String(SID),datos:d,actualizado:new Date().toISOString()});if(error)throw error;VTA=d;NEED38=false;go()}
 const f64=f=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=ko;r.readAsDataURL(f)});
 function docSubir(){const P=(S.pla||[]).filter(p=>p.activo!==false);
@@ -1962,13 +1967,17 @@ function botVentas(){const v=VTA||{},P=(S.pla||[]).filter(p=>p.activo!==false).s
   {k:'meta',l:'Plan al que apunta siempre',t:'sel',v:v.meta||(P[P.length-1]||{}).nombre||'',o:[['','— Ninguno —']].concat(P.map(p=>[p.nombre,p.nombre+' · '+sol(p.precio)]))}];
  P.forEach((p,i)=>F.push({k:'m'+i,l:`Mínimo «${esc(p.nombre)}» (normal ${sol(p.precio)})`,t:'number',half:1,im:'decimal',v:(v.minimos||{})[p.nombre]||'',ph:'Sin rebaja'}));
  if(P.length%2)F.push({k:'_x',l:'',t:'hidden',half:1,v:''});
- F.push({k:'especiales',l:'Promos especiales y cuándo darlas (solo si pagan hoy)',t:'area',rows:4,v:v.especiales||'',ph:'2 personas, 3 meses: S/ 700 los dos.\n1 año a S/ 500 solo si ya viene decidido por el año y paga hoy.\n6 meses a S/ 400 en casos especiales.'},
+ F.push({k:'borrador',l:'📝 Borrador de promos especiales: escribe como quieras, con todos los detalles',t:'area',rows:4,v:v.borrador||'',ph:'Ej. si alguien menciona la promo antigua del año a 500 y paga hoy se le permite. Si vienen 2 personas por 3 meses se les deja en 650 los dos…',on:fm=>{
+   const ta=fm.querySelector('#f_borrador');ta.closest('label').insertAdjacentHTML('afterend','<button type="button" class="btn sm p" id="rgOr" style="justify-self:start">✨ Ordenar para el asistente</button>');
+   fm.querySelector('#rgOr').onclick=async e=>{const b=e.target,t=ta.value.trim();if(t.length<8)return toast('Escribe primero tus promos en el borrador');b.disabled=true;b.textContent='🤖 Ordenando…';
+    try{const out=fm.querySelector('#f_especiales');out.value=await reglasIA(t);out.focus();toast('✨ Listo. Revisa las reglas y guarda')}catch(er){toast(er.message)}b.disabled=false;b.textContent='✨ Ordenar para el asistente'}}},
+  {k:'especiales',l:'✅ Reglas que usa el asistente (revísalas; puedes corregirlas)',t:'area',rows:5,v:v.especiales||'',ph:'2 personas, 3 meses: S/ 700 los dos.\n1 año a S/ 500 solo si ya viene decidido por el año y paga hoy.\n6 meses a S/ 400 en casos especiales.'},
   {k:'yape',l:'Yape',half:1,v:v.yape||'',ph:'987654321',im:'tel'},{k:'plin',l:'Plin',half:1,v:v.plin||'',ph:'987654321',im:'tel'},
   {k:'titular',l:'A nombre de',v:v.titular||'',ph:'Nombre que ve el cliente al pagar'},
   {k:'cuenta',l:'Cuenta para transferencia',t:'area',rows:2,v:v.cuenta||'',ph:'BCP 191-1234567-0-12 · CCI 002-191-001234567012-55'});
  form('🎯 Cómo vende tu asistente',F,async x=>{
   const minimos={};P.forEach((p,i)=>{const n=+x['m'+i];if(n>0){if(n>+p.precio)throw new Error('El mínimo de «'+p.nombre+'» no puede ser mayor que su precio');minimos[p.nombre]=n}});
-  const d={...(VTA||{}),modo:x.modo==='vendedor'?'vendedor':'directo',meta:String(x.meta||'').slice(0,60),minimos,especiales:String(x.especiales||'').slice(0,1500),yape:String(x.yape||'').replace(/[^\d ]/g,'').slice(0,20),plin:String(x.plin||'').replace(/[^\d ]/g,'').slice(0,20),titular:String(x.titular||'').slice(0,80),cuenta:String(x.cuenta||'').slice(0,300)};
+  const d={...(VTA||{}),borrador:String(x.borrador||'').slice(0,4000),modo:x.modo==='vendedor'?'vendedor':'directo',meta:String(x.meta||'').slice(0,60),minimos,especiales:String(x.especiales||'').slice(0,1500),yape:String(x.yape||'').replace(/[^\d ]/g,'').slice(0,20),plin:String(x.plin||'').replace(/[^\d ]/g,'').slice(0,20),titular:String(x.titular||'').slice(0,80),cuenta:String(x.cuenta||'').slice(0,300)};
   if(DEMO){VTA=d;go();return toast('Demo: no se guarda')}
   const{error}=await sb.from('xa_bot_ventas').upsert({sitio_id:String(SID),datos:d,actualizado:new Date().toISOString()});if(error)throw error;VTA=d;NEED38=false;go();toast('🎯 Guardado. El asistente vende así en unos minutos')})}
 function misBots(){if(!BOT&&DEMO){BOT={};VTA=VTA||{}}if(!BOT){setTimeout(botCargar);return'<div class="card mu">Cargando…</div>'}
