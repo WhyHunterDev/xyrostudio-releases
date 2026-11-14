@@ -410,7 +410,7 @@ async function waEnviar1(env, phoneId, to, texto, img, doc) {
   return { ok: !!(r && r.ok), id: j.messages && j.messages[0] && j.messages[0].id, error: j.error };
 }
 
-async function waProcesar(env, phoneId, m, nombre) {
+async function waProcesar(env, phoneId, m, nombre, alt) {
   const texto = m.type === "text" ? corta(m.text && m.text.body, 2000)
     : m.type === "button" ? corta(m.button && m.button.text, 500)
     : m.type === "interactive" ? corta((m.interactive.button_reply || m.interactive.list_reply || {}).title, 500)
@@ -419,7 +419,8 @@ async function waProcesar(env, phoneId, m, nombre) {
     : `[${m.type}]`;
   m.from = m.from || m.from_user_id;   // usuarios con nombre de usuario de WhatsApp: llega su ID (p. ej. PE.123…) en vez del número
   if (!m.from) return "sin remitente";
-  const e = await rpcAnon(env, "xa_wa_entrante", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: m.from, p_nombre: corta(nombre, 80), p_texto: texto, p_wa_id: m.id });
+  const clave = await rpcAnon(env, "xa_wa_clave_chat", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: m.from, p_alt: alt || null, p_nombre: corta(nombre, 80) });   // misma persona con número o con ID de usuario = un solo chat (SQL 43)
+  const e = await rpcAnon(env, "xa_wa_entrante", { p_clave: env.WA_CLAVE, p_phone_id: phoneId, p_tel: typeof clave === "string" && clave ? clave : m.from, p_nombre: corta(nombre, 80), p_texto: texto, p_wa_id: m.id });
   if (e && e.ok && e.humano && (m.type === "image" || m.type === "document")) return waComprobante(env, e, m, nombre, async () => "humano");   // aunque atienda recepción, el pago va a «Ventas del bot» (sin responder: responde recepción)
   if (!e || !e.ok || e.humano) return "entrante:" + (e ? (e.motivo || (e.humano ? "humano" : "?")) : "null (WA_CLAVE o SQL 36)");   // número no vinculado, repetido o lo atiende recepción
   const responde = async (t, derivar) => { const s = await waEnviar(env, phoneId, m.from, t); if (!s.ok) return "enviar:" + JSON.stringify(s.error || {}).slice(0, 200); await rpcAnon(env, "xa_wa_saliente", { p_clave: env.WA_CLAVE, p_chat: e.chat, p_de: "bot", p_texto: t, p_wa_id: s.id || null, p_derivar: !!derivar }); return "ok"; };
@@ -525,8 +526,8 @@ async function waApi(req, env, ctx) {
   const tareas = [];
   for (const en of b.entry || []) for (const ch of en.changes || []) {
     const v = ch.value || {}, pid = v.metadata && v.metadata.phone_number_id;
-    const nombres = {}; (v.contacts || []).forEach(c => { const n = c.profile && c.profile.name; if (c.wa_id) nombres[c.wa_id] = n; if (c.user_id) nombres[c.user_id] = n; });
-    for (const m of v.messages || []) if (pid) tareas.push(waProcesar(env, pid, m, nombres[m.from || m.from_user_id] || ""));
+    const nombres = {}, otro = {}; (v.contacts || []).forEach(c => { const n = c.profile && c.profile.name; if (c.wa_id) nombres[c.wa_id] = n; if (c.user_id) nombres[c.user_id] = n; if (c.wa_id && c.user_id) { otro[c.wa_id] = c.user_id; otro[c.user_id] = c.wa_id; } });
+    for (const m of v.messages || []) if (pid) { const id = m.from || m.from_user_id; tareas.push(waProcesar(env, pid, m, nombres[id] || "", (m.from && m.from_user_id && m.from !== m.from_user_id ? m.from_user_id : "") || otro[id] || "")); }
   }
   if (req.headers.get("x-xyro-diag") === "1") return json({ ok: true, pasos: await Promise.all(tareas).catch(e => ["error " + e?.message]) });   // diagnóstico (requiere firma válida)
   ctx.waitUntil(Promise.all(tareas).then(x => console.log("wa", JSON.stringify(x))).catch(e => console.log("wa", e?.message)));
