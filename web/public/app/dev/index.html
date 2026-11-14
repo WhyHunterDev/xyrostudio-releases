@@ -374,7 +374,14 @@ const DISENOS_X=[['fuerza','Fuerza','Foto a pantalla completa y letras gigantes.
 const DIS_C=[['clinica','Clínica','Portada con agenda animada, servicios, especialistas con sus días y reserva de cita en 4 pasos por WhatsApp.']];
 const demoURL=(e,t)=>(R.citas?'/consultorio/':'/sitio/')+'?n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||WEB.color||'#f5c400').replace('#','')+(CFG.logo&&/^https:/.test(CFG.logo)?'&l='+encodeURIComponent(CFG.logo):'')+'&e='+e+(t?'&tema='+t:'');
 const conTema=(u,t)=>u?u.replace(/#.*$/,'')+(u.includes('?')?'&':'?')+'tema='+t:'';
-const PRONTO=k=>{const x=XYROS.find(y=>y[0]===k);return!!(x&&x[3])};
+// Consultorio dental: qué hace cada Xyro en una clínica (disponibles y pensados, «muy pronto»).
+const XYROS_D=[['apps','Xyro Apps','Agenda por odontólogo, pacientes, odontograma, historia clínica privada, presupuestos con abonos, cobros y caja, seguimiento de pacientes por volver y equipo con roles.',0,['🗓️ Agenda por especialista','🦷 Odontograma','📋 Historia clínica','💸 Presupuestos y abonos','🔁 Pacientes por volver']],
+ ['webs','Xyro Webs','La web de tu clínica con tus servicios, tus especialistas y sus días, opiniones y reserva de cita en 4 pasos que llega a tu WhatsApp. Tus tratamientos y precios pasan solos desde la app.',0,['🌐 Web con tu dominio','📅 Reserva de cita','👩‍⚕️ Tus especialistas','🦷 Tratamientos al día']],
+ ['control','Xyro Control','Vende productos en el consultorio (cepillos, hilo dental, kits de blanqueamiento) y controla tus insumos (resinas, anestesia, guantes): stock que avisa antes de acabarse y cuánto ganas de verdad.',0,['🪥 Venta de productos','📦 Insumos y stock','💰 Márgenes']],
+ ['bots','Xyro Bots','Asistente por WhatsApp que agenda citas solo las 24 horas en los horarios libres, recuerda la cita un día antes, confirma o reprograma, invita a su control a los pacientes por volver y avisa los saldos.',1,['🤖 Agenda 24 h','⏰ Recordatorios','🔁 Reactiva pacientes','💸 Avisa saldos']],
+ ['edits','Xyro Edits','Videos y reels para tus redes: antes y después de tratamientos, consejos de salud dental y presentación de tus especialistas.',1,['🎬 Antes y después','💡 Consejos','📣 Reels']]];
+const XYR=()=>R.citas?XYROS_D:XYROS;
+const PRONTO=k=>{const x=XYR().find(y=>y[0]===k);return!!(x&&x[3])};
 const soporteWA=()=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;
 const soporteURL=()=>DEMO?soporteWA():'#/soporte';const soporteTgt=()=>DEMO?' target="_blank" rel="noopener"':'';
 const tiene=k=>DEMO||XY.includes(k);
@@ -2428,6 +2435,7 @@ function xyros(){
  const wa=n=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, quiero activar '+n+' para '+nombre())}`;
  const desc=k=>k==='apps'?'Tu sistema base: '+R.clis.toLowerCase()+', '+R.plan.toLowerCase()+'s, cobros, asistencia, caja, metas y equipo.':XYROS.find(x=>x[0]===k)[2]+'.';
  const wa2=t=>`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
+ if(R.citas)return xyrosDent(on,wa,wa2);
  const acc=k=>{if(!on(k)&&PRONTO(k))return'';if(!on(k))return isAdmin()?`${k==='webs'||k==='control'||k==='bots'?`<a class="btn sm" href="#/xyros/${arg==='demos'+k?'':'demos'+k}">${arg==='demos'+k?'Ocultar demos':'👀 Ver demos'}</a>`:''}<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
   if(k==='control')return'<a class="btn sm" href="#/tienda">Abrir punto de venta</a>';
   if(k==='bots')return isAdmin()?'<a class="btn sm" href="#/bots">⚙️ Configurar asistente</a>':'';
@@ -2444,6 +2452,20 @@ function xyros(){
  ${ME.gestor?'<p class="mu sm" style="margin-top:12px">Como XyroStudio ves lo mismo que el cliente. Sus integraciones se activan en tu Panel XyroStudio → Clientes → Xyros.</p>':''}`;
 }
 
+function xyrosDent(on,wa,wa2){
+ const ch=L=>`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${L.map(t=>`<span style="font-size:12px;padding:4px 9px;border-radius:99px;background:var(--line);white-space:nowrap">${esc(t)}</span>`).join('')}</div>`;
+ const acc=(k,n)=>{if(on(k)){if(k==='webs')return'<a class="btn sm" href="#/web">Editar mi web</a><a class="btn sm" target="_blank" rel="noopener" href="'+wa2('Hola XyroStudio 👋 Quiero hacer cambios en la web de '+nombre())+'">✏️ Pedir cambios</a>';if(k==='control')return'<a class="btn sm" href="#/tienda">Abrir productos</a>';return''}
+  if(!isAdmin())return'<small class="mu">Pídele al administrador que lo active.</small>';
+  return`${k==='webs'||k==='control'?`<a class="btn sm" href="#/xyros/${arg==='demos'+k?'':'demos'+k}">${arg==='demos'+k?'Ocultar demo':'👀 Ver demo'}</a>`:''}<a class="btn sm p" target="_blank" rel="noopener" href="${wa(n)}">Activar por WhatsApp</a>`};
+ const card=([k,n,d,p,L])=>`<div class="card eqc" style="align-items:flex-start;flex-wrap:wrap"><img src="/img/marca/logo-${k}-app.svg" alt="" style="width:44px;height:44px;flex:none"><div class="nm" style="flex:1 1 260px"><b>${esc(n)}${k==='apps'?' <small class="mu">· base</small>':''}</b><small style="white-space:normal">${esc(d)}</small>${ch(L)}</div><div class="eqa">${k==='apps'||on(k)?'<span class="pill act">Activo</span>':p?'<span class="pill pronto">Muy pronto</span>':'<span class="pill sin">No activo</span>'}${k==='apps'?'':p?`<a class="btn sm" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Me interesa '+n+' para '+nombre()+'. Avísenme cuando esté listo.')}">🔔 Avísame</a>`:acc(k,n)}</div></div>`;
+ const D=XYROS_D.filter(x=>!x[3]),P=XYROS_D.filter(x=>x[3]);
+ return`<div class="hi"><div><h2>Integraciones para tu consultorio</h2><p class="mu">Xyro Apps es la base de tu clínica y le sumas lo que necesites, todo en este mismo panel.</p></div></div>
+ <p class="mu sm" style="margin:6px 0 8px">✅ Disponibles</p><div class="eq st">${D.map(card).join('')}</div>
+ ${!on('webs')&&(arg==='demos'||arg==='demoswebs')?xyDemos(wa2):''}
+ ${!on('control')&&arg==='demoscontrol'?xyDemoCtl(wa2):''}
+ <p class="mu sm" style="margin:18px 0 8px">🔜 Pensados para clínicas dentales · muy pronto en este mismo panel</p><div class="eq st">${P.map(card).join('')}</div>
+ ${ME.gestor?'<p class="mu sm" style="margin-top:12px">Como XyroStudio ves lo mismo que el cliente. Sus integraciones se activan en tu Panel XyroStudio → Clientes → Xyros.</p>':''}`;
+}
 function xyDemos(wa2){
  return`<div class="card" id="xyDemos" style="margin-top:12px"><h3 style="margin:0 0 4px">🌐 Así se vería tu web</h3><p class="mu sm" style="margin:0 0 14px">${R.citas?'Lista':'3 diseños listos'} con el nombre y color de ${esc(nombre())}. Tócalo para verlo en grande. Si te gusta uno, pídelo y lo dejamos con tus fotos, precios y tu propio dominio.</p>
  <div class="dmx">${(R.citas?DIS_C:DISENOS_X).map(([k,n,d])=>`<div class="dmc"><a class="dmf" href="${demoURL(k)}" target="_blank" rel="noopener" aria-label="Ver ${n} en grande"><iframe src="${demoURL(k)}" loading="lazy" tabindex="-1" title="${n}" scrolling="no"></iframe><span>Ver en grande ↗</span></a>
@@ -2452,14 +2474,14 @@ function xyDemos(wa2){
  <div class="tmx" ${R.citas?'hidden':''}>${TEMAS_X.map(([k,e,n])=>`<a class="btn sm" target="_blank" rel="noopener" href="${demoURL('fuerza',k)}">${e} ${n}</a>`).join('')}</div></div>`;
 }
 function xyDemoCtl(wa2){
- const t=tiendaN(),P=[['🥤','Batido de proteína',10,18,4],['🍫','Barra proteica',7,42,6],['💧','Agua 625 ml',2.5,60,1],['💊','Creatina 300 g',95,3,38]];
+ const t=tiendaN(),P=R.citas?[['🪥','Cepillo eléctrico',89,6,52],['✨','Kit de blanqueamiento',120,3,64],['🧵','Hilo dental',9,40,4],['🧴','Enjuague bucal',22,18,11]]:[['🥤','Batido de proteína',10,18,4],['🍫','Barra proteica',7,42,6],['💧','Agua 625 ml',2.5,60,1],['💊','Creatina 300 g',95,3,38]];
  return`<div class="card" id="xyDemoCtl" style="margin-top:12px"><h3 style="margin:0 0 4px">🧾 Así funcionaría tu ${esc(t.toLowerCase())} con Xyro Control</h3><p class="mu sm" style="margin:0 0 14px">Vendes con un toque, el stock baja solo y ves cuánto ganas de verdad. Todo en este mismo panel, en la misma caja de tu negocio.</p>
  <div class="dmx">
-  <div class="dmc"><b>⚡ Venta en 2 toques</b><div class="card" style="padding:10px;display:grid;gap:6px">${P.map(([e,n,pr,st])=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${e} ${n}</span><span><b>${sol(pr)}</b> <small class="mu">· ${st} en stock</small></span></div>`).join('')}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px"><b>Venta: 2 batidos + 1 agua</b><b style="color:var(--a)">${sol(22.5)}</b></div></div><small class="mu">Cobras en efectivo, Yape o tarjeta y sale su comprobante.</small></div>
+  <div class="dmc"><b>⚡ Venta en 2 toques</b><div class="card" style="padding:10px;display:grid;gap:6px">${P.map(([e,n,pr,st])=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${e} ${n}</span><span><b>${sol(pr)}</b> <small class="mu">· ${st} en stock</small></span></div>`).join('')}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px"><b>Venta: ${R.citas?'1 cepillo + 1 hilo':'2 batidos + 1 agua'}</b><b style="color:var(--a)">${sol(R.citas?98:22.5)}</b></div></div><small class="mu">Cobras en efectivo, Yape o tarjeta y sale su comprobante.</small></div>
   <div class="dmc"><b>📦 Stock que se cuida solo</b><div class="card" style="padding:10px;display:grid;gap:8px">${P.map(([e,n,pr,st])=>`<div><div style="display:flex;justify-content:space-between"><small>${e} ${n}</small><small class="${st<5?'':'mu'}" style="${st<5?'color:var(--bad);font-weight:700':''}">${st<5?'⚠️ quedan '+st:st+' u.'}</small></div><div style="height:6px;border-radius:9px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${Math.min(100,st*1.6)}%;background:${st<5?'var(--bad)':'var(--a)'}"></i></div></div>`).join('')}</div><small class="mu">Te avisa antes de que se acabe y registra cada entrada de mercadería.</small></div>
   <div class="dmc"><b>💰 Cuánto ganas de verdad</b><div class="card" style="padding:10px;display:grid;gap:6px">${P.map(([e,n,pr,st,co])=>`<div style="display:flex;justify-content:space-between"><small>${e} ${n}</small><small>gana <b style="color:var(--ok)">${Math.round((pr-co)/pr*100)}%</b></small></div>`).join('')}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px"><b>Ganancia del mes</b><b style="color:var(--ok)">${sol(1840)}</b></div></div><small class="mu">Márgenes por producto, cierre de caja por turno y reportes por fecha.</small></div>
  </div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><a class="btn sm" target="_blank" rel="noopener" href="/app/?demo=gym#/tienda">🧪 Probarlo en la demo ↗</a><a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Vi la demo de Xyro Control y quiero el punto de venta para '+nombre()+'.')}">💬 Lo quiero</a></div></div>`;
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><a class="btn sm" target="_blank" rel="noopener" href="/app/?demo=${R.citas?'consultorio':'gym'}#/tienda">🧪 Probarlo en la demo ↗</a><a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Vi la demo de Xyro Control y quiero el punto de venta para '+nombre()+'.')}">💬 Lo quiero</a></div></div>`;
 }
 /* ===== Xyro Bots: asistente del negocio (chat en su web; WhatsApp después). Worker /api/bot, SQL 34 ===== */
 let BOT=null,BOTH=[],BOT_ON=false;
