@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261113-1902",
+  "fecha": "2026-11-13 19:02",
+  "titulo": "Xyro Bots: interesados y clase de prueba",
+  "notas": "Xyro Bots: interesados y clase de prueba",
+  "cambios": [
+   "El asistente de tu web pide nombre y celular a quien quiere inscribirse",
+   "Puede ofrecer y agendar una clase de prueba gratis (actívalo en Lo que sabe tu asistente)",
+   "Nueva pestaña 🧲 Interesados en Seguimiento: escríbeles por WhatsApp y marca si se inscribieron"
+  ],
+  "requiere": "SQL 35"
+ },
+ {
   "id": "20261113-1843",
   "fecha": "2026-11-13 18:43",
   "titulo": "Asistente más humano y con promos",
