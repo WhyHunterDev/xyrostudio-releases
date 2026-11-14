@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261114-0342",
+  "fecha": "2026-11-14 03:42",
+  "titulo": "Cobro al paso (dental)",
+  "notas": "Cobro al paso (dental)",
+  "cambios": [
+   "Nuevo «🚶 Cobro al paso» en Inicio y en Caja para quien no es paciente: eliges el tratamiento, sale el precio, cobras y entra a la caja con su comprobante",
+   "Arreglado el botón «Agregar especialistas» de la clínica nueva"
+  ]
+ },
+ {
   "id": "20261114-0334",
   "fecha": "2026-11-14 03:34",
   "titulo": "Consultorio dental: sin cafetín ni importar",
