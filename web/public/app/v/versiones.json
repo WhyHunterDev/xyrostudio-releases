@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261114-0354",
+  "fecha": "2026-11-14 03:54",
+  "titulo": "Integraciones para el consultorio",
+  "notas": "Integraciones para el consultorio",
+  "cambios": [
+   "Integraciones del consultorio explica qué hace cada Xyro en una clínica dental",
+   "Disponibles: Xyro Apps (base), Xyro Webs (web con reserva de cita) y Xyro Control (productos e insumos dentales)",
+   "Muy pronto: Xyro Bots (agenda citas y recuerda por WhatsApp) y Xyro Edits (reels de antes y después), con botón «🔔 Avísame»"
+  ],
+  "rubros": [
+   "consultorio"
+  ]
+ },
+ {
   "id": "20261114-0347",
   "fecha": "2026-11-14 03:47",
   "titulo": "Asistencia solo arriba y enlace único de acceso",
