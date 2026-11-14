@@ -242,7 +242,7 @@ async function pensar(env, f, historial, msg, canal) {
   if (messages.length && messages[messages.length - 1].role === "user") messages[messages.length - 1].content += "\n" + msg;
   else messages.push({ role: "user", content: msg });
   const hoyL = new Date(Date.now() - 5 * 3600e3), DS = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-  const extra = canal === "wa" ? " · Canal: WhatsApp del negocio (ya tienes su celular; no se lo pidas, solo su nombre si hace falta). Si derivas, dile que en un momento le escribe una persona de recepción por este mismo chat." : "";
+  const extra = canal === "wa" ? " · Canal: WhatsApp del negocio (ya tienes su celular; no se lo pidas, solo su nombre si hace falta). Si derivas, dile que en un momento le escribe una persona de recepción por este mismo chat." : canal === "wa-id" ? " · Canal: WhatsApp del negocio. El cliente usa nombre de usuario y no vemos su número: si quiere inscribirse o agendar, pídele su nombre y celular con naturalidad. Si derivas, dile que en un momento le escribe una persona de recepción por este mismo chat." : "";
   messages[messages.length - 1].content = `[HOY: ${DS[hoyL.getUTCDay()]} ${hoyL.toISOString().slice(0, 10)}${extra}]\n` + messages[messages.length - 1].content;
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 2 });
   const r = await client.messages.create({
@@ -315,7 +315,7 @@ async function waProcesar(env, phoneId, m, nombre) {
   if (!c || !c.ok) return "cupo:" + JSON.stringify(c) + " " + await responde("En un momento te responde una persona de recepción 🙌", true);
   try {
     const hist = (e.historial || []).map(x => ({ de: x.de === "cliente" ? "u" : "b", t: x.t }));
-    const { o, sede } = await pensar(env, f, hist, texto, "wa");
+    const { o, sede } = await pensar(env, f, hist, texto, /^\d+$/.test(m.from) ? "wa" : "wa-id");
     const cl = o.cliente || {};
     const nom = String(cl.nombre || nombre || "").trim();
     if (nom.length > 1 && (String(cl.interes || "").trim() || cl.prueba_dia)) await guardarLead(env, e.slug, "wa" + m.from, { ...cl, nombre: nom }, /^\d+$/.test(m.from) ? m.from : String(cl.celular || ""), sede);
