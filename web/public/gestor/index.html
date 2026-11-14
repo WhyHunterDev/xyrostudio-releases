@@ -699,6 +699,7 @@ async function crearNegocio(){
   const {data:ya}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle(); if(ya)throw new Error('Ya existe un negocio con el código «'+slug+'». Cambia el nombre o el código en «Más opciones».');
   const {data:s,error:e1}=await sb.from('sitios').insert({slug,negocio}).select('id').single(); if(e1)throw new Error('No pude crear el negocio: '+e1.message);
   const {error:e2}=await sb.from('contenido').upsert([{sitio_id:s.id,clave:'config',valor:{xyros}},{sitio_id:s.id,clave:'app',valor:{rubro:plt.k,nombre:negocio,color:v('aC')||plt.color||'#7c5cff',...(web?{web}:{})}}]); if(e2)throw new Error('Negocio creado, pero no pude guardar sus ajustes: '+e2.message);
+  if(xyros.includes('apps')){ try{ VERS=await fetch('/app/v/versiones.json',{cache:'no-store'}).then(r=>r.json()); const u=ultDe(plt.k); if(u)await sb.from('xa_versiones').upsert({clave:String(s.id),version:u,actualizado:new Date().toISOString()}); }catch(_){} }
   let webB='', aviso='';
   if(xyros.includes('webs')){ try{ webB=await sembrarWeb(slug); }catch(ex){ aviso='El panel se creó, pero no pude crear su web desde la base ('+ex.message+'). Vuelve a guardar sus Xyros.'; } }
   const mm=+v('aM')||0, modulos={}; ['webs','apps','control','bots','edits'].forEach(k=>modulos[k]={on:xyros.includes(k),precio:k==='apps'&&mm?mm:null});
@@ -715,31 +716,41 @@ const prox3am=()=>{const d=new Date(),t=new Date(Date.UTC(d.getUTCFullYear(),d.g
 const vEf=r=>{if(!r)return null;const ya=r.prog&&new Date(r.prog_para)<=new Date();if(!ya)return r.version;return r.fijo||!r.version||r.prog>r.version?r.prog:r.version};
 const progOn=r=>r&&r.prog&&new Date(r.prog_para)>new Date();
 let VERS=[];
+// Ecosistemas: cada versión dice para qué rubros es (versiones.json → rubros; sin rubros = para todos).
+const ECOS={gym:['🏋️','Gimnasios','gimnasios'],consultorio:['🦷','Consultorios dentales','consultorios'],academia:['🎓','Academias','academias']};
+const vPara=(v,r)=>!v.rubros||!v.rubros.length||v.rubros.includes(r);
+const ultDe=r=>(VERS.find(v=>vPara(v,r))||{}).id||'';
+let vEco=localStorage.getItem('xg-veco')||'gym',VSIT=[];
 V.versiones=async ()=>{
-  H('Actualizaciones','Lo nuevo se prueba en el panel de pruebas. Los negocios no cambian hasta que tú lo subes, y nunca mientras lo están usando: toma la versión nueva al volver a abrir.');
-  $('#acts').innerHTML='<a class="btn btn-g" href="/app/dev/?demo=gym" target="_blank" rel="noopener">🧪 Panel de pruebas</a> <button class="btn btn-g" data-v="versiones">↻</button>';
-  const [vj,{data:rows,error},{data:si},{data:cs}]=await Promise.all([fetch('/app/v/versiones.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>[]),sb.from('xa_versiones').select('*'),sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,valor').eq('clave','config')]);
+  H('Actualizaciones','Cada ecosistema tiene sus propias actualizaciones: lo de consultorios no se ofrece a gimnasios y al revés. Los negocios no cambian hasta que tú lo subes, y nunca mientras lo están usando.');
+  const [vj,{data:rows,error},{data:si},{data:cs}]=await Promise.all([fetch('/app/v/versiones.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>[]),sb.from('xa_versiones').select('*'),sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,clave,valor').in('clave',['config','app'])]);
   VERS=vj||[];
   if(error)return '<div class="panel"><div class="empty">Falta correr el SQL 28 (versiones) en Supabase.</div></div>';
-  const M={};(rows||[]).forEach(r=>M[r.clave]=r);const g=M.general||{},vg=vEf(g)||(VERS.length?VERS[VERS.length-1].id:''),ult=VERS.length?VERS[0].id:'';
-  const xy={};(cs||[]).forEach(r=>xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[]);
-  const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps'));
+  const M={};(rows||[]).forEach(r=>M[r.clave]=r);const g=M.general||{},vg=vEf(g)||(VERS.length?VERS[VERS.length-1].id:'');
+  const xy={},rub={};(cs||[]).forEach(r=>{if(r.clave==='config')xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[];else rub[r.sitio_id]=(r.valor&&r.valor.rubro)||'gym'});
+  const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps')).map(s=>Object.assign(s,{rubro:rub[s.id]||'gym'}));
   const nom=id=>{const x=VERS.find(v=>v.id===id);return x?x.fecha:(id||'—')};
   const efS=s=>{const r=M[s.id];if(!r)return vg;const v=vEf(r);return r.fijo?(v||vg):(v&&v>vg?v:vg)};
   const pt=r=>progOn(r)?` <span class="tag pend">⏰ ${esc(nom(r.prog))} a las 3 am</span>`:'';
   const a3=!!g.auto3am;
-  return `<div class="panel"><h3>🌎 Todos los negocios</h3>
-    <p class="d">Versión general: <b>${esc(nom(vg))}</b>${pt(g)}</p>
-    <label style="display:flex;gap:8px;align-items:center;margin:12px 0;cursor:pointer"><input type="checkbox" data-auto3am ${a3?'checked':''}> ⏰ Subir las actualizaciones a las 3 am (cuando nadie lo usa)</label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">${ult&&ult>vg&&g.prog!==ult?`<button class="btn btn-p" data-vsub="general">⬆️ Subir actualización a todos${a3?' (3 am)':''}</button>`:`<span class="d">✅ La versión general está al día.</span>`}${progOn(g)?'<button class="btn btn-g btn-sm" data-vcancel="general">Cancelar lo programado</button>':''}</div></div>
-  <div class="panel"><h3>📱 Por negocio</h3><p class="d">«Subir» le pone lo último solo a ese negocio. «Volver a…» lo deja fijo en una versión anterior si algo falla.</p>
-    <div class="clients">${L.map(s=>{const r=M[s.id],v=efS(s),pend=ult&&ult>v;return`<div class="cl"><div class="in"><h4>${esc(s.negocio||s.slug)} ${pend?'<span class="tag pend">Hay actualización</span>':'<span class="tag activo">Al día</span>'}${r&&r.fijo?' <span class="tag">📌 Fijo</span>':''}${pt(r)}</h4><div class="meta"><span>Versión: ${esc(nom(v))}</span></div></div>
-      <div class="acts">${pend&&!(progOn(r)&&r.prog===ult)?`<button class="btn btn-p btn-sm" data-vsub="${s.id}">⬆️ Subir${a3?' (3 am)':''}</button>`:''}${progOn(r)?`<button class="btn btn-g btn-sm" data-vcancel="${s.id}">Cancelar</button>`:''}<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="/app/dev/?s=${encodeURIComponent(s.slug)}">🧪 Probar</a><span class="vw"><button class="btn btn-g btn-sm" data-vmenu="${s.id}">↩️ Volver a…</button><div class="vmenu" id="vm-${s.id}" hidden><small>Dejarlo fijo en la versión del…</small>${VERS.map(x=>`<button data-vset="${s.id}|${x.id}" data-n="${esc(s.negocio||s.slug)}">${x.id===v?'✓ ':''}${esc(x.fecha)}</button>`).join('')}${r&&r.fijo?`<button data-vset="${s.id}|-" data-n="${esc(s.negocio||s.slug)}">📌 Quitar fijo</button>`:''}</div></span></div></div>`}).join('')||'<div class="empty">Aún no hay negocios con Xyro Apps.</div>'}</div></div>
-  <div class="panel"><h3>📜 Historial de actualizaciones</h3><p class="d">Todo lo que se ha hecho, de lo más nuevo a lo más antiguo. Toca «🧪 Ver» para abrir esa versión con datos de ejemplo antes de subirla o regresar a ella.</p>
-    ${VERS.map((v,i)=>{const n=L.filter(s=>efS(s)===v.id),cam=v.cambios&&v.cambios.length?v.cambios:[v.notas];return`<div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+  const pendDe=s=>{const u=ultDe(s.rubro),r=M[s.id];return u&&u>efS(s)&&!(progOn(r)&&r.prog===u)};
+  const ecos=[...new Set(['gym','consultorio'].concat(L.map(s=>s.rubro)))].filter(k=>ECOS[k]);
+  if(!ecos.includes(vEco))vEco='gym';
+  const E=ECOS[vEco],LE=L.filter(s=>s.rubro===vEco),ult=ultDe(vEco),PE=LE.filter(s=>pendDe(s)&&!(M[s.id]&&M[s.id].fijo));VSIT=PE.map(s=>s.id);
+  $('#acts').innerHTML=`<a class="btn btn-g" href="/app/dev/?demo=${vEco}" target="_blank" rel="noopener">🧪 Probar ${esc(E[2])}</a> <button class="btn btn-g" data-v="versiones">↻</button>`;
+  const VE=VERS.filter(v=>vPara(v,vEco));
+  return `<div class="panel"><div style="display:flex;gap:8px;flex-wrap:wrap">${ecos.map(k=>{const n=L.filter(s=>s.rubro===k&&pendDe(s)).length;return`<button class="btn ${k===vEco?'btn-p':'btn-g'}" data-veco="${k}">${ECOS[k][0]} ${esc(ECOS[k][1])}${n?` <span class="tag pend">${n}</span>`:''}</button>`}).join('')}</div>
+    <label style="display:flex;gap:8px;align-items:center;margin:14px 0 0;cursor:pointer"><input type="checkbox" data-auto3am ${a3?'checked':''}> ⏰ Subir las actualizaciones a las 3 am (cuando nadie lo usa)</label></div>
+  <div class="panel"><h3>${E[0]} ${esc(E[1])}</h3>
+    <p class="d">Última versión para ${esc(E[2])}: <b>${esc(nom(ult))}</b>${ult?' · '+esc((VERS.find(v=>v.id===ult)||{}).titulo||''):''}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${PE.length?`<button class="btn btn-p" data-vsubeco="${vEco}">⬆️ Subir a todos los ${esc(E[2])} (${PE.length})${a3?' · 3 am':''}</button>`:`<span class="d">✅ Todos los ${esc(E[2])} están al día.</span>`}</div>
+    <div class="clients" style="margin-top:14px">${LE.map(s=>{const r=M[s.id],v=efS(s),pend=pendDe(s);return`<div class="cl"><div class="in"><h4>${esc(s.negocio||s.slug)} ${pend?'<span class="tag pend">Hay actualización</span>':'<span class="tag activo">Al día</span>'}${r&&r.fijo?' <span class="tag">📌 Fijo</span>':''}${pt(r)}</h4><div class="meta"><span>Versión: ${esc(nom(v))}</span></div></div>
+      <div class="acts">${pend?`<button class="btn btn-p btn-sm" data-vsub="${s.id}" data-vv="${ult}">⬆️ Subir${a3?' (3 am)':''}</button>`:''}${progOn(r)?`<button class="btn btn-g btn-sm" data-vcancel="${s.id}">Cancelar</button>`:''}<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="/app/dev/?s=${encodeURIComponent(s.slug)}">🧪 Probar</a><span class="vw"><button class="btn btn-g btn-sm" data-vmenu="${s.id}">↩️ Volver a…</button><div class="vmenu" id="vm-${s.id}" hidden><small>Dejarlo fijo en la versión del…</small>${VE.map(x=>`<button data-vset="${s.id}|${x.id}" data-n="${esc(s.negocio||s.slug)}">${x.id===v?'✓ ':''}${esc(x.fecha)}</button>`).join('')}${r&&r.fijo?`<button data-vset="${s.id}|-" data-n="${esc(s.negocio||s.slug)}">📌 Quitar fijo</button>`:''}</div></span></div></div>`}).join('')||`<div class="empty">Aún no hay ${esc(E[2])} con Xyro Apps.</div>`}</div></div>
+  <div class="panel"><h3>📜 Historial · ${esc(E[1])}</h3><p class="d">Solo lo que cambia para ${esc(E[2])}. Toca «🧪 Ver» para abrir esa versión con datos de ejemplo.</p>
+    ${VE.map((v,i)=>{const n=LE.filter(s=>efS(s)===v.id),cam=v.cambios&&v.cambios.length?v.cambios:[v.notas];return`<div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,.06)">
       <div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap"><div><b style="font-size:1rem">${esc(v.titulo||v.notas||'Actualización')}</b>
-        <div class="d" style="margin-top:3px">${esc(v.fecha)}${i===0?' · <span class="tag activo">🆕 Más nueva</span>':''}${v.id===vg?' · <span class="tag pg">🌎 Versión general</span>':v.id>vg?' · <span class="tag pend">Sin subir a todos</span>':''}${n.length?' · 📱 '+n.map(s=>esc(s.negocio||s.slug)).join(', '):''}${v.requiere?' · <span class="tag">Requiere '+esc(v.requiere)+'</span>':''}</div></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap"><a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="/app/v/${encodeURIComponent(v.id)}/?demo=gym">🧪 Ver</a>${v.id<vg?`<button class="btn btn-g btn-sm" data-vgen="${esc(v.id)}" data-f="${esc(v.fecha)}">↩️ Regresar a todos a esta</button>`:''}</div></div>
+        <div class="d" style="margin-top:3px">${esc(v.fecha)}${i===0?' · <span class="tag activo">🆕 Más nueva</span>':''} · <span class="tag">${v.rubros&&v.rubros.length?v.rubros.map(k=>(ECOS[k]||[''])[0]+' Solo '+((ECOS[k]||[,,k])[2])).join(', '):'🌎 Para todos'}</span>${n.length?' · 📱 '+n.map(s=>esc(s.negocio||s.slug)).join(', '):''}${v.requiere?' · <span class="tag">Requiere '+esc(v.requiere)+'</span>':''}</div></div>
+        <a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="/app/v/${encodeURIComponent(v.id)}/?demo=${vEco}">🧪 Ver</a></div>
       <ul style="margin:10px 0 0 18px;display:grid;gap:4px;color:#d6d6e0;font-size:.88rem">${cam.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`}).join('')||'<div class="empty">Sin versiones.</div>'}</div>`;
 };
 async function fijarVersion(sid,v,n){
@@ -749,14 +760,15 @@ async function fijarVersion(sid,v,n){
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.vw,.vmenu'))document.querySelectorAll('.vmenu').forEach(m=>m.hidden=true)});
 addEventListener('scroll',e=>!(e.target.closest&&e.target.closest('.vmenu'))&&document.querySelectorAll('.vmenu').forEach(m=>m.hidden=true),true);
-async function subirVersion(clave){
-  const ult=VERS.length&&VERS[0].id; if(!ult)throw new Error('No hay versiones.');
+async function subirVersion(clave,ver,quiet){
+  const ult=ver||(VERS.length&&VERS[0].id); if(!ult)throw new Error('No hay versiones.');
   const {data:g}=await sb.from('xa_versiones').select('*').eq('clave','general').maybeSingle(), auto=!!(g&&g.auto3am);
   const {data:r}=clave==='general'?{data:g}:await sb.from('xa_versiones').select('*').eq('clave',clave).maybeSingle();
   const row={clave,actualizado:new Date().toISOString()};
   if(auto){row.prog=ult;row.prog_para=prox3am().toISOString();}else{row.version=ult;row.prog=null;row.prog_para=null;row.fijo=false;}
   if(!r&&auto)row.version=null;
   const {error}=await sb.from('xa_versiones').upsert(row); if(error)throw error;
+  if(quiet)return auto;
   touch(`Subió la versión ${ult} a ${clave==='general'?'todos':'un negocio'}${auto?' (3 am)':''}`);
   toast(auto?'⏰ Programada para las 3 am':'✅ Subida. La verán al volver a abrir la app.');
 }
@@ -1099,7 +1111,10 @@ document.addEventListener('click', async e=>{
       document.body.appendChild(m); m.hidden=false; const b=el.getBoundingClientRect(),w=m.offsetWidth,hh=m.offsetHeight;
       m.style.left=Math.max(8,Math.min(innerWidth-w-8,b.right-w))+'px'; m.style.top=(b.bottom+6+hh>innerHeight?Math.max(8,b.top-hh-6):b.bottom+6)+'px'; return; }
     if(d.vset){ const [sid,v]=d.vset.split('|'); document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); await fijarVersion(sid,v,d.n); return go('versiones'); }
-    if(d.vsub){ el.disabled=true; try{ await subirVersion(d.vsub); }catch(ex){ toast(ex.message); } return go('versiones'); }
+    if(d.veco){ vEco=d.veco; try{localStorage.setItem('xg-veco',vEco)}catch(_){} return go('versiones'); }
+    if(d.vsubeco){ const E=ECOS[d.vsubeco],u=ultDe(d.vsubeco); if(!confirm(`¿Subir la versión del ${(VERS.find(x=>x.id===u)||{}).fecha||u} a ${VSIT.length} ${E[2]}? Solo a ${E[2]}: los demás negocios no cambian. Lo verán al volver a abrir la app.`))return;
+      el.disabled=true; let auto=false; try{ for(const sid of VSIT)auto=await subirVersion(sid,u,true); touch(`Subió la versión ${u} a todos los ${E[2]}${auto?' (3 am)':''}`); toast(auto?'⏰ Programada para las 3 am':'✅ Subida a todos los '+E[2]); }catch(ex){ toast(ex.message); } return go('versiones'); }
+    if(d.vsub){ el.disabled=true; try{ await subirVersion(d.vsub,d.vv); }catch(ex){ toast(ex.message); } return go('versiones'); }
     if(d.vgen){ if(!confirm(`¿Regresar a TODOS los negocios a la versión del ${d.f}? La verán al volver a abrir la app. (Los que dejaste fijos se quedan como están.)`))return;
       const t=new Date().toISOString(); let {error}=await sb.from('xa_versiones').upsert({clave:'general',version:d.vgen,prog:null,prog_para:null,actualizado:t}); if(error)throw error;
       ({error}=await sb.from('xa_versiones').delete().neq('clave','general').eq('fijo',false)); if(error)throw error;

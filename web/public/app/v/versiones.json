@@ -1,5 +1,14 @@
 [
  {
+  "id": "20261114-0344",
+  "fecha": "2026-11-14 03:44",
+  "titulo": "--help",
+  "notas": "--help",
+  "cambios": [
+   "--help"
+  ]
+ },
+ {
   "id": "20261114-0342",
   "fecha": "2026-11-14 03:42",
   "titulo": "Cobro al paso (dental)",
@@ -7,6 +16,9 @@
   "cambios": [
    "Nuevo «🚶 Cobro al paso» en Inicio y en Caja para quien no es paciente: eliges el tratamiento, sale el precio, cobras y entra a la caja con su comprobante",
    "Arreglado el botón «Agregar especialistas» de la clínica nueva"
+  ],
+  "rubros": [
+   "consultorio"
   ]
  },
  {
@@ -18,6 +30,9 @@
    "En consultorios ya no aparece el rol Cafetín ni Supervisor: solo Administrador, Recepción y Odontólogo(a)",
    "Se quitó «Importar desde AppFit» y la tarjeta de planes a la web en consultorios (la web toma los tratamientos sola)",
    "El botón de arriba en Ajustes agenda una cita en vez de abrir asistencia"
+  ],
+  "rubros": [
+   "consultorio"
   ]
  },
  {
@@ -32,7 +47,10 @@
    "Seguimiento dental: pacientes por volver, con saldo, tratamientos sin cita y presupuestos sin respuesta",
    "Lista de tratamientos y precios"
   ],
-  "requiere": "SQL 44"
+  "requiere": "SQL 44",
+  "rubros": [
+   "consultorio"
+  ]
  },
  {
   "id": "20261114-0307",
