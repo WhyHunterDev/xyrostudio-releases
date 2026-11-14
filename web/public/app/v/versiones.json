@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261114-0000",
+  "fecha": "2026-11-14 00:00",
+  "titulo": "Recepción solo apoya al asistente",
+  "notas": "Recepción solo apoya al asistente",
+  "cambios": [
+   "Al responder, «Enviar y devolver al bot» deja que el asistente siga con la venta",
+   "Si el cliente manda su pago mientras atiende recepción, igual llega a Ventas del bot"
+  ]
+ },
+ {
   "id": "20261113-2350",
   "fecha": "2026-11-13 23:50",
   "titulo": "Tomar chat en WhatsApp",
