@@ -771,8 +771,8 @@ const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||
 const NAV=()=>{if(isCoach())return[['rutinas','📋',ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento'],['cuenta','🔐','Mi cuenta']];
  if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
- return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
-const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento']],['gym','🏋️','Gimnasio',['rutinas','tienda','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','cuenta']]];
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']],!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento']],['gym','🏋️','Gimnasio',['rutinas','tienda','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
 function navGrupos(n){const top=[],G=NAVG.map(g=>({k:g[0],i:g[1],t:g[2],L:[]}));n.forEach(x=>{const g=NAVG.findIndex(g=>g[3].includes(x[0]));(g<0||n.length<=8?top:G[g].L).push(x)});return{top,G:G.filter(g=>g.L.length)}}
 const navNum=t=>{const m=String(t).match(/\((\d+)\)\s*$/);return m?+m[1]:0};
 function shell(){
@@ -794,13 +794,13 @@ function go(){
  if(isCoach()&&!['rutinas','cuenta','mas','soporte'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
  {const a=$('#side .ngl .nav[data-k="'+ruta+'"]');a&&(a.closest('details').open=true)}
- $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp','ventasbot','pruebas'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
+ $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp','ventasbot','pruebas','miplan'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
  if((ruta==='whatsapp'||ruta==='ventasbot')&&!waVer())ruta='inicio';
- const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV}[ruta]||inicio;
- const html=V();$('#v').innerHTML=`<div class="v">${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
+ const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan}[ruta]||inicio;
+ const html=V();$('#v').innerHTML=`<div class="v">${ruta!=='miplan'?planAviso():''}${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
  $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',pruebas:'Días de prueba',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio'}[ruta]||'';
@@ -2251,6 +2251,41 @@ function xyTemas(wa2){
  <div class="eq">${TEMAS_X.map(([k,e,n])=>{const ok=TEMP.includes(k);return`<div class="eqc" style="padding:8px 0;border-top:1px solid var(--line)"><div class="nm"><b>${e} ${n}</b><small>${ok?'Incluido en tu plan: lo pones tú mismo en Mi web → Contenido → Tema.':'🔒 Vista previa. Actívalo para usarlo en tu web.'}</small></div><div class="eqa"><a class="btn sm" target="_blank" rel="noopener" href="${esc(conTema(w,k))}">👀 Ver en mi web</a>${ok?'<span class="pill act">Activo</span>':`<a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Quiero activar el tema '+n+' en la web de '+nombre()+'.')}">🔓 Lo quiero</a>`}</div></div>`}).join('')}</div></div>`;
 }
 
+
+/* ===== Mi plan XyroStudio (SQL 42): el negocio paga a XyroStudio por Yape/Plin/transferencia, sube la captura y la IA la verifica (/api/xyro/pago). ===== */
+let XP=null,XPC={},XPP=[],NEED42=false,xpCarg=false;
+async function xpCargar(){if(DEMO||!SID||!isAdmin()||xpCarg)return;xpCarg=true;
+ try{const[a,b,c]=await Promise.all([sb.from('xa_xyro_plan').select('*').eq('sitio_id',String(SID)).maybeSingle(),sb.from('xa_xyro_cobro').select('*').eq('id',1).maybeSingle(),sb.from('xa_xyro_pagos').select('id,monto,estado,motivo,creado,vence_nuevo,autor_nombre').eq('sitio_id',String(SID)).order('creado',{ascending:false}).limit(12)]);
+  if(a.error){NEED42=true;XP={};return}XP=a.data||{};XPC=b.data||{};XPP=c.data||[]}catch(_){XP=XP||{}}finally{xpCarg=false}}
+const xpF=d=>d?new Date(d+'T12:00:00').toLocaleDateString('es-PE',{day:'numeric',month:'long',year:'numeric'}):'—';
+const xpDias=()=>XP&&XP.vence&&XP.activo!==false&&+XP.monto>0?Math.round((new Date(XP.vence+'T12:00:00')-new Date(hoy()+'T12:00:00'))/864e5):null;
+const xpRevisando=()=>XPP.some(x=>x.estado==='revisar');
+function planAviso(){const d=xpDias();if(d==null||d>5)return'';const rv=xpRevisando();
+ const t=rv?'⏳ Recibimos tu pago del plan XyroStudio y lo estamos revisando.':d<0?`🔴 Tu plan XyroStudio venció hace ${-d} día${d===-1?'':'s'}. Paga hoy para no perder el servicio.`:d===0?'🔴 Tu plan XyroStudio vence hoy.':`🟠 Tu plan XyroStudio vence en ${d} día${d===1?'':'s'} (${xpF(XP.vence)}).`;
+ return`<a class="card" href="#/miplan" style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px;text-decoration:none;color:inherit;border-color:${rv?'var(--line)':d<=0?'var(--bad)':'#f5b544'}"><b class="sm">${t}</b>${rv?'':'<span class="btn sm p">💳 Pagar</span>'}</a>`}
+function miPlan(){if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
+ if(DEMO)return'<div class="empty"><b>💳</b>Aquí verás tu plan de XyroStudio y podrás pagarlo con Yape o transferencia.</div>';
+ if(XP===null){xpCargar().then(()=>ruta==='miplan'&&go());return'<div class="empty"><b>💳</b>Cargando…</div>'}
+ if(NEED42)return'<div class="empty"><b>💳</b>Muy pronto podrás pagar tu plan desde aquí.</div>';
+ setTimeout(()=>{$$('[data-cp]').forEach(b=>b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(b.dataset.cp).then(()=>toast('📋 Copiado'))});
+  const i=$('#xpF'),b=$('#xpB');b&&(b.onclick=()=>i.click());i&&(i.onchange=()=>i.files[0]&&xpSubir(i.files[0],b))});
+ const d=xpDias(),C=XPC||{},cp=(l,v)=>v?`<div class="row" style="padding:8px 0"><span class="nm"><small class="mu">${l}</small><b>${esc(v)}</b></span><button class="btn sm" data-cp="${esc(v)}">📋 Copiar</button></div>`:'';
+ const EST={verificado:['✅ Verificado','act'],confirmado:['✅ Confirmado','act'],revisar:['⏳ En revisión','venc'],rechazado:['❌ Rechazado','sin']};
+ return`<div class="hi"><div><h2>💳 Mi plan XyroStudio</h2><p class="mu">Paga con Yape, Plin o transferencia y sube tu comprobante: se verifica solo y tu plan se renueva al instante.</p></div></div>
+ <div class="g st" style="max-width:720px">
+ <div class="card">${XP.sitio_id?`<h3>${sol(+XP.monto)} <small class="mu" style="font-weight:600">cada ${+XP.meses>1?XP.meses+' meses':'mes'}</small></h3><p class="sm" style="margin:6px 0 0">${d==null?'Sin fecha de vencimiento.':d<0?`🔴 Venció el <b>${xpF(XP.vence)}</b>`:`Vence el <b>${xpF(XP.vence)}</b>${d<=5?` · <b style="color:#f5b544">en ${d} día${d===1?'':'s'}</b>`:''}`}</p>${XP.nota?`<p class="mu sm" style="margin:6px 0 0">${esc(XP.nota)}</p>`:''}`:'<p class="sm">Tu plan aún no está configurado. Si tienes dudas, escríbenos en 🛟 Soporte.</p>'}</div>
+ <div class="card"><h3>Cómo pagar</h3>${C.titular?`<p class="mu sm" style="margin:0 0 4px">Titular: <b style="color:var(--tx)">${esc(C.titular)}</b> · XyroStudio</p>`:''}${cp('Yape',C.yape)}${cp('Plin',C.plin)}${cp(C.banco?'Cuenta '+C.banco:'Cuenta',C.cuenta)}${cp('CCI (desde otro banco)',C.cci)}${C.nota?`<p class="mu sm" style="margin:8px 0 0">${esc(C.nota)}</p>`:''}${!C.yape&&!C.plin&&!C.cuenta?'<p class="mu sm">Pronto verás aquí los datos para pagar.</p>':''}</div>
+ <div class="card"><h3>📎 Ya pagué</h3><p class="mu sm" style="margin:0 0 10px">Sube la captura de tu Yape, Plin o transferencia. Si el monto y el N.º de operación cuadran, tu plan se renueva al momento.</p><input id="xpF" type="file" accept="image/*" hidden><button class="btn p" id="xpB" ${XP.sitio_id?'':'disabled'}>📎 Subir comprobante</button></div>
+ ${XPP.length?`<div class="card"><h3>Mis pagos</h3>${XPP.map(x=>{const[e,c]=EST[x.estado]||['',''];return`<div class="row" style="padding:8px 0"><span class="nm"><b>${x.monto!=null?sol(+x.monto):'—'} · ${new Date(x.creado).toLocaleDateString('es-PE',{day:'numeric',month:'short'})}</b><small>${x.estado==='rechazado'||x.estado==='revisar'?esc(x.motivo||''):x.vence_nuevo?'Renovado hasta el '+xpF(x.vence_nuevo):''}</small></span><span class="pill ${c}">${e}</span></div>`}).join('')}</div>`:''}
+ </div>`}
+async function xpSubir(f,b){if(!/^image\//.test(f.type))return toast('Sube una imagen (captura de pantalla)');b.disabled=true;b.textContent='🤖 Leyendo tu comprobante…';
+ try{const url=await subirImg(f,1600,'pago-xyro'),{data}=await sb.auth.getSession(),tk=data&&data.session&&data.session.access_token;
+  const r=await fetch('/api/xyro/pago',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tk},body:JSON.stringify({sitio:String(SID),foto:url})}),j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.ok)throw new Error(j.error||j.motivo||'No se pudo enviar. Intenta otra vez.');
+  XP=null;await xpCargar();shell();go();
+  if(j.estado==='verificado'){confeti(50);toast('✅ ¡Pago verificado! Tu plan vence el '+xpF(j.vence))}else toast('⏳ Recibido. XyroStudio lo revisa'+(j.motivo?': '+j.motivo:''))}
+ catch(er){toast(er.message)}b.disabled=false;b.textContent='📎 Subir comprobante'}
+
 /* ===== Equipo: cuentas, permisos y claves (mismas cuentas que el panel de la web) ===== */
 let EQ=null,EQerr='',EQnew=null;
 const PERMS=()=>Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)&&((k!=='entrenador'&&k!=='nutricionista')||rutOn())).map(([k,v])=>[k,CTL()&&PERMC[k]?[v[0],PERMC[k]]:v]));
@@ -2553,7 +2588,7 @@ async function verVersion(){try{localStorage.setItem('xa-slug',SLUG)}catch(_){}i
   if(data!==VER){location.replace('/app/'+location.search+location.hash);return true}}catch(_){}return false}
 if(/\/app\/dev\//.test(location.pathname))addEventListener('DOMContentLoaded',()=>document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:99999;background:#f59e0b;color:#000;font:700 12px system-ui;padding:4px 12px;border-radius:99px;pointer-events:none">🧪 PANEL DE PRUEBAS · los negocios no ven esto</div>'));
 /* ===== Arranque real (Supabase) ===== */
-function start(){initSede();setTimeout(misNegocios,500);setTimeout(waIni,800);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>TKN&&toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')),2500)}
+function start(){initSede();setTimeout(misNegocios,500);setTimeout(waIni,800);setTimeout(()=>xpCargar().then(()=>{if(planAviso()||ruta==='miplan')go();shell()}),900);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>TKN&&toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')),2500)}
 async function salir(){try{await sb.auth.signOut()}catch(_){}LS.r('xa-s');location.href='/app/'}
 async function boot(){
  if(DEMO)return demoBoot();
