@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261114-0025",
+  "fecha": "2026-11-14 00:25",
+  "titulo": "Resumen visible siempre",
+  "notas": "Resumen visible siempre",
+  "cambios": [
+   "El resumen «Lo que sabe tu asistente» se ve aunque falte activar Xyro Webs",
+   "El botón de editar ahora se llama «Ajustes del asistente»; los días de prueba se configuran en Días de prueba → Reglas"
+  ]
+ },
+ {
   "id": "20261114-0018",
   "fecha": "2026-11-14 00:18",
   "titulo": "Resumen de lo que sabe el asistente",
