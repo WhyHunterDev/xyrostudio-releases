@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261113-2340",
+  "fecha": "2026-11-13 23:40",
+  "titulo": "Fecha de inicio en ventas del asistente",
+  "notas": "Fecha de inicio en ventas del asistente",
+  "cambios": [
+   "Si el cliente pide empezar otro día, la venta llega con esa fecha ya puesta",
+   "Lo que recepción debe saber (congelar, lesión, horario) aparece como nota y queda en su ficha"
+  ]
+ },
+ {
   "id": "20261113-2334",
   "fecha": "2026-11-13 23:34",
   "titulo": "Fotos y videos del gym",
