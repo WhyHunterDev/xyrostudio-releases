@@ -365,14 +365,14 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['tickets','🎫','Tickets'],['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['tickets','🎫','Tickets'],['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['pendientes','📋','Pendientes'],['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
-    NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}${id==='tickets'&&TKG?` <b class="tkb">${TKG}</b>`:''}</button>`).join('')).join('')+
+    NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}${id==='tickets'&&TKG?` <b class="tkb">${TKG}</b>`:''}${id==='pendientes'&&PDN?` <b class="tkb">${PDN}</b>`:''}</button>`).join('')).join('')+
     `<div class="me"><b>${esc(me.nombre)}</b><small>${esc(ROL_NOMBRE[me.rol]||me.rol)} · ${esc(me.email)}</small><button class="btn btn-g btn-sm" data-logout style="width:100%">Cerrar sesión</button></div>`;
 }
 async function go(v){ document.querySelectorAll('body>.vmenu').forEach(m=>m.remove()); if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); }
-async function start(){ show('app'); setTimeout(tkCuenta,1500); setInterval(tkCuenta,120000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
+async function start(){ show('app'); setTimeout(tkCuenta,1500); setTimeout(pdCuenta,2500); setInterval(tkCuenta,120000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
 
 const H=(t,s)=>{$('#h').innerHTML=`<div><h1>${esc(t)}</h1>${s?`<p class="sub" style="margin:4px 0 0">${esc(s)}</p>`:''}</div>`;};
 
@@ -387,7 +387,8 @@ V.resumen=async ()=>{
   const mensual=C.filter(c=>c.estado!=='baja').reduce((a,c)=>a+mensualDe(c),0);
   const pend=C.filter(c=>c.pago==='pendiente').reduce((a,c)=>a+(+c.costo||0),0);
   let segN=0,segF=0;try{const d24=new Date(Date.now()-864e5).toISOString();const[a,f]=await Promise.all([sb.from('xa_seguridad').select('id',{count:'exact',head:true}).in('tipo',['ataque','sospechoso']).gte('creado',d24),sb.from('xa_seguridad').select('id',{count:'exact',head:true}).eq('tipo','login_fallido').gte('creado',d24)]);segN=a.count||0;segF=f.count||0}catch(_){}
-  return `${segN||segF>=25?`<div class="note" style="border-color:#ff5c7a66;background:#ff5c7a14">🛡️ <div><b>${segN?`${segN} alerta${segN===1?'':'s'} de seguridad`:`${segF} intentos fallidos de entrar`} en las últimas 24 h.</b> Ya se bloquearon solos. <button class="btn btn-g btn-sm" data-v="seguridad">Ver Seguridad</button></div></div>`:''}<div class="grid4">
+  const pdU=await pdUrgentes();
+  return `${pdU.length?`<div class="note" style="border-color:#ffb02066;background:#ffb02014">📋 <div><b>${pdU.length===1?'Tienes 1 pendiente':'Tienes '+pdU.length+' pendientes'} por vencer o vencido${pdU.length===1?'':'s'}:</b> ${pdU.slice(0,3).map(x=>esc(x.titulo)).join(' · ')}${pdU.length>3?'…':''} <button class="btn btn-g btn-sm" data-v="pendientes">Ver pendientes</button></div></div>`:''}${segN||segF>=25?`<div class="note" style="border-color:#ff5c7a66;background:#ff5c7a14">🛡️ <div><b>${segN?`${segN} alerta${segN===1?'':'s'} de seguridad`:`${segF} intentos fallidos de entrar`} en las últimas 24 h.</b> Ya se bloquearon solos. <button class="btn btn-g btn-sm" data-v="seguridad">Ver Seguridad</button></div></div>`:''}<div class="grid4">
       <div class="kpi"><b>${C.length}</b><small>Clientes</small></div>
       <div class="kpi g"><b>${act.length}</b><small>Activos / soporte</small></div>
       <div class="kpi"><b>${soles(facturado)}</b><small>Total facturado</small></div>
@@ -401,6 +402,76 @@ function clCard(cl){return`<div class="cl"><div class="in"><h4>${esc(cl.negocio)
   <div class="acts"><button class="btn btn-g btn-sm" data-open="${cl.id}">Abrir ficha</button>${webDe(cl)?`<a class="btn btn-g btn-sm" href="${esc(cl.url)}" target="_blank" rel="noopener">Web ↗</a>`:''}<button class="btn btn-g btn-sm" data-del="${cl.id}" title="Eliminar cliente">🗑️</button></div></div>`;}
 // Xyro Apps de todos tus clientes: cómo van este mes y entrar con un clic (solo tú lo ves; mirar no deja rastro).
 async function sumaPagos(sid,desde){let t=0,i=0;for(;;){const{data,error}=await sb.from('xa_pagos').select('monto').eq('sitio_id',sid).gte('fecha',desde).order('id').range(i,i+999);if(error||!data)break;data.forEach(r=>t+=+r.monto||0);if(data.length<1000)break;i+=1000}return t}
+/* ===== Pendientes del dueño (SQL 37: xa_pendientes; sin SQL se guarda en este equipo) ===== */
+let PD=null,PDLOCAL=false,PDN=0,pdEdit=null;
+const PD_CAT=[['legal','⚖️ Legal'],['pagos','💳 Pagos'],['meta','💬 Meta / WhatsApp'],['web','🌐 Dominios y web'],['seguridad','🛡️ Seguridad'],['otro','📌 Otro']];
+const pdHoy=()=>{const d=new Date(Date.now()-5*36e5);return d.toISOString().slice(0,10)};
+const pdDias=f=>f?Math.round((new Date(f+'T12:00:00Z')-new Date(pdHoy()+'T12:00:00Z'))/864e5):null;
+const PD_BASE=[
+ {titulo:'Regenerar la clave secreta de la app de Meta',detalle:'developers.facebook.com → app XyroStudio → Configuración → Básica → Restablecer. Luego actualiza WA_APP_SECRET en Cloudflare (salió en una captura).',cat:'seguridad',fecha:'2026-11-16',cada:''},
+ {titulo:'Verificar la empresa en Meta',detalle:'App de Meta → Paso 3: Verificación del negocio. Sociedad unipersonal → Registrado. Sube la Ficha RUC (PDF de SUNAT SOL) + recibo o estado de cuenta con tu dirección. Así pasas de 2 a 20 números.',cat:'meta',fecha:'2026-11-20',cada:''},
+ {titulo:'Comprar el chip de XyroStudio y conectarlo a la API',detalle:'No lo actives en ninguna app de WhatsApp. Se agrega en WhatsApp Manager → Agregar número.',cat:'meta',fecha:'2026-11-22',cada:''},
+ {titulo:'Agregar método de pago en WhatsApp Manager',detalle:'Necesario para enviar recordatorios (plantillas). Las respuestas dentro de 24 h son gratis.',cat:'meta',fecha:'2026-11-30',cada:''},
+ {titulo:'Registrar la marca XyroStudio en INDECOPI',detalle:'Clase 42 (software) y 35 (servicios a negocios). Aprox. S/ 535 por clase. indecopi.gob.pe',cat:'legal',fecha:'2026-12-15',cada:''},
+ {titulo:'Pasar Supabase a Pro (~US$ 25/mes)',detalle:'Cuando tengas 2–3 gyms pagando. Da copias diarias automáticas y más capacidad.',cat:'pagos',fecha:'2026-12-31',cada:''},
+ {titulo:'Renovar el dominio xyrostudio.net',detalle:'Revisa la fecha real en Cloudflare → Domain Registration y corrígela aquí. Activa la renovación automática.',cat:'web',fecha:'',cada:'año'},
+ {titulo:'Revisar saldo de Anthropic (IA y bots)',detalle:'console.anthropic.com → Billing. Si baja de US$ 2, recarga para que el bot no se apague.',cat:'pagos',fecha:'2026-12-01',cada:'mes'},
+ {titulo:'Confirmar SQL pendientes en Supabase',detalle:'Revisa que corriste 28, 29, 31, 32, 33, 35 y 37.',cat:'web',fecha:'2026-11-15',cada:''},
+ {titulo:'Agregar xyrostudio.net/gestor/ en Supabase → Auth → Redirect URLs',detalle:'Para que «olvidé mi contraseña» del panel funcione.',cat:'seguridad',fecha:'',cada:''},
+ {titulo:'Formalizar la empresa (RUC 20)',detalle:'SAC unipersonal o EIRL con contador, cuando factures más o un gym grande pida factura de empresa.',cat:'legal',fecha:'',cada:''}];
+async function pdCargar(){if(PD)return PD;
+ const{data,error}=await sb.from('xa_pendientes').select('*').order('hecho').order('fecha',{ascending:true,nullsFirst:false}).limit(500);
+ if(error){PDLOCAL=true;try{PD=JSON.parse(localStorage.getItem('xg-pend')||'null')}catch(_){PD=null}if(!PD){PD=PD_BASE.map((x,i)=>({id:'l'+i,hecho:false,...x}));pdLocal()}return PD}
+ PD=data||[];
+ if(!PD.length&&!localStorage.getItem('xg-pend-sem')){const{data:d2}=await sb.from('xa_pendientes').insert(PD_BASE.map(x=>({...x,fecha:x.fecha||null}))).select('*');PD=d2||[];try{localStorage.setItem('xg-pend-sem','1')}catch(_){}}
+ return PD}
+function pdLocal(){try{localStorage.setItem('xg-pend',JSON.stringify(PD))}catch(_){}}
+async function pdUrgentes(){try{await pdCargar()}catch(_){return[]}return(PD||[]).filter(x=>!x.hecho&&x.fecha&&pdDias(x.fecha)<=7)}
+async function pdCuenta(){const n=(await pdUrgentes()).length;if(n!==PDN){PDN=n;side()}}
+async function pdGuardar(x,cambios){Object.assign(x,cambios);if(PDLOCAL){pdLocal();return}
+ const{error}=await sb.from('xa_pendientes').update({titulo:x.titulo,detalle:x.detalle,cat:x.cat,fecha:x.fecha||null,cada:x.cada||'',hecho:!!x.hecho}).eq('id',x.id);if(error)throw error}
+function pdSig(f,cada){const d=new Date((f||pdHoy())+'T12:00:00Z');if(cada==='mes')d.setUTCMonth(d.getUTCMonth()+1);else d.setUTCFullYear(d.getUTCFullYear()+1);return d.toISOString().slice(0,10)}
+V.pendientes=async ()=>{
+ H('Pendientes','Todo lo que tienes que hacer para tener XyroStudio al día. Te aviso en Resumen 7 días antes.');
+ $('#acts').innerHTML='<button class="btn btn-p" data-pdnew>＋ Pendiente</button>';
+ await pdCargar();PDN=PD.filter(x=>!x.hecho&&x.fecha&&pdDias(x.fecha)<=7).length;side();
+ const ab=PD.filter(x=>!x.hecho).sort((a,b)=>(a.fecha||'9999')<(b.fecha||'9999')?-1:1),he=PD.filter(x=>x.hecho);
+ const cuando=x=>{if(!x.fecha)return'<span class="tag pausado">Sin fecha</span>';const d=pdDias(x.fecha),f=new Date(x.fecha+'T12:00:00Z').toLocaleDateString('es-PE',{day:'numeric',month:'short',timeZone:'UTC'});
+  return d<0?`<span class="tag baja">🔴 Venció hace ${-d} día${d===-1?'':'s'}</span>`:d===0?'<span class="tag baja">🔴 Hoy</span>':d<=7?`<span class="tag pend">🟠 En ${d} día${d===1?'':'s'} · ${f}</span>`:`<span class="tag activo">${f}</span>`};
+ const cat=c=>(PD_CAT.find(z=>z[0]===c)||PD_CAT[5])[1];
+ const fila=x=>pdEdit===String(x.id)?pdForm(x):`<div class="cl"><div class="in"><h4>${x.hecho?'✅ ':''}${esc(x.titulo)} ${x.hecho?'':cuando(x)}${x.cada?` <span class="tag soporte">🔁 cada ${x.cada}</span>`:''}</h4><div class="meta"><span>${cat(x.cat)}</span></div>${x.detalle?`<p class="d" style="margin:6px 0 0;white-space:pre-wrap">${esc(x.detalle)}</p>`:''}</div>
+  <div class="acts">${x.hecho?`<button class="btn btn-g btn-sm" data-pdok="${x.id}" data-v2="0">↩️ Reabrir</button>`:`<button class="btn btn-p btn-sm" data-pdok="${x.id}" data-v2="1">${x.cada?'✅ Hecho (siguiente '+(x.cada==='mes'?'mes':'año')+')':'✅ Hecho'}</button>`}<button class="btn btn-g btn-sm" data-pded="${x.id}">✏️</button><button class="btn btn-g btn-sm" data-pddel="${x.id}" title="Eliminar">🗑️</button></div></div>`;
+ return `${PDLOCAL?'<div class="note">📋 Por ahora se guardan solo en este equipo. Corre <b>37-xyro-pendientes.sql</b> en Supabase para verlos en todos tus equipos.</div>':''}
+  ${pdEdit==='nuevo'?`<div class="panel">${pdForm({})}</div>`:''}
+  <div class="panel"><h3>Por hacer (${ab.length})</h3><div class="clients">${ab.map(fila).join('')||'<div class="empty">🎉 Nada pendiente.</div>'}</div></div>
+  ${he.length?`<div class="panel"><h3>Hechos (${he.length})</h3><div class="clients">${he.map(fila).join('')}</div></div>`:''}`;
+};
+function pdForm(x){return`<form class="form" id="pdf" data-id="${esc(String(x.id||''))}" onsubmit="return false" style="margin:8px 0">
+ <label class="full">Qué hay que hacer<input id="pdT" maxlength="120" value="${esc(x.titulo||'')}" placeholder="Ej: Pagar el hosting" required></label>
+ <label>Fecha límite<input id="pdF" type="date" value="${esc(x.fecha||'')}"></label>
+ <label>Se repite<select id="pdC"><option value="">No</option><option value="mes" ${x.cada==='mes'?'selected':''}>Cada mes</option><option value="año" ${x.cada==='año'?'selected':''}>Cada año</option></select></label>
+ <label>Tipo<select id="pdK">${PD_CAT.map(([k,t])=>`<option value="${k}" ${x.cat===k?'selected':''}>${t}</option>`).join('')}</select></label>
+ <label class="full">Detalle (opcional)<textarea id="pdD" rows="3" maxlength="800">${esc(x.detalle||'')}</textarea></label>
+ <div class="full" style="display:flex;gap:8px"><button class="btn btn-p" data-pdsave>Guardar</button><button class="btn btn-g" data-pdcancel>Cancelar</button></div></form>`}
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-pdnew],[data-pded],[data-pdcancel],[data-pdsave],[data-pdok],[data-pddel]');if(!t||!me)return;
+ try{
+  if(t.dataset.pdnew!==undefined){pdEdit='nuevo';return go('pendientes')}
+  if(t.dataset.pded){pdEdit=t.dataset.pded;return go('pendientes')}
+  if(t.dataset.pdcancel!==undefined){pdEdit=null;return go('pendientes')}
+  if(t.dataset.pdsave!==undefined){const f=$('#pdf'),v={titulo:$('#pdT').value.trim(),fecha:$('#pdF').value||null,cada:$('#pdC').value,cat:$('#pdK').value,detalle:$('#pdD').value.trim()};if(!v.titulo)return toast('Escribe qué hay que hacer');
+   const id=f.dataset.id;t.disabled=true;
+   if(id){const x=PD.find(z=>String(z.id)===id);await pdGuardar(x,v)}
+   else if(PDLOCAL){PD.push({id:'l'+Date.now(),hecho:false,...v});pdLocal()}
+   else{const{data,error}=await sb.from('xa_pendientes').insert(v).select('*').single();if(error)throw error;PD.push(data)}
+   pdEdit=null;toast('📋 Guardado');return go('pendientes')}
+  if(t.dataset.pdok){const x=PD.find(z=>String(z.id)===t.dataset.pdok);if(!x)return;
+   if(t.dataset.v2==='1'&&x.cada){await pdGuardar(x,{fecha:pdSig(x.fecha,x.cada)});toast('✅ Listo. Te lo recuerdo el '+new Date(x.fecha+'T12:00:00Z').toLocaleDateString('es-PE',{day:'numeric',month:'long',timeZone:'UTC'}))}
+   else{await pdGuardar(x,{hecho:t.dataset.v2==='1'});t.dataset.v2==='1'&&toast('✅ ¡Bien!')}
+   return go('pendientes')}
+  if(t.dataset.pddel){const x=PD.find(z=>String(z.id)===t.dataset.pddel);if(!x||!confirm('¿Eliminar «'+x.titulo+'»?'))return;
+   if(!PDLOCAL){const{error}=await sb.from('xa_pendientes').delete().eq('id',x.id);if(error)throw error}
+   PD=PD.filter(z=>z!==x);PDLOCAL&&pdLocal();return go('pendientes')}
+ }catch(ex){t.disabled=false;toast(ex.message||String(ex))}});
 V.negocios=async ()=>{
   H('Xyro Apps','Cómo van los negocios de tus clientes. Solo tú lo ves y mirar no deja rastro.');
   $('#acts').innerHTML='<button class="btn btn-p" data-v="alta">＋ Nuevo negocio</button> <button class="btn btn-g" data-v="accesos">📨 Enviar acceso a todos</button> <button class="btn btn-g" data-v="negocios">↻ Actualizar</button>';
