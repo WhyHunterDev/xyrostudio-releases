@@ -1,5 +1,21 @@
 [
  {
+  "id": "20261114-1531",
+  "fecha": "2026-11-14 15:31",
+  "titulo": "Pedidos de planes desde la app",
+  "notas": "Pedidos de planes desde la app",
+  "cambios": [
+   "En Rutinas y dietas aparecen los pedidos que hacen tus socios desde su app Mi Xyro",
+   "El entrenador arma el plan y lo envía directo a la app del socio",
+   "Recepción agenda la cita con nutrición y conversa con el socio por chat",
+   "La nutricionista ve sus citas y envía el plan de alimentación a la app"
+  ],
+  "requiere": "SQL 48",
+  "rubros": [
+   "gym"
+  ]
+ },
+ {
   "id": "20261114-1430",
   "fecha": "2026-11-14 14:30",
   "titulo": "Cartel QR para imprimir que ahorra tinta",
