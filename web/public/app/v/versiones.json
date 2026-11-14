@@ -1,11 +1,15 @@
 [
  {
-  "id": "20261114-0344",
-  "fecha": "2026-11-14 03:44",
-  "titulo": "--help",
-  "notas": "--help",
+  "id": "20261114-0347",
+  "fecha": "2026-11-14 03:47",
+  "titulo": "Asistencia solo arriba y enlace único de acceso",
+  "notas": "Asistencia solo arriba y enlace único de acceso",
   "cambios": [
-   "--help"
+   "«Asistencia» queda solo en el botón de arriba (se quitó del menú lateral y de Inicio)",
+   "El mensaje de acceso del equipo trae un solo enlace: xyrostudio.net/app/ (la cuenta ya dice a qué negocio entra)"
+  ],
+  "rubros": [
+   "gym"
   ]
  },
  {
@@ -64,7 +68,10 @@
    "El mensaje de acceso del equipo ahora trae un solo enlace: xyrostudio.net/app/ (detecta el negocio de la cuenta)",
    "Asistencia queda solo arriba (se quitó del menú y de Inicio)"
   ],
-  "requiere": "SQL 44"
+  "requiere": "SQL 44",
+  "rubros": [
+   "consultorio"
+  ]
  },
  {
   "id": "20261114-0232",
