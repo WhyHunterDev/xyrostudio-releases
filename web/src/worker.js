@@ -330,7 +330,8 @@ async function waApi(req, env, ctx) {
   }
   if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
   const raw = await req.text();
-  if (raw.length > 200000 || !(await firmaOk(env, raw, req.headers.get("x-hub-signature-256")))) return json({ error: "Firma inválida" }, 401);
+  if (raw.length > 200000 || !(await firmaOk(env, raw, req.headers.get("x-hub-signature-256")))) { console.log("wa firma inválida", raw.length, !!req.headers.get("x-hub-signature-256")); return json({ error: "Firma inválida" }, 401); }
+  console.log("wa webhook", raw.length);
   let b; try { b = JSON.parse(raw); } catch { return json({ ok: true }); }
   const tareas = [];
   for (const en of b.entry || []) for (const ch of en.changes || []) {
