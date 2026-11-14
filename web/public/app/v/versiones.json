@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261114-0204",
+  "fecha": "2026-11-14 02:04",
+  "titulo": "Lo delicado lo configura XyroStudio",
+  "notas": "Lo delicado lo configura XyroStudio",
+  "cambios": [
+   "Diseño de la web, secciones, logo, colores, sedes, turnos de caja, comprobantes, importar datos, reglas del asistente, contratos y reglas de días de prueba ahora solo los cambia XyroStudio",
+   "El negocio ve «✏️ Pedir cambio», que abre un ticket de soporte para que lo respondas desde tu gestor",
+   "Los temas de temporada siguen editables solo si el negocio ya los pagó"
+  ]
+ },
+ {
   "id": "20261114-0025",
   "fecha": "2026-11-14 00:25",
   "titulo": "Resumen visible siempre",
