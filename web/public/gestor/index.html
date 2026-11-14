@@ -259,7 +259,7 @@ const TEMAS=[['','Normal','✨'],['navidad','Navidad','🎄'],['halloween','Hall
 // Slug del proyecto: último tramo de la ruta (…/santos-strength/) o, si la web está en la raíz, el subdominio/dominio (panaderia.xyrostudio.net → panaderia).
 const slugDe=url=>{try{const u=new URL(url);if(u.searchParams.get('s'))return u.searchParams.get('s');const p=u.pathname.split('/').filter(Boolean).filter(x=>!/\.html?$/i.test(x));if(p.length)return p[p.length-1];const h=u.hostname.split('.').filter(x=>x!=='www');return h[0]||'';}catch(_){return '';}};
 // Web real del cliente: vacío si solo tiene Xyro Apps (enlace /app/?s= o subdominio automático slug.xyrostudio.net).
-const webDe=cl=>{const u=String(cl&&cl.url||'');if(!u)return'';try{const x=new URL(u);if(/^\/sitio\//.test(x.pathname))return u;if(x.searchParams.get('s')||/^[^.]+\.xyrostudio\.net$/i.test(x.hostname)&&!(cl.modulos&&cl.modulos.webs&&cl.modulos.webs.on))return'';}catch(_){return''}return u};
+const webDe=cl=>{const u=String(cl&&cl.url||'');if(!u)return'';try{const x=new URL(u);if(/^\/(sitio|consultorio)\//.test(x.pathname))return u;if(x.searchParams.get('s')||/^[^.]+\.xyrostudio\.net$/i.test(x.hostname)&&!(cl.modulos&&cl.modulos.webs&&cl.modulos.webs.on))return'';}catch(_){return''}return u};
 const appLink=s=>'https://xyrostudio.net/app/?s='+encodeURIComponent(s);
 // ---- Xyro Webs: base fija de gimnasio (/sitio/js/base.js). Al activar Webs se copia al negocio solo lo que le falta: nunca pisa lo que ya editó. ----
 const sitioWeb=s=>'https://xyrostudio.net/sitio/?s='+encodeURIComponent(s);
@@ -268,7 +268,9 @@ const baseGym=()=>baseGymP||(baseGymP=new Promise((ok,ko)=>{ if(window.XYRO_BASE
 async function sembrarWeb(slug){
   const {data:s}=await sb.from('sitios').select('id,negocio').eq('slug',slug).maybeSingle(); if(!s)throw new Error('No encuentro el negocio «'+slug+'».');
   const {data:rows}=await sb.from('contenido').select('clave,valor').eq('sitio_id',s.id); const ya={}; (rows||[]).forEach(r=>ya[r.clave]=r.valor);
-  const app=ya.app||{}; if(app.rubro&&app.rubro!=='gym')return ''; // por ahora solo hay base de gimnasio
+  const app=ya.app||{};
+  if(app.rubro==='consultorio'){ const web=app.web||'https://xyrostudio.net/consultorio/?s='+encodeURIComponent(slug); if(!app.web){ const {error}=await sb.from('contenido').upsert({sitio_id:s.id,clave:'app',valor:{...app,web}}); if(error)throw error; } return web; } // base de consultorio: /consultorio/ lee sus datos de Xyro Apps
+  if(app.rubro&&app.rubro!=='gym')return ''; // academia: aún sin base
   const B=(await baseGym())(app.nombre||s.negocio||slug), up=[];
   Object.keys(B).forEach(k=>{ if(k==='config'){ const c=ya.config||{}; if(!c.hero)up.push({sitio_id:s.id,clave:'config',valor:{...B.config,...c}}); } else if(ya[k]===undefined)up.push({sitio_id:s.id,clave:k,valor:B[k]}); });
   const web=app.web||sitioWeb(slug); if(!app.web)up.push({sitio_id:s.id,clave:'app',valor:{...app,web}});
@@ -543,7 +545,7 @@ V.negocios=async ()=>{
 // ---- Alta de un negocio nuevo en 1 minuto: cliente + sitio + Xyros + ajustes de la app + cuenta del dueño ----
 const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
 // Plantillas de Xyro Apps por rubro (on = lista para usar).
-const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🩺',n:'Consultorio',d:'Pacientes, citas e historial',on:0},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
+const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🩺',n:'Consultorio',d:'Pacientes, agenda por especialista, historia clínica privada y caja',on:1,color:'#14b8a6'},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
 let altaRes=null,altaPlt='gym';
 /* Accesos de prueba (SQL 31): enlace /app/?prueba=CODIGO con el nombre del posible cliente y vencimiento. Es la demo completa con tiempo. */
 const PR_DUR=[[60,'1 hora'],[180,'3 horas'],[1440,'1 día'],[4320,'3 días'],[10080,'7 días'],[21600,'15 días'],[43200,'30 días']];
@@ -659,7 +661,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-accenv]');
 V.alta=async ()=>{
   H('Nuevo negocio','Nombre, plantilla y costo. Con un clic queda su panel de Xyro Apps listo.');
   $('#acts').innerHTML='<button class="btn btn-g" data-v="clientes">← Clientes</button>';
-  if(altaRes){ const r=altaRes, link=`https://xyrostudio.net/app/?s=${r.slug}${r.email?'&e='+encodeURIComponent(r.email):''}`, msg=r.email?`Hola ${r.nombre} 👋 Ya tienes tu sistema de ${r.negocio} (Xyro Apps):\nEntra aquí: ${link}\nCorreo: ${r.email}\nClave temporal: ${r.pass}\nAl entrar te pedirá crear tu propia contraseña.`:'';
+  if(altaRes){ const r=altaRes, link=r.email?'https://xyrostudio.net/app/':`https://xyrostudio.net/app/?s=${r.slug}`, msg=r.email?`Hola ${r.nombre}, ya tienes tu sistema de ${r.negocio} (Xyro Apps):\nEntra aquí: ${link}\nCorreo: ${r.email}\nClave temporal: ${r.pass}\nAl entrar te pedirá crear tu propia contraseña.`:'';
     return `<div class="panel"><h3>✅ ${esc(r.negocio)} ya tiene su panel</h3><p class="d">Plantilla ${esc(r.plt)} · Código <b>${esc(r.slug)}</b> · ${r.xyros.map(esc).join(', ')}</p>
       ${r.email?`<div class="clavebox" style="margin-top:12px"><div>🔑 Cuenta del administrador <b>${esc(r.nombre)}</b> (${esc(r.email)})</div><div class="cv"><code>${esc(r.pass)}</code><button class="btn btn-p btn-sm" data-ucopy="${esc(msg)}">📋 Copiar mensaje</button>${r.tel?`<a class="btn btn-g btn-sm" target="_blank" rel="noopener" href="https://wa.me/${esc(r.tel)}?text=${encodeURIComponent(msg)}">💬 Enviar por WhatsApp</a>`:''}</div><small>La clave se muestra una sola vez.</small></div>`
         :r.vinc?`<div class="note" style="margin-top:12px">🏢 <b>${esc(r.vinc)}</b> (${esc(r.vincE)}) ya tenía cuenta: ahora también administra este negocio con su mismo correo y clave. En su Xyro Apps toca «🏢 Cambiar negocio» para pasar de uno a otro.</div>`

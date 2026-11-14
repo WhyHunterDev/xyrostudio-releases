@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Consultorio · Xyro Webs</title>
+<meta name="description" content="Agenda tu cita en línea. Atención con especialistas, horarios claros y confirmación por WhatsApp.">
+<meta name="theme-color" content="#07080c">
+<link rel="icon" href="/img/marca/logo-webs-app.svg">
+<style>
+:root{--a:#3ad6ff;--bg:#07080c;--c1:#10121a;--ln:#ffffff14;--tx:#f1f3f9;--mu:#9aa0b4;--ok:#3ddc97;--r:22px}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{background:var(--bg);color:var(--tx);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}img{max-width:100%;display:block}
+.w{max-width:1160px;margin:0 auto;padding:0 20px}
+nav.top{position:fixed;inset:0 0 auto;z-index:20;transition:.3s}nav.top.s{background:#07080ccc;backdrop-filter:blur(14px);border-bottom:1px solid var(--ln)}
+nav.top .w{display:flex;align-items:center;gap:14px;height:68px}.lg{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:18px}.lg i{width:38px;height:38px;border-radius:12px;background:var(--a);display:grid;place-items:center;color:#000;font-style:normal;font-size:18px;overflow:hidden}.lg i img{width:100%;height:100%;object-fit:contain;background:#fff}
+nav.top .lk{display:flex;gap:22px;margin-left:auto;font-size:14.5px;color:var(--mu)}nav.top .lk a:hover{color:var(--tx)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border-radius:999px;font-weight:700;font-size:15px;transition:transform .2s,box-shadow .2s;white-space:nowrap}.btn.p{background:var(--a);color:#000;box-shadow:0 10px 30px -10px var(--a)}.btn.p:hover{transform:translateY(-2px);box-shadow:0 16px 40px -10px var(--a)}.btn.g{border:1px solid var(--ln);background:#ffffff08}.btn.g:hover{background:#ffffff12}
+nav.top .btn{padding:10px 18px;font-size:14px}
+@media(max-width:820px){nav.top .lk{display:none}nav.top .btn{margin-left:auto}}
+/* Hero */
+.hero{min-height:100svh;display:grid;align-items:center;position:relative;overflow:hidden;padding:110px 0 60px}
+.hero::before{content:"";position:absolute;inset:-20%;background:radial-gradient(40% 40% at 70% 30%,color-mix(in srgb,var(--a) 28%,transparent),transparent 70%),radial-gradient(30% 30% at 15% 80%,color-mix(in srgb,var(--a) 14%,transparent),transparent 70%);animation:fl 14s ease-in-out infinite alternate;pointer-events:none}
+@keyframes fl{to{transform:translate(-4%,3%) scale(1.08)}}
+.hero .w{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+@media(max-width:900px){.hero .w{grid-template-columns:1fr}}
+.tag{display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border-radius:999px;border:1px solid var(--ln);background:#ffffff08;font-size:13px;color:var(--mu)}.tag b{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 var(--ok);animation:pu 2s infinite}
+@keyframes pu{70%{box-shadow:0 0 0 10px transparent}}
+h1{font-size:clamp(40px,6.4vw,76px);line-height:1.02;letter-spacing:-.045em;margin:18px 0;font-weight:850}h1 em{font-style:normal;color:var(--a)}
+.hero p.l{font-size:clamp(16px,1.6vw,19px);color:var(--mu);max-width:540px}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.ecg{width:100%;height:70px;margin-top:34px;opacity:.9}.ecg path{stroke:var(--a);stroke-width:2.5;fill:none;stroke-dasharray:1;stroke-dashoffset:1;animation:ecg 3.2s linear infinite;filter:drop-shadow(0 0 6px var(--a))}
+@keyframes ecg{0%{stroke-dashoffset:1}60%,100%{stroke-dashoffset:0}}
+.nums{display:flex;gap:28px;margin-top:26px;flex-wrap:wrap}.nums div b{display:block;font-size:30px;font-weight:800;letter-spacing:-.03em}.nums div small{color:var(--mu);font-size:13px}
+/* Tarjeta flotante de próxima cita */
+.card{background:linear-gradient(160deg,#ffffff0e,#ffffff04);border:1px solid var(--ln);border-radius:var(--r);padding:22px}
+.mock{position:relative;transform:perspective(1000px) rotateY(-8deg) rotateX(4deg);transition:transform .6s;animation:fu 6s ease-in-out infinite}.mock:hover{transform:none}
+@keyframes fu{50%{translate:0 -10px}}
+.mock h4{font-size:13px;color:var(--mu);font-weight:600;margin-bottom:12px}.sl{display:grid;gap:10px}.sl div{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:#ffffff08;border-left:4px solid var(--c,var(--a))}.sl b{font-size:14px}.sl small{display:block;color:var(--mu);font-size:12px}.sl span.ok{margin-left:auto;font-size:12px;font-weight:700;color:var(--ok)}
+.mock .bub{position:absolute;right:-12px;bottom:-22px;background:#25d366;color:#04140a;font-weight:700;font-size:13px;padding:10px 14px;border-radius:16px 16px 4px 16px;box-shadow:0 12px 30px -10px #25d366}
+@media(max-width:900px){.mock{transform:none;max-width:460px}}
+/* Secciones */
+section{padding:90px 0}section h2{font-size:clamp(30px,4.2vw,50px);letter-spacing:-.035em;line-height:1.08;font-weight:800;margin-bottom:12px}section .sub{color:var(--mu);max-width:620px;margin-bottom:36px}
+.kick{color:var(--a);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.sv{position:relative;overflow:hidden;transition:transform .3s,border-color .3s}.sv:hover{transform:translateY(-6px);border-color:color-mix(in srgb,var(--a) 60%,transparent)}.sv .ic{font-size:30px;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;background:color-mix(in srgb,var(--a) 14%,transparent);margin-bottom:16px}.sv h3{font-size:19px;letter-spacing:-.02em}.sv p{color:var(--mu);font-size:14.5px;margin-top:6px}.sv .pr{margin-top:14px;font-size:13px;font-weight:700;color:var(--a)}
+.sv::after{content:"";position:absolute;inset:auto -40% -60% auto;width:160px;height:160px;border-radius:50%;background:var(--a);opacity:.0;filter:blur(50px);transition:.4s}.sv:hover::after{opacity:.25}
+.dr{display:grid;gap:14px;text-align:center;justify-items:center}.dr .av{width:110px;height:110px;border-radius:36px;display:grid;place-items:center;font-size:36px;font-weight:800;color:#000;background:var(--c);box-shadow:0 20px 50px -20px var(--c)}.dr h3{font-size:18px}.dr small{color:var(--mu)}.dr .ds{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}.dr .ds i{font-style:normal;font-size:11px;padding:3px 8px;border-radius:999px;background:#ffffff0c;color:var(--mu)}.dr .ds i.on{background:color-mix(in srgb,var(--c) 25%,transparent);color:var(--tx)}
+/* Reserva */
+.bk{display:grid;grid-template-columns:.9fr 1.1fr;gap:24px;align-items:start}@media(max-width:900px){.bk{grid-template-columns:1fr}}
+.stp{display:grid;gap:18px}.stp label{font-size:13px;color:var(--mu);font-weight:600;display:block;margin-bottom:8px}
+.ch{display:flex;flex-wrap:wrap;gap:8px}.ch button{padding:10px 14px;border-radius:12px;border:1px solid var(--ln);background:#ffffff06;font-size:14px;font-weight:600;transition:.2s}.ch button:hover{border-color:var(--a)}.ch button.on{background:var(--a);color:#000;border-color:var(--a)}.ch button:disabled{opacity:.3;cursor:not-allowed}
+.dias{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}.dias button{min-width:62px;display:grid;justify-items:center;padding:8px 6px}.dias small{font-size:11px;color:inherit;opacity:.7}.dias b{font-size:18px}
+input.in{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--ln);background:#ffffff08;color:var(--tx);font:inherit}input.in:focus{outline:2px solid var(--a);border-color:transparent}
+.res{position:sticky;top:90px}.res .row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed var(--ln);font-size:14.5px}.res .row span{color:var(--mu)}.res .btn{width:100%;justify-content:center;margin-top:18px}.res .btn[aria-disabled=true]{opacity:.4;pointer-events:none}
+.nt{font-size:12.5px;color:var(--mu);margin-top:10px}
+/* Sedes, opiniones, preguntas */
+.sd h3{font-size:19px}.sd p{color:var(--mu);font-size:14.5px}.sd .hr{margin-top:10px;font-size:13.5px;display:grid;gap:2px}.sd .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.sd .btn{padding:9px 14px;font-size:13.5px}
+.op{font-size:15px}.op .st{color:#f5b544;letter-spacing:2px}.op p{margin:10px 0;color:#d5d9e6}.op small{color:var(--mu)}
+details.fq{border-bottom:1px solid var(--ln);padding:18px 0}details.fq summary{cursor:pointer;font-weight:700;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:12px}details.fq summary::after{content:"+";color:var(--a);font-size:24px;line-height:1;transition:.3s}details.fq[open] summary::after{transform:rotate(45deg)}details.fq p{color:var(--mu);margin-top:10px}
+.cta2{text-align:center;border-radius:32px;padding:60px 24px;background:radial-gradient(60% 120% at 50% 0%,color-mix(in srgb,var(--a) 30%,transparent),transparent),var(--c1);border:1px solid var(--ln)}
+footer{padding:40px 0 100px;border-top:1px solid var(--ln);color:var(--mu);font-size:14px}footer .w{display:flex;gap:20px;flex-wrap:wrap;justify-content:space-between}
+.fab{position:fixed;right:18px;bottom:18px;z-index:30;width:60px;height:60px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 14px 34px -10px #25d366;transition:transform .2s}.fab:hover{transform:scale(1.08)}.fab svg{width:30px;height:30px;fill:#fff}
+.rv{opacity:0;transform:translateY(24px);transition:opacity .7s,transform .7s}.rv.in{opacity:1;transform:none}
+.mk{background:#f5b54422;color:#f5b544;border-radius:6px;padding:0 4px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<nav class="top" id="nav"><div class="w"><a class="lg" href="#"><i id="lgI">🩺</i><span id="lgN">(nombre del consultorio)</span></a><div class="lk"><a href="#servicios">Servicios</a><a href="#equipo">Especialistas</a><a href="#sedes">Ubicación</a><a href="#preguntas">Preguntas</a></div><a class="btn p" href="#reserva">Reservar cita</a></div></nav>
+
+<header class="hero"><div class="w">
+ <div>
+  <span class="tag"><b></b><span id="hTag">Agenda abierta esta semana</span></span>
+  <h1 id="hT">Tu salud en <em>buenas manos</em>, sin esperas.</h1>
+  <p class="l" id="hS">Especialistas que te escuchan, tecnología moderna y tu cita confirmada por WhatsApp en minutos.</p>
+  <div class="cta"><a class="btn p" href="#reserva">🗓️ Reservar mi cita</a><a class="btn g" href="#servicios">Ver servicios</a></div>
+  <svg class="ecg" viewBox="0 0 600 70" preserveAspectRatio="none"><path pathLength="1" d="M0 40 H170 L185 40 L195 12 L208 64 L220 28 L230 40 H360 L372 40 L380 22 L390 55 L398 40 H600"/></svg>
+  <div class="nums"><div><b id="nA">+10</b><small>años de experiencia</small></div><div><b id="nE">3</b><small>especialistas</small></div><div><b>4.9★</b><small>opinión de pacientes</small></div></div>
+ </div>
+ <div class="mock card"><h4>📅 Agenda de hoy · <span id="mN">(nombre del consultorio)</span></h4><div class="sl" id="mL"></div><div class="bub">✅ ¡Cita confirmada!</div></div>
+</div></header>
+
+<section id="servicios"><div class="w"><p class="kick">Servicios</p><h2>Todo lo que necesitas, en un solo lugar.</h2><p class="sub">Elige el servicio y reserva en menos de un minuto.</p><div class="grid" id="svL"></div></div></section>
+
+<section id="equipo" style="background:linear-gradient(#ffffff03,transparent)"><div class="w"><p class="kick">Especialistas</p><h2>Te atiende un equipo que sí te explica.</h2><p class="sub">Conoce a quienes cuidan de ti y los días que atienden.</p><div class="grid" id="drL"></div></div></section>
+
+<section id="reserva"><div class="w"><p class="kick">Reserva en línea</p><h2>Tu cita en 4 pasos.</h2><p class="sub">Elige servicio, especialista, día y hora. Te confirmamos por WhatsApp.</p>
+ <div class="bk">
+  <div class="card stp">
+   <div><label>1 · Servicio</label><div class="ch" id="bS"></div></div>
+   <div><label>2 · Especialista</label><div class="ch" id="bP"></div></div>
+   <div><label>3 · Día</label><div class="ch dias" id="bD"></div></div>
+   <div><label>4 · Hora</label><div class="ch" id="bH"><small class="nt">Elige un día primero.</small></div></div>
+   <div><label>Tu nombre</label><input class="in" id="bN" maxlength="60" placeholder="Nombre y apellido" autocomplete="name"></div>
+  </div>
+  <div class="card res"><h3 style="font-size:20px;margin-bottom:8px">Tu reserva</h3>
+   <div class="row"><span>Servicio</span><b id="rS">—</b></div><div class="row"><span>Especialista</span><b id="rP">—</b></div><div class="row"><span>Día</span><b id="rD">—</b></div><div class="row"><span>Hora</span><b id="rH">—</b></div>
+   <a class="btn p" id="bGo" target="_blank" rel="noopener" aria-disabled="true">💬 Reservar por WhatsApp</a><p class="nt">El horario queda sujeto a confirmación. Te respondemos en minutos.</p>
+  </div>
+ </div>
+</div></section>
+
+<section id="opiniones"><div class="w"><p class="kick">Opiniones</p><h2>Lo que dicen nuestros pacientes.</h2><div class="grid" id="opL" style="margin-top:30px"></div></div></section>
+
+<section id="sedes"><div class="w"><p class="kick">Ubicación</p><h2>Visítanos.</h2><p class="sub">Atención con cita previa. También recibimos emergencias.</p><div class="grid" id="sdL"></div></div></section>
+
+<section id="preguntas"><div class="w" style="max-width:820px"><p class="kick">Preguntas frecuentes</p><h2>Resolvemos tus dudas.</h2><div id="fqL" style="margin-top:20px"></div></div></section>
+
+<section><div class="w"><div class="cta2 rv"><h2>¿Listo para tu próxima cita?</h2><p class="sub" style="margin:10px auto 26px">Reserva hoy y recibe tu recordatorio un día antes.</p><a class="btn p" href="#reserva">🗓️ Reservar ahora</a></div></div></section>
+
+<footer><div class="w"><span>© <span id="yr"></span> <span id="fN">(nombre del consultorio)</span></span><span>Web hecha con <a href="https://xyrostudio.net" style="color:var(--tx)">Xyro Webs</a></span></div></footer>
+<a class="fab" id="fab" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M20.5 3.5A11.8 11.8 0 0 0 1.9 17.7L.3 23.7l6.1-1.6A11.8 11.8 0 0 0 24 12a11.7 11.7 0 0 0-3.5-8.5ZM12 21.6a9.7 9.7 0 0 1-5-1.4l-.3-.2-3.6 1 1-3.5-.3-.4A9.7 9.7 0 1 1 12 21.6Zm5.3-7.3c-.3-.1-1.7-.9-2-1s-.5-.1-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a8 8 0 0 1-4-3.5c-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6a1.1 1.1 0 0 0-.8.4 3.4 3.4 0 0 0-1 2.5 5.9 5.9 0 0 0 1.2 3.1 13.4 13.4 0 0 0 5.2 4.6c1.9.8 2.7.9 3.6.7a3.1 3.1 0 0 0 2-1.4 2.5 2.5 0 0 0 .2-1.4c-.1-.1-.3-.2-.6-.3Z"/></svg></a>
+
+<script>
+/* Base Xyro Webs · Consultorio. /consultorio/?s=slug lee lo público del negocio (contenido): nombre, logo, color y
+   profesionales de Xyro Apps (contenido 'app'), servicios ('planes'), sedes ('sedes') y textos propios ('clinica').
+   Lo que falte sale de la base con marcadores «(nombre del consultorio)». Vista de venta: ?n=Nombre&c=hex. Solo lectura. */
+(function(){
+const SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
+const Q=new URLSearchParams(location.search),SLUG=(Q.get('s')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0'),hm=s=>{const[a,b]=String(s||'0:0').split(':');return(+a||0)*60+(+b||0)},mh=m=>pad(Math.floor(m/60))+':'+pad(m%60);
+const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],MS=['ene','feb','mar','abr','may','jun','jul','ago','set','oct','nov','dic'];
+const BASE=n=>({
+ nombre:n||'(nombre del consultorio)',wa:'51936449066',
+ servicios:[['🦷','Consulta y diagnóstico','Evaluación completa y plan de tratamiento claro, sin sorpresas.',50],['✨','Limpieza dental','Profilaxis y destartraje para encías sanas y aliento fresco.',90],['🪥','Curaciones','Resinas del color de tu diente, en una sola sesión.',120],['🩺','Endodoncia','Tratamiento de conducto sin dolor y con control.',380],['😁','Blanqueamiento','Hasta 3 tonos más blanco en una cita.',450],['📐','Ortodoncia','Brackets y alineadores con controles mensuales.',150]],
+ profs:[{id:'a',n:'Dra. (nombre)',esp:'Odontología general',color:'#3ad6ff',dias:[1,2,3,4,5,6],desde:'09:00',hasta:'18:00',dur:30},{id:'b',n:'Dr. (nombre)',esp:'Ortodoncia',color:'#7c5cff',dias:[1,3,5],desde:'14:00',hasta:'20:00',dur:30},{id:'c',n:'Dra. (nombre)',esp:'Endodoncia',color:'#3ddc97',dias:[2,4,6],desde:'09:00',hasta:'17:00',dur:60}],
+ sedes:[{nombre:'Sede (distrito)',direccion:'Av. (dirección) 123, (distrito)',horario:['Lun a Vie · 9:00 a.m. – 8:00 p.m.','Sáb · 9:00 a.m. – 2:00 p.m.'],maps:'',whatsapp:''}],
+ opiniones:[['Me atendieron a la hora exacta y me explicaron todo. Súper recomendado.','María Q.'],['El recordatorio por WhatsApp me salvó, siempre me olvido de mis citas 😅','Jorge R.'],['Excelente trato con mi hijo, ya no le tiene miedo al dentista.','Lucía T.']],
+ faq:[['¿Necesito cita previa?','Sí, así no esperas. Reserva aquí o por WhatsApp; para emergencias escríbenos y te atendemos lo antes posible.'],['¿Qué medios de pago aceptan?','Efectivo, Yape, Plin, tarjeta y transferencia. También puedes pagar tratamientos largos en cuotas.'],['¿Cómo confirmo o cambio mi cita?','Un día antes te escribimos por WhatsApp. Responde SÍ para confirmar o pídenos otro horario.'],['¿Atienden a niños?','Sí, con especialistas y mucha paciencia para que su visita sea tranquila.']]
+});
+async function rest(p){const r=await fetch(SB.url+'/rest/v1/'+p,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
+async function cargar(){
+ const B=BASE(SLUG?'':(Q.get('n')||'').slice(0,40));let D={...B,color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):'',logo:/^https:\/\//.test(Q.get('l')||'')?Q.get('l'):''};
+ if(!SLUG)return D;
+ try{const s=(await rest('sitios?select=id,negocio&slug=eq.'+encodeURIComponent(SLUG)))[0];if(!s)return D;
+  const C={};(await rest('contenido?select=clave,valor&sitio_id=eq.'+s.id)).forEach(r=>C[r.clave]=r.valor);
+  const app=C.app||{},cl=C.clinica||{};D.nombre=app.nombre||s.negocio||D.nombre;D.color=app.color||'';D.logo=app.logo||'';
+  const pr=(app.profesionales||[]).filter(p=>p.activo!==false);if(pr.length)D.profs=pr.map(p=>({id:p.id,n:p.n,esp:p.esp,color:p.color,dias:p.dias,desde:p.desde,hasta:p.hasta,dur:p.dur}));
+  const pl=Array.isArray(C.planes)?C.planes.filter(p=>p&&p.nombre&&p.activo!==false):[];if(pl.length)D.servicios=pl.map(p=>[p.emoji||'🩺',p.nombre,p.desc||p.descripcion||'',p.precio]);
+  if(Array.isArray(C.sedes)&&C.sedes.length)D.sedes=C.sedes;
+  const w=(D.sedes.find(x=>x.whatsapp)||{}).whatsapp||(C.bot&&C.bot.whatsapp)||cl.whatsapp;if(w)D.wa=String(w).replace(/\D/g,'').replace(/^9(\d{8})$/,'519$1');
+  ['hero','sub','opiniones','faq','anios'].forEach(k=>{if(cl[k])D[k]=cl[k]});
+ }catch(e){console.warn('Muestro la base',e)}
+ return D;
+}
+const mk=s=>esc(s).replace(/\((nombre[^)]*|distrito|dirección)\)/g,'<span class="mk">($1)</span>');
+cargar().then(D=>{
+ if(D.color)document.documentElement.style.setProperty('--a',D.color);
+ document.title=D.nombre.replace(/[()]/g,'')+' · Reserva tu cita';['#lgN','#mN','#fN'].forEach(s=>$(s).innerHTML=mk(D.nombre));$('#yr').textContent=new Date().getFullYear();
+ if(D.logo)$('#lgI').innerHTML=`<img src="${esc(D.logo)}" alt="">`;
+ if(D.hero)$('#hT').textContent=D.hero;if(D.sub)$('#hS').textContent=D.sub;if(D.anios)$('#nA').textContent='+'+D.anios;$('#nE').textContent=D.profs.length;
+ const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);$('#fab').href=wa('Hola '+D.nombre+', quiero reservar una cita 🙂');
+ // Agenda falsa animada (efecto)
+ const P=D.profs,S=D.servicios,ini=n=>String(n).replace(/^(Dra?|Lic|Mg)\.?\s*/i,'').replace(/[()]/g,'').trim().slice(0,1).toUpperCase()||'+';
+ $('#mL').innerHTML=['09:00','10:30','12:00','16:30'].map((h,i)=>{const p=P[i%P.length],s=S[i%S.length];return`<div style="--c:${esc(p.color||'var(--a)')}"><b>${h}</b><span><b>${esc(s[1])}</b><small>${mk(p.n)}</small></span><span class="ok">${i<2?'✅ Confirmada':'🗓️'}</span></div>`}).join('');
+ $('#svL').innerHTML=S.map(s=>`<a class="card sv rv" href="#reserva" data-sv="${esc(s[1])}"><div class="ic">${esc(s[0])}</div><h3>${esc(s[1])}</h3>${s[2]?`<p>${esc(s[2])}</p>`:''}<div class="pr">Reservar →</div></a>`).join('');
+ $('#drL').innerHTML=P.map(p=>{const ds=p.dias||[1,2,3,4,5,6];return`<div class="card dr rv" style="--c:${esc(p.color||'#3ad6ff')}"><div class="av">${esc(ini(p.n))}</div><div><h3>${mk(p.n)}</h3><small>${esc(p.esp||'')}</small></div><div class="ds">${[1,2,3,4,5,6,0].map(d=>`<i class="${ds.includes(d)?'on':''}">${DN[d]}</i>`).join('')}</div><small>${esc(p.desde||'09:00')} – ${esc(p.hasta||'19:00')}</small></div>`}).join('');
+ $('#opL').innerHTML=(D.opiniones||[]).map(o=>`<div class="card op rv"><div class="st">★★★★★</div><p>“${esc(o[0]||o.t)}”</p><small>— ${esc(o[1]||o.n)}</small></div>`).join('');
+ $('#fqL').innerHTML=(D.faq||[]).map(f=>`<details class="fq"><summary>${esc(f[0]||f.p)}</summary><p>${esc(f[1]||f.r)}</p></details>`).join('');
+ $('#sdL').innerHTML=D.sedes.map(s=>`<div class="card sd rv"><h3>📍 ${mk(s.nombre||'Sede')}</h3><p>${mk(s.direccion||'')}</p><div class="hr">${(Array.isArray(s.horario)?s.horario:[s.horario||'']).filter(Boolean).map(h=>`<span>🕘 ${esc(typeof h==='string'?h:(h.d||'')+' '+(h.h||''))}</span>`).join('')}</div><div class="acts">${s.maps?`<a class="btn g" target="_blank" rel="noopener" href="${esc(s.maps)}">🗺️ Cómo llegar</a>`:''}<a class="btn g" target="_blank" rel="noopener" href="${wa('Hola, una consulta sobre la '+(s.nombre||'sede'))}">💬 Escribir</a></div></div>`).join('');
+ // Reserva en 4 pasos
+ const B={s:'',p:'',d:'',h:''},hoy=new Date();
+ const dias=()=>{const p=P.find(x=>x.id===B.p),out=[];for(let i=0;out.length<12&&i<30;i++){const d=new Date(hoy);d.setDate(d.getDate()+i);if(p&&!(p.dias||[1,2,3,4,5,6]).includes(d.getDay()))continue;if(!p&&d.getDay()===0)continue;out.push(d)}return out};
+ const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),fD=s=>{const d=new Date(s+'T12:00:00');return DL[d.getDay()]+' '+d.getDate()+' '+MS[d.getMonth()]};
+ const horas=()=>{const p=P.find(x=>x.id===B.p)||P[0];if(!B.d)return[];const a=hm(p.desde||'09:00'),b=hm(p.hasta||'19:00'),st=+p.dur||30,now=new Date(),out=[];for(let m=a;m+st<=b;m+=st){if(B.d===ymd(now)&&m<=now.getHours()*60+now.getMinutes()+30)continue;out.push(mh(m))}return out};
+ const pinta=()=>{
+  $('#bS').innerHTML=S.map(s=>`<button data-k="s" data-v="${esc(s[1])}" class="${B.s===s[1]?'on':''}">${esc(s[0])} ${esc(s[1])}</button>`).join('');
+  $('#bP').innerHTML=P.map(p=>`<button data-k="p" data-v="${esc(p.id)}" class="${B.p===p.id?'on':''}">${mk(p.n)}<small style="display:block;font-size:11px;opacity:.7">${esc(p.esp||'')}</small></button>`).join('');
+  $('#bD').innerHTML=dias().map(d=>`<button data-k="d" data-v="${ymd(d)}" class="${B.d===ymd(d)?'on':''}"><small>${DN[d.getDay()]}</small><b>${d.getDate()}</b><small>${MS[d.getMonth()]}</small></button>`).join('');
+  const H=horas();$('#bH').innerHTML=B.d?(H.length?H.map(h=>`<button data-k="h" data-v="${h}" class="${B.h===h?'on':''}">${h}</button>`).join(''):'<small class="nt">No quedan horarios ese día. Elige otro.</small>'):'<small class="nt">Elige un día primero.</small>';
+  const p=P.find(x=>x.id===B.p);$('#rS').textContent=B.s||'—';$('#rP').innerHTML=p?mk(p.n):'—';$('#rD').textContent=B.d?fD(B.d):'—';$('#rH').textContent=B.h||'—';
+  const n=$('#bN').value.trim(),ok=B.s&&B.p&&B.d&&B.h&&n.length>1,g=$('#bGo');g.setAttribute('aria-disabled',ok?'false':'true');
+  g.href=ok?wa(`Hola ${D.nombre}, quiero reservar una cita:\n• Servicio: ${B.s}\n• Especialista: ${p.n}\n• Día: ${fD(B.d)}\n• Hora: ${B.h}\n• Nombre: ${n}\n¿Me confirman? 🙂`):'#';
+ };
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b){B[b.dataset.k]=b.dataset.v;if(b.dataset.k==='p'){B.d='';B.h=''}if(b.dataset.k==='d')B.h='';pinta();return}const s=e.target.closest('[data-sv]');if(s){B.s=s.dataset.sv;pinta()}});
+ $('#bN').addEventListener('input',pinta);pinta();
+ const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});document.querySelectorAll('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*.08+'s';io.observe(el)});
+});
+addEventListener('scroll',()=>$('#nav').classList.toggle('s',scrollY>20),{passive:true});
+})();
+</script>
+</body>
+</html>

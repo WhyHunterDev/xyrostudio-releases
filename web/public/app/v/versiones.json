@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261114-0307",
+  "fecha": "2026-11-14 03:07",
+  "titulo": "Consultorios: agenda de citas e historia clínica",
+  "notas": "Consultorios: agenda de citas e historia clínica",
+  "cambios": [
+   "Nuevo rubro Consultorio: agenda por especialista con horarios libres, recordatorio por WhatsApp, llegó, cobrar y reprogramar",
+   "Historia clínica privada por paciente (solo el admin y los profesionales la ven) e impresión",
+   "Nuevo rol Profesional de salud: ve solo su agenda y sus pacientes",
+   "El mensaje de acceso del equipo ahora trae un solo enlace: xyrostudio.net/app/ (detecta el negocio de la cuenta)",
+   "Asistencia queda solo arriba (se quitó del menú y de Inicio)"
+  ],
+  "requiere": "SQL 44"
+ },
+ {
   "id": "20261114-0232",
   "fecha": "2026-11-14 02:32",
   "titulo": "Logo y datos del negocio en WhatsApp",
