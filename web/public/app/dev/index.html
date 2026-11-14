@@ -309,6 +309,14 @@ body:not(.dentro){background:#05060a}
 .odl{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--mu)}.odl i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid #fff3}
 .prs{border:1px solid var(--ln);border-radius:14px;padding:12px;display:grid;gap:8px}.prb{height:8px;border-radius:99px;background:#ffffff10;overflow:hidden}.prb i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--ok));border-radius:99px;transition:width .8s}.pri{cursor:pointer;padding:6px 8px}.pri input{width:18px;height:18px;accent-color:var(--ok)}.pri:has(input:checked) .nm b{text-decoration:line-through;opacity:.6}
 .pir{display:grid;grid-template-columns:64px 1fr 92px 40px;gap:6px;align-items:center}.pir input{min-width:0;width:100%;padding:10px;border-radius:10px;border:1px solid var(--ln);background:#ffffff08;color:var(--tx);font:inherit}
+.mpB{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start;margin-bottom:14px}.mpB section{display:grid;gap:10px;align-content:start}.mpB h3{display:flex;gap:8px;align-items:center}
+.mpC{padding:14px;display:grid;gap:8px;animation:mpIn .35s cubic-bezier(.2,1.3,.3,1)}.mpC.nuevo{border-color:var(--wa);box-shadow:0 0 0 1px var(--wa),0 10px 40px -18px var(--wa)}.mpC.preparando{border-color:#3ad6ff66}.mpC.servido{border-color:var(--a)}
+.mpH{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.mpM{font-size:20px;font-weight:900;letter-spacing:-.02em}.mpI{display:grid;gap:3px;font-size:14px}.mpN{background:#ffffff0a;border-radius:10px;padding:6px 10px}
+.mpF{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px dashed var(--ln);padding-top:8px}.mpE{padding:18px;border:1px dashed var(--ln);border-radius:16px;text-align:center}
+.mpHero{display:grid;gap:14px;padding:22px}.mpSt{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.mpSt div{display:grid;gap:6px;justify-items:center;text-align:center;padding:16px 10px;border:1px solid var(--ln);border-radius:16px;animation:mpIn .5s both}.mpSt span{font-size:30px}.mpSt b{font-size:13px}
+.mpQ{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;max-height:46vh;overflow:auto;margin:10px 0}.mpQ .btn{display:grid;gap:2px;padding:12px}.mpQ small{opacity:.6;font-size:11px}
+@keyframes mpIn{from{opacity:0;transform:translateY(12px) scale(.97)}}
+@media(max-width:900px){.mpB{grid-template-columns:1fr}.mpSt{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -397,7 +405,7 @@ const isSup=()=>ME&&['admin','gestor','supervisor'].includes(ME.rol);
 const puedeProd=()=>ME&&['admin','gestor','supervisor','cafetin'].includes(ME.rol);
 // Ver otras sedes: el admin siempre; el resto solo si el admin le dio «Todas» en Equipo.
 const verTodas=()=>isAdmin()||!!(ME&&(!ME.sede||ME.sede==='todas'));
-let NEED24=false,NEED26=false,NEED29=false;
+let NEED24=false,NEED26=false,NEED29=false,NEED50P=false;
 
 /* ===== Fechas ===== */
 const pad=n=>String(n).padStart(2,'0');
@@ -463,7 +471,7 @@ const DB={
   const e=rs.find(r=>r.error);if(e){if(/xa_|relation|schema cache/i.test(e.error.message))throw new Error('Falta activar la base de Xyro Apps (SQL 15).');throw e.error}
   [S.cli,S.pla,S.mem,S.pag,S.asi]=rs.map(r=>r.data||[]);
   const r2=await Promise.all([todo(()=>q('pro').order('nombre').order('id'),10000),todo(()=>q('mov').gte('t',since).order('t',{ascending:false}).order('id'),40000),q('cie').order('hasta',{ascending:false}).limit(60)]);
-  NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);
+  NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);NEED50P=!!(await sb.from(T.pro).select('en_mesa').limit(1)).error;MP=null;
   NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED39=!!(await sb.from(T.pag).select('foto_pago').limit(1)).error;NEED26=!!(await sb.from(T.mem).select('cuotas').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
   {const r=await sb.from(T.sol).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(1000),r2=await sb.from(T.cie).select('area').limit(1);NEED24=!!(r.error||r2.error);S.sol=r.data||[]}
   {const r=await sb.from(T.rut).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(5000);NEED29=!!r.error;S.rut=r.data||[];PDA=null;pdaCargar().then(()=>{if(pdaN()&&!document.querySelector('.ov'))go()})}
@@ -1292,17 +1300,17 @@ function webDent(){
 const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||String(x.sede)===SEDE)).length;
 const NAV=()=>{let n=NAV0();if(R.citas&&!isProf()){n=n.filter(x=>!DENT_OFF.includes(x[0])).map(x=>x[0]==='planes'?['planes','🦷','Tratamientos']:x);if(citOn())n.splice(1,0,['agenda','🗓️','Agenda'])}return n};
 const NAV0=()=>{if(isProf())return[['agenda','🗓️','Mi agenda'],['socios','👥',R.clis],['cuenta','🔐','Mi cuenta']];if(isCoach())return[['rutinas','📋',(ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento')+(pdaN()?' ('+pdaN()+')':'')],['cuenta','🔐','Mi cuenta']];
- if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
+ if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()]].concat(mpVis()?[['pedidos','🍽️','Pedidos'+(mpNuevos()?' ('+mpNuevos()+')':'')]]:[],[['caja','💰','Caja']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
- return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['miapp','📱','App de clientes'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas'+(pdaN()?' ('+pdaN()+')':'')]]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']],!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
-const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento','miapp']],['gym','🏋️','Gimnasio',['rutinas','tienda','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['miapp','📱','App de clientes'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas'+(pdaN()?' ('+pdaN()+')':'')]]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()]].concat(mpVis()?[['pedidos','🍽️','Pedidos de mesa'+(mpNuevos()?' ('+mpNuevos()+')':'')]]:[],[['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']])).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']],!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento','miapp']],['gym','🏋️','Gimnasio',['rutinas','tienda','pedidos','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
 function navGrupos(n){const top=[],G=NAVG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));n.forEach(x=>{const g=NAVG.findIndex(g=>g[3].includes(x[0]));(g<0||n.length<=8?top:G[g].L).push(x)});const G2=G.filter(g=>g.L.length);G2.filter(g=>g.L.length===1).forEach(g=>top.push(g.L[0]));return{top,G:G2.filter(g=>g.L.length>1)}}
 const navNum=t=>{const m=String(t).match(/\((\d+)\)\s*$/);return m?+m[1]:0};
 function shell(){
  const n=NAV(),NG=navGrupos(n.filter(x=>x[0]!=='kiosco')),lnk=([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`;
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+NG.top.map(lnk).join('')+NG.G.map(g=>{const c=g.L.reduce((a,x)=>a+navNum(x[2]),0),ab=LS.g('xa-ng-'+g.k,'')==='1'||c>0||g.L.some(x=>x[0]===ruta);return`<details class="ng" data-g="${g.k}" ${ab?'open':''}><summary class="nav"><em>${g.i}</em>${esc(g.t)}${c?`<b class="ngc">${c}</b>`:''}</summary><div class="ngl">${g.L.map(lnk).join('')}</div></details>`}).join('')+
   `<div class="side-f"><a class="btn sm"${soporteTgt()} href="${soporteURL()}">🛟 Soporte XyroStudio<b class="tkb" ${TKN?'':'hidden'}>${TKN}</b></a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor||NEG.length>1?'<button class="btn sm" id="cambia">🏢 Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
- $('#bn').innerHTML=n.filter(x=>['inicio','agenda','socios','kiosco','tienda','caja'].includes(x[0])||(isCoach()&&x[0]==='rutinas')).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
+ $('#bn').innerHTML=n.filter(x=>['inicio','agenda','socios','kiosco','tienda','caja'].includes(x[0])||(ME.rol==='cafetin'&&x[0]==='pedidos')||(isCoach()&&x[0]==='rutinas')).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  $$('#side details.ng').forEach(d=>d.ontoggle=()=>LS.s('xa-ng-'+d.dataset.g,d.open?'1':''));
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=cambiarNegocio);
  marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):verTodas()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
@@ -1313,18 +1321,19 @@ let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
 function go(){
  ixOff();
  const h=(location.hash||'#/inicio').slice(2).split('/');ruta=h[0]||'inicio';arg=decodeURIComponent(h[1]||'');
- if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta','web','soporte'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
+ if(ME&&ME.rol==='cafetin'&&!['tienda','pedidos','caja','mas','cuenta','web','soporte'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
  if(R.citas&&DENT_OFF.includes(ruta)){ruta='inicio';history.replaceState(null,'','#/inicio')}
  if(isProf()&&!['agenda','socios','socio','cuenta','mas','soporte'].includes(ruta)){ruta='agenda';history.replaceState(null,'','#/agenda')}
  if(isCoach()&&!['rutinas','cuenta','mas','soporte'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
  {const a=$('#side .ngl .nav[data-k="'+ruta+'"]');a&&(a.closest('details').open=true)}
- $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp','ventasbot','pruebas','miplan'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
+ $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp','ventasbot','pruebas','miplan','pedidos'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
+ if(ruta==='pedidos'&&!mpVis())ruta=CTL()?'tienda':'inicio';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
  if((ruta==='whatsapp'||ruta==='ventasbot')&&!waVer())ruta='inicio';
- const V={miapp:miApp,inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda}[ruta]||inicio;
+ const V={pedidos:pedidosMesa,miapp:miApp,inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${ruta!=='miplan'?planAviso():''}${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:citOn()?'🗓️ Cita':(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:R.citas?'＋ Tratamiento':'＋ Plan',caja:R.citas?'🚶 Cobro al paso':'＋ Cobro',ajustes:R.citas?'🗓️ Cita':'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket',agenda:'＋ Cita'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
@@ -2074,8 +2083,9 @@ function editProd(p){
  const f=[{k:'nombre',l:'Producto',v:p&&p.nombre,req:1,ph:'Ej. Batido de proteína'},{k:'categoria',l:'Categoría',v:p&&p.categoria,dl:cats.length?cats:['Bebidas','Batidos','Snacks','Suplementos','Accesorios'],ph:'Ej. Bebidas'},{k:'precio',l:'Precio de venta (S/)',t:'number',v:p&&p.precio,req:1,half:1},{k:'costo',l:'Costo (S/, opcional)',t:'number',v:p&&p.costo,half:1},{k:'minimo',l:'Avisar cuando queden',t:'number',v:p?p.minimo:3,half:1}];
  if(!p)f.push({k:'stock',l:'Stock inicial',t:'number',v:0,half:1});
  f.push({k:'emoji',l:'Ícono',t:'opts',v:(p&&p.emoji)||'🥤',o:EMOJ.map(x=>[x,x])});
+ if(CTL()&&!NEED50P)f.push({k:'detalle',l:'Detalle para el menú (opcional)',v:p&&p.detalle,ph:'Ej. Batido + barra de proteína'},{k:'en_mesa',l:'🍽️ Mostrar en el menú de mesas (QR)',t:'chk',v:!p||p.en_mesa!==false});
  form(p?'Editar producto':'Nuevo producto',f,async v=>{
-  const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};
+  const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};if(CTL()&&!NEED50P)Object.assign(row,{detalle:v.detalle||null,en_mesa:!!v.en_mesa});
   if(p){await DB.upd('pro',p.id,row)}else{const n=await DB.ins('pro',Object.assign(row,{stock:0,creado:new Date().toISOString()}));if(+v.stock>0)await DB.stock(n.id,+v.stock,'entrada','Stock inicial')}
   S.pro.sort((a,b)=>a.nombre.localeCompare(b.nombre));toast('Producto guardado ✓');go();
  },p?'<button type="button" class="btn bad" id="prDel" style="margin-right:auto">Archivar</button>':'');
@@ -2087,6 +2097,131 @@ function entrada(p){
   await DB.stock(p.id,v.tipo==='ajuste'?-n:n,v.tipo,v.nota||null);toast('Stock: '+p.stock+' und ✓');go();
  });
 }
+
+/* ===== Pedidos por QR de mesa (SQL 50, Xyro Control): el socio escanea /pedir/?s=slug&m=N, pide y paga al final en el cafetín ===== */
+let MP=null,NEED50=false,MPn=0;
+const mpVis=()=>mpOn()&&(mpCfg().on||isAdmin());
+const mpOn=()=>CTL()&&!R.citas&&!!ME&&['gestor','admin','supervisor','recepcion','cafetin'].includes(ME.rol);
+const mpCfg=()=>Object.assign({on:!!DEMO,n:DEMO?8:0,desde:'07:00',hasta:'21:00',dias:[]},CFG.mesas||{});
+const mpLink=n=>DEMO?location.origin+'/pedir/?demo=1&m='+n+'&n='+encodeURIComponent(nombre()):'https://xyrostudio.net/pedir/?s='+encodeURIComponent(SLUG)+'&m='+n;
+const MPE={nuevo:['🟡 Nuevo','var(--wa)'],preparando:['👨‍🍳 Preparando','#3ad6ff'],servido:['🍽️ Servido · falta pagar','var(--a)'],pagado:['✅ Pagado','var(--ok)'],cancelado:['Cancelado','var(--mu)']};
+const mpAbiertos=()=>(MP&&MP.pedidos||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
+const mpNuevos=()=>(MP&&MP.pedidos||[]).filter(p=>p.estado==='nuevo').length;
+const mpHace=t=>{const m=Math.max(0,Math.round((Date.now()-new Date(t))/6e4));return m<1?'ahora':m<60?'hace '+m+' min':'hace '+Math.floor(m/60)+' h'};
+function mpDemo(){const P=S.pro.filter(p=>p.activo!==false).slice(0,6),it=(i,c)=>{const p=P[i%Math.max(1,P.length)]||{id:'x',nombre:'Batido',precio:10,emoji:'🥤'};return{id:p.id,n:p.nombre,c,p:+p.precio,e:p.emoji}},t=m=>new Date(Date.now()-m*6e4).toISOString(),c=S.cli[0];
+ const L=[{id:'m1',num:1,mesa:2,items:[it(2,2),it(4,1)],nota:'Sin azúcar porfa',nombre:c?c.nombre:'Lucía',cliente_id:c&&c.id,cliente_nombre:c&&c.nombre,estado:'servido',creado:t(34),cambio:t(20)},
+  {id:'m2',num:2,mesa:5,items:[it(0,1),it(3,1)],nombre:'Diego',estado:'preparando',creado:t(9),cambio:t(5)},
+  {id:'m3',num:3,mesa:1,items:[it(1,3)],nombre:'',estado:'nuevo',creado:t(1),cambio:t(1)}];
+ L.forEach(p=>p.total=p.items.reduce((a,i)=>a+i.p*i.c,0));return{mesas:mpCfg(),abierto:true,pedidos:L}}
+async function mpRpc(f,a){
+ if(DEMO){const p=(MP.pedidos||[]).find(x=>x.id===(a||{}).p_id);if(f==='xa_mesa_estado'&&p){p.estado=a.p_estado;p.cambio=new Date().toISOString();p.atendio=QUIEN()}
+  if(f==='xa_mesa_cobrar')(MP.pedidos||[]).filter(x=>a.p_ids.includes(x.id)).forEach(x=>{x.estado='pagado';x.pagado=new Date().toISOString();x.cobro=QUIEN();x.metodo=a.p_metodo;x.pago_id=a.p_pago});return p||{}}
+ const{data,error}=await sb.rpc(f,a||{});if(error)throw error;return data}
+async function mpCargar(){if(!mpOn())return MP=null;if(DEMO){MP=MP||mpDemo();MP.mesas=mpCfg();return MP}
+ try{MP=await mpRpc('xa_mesa_lista',{p_slug:SLUG||null});NEED50=false}catch(e){NEED50=/xa_mesa|function|schema/i.test(e.message||'');MP=MP||{pedidos:[]}}return MP}
+// Revisa pedidos nuevos cada 12 s en la vista y cada 30 s en el resto del panel (suena y avisa)
+let mpT=0;setInterval(async()=>{if(document.hidden||!mpOn()||!mpCfg().on||NEED50)return;const en=/^#\/pedidos/.test(location.hash);if(!en&&Date.now()-mpT<3e4)return;mpT=Date.now();
+ const n0=mpNuevos(),ids=new Set((MP&&MP.pedidos||[]).map(p=>p.id)),j=JSON.stringify(MP&&MP.pedidos);await mpCargar();const nv=(MP.pedidos||[]).filter(p=>p.estado==='nuevo'&&!ids.has(p.id));
+ if(nv.length&&MPn){beep(true);toast('🍽️ Nuevo pedido · Mesa '+nv.map(p=>p.mesa).join(', '))}MPn=1;
+ if(mpNuevos()!==n0)shell();if(en&&JSON.stringify(MP.pedidos)!==j&&!document.querySelector('.ov'))go()},12000);
+function pedidosMesa(){
+ if(!mpOn())return'<div class="empty"><b>🍽️</b>Los pedidos por QR vienen con Xyro Control.</div>';
+ if(MP==null){mpCargar().then(()=>{MPn=1;if(ruta==='pedidos')go()});return'<div class="empty"><b>⏳</b>Cargando pedidos…</div>'}
+ const C=mpCfg(),adm=isAdmin();
+ setTimeout(()=>{const q=s=>$(s);q('#mpCfg')&&(q('#mpCfg').onclick=mpConfig);q('#mpAct')&&(q('#mpAct').onclick=mpConfig);q('#mpQR')&&(q('#mpQR').onclick=mpQRs);q('#mpSim')&&(q('#mpSim').onclick=mpSimular);
+  q('#mpVer')&&(q('#mpVer').onclick=()=>window.open(mpLink(1),'_blank'));
+  $$('[data-mpe]').forEach(b=>b.onclick=async()=>{const[id,e]=b.dataset.mpe.split('|');if(e==='cancelado'&&!confirm('¿Cancelar este pedido?'))return;b.disabled=true;try{await mpRpc('xa_mesa_estado',{p_id:id,p_estado:e});await mpCargar();toast(e==='servido'?'🍽️ Marcado como servido':e==='preparando'?'👨‍🍳 En preparación':'Pedido cancelado');shell();go()}catch(er){toast(er.message);b.disabled=false}});
+  $$('[data-mpc]').forEach(b=>b.onclick=()=>mpCobrar(+b.dataset.mpc))});
+ if(NEED50&&!DEMO)return`<div class="hi"><div><h2>🍽️ Pedidos de mesa</h2></div></div><div class="empty"><b>🧩</b>Para recibir pedidos por QR falta activar la función en tu base (<b>SQL 50</b>). Avísale a XyroStudio.</div>`;
+ if(!C.on)return`<div class="hi"><div><h2>🍽️ Pedidos desde la mesa</h2><p class="mu">Tus ${R.clis.toLowerCase()} escanean el QR de su mesa, eligen del ${esc(tiendaN().toLowerCase())} y piden sin hacer cola.</p></div></div>
+  <div class="card mpHero"><div class="mpSt">${[['📷','Escanea el QR de su mesa'],['🛒','Elige combos, promos y productos'],['🔔','Te llega el pedido al instante'],['💰','Paga al terminar y queda registrado']].map(([i,t],k)=>`<div style="animation-delay:${k*.08}s"><span>${i}</span><b>${t}</b></div>`).join('')}</div>
+  <p class="mu sm">Solo muestra lo que tienes en stock y no recibe pedidos fuera de tu horario.</p>${adm?'<button class="btn p" id="mpAct">🚀 Activar pedidos por QR</button>':'<p class="sm">Pídele al administrador que lo active.</p>'}<button class="btn" id="mpVer" style="margin-left:6px">👀 Ver cómo lo ve el cliente</button></div>`;
+ const A=mpAbiertos(),col=e=>A.filter(p=>p.estado===e),serv=col('servido'),mesas=[...new Set(serv.map(p=>p.mesa))].sort((a,b)=>a-b);
+ const hoyP=(MP.pedidos||[]).filter(p=>p.estado==='pagado'),totH=hoyP.reduce((a,p)=>a+ +p.total,0);
+ const card=p=>{const e=MPE[p.estado];return`<div class="card mpC ${p.estado}"><div class="mpH"><b class="mpM">Mesa ${p.mesa}</b><span class="mu sm">#${p.num} · ${mpHace(p.creado)}</span></div>
+  ${p.nombre||p.cliente_nombre?`<p class="sm">👤 ${esc(p.cliente_nombre||p.nombre)}${p.cliente_id?' <span class="pill act" style="font-size:10px">socio</span>':''}</p>`:''}
+  <div class="mpI">${(p.items||[]).map(i=>`<div><b>${+i.c}×</b> ${esc(i.e||'')} ${esc(i.n)}</div>`).join('')}</div>${p.nota?`<p class="sm mpN">📝 ${esc(p.nota)}</p>`:''}
+  <div class="mpF"><b>${sol(p.total)}</b><span style="display:flex;gap:6px">${p.estado==='nuevo'?`<button class="btn sm" data-mpe="${p.id}|cancelado" title="Cancelar">✕</button><button class="btn sm p" data-mpe="${p.id}|preparando">👨‍🍳 Preparar</button>`:p.estado==='preparando'?`<button class="btn sm p" data-mpe="${p.id}|servido">🍽️ Servido</button>`:''}</span></div></div>`};
+ return`<div class="hi"><div><h2>🍽️ Pedidos de mesa</h2><p class="mu">${MP.abierto||DEMO?'<span style="color:var(--ok)">● Recibiendo pedidos</span>':'<span style="color:var(--bad)">● Cerrado ahora</span>'} · ${C.n} mesas · ${esc(C.desde||'')}–${esc(C.hasta||'')} · hoy ${hoyP.length} cobrados (${sol(totH)})</p></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap">${DEMO?'<button class="btn" id="mpSim">🧪 Simular pedido</button>':''}<button class="btn" id="mpQR">🖨️ QR de mesas</button>${adm?'<button class="btn" id="mpCfg">⚙️ Mesas y horario</button>':''}</div></div>
+ <div class="mpB">
+  <section><h3>🟡 Nuevos <span class="pill">${col('nuevo').length}</span></h3>${col('nuevo').map(card).join('')||'<p class="mu sm mpE">Sin pedidos nuevos. Suena cuando llega uno.</p>'}</section>
+  <section><h3>👨‍🍳 Preparando <span class="pill">${col('preparando').length}</span></h3>${col('preparando').map(card).join('')||'<p class="mu sm mpE">Nada en preparación.</p>'}</section>
+  <section><h3>💰 Por cobrar <span class="pill">${mesas.length}</span></h3>${mesas.map(m=>{const L=serv.filter(p=>p.mesa===m),t=L.reduce((a,p)=>a+ +p.total,0);return`<div class="card mpC servido"><div class="mpH"><b class="mpM">Mesa ${m}</b><span class="mu sm">${L.length} pedido${L.length>1?'s':''}</span></div>
+   <div class="mpI">${L.flatMap(p=>p.items||[]).map(i=>`<div><b>${+i.c}×</b> ${esc(i.e||'')} ${esc(i.n)} <span class="mu">${sol(i.p*i.c)}</span></div>`).join('')}</div>
+   <button class="btn p" data-mpc="${m}" style="width:100%;margin-top:8px">Cobrar ${sol(t)}</button></div>`}).join('')||'<p class="mu sm mpE">Cuando sirvas un pedido, aquí sale cuánto paga cada mesa.</p>'}</section>
+ </div>
+ ${hoyP.length?`<div class="card"><h3>✅ Cobrados hoy</h3><div class="tl">${hoyP.slice().reverse().slice(0,30).map(p=>`<div class="row" style="padding:7px 6px"><span class="nm"><b>Mesa ${p.mesa} · #${p.num}${p.cliente_nombre?' · '+esc(p.cliente_nombre):''}</b><small>${(p.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ')} · ${esc(p.metodo||'')} · ${p.pagado?fH(p.pagado):''}${p.cobro?' · '+esc(p.cobro):''}</small></span><b>${sol(p.total)}</b></div>`).join('')}</div></div>`:''}`;
+}
+function mpCobrar(m){
+ const L=mpAbiertos().filter(p=>p.estado==='servido'&&p.mesa===m);if(!L.length)return;
+ const tot=Math.round(L.reduce((a,p)=>a+ +p.total,0)*100)/100,cl=(L.find(p=>p.cliente_id)||{}).cliente_id||'',items=[];
+ L.flatMap(p=>p.items||[]).forEach(i=>{const o=items.find(x=>x.id===i.id&&x.p===+i.p);o?o.c+=+i.c:items.push({id:i.id,n:i.n,c:+i.c,p:+i.p})});
+ form('💰 Mesa '+m+' · '+sol(tot),[...pagoFields(()=>tot),{k:'cliente',l:R.cli+' (opcional, queda en su historial)',t:'sel',v:cl,o:[['','—']].concat(S.cli.map(c=>[c.id,(c.num?'#'+c.num+' ':'')+c.nombre]))},...compFields()],async v=>{
+  valComp(v);valSplit(v,tot);
+  const pg=await pagar({concepto:tiendaN()+' · Mesa '+m+': '+items.map(i=>i.c+'× '+i.n).join(', '),items,monto:tot,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:QUIEN()},v);
+  for(const i of items)if(S.pro.some(p=>p.id===i.id))await DB.stock(i.id,-i.c,'venta','Mesa '+m);
+  await mpRpc('xa_mesa_cobrar',{p_ids:L.map(p=>p.id),p_metodo:v.metodo,p_pago:pg&&pg.id||null,p_cliente:v.cliente||null});
+  await mpCargar();shell();go();await finCobro(pg,v,'Mesa '+m+' cobrada');
+ });
+}
+function mpConfig(){if(!isAdmin())return;const C=mpCfg(),D=[['1','Lun'],['2','Mar'],['3','Mié'],['4','Jue'],['5','Vie'],['6','Sáb'],['0','Dom']];
+ sheet(`<form class="g" style="gap:12px" id="mpf"><h3>⚙️ Mesas y horario</h3><p class="mu sm">Pon cuántas mesas tienes. Cada una tendrá su propio QR. Fuera del horario el menú se ve, pero no se puede pedir.</p>
+  <label class="fl">¿Cuántas mesas tiene tu ${esc(tiendaN().toLowerCase())}?<input id="mpn" type="number" min="1" max="200" inputmode="numeric" required value="${C.n||''}" placeholder="Ej. 8"></label>
+  <div class="f2"><label class="fl">Abre<input id="mpd" type="time" value="${esc(C.desde||'07:00')}"></label><label class="fl">Cierra<input id="mph" type="time" value="${esc(C.hasta||'21:00')}"></label></div>
+  <div class="fl">Días que atiende<div class="opts mpD">${D.map(([k,t])=>`<button type="button" data-d="${k}" class="${!C.dias.length||C.dias.includes(+k)?'on':''}">${t}</button>`).join('')}</div></div>
+  <label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx)"><input id="mpp" type="checkbox" ${C.pausa?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">⏸️ Pausar pedidos por ahora (ej. no hay quien atienda)</label>
+  <p class="err" hidden></p><div class="bt">${C.on?'<button type="button" class="btn bad" id="mpOff" style="margin-right:auto">Apagar</button>':''}<button type="button" class="btn" data-x>Cancelar</button><button class="btn p">${C.on?'Guardar':'🚀 Activar'}</button></div></form>`,(el,close)=>{
+  el.querySelectorAll('.mpD button').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+  const off=el.querySelector('#mpOff');off&&(off.onclick=async()=>{await DB.cfg({mesas:Object.assign(C,{on:false})});close();toast('Pedidos por QR apagados');go()});
+  el.querySelector('#mpf').onsubmit=async e=>{e.preventDefault();const n=Math.min(200,Math.max(1,Math.round(+el.querySelector('#mpn').value)||0)),d=[...el.querySelectorAll('.mpD .on')].map(b=>+b.dataset.d);
+   const er=el.querySelector('.err');if(!d.length){er.textContent='Elige al menos un día';er.hidden=false;return}
+   try{const nuevo=!C.on;await DB.cfg({mesas:{on:true,n,desde:el.querySelector('#mpd').value||'',hasta:el.querySelector('#mph').value||'',dias:d.length===7?[]:d,pausa:el.querySelector('#mpp').checked}});close();MP=null;toast(nuevo?'🎉 Listo. Descarga los QR de tus mesas':'Guardado ✓');go();if(nuevo)setTimeout(mpQRs,500)}catch(x){er.textContent=x.message;er.hidden=false}}})}
+function mpQRs(){const n=mpCfg().n||0;if(!n)return mpConfig();
+ sheet(`<h3>🖨️ QR de tus mesas</h3><p class="mu sm">Imprímelos en blanco (gastan poca tinta) y pega cada uno en su mesa. Cada QR dice su número.</p>
+ <div class="mpQ">${Array.from({length:n},(_,i)=>`<button class="btn" data-mq="${i+1}">🪑 Mesa ${i+1}<small>⬇️ PNG</small></button>`).join('')}</div>
+ <div class="bt"><button class="btn" id="mqv">👀 Probar mesa 1</button><button class="btn p" id="mqa">⬇️ Descargar las ${n}</button></div>`,(el)=>{
+  el.querySelectorAll('[data-mq]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await mesaPNG(+b.dataset.mq)}catch(e){toast(e.message)}b.disabled=false});
+  el.querySelector('#mqv').onclick=()=>window.open(mpLink(1),'_blank');
+  el.querySelector('#mqa').onclick=async e=>{const b=e.target;b.disabled=true;for(let i=1;i<=n;i++){b.textContent='⬇️ Mesa '+i+' de '+n+'…';try{await mesaPNG(i)}catch(er){toast(er.message);break}await new Promise(r=>setTimeout(r,450))}b.textContent='✅ Listo';b.disabled=false}})}
+async function mesaPNG(m){
+ if(!window.qrcode)await cargaJS('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js');
+ const W=1240,H=1754,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d'),F="'Inter','Segoe UI',system-ui,sans-serif";
+ const A0=getComputedStyle(document.documentElement).getPropertyValue('--a').trim(),A=/^#[0-9a-f]{6}$/i.test(A0)?A0:'#7c5cff';
+ const [lg,xy]=await Promise.all([imgDe(logoDe()),imgDe('/img/marca/logo-xyrostudio-app.svg')]);
+ const rr=(X,Y,w,h,r)=>{x.beginPath();x.roundRect(X,Y,w,h,r)},cen=(t,y,f,c)=>{x.font=f;x.fillStyle=c;x.textAlign='center';x.fillText(t,W/2,y)};
+ const fit=(t,max,peso,px)=>{let s=px;x.font=`${peso} ${s}px ${F}`;while(x.measureText(t).width>max&&s>36){s-=4;x.font=`${peso} ${s}px ${F}`}return`${peso} ${s}px ${F}`};
+ x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle=A;x.fillRect(0,0,W,14);
+ // Logo + nombre del negocio
+ let y=86;const LS=130;x.lineWidth=5;x.strokeStyle=A;x.beginPath();x.arc(W/2,y+LS/2,LS/2+10,0,7);x.stroke();
+ if(lg){x.save();x.beginPath();x.arc(W/2,y+LS/2,LS/2,0,7);x.clip();const r=Math.max(LS/lg.width,LS/lg.height)*.98,w=lg.width*r,h=lg.height*r;x.drawImage(lg,W/2-w/2,y+LS/2-h/2,w,h);x.restore()}
+ else cen(nombre().trim()[0].toUpperCase(),y+LS/2+30,`900 84px ${F}`,A);
+ y+=LS+80;cen(nombre(),y,fit(nombre(),W-180,800,64),'#111');y+=52;cen(tiendaN(),y,`600 36px ${F}`,'#666');
+ // MESA N (contorno: casi sin tinta)
+ y+=40;const bw=560,bh=190;x.lineWidth=6;x.strokeStyle='#111';rr(W/2-bw/2,y,bw,bh,95);x.stroke();
+ cen('MESA',y+66,`800 40px ${F}`,'#555');x.font=`900 104px ${F}`;cen(String(m),y+164,`900 104px ${F}`,'#111');
+ // QR
+ const q=qrcode(0,'H');q.addData(mpLink(m));q.make();const n=q.getModuleCount(),cs=Math.floor(560/n),qs=cs*n,ox=(W-qs)/2,oy=y+bh+90;
+ x.strokeStyle=A;x.lineWidth=5;rr(ox-46,oy-46,qs+92,qs+92,48);x.stroke();
+ x.fillStyle='#111';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c)){const ojo=(r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7);if(!ojo){rr(ox+c*cs+.6,oy+r*cs+.6,cs-1.2,cs-1.2,cs*.32);x.fill()}}
+ for(const[r0,c0]of[[0,0],[0,n-7],[n-7,0]]){const X=ox+c0*cs,Y=oy+r0*cs;x.fillStyle='#111';rr(X,Y,7*cs,7*cs,cs*1.9);x.fill();x.fillStyle='#fff';rr(X+cs,Y+cs,5*cs,5*cs,cs*1.3);x.fill();x.fillStyle='#111';rr(X+2*cs,Y+2*cs,3*cs,3*cs,cs*.9);x.fill()}
+ const cl=Math.round(qs*.2);x.fillStyle='#fff';rr(W/2-cl/2-10,oy+qs/2-cl/2-10,cl+20,cl+20,26);x.fill();
+ if(lg){x.save();rr(W/2-cl/2,oy+qs/2-cl/2,cl,cl,20);x.clip();const r=Math.max(cl/lg.width,cl/lg.height),w=lg.width*r,h=lg.height*r;x.drawImage(lg,W/2-w/2,oy+qs/2-h/2,w,h);x.restore()}else if(xy)x.drawImage(xy,W/2-cl/2,oy+qs/2-cl/2,cl,cl);
+ // Pasos
+ y=oy+qs+46+92;cen('Escanea y pide desde tu mesa',y,`800 46px ${F}`,'#111');
+ const ST=[['1','Escanea'],['2','Elige'],['3','Paga al final']],sw=330,sx=(W-sw*3)/2;y+=44;
+ ST.forEach(([nn,t],i)=>{const cx=sx+sw*i+sw/2;x.lineWidth=4;x.strokeStyle=A;x.beginPath();x.arc(cx,y+34,32,0,7);x.stroke();x.fillStyle=A;x.font=`900 34px ${F}`;x.textAlign='center';x.fillText(nn,cx,y+46);x.fillStyle='#333';x.font=`700 30px ${F}`;x.fillText(t,cx,y+112);
+  if(i<2){x.strokeStyle='#00000026';x.lineWidth=3;x.setLineDash([8,10]);x.beginPath();x.moveTo(cx+50,y+34);x.lineTo(cx+sw-50,y+34);x.stroke();x.setLineDash([])}});
+ // Pie
+ const fy=H-128;x.strokeStyle='#00000022';x.lineWidth=2;rr(150,fy,W-300,90,45);x.stroke();
+ x.font=`600 28px ${F}`;const t1='Hecho con ',t2='XyroStudio',w1=x.measureText(t1).width;x.font=`800 28px ${F}`;const w2=x.measureText(t2).width,iw=50,tot=iw+16+w1+w2;let fx=W/2-tot/2;
+ if(xy)x.drawImage(xy,fx,fy+20,iw,iw);fx+=iw+16;x.textAlign='left';x.fillStyle='#555';x.font=`600 28px ${F}`;x.fillText(t1,fx,fy+56);fx+=w1;
+ const g=x.createLinearGradient(fx,0,fx+w2,0);g.addColorStop(0,'#6d4dff');g.addColorStop(1,'#1aa3d9');x.fillStyle=g;x.font=`800 28px ${F}`;x.fillText(t2,fx,fy+56);
+ const b=await new Promise(ok=>cv.toBlob(ok,'image/png')),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mesa-'+m+'-'+(SLUG||'negocio')+'.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4e3)}
+function mpSimular(){if(!DEMO||!MP)return;const P=S.pro.filter(p=>p.activo!==false&&+p.stock>0),r=()=>P[Math.floor(Math.random()*P.length)];if(!P.length)return toast('Agrega productos primero');
+ const a=r(),b=r(),items=[{id:a.id,n:a.nombre,c:1,p:+a.precio,e:a.emoji}].concat(b!==a?[{id:b.id,n:b.nombre,c:2,p:+b.precio,e:b.emoji}]:[]);
+ MP.pedidos.push({id:uid(),num:MP.pedidos.length+1,mesa:1+Math.floor(Math.random()*(mpCfg().n||6)),items,total:items.reduce((s,i)=>s+i.p*i.c,0),nombre:['Andrea','Luis','Kevin','Sofía'][Math.floor(Math.random()*4)],estado:'nuevo',creado:new Date().toISOString()});
+ beep(true);toast('🍽️ Nuevo pedido desde una mesa');shell();go()}
 
 /* ===== Cierre de caja (membresías + tienda + otros, por método) ===== */
 function imprimirHTML(h){if(DEMO)return noDemo('imprime');const f=document.createElement('iframe');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.onload=()=>setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(_){toast('No se pudo imprimir')}setTimeout(()=>f.remove(),6e4)},300);f.srcdoc=h}

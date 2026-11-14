@@ -665,6 +665,7 @@ async function escanear(onCode,txt){
   try{if(det){const r=await det.detect(v);t=r[0]&&r[0].rawValue||''}
    else if(window.jsQR&&v.videoWidth){const w=480,h=Math.round(v.videoHeight*w/v.videoWidth);cv.width=w;cv.height=h;cx.drawImage(v,0,0,w,h);const r=jsQR(cx.getImageData(0,0,w,h).data,w,h);t=r&&r.data||''}}catch(_){}
   if(t&&onCode){if(t===escanear.u&&Date.now()-escanear.t<3500){setTimeout(leer,250);return}escanear.u=t;escanear.t=Date.now();vib();if(await onCode(t)){fin();return}setTimeout(leer,900);return}
+  if(t&&/^https:\/\/(www\.)?xyrostudio\.net\/pedir\/\?/.test(t)){vib();fin();location.href=t;return}
   if(t){const s=slugDe(t),c=/[?&]c=/.test(t)?codigoDe(t):'';
    if(s){vib();fin();await abrirNeg(s);if(D&&NEG[s]&&!NEG[s].guardado&&!NEG[s].socio)guardarNeg(s,true);return}
    if(c){vib();fin();return conCodigo(c)}
@@ -718,7 +719,7 @@ async function nCargar(){const r=await nrpc('xa_neg',{p_slug:NSLUG});if(!r||r.er
 const nDent=()=>NB&&NB.rubro==='consultorio';
 const ROLN={gestor:'XyroStudio',admin:'Administrador',supervisor:'Supervisor',recepcion:'Recepción',cafetin:'Cafetín',entrenador:'Entrenador',nutricionista:'Nutricionista',profesional:'Profesional'};
 async function modoNegocio(silencio){
- if(DEMO){MODO='negocio';NB=demoNB();NTAB=nCoach()?'pedidos':'resumen';NPED=null;pinta();nPedCarga().then(()=>{if(MODO==='negocio')pinta()});return}
+ if(DEMO){MODO='negocio';NB=demoNB();NTAB=nCoach()?'pedidos':'resumen';NPED=null;NMP=null;pinta();nMpCarga().then(()=>{if(MODO==='negocio')pinta()});nPedCarga().then(()=>{if(MODO==='negocio')pinta()});return}
  try{await cliNeg();
   const{data:{session}}=await sb2.auth.getSession();
   if(session){NSB=sb2;try{await nCargar();return entrarNeg()}catch(_){}}
@@ -728,7 +729,7 @@ async function modoNegocio(silencio){
  if(silencio){MODO='cliente';ls.s('mi-modo',null);return false}
  loginNegocio();
 }
-function entrarNeg(){MODO='negocio';ls.s('mi-modo','negocio');NTAB=nCoach()?'pedidos':'resumen';NRES=null;NPED=null;pinta();nPedCarga().then(()=>{if(MODO==='negocio')pinta()});return true}
+function entrarNeg(){MODO='negocio';ls.s('mi-modo','negocio');NTAB=nCoach()?'pedidos':'resumen';NRES=null;NPED=null;NMP=null;pinta();nMpCarga().then(()=>{if(MODO==='negocio')pinta()});nPedCarga().then(()=>{if(MODO==='negocio')pinta()});return true}
 function modoCliente(){vib();MODO='cliente';ls.s('mi-modo',null);if(D)return pinta();pantallaEntrada()}
 function loginNegocio(){hoja(`<div style="display:grid;justify-items:center;gap:8px;text-align:center"><div class="ibox big">${I.brief.replace('width="22" height="22"','width="34" height="34"')}</div><h2>Entrar a mi negocio</h2>
   <p class="mu sm" style="max-width:320px">Para dueños y personal autorizado. Usa la misma cuenta de tu panel Xyro Apps.</p></div>
@@ -748,13 +749,14 @@ function loginNegocio(){hoja(`<div style="display:grid;justify-items:center;gap:
   catch(er){say(er.message&&!/fetch|JWT|PGRST/i.test(er.message)?er.message:errDe(er));b.disabled=false;b.textContent='Entrar'}}})}
 
 function pintaNeg(){acento();
- const dn=nDent(),pe=nPedOn(),T=nCoach()?[['pedidos',I.inbox,'Solicitudes'],['socios',I.users,'Socios'],['mas',I.grid,'Más']]
+ const dn=nDent(),pe=nPedOn(),T=nRol()==='cafetin'?[['mesas',I.inbox,'Pedidos'],['mas',I.grid,'Más']]:nCoach()?[['pedidos',I.inbox,'Solicitudes'],['socios',I.users,'Socios'],['mas',I.grid,'Más']]
   :[['resumen',I.chart,'Resumen'],['socios',I.users,dn?'Pacientes':'Socios'],['scan',I.scan,''],pe?['pedidos',I.inbox,'Solicitudes']:['hoy',dn?I.cal:I.pulse,dn?'Agenda':'Hoy'],['mas',I.grid,'Más']];
  if(nCoach()&&['resumen','hoy'].includes(NTAB))NTAB='pedidos';
+ if(nRol()==='cafetin'&&!['mesas','mas'].includes(NTAB))NTAB='mesas';
  const tk=NTAB==='ped'||NTAB==='plan'?'pedidos':NTAB==='hoy'&&pe?'resumen':NTAB,pn=pe&&NPED?nPedN():0;
- const body=NB&&NB.gestor&&!NSLUG?nGestor():({resumen:nResumen,socios:nSocios,hoy:nHoy,mas:nMas,pedidos:nPedidos,ped:nPed,plan:nPlan}[NTAB]||nResumen)();
+ const body=NB&&NB.gestor&&!NSLUG?nGestor():({mesas:nMesas,resumen:nResumen,socios:nSocios,hoy:nHoy,mas:nMas,pedidos:nPedidos,ped:nPed,plan:nPlan}[NTAB]||nResumen)();
  app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
- <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===tk?' on':''}" data-nt="${k}" aria-label="${k==='scan'?(dn?'Buscar por QR':'Marcar ingreso con QR'):t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='pedidos'&&pn?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
+ <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===tk?' on':''}" data-nt="${k}" aria-label="${k==='scan'?(dn?'Buscar por QR':'Marcar ingreso con QR'):t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='pedidos'&&pn||k==='mesas'&&nMpNuevos()?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
  app.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.nt==='scan')return nScan();NTAB=b.dataset.nt;if(NTAB==='pedidos')nPedCarga().then(()=>{if(NTAB==='pedidos')pinta()});pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-cli]').forEach(b=>b.onclick=()=>nFicha(NRES&&NRES.find(x=>x.id===b.dataset.cli)));
  app.querySelectorAll('[data-ntgo]').forEach(b=>b.onclick=()=>{NTAB=b.dataset.ntgo;pinta()});
@@ -776,6 +778,7 @@ function nResumen(){if(!NB)return'';const dn=nDent(),C=NB.citas||[],h=new Date()
    <div class="bars">${sem.map((x,i)=>`<div><i style="height:${Math.max(4,Math.round((+x.v||0)/mx*100))}%" class="${i===sem.length-1?'on':''}"></i><span>${'DLMMJVS'[new Date(x.d+'T12:00:00').getDay()]}</span></div>`).join('')}</div></div>`:''}
   ${dn?'':`<button class="btn p" data-nscan>${I.scan}Marcar ingreso con QR</button>`}
   ${nPedOn()&&NPED&&nPedN()?`<button class="card fd nv" data-ntgo="pedidos"><div class="row"><div class="ibox">${I.inbox}</div><div class="sp"><b>${nPedN()} solicitud${nPedN()>1?'es':''} desde la app</b><p class="mu sm">Planes y citas de nutrición que piden tus socios</p></div><span class="mu">›</span></div></button>`:''}
+  ${nMpOn()&&NMP&&nMpAb().length?`<button class="card fd nv" data-ntgo="mesas"><div class="row"><div class="ibox">🍽️</div><div class="sp"><b>${nMpAb().length} pedido${nMpAb().length>1?'s':''} de mesa</b><p class="mu sm">${nMpNuevos()?nMpNuevos()+' nuevo'+(nMpNuevos()>1?'s':'')+' por preparar':'Preparando o por cobrar'}</p></div><span class="mu">›</span></div></button>`:''}
   ${!dn&&nPedOn()?`<button class="btn" data-ntgo="hoy">${I.pulse}${NB.plata?'Caja e ingresos de hoy':'Quién vino hoy'}</button>`:''}
   <div class="card"><div class="row"><div class="ibox">${I.phone}</div><div class="sp"><b>Mi Xyro</b><p class="mu sm">${NB.seguidores||0} te guardaron · ${NB.en_app||0} ${dn?'pacientes':'socios'} con su app</p></div></div></div>
   ${dn&&C.length?`<h2>Citas de hoy</h2><div class="card">${C.slice(0,6).map(nCita).join('')}</div>`:''}
@@ -824,6 +827,7 @@ function nMas(){
  return`${nHead('MÁS')}<div class="g">
   <a class="btn p" href="${DEMO?'/app/?demo='+(nDent()?'consultorio':'gym'):panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel completo</a>
   <p class="mu xs" style="text-align:center;margin-top:-4px">Cobrar, crear socios, caja, reportes y todo lo demás. Entra sin volver a escribir tu clave.</p>
+  ${nMpOn()?`<button class="btn" data-ntgo="mesas">🍽️ Pedidos de mesa${nMpNuevos()?' · '+nMpNuevos()+' nuevos':''}</button>`:''}
   <button class="btn" id="nrf">${I.refresh}Actualizar datos</button>
   ${(NB.mios||0)>1||NB.rol==='gestor'?`<button class="btn" id="ncb">${I.store}Cambiar de negocio</button>`:''}
   <div class="card"><div class="row"><div class="ibox">${I.user}</div><div class="sp"><b>Mi cuenta personal</b><p class="mu sm">Tus membresías, QR, promos y negocios guardados.</p></div></div><button class="btn" id="nmc">Volver a mi cuenta personal</button></div>
@@ -838,6 +842,39 @@ async function cambiarNeg(){
 function nGestor(){const L=NB.negocios||[];
  post=()=>app.querySelectorAll('[data-gs]').forEach(b=>b.onclick=async()=>{NSLUG=b.dataset.gs;ls.s('mi-nslug',NSLUG);try{await nCargar();NTAB='resumen';pinta()}catch(e){toast(errDe(e))}});
  return`<div class="hdr"><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">XYROSTUDIO</p><h1>Elige un negocio</h1></div></div><div class="g">${L.map(x=>`<button class="card" data-gs="${esc(x.slug)}" style="text-align:left;width:100%;cursor:pointer"><b>${esc(x.negocio)}</b><span class="mu xs">${esc(x.slug)}</span></button>`).join('')}</div>`}
+
+// ---------- Pedidos de mesa por QR (SQL 50): el cafetín los atiende igual que en el panel ----------
+let NMP=null,NMPX=false;
+const nMpOn=()=>NB&&!nDent()&&['gestor','admin','supervisor','recepcion','cafetin'].includes(nRol());
+const nMpAb=()=>((NMP&&NMP.pedidos)||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
+const nMpNuevos=()=>nMpAb().filter(p=>p.estado==='nuevo').length;
+const NMPE={nuevo:['Nuevo','#f59e0b'],preparando:['Preparando','#3ad6ff'],servido:['Servido · falta pagar','var(--a)'],pagado:['Pagado','#22c55e'],cancelado:['Cancelado','#ef4444']};
+function nMpDemo(){const t=m=>new Date(Date.now()-m*6e4).toISOString(),P=[['Batido de proteína',12,'🥤'],['Barra proteica',7,'🍫'],['Agua 625 ml',2.5,'💧'],['Café americano',6,'☕']],it=(i,c)=>({id:'p'+i,n:P[i][0],c,p:P[i][1],e:P[i][2]});
+ const L=[{id:'a1',num:1,mesa:2,items:[it(0,2),it(1,1)],nombre:'Lucía',estado:'servido',creado:t(30)},{id:'a2',num:2,mesa:5,items:[it(3,1)],nombre:'Diego',estado:'preparando',creado:t(8)},{id:'a3',num:3,mesa:1,items:[it(2,2),it(1,1)],nota:'Bien helada',estado:'nuevo',creado:t(1)}];
+ L.forEach(p=>p.total=p.items.reduce((a,i)=>a+i.p*i.c,0));return{mesas:{on:true,n:8,desde:'07:00',hasta:'21:00'},abierto:true,pedidos:L}}
+async function nMpRpc(f,a){if(DEMO){if(!NMP)NMP=nMpDemo();const L=NMP.pedidos;if(f==='xa_mesa_lista')return NMP;
+  if(f==='xa_mesa_estado'){const p=L.find(x=>x.id===a.p_id);p.estado=a.p_estado;return p}
+  if(f==='xa_mesa_cobrar'){L.filter(x=>a.p_ids.includes(x.id)).forEach(x=>{x.estado='pagado';x.metodo=a.p_metodo;x.pagado=new Date().toISOString()});return{}}}
+ return nrpc(f,a)}
+async function nMpCarga(){if(!nMpOn())return NMP=null;try{NMP=await nMpRpc('xa_mesa_lista',{p_slug:NSLUG});NMPX=false}catch(_){NMP=NMP||{pedidos:[]};NMPX=true}return NMP}
+function nMesas(){if(NMP==null){nMpCarga().then(()=>{if(MODO==='negocio'&&NTAB==='mesas')pinta()});return`${nHead('PEDIDOS DE MESA')}<div class="card vacio"><span class="e">⏳</span></div>`}
+ const A=nMpAb(),on=NMP.mesas&&NMP.mesas.on,ord={nuevo:0,preparando:1,servido:2},serv=A.filter(p=>p.estado==='servido'),ms=[...new Set(serv.map(p=>p.mesa))].sort((a,b)=>a-b),hoyP=(NMP.pedidos||[]).filter(p=>p.estado==='pagado');
+ post=()=>{app.querySelectorAll('[data-mpe]').forEach(b=>b.onclick=async()=>{const[id,e]=b.dataset.mpe.split('|');if(e==='cancelado'&&!confirm('¿Cancelar este pedido?'))return;vib();b.disabled=true;try{await nMpRpc('xa_mesa_estado',{p_id:id,p_estado:e});await nMpCarga();pinta();toast(e==='servido'?'🍽️ Servido':e==='preparando'?'👨‍🍳 En preparación':'Pedido cancelado')}catch(er){toast(errDe(er));b.disabled=false}});
+  app.querySelectorAll('[data-mpc]').forEach(b=>b.onclick=()=>nMpCobrar(+b.dataset.mpc))};
+ const card=p=>{const e=NMPE[p.estado];return`<div class="card" style="${p.estado==='nuevo'?'border-color:#f59e0b':''}"><div class="row"><b class="sp" style="font-size:18px">Mesa ${p.mesa}</b><span class="xs" style="font-weight:800;color:${e[1]}">${e[0]}</span></div>
+  <p class="mu xs">#${p.num} · ${fH(p.creado)}${p.cliente_nombre||p.nombre?' · '+esc(p.cliente_nombre||p.nombre):''}</p>${(p.items||[]).map(i=>`<p class="sm"><b>${+i.c}×</b> ${esc(i.e||'')} ${esc(i.n)}</p>`).join('')}${p.nota?`<p class="sm">📝 ${esc(p.nota)}</p>`:''}
+  <div class="row" style="margin-top:6px"><b class="sp">${money(p.total)}</b>${p.estado==='nuevo'?`<button class="btn" style="width:auto;padding:9px 14px" data-mpe="${esc(p.id)}|cancelado">✕</button><button class="btn p" style="width:auto;padding:9px 16px;margin-left:8px" data-mpe="${esc(p.id)}|preparando">👨‍🍳 Preparar</button>`:p.estado==='preparando'?`<button class="btn p" style="width:auto;padding:9px 16px;margin-left:8px" data-mpe="${esc(p.id)}|servido">🍽️ Servido</button>`:''}</div></div>`};
+ return`${nHead('PEDIDOS DE MESA')}<div class="g">
+  ${NMPX?`<div class="card"><p class="sm">⚙️ Esta función se activa cuando XyroStudio termina de instalarla en tu negocio.</p></div>`:!on?`<div class="card vacio"><span class="e">🍽️</span><h2>Pedidos por QR apagados</h2><p class="mu sm" style="max-width:300px">El administrador los activa en el panel: Gimnasio → Pedidos de mesa.</p></div>`:
+  `<p class="mu sm">${NMP.abierto?'🟢 Recibiendo pedidos':'🔴 Cerrado ahora'} · hoy ${hoyP.length} cobrados (${money(hoyP.reduce((a,p)=>a+ +p.total,0))})</p>
+  ${ms.map(m=>{const L=serv.filter(p=>p.mesa===m);return`<div class="card" style="border-color:var(--a)"><div class="row"><b class="sp" style="font-size:18px">💰 Mesa ${m}</b><span class="mu xs">${L.length} pedido${L.length>1?'s':''}</span></div>${L.flatMap(p=>p.items||[]).map(i=>`<p class="sm">${+i.c}× ${esc(i.n)}</p>`).join('')}<button class="btn p" data-mpc="${m}">Cobrar ${money(L.reduce((a,p)=>a+ +p.total,0))}</button></div>`}).join('')}
+  ${A.filter(p=>p.estado!=='servido').sort((a,b)=>ord[a.estado]-ord[b.estado]).map(card).join('')}
+  ${A.length?'':`<div class="card vacio"><span class="e">🍽️</span><h2>Sin pedidos ahora</h2><p class="mu sm" style="max-width:300px">Cuando un cliente pida desde el QR de su mesa, te llega aquí y vibra.</p></div>`}`}</div>`}
+function nMpCobrar(m){const L=nMpAb().filter(p=>p.estado==='servido'&&p.mesa===m),t=L.reduce((a,p)=>a+ +p.total,0);if(!L.length)return;
+ hoja(`<h2>💰 Mesa ${m} · ${money(t)}</h2><p class="mu sm">¿Cómo pagó? Queda en la caja del panel y baja el stock.</p><div class="g">${['Efectivo','Yape','Plin','Tarjeta','Transferencia'].map(x=>`<button class="btn" data-mt="${x}">${x}</button>`).join('')}</div><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  o.querySelectorAll('[data-mt]').forEach(b=>b.onclick=async()=>{o.querySelectorAll('[data-mt]').forEach(x=>x.disabled=true);try{await nMpRpc('xa_mesa_cobrar',{p_ids:L.map(p=>p.id),p_metodo:b.dataset.mt});close();confeti();toast('✅ Mesa '+m+' cobrada');await nMpCarga();pinta()}catch(er){toast(errDe(er));o.querySelectorAll('[data-mt]').forEach(x=>x.disabled=false)}})})}
+setInterval(async()=>{if(document.hidden||MODO!=='negocio'||!nMpOn()||NMPX)return;const ids=new Set(nMpAb().map(p=>p.id)),had=NMP!=null,j=JSON.stringify(NMP&&NMP.pedidos);await nMpCarga();
+ if(had&&nMpAb().some(p=>p.estado==='nuevo'&&!ids.has(p.id))){vib();toast('🍽️ Nuevo pedido de mesa')}if(JSON.stringify(NMP.pedidos)!==j&&!document.querySelector('.ov')&&['mesas','resumen'].includes(NTAB))pinta()},15000);
 // ---------- Solicitudes desde la app: planes y citas de nutrición (SQL 48) ----------
 let NPED=null,NPID=null,NPF='abiertos',NPX=false;
 const nRol=()=>NB&&NB.rol,nCoach=()=>['entrenador','nutricionista'].includes(nRol()),nRecep=()=>['gestor','admin','supervisor','recepcion'].includes(nRol());
@@ -936,7 +973,7 @@ function demoPedNeg(f,a){const r=nRol();NPED=NPED||null;
  throw 'demo'}
 
 function demoNB(){const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)},t=m=>new Date(Date.now()-m*6e4).toISOString(),dn=DEMO==='negocio-dental';
- const dr=['recepcion','entrenador','nutricionista','supervisor'].includes(P.get('rol'))?P.get('rol'):'admin';
+ const dr=['recepcion','entrenador','nutricionista','supervisor','cafetin'].includes(P.get('rol'))?P.get('rol'):'admin';
  const base={slug:'demo',negocio:dn?'Sonrisa Dental':'Fuerza Gym',logo:null,rubro:dn?'consultorio':'gym',rol:dr,nombre:{recepcion:'Rosa',entrenador:'Coach Diego',nutricionista:'Lic. Andrea Ruiz',supervisor:'Paola'}[dr]||'Carlos',plata:['admin','supervisor'].includes(dr),mios:2,asis_hoy:86,activos:412,clientes:538,nuevos_mes:23,seguidores:57,en_app:31,
   ing_hoy:1840,cobros_hoy:11,ing_mes:38250,metodos:{yape:980,efectivo:560,plin:300},semana:[1520,2210,1380,2640,1960,980,1840].map((v,i)=>({d:ad(i-6),v})),
   por_vencer:[['Lucía Fernández',1,'Mensual'],['Jorge Ramírez',2,'Trimestral'],['Ana Quispe',4,'Mensual'],['Diego Salazar',6,'Semestral']].map(([nombre,d,plan])=>({nombre,fin:ad(d),plan,tel:'936449066'})),
