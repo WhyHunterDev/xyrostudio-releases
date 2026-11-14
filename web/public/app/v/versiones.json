@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261114-1418",
+  "fecha": "2026-11-14 14:18",
+  "titulo": "Cartel QR de la app más bonito",
+  "notas": "Cartel QR de la app más bonito",
+  "cambios": [
+   "El cartel para imprimir lleva el logo del negocio dentro del QR, los 3 pasos y la marca «Hecho con XyroStudio»",
+   "Ya no muestra el enlace escrito"
+  ]
+ },
+ {
   "id": "20261114-1319",
   "fecha": "2026-11-14 13:19",
   "titulo": "App de clientes Mi Xyro",
