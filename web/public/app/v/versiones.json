@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261114-0334",
+  "fecha": "2026-11-14 03:34",
+  "titulo": "Consultorio dental: sin cafetín ni importar",
+  "notas": "Consultorio dental: sin cafetín ni importar",
+  "cambios": [
+   "En consultorios ya no aparece el rol Cafetín ni Supervisor: solo Administrador, Recepción y Odontólogo(a)",
+   "Se quitó «Importar desde AppFit» y la tarjeta de planes a la web en consultorios (la web toma los tratamientos sola)",
+   "El botón de arriba en Ajustes agenda una cita en vez de abrir asistencia"
+  ]
+ },
+ {
   "id": "20261114-0323",
   "fecha": "2026-11-14 03:23",
   "titulo": "Consultorio dental: solo lo que usa una clínica dental",
