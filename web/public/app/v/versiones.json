@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261113-2305",
+  "fecha": "2026-11-13 23:05",
+  "titulo": "Contratos y reglamento para el asistente",
+  "notas": "Contratos y reglamento para el asistente",
+  "cambios": [
+   "En Xyro Bots → Cómo vende puedes subir el contrato (por membresía) y el reglamento en PDF",
+   "El asistente responde dudas guiándose de lo que dicen y, si el cliente lo pide, se los manda por WhatsApp",
+   "Si hay un reclamo o algo que no entiende, pasa el chat a recepción"
+  ]
+ },
+ {
   "id": "20261113-2256",
   "fecha": "2026-11-13 22:56",
   "titulo": "Ventas del asistente",
