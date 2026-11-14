@@ -292,6 +292,7 @@ input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus
 body.dentro #lfx,body.dentro .laura,body.dentro .lglow{display:none}
 body:not(.dentro){background:#05060a}
 .cen>.lg .card{background:#10131cd9;backdrop-filter:blur(8px);border-color:#ffffff1a}
+.wag{display:grid;grid-template-columns:minmax(260px,360px) 1fr;gap:12px;align-items:start}.wac.on{background:#ffffff0d;border-radius:10px}.wac small.mu{white-space:nowrap}.wac .nm small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}.wach{padding:0;overflow:hidden}.wach .btg{max-width:78%}.wabk{display:none}.wnb{display:inline-block;min-width:18px;padding:0 6px;border-radius:9px;background:var(--a);color:#000;font-size:11px;text-align:center;vertical-align:middle}.btg.yo.wabot{background:#2a2a2e;color:inherit}.btg.yo.waequipo{background:var(--a);color:#000}.wa0{display:grid;place-items:center;min-height:300px;text-align:center}@media(max-width:820px){.wag{grid-template-columns:1fr}.wag.sel>.card:first-child{display:none}.wag:not(.sel)>.wach{display:none}.wabk{display:inline-flex}}
 .btw{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#0b0b0c;max-width:380px}.bth{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}.bth i{width:9px;height:9px;border-radius:50%;background:var(--ok,#22c55e)}.bth small{color:var(--ok,#22c55e);margin-left:auto}.btc{height:300px;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:7px}.btg{max-width:85%;padding:8px 11px;border-radius:13px;font-size:14px;line-height:1.4;white-space:pre-wrap}.btg.bo{background:#1b1b1d;align-self:flex-start;border-bottom-left-radius:4px}.btg.yo{background:var(--bc);color:#000;align-self:flex-end;border-bottom-right-radius:4px}.bts{display:flex;flex-wrap:wrap;gap:6px;padding:0 10px 8px}.btf{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line)}.btf input{flex:1;min-width:0;background:#151517;border:1px solid var(--line);color:inherit;border-radius:10px;padding:9px 10px;font:inherit}
 </style>
 </head>
@@ -761,7 +762,7 @@ const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||
 const NAV=()=>{if(isCoach())return[['rutinas','📋',ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento'],['cuenta','🔐','Mi cuenta']];
  if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
- return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento']].concat(rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+ return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas']]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()],['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
 function shell(){
  const n=NAV();
  $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+n.map(([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('')+
@@ -779,15 +780,16 @@ function go(){
  if(ME&&ME.rol==='cafetin'&&!['tienda','caja','mas','cuenta','web','soporte'].includes(ruta)){ruta=CTL()?'tienda':'caja';history.replaceState(null,'','#/'+ruta);if(cjF&&!cjF.t)cjF.t='tienda'}
  if(isCoach()&&!['rutinas','cuenta','mas','soporte'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
- $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
+ $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
  if(ruta==='tienda'&&!CTL())ruta=ME&&ME.rol==='cafetin'?'caja':'xyros';
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
- const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots}[ruta]||inicio;
+ if(ruta==='whatsapp'&&!waVer())ruta='inicio';
+ const V={inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:'＋ Plan',caja:'＋ Cobro',ajustes:'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
- $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',seguimiento:'Seguimiento',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio'}[ruta]||'';
+ $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',seguimiento:'Seguimiento',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
 $('#nuevo').onclick=()=>{(({socio:()=>{const c=cli(arg);c&&cobrar(c)},planes:()=>isAdmin()?editPlan():toast('Solo el administrador edita planes'),caja:cobroSuelto,ajustes:kiosco,tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket()})[ruta]||nuevoCli)()};
@@ -1929,7 +1931,7 @@ function xyDemoBot(wa2){
 async function botCargar(){try{const{data}=await sb.from('contenido').select('valor').eq('sitio_id',SID).eq('clave','bot').maybeSingle();BOT=(data&&data.valor)||{}}catch(e){BOT={};reportar('bot',e)}ruta==='bots'&&go()}
 function misBots(){if(!BOT&&DEMO)BOT={};if(!BOT){setTimeout(botCargar);return'<div class="card mu">Cargando…</div>'}
  const tag=`<script src="https://xyrostudio.net/bot.js" data-s="${SLUG}" data-n="${esc(nombre())}" data-c="${String(CFG.color||'').replace('#','')}" defer><\/script>`;
- setTimeout(()=>{const e=$('#btEd');e&&(e.onclick=botEditar);const cp=$('#btCp');cp&&(cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(tag).then(()=>toast('📋 Código copiado'))})});
+ setTimeout(()=>{const e=$('#btEd');e&&(e.onclick=botEditar);const wv=$('#waVin');wv&&(wv.onclick=waVincular);const cp=$('#btCp');cp&&(cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(tag).then(()=>toast('📋 Código copiado'))})});
  return`<div class="hi"><div><h2>🤖 Tu asistente</h2><p class="mu">Atiende a tus clientes en tu web las 24 horas con tus precios, horarios, clases y sedes. Lo que no sabe lo pasa a recepción por WhatsApp.</p></div></div>
  <div class="dmx" style="align-items:start"><div><h3 style="margin:0 0 8px">Pruébalo</h3>${botChat()}<small class="mu">Las pruebas cuentan en tu cupo diario del soporte.</small></div>
  <div style="display:grid;gap:12px"><div class="card"><h3 style="margin:0 0 6px">Lo que sabe</h3><p class="mu sm" style="margin:0 0 8px">Toma los datos de tu web (planes, sedes, horarios, clases, cafetín). Si cambias algo en Mi web o envías tus planes a la web, se entera en unos minutos.</p>
@@ -1937,7 +1939,58 @@ function misBots(){if(!BOT&&DEMO)BOT={};if(!BOT){setTimeout(botCargar);return'<d
   <button class="btn sm p" id="btEd">✏️ Editar lo que sabe</button></div>
   <div class="card"><h3 style="margin:0 0 6px">Dónde aparece</h3><p class="mu sm" style="margin:0 0 8px">${CFG.web&&/\/sitio\//.test(CFG.web)?'✅ Ya aparece solo en tu web.':'En tu web con Xyro Webs aparece solo. Para otra web, pega este código antes de &lt;/body&gt;:'}</p>
   <code class="sm" style="display:block;word-break:break-all;padding:8px;border:1px solid var(--line);border-radius:8px">${esc(tag)}</code><button class="btn sm" id="btCp" style="margin-top:8px">📋 Copiar código</button>
-  <p class="mu sm" style="margin:10px 0 0">📱 WhatsApp del negocio: muy pronto. Te avisaremos para conectarlo.</p></div></div></div>`}
+  <p class="mu sm" style="margin:10px 0 0">📱 WhatsApp del negocio: ${waOn()?'✅ conectado ('+esc(WAN.map(n=>n.numero||n.phone_id).join(', '))+'). Las conversaciones están en <a href="#/whatsapp">💬 WhatsApp</a>.':'muy pronto. Te avisaremos para conectarlo.'}</p>${ME.gestor?'<button class="btn sm" id="waVin" style="margin-top:8px">🔗 Vincular número de WhatsApp (XyroStudio)</button>':''}</div></div></div>`}
+/* ===== WhatsApp del negocio (Xyro Bots, SQL 36: xa_wa_numeros/chats/msgs, /api/wa/responder) ===== */
+let WAN=null,WAC=null,WAM={},WAT=0,NEED36=false,waF='todos';
+const waVer=()=>tiene('bots')&&ME&&!isCoach()&&ME.rol!=='cafetin',waOn=()=>waVer()&&!!(WAN&&WAN.length),waPend=()=>(WAC||[]).filter(c=>c.pendiente).length;
+const waVentana=c=>!!c.ultimo_cliente&&Date.now()-new Date(c.ultimo_cliente).getTime()<864e5;
+function waDemo(){const m=n=>new Date(Date.now()-n*6e4).toISOString(),C=[
+ {id:'w1',nombre:'Carla Mendoza',telefono:'51987111222',humano:true,pendiente:true,no_leidos:2,ultimo:m(3),ultimo_cliente:m(3),ultimo_txt:'¿Puedo congelar mi membresía 2 semanas? Viajo por trabajo'},
+ {id:'w2',nombre:'Jorge Paredes',telefono:'51955333444',humano:false,pendiente:false,no_leidos:0,ultimo:m(25),ultimo_cliente:m(26),ultimo_txt:'¡Genial! Te esperamos mañana a las 7 pm 💪'},
+ {id:'w3',nombre:'Valeria Soto',telefono:'51944555666',humano:false,pendiente:false,no_leidos:1,ultimo:m(60*30),ultimo_cliente:m(60*30),ultimo_txt:'Gracias 🙌'}];
+ WAM={w1:[{de:'cliente',texto:'Hola, soy socia del plan trimestral',creado:m(9)},{de:'bot',texto:'¡Hola Carla! 👋 Qué gusto saludarte. ¿En qué te ayudo?',creado:m(8)},{de:'cliente',texto:'¿Puedo congelar mi membresía 2 semanas? Viajo por trabajo',creado:m(3)},{de:'bot',texto:'Eso lo ve recepción directamente 😊 Ya les pasé tu mensaje y te escriben por aquí en un momento.',creado:m(3)}],
+ w2:[{de:'cliente',texto:'Hola, cuánto cuesta el mes?',creado:m(30)},{de:'bot',texto:'¡Hola Jorge! 👋 El plan mensual está en S/ 120 y te da acceso libre a sala y clases. ¿Te gustaría venir a una clase de prueba gratis?',creado:m(29)},{de:'cliente',texto:'Sí, mañana en la noche',creado:m(26)},{de:'bot',texto:'¡Genial! Te esperamos mañana a las 7 pm 💪',creado:m(25)}],
+ w3:[{de:'cliente',texto:'¿Abren los feriados?',creado:m(60*30+2)},{de:'bot',texto:'Los feriados abrimos de 8 am a 1 pm 😊',creado:m(60*30+1)},{de:'cliente',texto:'Gracias 🙌',creado:m(60*30)}]};return C}
+async function waIni(){if(!waVer())return;
+ if(DEMO){WAN=[{phone_id:'demo',numero:'51987654321'}];WAC=waDemo();shell();ruta==='whatsapp'&&go();return}
+ try{const{data,error}=await sb.from('xa_wa_numeros').select('phone_id,numero,activo').eq('sitio_id',String(SID));if(error)throw error;WAN=(data||[]).filter(x=>x.activo)}catch(e){WAN=[];NEED36=true}
+ if(!WAN.length)return;await waChats();shell();ruta==='whatsapp'&&go();clearInterval(WAT);WAT=setInterval(waTick,2e4)}
+async function waChats(){const{data,error}=await sb.from('xa_wa_chats').select('*').eq('sitio_id',String(SID)).order('ultimo',{ascending:false}).limit(200);if(!error)WAC=data||[]}
+async function waMsgs(id){if(DEMO)return;const{data,error}=await sb.from('xa_wa_msgs').select('id,de,texto,creado').eq('chat_id',id).order('creado',{ascending:false}).limit(150);if(!error)WAM[id]=(data||[]).reverse()}
+async function waTick(){if(document.hidden||DEMO)return;const p0=waPend(),f0=(WAC||[]).map(c=>c.id+c.ultimo).join();try{await waChats();if(ruta==='whatsapp'&&arg)await waMsgs(arg)}catch(_){return}
+ const f1=(WAC||[]).map(c=>c.id+c.ultimo).join();if(waPend()!==p0)shell();if(f1!==f0){if(waPend()>p0)toast('💬 Un cliente de WhatsApp te necesita');if(ruta==='whatsapp'&&!(document.activeElement&&document.activeElement.id==='waT'))go()}}
+async function waSet(c,o){Object.assign(c,o);go();shell();if(DEMO)return;const{error}=await sb.from('xa_wa_chats').update(o).eq('id',c.id);if(error){toast('No se pudo guardar');reportar('wa',error)}}
+async function waEnviar(c,t){t=String(t||'').trim();if(!t)return;
+ if(DEMO){(WAM[c.id]=WAM[c.id]||[]).push({de:'equipo',texto:t,creado:new Date().toISOString()});Object.assign(c,{humano:true,pendiente:false,ultimo:new Date().toISOString(),ultimo_txt:t});go();shell();return toast('Demo: no se envía')}
+ const b=$('#waB');b&&(b.disabled=true);
+ try{const{data}=await sb.auth.getSession(),tk=data&&data.session&&data.session.access_token;
+  const r=await fetch('/api/wa/responder',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tk},body:JSON.stringify({chat:c.id,texto:t.slice(0,4000)})});
+  const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok){b&&(b.disabled=false);return toast(j.error||'No se pudo enviar')}
+  await waMsgs(c.id);Object.assign(c,{humano:true,pendiente:false,no_leidos:0,ultimo:new Date().toISOString(),ultimo_txt:t});go();shell()}
+ catch(e){b&&(b.disabled=false);toast('No se pudo enviar');reportar('wa',e)}}
+function waHora(t){const d=new Date(t),h=hoy();return d.toISOString().slice(0,10)===h?d.toLocaleTimeString('es-PE',{hour:'numeric',minute:'2-digit'}):fF(d.toISOString().slice(0,10))}
+function waVista(){
+ if(!WAN||!WAC){setTimeout(waIni);return'<div class="card mu">Cargando…</div>'}
+ if(!WAN.length)return`<div class="empty"><b>💬</b>${NEED36?'Falta activar WhatsApp en tu sistema. Avísale a XyroStudio (SQL 36).':'Tu WhatsApp aún no está conectado. XyroStudio te avisa cuando quede listo.'}</div>`;
+ const c=arg&&WAC.find(x=>x.id===arg);
+ if(c&&c.no_leidos)setTimeout(()=>waSet(c,{no_leidos:0}));
+ if(c&&!DEMO&&!WAM[c.id])setTimeout(async()=>{await waMsgs(c.id);ruta==='whatsapp'&&arg===c.id&&go()});
+ const L=WAC.filter(x=>waF==='todos'||(waF==='pend'?x.pendiente:waF==='yo'?x.humano:!x.humano));
+ setTimeout(()=>{$$('[data-wf]').forEach(b=>b.onclick=()=>{waF=b.dataset.wf;go()});
+  const f=$('#waF');f&&(f.onsubmit=e=>{e.preventDefault();waEnviar(c,f.t.value)});const ta=$('#waT');ta&&ta.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();f.requestSubmit()}});
+  const hb=$('#waH');hb&&(hb.onclick=()=>waSet(c,c.humano?{humano:false,pendiente:false}:{humano:true}));const ms=$('#waMs');ms&&(ms.scrollTop=ms.scrollHeight)});
+ const fila=x=>`<a class="row wac ${x.id===arg?'on':''}" href="#/whatsapp/${esc(x.id)}"><span class="av" style="display:grid;place-items:center">${x.pendiente?'🙋':x.humano?'👤':'🤖'}</span><span class="nm"><b>${esc(x.nombre||'+'+x.telefono)}${x.no_leidos?` <span class="wnb">${x.no_leidos}</span>`:''}</b><small>${x.pendiente?'<b style="color:var(--bad)">Te necesita · </b>':''}${esc(x.ultimo_txt||'')}</small></span><small class="mu">${waHora(x.ultimo)}</small></a>`;
+ const lista=`<div class="card" style="padding:8px"><div class="chips" style="margin:0 0 6px">${[['todos','Todos'],['pend','🙋 Te necesitan'],['yo','👤 Atiendes tú'],['bot','🤖 Atiende el bot']].map(([k,t])=>`<button class="chip ${waF===k?'on':''}" data-wf="${k}">${t}${k==='pend'&&waPend()?`<span>${waPend()}</span>`:''}</button>`).join('')}</div><div class="tl">${L.map(fila).join('')||'<div class="empty">No hay conversaciones aquí.</div>'}</div></div>`;
+ const M=c&&(WAM[c.id]||[]),vt=c&&waVentana(c);
+ const chat=c?`<div class="card wach"><div class="bth"><a class="btn sm wabk" href="#/whatsapp">←</a><b>${esc(c.nombre||'Cliente')}</b><small class="mu" style="color:inherit">+${esc(c.telefono)}</small><button class="btn sm" id="waH" style="margin-left:auto">${c.humano?'🤖 Devolver al bot':'🙋 Atender yo'}</button></div>
+  <p class="mu sm" style="margin:6px 12px 0">${c.humano?'👤 Atiende recepción: el bot no responde en este chat.':'🤖 Responde el asistente. Si escribes, el chat pasa a recepción.'}</p>
+  <div class="btc" id="waMs" style="height:min(52vh,460px)">${M?M.map(m=>`<div class="btg ${m.de==='cliente'?'bo':'yo wa'+m.de}">${esc(m.texto)}<small style="display:block;opacity:.6;font-size:11px;margin-top:3px">${m.de==='bot'?'🤖 Asistente · ':m.de==='equipo'?'👤 Recepción · ':''}${waHora(m.creado)}</small></div>`).join(''):'<div class="mu">Cargando…</div>'}</div>
+  ${vt?`<form class="btf" id="waF"><textarea id="waT" name="t" rows="2" maxlength="4000" placeholder="Escribe tu respuesta…" style="flex:1;min-width:0;background:#151517;border:1px solid var(--line);color:inherit;border-radius:10px;padding:9px 10px;font:inherit;resize:none"></textarea><button class="btn p" id="waB">Enviar</button></form>`:`<p class="sm" style="margin:0;padding:10px 12px;border-top:1px solid var(--line)">⏳ Pasaron más de 24 horas desde su último mensaje. WhatsApp no deja escribirle hasta que el cliente vuelva a escribir. <a target="_blank" rel="noopener" href="https://wa.me/${esc(c.telefono)}">Abrir en WhatsApp ↗</a></p>`}</div>`
+  :`<div class="card wach wa0 mu">💬<br>Elige una conversación.<br><small>El asistente responde solo; aquí ves todo y entras cuando te necesitan.</small></div>`;
+ return`<div class="hi"><div><h2>💬 WhatsApp</h2><p class="mu">Conversaciones del WhatsApp de ${esc(nombre())}. 🙋 = el asistente pasó el chat a recepción.</p></div></div><div class="wag ${c?'sel':''}">${lista}${chat}</div>`}
+async function waVincular(){form('🔗 Vincular WhatsApp (solo XyroStudio)',[{k:'pid',l:'Phone number ID (Meta → WhatsApp → Configuración de la API)',v:'',ph:'123456789012345'},{k:'num',l:'Número (con 51)',v:'',ph:'51987654321'}],async v=>{
+ if(DEMO)return toast('Demo: no se guarda');if(!/^\d{6,30}$/.test(String(v.pid||'').trim()))throw new Error('Phone number ID inválido');
+ const{error}=await sb.rpc('xa_wa_vincular',{p_slug:SLUG,p_phone_id:String(v.pid).trim(),p_numero:String(v.num||'')});if(error)throw error;WAN=null;await waIni();go();toast('✅ WhatsApp vinculado')})}
 function botEditar(){form('🤖 Lo que sabe tu asistente',[{k:'whatsapp',l:'WhatsApp de recepción (si una sede no tiene el suyo en Mi web → Sedes)',v:botWA(),ph:'51987654321'},{k:'captar',l:'🧲 Pedir nombre y celular a los interesados (llegan a Seguimiento → Interesados)',t:'chk',v:!BOT||BOT.captar!==false},{k:'prueba',l:'🎟️ Ofrecer clase de prueba gratis y agendarla',t:'chk',v:!!(BOT&&BOT.prueba)},{k:'pruebaTxt',l:'Días y horas para la clase de prueba',v:(BOT&&BOT.pruebaTxt)||'',ph:'Lunes a viernes de 6 a 9 pm, sábados 9 a 12'},{k:'extra',l:'Promos e información extra (el asistente las ofrece cuando vengan al caso)',t:'area',rows:5,v:(BOT&&BOT.extra)||'',ph:'Promo diciembre: matrícula gratis y 3 meses a S/ 250 hasta el 31.\nAceptamos Yape, Plin y tarjeta.\nHay estacionamiento frente al local.'}],async v=>{
  const val={...(BOT||{}),whatsapp:String(v.whatsapp||'').replace(/\D/g,'').slice(0,15),extra:String(v.extra||'').slice(0,3000),captar:!!v.captar,prueba:!!v.prueba,pruebaTxt:String(v.pruebaTxt||'').slice(0,200)};
  if(DEMO){BOT=val;go();return toast('Demo: no se guarda')}
@@ -2250,7 +2303,7 @@ async function verVersion(){try{localStorage.setItem('xa-slug',SLUG)}catch(_){}i
   if(data!==VER){location.replace('/app/'+location.search+location.hash);return true}}catch(_){}return false}
 if(/\/app\/dev\//.test(location.pathname))addEventListener('DOMContentLoaded',()=>document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:99999;background:#f59e0b;color:#000;font:700 12px system-ui;padding:4px 12px;border-radius:99px;pointer-events:none">🧪 PANEL DE PRUEBAS · los negocios no ven esto</div>'));
 /* ===== Arranque real (Supabase) ===== */
-function start(){initSede();setTimeout(misNegocios,500);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>TKN&&toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')),2500)}
+function start(){initSede();setTimeout(misNegocios,500);setTimeout(waIni,800);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>TKN&&toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')),2500)}
 async function salir(){try{await sb.auth.signOut()}catch(_){}LS.r('xa-s');location.href='/app/'}
 async function boot(){
  if(DEMO)return demoBoot();
