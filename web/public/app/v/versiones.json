@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261114-0224",
+  "fecha": "2026-11-14 02:24",
+  "titulo": "Aviso de pago también para el supervisor",
+  "notas": "Aviso de pago también para el supervisor",
+  "cambios": [
+   "«💳 Mi plan XyroStudio» lo ve solo el administrador",
+   "El aviso de vencimiento lo ven el administrador y el supervisor de ventas (el supervisor ve «Avísale al administrador»)"
+  ],
+  "requiere": "SQL 42"
+ },
+ {
   "id": "20261114-0219",
   "fecha": "2026-11-14 02:19",
   "titulo": "Mi plan XyroStudio y avisos de pago",
