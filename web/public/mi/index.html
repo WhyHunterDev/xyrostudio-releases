@@ -297,7 +297,11 @@ const errDe=e=>{const t=String(e&&(e.message||e.error)||e||'');for(const k in ER
  if(/Password should/i.test(t))return 'Tu clave debe tener al menos 6 caracteres.';if(/not confirmed/i.test(t))return 'Confirma tu correo: te enviamos un enlace.';
  if(/rate limit|security purposes/i.test(t))return 'Espera un minuto y vuelve a intentar.';if(/provider is not enabled|Unsupported provider/i.test(t))return 'El ingreso con Google se activa muy pronto. Usa tu correo por ahora.';
  if(/^[A-ZÁÉÍÓÚÑ¿][^_{}<>]{5,120}$/.test(t)&&!/fetch|JWT|PGRST|function|column|relation|violates|syntax|permission/i.test(t))return t;
- return 'Algo falló. Revisa tu internet y vuelve a intentar.'};
+ if(/Failed to fetch|NetworkError|Load failed|network|timeout|aborted/i.test(t))return 'Sin conexión. Revisa tu internet y vuelve a intentar.';
+ try{repErr('rpc: '+t)}catch(_){}
+ if(/PGRST202|Could not find the function|does not exist|schema cache/i.test(t))return 'Esta función se está activando en tu negocio. Inténtalo más tarde o pídelo en recepción.';
+ if(/sin sesi|JWT|not authenticated/i.test(t))return 'Tu sesión venció. Sal y vuelve a entrar.';
+ return 'No se pudo completar. Ya avisamos a soporte; inténtalo en un rato.'};
 // Lo que la persona quería hacer antes de iniciar sesión (escaneó un QR o abrió un enlace).
 const pend={get(){try{return JSON.parse(ls.g('mi-pend')||'null')}catch(_){return null}},set(v){ls.s('mi-pend',v?JSON.stringify(v):null)}};
 
