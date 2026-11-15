@@ -123,6 +123,7 @@ input:focus{border-color:var(--a)}
 .bb{max-width:84%;padding:9px 13px;border-radius:18px;border-bottom-left-radius:6px;font-size:14px;background:var(--c2);justify-self:start;white-space:pre-wrap;word-break:break-word}
 .bb.yo{justify-self:end;background:var(--gr);color:#fff;border-radius:18px;border-bottom-right-radius:6px}
 .bb small{display:block;font-size:10.5px;opacity:.6;margin-top:3px}
+.cdn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff1a;font-size:12.5px;color:var(--mu)}.cdn b{font-size:18px;color:var(--tx);font-variant-numeric:tabular-nums}.cdn i{position:absolute;left:0;bottom:0;height:3px;background:var(--a);transition:width 1s linear}.cdn.ur{border-color:#f59e0b88}.cdn.ur b{color:#f59e0b}.cdn.ur i{background:#f59e0b}
 .cin{display:flex;gap:8px}.cin input{flex:1;padding:12px 14px}.cin .btn{padding:0 14px;flex:none}
 .cdt{text-align:center;min-width:54px;background:var(--c2);border-radius:14px;padding:8px 4px}.cdt b{font-size:22px;display:block;line-height:1}.cdt span{font-size:11px;color:var(--mu);text-transform:uppercase;font-weight:700}
 .np{width:100%;text-align:left;cursor:pointer;color:inherit}.dot.big{width:42px;height:42px;border-radius:14px;font-size:20px}
@@ -376,7 +377,7 @@ addEventListener('popstate',e=>{
  if(!st||!st.mi)return;const m=st.mi;if(m.m==='negocio'&&!NB)return;
  HN.pop=true;try{MODO=m.m;ls.s('mi-modo',MODO);TAB=m.t;SUB=m.s;NTAB=m.nt;NPID=m.np;PEDID=m.pe;CUR=m.c;HN.k=JSON.stringify(m);const i=HN.st.lastIndexOf(HN.k);if(i>=0)HN.st.length=i+1;else HN.st=[HN.k];pinta();const sc=document.querySelector('#sc');sc&&(sc.scrollTop=0)}catch(_){}HN.pop=false});
 // ---------- Navegación ----------
-const SUBV={mi:vMi,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,pedido:vPedido};
+const SUBV={mi:vMi,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,pedido:vPedido,ayuda:()=>vAyuda()};
 function pinta(){const r=pinta0();try{hSync()}catch(_){}return r}
 function pinta0(){
  if(MODO==='negocio'&&NB)return pintaNeg();
@@ -387,13 +388,13 @@ function pinta0(){
  else if(SUB&&SUBV[SUB])body=`<button class="back" data-back>‹ Volver</button>`+SUBV[SUB](N());
  else body=({inicio:vInicioGen,negocios:vNegocios,avisos:vAvisos,perfil:vPerfil}[TAB]||vInicioGen)();
  const T=[['inicio',I.home,'Inicio'],['negocios',I.store,'Negocios'],['scan',I.scan,''],['avisos',I.bell,'Avisos'],['perfil',I.user,'Perfil']];
- const av=((D&&D.avisos)||[]).length+((SOP||[]).filter(x=>x.respuesta&&!x.visto).length)+pedNuevos().length;
+ const av=((D&&D.avisos)||[]).length+(SOP&&SOP.visto===false&&SUB!=='ayuda'?1:0)+pedNuevos().length;
  app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
  <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===TAB?' on':''}" data-tab="${k}" aria-label="${k==='scan'?'Escanear QR':t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='avisos'&&av?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.tab==='scan')return escanear();TAB=b.dataset.tab;SUB=null;pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{vib();SUB=b.dataset.sub;pinta()});
  app.querySelectorAll('[data-neg]').forEach(b=>b.onclick=()=>abrirNeg(b.dataset.neg));
- app.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{SUB=typeof SUB==='string'&&SUB!=='mi'&&N()?'mi':null;pinta()});
+ app.querySelectorAll('[data-back]').forEach(b=>b.onclick=()=>{if(SUB==='ayuda'&&SOP&&SOP.estado==='cerrado')sopFin();SUB=typeof SUB==='string'&&SUB!=='mi'&&SUB!=='ayuda'&&N()?'mi':null;pinta()});
  app.querySelectorAll('[data-pedir]').forEach(b=>b.onclick=()=>{vib();pedirPlan(N(),b.dataset.pedir)});
  app.querySelectorAll('[data-ped]').forEach(b=>b.onclick=()=>abrirPed(b.dataset.ped));
  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{vib();const[i,sb]=b.dataset.go.split('|');CUR=+i;ls.s('mi-neg',CUR);TAB='negocios';SUB=sb;window._dia=undefined;pinta();$('#sc').scrollTop=0});
@@ -1018,21 +1019,52 @@ async function demoNegRpc(f,a){if(/pedido|xa_neg_nutris/.test(f))return demoPedN
  throw 'demo'}
 
 // ---------- Avisos y ayuda (modo cliente) ----------
-let SOP=null;
-async function cargaSop(){if(DEMO){SOP=SOP||[{id:'s1',texto:'¿Cómo conecto mi membresía?',estado:'respondido',respuesta:'Dale tu ID de cuenta a recepción y acepta el aviso que te llega. ¡Listo! 🙌',visto:false,creado:new Date(Date.now()-864e5).toISOString()}];return SOP}
- try{SOP=await rpc('xa_yo_mis_reportes')||[]}catch(_){SOP=SOP||[]}return SOP}
-function vAvisos(){const G=((D&&D.guardados)||[]).filter(g=>g.promos),S=SOP||[],av=avisos();
- if(SOP==null)cargaSop().then(()=>{if(TAB==='avisos'&&MODO==='cliente'&&!SUB)pinta()});
+let SOP=null,SOPL=false,SOPD=0,SOPX=false,SOPH=ls.g('mi-sopfin')||'';
+const sopFin=()=>{if(SOP&&SOP.estado==='cerrado'){SOPH=SOP.id;ls.s('mi-sopfin',SOPH)}SOP=null};
+// Chat de ayuda con XyroStudio (SQL 54). SOP = chat abierto (o recién cerrado) o null.
+function sopPon(r){if(r&&r.estado==='cerrado'&&r.id===SOPH)r=null;SOP=r||null;SOPL=true;if(SOP&&SOP.ahora)SOPD=Date.now()-new Date(SOP.ahora).getTime();return SOP}
+function sopDemoTick(){const c=SOP;if(!c||c.estado==='cerrado')return;const M=c.msgs,u=M[M.length-1],now=Date.now();
+ if(u.de==='yo'&&now-new Date(u.t)>3500){M.push({de:'xyro',autor:'Camila',texto:M.filter(m=>m.de==='xyro').length?'¡Perfecto! ¿Te ayudo con algo más?':'¡Hola! 👋 Soy Camila de XyroStudio. Ya reviso tu caso, dame un momento.',t:new Date().toISOString()});c.vence=new Date(now+45e3).toISOString();c.visto=SUB==='ayuda'}
+ else if(c.vence&&now>new Date(c.vence)){M.push({de:'sis',texto:'🙏 Gracias por escribirnos. Como no tuvimos respuesta, cerramos esta atención. Si necesitas algo más, toca «Necesito ayuda» otra vez.',t:new Date().toISOString()});c.estado='cerrado';c.motivo='inactividad';c.vence=null;c.fin=now}
+ c.ahora=new Date().toISOString()}
+async function cargaSop(v){if(DEMO){if(SOP){sopDemoTick();if(SOP.estado==='cerrado'&&Date.now()-SOP.fin>2e4&&SUB!=='ayuda')SOP=null}SOPL=true;return SOP}
+ try{sopPon(await rpc('xa_yo_ayuda',{p_visto:!!v}));SOPX=false}catch(e){SOPL=true;SOPX=/PGRST202|schema cache|function/i.test((e&&(e.code+' '+e.message))||'')}return SOP}
+const sopMsgs=()=>!SOP?[]:(SOP.msgs&&SOP.msgs.length?SOP.msgs:[{de:'yo',texto:SOP.texto||'',t:SOP.creado}]);
+const sopFalta=()=>SOP&&SOP.vence&&SOP.estado!=='cerrado'?Math.max(0,Math.round((new Date(SOP.vence).getTime()-(Date.now()-SOPD))/1000)):null;
+const sopChat=()=>{const M=sopMsgs();if(!M.length)return`<p class="mu sm" style="text-align:center;padding:14px 6px">👋 Cuéntanos qué pasó. Una persona de XyroStudio te responde aquí mismo.</p>`;
+ return M.map(m=>m.de==='sis'?`<p class="mu xs" style="text-align:center;padding:6px 10px;background:#ffffff0a;border-radius:12px">${esc(m.texto)}</p>`:`<div class="bb${m.de==='yo'?' yo':''}">${m.de==='yo'?'':`<b class="xs" style="color:#cfc6ff">${esc(m.autor||'XyroStudio')} · XyroStudio</b><br>`}${esc(m.texto)}<small>${fH(m.t)}</small></div>`).join('')};
+function sopCuenta(){const el=$('#aycd');if(!el)return;const f=sopFalta();if(f==null){el.innerHTML=SOP&&SOP.estado!=='cerrado'&&sopMsgs().length?'<p class="mu xs" style="text-align:center">⏳ Esperando a soporte. Te avisamos aquí cuando respondan.</p>':'';return}
+ const mm=Math.floor(f/60),ss=String(f%60).padStart(2,'0');el.innerHTML=`<div class="cdn${f<=120?' ur':''}"><span>¿Sigues ahí? Responde para seguir con la atención</span><b>${mm}:${ss}</b><i style="width:${Math.min(100,f/6)}%"></i></div>`}
+function sopRef(){const c=$('#aych');if(!c)return;const j=c.dataset.n|0,n=sopMsgs().length,cer=!!(SOP&&SOP.estado==='cerrado');if(cer!==(c.dataset.c==='1')||!SOP)return pinta();if(n!==j){c.innerHTML=sopChat();c.dataset.n=n;c.scrollTop=c.scrollHeight;vib()}sopCuenta()}
+function vAyuda(){const c=SOP,cer=c&&c.estado==='cerrado';
+ if(!SOPL)cargaSop(true).then(()=>{if(SUB==='ayuda')pinta()});
+ if(c&&c.visto===false){c.visto=true;if(!DEMO)rpc('xa_yo_ayuda',{p_visto:true}).catch(()=>{})}
+ const f0=post;post=()=>{f0&&f0();const ch=$('#aych');ch&&(ch.scrollTop=ch.scrollHeight);sopCuenta();const i=$('#aymi'),b=$('#ayms'),fin=$('#ayfin');
+  fin&&(fin.onclick=()=>{sopFin();SUB=null;pinta()});
+  const env=async()=>{const t=i.value.trim();if(!t)return;b.disabled=true;
+   try{if(DEMO){if(!SOP)SOP={id:'d',estado:'abierto',msgs:[],visto:true};SOP.msgs.push({de:'yo',texto:t,t:new Date().toISOString()});SOP.vence=null}else sopPon(await rpc('xa_yo_ayuda_msg',{p_texto:t,p_ctx:ctxApp()}));pinta();const j=$('#aymi');j&&j.focus()}
+   catch(er){toast(/PGRST202|schema cache/i.test((er.code||'')+(er.message||''))?'El chat de ayuda se está activando. Inténtalo en unos minutos.':errDe(er));b.disabled=false}};
+  b&&(b.onclick=env);i&&(i.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();env()}})};
+ return`<div class="g"><div class="row"><div class="sp"><p class="mu xs" style="font-weight:700">AYUDA</p><h2>Chat con XyroStudio</h2></div><span class="pill ${cer?'':'ok'}">${cer?'Terminada':c?'En atención':'Nuevo'}</span></div>
+  <div class="card"><div class="chat" id="aych" data-n="${sopMsgs().length}" data-c="${cer?1:0}" style="max-height:52vh">${sopChat()}</div>
+  ${cer?`<div style="text-align:center;display:grid;gap:8px;justify-items:center;padding-top:6px"><b>✅ Atención terminada</b><p class="mu sm">Si necesitas algo más, vuelve a tocar «Necesito ayuda».</p></div><button class="btn p" id="ayfin">Listo</button>`
+   :`<div id="aycd"></div><div class="cin"><input id="aymi" placeholder="${c?'Escribe un mensaje…':'Ej.: No me aparece mi membresía'}" maxlength="1500" enterkeyhint="send" autocomplete="off"><button class="btn p" id="ayms" aria-label="Enviar">${I.send}</button></div>`}</div></div>`}
+function vAvisos(){const G=((D&&D.guardados)||[]).filter(g=>g.promos),c=SOP,av=avisos(),M=sopMsgs(),u=M[M.length-1];
+ if(!SOPL)cargaSop().then(()=>{if(TAB==='avisos'&&MODO==='cliente'&&!SUB)pinta()});
  return`<div class="hdr"><div class="sp"><h1>Avisos</h1><p class="mu sm">Lo nuevo de tus negocios y de XyroStudio.</p></div></div><div class="g">
   ${av}
   ${G.length?`<p class="mu xs" style="font-weight:700">PROMOS POR LA APP</p>${G.map(g=>`<button class="card" data-neg="${esc(g.slug)}" style="text-align:left;width:100%;cursor:pointer"><div class="row"><div class="ibox">${I.gift}</div><div class="sp"><b>${esc(g.negocio)}</b><p class="mu sm">${g.promos} promo${g.promos>1?'s':''} solo por usar Mi Xyro</p></div><span class="mu">›</span></div></button>`).join('')}`:''}
-  ${S.length?`<p class="mu xs" style="font-weight:700">AYUDA</p>${S.map(s=>`<div class="card"><p class="mu xs">${fF(s.creado,{day:'numeric',month:'short'})} · ${s.respuesta?'<span style="color:#22c55e">Respondido</span>':'En revisión'}</p><p class="sm">${esc(s.texto)}</p>${s.respuesta?`<div class="resp"><b class="xs" style="color:var(--a)">XyroStudio</b><p class="sm">${esc(s.respuesta)}</p></div>`:''}</div>`).join('')}`:''}
-  ${!av&&!G.length&&!S.length?`<div class="card" style="text-align:center;justify-items:center;padding:28px 18px"><div class="ibox big">${I.bell.replace('width="22" height="22"','width="36" height="36"')}</div><h2>Todo al día</h2><p class="mu sm" style="max-width:280px">Aquí verás cuando un negocio quiera conectar tu cuenta, sus promos y las respuestas de soporte.</p></div>`:''}
-  <button class="btn" id="ayu">${I.help}Necesito ayuda</button></div>`}
-function ayuda(){hoja(`<h2>🛟 ¿En qué te ayudamos?</h2><p class="mu sm">Cuéntanos qué pasó. Te respondemos aquí, en Avisos.</p><textarea id="at" rows="4" maxlength="1500" placeholder="Ej.: No me aparece mi membresía"></textarea><div class="msg" id="am"></div><button class="btn p" id="ab">Enviar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
- o.querySelector('#ab').onclick=async()=>{const t=o.querySelector('#at').value.trim(),m=o.querySelector('#am');if(t.length<4){m.textContent='Escribe un poco más.';m.className='msg on';return}
-  if(DEMO){close();return toast('En la demo no se envía de verdad')}
-  try{await rpc('xa_yo_reportar',{p_tipo:'ayuda',p_texto:t,p_ctx:ctxApp()});close();SOP=null;toast('✅ Enviado. Te respondemos en Avisos.');if(TAB==='avisos')pinta()}catch(e){m.textContent=errDe(e);m.className='msg on'}}})}
+  ${c?`<p class="mu xs" style="font-weight:700">AYUDA</p><button class="card" data-sub="ayuda" style="text-align:left;width:100%;cursor:pointer"><div class="row"><div class="ibox">${I.help}</div><div class="sp"><b>Chat con XyroStudio${c.visto===false?' <span class="pdot nv" style="display:inline-block;vertical-align:middle"></span>':''}</b><p class="mu sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.estado==='cerrado'?'Atención terminada':esc(u?(u.de==='yo'?'Tú: ':'')+u.texto:'')}</p></div><span class="mu">›</span></div></button>`:''}
+  ${!av&&!G.length&&!c?`<div class="card" style="text-align:center;justify-items:center;padding:28px 18px"><div class="ibox big">${I.bell.replace('width="22" height="22"','width="36" height="36"')}</div><h2>Todo al día</h2><p class="mu sm" style="max-width:280px">Aquí verás cuando un negocio quiera conectar tu cuenta, sus promos y el chat de ayuda.</p></div>`:''}
+  ${c&&c.estado!=='cerrado'?'':`<button class="btn" id="ayu">${I.help}Necesito ayuda</button>`}</div>`}
+function ayuda(){vib();if(SOP&&SOP.estado==='cerrado')sopFin();TAB='avisos';SUB='ayuda';pinta()}
+setInterval(async()=>{if(document.hidden||DEMO||!D||document.querySelector('.ov,.cam'))return;
+ if(MODO==='cliente'&&SUB==='pedido'){const p0=JSON.stringify((PEDS().find(x=>x.id===PEDID)||{}).msgs||[]);try{await cargar()}catch(_){return}const p=PEDS().find(x=>x.id===PEDID),c=$('#cht');if(p&&c&&SUB==='pedido'&&JSON.stringify(p.msgs||[])!==p0){c.innerHTML=chatHTML(p);c.scrollTop=c.scrollHeight;vib();if(p.visto_persona===false){p.visto_persona=true;rpc('xa_yo_plan_visto',{p_id:p.id}).catch(()=>{})}}}
+ else if(MODO==='negocio'&&NB&&NTAB==='ped'){const p0=JSON.stringify(((NPED||[]).find(x=>x.id===NPID)||{}).msgs||[]);try{await nPedCarga()}catch(_){return}const p=(NPED||[]).find(x=>x.id===NPID),c=$('#ncht');if(p&&c&&NTAB==='ped'&&JSON.stringify(p.msgs||[])!==p0){c.innerHTML=nChat(p);c.scrollTop=c.scrollHeight;vib();if(p.visto_negocio===false){p.visto_negocio=true;nrpc('xa_neg_pedido_visto',{p_id:p.id}).catch(()=>{})}}}},6000);
+// El chat abierto se refresca cada 5 s y el contador cada segundo
+setInterval(()=>{if(MODO==='cliente'&&SUB==='ayuda')sopCuenta()},1000);
+setInterval(async()=>{if(document.hidden||MODO!=='cliente'||!D||SOPX)return;if(SUB==='ayuda'&&SOP){await cargaSop(true);if(SUB==='ayuda')sopRef()}},5000);
+setInterval(async()=>{if(document.hidden||MODO!=='cliente'||!D||SOPX||SUB==='ayuda'||document.querySelector('.ov,.cam'))return;const v0=SOP&&SOP.visto,i0=SOP&&SOP.id,e0=SOP&&SOP.estado;await cargaSop();if((SOP&&SOP.visto)!==v0||(SOP&&SOP.id)!==i0||(SOP&&SOP.estado)!==e0){if(SOP&&SOP.visto===false&&v0!==false){vib();toast('💬 XyroStudio te respondió')}pinta()}},20000);
 const equipo=()=>{const u=navigator.userAgent;return(/iPhone|iPad/i.test(u)?'iPhone':/Android/i.test(u)?'Android':/Windows/i.test(u)?'PC Windows':/Mac/i.test(u)?'Mac':'Otro')+(esApp()?' · app':' · web')};
 const ctxApp=()=>({v:'mi',equipo:equipo(),ruta:TAB+(SUB?'/'+(SUB.neg||SUB):''),pantalla:innerWidth+'x'+innerHeight});
 let nErr=0;function repErr(msg){if(DEMO||!sb||!D||nErr>=3)return;nErr++;try{sb.rpc('xa_yo_reportar',{p_tipo:'error',p_texto:String(msg).slice(0,500),p_ctx:ctxApp()}).then(()=>{},()=>{})}catch(_){}}

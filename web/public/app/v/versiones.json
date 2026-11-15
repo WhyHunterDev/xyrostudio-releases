@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261115-0408",
+  "fecha": "2026-11-15 04:08",
+  "titulo": "Chat de solicitudes al instante",
+  "notas": "Chat de solicitudes al instante",
+  "cambios": [
+   "El chat con el socio se actualiza solo cada pocos segundos (ya no hay que cerrar y abrir)",
+   "Arreglado: el cuadro para escribir en el chat se veía en blanco"
+  ]
+ },
+ {
   "id": "20261115-0210",
   "fecha": "2026-11-15 02:10",
   "titulo": "Realidad aumentada en el menú de mesas",
