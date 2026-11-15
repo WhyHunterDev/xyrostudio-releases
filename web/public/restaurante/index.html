@@ -126,13 +126,16 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc
 const pad=n=>String(n).padStart(2,'0'),hm=s=>{const[a,b]=String(s||'0:0').split(':');return(+a||0)*60+(+b||0)},mh=m=>pad(Math.floor(m/60)%24)+':'+pad(m%60);
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],MS=['ene','feb','mar','abr','may','jun','jul','ago','set','oct','nov','dic'];
 const U=i=>'https://images.unsplash.com/photo-'+i+'?auto=format&fit=crop&w=900&q=70';
-const IMG={hero:U('1517248135467-4c7edcad34c4'),reserva:U('1414235077428-338989a2e8c0'),local:U('1559339352-11d035aa65de')};
+let CAF=Q.get('r')==='cafe'; // cafetería: demo ?r=cafe o negocio con app.tipo 'cafe'
+const IMG={hero:U(CAF?'1554118811-1e0d58224f24':'1517248135467-4c7edcad34c4'),reserva:U('1414235077428-338989a2e8c0'),local:U('1559339352-11d035aa65de')};
 const sol=v=>'S/ '+Number(v).toLocaleString('es-PE',{minimumFractionDigits:+v%1?2:0,maximumFractionDigits:2});
 const P0=[['Combos','🎁','Menú ejecutivo',22,'Entrada + fondo + refresco de la casa',U('1504674900247-0877df9cc836'),26,1],['Fondos','🥩','Lomo a la parrilla',42,'Con papas nativas y ensalada fresca.',U('1600891964092-4316c288032e'),0,1],['Fondos','🍢','Brochetas mixtas',34,'Pollo, res y verduras al carbón.',U('1555939594-58d7cb561ad1')],['Fondos','🍕','Pizza margarita',30,'Masa madre, tomate, mozzarella y albahaca.',U('1565299624946-b28f40a0ae38')],['Fondos','🍔','Hamburguesa clásica',24,'Carne 180 g, queso, tocino y salsas de la casa.',U('1568901346375-23c9450c58cd')],['Entradas','🥗','Ensalada César',19,'Lechuga, pollo, crutones y parmesano.',U('1546069901-ba9599a7e63c')],['Entradas','🥙','Bowl de pollo y quinua',21,'Pollo, quinua, palta y vegetales.',U('1512621776951-a57141f2eefd')],['Cafés','☕','Capuchino',10,'Doble shot y leche cremosa.',U('1509042239860-f550ce710b93'),0,1],['Cafés','☕','Americano',7,'Café de especialidad peruano.',U('1495474472287-4d71bcdd2085')],['Postres','🍰','Torta de chocolate',14,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Postres','🍨','Helado artesanal',11,'Dos bolas a elección.',U('1563805042-7684c019e1cb')],['Bebidas','🍋','Limonada frozen',12,'Limón, hierbabuena y hielo frappé.'],['Bebidas','🍇','Chicha morada (jarra)',15,'Receta de la casa.']]
  .map((p,i)=>({id:'b'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||'',antes:p[6]||null,destacado:!!p[7]}));
-const BASE=n=>({nombre:n||'(nombre del restaurante)',wa:'51936449066',distrito:'(distrito)',desde:'12:00',hasta:'23:00',dias:[],
- hero:'',sub:'Cocina casera, ingredientes frescos y la mejor atención. Mira la carta, reserva tu mesa o pide desde tu mesa con el QR.',
- sedes:[{nombre:'(nombre del restaurante)',direccion:'Av. (dirección) 123, (distrito)',maps:''}],productos:P0,qr:true,
+const PC=[['Combos','🎁','Combo desayuno',14,'Café a elección + sándwich de pollo o triple',U('1509042239860-f550ce710b93'),17,1],['Combos','🎁','Combo dulce',25,'Frappé a elección + waffle con helado',U('1572490122747-3968b75cc699'),29],['Frappés','🧋','Frappé de Oreo',14,'Galleta Oreo, helado de vainilla y crema batida.',U('1572490122747-3968b75cc699'),0,1],['Frappés','🧋','Frappé moka',13,'Café, chocolate y crema batida.'],['Frappés','🍓','Frappé de fresa',13,'Fresas naturales, leche y helado.'],['Cafés','☕','Capuchino',9,'Doble shot y espuma cremosa.',U('1509042239860-f550ce710b93')],['Cafés','☕','Americano',6,'Café de altura peruano.',U('1495474472287-4d71bcdd2085')],['Cafés','☕','Mocaccino',11,'Espresso, chocolate y leche.'],['Waffles y crepes','🧇','Waffle con helado y fresas',16,'Waffle crocante, helado, fresas y miel de maple.',U('1562376552-0d160a2f238d'),0,1],['Waffles y crepes','🧇','Waffle Nutella y plátano',15,'Con Nutella, plátano y azúcar impalpable.'],['Waffles y crepes','🥞','Crepe Nutella y fresa',14,'Crepe fino relleno de Nutella y fresas.'],['Sándwiches','🥐','Croissant jamón y queso',10,'Croissant de mantequilla, caliente.',U('1555507036-ab1f4038808a')],['Sándwiches','🥪','Sándwich de pollo',11,'Pollo deshilachado, lechuga y mayonesa casera.'],['Postres','🍰','Cheesecake de maracuyá',12,'Base de galleta y salsa de maracuyá.',U('1533134242443-d4fd215305ad')],['Postres','🍰','Torta de chocolate',10,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Bebidas frías','🥭','Smoothie de mango',11,'Mango, yogur y hielo.',U('1505252585461-04db1eb84625')],['Bebidas frías','🍋','Limonada frozen',9,'Limón, hierbabuena y hielo frappé.']]
+ .map((p,i)=>({id:'c'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4]||'',foto:p[5]||'',antes:p[6]||null,destacado:!!p[7]}));
+const BASE=n=>({nombre:n||(CAF?'(nombre de la cafetería)':'(nombre del restaurante)'),wa:'51936449066',distrito:'(distrito)',desde:CAF?'08:00':'12:00',hasta:CAF?'22:00':'23:00',dias:[],
+ hero:'',sub:CAF?'Cafés de altura, frappés, waffles y postres hechos al momento. Mira la carta, reserva tu mesa o pide desde tu mesa con el QR.':'Cocina casera, ingredientes frescos y la mejor atención. Mira la carta, reserva tu mesa o pide desde tu mesa con el QR.',
+ sedes:[{nombre:CAF?'(nombre de la cafetería)':'(nombre del restaurante)',direccion:'Av. (dirección) 123, (distrito)',maps:''}],productos:CAF?PC:P0,qr:true,
  pagos:['💵 Efectivo','📱 Yape','📱 Plin','💳 Tarjeta'],redes:{}});
 async function rest(p){const r=await fetch(SB.url+'/rest/v1/'+p,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
 async function rpc(f,b){const r=await fetch(SB.url+'/rest/v1/rpc/'+f,{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw new Error(r.status);return r.json()}
@@ -142,6 +145,7 @@ async function cargar(){
  try{const s=(await rest('sitios?select=id,negocio&slug=eq.'+encodeURIComponent(SLUG)))[0];if(!s)return D;
   const C={};(await rest('contenido?select=clave,valor&sitio_id=eq.'+s.id)).forEach(r=>C[r.clave]=r.valor);
   const app=C.app||{},pf=app.perfil||{},rs=C.resto||{},m=app.mesas||{};
+  if(app.tipo==='cafe'&&!CAF){CAF=true;const b2=BASE('');D.sub=b2.sub;D.productos=b2.productos;D.desde=b2.desde;D.hasta=b2.hasta;IMG.hero=U('1554118811-1e0d58224f24')}
   D.nombre=app.nombre||s.negocio||D.nombre;D.color=app.color||'';D.logo=app.logo||'';D.qr=!!m.on;
   if(m.desde)D.desde=m.desde;if(m.hasta)D.hasta=m.hasta;if(Array.isArray(m.dias))D.dias=m.dias;
   if(pf.descripcion)D.sub=pf.descripcion;if(/^https:/.test(pf.portada||''))IMG.hero=pf.portada;if(pf.redes)D.redes=pf.redes;
@@ -154,11 +158,11 @@ async function cargar(){
  return D;
 }
 const mk=s=>esc(s).replace(/\((nombre[^)]*|distrito|dirección)\)/g,'<span class="mk">($1)</span>');
-const ft=(p,cls)=>p.foto&&/^https:\/\//.test(p.foto)?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.remove()">`:'';
+const ft=(p,cls)=>p.foto&&/^https:\/\//.test(p.foto)?`<img src="${esc(p.foto)}" alt="" loading="lazy" data-e="${esc(p.emoji||'🍽️')}" onerror="this.outerHTML=this.dataset.e">`:'';
 const abierto=D=>{const d=new Date(),dd=d.getDay(),t=d.getHours()*60+d.getMinutes(),a=hm(D.desde),b=hm(D.hasta);const dia=!D.dias.length||D.dias.includes(dd);return dia&&(b>a?t>=a&&t<b:t>=a||t<b)};
 
 cargar().then(D=>{
- if(D.color)document.documentElement.style.setProperty('--a',D.color);
+ if(!D.color&&CAF)D.color='#c8873a';if(D.color)document.documentElement.style.setProperty('--a',D.color);
  const N=D.nombre;document.title=N.replace(/[()]/g,'')+' · Carta y reservas';$$('[data-nom]').forEach(e=>e.innerHTML=mk(N));
  if(D.logo)$('#lg').innerHTML=`<img src="${esc(D.logo)}" alt="">`;else $('#lg').textContent=(N.replace(/[()]/g,'').trim()[0]||'R').toUpperCase();
  const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);$('#fab').href=wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.');
@@ -171,12 +175,12 @@ cargar().then(D=>{
  const V={
   '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
    <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(D.hasta):'Cerrado ahora · abrimos '+esc(D.desde)}</span>
-   <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">sabor que vuelve.</span></h1><p class="ld">${esc(D.sub)}</p>
+   <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
    <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/reservar">📅 Reservar mesa</a></div>
    <div class="chips" style="margin-top:22px">${cats.slice(0,6).map(c=>`<a class="chip" href="#/carta" data-gc="${esc(c)}">${esc(c)}</a>`).join('')}</div></div>
    <div class="hc"><span class="eyb">Lo más pedido</span>${dest.map(p=>`<button class="it" data-p="${esc(p.id)}" style="text-align:left">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=e>${esc(p.emoji||'🍽️')}</span>'">`:`<span class="e">${esc(p.emoji||'🍽️')}</span>`}<span><b>${esc(p.nombre)}</b><span class="mu xs">${esc(p.categoria||'')}</span></span><span class="pr">${sol(p.precio)}</span></button>`).join('')}
    ${D.qr?'<p class="mu xs">📱 En el local, escanea el QR de tu mesa y pide desde tu celular.</p>':''}</div></div></section>`,
-  carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta${SLUG?' · precios al día':''}</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">${D.qr?'Para pedir, escanea el QR de tu mesa en el local. ':''}Toca un plato para verlo en grande.</p>
+  carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta${SLUG?' · precios al día':''}</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">${D.qr?'Para pedir, escanea el QR de tu mesa en el local. ':''}Toca ${CAF?'un producto':'un plato'} para verlo en grande.</p>
    <div class="cats"><div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div></div>
    <div class="grid">${L.map(plC).join('')||'<p class="mu">Pronto subimos la carta.</p>'}</div></div></section>`},
   reservar:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">Reserva en 3 pasos</span><h2>Tu mesa <span class="serif">te espera</span></h2><p class="mu" style="margin-bottom:18px">Eliges día, hora y personas. Te confirmamos por WhatsApp.</p>

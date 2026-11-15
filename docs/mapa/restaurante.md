@@ -15,3 +15,9 @@ Creado 2026-11-15. Lee solo la parte que necesitas (`grep -n palabra docs/mapa/r
 **Web base `/restaurante/?s=slug`** (tipo app, oscura y cálida, pestañas con indicador + dock en celular, rutas `#/ #/carta #/reservar #/local`): carta EN VIVO de `xa_carta`, estado abierto/cerrado por `app.mesas` horario, reserva de mesa en 3 pasos (día/hora → personas → nombre) a WhatsApp, cómo llegar con mapa, pagos y redes. Lee `app` (+`perfil` de SQL 52, `mesas`), `sedes`, `bot.whatsapp` y `resto` {hero, sub, pagos, fotos{hero,reserva,local}}; vista de venta `?n=&c=&l=`. Gestor: plantilla «Restaurante / Cafetería» (`PLANTILLAS`, `ECOS`, `sembrarWeb` → /restaurante/).
 
 **Falta / ideas:** delivery con zonas, reservas guardadas en el panel (hoy van a WhatsApp), comandas impresas por área (cocina/bar), división de cuenta por persona, propinas, Bots que toma pedidos (cuando se venda), RA de platos (sigue oculta hasta tener escaneos reales).
+
+## Cafeterías (2026-11-15)
+- Variante del rubro restaurante: en la base se guarda `app.rubro='restaurante'` + `app.tipo='cafe'` (SQL 56 sirve igual). En Xyro Apps `rubDe(CFG)` elige `RUBROS.cafeteria` (resto:1, cafe:1, roles «Barra / Cocina», carta típica).
+- Demo: `/app/?demo=cafeteria`, `/pedir/?demo=1&r=cafe&m=4&n=Nombre`, web `/restaurante/?r=cafe&n=Nombre` (color café #c8873a, «tu café de cada día»).
+- Carta vacía → botón «📖 Cargar carta base» (inserta R.productos con en_mesa y activa stockNeg: la cafetería prepara al momento).
+- Gestor: plantilla «☕ Cafetería» (rub restaurante, tipo cafe, stockNeg).
