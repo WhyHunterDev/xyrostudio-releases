@@ -1,5 +1,21 @@
 [
  {
+  "id": "20261115-1744",
+  "fecha": "2026-11-15 17:44",
+  "titulo": "Puestos, insumos y menú por Xyro",
+  "notas": "Puestos, insumos y menú por Xyro",
+  "cambios": [
+   "Cada negocio elige qué puestos tiene (Caja, Encargado, Mozo, Cocina…) en Ajustes → Puestos; al crear cuentas solo salen esos.",
+   "Nuevos puestos Mozo (sin cocina) y Cocina (solo pantalla de cocina).",
+   "Insumos y recetas: cada venta descuenta lo que usa, lista de compras y costo real de cada producto.",
+   "El menú se ordena por Xyro: Xyro Apps, Xyro Control, Xyro Webs."
+  ],
+  "requiere": "SQL 60",
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-1734",
   "fecha": "2026-11-15 17:34",
   "titulo": "Cafeterías: tamaños, leche y extras",
