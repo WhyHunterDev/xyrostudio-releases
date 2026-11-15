@@ -1334,7 +1334,7 @@ function go(){
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
  if((ruta==='whatsapp'||ruta==='ventasbot')&&!waVer())ruta='inicio';
  const V={pedidos:pedidosMesa,miapp:miApp,inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda}[ruta]||inicio;
- const html=V();$('#v').innerHTML=`<div class="v">${ruta!=='miplan'?planAviso():''}${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
+ const html=V();$('#v').innerHTML=`<div class="v">${ruta!=='miplan'?planAviso():''}${dmAviso()}${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
  const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:citOn()?'🗓️ Cita':(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:R.citas?'＋ Tratamiento':'＋ Plan',caja:R.citas?'🚶 Cobro al paso':'＋ Cobro',ajustes:R.citas?'🗓️ Cita':'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket',agenda:'＋ Cita'};
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
  $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:R.citas?'Tratamientos y precios':'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',miapp:'App de clientes',pruebas:'Días de prueba',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio',agenda:'Agenda'}[ruta]||'';
@@ -2303,7 +2303,12 @@ function solCli(c){const L=(S.sol||[]).filter(x=>x.cliente_id===c.id);if(!L.leng
 let solV='pend';
 /* ===== Soporte XyroStudio con tickets (SQL 32: xa_tickets, xa_ticket_msgs). El gestor responde en Panel XyroStudio → Tickets ===== */
 let TK=null,TKN=0,NEED32=false,tkCarg=false;const TKM={};
-const TK_CAT={problema:'🐞 Algo no funciona',duda:'❓ Duda',cambio:'✏️ Pedido de cambio',pago:'💳 Pagos y plan',otro:'💬 Otro'};
+const TK_CAT={problema:'🐞 Algo no funciona',duda:'❓ Duda',cambio:'✏️ Pedido de cambio',pago:'💳 Pagos y plan',otro:'💬 Otro',directo:'📨 Mensaje de XyroStudio'};
+/* Mensajes directos (SQL 51): XyroStudio escribe a admin/supervisor (RLS por «para»). Aviso arriba en todas las vistas hasta que lo lean. */
+const dmNuevos=()=>(TK||[]).filter(t=>t.categoria==='directo'&&tkNuevo(t));
+function dmAviso(){if(DEMO||!isSup())return'';const L=dmNuevos().filter(t=>!(ruta==='soporte'&&+arg===t.id));if(!L.length)return'';const t=L[0];
+ return`<a href="#/soporte/${t.id}" class="card" style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px;text-decoration:none;color:inherit;border-color:var(--a)"><b class="sm">📨 XyroStudio te escribió: «${esc(t.asunto)}»${L.length>1?` y ${L.length-1} más`:''}</b><span class="btn sm p">Leer</span></a>`}
+let dmVistos=-1;async function dmRevisar(){if(DEMO||!isSup()||document.hidden)return;TK=null;await tkCargar();const n=dmNuevos().length;if(dmVistos>=0&&n>dmVistos)toast('📨 XyroStudio te escribió. Míralo arriba o en Soporte.');dmVistos=n}
 const TK_EST={abierto:['Recibido','pronto'],en_proceso:['En proceso','cong'],esperando:['Te respondimos','act'],resuelto:['Resuelto','sin']};
 const tkNuevo=t=>t.ultimo_gestor&&(!t.visto_cliente||t.visto_cliente<t.actualizado);
 const tkFecha=d=>new Date(d).toLocaleString('es-PE',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
@@ -2386,7 +2391,7 @@ function nuevoTicket(tipo,asu){
   const{error:e2}=await sb.from('xa_ticket_msgs').insert({ticket_id:t.id,autor:ME.id,autor_nombre:QUIEN(),texto:v.txt.slice(0,4000),adjunto:adj});if(e2)throw e2;
   TK=null;XBH=[];toast('🛟 Ticket #'+t.id+' enviado. Te respondemos aquí mismo.');location.hash='#/soporte/'+t.id});
 }
-function tkCard(t){const[e,c]=TK_EST[t.estado]||['',''];return`<a class="card" href="#/soporte/${t.id}" style="display:flex;justify-content:space-between;gap:10px;align-items:center;text-decoration:none;color:inherit"><div style="min-width:0"><b>#${t.id} · ${esc(t.asunto)}</b><br><small class="mu">${esc(TK_CAT[t.categoria]||'')} · ${esc(t.autor_nombre||'')} · ${tkFecha(t.actualizado)}${t.prioridad==='urgente'?' · 🔴 Urgente':''}</small></div><span style="display:flex;gap:6px;align-items:center">${tkNuevo(t)?'<span class="pill venc">💬 Nueva respuesta</span>':''}<span class="pill ${c}">${e}</span></span></a>`}
+function tkCard(t){const[e,c]=t.categoria==='directo'?['Mensaje','act']:TK_EST[t.estado]||['',''];return`<a class="card" href="#/soporte/${t.id}" style="display:flex;justify-content:space-between;gap:10px;align-items:center;text-decoration:none;color:inherit"><div style="min-width:0"><b>#${t.id} · ${esc(t.asunto)}</b><br><small class="mu">${esc(TK_CAT[t.categoria]||'')} · ${esc(t.autor_nombre||'')} · ${tkFecha(t.actualizado)}${t.prioridad==='urgente'?' · 🔴 Urgente':''}</small></div><span style="display:flex;gap:6px;align-items:center">${tkNuevo(t)?'<span class="pill venc">💬 Nueva respuesta</span>':''}<span class="pill ${c}">${e}</span></span></a>`}
 function soporte(){
  if(!DEMO&&TK===null){tkCargar().then(()=>ruta==='soporte'&&go());return'<div class="empty"><b>🛟</b>Cargando…</div>'}
  if(arg)return tkDetalle(+arg);
@@ -2394,13 +2399,13 @@ function soporte(){
  const head=`<div class="hi"><div><h2>Soporte XyroStudio</h2><p class="mu">Pregúntale al asistente: responde al instante. Si es una urgencia, un problema con ventas o una modificación, habla con nuestro equipo.</p></div><button class="btn" id="tkN">🧑‍💻 Hablar con soporte</button></div>`;
  if(DEMO)return head+xbHTML();
  if(NEED32)return head+xbHTML()+`<div class="empty" style="margin-top:12px"><b>🛟</b>Los tickets se están activando.<br><a class="btn sm" target="_blank" rel="noopener" href="${soporteWA()}" style="margin-top:10px">💬 Escríbenos por WhatsApp</a></div>`;
- const mios=isAdmin()?TK:TK.filter(t=>t.autor===ME.id),ab=mios.filter(t=>t.estado!=='resuelto'),re=mios.filter(t=>t.estado==='resuelto');
- return head+xbHTML()+`${ab.length?`<p class="mu sm" style="margin:18px 0 8px">Tus tickets abiertos</p><div class="g st">${ab.map(tkCard).join('')}</div>`:''}${re.length?`<p class="mu sm" style="margin:18px 0 8px">Resueltos</p><div class="g st">${re.slice(0,30).map(tkCard).join('')}</div>`:''}`;
+ const dms=TK.filter(t=>t.categoria==='directo'),mios=(isAdmin()?TK:TK.filter(t=>t.autor===ME.id)).filter(t=>t.categoria!=='directo'),ab=mios.filter(t=>t.estado!=='resuelto'),re=mios.filter(t=>t.estado==='resuelto');
+ return head+(dms.length?`<p class="mu sm" style="margin:0 0 8px">📨 Mensajes de XyroStudio</p><div class="g st" style="margin-bottom:18px">${dms.slice(0,20).map(tkCard).join('')}</div>`:'')+xbHTML()+`${ab.length?`<p class="mu sm" style="margin:18px 0 8px">Tus tickets abiertos</p><div class="g st">${ab.map(tkCard).join('')}</div>`:''}${re.length?`<p class="mu sm" style="margin:18px 0 8px">Resueltos</p><div class="g st">${re.slice(0,30).map(tkCard).join('')}</div>`:''}`;
 }
 function tkDetalle(id){
  const t=(TK||[]).find(x=>x.id===id);if(!t)return'<div class="empty"><b>🔎</b>No encontré ese ticket. <a href="#/soporte">Volver</a></div>';
  if(!TKM[id]){TKM[id]='…';sb.from('xa_ticket_msgs').select('id,autor_nombre,de_gestor,texto,adjunto,creado').eq('ticket_id',id).order('creado').then(({data})=>{TKM[id]=data||[];if(tkNuevo(t)){t.visto_cliente=new Date().toISOString();TKN=TK.filter(tkNuevo).length;tkBadge();sb.rpc('xa_ticket_visto',{p_id:id}).then(()=>{},()=>{})}ruta==='soporte'&&go()});}
- const M=Array.isArray(TKM[id])?TKM[id]:null,[e,c]=TK_EST[t.estado]||['',''];
+ const M=Array.isArray(TKM[id])?TKM[id]:null,[e,c]=t.categoria==='directo'?['Mensaje','act']:TK_EST[t.estado]||['',''];
  setTimeout(()=>{const f=$('#tkR');f&&(f.onsubmit=async ev=>{ev.preventDefault();const b=f.querySelector('.btn.p'),tx=f.querySelector('textarea').value.trim(),a=f.querySelector('input[type=file]').files[0];if(!tx)return toast('Escribe tu mensaje');b.disabled=true;
   try{const adj=a?await subirImg(a,1600,'ticket'):null;const{error}=await sb.from('xa_ticket_msgs').insert({ticket_id:id,autor:ME.id,autor_nombre:QUIEN(),texto:tx.slice(0,4000),adjunto:adj});if(error)throw error;delete TKM[id];TK=null;toast('Mensaje enviado ✓');go()}catch(er){reportar('ticket',er);toast('No se pudo enviar. Intenta de nuevo.');b.disabled=false}})});
  return`<div class="hi"><div><a class="mu sm" href="#/soporte">← Mis tickets</a><h2 style="margin-top:4px">#${t.id} · ${esc(t.asunto)}</h2><p class="mu">${esc(TK_CAT[t.categoria]||'')} · creado ${tkFecha(t.creado)}${t.prioridad==='urgente'?' · 🔴 Urgente':''}</p></div><span class="pill ${c}">${e}</span></div>
@@ -3414,7 +3419,7 @@ async function verVersion(){try{localStorage.setItem('xa-slug',SLUG)}catch(_){}i
   if(data!==VER){location.replace('/app/'+location.search+location.hash);return true}}catch(_){}return false}
 if(/\/app\/dev\//.test(location.pathname))addEventListener('DOMContentLoaded',()=>document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:99999;background:#f59e0b;color:#000;font:700 12px system-ui;padding:4px 12px;border-radius:99px;pointer-events:none">🧪 PANEL DE PRUEBAS · los negocios no ven esto</div>'));
 /* ===== Arranque real (Supabase) ===== */
-function start(){initSede();setTimeout(misNegocios,500);setTimeout(waIni,800);setTimeout(()=>xpCargar().then(()=>{if(planAviso()||ruta==='miplan')go();shell()}),900);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>TKN&&toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')),2500)}
+function start(){initSede();setTimeout(misNegocios,500);setTimeout(waIni,800);setTimeout(()=>xpCargar().then(()=>{if(planAviso()||ruta==='miplan')go();shell()}),900);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>{dmVistos=dmNuevos().length;if(dmVistos&&isSup()){toast('📨 XyroStudio te escribió un mensaje.');(ruta==='inicio'||!ruta)&&go()}else if(TKN)toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')}),2500);setInterval(dmRevisar,180000)}
 async function salir(){try{await sb.auth.signOut()}catch(_){}LS.r('xa-s');location.href='/app/'}
 async function boot(){
  if(DEMO)return demoBoot();
