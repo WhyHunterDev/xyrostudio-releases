@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261115-1351",
+  "fecha": "2026-11-15 13:51",
+  "titulo": "Pasar datos: solo XyroStudio",
+  "notas": "Pasar datos: solo XyroStudio",
+  "cambios": [
+   "El botón para pasar datos de otro sistema ya no lo ven los negocios: ahora es un servicio que haces tú",
+   "Se quitó el nombre de otras marcas de todo el panel"
+  ]
+ },
+ {
   "id": "20261115-0953",
   "fecha": "2026-11-15 09:53",
   "titulo": "Nuevo: restaurantes y cafeterías",
@@ -271,7 +281,7 @@
   "notas": "Consultorio dental: sin cafetín ni importar",
   "cambios": [
    "En consultorios ya no aparece el rol Cafetín ni Supervisor: solo Administrador, Recepción y Odontólogo(a)",
-   "Se quitó «Importar desde AppFit» y la tarjeta de planes a la web en consultorios (la web toma los tratamientos sola)",
+   "Se quitó «Importar desde otro sistema» y la tarjeta de planes a la web en consultorios (la web toma los tratamientos sola)",
    "El botón de arriba en Ajustes agenda una cita en vez de abrir asistencia"
   ],
   "rubros": [
