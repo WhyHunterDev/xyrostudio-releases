@@ -3,7 +3,7 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Frame-Options: SAMEORIGIN
-  Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=(), usb=()
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(self), payment=(), usb=()
 
 /app/*
   X-Robots-Tag: noindex, nofollow
@@ -21,6 +21,12 @@
 /bot.js
   Cache-Control: no-cache
   Access-Control-Allow-Origin: *
+
+/pedir/*
+  ! Permissions-Policy
+  Permissions-Policy: camera=(self), microphone=(), geolocation=(self), xr-spatial-tracking=(self), payment=(), usb=()
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache
 
 /mi/*
   Cache-Control: no-cache
