@@ -297,7 +297,10 @@ const errDe=e=>{const t=String(e&&(e.message||e.error)||e||'');for(const k in ER
  if(/Password should/i.test(t))return 'Tu clave debe tener al menos 6 caracteres.';if(/not confirmed/i.test(t))return 'Confirma tu correo: te enviamos un enlace.';
  if(/rate limit|security purposes/i.test(t))return 'Espera un minuto y vuelve a intentar.';if(/provider is not enabled|Unsupported provider/i.test(t))return 'El ingreso con Google se activa muy pronto. Usa tu correo por ahora.';
  if(/^[A-ZÁÉÍÓÚÑ¿][^_{}<>]{5,120}$/.test(t)&&!/fetch|JWT|PGRST|function|column|relation|violates|syntax|permission/i.test(t))return t;
- return 'Algo falló. Revisa tu internet y vuelve a intentar.'};
+ if(/PGRST202|PGRST205|schema cache|Could not find the function|does not exist/i.test(t))return 'Esta función se está activando en tu negocio. Vuelve a intentar en un rato.';
+ if(/Failed to fetch|NetworkError|Load failed/i.test(t))return 'Sin conexión. Revisa tu internet y vuelve a intentar.';
+ if(window.repErr)try{repErr(t)}catch(_){}
+ return 'Algo no salió bien. Ya avisamos a XyroStudio; vuelve a intentar en un rato.'};
 // Lo que la persona quería hacer antes de iniciar sesión (escaneó un QR o abrió un enlace).
 const pend={get(){try{return JSON.parse(ls.g('mi-pend')||'null')}catch(_){return null}},set(v){ls.s('mi-pend',v?JSON.stringify(v):null)}};
 
