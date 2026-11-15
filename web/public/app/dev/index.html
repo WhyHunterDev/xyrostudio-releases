@@ -332,6 +332,7 @@ body:not(.dentro){background:#05060a}
 .ckI{display:grid;gap:6px}.ckI div{display:flex;gap:10px;align-items:baseline;font-size:18px}.ckI b{min-width:30px;font-size:22px;color:var(--a)}
 .ckN{padding:8px 10px;border-radius:12px;background:color-mix(in srgb,var(--wa) 14%,transparent);font-weight:700}
 .tmM{flex-wrap:wrap}.tmM button{min-width:46px}.tmL{display:grid;gap:6px;max-height:44vh;overflow:auto;margin:8px 0}
+.nh{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);padding:16px 14px 6px;opacity:.8}
 .tmP{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:14px;border:1px solid var(--ln)}.tmP.on{border-color:var(--a)}.tmP.ag{opacity:.45}
 .tmP img,.tmP>span:first-child{width:44px;height:44px;border-radius:12px;object-fit:cover;display:grid;place-items:center;font-size:24px;flex:none}.tmP .nm{flex:1;display:grid}
 @media(max-width:600px){.rMes{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.rMe{padding:10px 4px;border-radius:14px}.rMe b{font-size:20px}.rMe span{font-size:10px}.rMe small{display:none}}
@@ -1366,14 +1367,18 @@ async function editServicios(){const off=new Set(CFG.apagados||[]);
   <div class="bt"><button class="btn p" id="svG">Guardar</button><button class="btn" data-x>Cancelar</button></div>`,(el,close)=>{
   el.querySelector('#svG').onclick=async()=>{const a=[...el.querySelectorAll('[data-sv]')].filter(x=>!x.checked).map(x=>x.dataset.sv);
    try{await DB.cfg({apagados:a});close();shell();go();toast('Servicios guardados ✓')}catch(e){toast(e.message)}}})}
-const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento','miapp']],['gym','🏋️','Gimnasio',['rutinas','planes','solicitudes']],['ctl','🛒','Xyro Control',['tienda','pedidos']],['res','📊','Resultados',['reportes','metas']],['xweb','🌐','Xyro Webs',['web']],['cfg','⚙️','Configuración',['equipo','xyros','ajustes','miplan','cuenta']]];
-// Restaurantes y cafeterías: el menú dice de qué Xyro viene cada función.
-const NAVGR=[['xapp','📱','Xyro Apps',['pedidos','cocina','caja','miapp','reportes']],['ctl','🛒','Xyro Control',['tienda','insumos']],['xweb','🌐','Xyro Webs',['web']],['cfg','⚙️','Configuración',['equipo','xyros','ajustes','miplan','cuenta']]];
-function navGrupos(n){const NG=R.resto?NAVGR:NAVG,top=[],G=NG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));n.forEach(x=>{const g=NG.findIndex(g=>g[3].includes(x[0]));(g<0||n.length<=(R.resto?6:8)?top:G[g].L).push(x)});const G2=G.filter(g=>g.L.length),fijo=g=>/^x|^ctl/.test(g.k);G2.filter(g=>g.L.length===1&&!fijo(g)).forEach(g=>top.push(g.L[0]));return{top,G:G2.filter(g=>g.L.length>1||fijo(g))}}
+// Menú por Xyro: cada sección dice de qué Xyro viene la función (Xyro Apps, Bots, Control, Webs) y al final Configuración.
+const NAVG=[['ventas','🧲','Ventas',['seguimiento','miapp','pruebas']],['gym','🏋️','Gimnasio',['rutinas','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['equipo','xyros','ajustes','miplan','cuenta']]];
+const XSEC=[['app','Xyro Apps'],['bot','Xyro Bots'],['ctl','Xyro Control'],['web','Xyro Webs'],['cfg','']];
+const xsDe=k=>['whatsapp','ventasbot','bots'].includes(k)?'bot':['tienda','insumos'].includes(k)||(k==='pedidos'&&!R.resto)?'ctl':k==='web'?'web':['equipo','xyros','ajustes','miplan','cuenta'].includes(k)?'cfg':'app';
+function navGrupos(n){const chico=n.length<=(R.resto?7:8);
+ return XSEC.map(([x,h])=>{const L=n.filter(it=>xsDe(it[0])===x),top=[],G=NAVG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));
+  L.forEach(it=>{const g=R.resto&&x==='app'?-1:NAVG.findIndex(g=>g[3].includes(it[0]));(g<0||chico&&x!=='cfg'?top:G[g].L).push(it)});
+  const G2=G.filter(g=>g.L.length);G2.filter(g=>g.L.length===1).forEach(g=>top.push(g.L[0]));return{x,h,top,G:G2.filter(g=>g.L.length>1)}}).filter(s=>s.top.length||s.G.length)}
 const navNum=t=>{const m=String(t).match(/\((\d+)\)\s*$/);return m?+m[1]:0};
 function shell(){
  const n=NAV(),NG=navGrupos(n.filter(x=>x[0]!=='kiosco')),lnk=([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`;
- $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+NG.top.map(lnk).join('')+NG.G.map(g=>{const c=g.L.reduce((a,x)=>a+navNum(x[2]),0),ab=LS.g('xa-ng-'+g.k,'')==='1'||c>0||g.L.some(x=>x[0]===ruta);return`<details class="ng" data-g="${g.k}" ${ab?'open':''}><summary class="nav"><em>${g.i}</em>${esc(g.t)}${c?`<b class="ngc">${c}</b>`:''}</summary><div class="ngl">${g.L.map(lnk).join('')}</div></details>`}).join('')+
+ $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+NG.map(sec=>(NG.length>1&&sec.h?`<div class="nh">${esc(sec.h)}</div>`:'')+sec.top.map(lnk).join('')+sec.G.map(g=>{const c=g.L.reduce((a,x)=>a+navNum(x[2]),0),ab=LS.g('xa-ng-'+g.k,'')==='1'||c>0||g.L.some(x=>x[0]===ruta);return`<details class="ng" data-g="${g.k}" ${ab?'open':''}><summary class="nav"><em>${g.i}</em>${esc(g.t)}${c?`<b class="ngc">${c}</b>`:''}</summary><div class="ngl">${g.L.map(lnk).join('')}</div></details>`}).join('')).join('')+
   `<div class="side-f"><a class="btn sm"${soporteTgt()} href="${soporteURL()}">🛟 Soporte XyroStudio<b class="tkb" ${TKN?'':'hidden'}>${TKN}</b></a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor||NEG.length>1?'<button class="btn sm" id="cambia">🏢 Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
  $('#bn').innerHTML=n.filter(x=>R.resto?['inicio','pedidos','cocina','caja'].includes(x[0])||(ME.rol==='cafetin'&&x[0]==='tienda'):['inicio','agenda','socios','kiosco','tienda','caja'].includes(x[0])||(ME.rol==='cafetin'&&x[0]==='pedidos')||(isCoach()&&x[0]==='rutinas')).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  $$('#side details.ng').forEach(d=>d.ontoggle=()=>LS.s('xa-ng-'+d.dataset.g,d.open?'1':''));
@@ -2700,7 +2705,7 @@ function reportes(){
 function mas(){
  const n=NAV().filter(x=>!['inicio','socios','kiosco','tienda','caja'].includes(x[0])&&!(isCoach()&&x[0]==='rutinas'));
  const NG=navGrupos(n),cd=([k,i,t])=>`<a class="card" href="#/${k}"><em>${i}</em>${esc(t)}</a>`;
- return`<div class="hi"><h2>Más</h2></div>${NG.G.map(g=>`<h3 style="margin:14px 0 8px">${g.i} ${esc(g.t)}</h3><div class="mas st">${g.L.map(cd).join('')}</div>`).join('')}<h3 style="margin:14px 0 8px">✨ Otros</h3><div class="mas st">${NG.top.map(cd).join('')}<a class="card"${soporteTgt()} href="${soporteURL()}"><em>🛟</em>Soporte${TKN?` <b class="tkb">${TKN}</b>`:''}</a>${NEG.length>1?'<a class="card" href="#" data-cneg><em>🏢</em>Cambiar de negocio</a>':''}${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
+ return`<div class="hi"><h2>Más</h2></div>${NG.map(sec=>`<h3 style="margin:14px 0 8px">${sec.h?esc(sec.h):'⚙️ Configuración'}</h3><div class="mas st">${sec.top.concat(...sec.G.map(g=>g.L)).map(cd).join('')}</div>`).join('')}<h3 style="margin:14px 0 8px">✨ Otros</h3><div class="mas st"><a class="card"${soporteTgt()} href="${soporteURL()}"><em>🛟</em>Soporte${TKN?` <b class="tkb">${TKN}</b>`:''}</a>${NEG.length>1?'<a class="card" href="#" data-cneg><em>🏢</em>Cambiar de negocio</a>':''}${DEMO?'<a class="card" href="./"><em>🚪</em>Salir de la demo</a>':'<a class="card" href="#" id="out2"><em>🚪</em>Cerrar sesión</a>'}</div>`;
 }
 
 /* ===== Mi web (Xyro Webs dentro del panel): abre el panel de la web con entrada de un clic ===== */
