@@ -100,6 +100,7 @@ th{color:var(--mu);font-size:.66rem;letter-spacing:.08em;text-transform:uppercas
 .ver.now .dot{background:var(--ac2);box-shadow:0 0 0 4px rgba(0,230,168,.18)}
 .ver .vi{flex:1;min-width:0}.ver small{color:var(--mu);font-family:var(--mono)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
+.chips.ecos .chip{font-size:.9rem;padding:.5rem .95rem}.chips.ecos .chip b{margin-left:4px;opacity:.7}.ecoh{display:flex;align-items:baseline;gap:10px;margin:18px 0 10px;font-size:1.05rem}.ecoh small{color:var(--mu);font-weight:500;font-size:.8rem}
 .chip{padding:.4rem .8rem;border-radius:999px;background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--mu);font-size:.82rem;font-weight:600;transition:.15s}
 .chip:hover{color:var(--tx);border-color:var(--line2)}
 .chip.on{background:var(--ac);color:#fff;border-color:transparent}
@@ -607,9 +608,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.i
 V.negocios=async ()=>{
   H('Xyro Apps','Cómo van los negocios de tus clientes. Solo tú lo ves y mirar no deja rastro.');
   $('#acts').innerHTML='<button class="btn btn-p" data-v="alta">＋ Nuevo negocio</button> <button class="btn btn-g" data-v="accesos">📨 Enviar acceso a todos</button> <button class="btn btn-g" data-v="negocios">↻ Actualizar</button>';
-  const [{data:si},{data:cs}]=await Promise.all([sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,valor').eq('clave','config')]);
-  const xy={};(cs||[]).forEach(r=>xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[]);
-  const L=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps'));
+  const [{data:si},{data:cs}]=await Promise.all([sb.from('sitios').select('id,slug,negocio'),sb.from('contenido').select('sitio_id,clave,valor').in('clave',['config','app'])]);
+  const xy={},rb={};(cs||[]).forEach(r=>{if(r.clave==='config')xy[r.sitio_id]=(r.valor&&r.valor.xyros)||[];else rb[r.sitio_id]=(r.valor&&r.valor.rubro)||'gym'});
+  const L0=(si||[]).filter(s=>(xy[s.id]||[]).includes('apps')).map(s=>Object.assign(s,{rubro:rb[s.id]||'gym'}));
+  const ch=ecoChips(L0,s=>s.rubro),L=L0.filter(s=>gEco==='todos'||s.rubro===gEco);
+  if(L0.length&&!L.length)return ch+`<div class="panel"><div class="empty">Aún no tienes ${esc(ecoInfo(gEco)[2])} con Xyro Apps. Crea uno con «＋ Nuevo negocio» y elige su plantilla.</div></div>`;
   if(!L.length)return '<div class="panel"><div class="empty">Aún no hay clientes con Xyro Apps. Tócale «＋ Nuevo negocio» y queda listo en 1 minuto.</div></div>';
   const m0=new Date();m0.setDate(1);m0.setHours(0,0,0,0);const h0=new Date();h0.setHours(0,0,0,0);
   const cnt=async(t,s,f)=>{let q=sb.from(t).select('id',{count:'exact',head:true}).eq('sitio_id',s);if(f)q=f(q);const r=await q;return r.count||0};
@@ -617,9 +620,10 @@ V.negocios=async ()=>{
   R.sort((a,b)=>b.mes-a.mes);
   const T=k=>R.reduce((a,r)=>a+r[k],0);
   const MOD={control:'Control',webs:'Web',bots:'Bots',edits:'Edits'};
-  return `<div class="grid4"><div class="kpi"><b>${R.length}</b><small>Negocios con Xyro Apps</small></div><div class="kpi g"><b>${soles(T('mes'))}</b><small>Cobrado por ellos este mes</small></div><div class="kpi"><b>${T('soc').toLocaleString('es-PE')}</b><small>Clientes registrados</small></div><div class="kpi w"><b>${T('asi').toLocaleString('es-PE')}</b><small>Asistencias de hoy</small></div></div>
-    <div class="panel tbl"><table><tr><th>Negocio</th><th>Integraciones</th><th style="text-align:right">Hoy</th><th style="text-align:right">Este mes</th><th style="text-align:right">Clientes</th><th style="text-align:right">Asist. hoy</th><th></th></tr>
-    ${R.map(r=>`<tr><td><b>${esc(r.s.negocio||r.s.slug)}</b><br><small style="color:var(--mu)">${esc(r.s.slug)}</small></td><td>${Object.keys(MOD).filter(k=>r.mods.includes(k)).map(k=>`<span class="tag">${MOD[k]}</span>`).join(' ')||'<small style="color:var(--mu)">Solo base</small>'}</td><td style="text-align:right">${soles(r.hoy)}</td><td style="text-align:right"><b>${soles(r.mes)}</b></td><td style="text-align:right">${r.soc}</td><td style="text-align:right">${r.asi}</td><td style="text-align:right"><button class="btn btn-g btn-sm" data-xapp="${esc(r.s.slug)}">Entrar ↗</button></td></tr>`).join('')}</table>
+  const ord=Object.keys(ECOS),gr=[...new Set(R.map(r=>r.s.rubro))].sort((a,b)=>ord.indexOf(a)-ord.indexOf(b));
+  const fila=r=>`<tr><td><b>${esc(r.s.negocio||r.s.slug)}</b><br><small style="color:var(--mu)">${esc(r.s.slug)}</small></td><td>${Object.keys(MOD).filter(k=>r.mods.includes(k)).map(k=>`<span class="tag">${MOD[k]}</span>`).join(' ')||'<small style="color:var(--mu)">Solo base</small>'}</td><td style="text-align:right">${soles(r.hoy)}</td><td style="text-align:right"><b>${soles(r.mes)}</b></td><td style="text-align:right">${r.soc}</td><td style="text-align:right">${r.s.rubro==='gym'?r.asi:'—'}</td><td style="text-align:right"><button class="btn btn-g btn-sm" data-xapp="${esc(r.s.slug)}">Entrar ↗</button></td></tr>`;
+  return `${ch}<div class="grid4"><div class="kpi"><b>${R.length}</b><small>${gEco==='todos'?'Negocios con Xyro Apps':esc(ecoInfo(gEco)[1])}</small></div><div class="kpi g"><b>${soles(T('mes'))}</b><small>Cobrado por ellos este mes</small></div><div class="kpi"><b>${T('soc').toLocaleString('es-PE')}</b><small>Clientes registrados</small></div><div class="kpi w"><b>${T('asi').toLocaleString('es-PE')}</b><small>Asistencias de hoy</small></div></div>
+    ${gr.map(k=>{const G=R.filter(r=>r.s.rubro===k);return`${ecoTit(k,G.length,' · '+soles(G.reduce((a,r)=>a+r.mes,0))+' este mes')}<div class="panel tbl" style="margin-bottom:14px"><table><tr><th>Negocio</th><th>Integraciones</th><th style="text-align:right">Hoy</th><th style="text-align:right">Este mes</th><th style="text-align:right">${k==='consultorio'?'Pacientes':'Clientes'}</th><th style="text-align:right">Asist. hoy</th><th></th></tr>${G.map(fila).join('')}</table></div>`}).join('')}<div class="panel">
     <p class="d" style="margin-top:10px">«Entrar» abre su Xyro Apps con tu cuenta de XyroStudio sin pedir contraseña. Ahí ves y corriges todo; los cambios que hagas quedan con tu nombre.</p></div>`;
 };
 // ---- Alta de un negocio nuevo en 1 minuto: cliente + sitio + Xyros + ajustes de la app + cuenta del dueño ----
@@ -864,14 +868,30 @@ async function subirVersion(clave,ver,quiet){
 document.addEventListener('change',async e=>{const t=e.target;try{
   if('auto3am' in t.dataset){const {error}=await sb.from('xa_versiones').upsert({clave:'general',auto3am:t.checked,actualizado:new Date().toISOString()});if(error)throw error;touch((t.checked?'Activó':'Quitó')+' las actualizaciones a las 3 am');toast(t.checked?'⏰ Las subidas quedarán para las 3 am':'Las subidas serán al instante');return go('versiones');}
 }catch(ex){toast(ex.message||'No se pudo')}});
+// ---- Ecosistemas: cada rubro en su propia categoría (Clientes y Xyro Apps) ----
+let gEco=(()=>{try{return localStorage.getItem('xg-geco')||'todos'}catch(_){return'todos'}})(),RUBS=null;
+const ECO_OTROS=['🌐','Otros / solo web','negocios de otros rubros'];
+const ecoInfo=k=>ECOS[k]||ECO_OTROS;
+const ecoTxt=t=>{t=String(t||'').toLowerCase();return/dental|consult|cl[ií]nic|odont/.test(t)?'consultorio':/restaur|cafeter|caf[eé]\b|comida|cevich|poller|juguer|cocina/.test(t)?'restaurante':/academ/.test(t)?'academia':/gym|gimn|fit|strength|crossfit/.test(t)?'gym':'otros'};
+async function cargarRubs(){if(RUBS)return RUBS;const [{data:si},{data:ap}]=await Promise.all([sb.from('sitios').select('id,slug'),sb.from('contenido').select('sitio_id,valor').eq('clave','app')]);
+  const r={};(ap||[]).forEach(x=>r[x.sitio_id]=(x.valor&&x.valor.rubro)||'gym');RUBS={};(si||[]).forEach(x=>{if(r[x.id])RUBS[x.slug]=r[x.id]});return RUBS}
+const ecoCli=cl=>{const sl=cl.url?slugDe(cl.url):'';return(RUBS&&sl&&RUBS[sl])||ecoTxt(cl.rubro)};
+// Fila de categorías: Todos + gimnasios, consultorios y restaurantes (siempre) + los que tengan negocios
+function ecoChips(L,ecoOf){const n={};L.forEach(x=>{const k=ecoOf(x);n[k]=(n[k]||0)+1});
+  const ks=[...new Set(['gym','consultorio','restaurante'].concat(Object.keys(ECOS).filter(k=>n[k]),n.otros?['otros']:[]))];
+  if(gEco!=='todos'&&!ks.includes(gEco))gEco='todos';
+  return `<div class="chips ecos"><button class="chip ${gEco==='todos'?'on':''}" data-geco="todos">Todos <b>${L.length}</b></button>${ks.map(k=>{const E=ecoInfo(k);return`<button class="chip ${k===gEco?'on':''}" data-geco="${k}">${E[0]} ${esc(E[1])} <b>${n[k]||0}</b></button>`}).join('')}</div>`}
+const ecoTit=(k,n,extra)=>{const E=ecoInfo(k);return`<h3 class="ecoh">${E[0]} ${esc(E[1])} <small>${n} negocio${n===1?'':'s'}${extra||''}</small></h3>`};
 let flt='todos';
 V.clientes=async ()=>{
   H('Clientes','Cada web que creas, con su costo, soporte y versiones. Guardado en la nube.');
   $('#acts').innerHTML=`<button class="btn btn-p" data-v="alta">＋ Nuevo negocio</button> <button class="btn btn-g" data-new title="Cliente que solo tiene web, sin Xyro Apps">＋ Solo web</button>`;
   if(editing)return await clForm();
-  const f=clientes.filter(c=>flt==='todos'||c.estado===flt);
-  return `<div class="chips">${[['todos','Todos'],...estados].map(([k,n])=>`<button class="chip ${k===flt?'on':''}" data-flt="${k}">${n}</button>`).join('')}</div>
-    <div class="clients">${f.map(clCard).join('')||'<div class="empty">Nada por aquí.</div>'}</div>`;
+  try{await cargarRubs()}catch(_){}
+  const ch=ecoChips(clientes,ecoCli),f=clientes.filter(c=>(flt==='todos'||c.estado===flt)&&(gEco==='todos'||ecoCli(c)===gEco)),ord=Object.keys(ECOS).concat('otros');
+  const grupos=gEco==='todos'?[...new Set(f.map(ecoCli))].sort((a,b)=>ord.indexOf(a)-ord.indexOf(b)):[gEco];
+  return `${ch}<div class="chips">${[['todos','Todos'],...estados].map(([k,n])=>`<button class="chip ${k===flt?'on':''}" data-flt="${k}">${n}</button>`).join('')}</div>
+    ${f.length?grupos.map(k=>{const L=f.filter(c=>ecoCli(c)===k);return`${gEco==='todos'?ecoTit(k,L.length):''}<div class="clients">${L.map(clCard).join('')}</div>`}).join(''):'<div class="empty">Nada por aquí. Crea uno con «＋ Nuevo negocio» y elige su ecosistema.</div>'}`;
 };
 async function clForm(){
   const n=editing==='new', cl=n?{negocio:'',rubro:'',estado:'activo',contacto:'',telefono:'',url:'',panel:'',costo:'',soporte:'',pago:'pendiente',ciclo:'mensual',entregado:new Date().toISOString().slice(0,10),notas:'',versiones:[]}:structuredClone(clientes.find(c=>c.id===editing));
@@ -1200,6 +1220,7 @@ document.addEventListener('click', async e=>{
       document.body.appendChild(m); m.hidden=false; const b=el.getBoundingClientRect(),w=m.offsetWidth,hh=m.offsetHeight;
       m.style.left=Math.max(8,Math.min(innerWidth-w-8,b.right-w))+'px'; m.style.top=(b.bottom+6+hh>innerHeight?Math.max(8,b.top-hh-6):b.bottom+6)+'px'; return; }
     if(d.vset){ const [sid,v]=d.vset.split('|'); document.querySelectorAll('.vmenu').forEach(x=>x.hidden=true); await fijarVersion(sid,v,d.n); return go('versiones'); }
+    if(d.geco){ gEco=d.geco; try{localStorage.setItem('xg-geco',gEco)}catch(_){} return go(view); }
     if(d.veco){ vEco=d.veco; try{localStorage.setItem('xg-veco',vEco)}catch(_){} return go('versiones'); }
     if(d.vsubeco){ const E=ECOS[d.vsubeco],u=ultDe(d.vsubeco); if(!confirm(`¿Subir la versión del ${(VERS.find(x=>x.id===u)||{}).fecha||u} a ${VSIT.length} ${E[2]}? Solo a ${E[2]}: los demás negocios no cambian. Lo verán al volver a abrir la app.`))return;
       el.disabled=true; let auto=false; try{ for(const sid of VSIT)auto=await subirVersion(sid,u,true); touch(`Subió la versión ${u} a todos los ${E[2]}${auto?' (3 am)':''}`); toast(auto?'⏰ Programada para las 3 am':'✅ Subida a todos los '+E[2]); }catch(ex){ toast(ex.message); } return go('versiones'); }
