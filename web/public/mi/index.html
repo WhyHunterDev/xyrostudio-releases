@@ -608,7 +608,7 @@ async function cargaNeg(slug){try{const d=await rpc('xa_yo_negocio',{p_slug:slug
 function vNegocio(slug){const n=NEG[slug];
  if(!n)return`<button class="back" data-back>‹ Volver</button><div class="card vacio"><span class="e">🤔</span><h2>No encontramos este negocio</h2><p class="mu">Revisa tu internet o escanea otra vez su QR.</p></div>`;
  WEBN=n.web||'';const rub=n.rubro,lg=logoURL(n.logo),mi=negs().findIndex(x=>x.slug===slug),sesion=!!D;
- const cov=media((n.clinica&&n.clinica.hero)||((n.publicaciones||[]).find(p=>p.media&&p.mediaTipo!=='video')||{}).media||((n.sedes||[])[0]||{}).foto||'',rub);
+ const cov=media(n.portada||(n.clinica&&n.clinica.hero)||((n.publicaciones||[]).find(p=>p.media&&p.mediaTipo!=='video')||{}).media||((n.sedes||[])[0]||{}).foto||'',rub);
  const PR=(n.promos||[]).filter(p=>!p.hasta||p.hasta>=hoyL()),PB=n.publicaciones||[],PL=(n.planes||[]).filter(p=>p.nombre),SE=n.sedes||[],CL=n.clases||[];
  const red=n.redes||{},RD=[['instagram','📸 Instagram'],['tiktok','🎵 TikTok'],['facebook','👍 Facebook']].filter(([k])=>red[k]);
  const ev=p=>+p.precioEvento&&(!p.eventoHasta||p.eventoHasta>=hoyL());
@@ -616,7 +616,7 @@ function vNegocio(slug){const n=NEG[slug];
  return`<div class="nwrap"><button class="back fl" data-back aria-label="Volver">‹</button>
  <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:'background:linear-gradient(135deg,var(--a),#000)'}"></div>
  <div class="nhead">${lg?`<img class="lg" src="${esc(lg)}" alt="">`:`<div class="lg" style="display:grid;place-items:center;font-size:34px">${rub==='consultorio'?'🦷':'🏋️'}</div>`}
-  <h1>${esc(n.negocio)}</h1>${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
+  <h1>${esc(n.negocio)}</h1>${n.descripcion?`<p class="sm" style="max-width:420px;opacity:.9">${esc(n.descripcion)}</p>`:''}${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
  <div class="g" style="margin-top:14px">
   ${mi>=0?`<button class="btn p" id="sv">${rub==='consultorio'?'🦷 Ver mis citas y tratamiento':'🎟️ Ver mi membresía y mi QR'}</button>`
    :`<div class="row">${sesion?`<button class="btn ${n.guardado?'':'p'} sp" id="gd">${n.guardado?'✓ Guardado':'＋ Guardar negocio'}</button>`:`<button class="btn p sp" id="gd">＋ Guardar en mi app</button>`}${waBtn(n,'Hola, los vi en la app Mi Xyro. Quiero información.','💬')}</div>
@@ -1034,7 +1034,7 @@ function demoData(){const{gym,den}=demoBoth(),dent=DEMO==='consultorio';
   pedidos:dent?[]:demoPedUsr(),
   avisos:[{id:'av1',negocio:dent?'Fuerza Gym':'Sonrisa Dental',color:dent?'#e11d48':'#0ea5e9',rubro:dent?'gym':'consultorio',nombre:'Valeria Torres',quien:'Recepción'}]}}
 function demoNeg(slug){const g=slug==='demo-gym'?{negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym'}:slug==='demo-dental'?{negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio'}:{negocio:'Nativa Café',color:'#16a34a',rubro:'gym'};
- return{slug,...g,whatsapp:'936449066',guardado:true,socio:negs().some(n=>n.slug===slug),
+ return{slug,...g,whatsapp:'936449066',descripcion:g.rubro==='consultorio'?'Odontología para toda la familia, sin dolor y con citas puntuales.':'Entrena con nosotros: máquinas nuevas, clases todos los días y buen ambiente.',guardado:true,socio:negs().some(n=>n.slug===slug),
   promos:[{titulo:g.rubro==='consultorio'?'Limpieza a S/ 59 por la app':'Inscripción gratis + 1 semana extra',descripcion:'Solo para quienes nos guardaron en Mi Xyro.',hasta:''}],
   publicaciones:[{tipo:'Promo',titulo:'Reto 30 días',descripcion:'Únete al reto y gana un mes gratis.',media:'img/clase.webp',fin:''}],
   planes:g.rubro==='consultorio'?[{nombre:'Limpieza dental',precio:80},{nombre:'Blanqueamiento',precio:450,destacado:true},{nombre:'Ortodoncia',precio:3500}]:[{nombre:'1 mes',precio:100,meses:1},{nombre:'3 meses',precio:270,meses:3},{nombre:'1 año',precio:900,meses:12,destacado:true,precioEvento:750,eventoTexto:'Solo este mes'}],

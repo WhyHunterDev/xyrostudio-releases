@@ -1,5 +1,5 @@
 // Mi Xyro: red primero y caché de respaldo, para que el QR abra aunque no haya señal.
-const C = 'mi-xyro-v8';
+const C = 'mi-xyro-v9';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(C).then((c) => c.addAll(['/mi/', '/img/marca/logo-xyrostudio-app.svg']))); });
 self.addEventListener('activate', (e) => e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((x) => x.startsWith('mi-xyro') && x !== C).map((x) => caches.delete(x)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', (e) => {

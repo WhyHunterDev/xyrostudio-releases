@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261115-0024",
+  "fecha": "2026-11-15 00:24",
+  "titulo": "Perfil del negocio en la app",
+  "notas": "Perfil del negocio en la app",
+  "cambios": [
+   "Nueva sección «Tu perfil en la app» en App de clientes: portada, descripción, WhatsApp, redes, dirección y horario",
+   "Publica novedades (promo, evento, reto, aviso) que salen en la app Mi Xyro sin necesitar página web",
+   "Si tienes web, la app completa con ella lo que falte"
+  ],
+  "requiere": "SQL 52"
+ },
+ {
   "id": "20261115-0013",
   "fecha": "2026-11-15 00:13",
   "titulo": "Mensajes directos de XyroStudio",
