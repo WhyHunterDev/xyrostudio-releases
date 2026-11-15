@@ -22,3 +22,6 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 
 ## Fundadores (2026-11-15, SQL 57)
 - Primeras 50 cuentas de Mi Xyro: `xa_personas.fundador` (número fijo, se da en `xa_yo_perfil` con candado). Insignia «★ Fundador #007» (inicio, perfil, carnet), carnet dorado (`body.fund`), bienvenida una vez (`fundBienvenida`). @ de 3-4 letras solo fundadores (`usuario_corto`). Cupos en `xa_fund_max()`.
+- QR propio (`qrSVG`, nivel H, módulos redondeados, ojos rx 1.2, X al centro; probado con jsQR 36/36). Fundador = ojos/X dorados oscuros. Ojo: puntos redondos o dorado claro NO se leen bien.
+- Foto de perfil: `subirFoto` (400 px webp) a medios/mi/<uid>/ (política en SQL 57); se guarda con p_foto de xa_yo_editar.
+- Fundador en toda la app (`body.fund`): botones, botón escanear, pestaña activa, aro del avatar, nombre, ID y partículas dorados.
