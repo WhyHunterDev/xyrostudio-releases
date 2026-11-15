@@ -89,6 +89,12 @@ input:focus{border-color:var(--a)}
 .xcard.f .xm{background:#2a1c0518}.xcard.f .xn{background:linear-gradient(180deg,#3a2706,#6b4a0c);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
 .xcard.p{background:linear-gradient(135deg,#0c0d12,#2a2d36 40%,#11131a 70%,#3a3e4a);box-shadow:0 24px 50px -24px #000,inset 0 1px 0 #ffffff30;color:#e9ecf3}
 .xcard.p .xl{background:linear-gradient(90deg,#fff,#a9b0c2,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.xcard.o{background:linear-gradient(135deg,#050507,#16121f 35%,#0a0a10 60%,#1d1730);color:#f3f0ff;box-shadow:0 26px 56px -24px #7c5cffaa,inset 0 1px 0 #ffffff26}
+.xcard.o::before{background:repeating-linear-gradient(115deg,#ffffff06 0 2px,transparent 2px 6px),radial-gradient(90% 80% at 85% 0%,#7c5cff55,transparent 60%),radial-gradient(70% 60% at 0% 110%,#3ad6ff33,transparent 60%)}
+.xcard.o .xn{background:conic-gradient(from 200deg,#ff9de2,#9de7ff,#b9ffb0,#fff59d,#c9a7ff,#ff9de2);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;font-size:44px}
+.xcard.o .xl{background:linear-gradient(90deg,#fff,#c9b8ff,#9de7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.xcard.s{background:linear-gradient(135deg,#0b1220,#1b2a44 45%,#0e1626 70%,#24395e);color:#e6eefc;box-shadow:0 24px 50px -24px #3a8bffaa,inset 0 1px 0 #ffffff26}
+.xcard.s .xn{color:#9ec3ff;letter-spacing:.2em}
 .xholo{position:absolute;right:18px;bottom:44px;width:38px;height:24px;border-radius:6px;background:conic-gradient(from 0deg,#ff9de2,#9de7ff,#b9ffb0,#fff59d,#ff9de2);opacity:.55;mix-blend-mode:overlay;z-index:1}
 @media (prefers-reduced-motion:reduce){.xcard::after{animation:none;display:none}.xcard{transform:none!important}}
 .tsec{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px}.tsec h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
@@ -435,7 +441,7 @@ addEventListener('popstate',e=>{
 const SUBV={mi:vMi,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,pedido:vPedido,ayuda:()=>vAyuda()};
 function pinta(){const r=pinta0();try{hSync()}catch(_){}if(MODO!=='negocio')fundBienvenida();return r}
 function pinta0(){
- try{document.body.classList.toggle('fund',!!(D&&D.persona&&D.persona.fundador)&&MODO!=='negocio')}catch(_){}
+ try{document.body.classList.toggle('fund',!!(D&&D.persona&&D.persona.fundador&&!D.persona.rango)&&MODO!=='negocio')}catch(_){}
  if(MODO==='negocio'&&NB)return pintaNeg();
  if(!D&&!(SUB&&SUB.neg))return pantallaEntrada();
  if(TAB==='inicio'&&N())acento(N());else if(SUB&&SUB.neg&&NEG[SUB.neg])acento(NEG[SUB.neg]);else acento(null);
@@ -583,10 +589,10 @@ function promosFeed(){const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.gu
  return(P.length?`<p class="mu xs sec">🎁 PROMOS PARA TI</p><div class="hs">${P.slice(0,8).map(({n,p})=>`<button class="promo" data-neg="${esc(n.slug)}" style="text-align:left;cursor:pointer"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b><span class="pill" style="background:var(--a);color:#fff">Solo app</span></div><h3 style="font-size:17px">${esc(p.titulo)}</h3>${p.descripcion?`<p class="sm mu">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Hasta el ${fF(p.hasta,{day:'numeric',month:'short'})}</p>`:''}</button>`).join('')}</div>`:'')
   +(B.length?`<p class="mu xs sec">📢 NOVEDADES</p>${B.slice(0,4).map(({n,p})=>{const im=p.media&&p.mediaTipo!=='video'?medDe(n,p.media):'';return`<button class="card fd" data-neg="${esc(n.slug)}" style="padding:0;overflow:hidden">${im?`<img src="${esc(im)}" alt="" loading="lazy" onerror="this.remove()" style="width:100%;height:160px;object-fit:cover;display:block">`:''}<div style="padding:14px;display:grid;gap:4px"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b>${p.tipo?`<span class="xs" style="font-weight:800;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}</div><h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}</div></button>`}).join('')}`:'')}
 /* ---------- Inicio premium: Xyro Card por nivel, resumen, beneficios y Xyro+ ---------- */
-const nivel=per=>per&&per.fundador?'f':per&&per.plus?'p':'n';
+const nivel=per=>!per?'n':per.rango==='owner'?'o':per.rango==='staff'?'s':per.fundador?'f':per.plus?'p':'n';
 function xCard(per){const t=nivel(per),xm=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
- const lab=t==='f'?'XYRO<small>FOUNDER EDITION</small>':t==='p'?'XYRO+<small>MEMBER</small>':'XYRO<small>MEMBER</small>';
- return`<div class="xcard ${t}" id="xcd" role="button" aria-label="Mi tarjeta Xyro"><div class="xt"><span class="xl">${lab}</span><span class="xm">${xm}</span></div><span class="xchip"></span>${t==='f'?`<span class="xn">#${String(per.fundador).padStart(3,'0')}</span>`:''}${t!=='n'?'<span class="xholo"></span>':''}
+ const lab=t==='o'?'XYRO<small>OWNER · XYROSTUDIO</small>':t==='s'?'XYRO<small>STAFF · XYROSTUDIO</small>':t==='f'?'XYRO<small>FOUNDER EDITION</small>':t==='p'?'XYRO+<small>MEMBER</small>':'XYRO<small>MEMBER</small>';
+ return`<div class="xcard ${t}" id="xcd" role="button" aria-label="Mi tarjeta Xyro"><div class="xt"><span class="xl">${lab}</span><span class="xm">${xm}</span></div><span class="xchip"></span>${t==='f'?`<span class="xn">#${String(per.fundador).padStart(3,'0')}</span>`:t==='o'?'<span class="xn">◆</span>':t==='s'?'<span class="xn" style="font-size:26px">TEAM</span>':''}${t!=='n'?'<span class="xholo"></span>':''}
   <div class="xb"><div style="min-width:0"><b>${esc(per.nombre||'')}</b><span>@${esc(per.usuario||'')}</span></div><span class="xid">${esc(idTxt(per.idn))}</span></div></div>`}
 function xCardFx(){const c=$('#xcd');if(!c)return;c.onclick=()=>{vib();TAB='perfil';pinta()};if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const mv=(x,y)=>{const r=c.getBoundingClientRect(),px=(x-r.left)/r.width-.5,py=(y-r.top)/r.height-.5;c.style.setProperty('--ry',(px*10).toFixed(1)+'deg');c.style.setProperty('--rx',(-py*10).toFixed(1)+'deg')},z=()=>{c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')};
@@ -594,11 +600,13 @@ function xCardFx(){const c=$('#xcd');if(!c)return;c.onclick=()=>{vib();TAB='perf
 function resumenHTML(M){const n=M.find(x=>(x.membresias||[]).length||x.ingresos);if(!n)return'';const{act}=memAct(n),h=hoyL(),rest=act?dias(h,act.fin):0;
  return`<div class="tsec"><h3>Tu resumen · ${esc(n.negocio)}</h3></div><div class="mini"><div><small>Tu plan</small><b>${act?rest:'—'}</b><small>${act?'días':'sin plan activo'}</small></div><div><small>Ingresos</small><b>${(n.ingresos&&n.ingresos.mes)|0}</b><small>últimos 30 días</small></div><div><small>Última vez</small><b style="font-size:16px;margin-top:6px">${n.ingresos&&n.ingresos.ultimo?esc(haceCuanto(n.ingresos.ultimo)):'—'}</b><small>&nbsp;</small></div></div>`}
 function perksHTML(per){const t=nivel(per);
- const L=t==='f'?[['🏅','Insignia #'+String(per.fundador).padStart(3,'0'),'Tuya para siempre'],['✨','Carnet dorado','En todos tus negocios'],['@','@ corto','De 3 o 4 letras'],['⭐','Xyro+ gratis','3 meses al lanzar']]
+ const L=t==='o'?[['🛠️','Panel XyroStudio','Clientes, cobros y equipo'],['👥','Equipo','Crea cuentas staff'],['⭐','Xyro+','Altas y movimientos'],['📊','Métricas','Uso de la app']]
+  :t==='s'?[['🎧','Soporte','Chats y ayuda'],['🧾','Clientes','Atiende negocios'],['📲','App','Prueba lo nuevo primero']]
+  :t==='f'?[['🏅','Insignia #'+String(per.fundador).padStart(3,'0'),'Tuya para siempre'],['✨','Carnet dorado','En todos tus negocios'],['@','@ corto','De 3 o 4 letras'],['⭐','Xyro+ gratis','3 meses al lanzar']]
   :t==='p'?[['🎟️','Descuentos','En negocios Xyro'],['📈','Mi progreso','Peso, medidas y rachas'],['🤖','Coach IA','Rutinas y comidas'],['⚡','Pide sin cola','En cafeterías']]
   :[['🎁','Promos solo app','De tus negocios'],['📱','Tu QR','Entra sin carnet'],['📋','Rutinas y citas','Todo en un lugar']];
- return`<div class="tsec"><h3>${t==='f'?'Beneficios de fundador':t==='p'?'Tu Xyro+':'Tu cuenta'}</h3></div><div class="perks">${L.map(([i,b,x])=>`<div class="perk"><i>${i}</i><b>${esc(b)}</b><span>${esc(x)}</span></div>`).join('')}</div>`}
-function xPlusHTML(per){if(per&&per.plus)return'';return`<div class="xplus" style="margin-top:14px"><span class="tag">MUY PRONTO</span><h3>Xyro+</h3><p class="mu sm">Descuentos en todos los negocios Xyro, tu progreso con gráficos, coach con IA y pedidos sin cola.${per&&per.fundador?' <b style="color:#f3d68a">Como fundador, tendrás 3 meses gratis.</b>':''}</p></div>`}
+ return`<div class="tsec"><h3>${t==='o'?'Cuenta de dueño':t==='s'?'Cuenta del equipo':t==='f'?'Beneficios de fundador':t==='p'?'Tu Xyro+':'Tu cuenta'}</h3>${t==='o'||t==='s'?'<a class="mu sm" href="/gestor/" style="color:var(--a);font-weight:700">Abrir panel ›</a>':''}</div><div class="perks">${L.map(([i,b,x])=>`<div class="perk"><i>${i}</i><b>${esc(b)}</b><span>${esc(x)}</span></div>`).join('')}</div>`}
+function xPlusHTML(per){if(per&&(per.plus||per.rango))return'';return`<div class="xplus" style="margin-top:14px"><span class="tag">MUY PRONTO</span><h3>Xyro+</h3><p class="mu sm">Descuentos en todos los negocios Xyro, tu progreso con gráficos, coach con IA y pedidos sin cola.${per&&per.fundador?' <b style="color:#f3d68a">Como fundador, tendrás 3 meses gratis.</b>':''}</p></div>`}
 function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||[],av=avisos();
  feedCarga();
  const f0=post;post=()=>{f0&&f0();xCardFx();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
@@ -1196,7 +1204,7 @@ function demoPedUsr(){const t=m=>new Date(Date.now()-m*6e4).toISOString(),c=new 
   cita:{inicio:c.toISOString(),nutri_nombre:'Lic. Andrea Ruiz',nota:'Ven con ropa cómoda, te tomamos medidas.'},
   msgs:[{de:'negocio',autor:'Rosa · Recepción',texto:'¡Hola Vale! 👋 Para tu cita con nutrición tenemos pasado mañana a las 6 pm o el sábado 10 am. ¿Cuál te acomoda?',creado:t(60*19)},{de:'persona',texto:'Pasado mañana 6 pm porfa 🙌',creado:t(60*18)},{de:'negocio',autor:'Rosa · Recepción',texto:'📅 Tu cita quedó agendada para el '+fF(c.toISOString(),{weekday:'long',day:'numeric'})+' a las 6:00 pm con Lic. Andrea Ruiz.',creado:t(30)}]}]}
 function demoData(){const{gym,den}=demoBoth(),dent=DEMO==='consultorio';
- return{persona:{nombre:'Valeria Torres',apodo:'Vale',usuario:'vale',fundador:7,fund_quedan:12,idn:48203716,email:'vale@gmail.com',celular:'987654321'},
+ return{persona:{nombre:'Valeria Torres',apodo:'Vale',usuario:'vale',fundador:7,rango:new URLSearchParams(location.search).get('rango')||null,fund_quedan:12,idn:48203716,email:'vale@gmail.com',celular:'987654321'},
   negocios:[dent?den:gym],guardados:[{slug:'demo-cafe',negocio:'Nativa Café',color:'#16a34a',rubro:'restaurante',promos:1}],
   pedidos:dent?[]:demoPedUsr(),
   avisos:[{id:'av1',negocio:dent?'Fuerza Gym':'Sonrisa Dental',color:dent?'#e11d48':'#0ea5e9',rubro:dent?'gym':'consultorio',nombre:'Valeria Torres',quien:'Recepción'}]}}
