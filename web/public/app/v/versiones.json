@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261115-0430",
+  "fecha": "2026-11-15 04:30",
+  "titulo": "Realidad aumentada con platos escaneados",
+  "notas": "Realidad aumentada con platos escaneados",
+  "cambios": [
+   "XyroStudio puede subir el modelo 3D escaneado de un plato o bebida (archivo .glb) desde el producto del cafetín",
+   "El cliente puede agregar el producto a su pedido desde la vista en su mesa"
+  ],
+  "requiere": "SQL 53",
+  "rubros": [
+   "gym"
+  ]
+ },
+ {
   "id": "20261115-0408",
   "fecha": "2026-11-15 04:08",
   "titulo": "Chat de solicitudes al instante",

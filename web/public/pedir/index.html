@@ -116,6 +116,7 @@ em{font-style:italic;color:var(--a);font-weight:900}
 .arh{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .arm{flex:1;min-height:0;display:grid;place-items:center;border-radius:22px;overflow:hidden}
 .arm model-viewer{width:100%;height:100%;--poster-color:transparent;background:transparent}
+.arp{position:absolute;left:12%;right:12%;top:50%;height:5px;border-radius:9px;background:#ffffff22;overflow:hidden;transition:opacity .4s}.arp i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
 .arb{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);width:auto;padding:14px 22px;box-shadow:0 16px 40px -12px var(--a);animation:up .4s}
 @keyframes gl{50%{box-shadow:0 0 0 3px #ffffff22,0 0 18px var(--a)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
@@ -146,7 +147,7 @@ const IM='https://whyhunterdev.github.io/santos-strength/img/cafe/';
 const DP=[['Combos','🎁','Combo Post-Entreno',18,'Batido Whey + Pancakes de Avena',IM+'1.jpg',21,1],['Combos','🎁','Combo Definición',21,'Batido Verde + Ensalada Atún Fit',IM+'4.jpg',24,1],['Batidos','🥤','Batido Whey Chocolate',12,'Proteína whey, leche descremada, plátano y cacao.',IM+'1.jpg',0,1],['Batidos','🥤','Batido Verde Detox',10,'Espinaca, piña, manzana verde, chía y proteína vegetal.',IM+'2.jpg'],['Platos','🥗','Bowl Pollo & Quinua',16,'Pechuga a la plancha, quinua, palta, tomate y huevo.',IM+'3.jpg',0,1],['Platos','🥗','Ensalada Atún Fit',14,'Atún, mix de hojas, choclo, huevo y limón.',IM+'4.jpg'],['Snacks','🥞','Pancakes de Avena',9,'Avena, claras, plátano y miel. Ideal pre-entreno.',IM+'5.jpg'],['Snacks','🍫','Barra Proteica + Agua',9,'Barra de 20 g de proteína y agua mineral.',IM+'6.jpg'],['Bebidas','💧','Agua 625 ml',2.5,''],['Bebidas','⚡','Bebida isotónica',5,'']];
 let DEMO_ORD=[];
 async function api(f,b){if(!DEMO)return rpc(f,b);await new Promise(r=>setTimeout(r,350));
- if(f==='xa_mesa_menu')return{negocio:Q.get('n')||'Tu Gimnasio',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):null,tienda:'Cafetín',mesa:MESA||3,abierto:true,desde:'07:00',hasta:'21:00',geo:Q.has('geo'),portada:IM+'hero.jpg',titulo:'Come como entrenas',texto:'Batidos, platos y snacks para antes o después de entrenar. Pide aquí y te lo llevamos a tu mesa.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],modelo:p[8]||null,agotado:i===9}))};
+ if(f==='xa_mesa_menu')return{negocio:Q.get('n')||'Tu Gimnasio',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):null,tienda:'Cafetín',mesa:MESA||3,abierto:true,desde:'07:00',hasta:'21:00',geo:Q.has('geo'),portada:IM+'hero.jpg',titulo:'Come como entrenas',texto:'Batidos, platos y snacks para antes o después de entrenar. Pide aquí y te lo llevamos a tu mesa.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],modelo:p[8]||(i===2&&/^https:\/\/\S+\.glb(\?\S*)?$/i.test(Q.get('glb')||'')?Q.get('glb'):null),agotado:i===9}))};
  if(f==='xa_mesa_pedir'){if(Q.has('lejos'))throw new Error('lejos');const it=b.p_items.map(x=>{const p=DP[+x.id.slice(1)];return{id:x.id,n:p[2],c:x.c,p:p[3],e:p[1]}}),o={id:'o'+Date.now(),num:DEMO_ORD.length+7,mesa:b.p_mesa,items:it,total:it.reduce((a,i)=>a+i.p*i.c,0),estado:'nuevo',creado:new Date().toISOString(),t0:Date.now()};DEMO_ORD.unshift(o);return o}
  if(f==='xa_mesa_mios'){DEMO_ORD.forEach(o=>{if(o.estado==='cancelado')return;const s=(Date.now()-o.t0)/1e3;o.estado=s>30?'servido':s>12?'preparando':'nuevo'});return DEMO_ORD}
  if(f==='xa_mesa_cancelar_mio'){const o=DEMO_ORD.find(x=>x.id===b.p_id);if(o.estado!=='nuevo')throw new Error('Ya lo están preparando. Pide el cambio en el cafetín.');o.estado='cancelado';return o}}
@@ -249,13 +250,16 @@ let MV=null;const cargaMV=()=>MV||(MV=new Promise((ok,ko)=>{const x=document.cre
 async function verAR(p){const o=document.createElement('div');o.className='ov arv';const u=new URL(p.modelo,location.href).href;
  o.innerHTML=`<div class="arw"><div class="arh"><div><span class="eb" style="color:var(--a)">Realidad aumentada</span><h2>${esc(p.nombre)}</h2></div><button class="xb" style="position:static" data-x aria-label="Cerrar">✕</button></div>
   <div class="arm"><div class="vac" style="padding:30px"><span class="e">🪄</span><p class="mu">Preparando tu ${esc(p.nombre)} en 3D…</p></div></div>
-  <p class="mu xs" id="arT" style="text-align:center">Gira con el dedo para verlo por todos lados.</p></div>`;
+  <p class="mu xs" id="arT" style="text-align:center">Gira con el dedo para verlo por todos lados.</p>
+  ${p.agotado||!M.abierto?'':`<button class="btn" id="arAdd">＋ Agregar a mi pedido · ${sol(p.precio)}</button>`}</div>`;
  o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o);
+ const ad=o.querySelector('#arAdd');ad&&(ad.onclick=()=>{mover(p.id,1,1);const c=(CART.find(i=>i.id===p.id)||{}).c||0;ad.textContent='✓ Agregado ('+c+') · toca para sumar otro';ad.classList.add('p');vib();pinta()});
  try{await cargaMV()}catch(_){o.querySelector('.arm').innerHTML='<div class="vac"><span class="e">📶</span><p class="mu">No se pudo abrir el 3D. Revisa tu internet.</p></div>';return}
- const box=o.querySelector('.arm');box.innerHTML=`<model-viewer src="${esc(u)}" alt="${esc(p.nombre)} en 3D" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="fixed" camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="0" rotation-per-second="24deg" shadow-intensity="1.2" shadow-softness=".8" exposure="1.05" environment-image="neutral" camera-orbit="30deg 62deg auto" interaction-prompt="none">
+ const box=o.querySelector('.arm');box.innerHTML=`<model-viewer src="${esc(u)}" ${/^https:\/\//.test(p.foto||'')?`poster="${esc(p.foto)}"`:''} alt="${esc(p.nombre)} en 3D" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="fixed" camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="0" rotation-per-second="24deg" shadow-intensity="1.2" shadow-softness=".8" exposure="1.05" environment-image="neutral" camera-orbit="30deg 62deg auto" interaction-prompt="none">
   <button slot="ar-button" class="btn p arb">📷 Verlo en mi mesa</button>
-  <div slot="progress-bar"></div></model-viewer>`;
+  <div slot="progress-bar" class="arp"><i></i></div></model-viewer>`;
  const mv=box.querySelector('model-viewer'),t=o.querySelector('#arT');
+ mv.addEventListener('progress',e=>{const b=box.querySelector('.arp'),i=b&&b.firstChild;if(!i)return;const v=e.detail.totalProgress;i.style.width=Math.round(v*100)+'%';b.style.opacity=v>=1?0:1});
  mv.addEventListener('load',()=>{setTimeout(()=>{if(!mv.canActivateAR){t.innerHTML='📱 Ábrelo desde tu celular para ponerlo sobre tu mesa con la cámara.'}else t.innerHTML='Toca <b>«Verlo en mi mesa»</b>, apunta la cámara a tu mesa y mueve el celular despacio. Aparece en tamaño real.'},400)});
  mv.addEventListener('ar-status',e=>{if(e.detail.status==='failed')toast('Tu celular no pudo abrir la cámara. Prueba con Chrome o Safari.')});
  mv.addEventListener('error',()=>{box.innerHTML='<div class="vac"><span class="e">😕</span><p class="mu">Este producto aún no tiene su modelo 3D listo.</p></div>'})}
