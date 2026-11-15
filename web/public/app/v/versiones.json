@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261115-1559",
+  "fecha": "2026-11-15 15:59",
+  "titulo": "Cafeterías",
+  "notas": "Cafeterías",
+  "cambios": [
+   "Nueva variante Cafetería: cafés, frappés, waffles, crepes y postres",
+   "Botón «Cargar carta base» para no empezar de cero (precios sugeridos, luego se editan)",
+   "Demo de cafetería con horario de mañana a noche y pedidos de ejemplo"
+  ],
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-1358",
   "fecha": "2026-11-15 13:58",
   "titulo": "Barra lateral más fina y menú Xyro Control",

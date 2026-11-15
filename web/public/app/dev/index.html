@@ -384,6 +384,9 @@ const RUBROS={
  restaurante:{n:'Restaurante / Cafetería',ico:'🍽️',cli:'Cliente',clis:'Clientes',plan:'Combo',demo:'La Sazón de Rosa',lema:'¡Gracias por tu visita! 🍽️',tienda:'Carta',resto:1,planes:[],
   roles:{supervisor:'Encargado(a)',recepcion:'Caja',cafetin:'Mozo / Cocina'},
   productos:[['Ceviche clásico','Entradas',32,12,'🐟'],['Causa limeña','Entradas',18,6,'🥔'],['Papa a la huancaína','Entradas',14,4,'🥔'],['Lomo saltado','Fondos',38,15,'🥩'],['Ají de gallina','Fondos',28,9,'🍛'],['Arroz con mariscos','Fondos',36,14,'🦐'],['Pollo a la brasa (1/4)','Fondos',24,9,'🍗'],['Tallarines verdes con bistec','Fondos',32,12,'🍝'],['Menú del día','Menú',16,6,'🍲'],['Chicha morada (jarra)','Bebidas',15,4,'🍇'],['Limonada frozen','Bebidas',12,3,'🍋'],['Inca Kola 500 ml','Bebidas',5,2.5,'🥤'],['Café pasado','Cafés',7,1.5,'☕'],['Capuchino','Cafés',10,2.5,'☕'],['Suspiro limeño','Postres',12,4,'🍮'],['Torta de chocolate','Postres',14,5,'🍰']]},
+ cafeteria:{n:'Cafetería',ico:'☕',cli:'Cliente',clis:'Clientes',plan:'Combo',demo:'Café Aroma',lema:'¡Gracias por tu visita! ☕',tienda:'Carta',resto:1,cafe:1,planes:[],
+  roles:{supervisor:'Encargado(a)',recepcion:'Caja',cafetin:'Barra / Cocina'},
+  productos:[['Espresso','Cafés',5,1,'☕'],['Americano','Cafés',6,1.2,'☕'],['Café con leche','Cafés',7,1.8,'☕'],['Capuchino','Cafés',9,2.2,'☕'],['Latte','Cafés',9,2.2,'☕'],['Mocaccino','Cafés',11,2.8,'☕'],['Frappé de café','Frappés',12,3,'🧋'],['Frappé moka','Frappés',13,3.4,'🧋'],['Frappé de Oreo','Frappés',14,3.8,'🧋'],['Frappé de fresa','Frappés',13,3.4,'🍓'],['Frappé de caramelo','Frappés',13,3.4,'🧋'],['Waffle clásico con miel','Waffles y crepes',11,3,'🧇'],['Waffle con helado y fresas','Waffles y crepes',16,5,'🧇'],['Waffle Nutella y plátano','Waffles y crepes',15,4.5,'🧇'],['Crepe Nutella y fresa','Waffles y crepes',14,4,'🥞'],['Crepe de pollo y queso','Waffles y crepes',15,5,'🥞'],['Sándwich de pollo','Sándwiches',11,4,'🥪'],['Triple clásico','Sándwiches',9,3,'🥪'],['Croissant jamón y queso','Sándwiches',10,3.5,'🥐'],['Torta de chocolate','Postres',10,3,'🍰'],['Cheesecake de maracuyá','Postres',12,3.8,'🍰'],['Brownie con helado','Postres',12,3.5,'🍫'],['Alfajores (3 unid.)','Postres',6,1.5,'🍪'],['Limonada frozen','Bebidas frías',9,2,'🍋'],['Jugo de fresa','Bebidas frías',9,2.5,'🍓'],['Smoothie de mango','Bebidas frías',11,3,'🥭'],['Té helado','Bebidas frías',7,1.5,'🧊'],['Combo desayuno (café + sándwich)','Combos',14,5,'🎁'],['Combo dulce (frappé + waffle)','Combos',25,7,'🎁']]},
  academia:{n:'Academia',ico:'🎓',cli:'Alumno',clis:'Alumnos',plan:'Mensualidad',demo:'Academia Vértice',lema:'¡A seguir aprendiendo! 📚',tienda:'Tienda',productos:[['Cuaderno','Útiles',6,3,'📒'],['Polo oficial','Ropa',35,18,'👕']],
   planes:[['Clase suelta',25,1,'#8d8fa8'],['Mensual',180,30,'#3ad6ff'],['Ciclo 4 meses',650,120,'#7c5cff']]}
 };
@@ -396,6 +399,7 @@ const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',as
 
 let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[],sol:[]};
 const KS=['cli','pla','mem','pag','asi','pro','mov','cie','sol','rut','cit','his','pre'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
+const rubDe=C=>C&&C.rubro==='restaurante'&&C.tipo==='cafe'?RUBROS.cafeteria:RUBROS[C&&C.rubro]||RUBROS.gym;
 const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, pedidos por QR desde la mesa, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','Asistente que atiende a tus clientes las 24 horas en tu web (y pronto en tu WhatsApp): precios, horarios, clases y sedes'],['edits','Xyro Edits','Videos y reels editados rápido para tus redes',1]];
 /* Vitrina para vender más: demos de los 3 diseños de web y temas de temporada (vista previa; usarlos se paga) */
 let TEMP=[];
@@ -533,7 +537,7 @@ const DB={
   if(DEMO)saveDemo();
  },
  async cfg(v){
-  CFG=Object.assign(CFG,v);R=RUBROS[CFG.rubro]||RUBROS.gym;
+  CFG=Object.assign(CFG,v);R=rubDe(CFG);
   if(DEMO)return saveDemo();
   const{error}=await sb.from('contenido').upsert({sitio_id:SID,clave:'app',valor:CFG});if(error)throw error;
  }
@@ -2098,11 +2102,11 @@ function tienda(){
   $$('[data-add]').forEach(b=>b.onclick=()=>{const p=S.pro.find(x=>x.id===b.dataset.add),it=carrito.find(i=>i.id===p.id),q=(it?it.c:0)+1;if(q>+p.stock&&!CFG.stockNeg)return toast('Sin stock de '+p.nombre);it?it.c++:carrito.push({id:p.id,n:p.nombre,p:+p.precio,c:1});b.animate([{transform:'scale(.92)'},{transform:'scale(1)'}],{duration:180});go()});
   $$('[data-q]').forEach(b=>b.onclick=()=>{const it=carrito[+b.dataset.q],p=S.pro.find(x=>x.id===it.id);if(+b.dataset.d>0&&it.c+1>+p.stock&&!CFG.stockNeg)return toast('Sin más stock');it.c+=+b.dataset.d;if(it.c<=0)carrito.splice(+b.dataset.q,1);go()});
   const c=$('#tCob');c&&(c.onclick=cobrarVenta);const v=$('#tVac');v&&(v.onclick=()=>{carrito=[];go()});
-  const i=$('#tInv');i&&(i.onclick=()=>{modoInv=true;go()});const nw=$('#tNew');nw&&(nw.onclick=()=>editProd());
+  const i=$('#tInv');i&&(i.onclick=()=>{modoInv=true;go()});const nw=$('#tNew');nw&&(nw.onclick=()=>editProd());const tb=$('#tBase');tb&&(tb.onclick=cartaBase);
  });
  return`<div class="hi"><div><h2>${esc(tiendaN())}</h2><p class="mu">Toca un producto para venderlo. El stock baja solo.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">${mpVis()?`<a class="btn" href="#/pedidos">🍽️ Pedidos de mesa${mpNuevos()?' ('+mpNuevos()+')':''}</a>`:''}${puedeProd()?'<button class="btn" id="tInv">📦 Stock</button><button class="btn" id="tNew">＋ Producto</button>':''}</div></div>
  <div class="pos"><div>${cats.length?`<div class="chips">${['',...cats].map(c=>`<button class="chip ${c===catSel?'on':''}" data-cat="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div>`:''}
- <div class="pgr st">${L.map(p=>`<button class="prod ${+p.stock<=0?'out':''}" data-add="${p.id}">${p.foto?`<img class="pf" src="${esc(p.foto)}" alt="" loading="lazy">`:`<span class="pe">${esc(p.emoji||'🛒')}</span>`}<b>${esc(p.nombre)}</b><span class="pp">${sol(p.precio)}</span><span class="ps ${+p.stock<=+(p.minimo||0)?'low':''}">${+p.stock} en stock</span></button>`).join('')||`<div class="empty"><b>🥤</b>Aún no hay productos.${isAdmin()?'<br>Toca «＋ Producto».':''}</div>`}</div></div>
+ <div class="pgr st">${L.map(p=>`<button class="prod ${+p.stock<=0?'out':''}" data-add="${p.id}">${p.foto?`<img class="pf" src="${esc(p.foto)}" alt="" loading="lazy">`:`<span class="pe">${esc(p.emoji||'🛒')}</span>`}<b>${esc(p.nombre)}</b><span class="pp">${sol(p.precio)}</span><span class="ps ${+p.stock<=+(p.minimo||0)?'low':''}">${+p.stock} en stock</span></button>`).join('')||`<div class="empty"><b>${R.cafe?'☕':'🥤'}</b>Aún no hay productos.${isAdmin()?'<br>Toca «＋ Producto».':''}${R.resto&&puedeProd()&&R.productos?`<br><button class="btn p" id="tBase" style="margin-top:12px">📖 Cargar carta base de ${R.cafe?'cafetería':'restaurante'}</button><br><small class="mu">${R.productos.length} productos típicos con precio sugerido. Luego cambias precios, fotos o borras lo que no vendes.</small>`:''}</div>`}</div></div>
  <div class="card cart ${carrito.length?'':'vacio'}"><h3>🛒 Venta ${carrito.length?'<button class="btn sm" id="tVac">Vaciar</button>':''}</h3><div class="tl">${carrito.map((it,i)=>`<div class="row" style="padding:8px 4px"><span class="nm"><b>${esc(it.n)}</b><small>${sol(it.p)} c/u</small></span><span class="qty"><button data-q="${i}" data-d="-1">−</button><b>${it.c}</b><button data-q="${i}" data-d="1">＋</button></span><b style="min-width:64px;text-align:right">${sol(it.p*it.c)}</b></div>`).join('')||'<p class="mu sm">Toca productos para agregarlos.</p>'}</div>
  <div class="ctot"><span class="mu">${n} producto${n===1?'':'s'}</span><b class="grad">${sol(tot)}</b></div><button class="btn p" id="tCob" ${carrito.length?'':'disabled'} style="width:100%">Cobrar ${sol(tot)}</button></div></div>`;
 }
@@ -2159,6 +2163,10 @@ const MPE={nuevo:['🟡 Nuevo','var(--wa)'],preparando:['👨‍🍳 Preparando'
 const mpAbiertos=()=>(MP&&MP.pedidos||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
 const mpNuevos=()=>(MP&&MP.pedidos||[]).filter(p=>p.estado==='nuevo').length;
 const mpHace=t=>{const m=Math.max(0,Math.round((Date.now()-new Date(t))/6e4));return m<1?'ahora':m<60?'hace '+m+' min':'hace '+Math.floor(m/60)+' h'};
+/* Carta base: carga los productos típicos del rubro (cafetería o restaurante) para no empezar de cero. */
+async function cartaBase(){if(S.pro.length||!R.productos)return;const b=$('#tBase');b&&(b.disabled=true,b.textContent='Cargando…');
+ try{for(const[nombre,categoria,precio,costo,emoji]of R.productos){const row={nombre,categoria,precio,costo,emoji,minimo:0,activo:true,stock:0,creado:new Date().toISOString()};if(CTL()&&!NEED50P)row.en_mesa=true;await DB.ins('pro',row)}
+  if(!CFG.stockNeg)await DB.cfg({stockNeg:true});toast('Carta cargada ✓ Edita precios y fotos a tu gusto');go()}catch(e){toast(e.message);b&&(b.disabled=false)}}
 function mpDemo(){if(R.resto)return mpDemoResto();const P=S.pro.filter(p=>p.activo!==false).slice(0,6),it=(i,c)=>{const p=P[i%Math.max(1,P.length)]||{id:'x',nombre:'Batido',precio:10,emoji:'🥤'};return{id:p.id,n:p.nombre,c,p:+p.precio,e:p.emoji}},t=m=>new Date(Date.now()-m*6e4).toISOString(),c=S.cli[0];
  const L=[{id:'m1',num:1,mesa:2,items:[it(2,2),it(4,1)],nota:'Sin azúcar porfa',nombre:c?c.nombre:'Lucía',cliente_id:c&&c.id,cliente_nombre:c&&c.nombre,estado:'servido',creado:t(34),cambio:t(20)},
   {id:'m2',num:2,mesa:5,items:[it(0,1),it(3,1)],nombre:'Diego',estado:'preparando',creado:t(9),cambio:t(5)},
@@ -2714,7 +2722,7 @@ function xyrosDent(on,wa,wa2){
   return`${k==='webs'||k==='control'?`<a class="btn sm" href="#/xyros/${arg==='demos'+k?'':'demos'+k}">${arg==='demos'+k?'Ocultar demo':'👀 Ver demo'}</a>`:''}<a class="btn sm p" target="_blank" rel="noopener" href="${wa(n)}">Activar por WhatsApp</a>`};
  const card=([k,n,d,p,L])=>`<div class="card eqc" style="align-items:flex-start;flex-wrap:wrap"><img src="/img/marca/logo-${k}-app.svg" alt="" style="width:44px;height:44px;flex:none"><div class="nm" style="flex:1 1 260px"><b>${esc(n)}${k==='apps'?' <small class="mu">· base</small>':''}</b><small style="white-space:normal">${esc(d)}</small>${ch(L)}</div><div class="eqa">${k==='apps'||on(k)?'<span class="pill act">Activo</span>':p?'<span class="pill pronto">Muy pronto</span>':'<span class="pill sin">No activo</span>'}${k==='apps'?'':p?`<a class="btn sm" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Me interesa '+n+' para '+nombre()+'. Avísenme cuando esté listo.')}">🔔 Avísame</a>`:acc(k,n)}</div></div>`;
  const XX=R.resto?XYROS_R:XYROS_D,D=XX.filter(x=>!x[3]),P=XX.filter(x=>x[3]);
- return`<div class="hi"><div><h2>Integraciones para tu ${R.resto?'restaurante':'consultorio'}</h2><p class="mu">Xyro Apps es la base de tu ${R.resto?'restaurante':'clínica'} y le sumas lo que necesites, todo en este mismo panel.</p></div></div>
+ return`<div class="hi"><div><h2>Integraciones para tu ${R.cafe?'cafetería':R.resto?'restaurante':'consultorio'}</h2><p class="mu">Xyro Apps es la base de tu ${R.cafe?'cafetería':R.resto?'restaurante':'clínica'} y le sumas lo que necesites, todo en este mismo panel.</p></div></div>
  <p class="mu sm" style="margin:6px 0 8px">✅ Disponibles</p><div class="eq st">${D.map(card).join('')}</div>
  ${!on('webs')&&(arg==='demos'||arg==='demoswebs')?xyDemos(wa2):''}
  ${!on('control')&&arg==='demoscontrol'?xyDemoCtl(wa2):''}
@@ -3571,15 +3579,15 @@ function webResto(){
 }
 // Demo: ventas de un mes de restaurante y pedidos en curso
 function demoResto(){
- const rnd=a=>a[Math.floor(Math.random()*a.length)],P=S.pro,H=hoy();CFG.mesas=Object.assign({on:true,n:12,desde:'12:00',hasta:'23:00',dias:[]},CFG.mesas||{});
- const peso=h=>h>=12&&h<=15?3:h>=19&&h<=22?2.4:h>=8&&h<=11?.8:.4;
+ const rnd=a=>a[Math.floor(Math.random()*a.length)],P=S.pro,H=hoy();CFG.mesas=Object.assign(R.cafe?{on:true,n:10,desde:'08:00',hasta:'22:00',dias:[]}:{on:true,n:12,desde:'12:00',hasta:'23:00',dias:[]},CFG.mesas||{});
+ const peso=R.cafe?h=>h>=9&&h<=11?2.6:h>=16&&h<=20?3:h>=12&&h<=15?1.4:h>=8&&h<=21?.6:.1:h=>h>=12&&h<=15?3:h>=19&&h<=22?2.4:h>=8&&h<=11?.8:.4;
  for(let d=0;d<30;d++){const n=(new Date(addD(H,-d)+'T12:00').getDay()%6===0?34:22)+Math.floor(Math.random()*10);
   for(let i=0;i<n;i++){let h;do{h=8+Math.floor(Math.random()*15)}while(Math.random()*3>peso(h));const t=new Date(addD(H,-d)+'T'+pad(h)+':'+pad(Math.floor(Math.random()*60))+':00');if(t>new Date())continue;
    const k=1+Math.floor(Math.random()*4),its=[];for(let j=0;j<k;j++){const p=rnd(P),o=its.find(x=>x.id===p.id);o?o.c++:its.push({id:p.id,n:p.nombre,c:1,p:p.precio})}
-   const m=Math.random()<.18?0:1+Math.floor(Math.random()*12);S.pag.push({id:uid(),concepto:tiendaN()+' · '+mesaN(m).replace('🥡 ','')+': '+its.map(x=>x.c+'× '+x.n).join(', '),items:its,monto:its.reduce((a,x)=>a+x.c*x.p,0),metodo:rnd(['Efectivo','Yape','Yape','Plin','Tarjeta','Tarjeta']),fecha:t.toISOString(),quien:rnd(['Caja','Mozo Luis','Mozo Ana'])})}}
+   const m=Math.random()<.18?0:1+Math.floor(Math.random()*12);S.pag.push({id:uid(),concepto:tiendaN()+' · '+mesaN(m).replace('🥡 ','')+': '+its.map(x=>x.c+'× '+x.n).join(', '),items:its,monto:its.reduce((a,x)=>a+x.c*x.p,0),metodo:rnd(['Efectivo','Yape','Yape','Plin','Tarjeta','Tarjeta']),fecha:t.toISOString(),quien:rnd(R.cafe?['Caja','Barra Luis','Mozo Ana']:['Caja','Mozo Luis','Mozo Ana'])})}}
 }
 function mpDemoResto(){const P=S.pro.filter(p=>p.activo!==false),pick=(i,c)=>{const p=P[i%Math.max(1,P.length)];return{id:p.id,n:p.nombre,c,p:+p.precio,e:p.emoji}},t=m=>new Date(Date.now()-m*6e4).toISOString();
- const L=[[3,[[0,2],[5,1],[11,2]],'servido',41,'','Familia Ramos'],[7,[[1,1],[12,1]],'servido',26],[1,[[4,2],[13,2]],'preparando',14,'Uno sin ají'],[9,[[2,1],[6,1],[10,2]],'preparando',8],[0,[[7,2],[11,1]],'nuevo',3,'','Para Jorge'],[5,[[3,1],[14,2]],'nuevo',1,'Término medio']];
+ const L=[[3,[[0,2],[5,1],[11,2]],'servido',41,'','Familia Ramos'],[7,[[1,1],[12,1]],'servido',26],[1,[[4,2],[13,2]],'preparando',14,R.cafe?'Uno sin azúcar':'Uno sin ají'],[9,[[2,1],[6,1],[10,2]],'preparando',8],[0,[[7,2],[11,1]],'nuevo',3,'','Para Jorge'],[5,[[3,1],[14,2]],'nuevo',1,R.cafe?'Leche deslactosada':'Término medio']];
  return{mesas:mpCfg(),abierto:true,pedidos:L.map(([mesa,its,estado,min,nota,nombre],i)=>{const items=its.map(([a,b])=>pick(a,b));return{id:'r'+i,num:31+i,mesa,items,total:items.reduce((a,x)=>a+x.p*x.c,0),nota:nota||'',nombre:nombre||'',estado,creado:t(min),cambio:t(Math.max(0,min-5))}})}}
 
 /* ===== Demo: datos de ejemplo realistas, todo en este navegador ===== */
@@ -3610,7 +3618,7 @@ function demoBoot(){
  let g=LS.g(DKEY(),null);if(g&&(!g.t||!PRUEBA&&Date.now()-g.t>DEMO_TTL)){LS.r(DKEY());g=null}DT=g?g.t:0;const n=P.get('n')||(PRUEBA&&!g?PRUEBA.nombre:null);
  const rl=P.get('rol');ME=['supervisor','recepcion','cafetin','entrenador','nutricionista','profesional'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz',entrenador:'Diego Salas',nutricionista:'Valeria Ríos',profesional:'Dra. Paola Ríos'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
  const arrancar=()=>{
-  R=RUBROS[CFG.rubro]||R;demoMetas();asegS();if(R.citas&&(!(CFG.profesionales||[]).length||!S.pre)){S.pre=[];demoClinica();S.pag.sort((a,b)=>b.fecha>a.fecha?1:-1);saveDemo()}if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
+  R=RUBROS[CFG.rubro]||rubDe(CFG)||R;demoMetas();asegS();if(R.citas&&(!(CFG.profesionales||[]).length||!S.pre)){S.pre=[];demoClinica();S.pag.sort((a,b)=>b.fecha>a.fecha?1:-1);saveDemo()}if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
   const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo de prueba · se borra en 24 h</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
   b.querySelector('#drst').onclick=()=>{LS.r(DKEY());location.href=PRB?'?prueba='+PRB:'?demo='+CFG.rubro};
  };
@@ -3690,7 +3698,7 @@ async function entrar(u){
  const xy=(C.config&&C.config.xyros)||[];XY=xy;TEMP=temasDe(C.config||{});
  if(!ME.gestor&&!xy.includes('apps'))return fatal('Xyro Apps aún no está activo para tu negocio',`<a class="btn p" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero activar Xyro Apps para '+(s.negocio||s.slug))}">Activarlo por WhatsApp</a>`);
  WEB=deWeb(C);
- CFG=Object.assign({rubro:'gym',nombre:WEB.nombre||s.negocio||s.slug},C.app||{});R=RUBROS[CFG.rubro]||RUBROS.gym;
+ CFG=Object.assign({rubro:'gym',nombre:WEB.nombre||s.negocio||s.slug},C.app||{});R=rubDe(CFG);
  if(ME.gestor&&(!CFG.web||!CFG.panelWeb)){try{const{data:ca}=await sb.from('clientes_agencia').select('url,panel').ilike('url','%'+SLUG+'%').limit(1);const c0=ca&&ca[0]||{};CFG.web=CFG.web||c0.url||'';if(!CFG.panelWeb&&c0.panel){CFG.panelWeb=c0.panel;setTimeout(()=>DB.cfg({panelWeb:c0.panel}).catch(()=>{}),1500)}}catch(_){}}
  await DB.load();asegS();
  start();
