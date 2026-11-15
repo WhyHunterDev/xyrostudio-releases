@@ -1,5 +1,20 @@
 [
  {
+  "id": "20261115-0930",
+  "fecha": "2026-11-15 09:30",
+  "titulo": "Elegir servicios del gym",
+  "notas": "Elegir servicios del gym",
+  "cambios": [
+   "Ajustes → «🧩 Servicios de tu gimnasio»: el admin apaga lo que su gym no tiene (cafetín, pedidos de mesa, entrenamiento, nutrición, app de clientes, días de prueba, metas, solicitudes)",
+   "Lo apagado desaparece del menú de todo el equipo; no se borra nada",
+   "En la app Mi Xyro los socios ya no pueden pedir un servicio que el gym no tiene"
+  ],
+  "requiere": "SQL 55",
+  "rubros": [
+   "gym"
+  ]
+ },
+ {
   "id": "20261115-0511",
   "fecha": "2026-11-15 05:11",
   "titulo": "Invitar socios a la app",

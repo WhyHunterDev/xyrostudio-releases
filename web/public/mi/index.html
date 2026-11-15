@@ -543,11 +543,12 @@ function pedEst(n,t){const p=pedAb(n,t),R=n.rutinas||[],ya=R.find(r=>r.tipo===t)
   :`<button class="btn s2" data-pedir="${t}">${t==='entreno'?(ya?'🔄 Pedir un plan nuevo':'✍️ Solicitar plan de entrenamiento'):(ya?'📅 Cita para un plan nuevo':'📅 Solicitar cita con nutricionista')}</button>`}
 function atajosPlanes(n){const R=n.rutinas||[],e=R.find(r=>r.tipo==='entreno'),d=R.find(r=>r.tipo==='nutri');
  const k=DIAS[(new Date(Date.now()-5*36e5).getUTCDay()+6)%7][0],l=e?lineas(e.datos&&e.datos[k]):[];
+ const off=(NEG[n.slug]||{}).apagados||[],vE=e||!off.includes('entreno'),vD=d||!off.includes('nutri');if(!vE&&!vD)return'';
  return`<div class="card"><p class="mu xs" style="font-weight:700">MIS PLANES</p>
-  <div class="row"${e?' data-sub="rutina" style="cursor:pointer"':''}><span style="font-size:24px">🏋️</span><div class="sp"><h3>${e?(l.length?'Hoy: '+esc(l.length>1?l[0]:'entrenamiento'):'Hoy: descanso'):'Plan de entrenamiento'}</h3><p class="mu sm">${e?esc(e.titulo||'Mi rutina')+(l.length>1?' · '+(l.length-1)+' ejercicios':''):'Aún no tienes uno. Pídelo y tu entrenador te lo arma.'}</p></div>${e?'<span class="mu">›</span>':''}</div>
-  ${pedEst(n,'entreno')}<div class="hr"></div>
-  <div class="row"${d?' data-sub="dieta" style="cursor:pointer"':''}><span style="font-size:24px">🥗</span><div class="sp"><h3>${d?esc(d.titulo||'Mi alimentación'):'Plan de alimentación'}</h3><p class="mu sm">${d?(d.datos&&d.datos.kcal?esc(d.datos.kcal)+' kcal · ':'')+'Ver comidas':'Agenda una cita con el nutricionista y recibe tu plan aquí.'}</p></div>${d?'<span class="mu">›</span>':''}</div>
-  ${pedEst(n,'nutri')}</div>`}
+  ${vE?`<div class="row"${e?' data-sub="rutina" style="cursor:pointer"':''}><span style="font-size:24px">🏋️</span><div class="sp"><h3>${e?(l.length?'Hoy: '+esc(l.length>1?l[0]:'entrenamiento'):'Hoy: descanso'):'Plan de entrenamiento'}</h3><p class="mu sm">${e?esc(e.titulo||'Mi rutina')+(l.length>1?' · '+(l.length-1)+' ejercicios':''):'Aún no tienes uno. Pídelo y tu entrenador te lo arma.'}</p></div>${e?'<span class="mu">›</span>':''}</div>
+  ${pedEst(n,'entreno')}`:''}${vE&&vD?'<div class="hr"></div>':''}
+  ${vD?`<div class="row"${d?' data-sub="dieta" style="cursor:pointer"':''}><span style="font-size:24px">🥗</span><div class="sp"><h3>${d?esc(d.titulo||'Mi alimentación'):'Plan de alimentación'}</h3><p class="mu sm">${d?(d.datos&&d.datos.kcal?esc(d.datos.kcal)+' kcal · ':'')+'Ver comidas':'Agenda una cita con el nutricionista y recibe tu plan aquí.'}</p></div>${d?'<span class="mu">›</span>':''}</div>
+  ${pedEst(n,'nutri')}`:''}</div>`}
 function pedirPlan(n,t){if(!n)return;const ent=t==='entreno',prev=(n.rutinas||[]).find(r=>r.tipo===t),ab=pedAb(n,t);if(ab)return abrirPed(ab.id);
  const OB=ent?['Ganar músculo','Bajar de peso','Tonificar','Ganar fuerza','Salud y energía']:['Bajar de peso','Ganar masa muscular','Comer más sano','Rendir mejor','Tengo una condición médica'];
  const GR=ent?[['Días por semana que puedes venir','d',['2','3','4','5','6']],['Tu nivel','v',['Principiante','Intermedio','Avanzado']]]:[['¿Qué horario te acomoda para la cita?','h',['Mañana','Tarde','Noche']]];
