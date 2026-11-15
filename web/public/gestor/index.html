@@ -242,7 +242,17 @@ function xyrosPanel(cl,cf,slug){
   return `<div class="panel"><h3>Xyros del cliente <span class="tag x">Suscripción</span></h3><p class="d">Activa cada división que el cliente contrata y su mensualidad. Las que no tenga le aparecen en su panel como mejora.</p>
     <div class="xy-grid">${XYROS.map(([k,n,d])=>`<div class="xy ${m[k].on?'on':''}"><img src="../img/marca/logo-${k}-app.svg" alt=""><div><b>${n}</b><small>${d}</small>${k==='apps'&&slug?`<a href="../app/?s=${encodeURIComponent(slug)}" target="_blank" rel="noopener" style="color:var(--ok);font-size:12px;font-weight:700">Abrir Xyro Apps ↗</a>`:''}</div><div class="xp"><input type="number" min="0" step="any" placeholder="S/ mes" data-xyp="${k}" value="${m[k].precio??''}"><button class="tema${m[k].on?' save':''}" data-xyt="${k}" style="${m[k].on?'border-color:var(--ok);color:var(--ok)':''}">${m[k].on?'✅ Activo':'➕ Activar'}</button></div></div>`).join('')}</div>
     <div class="xy-tot"><span>Mensualidad total</span><b id="xyTot">${soles(tot)}</b></div>
-    <button class="btn btn-p" data-xysave="${esc(cl.id)}" data-slug="${esc(slug||'')}" style="margin-top:12px">💾 Guardar Xyros</button></div>`;
+    <button class="btn btn-p" data-xysave="${esc(cl.id)}" data-slug="${esc(slug||'')}" style="margin-top:12px">💾 Guardar Xyros</button></div>${slug?`<div class="panel" id="nfBox" data-slug="${esc(slug)}"><h3>🏅 Negocio fundador</h3><p class="d">Cargando…</p></div>`:''}`;
+}
+const NFR={gym:'gimnasios',consultorio:'consultorios',restaurante:'restaurantes',cafeteria:'cafeterías',academia:'academias'};
+async function nfCargar(){const b=$('#nfBox');if(!b||b.dataset.ok)return;b.dataset.ok=1;const slug=b.dataset.slug;
+  const[a,l]=await Promise.all([sb.rpc('xa_neg_fund',{p_slug:slug}),sb.rpc('xa_g_neg_funds')]);
+  if(a.error&&/xa_neg_fund|function|schema cache/i.test(a.error.message)){b.querySelector('.d').textContent='Corre 61-xyro-negocio-fundador.sql en Supabase para activarlo.';return}
+  const f=a.data,L=l.data||[];
+  b.innerHTML=`<h3>🏅 Negocio fundador ${f?'<span class="tag" style="background:#e6b84d22;color:#e6b84d">Fundador de '+esc(NFR[f.rubro]||f.rubro)+'</span>':''}</h3>
+  <p class="d">Reconocimiento al primer negocio de cada rubro que creyó en XyroStudio. Solo hay uno por rubro y lleva insignia dorada en su panel, en Mi Xyro y en su carta.</p>
+  ${L.length?`<p class="sub">${L.map(x=>`<b>${esc(NFR[x.rubro]||x.rubro)}</b>: ${esc(x.negocio)} <small style="color:var(--mu)">desde ${esc(x.desde)}</small>`).join(' · ')}</p>`:'<p class="sub">Aún no hay negocios fundadores.</p>'}
+  <button class="btn ${f?'btn-g':'btn-p'}" data-nfund="${f?0:1}" data-slug="${esc(slug)}" style="margin-top:8px">${f?'Quitar título de fundador':'🏅 Nombrar negocio fundador'}</button>`;
 }
 async function guardarXyros(id,slug){
   const cl=clientes.find(c=>c.id==id), m={};
@@ -379,7 +389,7 @@ function side(){
     NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}${id==='tickets'&&TKG?` <b class="tkb">${TKG}</b>`:''}${id==='pendientes'&&PDN?` <b class="tkb">${PDN}</b>`:''}${id==='cobros'&&XGN?` <b class="tkb">${XGN}</b>`:''}${id==='mixyro'&&MXN?` <b class="tkb">${MXN}</b>`:''}</button>`).join('')).join('')+
     `<div class="me"><b>${esc(me.nombre)}</b><small>${esc(ROL_NOMBRE[me.rol]||me.rol)} · ${esc(me.email)}</small><button class="btn btn-g btn-sm" data-logout style="width:100%">Cerrar sesión</button></div>`;
 }
-async function go(v){ document.querySelectorAll('body>.vmenu').forEach(m=>m.remove()); if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); }
+async function go(v){ document.querySelectorAll('body>.vmenu').forEach(m=>m.remove()); if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); if($('#nfBox'))nfCargar().catch(()=>{}); }
 async function start(){ show('app'); setTimeout(tkCuenta,1500); setTimeout(pdCuenta,2500); setTimeout(xgCuenta,3000); setTimeout(mxCuenta,3500); setInterval(tkCuenta,120000); setInterval(xgCuenta,300000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
 
 const H=(t,s)=>{$('#h').innerHTML=`<div><h1>${esc(t)}</h1>${s?`<p class="sub" style="margin:4px 0 0">${esc(s)}</p>`:''}</div>`;};
@@ -1303,6 +1313,7 @@ document.addEventListener('click', async e=>{
     if(el.id==='mb')return $('#side').classList.toggle('open');
     if(el.id==='swSop'){const c=cfg();c.soporteSinRegistro=!c.soporteSinRegistro;setCfg(c);return go('soporte');}
     if(d.flt){flt=d.flt;return go('clientes');}
+    if(d.nfund){const dar=d.nfund==='1';if(!confirm(dar?'¿Nombrar a este negocio fundador de su rubro? Solo puede haber uno por rubro.':'¿Quitarle el título de negocio fundador?'))return;el.disabled=true;const{error}=await sb.rpc('xa_g_neg_fund',{p_slug:d.slug,p_dar:dar});if(error){toast(error.message);el.disabled=false;return}toast(dar?'🏅 Ahora es negocio fundador':'Título quitado');const b=$('#nfBox');if(b){delete b.dataset.ok;nfCargar()}return;}
     if(d.xyt){ const on=!el.classList.contains('save'); el.classList.toggle('save',on); el.style.cssText=on?'border-color:var(--ok);color:var(--ok)':''; el.textContent=on?'✅ Activo':'➕ Activar'; el.closest('.xy').classList.toggle('on',on); xyTot(); return; }
     if(d.xysave){ el.disabled=true; try{ await guardarXyros(d.xysave,d.slug); await cargar(); toast('Xyros guardados ✓'); fichaTab='xyros'; return go('clientes'); }catch(ex){ toast(ex.message); el.disabled=false; } return; }
     if(d.ftab){ fichaTab=d.ftab; $$('.ftabs button').forEach(b=>b.classList.toggle('on',b.dataset.ftab===fichaTab)); $('.fbody').dataset.cur=fichaTab; return; }

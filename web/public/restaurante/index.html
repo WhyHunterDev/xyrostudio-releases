@@ -106,6 +106,7 @@ label.f{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--mu);marg
  .demo{bottom:auto;top:74px;left:16px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.nfb{display:inline-flex;margin:0 8px 10px 0;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f7dc8a,#e6b84d 55%,#b8862b);box-shadow:0 4px 14px #e6b84d40}.nfb[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -153,6 +154,7 @@ async function cargar(){
   const w=pf.whatsapp||(D.sedes.find(x=>x.whatsapp)||{}).whatsapp||(C.bot&&C.bot.whatsapp);if(w)D.wa=String(w).replace(/\D/g,'').replace(/^9(\d{8})$/,'519$1');
   if(rs.fotos&&typeof rs.fotos==='object')Object.keys(rs.fotos).forEach(k=>{if(/^https:/.test(rs.fotos[k]||''))IMG[k]=rs.fotos[k]});
   ['hero','sub','pagos'].forEach(k=>{if(rs[k]!=null&&rs[k]!=='')D[k]=rs[k]});
+  rpc('xa_neg_fund',{p_slug:SLUG}).then(f=>{if(f){D.fund=f;const e=document.getElementById('nfb');e&&(e.hidden=false)}}).catch(()=>{});
   try{const c=await rpc('xa_carta',{p_slug:SLUG});if(c&&Array.isArray(c.productos)&&c.productos.length)D.productos=c.productos;if(c&&/^https:/.test(c.portada||'')&&!/^https:/.test(pf.portada||''))IMG.hero=c.portada}catch(_){}
  }catch(e){console.warn('Muestro la base',e)}
  return D;
@@ -174,6 +176,7 @@ cargar().then(D=>{
   <div class="bd"><h3>${esc(p.nombre)}</h3>${p.detalle?`<span class="mu sm ds">${esc(p.detalle)}</span>`:''}<span class="p"><b>${sol(p.precio)}</b>${+p.antes>+p.precio?`<s>${sol(p.antes)}</s>`:''}</span></div></button>`;
  const V={
   '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
+   <span class="nfb" id="nfb" ${D.fund?'':'hidden'} title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador · XyroStudio</span>
    <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(D.hasta):'Cerrado ahora · abrimos '+esc(D.desde)}</span>
    <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
    <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/reservar">📅 Reservar mesa</a></div>
