@@ -131,6 +131,7 @@ select{background:var(--c2);border:1px solid var(--ln);border-radius:14px;paddin
 input[type=date],input[type=time]{color-scheme:dark;min-height:50px}
 .pfl textarea{font-size:15px;line-height:1.4}
 /* Barra inferior */
+.tabs[hidden]{display:none!important}
 .tabs{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));display:flex;background:#0b0d18e0;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:24px;padding:6px;max-width:480px;margin:0 auto}
 .tab{flex:1;border:0;background:none;border-radius:18px;padding:8px 0 6px;display:grid;gap:2px;justify-items:center;font-size:11px;font-weight:700;color:var(--mu);cursor:pointer}
 .tab svg{width:23px;height:23px;opacity:.55;transition:.2s}.tab{position:relative}.tab b.dt{position:absolute;top:6px;left:calc(50% + 8px);width:8px;height:8px;border-radius:50%;background:#ef4444;border:2px solid #0d0d0f}
@@ -752,14 +753,14 @@ function loginNegocio(){hoja(`<div style="display:grid;justify-items:center;gap:
   catch(er){say(er.message&&!/fetch|JWT|PGRST/i.test(er.message)?er.message:errDe(er));b.disabled=false;b.textContent='Entrar'}}})}
 
 function pintaNeg(){acento();
- const dn=nDent(),pe=nPedOn(),T=nRol()==='cafetin'?[['mesas',I.inbox,'Pedidos'],['mas',I.grid,'Más']]:nCoach()?[['pedidos',I.inbox,'Solicitudes'],['socios',I.users,'Socios'],['mas',I.grid,'Más']]
+ const dn=nDent(),pe=nPedOn(),T=nRol()==='cafetin'?[]:nCoach()?[['pedidos',I.inbox,'Solicitudes'],['socios',I.users,'Socios'],['mas',I.grid,'Más']]
   :[['resumen',I.chart,'Resumen'],['socios',I.users,dn?'Pacientes':'Socios'],['scan',I.scan,''],pe?['pedidos',I.inbox,'Solicitudes']:['hoy',dn?I.cal:I.pulse,dn?'Agenda':'Hoy'],['mas',I.grid,'Más']];
  if(nCoach()&&['resumen','hoy'].includes(NTAB))NTAB='pedidos';
- if(nRol()==='cafetin'&&!['mesas','mas'].includes(NTAB))NTAB='mesas';
+ if(nRol()==='cafetin')NTAB='caf';
  const tk=NTAB==='ped'||NTAB==='plan'?'pedidos':NTAB==='hoy'&&pe?'resumen':NTAB,pn=pe&&NPED?nPedN():0;
- const body=NB&&NB.gestor&&!NSLUG?nGestor():({mesas:nMesas,resumen:nResumen,socios:nSocios,hoy:nHoy,mas:nMas,pedidos:nPedidos,ped:nPed,plan:nPlan}[NTAB]||nResumen)();
+ const body=NB&&NB.gestor&&!NSLUG?nGestor():({caf:nCafPanel,mesas:nMesas,resumen:nResumen,socios:nSocios,hoy:nHoy,mas:nMas,pedidos:nPedidos,ped:nPed,plan:nPlan}[NTAB]||nResumen)();
  app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<div class="scr" id="sc"><div class="wrap in">${body}</div></div>
- <nav class="tabs">${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===tk?' on':''}" data-nt="${k}" aria-label="${k==='scan'?(dn?'Buscar por QR':'Marcar ingreso con QR'):t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='pedidos'&&pn||k==='mesas'&&nMpNuevos()?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
+ <nav class="tabs" ${T.length?'':'hidden'}>${T.map(([k,i,t])=>`<button class="tab${k==='scan'?' scan':''}${k===tk?' on':''}" data-nt="${k}" aria-label="${k==='scan'?(dn?'Buscar por QR':'Marcar ingreso con QR'):t}">${k==='scan'?`<span class="fab">${i}</span>`:i}${t}${k==='pedidos'&&pn||k==='mesas'&&nMpNuevos()?'<b class="dt"></b>':''}</button>`).join('')}</nav>`;
  app.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{vib();if(b.dataset.nt==='scan')return nScan();NTAB=b.dataset.nt;if(NTAB==='pedidos')nPedCarga().then(()=>{if(NTAB==='pedidos')pinta()});pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-cli]').forEach(b=>b.onclick=()=>nFicha(NRES&&NRES.find(x=>x.id===b.dataset.cli)));
  app.querySelectorAll('[data-ntgo]').forEach(b=>b.onclick=()=>{NTAB=b.dataset.ntgo;pinta()});
@@ -848,7 +849,12 @@ function nGestor(){const L=NB.negocios||[];
 
 // ---------- Pedidos de mesa por QR (SQL 50): el cafetín los atiende igual que en el panel ----------
 let NMP=null,NMPX=false;
-const nMpOn=()=>NB&&!nDent()&&['gestor','admin','supervisor','recepcion','cafetin'].includes(nRol());
+const nMpOn=()=>NB&&!nDent()&&['gestor','admin','supervisor','recepcion'].includes(nRol());
+// Cafetín trabaja solo desde el panel web (ahí le llegan los pedidos de mesa)
+function nCafPanel(){post=()=>{const q=s=>$(s);q('#nmc')&&(q('#nmc').onclick=modoCliente);q('#nso')&&(q('#nso').onclick=async()=>{if(DEMO)return location.href='/mi/';try{await NSB.auth.signOut()}catch(_){}NB=null;NSB=null;modoCliente()})};
+ return`${nHead('CAFETÍN')}<div class="g"><div class="card vacio"><span class="e">🥤</span><h2>Tu cuenta trabaja en el panel</h2><p class="mu sm" style="max-width:300px">Las ventas del cafetín y los pedidos de mesa se atienden desde el panel web de Xyro Apps.</p></div>
+  <a class="btn p" href="${DEMO?'/app/?demo=gym&rol=cafetin':panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel</a>
+  <button class="btn" id="nmc">Volver a mi cuenta personal</button><button class="btn l" id="nso">Cerrar sesión del negocio</button></div>`}
 const nMpAb=()=>((NMP&&NMP.pedidos)||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
 const nMpNuevos=()=>nMpAb().filter(p=>p.estado==='nuevo').length;
 const NMPE={nuevo:['Nuevo','#f59e0b'],preparando:['Preparando','#3ad6ff'],servido:['Servido · falta pagar','var(--a)'],pagado:['Pagado','#22c55e'],cancelado:['Cancelado','#ef4444']};
