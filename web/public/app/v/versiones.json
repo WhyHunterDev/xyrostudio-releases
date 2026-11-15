@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261115-0210",
+  "fecha": "2026-11-15 02:10",
+  "titulo": "Realidad aumentada en el menú de mesas",
+  "notas": "Realidad aumentada en el menú de mesas",
+  "cambios": [
+   "Los productos pueden llevar un modelo 3D: el cliente toca «🪄 Verlo en mi mesa» y ve el plato o batido sobre su mesa con la cámara",
+   "El modelo 3D lo pone solo XyroStudio (se cobra como extra)"
+  ],
+  "requiere": "SQL 53",
+  "rubros": [
+   "gym"
+  ]
+ },
+ {
   "id": "20261115-0205",
   "fecha": "2026-11-15 02:05",
   "titulo": "Fotos en productos y pedidos solo desde el local",

@@ -2092,8 +2092,9 @@ function editProd(p){
  if(CTL()&&!NEED53)f.unshift({k:'foto',t:'img',l:'Foto del producto',v:p&&p.foto,pref:'prod',ayuda:'Una foto bonita vende más en el menú de mesas.'});
  if(CTL()&&!NEED50P)f.push({k:'detalle',l:'Detalle para el menú (opcional)',v:p&&p.detalle,ph:'Ej. Batido + barra de proteína'},{k:'en_mesa',l:'🍽️ Mostrar en el menú de mesas (QR)',t:'chk',v:!p||p.en_mesa!==false});
  if(CTL()&&!NEED53)f.push({k:'antes',l:'Precio antes (S/, para combos o promos)',t:'number',v:p&&p.antes,ph:'Opcional: se ve tachado'},{k:'destacado',l:'⭐ Destacar arriba del menú',t:'chk',v:p&&p.destacado});
+ if(CTL()&&!NEED53&&isXyro())f.push({k:'modelo',l:'🪄 Modelo 3D .glb (realidad aumentada, solo XyroStudio)',v:p&&p.modelo,ph:'https://…/plato.glb'});
  form(p?'Editar producto':'Nuevo producto',f,async v=>{
-  const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};if(CTL()&&!NEED50P)Object.assign(row,{detalle:v.detalle||null,en_mesa:!!v.en_mesa});if(CTL()&&!NEED53)Object.assign(row,{foto:v.foto||null,antes:v.antes===''||!(+v.antes>+v.precio)?null:+v.antes,destacado:!!v.destacado});
+  const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};if(CTL()&&!NEED50P)Object.assign(row,{detalle:v.detalle||null,en_mesa:!!v.en_mesa});if(CTL()&&!NEED53)Object.assign(row,{foto:v.foto||null,antes:v.antes===''||!(+v.antes>+v.precio)?null:+v.antes,destacado:!!v.destacado});if(CTL()&&!NEED53&&isXyro())row.modelo=/^https:\/\/\S+\.glb(\?\S*)?$/i.test(v.modelo||'')?v.modelo:null;
   if(p){await DB.upd('pro',p.id,row)}else{const n=await DB.ins('pro',Object.assign(row,{stock:0,creado:new Date().toISOString()}));if(+v.stock>0)await DB.stock(n.id,+v.stock,'entrada','Stock inicial')}
   S.pro.sort((a,b)=>a.nombre.localeCompare(b.nombre));toast('Producto guardado ✓');go();
  },p?'<button type="button" class="btn bad" id="prDel" style="margin-right:auto">Archivar</button>':'');
