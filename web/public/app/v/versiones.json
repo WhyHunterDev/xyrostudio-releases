@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261115-0131",
+  "fecha": "2026-11-15 01:31",
+  "titulo": "Quién edita el perfil de la app",
+  "notas": "Quién edita el perfil de la app",
+  "cambios": [
+   "Admin, supervisor y recepción pueden editar el perfil, novedades y promos de la app",
+   "Entrenador y nutricionista no"
+  ],
+  "requiere": "SQL 52"
+ },
+ {
   "id": "20261115-0130",
   "fecha": "2026-11-15 01:30",
   "titulo": "Pedidos de mesa visibles para todo el equipo",
