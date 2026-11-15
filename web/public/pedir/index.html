@@ -267,6 +267,13 @@ function geoAviso(k){const o=document.createElement('div');o.className='ov';cons
  <button class="btn p" data-x>Entendido</button></div>`;o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o)}
 async function cancelar(id){if(!confirm('¿Cancelar este pedido?'))return;try{await api('xa_mesa_cancelar_mio',{p_token:TOK,p_id:id});await cargarMios();pinta();toast('Pedido cancelado')}catch(e){toast(e.message)}}
 function confeti(){const C=['#fff',getComputedStyle(document.documentElement).getPropertyValue('--a').trim(),'#facc15','#3ad6ff'];for(let i=0;i<36;i++){const d=document.createElement('i');d.className='cf';d.style.left=Math.random()*100+'vw';d.style.background=C[i%C.length];d.style.animationDelay=Math.random()*.3+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}}
+// ---------- Botón «atrás» del celular: cierra la ventana abierta en vez de salir ----------
+const HN={k:'',st:[],skip:0,ov:0,pop:false},HSEL='.ov,.cam,.qrfull';
+new MutationObserver(()=>{const c=document.querySelectorAll(HSEL).length;
+ while(HN.ov<c){HN.ov++;try{history.pushState(Object.assign({},history.state||{},{_ov:HN.ov}),'')}catch(_){}}
+ if(HN.ov>c){const d=HN.ov-c;HN.ov=c;if(history.state&&history.state._ov){HN.skip++;history.go(-d)}}}).observe(document.body,{childList:true});
+function hCierra(){const els=document.querySelectorAll(HSEL);if(!els.length||HN.ov<1)return false;HN.ov--;const el=els[els.length-1],x=el.querySelector('#cx,[data-x]');try{x?x.click():el.click()}catch(_){}if(el.isConnected)el.remove();return true}
+addEventListener('popstate',e=>{if(HN.skip){HN.skip--;return}if(hCierra())return;if(e.state&&e.state._ov)history.back()});
 init();
 })();
 </script>

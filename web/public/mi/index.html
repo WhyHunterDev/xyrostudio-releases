@@ -357,9 +357,28 @@ async function entrar(){
  pinta();
 }
 
+// ---------- Botón «atrás» del celular: cierra la ventana abierta en vez de salir ----------
+const HN={k:'',st:[],skip:0,ov:0,pop:false},HSEL='.ov,.cam,.qrfull';
+new MutationObserver(()=>{const c=document.querySelectorAll(HSEL).length;
+ while(HN.ov<c){HN.ov++;try{history.pushState(Object.assign({},history.state||{},{_ov:HN.ov}),'')}catch(_){}}
+ if(HN.ov>c){const d=HN.ov-c;HN.ov=c;if(history.state&&history.state._ov){HN.skip++;history.go(-d)}}}).observe(document.body,{childList:true});
+function hCierra(){const els=document.querySelectorAll(HSEL);if(!els.length||HN.ov<1)return false;HN.ov--;const el=els[els.length-1],x=el.querySelector('#cx,[data-x]');try{x?x.click():el.click()}catch(_){}if(el.isConnected)el.remove();return true}
+const hSnap=()=>({m:MODO,t:TAB,s:SUB,nt:NTAB,np:NPID,pe:PEDID,c:CUR});
+function hSync(){if(HN.pop||HN.skip||(!D&&!NB&&!(SUB&&SUB.neg)))return;const s=hSnap(),k=JSON.stringify(s);if(k===HN.k)return;const L=HN.st;
+ try{if(!L.length){history.replaceState({mi:s},'');L.push(k)}
+  else if(L.length>1&&L[L.length-2]===k&&!(history.state&&history.state._ov)){L.pop();HN.skip++;history.back()}
+  else{history.pushState({mi:s},'');L.push(k);if(L.length>40)L.shift()}}catch(_){}
+ HN.k=k}
+addEventListener('popstate',e=>{
+ if(HN.skip){HN.skip--;if(!HN.skip)hSync();return}
+ if(hCierra())return;
+ const st=e.state;if(st&&st._ov)return history.back();
+ if(!st||!st.mi)return;const m=st.mi;if(m.m==='negocio'&&!NB)return;
+ HN.pop=true;try{MODO=m.m;ls.s('mi-modo',MODO);TAB=m.t;SUB=m.s;NTAB=m.nt;NPID=m.np;PEDID=m.pe;CUR=m.c;HN.k=JSON.stringify(m);const i=HN.st.lastIndexOf(HN.k);if(i>=0)HN.st.length=i+1;else HN.st=[HN.k];pinta();const sc=document.querySelector('#sc');sc&&(sc.scrollTop=0)}catch(_){}HN.pop=false});
 // ---------- Navegación ----------
 const SUBV={mi:vMi,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,pedido:vPedido};
-function pinta(){
+function pinta(){const r=pinta0();try{hSync()}catch(_){}return r}
+function pinta0(){
  if(MODO==='negocio'&&NB)return pintaNeg();
  if(!D&&!(SUB&&SUB.neg))return pantallaEntrada();
  if(TAB==='inicio'&&N())acento(N());else if(SUB&&SUB.neg&&NEG[SUB.neg])acento(NEG[SUB.neg]);else acento(null);
