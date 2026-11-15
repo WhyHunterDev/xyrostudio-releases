@@ -1,3 +1,4 @@
+*{scrollbar-width:thin;scrollbar-color:rgba(140,140,150,.35) transparent}::-webkit-scrollbar{width:8px;height:8px;background:transparent}::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}::-webkit-scrollbar-thumb{background:rgba(140,140,150,.35);border-radius:8px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-button{display:none;height:0;width:0}
 :root{
   --bg:#070707;--bg2:#0d0d0d;--card:#131313;--card2:#181818;--line:#222;--line2:#2e2e2e;
   --y:#F5C400;--y2:#FFD84D;--on:#000;--tx:#F4F1EA;--mu:#9a968e;--wa:#25D366;--r:20px;

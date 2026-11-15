@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261115-1358",
+  "fecha": "2026-11-15 13:58",
+  "titulo": "Barra lateral más fina y menú Xyro Control",
+  "notas": "Barra lateral más fina y menú Xyro Control",
+  "cambios": [
+   "La barra de desplazamiento ahora es fina y oscura en todos los paneles",
+   "Cafetín y Pedidos de mesa pasan a su propio grupo «Xyro Control» en el menú"
+  ]
+ },
+ {
   "id": "20261115-1351",
   "fecha": "2026-11-15 13:51",
   "titulo": "Pasar datos: solo XyroStudio",

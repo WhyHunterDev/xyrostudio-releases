@@ -9,7 +9,8 @@
 <meta name="theme-color" content="#0b0b0b">
 <link rel="icon" href="/img/marca/logo-apps-app.svg" type="image/svg+xml">
 <link rel="manifest" href="/app/manifest.webmanifest">
-<style>
+<style>*{scrollbar-width:thin;scrollbar-color:rgba(140,140,150,.35) transparent}::-webkit-scrollbar{width:8px;height:8px;background:transparent}::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}::-webkit-scrollbar-thumb{background:rgba(140,140,150,.35);border-radius:8px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-thumb:hover{background-color:rgba(160,160,170,.6)}::-webkit-scrollbar-button{display:none;height:0;width:0}
+
 :root{--a:#3ad6ff;--b:#7c5cff;--bg:#07070d;--c1:#141414;--c2:#1b1b1b;--ln:#ffffff14;--tx:#eef0f8;--mu:#8d8fa8;--ok:#3ddc97;--wa:#f5b544;--bad:#ff5c7a;--r:18px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -395,7 +396,7 @@ const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',as
 
 let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[],sol:[]};
 const KS=['cli','pla','mem','pag','asi','pro','mov','cie','sol','rut','cit','his','pre'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
-const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','Asistente que atiende a tus clientes las 24 horas en tu web (y pronto en tu WhatsApp): precios, horarios, clases y sedes'],['edits','Xyro Edits','Videos y reels editados rápido para tus redes',1]];
+const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, pedidos por QR desde la mesa, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','Asistente que atiende a tus clientes las 24 horas en tu web (y pronto en tu WhatsApp): precios, horarios, clases y sedes'],['edits','Xyro Edits','Videos y reels editados rápido para tus redes',1]];
 /* Vitrina para vender más: demos de los 3 diseños de web y temas de temporada (vista previa; usarlos se paga) */
 let TEMP=[];
 const TEMAS_X=[['navidad','🎄','Navidad'],['halloween','🎃','Halloween'],['anionuevo','🎆','Año Nuevo'],['fiestaspatrias','🇵🇪','Fiestas Patrias'],['sanvalentin','❤️','San Valentín']];
@@ -1345,7 +1346,7 @@ async function editServicios(){const off=new Set(CFG.apagados||[]);
   <div class="bt"><button class="btn p" id="svG">Guardar</button><button class="btn" data-x>Cancelar</button></div>`,(el,close)=>{
   el.querySelector('#svG').onclick=async()=>{const a=[...el.querySelectorAll('[data-sv]')].filter(x=>!x.checked).map(x=>x.dataset.sv);
    try{await DB.cfg({apagados:a});close();shell();go();toast('Servicios guardados ✓')}catch(e){toast(e.message)}}})}
-const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento','miapp']],['gym','🏋️','Gimnasio',['rutinas','tienda','pedidos','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
+const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento','miapp']],['gym','🏋️','Gimnasio',['rutinas','planes','solicitudes']],['ctl','🛒','Xyro Control',['tienda','pedidos']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
 function navGrupos(n){const top=[],G=NAVG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));n.forEach(x=>{const g=R.resto&&['pedidos','cocina','tienda','caja'].includes(x[0])?-1:NAVG.findIndex(g=>g[3].includes(x[0]));(g<0||n.length<=8?top:G[g].L).push(x)});const G2=G.filter(g=>g.L.length);G2.filter(g=>g.L.length===1).forEach(g=>top.push(g.L[0]));return{top,G:G2.filter(g=>g.L.length>1)}}
 const navNum=t=>{const m=String(t).match(/\((\d+)\)\s*$/);return m?+m[1]:0};
 function shell(){
