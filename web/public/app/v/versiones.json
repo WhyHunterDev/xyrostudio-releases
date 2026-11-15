@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261115-0205",
+  "fecha": "2026-11-15 02:05",
+  "titulo": "Fotos en productos y pedidos solo desde el local",
+  "notas": "Fotos en productos y pedidos solo desde el local",
+  "cambios": [
+   "Los productos del cafetín ahora llevan foto, precio antes (tachado) y ⭐ destacado; se ven en la caja y en el menú de mesas",
+   "Pedidos de mesa: opción «📍 Solo pedidos desde el local» para que nadie pida desde su casa con una foto del QR"
+  ],
+  "requiere": "SQL 53",
+  "rubros": [
+   "gym"
+  ]
+ },
+ {
   "id": "20261115-0131",
   "fecha": "2026-11-15 01:31",
   "titulo": "Quién edita el perfil de la app",

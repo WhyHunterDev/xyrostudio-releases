@@ -231,7 +231,7 @@ main{overflow:auto;height:100%;position:relative}
 .pgr{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
 .prod{display:grid;gap:3px;text-align:left;padding:14px;border-radius:16px;border:1px solid var(--ln);background:linear-gradient(160deg,#ffffff0d,#ffffff04);transition:.15s}
 .prod:hover{border-color:#ffffff30;transform:translateY(-2px)}.prod:active{transform:scale(.96)}
-.prod .pe{font-size:30px}.prod .pp{font-weight:800;color:var(--a)}.ps{font-size:11.5px;color:var(--mu)}.ps.low{color:var(--bad);font-weight:700}.prod.out{opacity:.45}
+.prod .pe{font-size:30px}.prod .pf{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:11px;margin-bottom:4px}.fo-p img{width:100%;height:100%;object-fit:cover;border-radius:inherit}.prod .pp{font-weight:800;color:var(--a)}.ps{font-size:11.5px;color:var(--mu)}.ps.low{color:var(--bad);font-weight:700}.prod.out{opacity:.45}
 .qty{display:flex;align-items:center;gap:8px}.qty button{width:28px;height:28px;border-radius:9px;background:#ffffff14;font-weight:800}
 .ctot{display:flex;justify-content:space-between;align-items:center;padding:12px 4px}.ctot b{font-size:26px}
 .fo{display:flex;gap:12px;align-items:center}.fo-p{width:64px;height:64px;border-radius:20px;background:#ffffff10;display:grid;place-items:center;font-size:26px;overflow:hidden;flex:none}.fo-p img{width:100%;height:100%;object-fit:cover}
@@ -405,7 +405,7 @@ const isSup=()=>ME&&['admin','gestor','supervisor'].includes(ME.rol);
 const puedeProd=()=>ME&&['admin','gestor','supervisor','cafetin'].includes(ME.rol);
 // Ver otras sedes: el admin siempre; el resto solo si el admin le dio «Todas» en Equipo.
 const verTodas=()=>isAdmin()||!!(ME&&(!ME.sede||ME.sede==='todas'));
-let NEED24=false,NEED26=false,NEED29=false,NEED50P=false;
+let NEED24=false,NEED26=false,NEED29=false,NEED50P=false,NEED53=false;
 
 /* ===== Fechas ===== */
 const pad=n=>String(n).padStart(2,'0');
@@ -471,7 +471,7 @@ const DB={
   const e=rs.find(r=>r.error);if(e){if(/xa_|relation|schema cache/i.test(e.error.message))throw new Error('Falta activar la base de Xyro Apps (SQL 15).');throw e.error}
   [S.cli,S.pla,S.mem,S.pag,S.asi]=rs.map(r=>r.data||[]);
   const r2=await Promise.all([todo(()=>q('pro').order('nombre').order('id'),10000),todo(()=>q('mov').gte('t',since).order('t',{ascending:false}).order('id'),40000),q('cie').order('hasta',{ascending:false}).limit(60)]);
-  NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);NEED50P=!!(await sb.from(T.pro).select('en_mesa').limit(1)).error;MP=null;
+  NEED17=r2.some(r=>r.error);[S.pro,S.mov,S.cie]=r2.map(r=>r.data||[]);NEED50P=!!(await sb.from(T.pro).select('en_mesa').limit(1)).error;NEED53=NEED50P||!!(await sb.from(T.pro).select('foto').limit(1)).error;MP=null;
   NEED20=!!(await sb.from(T.pag).select('sede').limit(1)).error;NEED39=!!(await sb.from(T.pag).select('foto_pago').limit(1)).error;NEED26=!!(await sb.from(T.mem).select('cuotas').limit(1)).error;NEED22=!!(await sb.from(T.cie).select('sede').limit(1)).error;
   {const r=await sb.from(T.sol).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(1000),r2=await sb.from(T.cie).select('area').limit(1);NEED24=!!(r.error||r2.error);S.sol=r.data||[]}
   {const r=await sb.from(T.rut).select('*').eq('sitio_id',SID).order('creado',{ascending:false}).limit(5000);NEED29=!!r.error;S.rut=r.data||[];PDA=null;pdaCargar().then(()=>{if(pdaN()&&!document.querySelector('.ov'))go()})}
@@ -621,6 +621,7 @@ function form(title,fields,onSave,extra){
   if(f.t==='sel')return`<label class="fl">${f.l}<select id="${id}">${f.o.map(o=>`<option value="${esc(o[0])}" ${String(o[0])===String(f.v)?'selected':''}>${esc(o[1])}</option>`).join('')}</select></label>`;
   if(f.t==='foto')return`<div class="fl">${f.l}<div class="fo"><span class="fo-p" id="${id}_p">${f.v?`<img src="${esc(f.v)}" alt="">`:'👤'}</span><div style="display:flex;gap:8px;flex-wrap:wrap">${matchMedia('(pointer:coarse)').matches?`<label class="btn sm">📷 Tomar<input type="file" accept="image/*" capture="user" hidden id="${id}_f"></label>`:(navigator.mediaDevices?`<button type="button" class="btn sm" id="${id}_c">📷 Cámara</button>`:'')}<label class="btn sm">🖼️ Subir<input type="file" accept="image/*" hidden id="${id}_g"></label></div><input type="hidden" id="${id}" value=""></div></div>`;
   if(f.t==='logo')return`<div class="fl">${f.l}<div class="fo"><span class="fo-p" id="${id}_p" style="border-radius:12px;background:var(--line)">${f.v?`<img src="${esc(f.v)}" alt="" style="object-fit:contain">`:'🖼️'}</span><div style="display:grid;gap:6px"><label class="btn sm">📁 Subir logo desde mi equipo<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden id="${id}_g"></label><small class="mu">PNG con fondo transparente se ve mejor.</small></div></div><input id="${id}" value="${esc(f.v??'')}" placeholder="o pega un enlace https://…" style="margin-top:8px"></div>`;
+  if(f.t==='img')return`<div class="fl">${f.l}<div class="fo"><span class="fo-p" id="${id}_p" style="border-radius:14px;width:84px;height:84px;background:var(--line)">${f.v?`<img src="${esc(f.v)}" alt="">`:'📷'}</span><div style="display:grid;gap:6px"><label class="btn sm">📁 Subir foto<input type="file" accept="image/*" hidden id="${id}_g"></label>${f.v?`<button type="button" class="btn sm" id="${id}_x">Quitar</button>`:''}<small class="mu">${f.ayuda||'Se ve en el menú de mesas.'}</small></div></div><input type="hidden" id="${id}" value="${esc(f.v??'')}"></div>`;
   if(f.t==='adj')return`<label class="fl">${f.l}<input id="${id}" type="file" accept="${f.acc||'image/*'}"></label>`;
   if(f.t==='chk')return`<label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx)"><input id="${id}" type="checkbox" ${f.v?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">${f.l}</label>`;
   if(f.t==='area')return`<label class="fl">${f.l}<textarea id="${id}" rows="${f.rows||3}" placeholder="${esc(f.ph||'')}">${esc(f.v)}</textarea></label>`;
@@ -630,7 +631,7 @@ function form(title,fields,onSave,extra){
   const fm=el.querySelector('form');
   fm.querySelectorAll('.opts').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));g.dispatchEvent(new Event('change'))}));
   const val=()=>{const o={};fields.forEach(f=>{if(f.t==='opts'){const b=fm.querySelector(`[data-k="${f.k}"] .on`);o[f.k]=b?b.dataset.v:''}else{const x=fm.querySelector('#f_'+f.k);o[f.k]=x?(x.type==='checkbox'?x.checked:x.value.trim()):''}});return o};
-  fields.forEach(f=>{f.on&&f.on(fm,val);f.t==='foto'&&fotoUI(fm,'f_'+f.k);f.t==='logo'&&logoUI(fm,'f_'+f.k)});
+  fields.forEach(f=>{f.on&&f.on(fm,val);f.t==='foto'&&fotoUI(fm,'f_'+f.k);f.t==='logo'&&logoUI(fm,'f_'+f.k);f.t==='img'&&imgUI(fm,'f_'+f.k,f.pref)});
   setTimeout(()=>{const i=fm.querySelector('input');i&&i.focus()},80);
   fm.addEventListener('submit',async e=>{e.preventDefault();const b=fm.querySelector('.btn.p');b.disabled=true;try{await onSave(val(),fm);close()}catch(er){const p=fm.querySelector('.err');p.textContent=er.message||String(er);p.hidden=false;b.disabled=false}});
  });
@@ -1974,6 +1975,11 @@ function importador(){if(soloXyro('la importación de datos'))return;
 function recorte(src,w,h){const s=Math.min(w,h),cv=document.createElement('canvas');cv.width=cv.height=360;cv.getContext('2d').drawImage(src,(w-s)/2,(h-s)/2,s,s,0,0,360,360);return cv.toDataURL('image/jpeg',.82)}
 function fotoDe(file){return new Promise((ok,ko)=>{const i=new Image();i.onload=()=>{ok(recorte(i,i.naturalWidth,i.naturalHeight));URL.revokeObjectURL(i.src)};i.onerror=()=>ko(new Error('Imagen no válida'));i.src=URL.createObjectURL(file)})}
 // Logo desde el equipo: se achica a 512 px (sin perder transparencia) y se sube a medios/<sitio>/xa/
+function imgUI(fm,id,pref){
+ const g=fm.querySelector('#'+id+'_g'),i=fm.querySelector('#'+id),pv=fm.querySelector('#'+id+'_p'),sv=fm.querySelector('.btn.p'),x=fm.querySelector('#'+id+'_x');
+ x&&(x.onclick=()=>{i.value='';pv.innerHTML='📷';x.remove()});
+ g.onchange=async()=>{const f=g.files[0];if(!f)return;if(f.size>12e6)return toast('Esa foto pesa mucho (máx. 12 MB)');sv&&(sv.disabled=true);pv.innerHTML='⏳';
+  try{const u=DEMO?URL.createObjectURL(f):await subirImg(f,900,pref||'img');i.value=u;pv.innerHTML=`<img src="${esc(u)}" alt="">`}catch(e){pv.innerHTML='📷';toast(amable(e))}sv&&(sv.disabled=false)}}
 function logoUI(fm,id){
  const g=fm.querySelector('#'+id+'_g'),i=fm.querySelector('#'+id),pv=fm.querySelector('#'+id+'_p'),sv=fm.querySelector('.btn.p');
  const ver=u=>{pv.innerHTML=u?`<img src="${esc(u)}" alt="" style="object-fit:contain">`:'🖼️'};
@@ -2054,7 +2060,7 @@ function tienda(){
  });
  return`<div class="hi"><div><h2>${esc(tiendaN())}</h2><p class="mu">Toca un producto para venderlo. El stock baja solo.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">${mpVis()?`<a class="btn" href="#/pedidos">🍽️ Pedidos de mesa${mpNuevos()?' ('+mpNuevos()+')':''}</a>`:''}${puedeProd()?'<button class="btn" id="tInv">📦 Stock</button><button class="btn" id="tNew">＋ Producto</button>':''}</div></div>
  <div class="pos"><div>${cats.length?`<div class="chips">${['',...cats].map(c=>`<button class="chip ${c===catSel?'on':''}" data-cat="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div>`:''}
- <div class="pgr st">${L.map(p=>`<button class="prod ${+p.stock<=0?'out':''}" data-add="${p.id}"><span class="pe">${esc(p.emoji||'🛒')}</span><b>${esc(p.nombre)}</b><span class="pp">${sol(p.precio)}</span><span class="ps ${+p.stock<=+(p.minimo||0)?'low':''}">${+p.stock} en stock</span></button>`).join('')||`<div class="empty"><b>🥤</b>Aún no hay productos.${isAdmin()?'<br>Toca «＋ Producto».':''}</div>`}</div></div>
+ <div class="pgr st">${L.map(p=>`<button class="prod ${+p.stock<=0?'out':''}" data-add="${p.id}">${p.foto?`<img class="pf" src="${esc(p.foto)}" alt="" loading="lazy">`:`<span class="pe">${esc(p.emoji||'🛒')}</span>`}<b>${esc(p.nombre)}</b><span class="pp">${sol(p.precio)}</span><span class="ps ${+p.stock<=+(p.minimo||0)?'low':''}">${+p.stock} en stock</span></button>`).join('')||`<div class="empty"><b>🥤</b>Aún no hay productos.${isAdmin()?'<br>Toca «＋ Producto».':''}</div>`}</div></div>
  <div class="card cart ${carrito.length?'':'vacio'}"><h3>🛒 Venta ${carrito.length?'<button class="btn sm" id="tVac">Vaciar</button>':''}</h3><div class="tl">${carrito.map((it,i)=>`<div class="row" style="padding:8px 4px"><span class="nm"><b>${esc(it.n)}</b><small>${sol(it.p)} c/u</small></span><span class="qty"><button data-q="${i}" data-d="-1">−</button><b>${it.c}</b><button data-q="${i}" data-d="1">＋</button></span><b style="min-width:64px;text-align:right">${sol(it.p*it.c)}</b></div>`).join('')||'<p class="mu sm">Toca productos para agregarlos.</p>'}</div>
  <div class="ctot"><span class="mu">${n} producto${n===1?'':'s'}</span><b class="grad">${sol(tot)}</b></div><button class="btn p" id="tCob" ${carrito.length?'':'disabled'} style="width:100%">Cobrar ${sol(tot)}</button></div></div>`;
 }
@@ -2083,9 +2089,11 @@ function editProd(p){
  const f=[{k:'nombre',l:'Producto',v:p&&p.nombre,req:1,ph:'Ej. Batido de proteína'},{k:'categoria',l:'Categoría',v:p&&p.categoria,dl:cats.length?cats:['Bebidas','Batidos','Snacks','Suplementos','Accesorios'],ph:'Ej. Bebidas'},{k:'precio',l:'Precio de venta (S/)',t:'number',v:p&&p.precio,req:1,half:1},{k:'costo',l:'Costo (S/, opcional)',t:'number',v:p&&p.costo,half:1},{k:'minimo',l:'Avisar cuando queden',t:'number',v:p?p.minimo:3,half:1}];
  if(!p)f.push({k:'stock',l:'Stock inicial',t:'number',v:0,half:1});
  f.push({k:'emoji',l:'Ícono',t:'opts',v:(p&&p.emoji)||'🥤',o:EMOJ.map(x=>[x,x])});
+ if(CTL()&&!NEED53)f.unshift({k:'foto',t:'img',l:'Foto del producto',v:p&&p.foto,pref:'prod',ayuda:'Una foto bonita vende más en el menú de mesas.'});
  if(CTL()&&!NEED50P)f.push({k:'detalle',l:'Detalle para el menú (opcional)',v:p&&p.detalle,ph:'Ej. Batido + barra de proteína'},{k:'en_mesa',l:'🍽️ Mostrar en el menú de mesas (QR)',t:'chk',v:!p||p.en_mesa!==false});
+ if(CTL()&&!NEED53)f.push({k:'antes',l:'Precio antes (S/, para combos o promos)',t:'number',v:p&&p.antes,ph:'Opcional: se ve tachado'},{k:'destacado',l:'⭐ Destacar arriba del menú',t:'chk',v:p&&p.destacado});
  form(p?'Editar producto':'Nuevo producto',f,async v=>{
-  const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};if(CTL()&&!NEED50P)Object.assign(row,{detalle:v.detalle||null,en_mesa:!!v.en_mesa});
+  const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};if(CTL()&&!NEED50P)Object.assign(row,{detalle:v.detalle||null,en_mesa:!!v.en_mesa});if(CTL()&&!NEED53)Object.assign(row,{foto:v.foto||null,antes:v.antes===''||!(+v.antes>+v.precio)?null:+v.antes,destacado:!!v.destacado});
   if(p){await DB.upd('pro',p.id,row)}else{const n=await DB.ins('pro',Object.assign(row,{stock:0,creado:new Date().toISOString()}));if(+v.stock>0)await DB.stock(n.id,+v.stock,'entrada','Stock inicial')}
   S.pro.sort((a,b)=>a.nombre.localeCompare(b.nombre));toast('Producto guardado ✓');go();
  },p?'<button type="button" class="btn bad" id="prDel" style="margin-right:auto">Archivar</button>':'');
@@ -2171,12 +2179,18 @@ function mpConfig(){if(!isAdmin())return;const C=mpCfg(),D=[['1','Lun'],['2','Ma
   <div class="f2"><label class="fl">Abre<input id="mpd" type="time" value="${esc(C.desde||'07:00')}"></label><label class="fl">Cierra<input id="mph" type="time" value="${esc(C.hasta||'21:00')}"></label></div>
   <div class="fl">Días que atiende<div class="opts mpD">${D.map(([k,t])=>`<button type="button" data-d="${k}" class="${!C.dias.length||C.dias.includes(+k)?'on':''}">${t}</button>`).join('')}</div></div>
   <label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx)"><input id="mpp" type="checkbox" ${C.pausa?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">⏸️ Pausar pedidos por ahora (ej. no hay quien atienda)</label>
+  ${NEED53?'':`<div class="card" style="padding:12px;display:grid;gap:8px"><b>📍 Solo pedidos desde el local</b><p class="mu sm" style="margin:0">Evita bromas: el celular debe estar cerca para pedir (si alguien toma foto al QR y pide desde su casa, no podrá). Párate en tu local y toca el botón. Si tienes varias sedes, hazlo en cada una.</p><div id="mpG"></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${sedesL().length>1?`<select id="mpS" style="width:auto">${sedesL().map(x=>`<option ${String(x.id)===String(SEDE)?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select>`:''}<button type="button" class="btn sm" id="mpGeo">📍 Estoy en el local: guardar ubicación</button><label class="mu sm" style="display:flex;gap:6px;align-items:center">Distancia máx.<select id="mpR" style="width:auto">${[80,150,300,500].map(m=>`<option value="${m}" ${(+C.radio||150)===m?'selected':''}>${m} m</option>`).join('')}</select></label></div></div>`}
   <p class="err" hidden></p><div class="bt">${C.on?'<button type="button" class="btn bad" id="mpOff" style="margin-right:auto">Apagar</button>':''}<button type="button" class="btn" data-x>Cancelar</button><button class="btn p">${C.on?'Guardar':'🚀 Activar'}</button></div></form>`,(el,close)=>{
   el.querySelectorAll('.mpD button').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+  let G=Array.isArray(C.geo)?C.geo.slice():[];const gl=el.querySelector('#mpG'),gb=el.querySelector('#mpGeo');
+  const gp=()=>{if(!gl)return;gl.innerHTML=G.length?G.map((g,i)=>`<div class="row" style="padding:6px 4px"><span class="nm"><b>📍 ${esc(g.n||'Local '+(i+1))}</b><small>Guardado ${g.t?fF(g.t):''}</small></span><button type="button" class="btn sm" data-gx="${i}">Quitar</button></div>`).join(''):'<p class="mu sm" style="margin:0">Aún sin ubicación: se puede pedir desde cualquier lugar.</p>';gl.querySelectorAll('[data-gx]').forEach(b=>b.onclick=()=>{G.splice(+b.dataset.gx,1);gp()})};gp();
+  gb&&(gb.onclick=()=>{if(!navigator.geolocation)return toast('Este equipo no da ubicación. Hazlo desde tu celular.');gb.disabled=true;gb.textContent='⏳ Buscando…';
+   navigator.geolocation.getCurrentPosition(q=>{const ss=el.querySelector('#mpS'),n=(ss&&ss.value)||((sedesL()[0]||{}).nombre)||'Local';G=G.filter(g=>g.n!==n);G.push({lat:+q.coords.latitude.toFixed(6),lng:+q.coords.longitude.toFixed(6),n,t:new Date().toISOString()});gp();gb.disabled=false;gb.textContent='📍 Estoy en el local: guardar ubicación';toast('📍 Ubicación lista. Toca Guardar.')},
+    ()=>{gb.disabled=false;gb.textContent='📍 Estoy en el local: guardar ubicación';toast('Permite la ubicación en tu navegador e inténtalo de nuevo')},{enableHighAccuracy:true,timeout:15000,maximumAge:0})});
   const off=el.querySelector('#mpOff');off&&(off.onclick=async()=>{await DB.cfg({mesas:Object.assign(C,{on:false})});close();toast('Pedidos por QR apagados');go()});
   el.querySelector('#mpf').onsubmit=async e=>{e.preventDefault();const n=Math.min(200,Math.max(1,Math.round(+el.querySelector('#mpn').value)||0)),d=[...el.querySelectorAll('.mpD .on')].map(b=>+b.dataset.d);
    const er=el.querySelector('.err');if(!d.length){er.textContent='Elige al menos un día';er.hidden=false;return}
-   try{const nuevo=!C.on;await DB.cfg({mesas:{on:true,n,desde:el.querySelector('#mpd').value||'',hasta:el.querySelector('#mph').value||'',dias:d.length===7?[]:d,pausa:el.querySelector('#mpp').checked}});close();MP=null;toast(nuevo?'🎉 Listo. Descarga los QR de tus mesas':'Guardado ✓');go();if(nuevo)setTimeout(mpQRs,500)}catch(x){er.textContent=x.message;er.hidden=false}}})}
+   try{const nuevo=!C.on;await DB.cfg({mesas:{on:true,n,desde:el.querySelector('#mpd').value||'',hasta:el.querySelector('#mph').value||'',dias:d.length===7?[]:d,pausa:el.querySelector('#mpp').checked,geo:G,radio:+(el.querySelector('#mpR')||{}).value||150}});close();MP=null;toast(nuevo?'🎉 Listo. Descarga los QR de tus mesas':'Guardado ✓');go();if(nuevo)setTimeout(mpQRs,500)}catch(x){er.textContent=x.message;er.hidden=false}}})}
 function mpQRs(){const n=mpCfg().n||0;if(!n)return mpConfig();
  sheet(`<h3>🖨️ QR de tus mesas</h3><p class="mu sm">Imprímelos en blanco (gastan poca tinta) y pega cada uno en su mesa. Cada QR dice su número.</p>
  <div class="mpQ">${Array.from({length:n},(_,i)=>`<button class="btn" data-mq="${i+1}">🪑 Mesa ${i+1}<small>⬇️ PNG</small></button>`).join('')}</div>
