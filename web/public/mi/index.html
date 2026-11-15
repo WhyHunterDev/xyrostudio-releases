@@ -69,6 +69,13 @@ input:focus{border-color:var(--a)}
 /* Carnet */
 .carnet{position:relative;border-radius:26px;padding:20px;background:var(--c1);border:1px solid var(--ln);overflow:hidden;display:grid;gap:14px;justify-items:center;text-align:center}
 .carnet::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--gr)}
+.fbad{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;color:#1a1204;background:linear-gradient(135deg,#fbe7a1,#e6b84d 45%,#b8862b);box-shadow:0 0 18px #e6b84d55;white-space:nowrap}
+body.fund .carnet{border-color:#e6b84d66;background:linear-gradient(160deg,#2b2110e6,#14110bd9 60%,#0f1220d9)}
+body.fund .carnet::before{background:linear-gradient(90deg,#b8862b,#fbe7a1,#e6b84d,#b8862b);height:4px}
+body.fund .carnet::after{background:linear-gradient(115deg,transparent 45%,#fbe7a126 50%,transparent 55%)}
+body.fund .idbox{border-color:#e6b84d55}
+.fcard{border-color:#e6b84d55!important;background:linear-gradient(160deg,#2b2110cc,#0f1220d9)!important}
+
 .carnet::after{content:"";position:absolute;inset:-60%;background:linear-gradient(115deg,transparent 45%,#ffffff12 50%,transparent 55%);animation:sh 4s infinite;pointer-events:none}
 @keyframes sh{from{transform:translateX(-50%)}to{transform:translateX(50%)}}
 .qr{overflow:hidden;background:#fff;padding:12px;border-radius:18px;width:min(230px,62vw);cursor:pointer}
@@ -272,7 +279,7 @@ async function cliente(){
  sb.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY')setTimeout(nuevaClave,300)});
  return sb;
 }
-async function rpc(f,a){if(DEMO)return demoRpc(f,a);const{data,error}=await sb.rpc(f,a||{});if(error)throw error;if(data&&data.error)throw data.error;return data}
+async function rpc(f,a){if(DEMO){const r=await demoRpc(f,a);if(f==='xa_yo_editar'&&r&&r.error)throw r.error;return r}const{data,error}=await sb.rpc(f,a||{});if(error)throw error;if(data&&data.error)throw data.error;return data}
 async function cargar(){
  if(DEMO){D=D||demoData();return D}
  D=await rpc('xa_yo');await cargaPed();ls.s('mi-data',JSON.stringify(D));return D;
@@ -294,7 +301,7 @@ function memAct(n){const h=hoyL(),L=(n.membresias||[]).slice().sort((a,b)=>a.ini
 function saldo(n){let t=0,v=null;(n.membresias||[]).forEach(m=>(m.cuotas||[]).forEach(q=>{if(!q.pagado){t+= +q.monto||0;if(!v||q.vence<v)v=q.vence}}));return{t,v}}
 const codigoDe=t=>{t=String(t||'').trim();const m=t.match(/[?&]c=([A-Za-z0-9]+)/);return(m?m[1]:t).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,20)};
 const slugDe=t=>{const m=String(t||'').match(/[?&]n=([a-z0-9-]+)/i);return m?m[1].toLowerCase():''};
-const ERR={usuario:'Tu @usuario debe tener de 3 a 20 letras, números, punto o guion bajo.',usuario_tomado:'Ese @usuario ya lo tiene otra persona. Prueba otro.',nombre:'Escribe tu nombre.',
+const ERR={usuario:'Tu @usuario debe tener de 3 a 20 letras, números, punto o guion bajo.',usuario_corto:'Los @ de 3 o 4 letras son solo para fundadores. Usa 5 o más.',usuario_tomado:'Ese @usuario ya lo tiene otra persona. Prueba otro.',nombre:'Escribe tu nombre.',
  celular:'Revisa tu celular (9 dígitos) o ya lo usa otra cuenta.',codigo:'Ese código no es válido. Pide ayuda en recepción.',dato:'Para confirmar que eres tú escribe tu DNI o el celular que diste en el negocio.',
  no_socio:'Primero conecta tu membresía de este negocio.',muchos:'Ya enviaste varias solicitudes hoy. Espera la respuesta.',vacio:'Escribe un mensaje.','sin acceso':'No tienes acceso a esto.',
  otro:'Ese carnet ya está unido a otra cuenta. Pide ayuda en recepción.',espera:'Demasiados intentos. Espera un rato y vuelve a probar.',no:'Este aviso ya no está disponible.'};
@@ -382,8 +389,9 @@ addEventListener('popstate',e=>{
  HN.pop=true;try{MODO=m.m;ls.s('mi-modo',MODO);TAB=m.t;SUB=m.s;NTAB=m.nt;NPID=m.np;PEDID=m.pe;CUR=m.c;HN.k=JSON.stringify(m);const i=HN.st.lastIndexOf(HN.k);if(i>=0)HN.st.length=i+1;else HN.st=[HN.k];pinta();const sc=document.querySelector('#sc');sc&&(sc.scrollTop=0)}catch(_){}HN.pop=false});
 // ---------- Navegación ----------
 const SUBV={mi:vMi,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,pedido:vPedido,ayuda:()=>vAyuda()};
-function pinta(){const r=pinta0();try{hSync()}catch(_){}return r}
+function pinta(){const r=pinta0();try{hSync()}catch(_){}if(MODO!=='negocio')fundBienvenida();return r}
 function pinta0(){
+ try{document.body.classList.toggle('fund',!!(D&&D.persona&&D.persona.fundador)&&MODO!=='negocio')}catch(_){}
  if(MODO==='negocio'&&NB)return pintaNeg();
  if(!D&&!(SUB&&SUB.neg))return pantallaEntrada();
  if(TAB==='inicio'&&N())acento(N());else if(SUB&&SUB.neg&&NEG[SUB.neg])acento(NEG[SUB.neg]);else acento(null);
@@ -421,6 +429,8 @@ function cabeza(n){const lg=logoURL(n.logo),h=new Date().toLocaleString('en-US',
  return`<div class="row" style="margin-bottom:14px">${lg?`<img class="lg" style="width:46px;height:46px;border-radius:14px" src="${esc(lg)}" alt="">`:''}<div class="sp"><p class="mu sm">${sal},</p><h2>${esc(nm)} ${dental(n)?'😁':'💪'}</h2></div><button class="btn l xs" data-neg="${esc(n.slug)}" style="font-weight:700">${esc(n.negocio)} ›</button></div>`}
 
 const saludo=()=>{const h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0;return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
+const fNum=n=>'#'+String(n).padStart(3,'0'),fBad=per=>per&&per.fundador?`<span class="fbad">★ Fundador ${fNum(per.fundador)}</span>`:'';
+function fundBienvenida(){const per=D&&D.persona;if(!per||!per.fundador||ls.g('mi-fund-'+per.idn))return;ls.s('mi-fund-'+per.idn,'1');setTimeout(()=>{hoja(`<div style="text-align:center;display:grid;gap:10px;justify-items:center"><div style="font-size:52px">🏅</div>${fBad(per)}<h2>¡Eres fundador de Mi Xyro!</h2><p class="mu sm">Eres de las primeras 50 personas en tener la app. Tu número es tuyo para siempre y nadie más lo tendrá.</p><div class="card fcard" style="text-align:left;width:100%"><p class="sm">★ Insignia de fundador en tu perfil</p><p class="sm">✨ Carnet dorado en todos tus negocios</p><p class="sm">@ Puedes usar un @usuario corto, de 3 o 4 letras</p></div><button class="btn p" data-x>¡Genial!</button></div>`);confeti()},600)}
 const avatarHTML=(per,id)=>`<div class="av"${id?` id="${id}"`:''}>${/^https:\/\//.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc((String(per.nombre||'?').trim()[0]||'?').toUpperCase())}</div>`;
 function tarjNeg(g){const lg=logoURL(g.logo);
  const ma=g._i!=null&&g.rubro!=='consultorio'?memAct(g):null,mt=ma?(ma.act?'activo hasta '+fF(ma.act.fin,{day:'numeric',month:'short'}):ma.fin?'venció el '+fF(ma.fin,{day:'numeric',month:'short'}):'sin plan activo'):'';
@@ -437,7 +447,7 @@ function vInicio(n){
   :fin?`<span class="pill ko">● Venció el ${fF(fin)}</span>`:`<span class="pill">Sin plan activo</span>`;
  const f0=post;post=()=>{f0&&f0();dibujaQR(n.codigo,'#qr');const q=$('#qr');q&&(q.onclick=()=>qrGrande(n))};
  return`${cabeza(n)}<div class="g">
-  <div class="carnet"><div class="row" style="width:100%"><b class="sm" style="text-align:left">${esc(n.negocio)}</b><span class="sp"></span>${n.num?`<span class="mu xs">N.º ${esc(n.num)}</span>`:''}</div>
+  <div class="carnet"><div class="row" style="width:100%"><b class="sm" style="text-align:left">${esc(n.negocio)}</b><span class="sp"></span>${D&&D.persona&&D.persona.fundador?fBad(D.persona):n.num?`<span class="mu xs">N.º ${esc(n.num)}</span>`:''}</div>
    <div class="qr" id="qr" title="Toca para agrandar"></div><div class="g" style="gap:6px;justify-items:center"><h2>${esc(n.nombre)}</h2>${pill}</div>
    <p class="mu xs">Muestra este QR en recepción para marcar tu ingreso</p></div>
   <div class="card"><div class="row">${anillo(rest,tot,`${act?rest:0}<small>días</small>`)}<div class="sp g" style="gap:4px">
@@ -520,7 +530,7 @@ function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||
  feedCarga();
  const f0=post;post=()=>{f0&&f0();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
  const it=feed(),pr=promosFeed();
- return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
+ return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1>${per.fundador?`<p style="margin-top:4px">${fBad(per)}</p>`:''}</div>${avatarHTML(per,'hav')}</div>
   ${M.length?`<div class="qk">${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}<button class="qkb" data-scan>${I.scan}<span><b>Escanear</b><small>QR de un negocio</small></span></button></div>`:''}
   ${av}<div class="g">${it.join('')}${pr}
   ${M.length?'':`<div class="card" style="text-align:center;justify-items:center;padding:26px 18px 18px;gap:12px"><div class="ibox big">${I.qr.replace('width="22" height="22"','width="40" height="40"')}</div><h2>Escanea el QR de tu negocio</h2>
@@ -708,7 +718,8 @@ async function escanear(onCode,txt){
 function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim()[0]||'?';
  const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=()=>modoNegocio();const s=$('#salir');s&&(s.onclick=salir);$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
  return`<div class="g"><div class="row"><div class="av">${/^https:\/\//.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
-   <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p></div></div>
+   <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p>${per.fundador?`<p style="margin-top:6px">${fBad(per)}</p>`:''}</div></div>
+  ${per.fundador?`<div class="card fcard"><div class="row"><span style="font-size:28px">🏅</span><div class="sp"><h3>Fundador ${fNum(per.fundador)} de Mi Xyro</h3><p class="mu sm">Eres de las primeras 50 personas en la app. Tu insignia, tu carnet dorado y tu @ corto son para siempre.</p></div></div></div>`:''}
   <button class="btn" id="ed">✏️ Editar mi perfil</button>
   <div class="idbox"><span class="mu xs" style="font-weight:700;display:inline-flex;gap:6px;align-items:center;justify-content:center;color:var(--a)">${I.id}ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><p class="mu xs">Es tuyo y nunca cambia. Dáselo a recepción para que conecten tu membresía a esta app.</p><button class="btn" id="cpi">📋 Copiar mi ID</button></div>
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
@@ -720,7 +731,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio</p></div>`}
 function editarPerfil(){const per=(D&&D.persona)||{};
  hoja(`<h2>✏️ Mi perfil</h2><label>Nombre<input id="pn" value="${esc(per.nombre||'')}" maxlength="80"></label><label>Apodo <span class="mu xs">(opcional, así te saludamos)</span><input id="pa" value="${esc(per.apodo||'')}" maxlength="40"></label>
-  <label>Tu @usuario<div class="row"><span style="font-weight:800;color:var(--a)">@</span><input id="pu" value="${esc(per.usuario||'')}" maxlength="20" autocapitalize="off" spellcheck="false"></div></label>
+  <label>Tu @usuario<div class="row"><span style="font-weight:800;color:var(--a)">@</span><input id="pu" value="${esc(per.usuario||'')}" maxlength="20" autocapitalize="off" spellcheck="false"></div><span class="mu xs">${per.fundador?'★ Como fundador puedes usar un @ corto, de 3 o 4 letras.':'De 5 a 20 letras. Los @ de 3 o 4 letras son de los fundadores.'}</span></label>
   <label>Celular <span class="mu xs">(opcional)</span><input id="pc" inputmode="numeric" value="${esc(per.celular||'')}" maxlength="12" placeholder="9XX XXX XXX"></label>
   <div class="msg" id="pm"></div><button class="btn p" id="pg">Guardar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
   const u=o.querySelector('#pu');u.oninput=()=>{u.value=u.value.toLowerCase().replace(/[^a-z0-9_.]/g,'')};
@@ -1098,7 +1109,7 @@ function demoPedUsr(){const t=m=>new Date(Date.now()-m*6e4).toISOString(),c=new 
   cita:{inicio:c.toISOString(),nutri_nombre:'Lic. Andrea Ruiz',nota:'Ven con ropa cómoda, te tomamos medidas.'},
   msgs:[{de:'negocio',autor:'Rosa · Recepción',texto:'¡Hola Vale! 👋 Para tu cita con nutrición tenemos pasado mañana a las 6 pm o el sábado 10 am. ¿Cuál te acomoda?',creado:t(60*19)},{de:'persona',texto:'Pasado mañana 6 pm porfa 🙌',creado:t(60*18)},{de:'negocio',autor:'Rosa · Recepción',texto:'📅 Tu cita quedó agendada para el '+fF(c.toISOString(),{weekday:'long',day:'numeric'})+' a las 6:00 pm con Lic. Andrea Ruiz.',creado:t(30)}]}]}
 function demoData(){const{gym,den}=demoBoth(),dent=DEMO==='consultorio';
- return{persona:{nombre:'Valeria Torres',apodo:'Vale',usuario:'vale.fit',idn:48203716,email:'vale@gmail.com',celular:'987654321'},
+ return{persona:{nombre:'Valeria Torres',apodo:'Vale',usuario:'vale',fundador:7,fund_quedan:12,idn:48203716,email:'vale@gmail.com',celular:'987654321'},
   negocios:[dent?den:gym],guardados:[{slug:'demo-cafe',negocio:'Nativa Café',color:'#16a34a',rubro:'restaurante',promos:1}],
   pedidos:dent?[]:demoPedUsr(),
   avisos:[{id:'av1',negocio:dent?'Fuerza Gym':'Sonrisa Dental',color:dent?'#e11d48':'#0ea5e9',rubro:dent?'gym':'consultorio',nombre:'Valeria Torres',quien:'Recepción'}]}}
@@ -1124,7 +1135,7 @@ async function demoRpc(f,a){
  if(f==='xa_yo_guardar'){toast('En la demo no se guarda de verdad');return true}
  if(f==='xa_yo_responder'){const av=D.avisos.shift(),{gym,den}=demoBoth();if(a.p_ok)D.negocios.push(av.rubro==='consultorio'?den:gym);return{ok:true}}
  if(/^xa_yo_plan/.test(f))return demoPlanRpc(f,a);
- if(f==='xa_yo_editar')return{...D.persona,nombre:a.p_nombre,apodo:a.p_apodo,usuario:a.p_usuario,celular:a.p_celular};
+ if(f==='xa_yo_editar'){const us=String(a.p_usuario||'');if(us.length<5&&!D.persona.fundador&&us!==D.persona.usuario)return{error:'usuario_corto'}}if(f==='xa_yo_editar')return{...D.persona,nombre:a.p_nombre,apodo:a.p_apodo,usuario:a.p_usuario,celular:a.p_celular};
  throw 'codigo'}
 
 // ---------- Arranque ----------
