@@ -69,6 +69,38 @@ input:focus{border-color:var(--a)}
 /* Carnet */
 .carnet{position:relative;border-radius:26px;padding:20px;background:var(--c1);border:1px solid var(--ln);overflow:hidden;display:grid;gap:14px;justify-items:center;text-align:center}
 .carnet::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--gr)}
+/* Xyro Card: tarjeta de cuenta por nivel (normal morado, Xyro+ titanio, fundador oro) */
+.xcard{position:relative;aspect-ratio:1.586;max-width:100%;border-radius:22px;padding:18px 20px;display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;cursor:pointer;color:#fff;
+ background:linear-gradient(135deg,#6a4cff,#4b5cff 45%,#2a8dff);box-shadow:0 24px 50px -24px #7c5cffaa,inset 0 1px 0 #ffffff40;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease;margin-bottom:14px;user-select:none;-webkit-user-select:none}
+.xcard::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,#ffffff08 0 2px,transparent 2px 6px),radial-gradient(120% 90% at 90% -10%,#ffffff40,transparent 55%);pointer-events:none}
+.xcard::after{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 42%,#ffffff40 50%,transparent 58%);transform:translateX(-60%);animation:xsh 5s ease-in-out infinite;pointer-events:none}
+@keyframes xsh{55%,100%{transform:translateX(60%)}}
+.xcard .xt{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+.xcard .xl{font-weight:900;letter-spacing:.32em;font-size:13px;opacity:.95}.xcard .xl small{display:block;letter-spacing:.2em;font-size:9.5px;opacity:.75;margin-top:3px;font-weight:800}
+.xcard .xm{width:34px;height:34px;border-radius:10px;background:#ffffff26;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.xcard .xchip{position:relative;z-index:1;align-self:center;width:44px;height:32px;border-radius:7px;background:linear-gradient(135deg,#f3f0e6,#bdb6a3 50%,#efe9d6);box-shadow:inset 0 0 0 1px #0002}
+.xcard .xchip::before{content:"";position:absolute;inset:7px 0;border-top:1px solid #0003;border-bottom:1px solid #0003}.xcard .xchip::after{content:"";position:absolute;inset:0 15px;border-left:1px solid #0003;border-right:1px solid #0003}
+.xcard .xn{font-size:34px;font-weight:900;letter-spacing:.04em;position:absolute;right:20px;top:50%;transform:translateY(-50%);z-index:1;font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #0002}
+.xcard .xb{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative;z-index:1;min-width:0}
+.xcard .xb b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.xcard .xb span{font-size:12px;opacity:.8}
+.xcard .xid{text-align:right;font:700 12px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;opacity:.85;white-space:nowrap}
+.xcard.f{color:#2a1c05;background:linear-gradient(125deg,#8a6114,#e6b84d 22%,#fff1bf 38%,#d9a43c 52%,#9a6c18 70%,#f2d27a 88%,#a87a20);box-shadow:0 26px 56px -24px #e6b84daa,inset 0 1px 0 #fff8,inset 0 -1px 0 #0003}
+.xcard.f::after{background:linear-gradient(115deg,transparent 40%,#fffbe8cc 50%,transparent 60%)}
+.xcard.f .xm{background:#2a1c0518}.xcard.f .xn{background:linear-gradient(180deg,#3a2706,#6b4a0c);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none}
+.xcard.p{background:linear-gradient(135deg,#0c0d12,#2a2d36 40%,#11131a 70%,#3a3e4a);box-shadow:0 24px 50px -24px #000,inset 0 1px 0 #ffffff30;color:#e9ecf3}
+.xcard.p .xl{background:linear-gradient(90deg,#fff,#a9b0c2,#fff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.xholo{position:absolute;right:18px;bottom:44px;width:38px;height:24px;border-radius:6px;background:conic-gradient(from 0deg,#ff9de2,#9de7ff,#b9ffb0,#fff59d,#ff9de2);opacity:.55;mix-blend-mode:overlay;z-index:1}
+@media (prefers-reduced-motion:reduce){.xcard::after{animation:none;display:none}.xcard{transform:none!important}}
+.tsec{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 8px}.tsec h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mini>div{background:var(--c1);border:1px solid var(--ln);border-radius:18px;padding:12px;display:grid;gap:2px;min-width:0;backdrop-filter:blur(6px)}
+.mini b{font-size:22px;font-variant-numeric:tabular-nums;white-space:nowrap}.mini small{font-size:11px;color:var(--mu);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.fund .mini>div{border-color:#e6b84d33}body.fund .ibox{background:#e6b84d1c;color:#e6b84d}body.fund .mini b{color:#f3d68a}
+.perks{display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:2px 16px 4px;scrollbar-width:none}.perks::-webkit-scrollbar{display:none}
+.perk{flex:none;width:150px;border-radius:18px;padding:14px;background:var(--c1);border:1px solid var(--ln);display:grid;gap:6px;backdrop-filter:blur(6px)}
+.perk i{font-style:normal;font-size:22px}.perk b{font-size:14px}.perk span{font-size:12px;color:var(--mu)}
+body.fund .perk{background:linear-gradient(160deg,#2b2110cc,#0f1220d9);border-color:#e6b84d40}
+.xplus{border-radius:22px;padding:18px;background:linear-gradient(135deg,#0c0d12,#22252e 60%,#0c0d12);border:1px solid #ffffff22;display:grid;gap:10px;position:relative;overflow:hidden}
+.xplus h3{font-size:18px}.xplus .tag{justify-self:start;font-size:11px;font-weight:800;letter-spacing:.1em;padding:4px 10px;border-radius:999px;background:#ffffff14;color:#cfd5e2}
 .fbad{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;color:#1a1204;background:linear-gradient(135deg,#fbe7a1,#e6b84d 45%,#b8862b);box-shadow:0 0 18px #e6b84d55;white-space:nowrap}
 body.fund .carnet{border-color:#e6b84d66;background:linear-gradient(160deg,#2b2110e6,#14110bd9 60%,#0f1220d9)}
 body.fund .carnet::before{background:linear-gradient(90deg,#b8862b,#fbe7a1,#e6b84d,#b8862b);height:4px}
@@ -550,17 +582,35 @@ function promosFeed(){const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.gu
  const lg=n=>{const l=logoURL(n.logo);return`<span class="fl2">${l?`<img src="${esc(l)}" alt="">`:icoR(n.rubro)}</span>`};
  return(P.length?`<p class="mu xs sec">🎁 PROMOS PARA TI</p><div class="hs">${P.slice(0,8).map(({n,p})=>`<button class="promo" data-neg="${esc(n.slug)}" style="text-align:left;cursor:pointer"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b><span class="pill" style="background:var(--a);color:#fff">Solo app</span></div><h3 style="font-size:17px">${esc(p.titulo)}</h3>${p.descripcion?`<p class="sm mu">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Hasta el ${fF(p.hasta,{day:'numeric',month:'short'})}</p>`:''}</button>`).join('')}</div>`:'')
   +(B.length?`<p class="mu xs sec">📢 NOVEDADES</p>${B.slice(0,4).map(({n,p})=>{const im=p.media&&p.mediaTipo!=='video'?medDe(n,p.media):'';return`<button class="card fd" data-neg="${esc(n.slug)}" style="padding:0;overflow:hidden">${im?`<img src="${esc(im)}" alt="" loading="lazy" onerror="this.remove()" style="width:100%;height:160px;object-fit:cover;display:block">`:''}<div style="padding:14px;display:grid;gap:4px"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b>${p.tipo?`<span class="xs" style="font-weight:800;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}</div><h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}</div></button>`}).join('')}`:'')}
+/* ---------- Inicio premium: Xyro Card por nivel, resumen, beneficios y Xyro+ ---------- */
+const nivel=per=>per&&per.fundador?'f':per&&per.plus?'p':'n';
+function xCard(per){const t=nivel(per),xm=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
+ const lab=t==='f'?'XYRO<small>FOUNDER EDITION</small>':t==='p'?'XYRO+<small>MEMBER</small>':'XYRO<small>MEMBER</small>';
+ return`<div class="xcard ${t}" id="xcd" role="button" aria-label="Mi tarjeta Xyro"><div class="xt"><span class="xl">${lab}</span><span class="xm">${xm}</span></div><span class="xchip"></span>${t==='f'?`<span class="xn">#${String(per.fundador).padStart(3,'0')}</span>`:''}${t!=='n'?'<span class="xholo"></span>':''}
+  <div class="xb"><div style="min-width:0"><b>${esc(per.nombre||'')}</b><span>@${esc(per.usuario||'')}</span></div><span class="xid">${esc(idTxt(per.idn))}</span></div></div>`}
+function xCardFx(){const c=$('#xcd');if(!c)return;c.onclick=()=>{vib();TAB='perfil';pinta()};if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const mv=(x,y)=>{const r=c.getBoundingClientRect(),px=(x-r.left)/r.width-.5,py=(y-r.top)/r.height-.5;c.style.setProperty('--ry',(px*10).toFixed(1)+'deg');c.style.setProperty('--rx',(-py*10).toFixed(1)+'deg')},z=()=>{c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')};
+ c.onpointermove=e=>mv(e.clientX,e.clientY);c.onpointerleave=z;c.onpointerup=z}
+function resumenHTML(M){const n=M.find(x=>(x.membresias||[]).length||x.ingresos);if(!n)return'';const{act}=memAct(n),h=hoyL(),rest=act?dias(h,act.fin):0;
+ return`<div class="tsec"><h3>Tu resumen · ${esc(n.negocio)}</h3></div><div class="mini"><div><small>Tu plan</small><b>${act?rest:'—'}</b><small>${act?'días':'sin plan activo'}</small></div><div><small>Ingresos</small><b>${(n.ingresos&&n.ingresos.mes)|0}</b><small>últimos 30 días</small></div><div><small>Última vez</small><b style="font-size:16px;margin-top:6px">${n.ingresos&&n.ingresos.ultimo?esc(haceCuanto(n.ingresos.ultimo)):'—'}</b><small>&nbsp;</small></div></div>`}
+function perksHTML(per){const t=nivel(per);
+ const L=t==='f'?[['🏅','Insignia #'+String(per.fundador).padStart(3,'0'),'Tuya para siempre'],['✨','Carnet dorado','En todos tus negocios'],['@','@ corto','De 3 o 4 letras'],['⭐','Xyro+ gratis','3 meses al lanzar']]
+  :t==='p'?[['🎟️','Descuentos','En negocios Xyro'],['📈','Mi progreso','Peso, medidas y rachas'],['🤖','Coach IA','Rutinas y comidas'],['⚡','Pide sin cola','En cafeterías']]
+  :[['🎁','Promos solo app','De tus negocios'],['📱','Tu QR','Entra sin carnet'],['📋','Rutinas y citas','Todo en un lugar']];
+ return`<div class="tsec"><h3>${t==='f'?'Beneficios de fundador':t==='p'?'Tu Xyro+':'Tu cuenta'}</h3></div><div class="perks">${L.map(([i,b,x])=>`<div class="perk"><i>${i}</i><b>${esc(b)}</b><span>${esc(x)}</span></div>`).join('')}</div>`}
+function xPlusHTML(per){if(per&&per.plus)return'';return`<div class="xplus" style="margin-top:14px"><span class="tag">MUY PRONTO</span><h3>Xyro+</h3><p class="mu sm">Descuentos en todos los negocios Xyro, tu progreso con gráficos, coach con IA y pedidos sin cola.${per&&per.fundador?' <b style="color:#f3d68a">Como fundador, tendrás 3 meses gratis.</b>':''}</p></div>`}
 function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||[],av=avisos();
  feedCarga();
- const f0=post;post=()=>{f0&&f0();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
+ const f0=post;post=()=>{f0&&f0();xCardFx();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
  const it=feed(),pr=promosFeed();
- return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1>${per.fundador?`<p style="margin-top:4px">${fBad(per)}</p>`:''}</div>${avatarHTML(per,'hav')}</div>
+ return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
+  ${per.idn?xCard(per):''}
   ${M.length?`<div class="qk">${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}<button class="qkb" data-scan>${I.scan}<span><b>Escanear</b><small>QR de un negocio</small></span></button></div>`:''}
-  ${av}<div class="g">${it.join('')}${pr}
+  ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}${av}<div class="g">${it.join('')}${pr}
   ${M.length?'':`<div class="card" style="text-align:center;justify-items:center;padding:26px 18px 18px;gap:12px"><div class="ibox big">${I.qr.replace('width="22" height="22"','width="40" height="40"')}</div><h2>Escanea el QR de tu negocio</h2>
    <p class="mu sm" style="max-width:300px">Tu gym, consultorio o tienda favorita tiene su QR de Xyro. Escanéalo y mira sus promos solo por la app.</p><button class="btn p" data-scan style="width:100%">${I.scan}Escanear QR</button></div>
   <div class="card"><div class="row"><div class="ibox">${I.id}</div><div class="sp"><h3>¿Ya eres socio o paciente?</h3><p class="mu sm">Conecta tu membresía, tu QR y tus rutinas o citas.</p></div></div><button class="btn" data-yo>Ya estoy registrado en un negocio</button></div>`}
-  ${M.length&&!it.length&&!pr&&!av?`<div class="card vacio"><span class="e">✨</span><h2>Todo al día</h2><p class="mu sm">Aquí verás tus promos, avisos y lo que te toca hoy.</p></div>`:''}</div>`}
+  </div>${per.idn?perksHTML(per)+xPlusHTML(per):''}`}
 
 // ---------- Mis planes: pedir plan de entrenamiento o cita con nutrición (SQL 48) ----------
 let PEDID=null;
