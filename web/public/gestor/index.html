@@ -645,15 +645,16 @@ async function prCrear(){
 /* Tickets de soporte (SQL 32): los negocios escriben desde Xyro Apps → Soporte. Aquí se responde, con su contexto y errores. */
 let TKIA=null,TKG=0,tkF='pend',tkSel=null;
 const TKE={abierto:['Nuevo','pend'],en_proceso:['En proceso','soporte'],esperando:['Esperando al cliente','x'],resuelto:['Resuelto','activo']};
-const TKC={problema:'🐞 Algo no funciona',duda:'❓ Duda',cambio:'✏️ Pedido de cambio',pago:'💳 Pagos y plan',otro:'💬 Otro'};
+const TKC={problema:'🐞 Algo no funciona',duda:'❓ Duda',cambio:'✏️ Pedido de cambio',pago:'💳 Pagos y plan',otro:'💬 Otro',directo:'📨 Mensaje directo'};
+const DMP={admin:'Administradores','admin,supervisor':'Administradores y supervisores'};let DMO=false;
 const tkPend=t=>!t.ultimo_gestor&&t.estado!=='resuelto';
 const tkF2=d=>d?new Date(d).toLocaleString('es-PE',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
 async function tkCuenta(){ try{ const {count,error}=await sb.from('xa_tickets').select('id',{count:'exact',head:true}).eq('ultimo_gestor',false).neq('estado','resuelto'); if(error)return; if(count!==TKG){ const sube=count>TKG; TKG=count||0; side(); if(sube&&TKG&&view!=='tickets')toast(`🎫 Tienes ${TKG} ticket${TKG===1?'':'s'} por responder`); } }catch(_){} }
 V.tickets=async ()=>{
   if(tkSel)return tkVer(tkSel);
   H('Tickets de soporte','Todo lo que piden los negocios desde su Xyro Apps, con su contexto técnico.');
-  $('#acts').innerHTML='<button class="btn btn-g" data-v="tickets">↻ Actualizar</button>';
-  const {data,error}=await sb.from('xa_tickets').select('id,slug,negocio,autor_nombre,autor_rol,categoria,prioridad,asunto,estado,creado,actualizado,ultimo_gestor').order('actualizado',{ascending:false}).limit(500);
+  $('#acts').innerHTML='<button class="btn btn-p" data-dmo>📨 Mensaje directo</button> <button class="btn btn-g" data-v="tickets">↻ Actualizar</button>';
+  const [{data,error},{data:SI}]=await Promise.all([sb.from('xa_tickets').select('id,slug,negocio,autor_nombre,autor_rol,categoria,prioridad,asunto,estado,creado,actualizado,ultimo_gestor').order('actualizado',{ascending:false}).limit(500),sb.from('sitios').select('id,slug,negocio').order('negocio')]);
   if(error)return `<div class="note">🎫 Para recibir tickets de soporte, corre <b>32-xyro-tickets-soporte.sql</b> en Supabase.</div>`;
   const L=data||[],F={pend:L.filter(tkPend),esp:L.filter(t=>t.ultimo_gestor&&t.estado!=='resuelto'),res:L.filter(t=>t.estado==='resuelto'),todo:L};
   TKG=F.pend.length; side();
@@ -661,13 +662,21 @@ V.tickets=async ()=>{
   const ch=(k,n)=>`<button class="btn ${tkF===k?'btn-p':'btn-g'} btn-sm" data-tkf="${k}">${n} · ${F[k].length}</button>`;
   const rows=F[tkF].sort((a,b)=>(b.prioridad==='urgente'&&tkF==='pend')-(a.prioridad==='urgente'&&tkF==='pend')||new Date(b.actualizado)-new Date(a.actualizado)).map(t=>{const [e,c]=TKE[t.estado]||['',''];
     return `<tr data-tk="${t.id}" style="cursor:pointer"><td><b>#${t.id}</b></td><td><b>${esc(t.asunto)}</b><br><small style="color:var(--mu)">${esc(TKC[t.categoria]||'')} · ${esc(t.autor_nombre||'')}${t.autor_rol?' ('+esc(t.autor_rol)+')':''}</small></td><td>${esc(t.negocio||t.slug||'')}</td><td>${t.prioridad==='urgente'?'<span class="tag baja">🔴 Urgente</span> ':''}<span class="tag ${c}">${e}</span>${tkPend(t)?' <span class="tag pend">por responder</span>':''}</td><td><small>${tkF2(t.actualizado)}</small></td></tr>`}).join('');
-  return `${urg?`<div class="note" style="border-color:#ff5c7a66;background:#ff5c7a14">🔴 <div><b>${urg} ticket${urg===1?'':'s'} urgente${urg===1?'':'s'}</b> por responder.</div></div>`:''}
+  /* Mensaje directo (SQL 51): XyroStudio escribe a los administradores/supervisores de un negocio; lo ven en su Soporte con aviso arriba y responden ahí. */
+  const dm=DMO?`<div class="panel" style="border-color:rgba(124,108,255,.5)"><h3>📨 Mensaje directo a un negocio</h3><p class="d">Le aparece arriba en su Xyro Apps y en Soporte. Lo ve solo quien elijas; responden aquí mismo.</p><form class="form" onsubmit="return false" style="margin-top:10px">
+    <label>Negocio<select id="dmS"><option value="*">🌎 Todos los negocios</option>${(SI||[]).map(x=>`<option value="${esc(x.id)}">${esc(x.negocio||x.slug)}</option>`).join('')}</select></label>
+    <label>Para<select id="dmP">${Object.entries(DMP).map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select></label>
+    <label class="full">Asunto<input id="dmA" maxlength="140" placeholder="Ej: Nueva función en tu panel"></label>
+    <label class="full">Mensaje<textarea id="dmT" rows="4" maxlength="4000" placeholder="Escribe tu mensaje…"></textarea></label>
+    <div class="full" style="display:flex;gap:8px"><button class="btn btn-p" data-dmsend>Enviar</button><button class="btn btn-g" data-dmo>Cancelar</button></div></form></div>`:'';
+  window.TKSI=SI||[];
+  return `${dm}${urg?`<div class="note" style="border-color:#ff5c7a66;background:#ff5c7a14">🔴 <div><b>${urg} ticket${urg===1?'':'s'} urgente${urg===1?'':'s'}</b> por responder.</div></div>`:''}
     <div class="panel"><div style="display:flex;gap:8px;flex-wrap:wrap">${ch('pend','Por responder')}${ch('esp','Esperando al cliente')}${ch('res','Resueltos')}${ch('todo','Todos')}</div>
     ${rows?`<div class="tbl" style="margin-top:12px"><table><tr><th>#</th><th>Asunto</th><th>Negocio</th><th>Estado</th><th>Actualizado</th></tr>${rows}</table></div>`:`<div class="empty" style="margin-top:12px">${tkF==='pend'?'🎉 Nada por responder.':'Nada por aquí.'}</div>`}</div>`;
 };
 async function tkVer(id){
   const {data:t,error}=await sb.from('xa_tickets').select('*').eq('id',id).single(); if(error||!t){ tkSel=null; return '<div class="panel"><div class="empty">No encontré ese ticket.</div></div>'; }
-  H(`#${t.id} · ${t.asunto}`,`${t.negocio||t.slug} · ${TKC[t.categoria]||''} · creado ${tkF2(t.creado)}`);
+  H(`#${t.id} · ${t.asunto}`,`${t.negocio||t.slug} · ${TKC[t.categoria]||''}${t.para?' para '+(DMP[t.para.join(',')]||t.para.join(', ')).toLowerCase():''} · creado ${tkF2(t.creado)}`);
   $('#acts').innerHTML='<button class="btn btn-g" data-tkback>← Tickets</button>'+(t.slug?` <button class="btn btn-g" data-xapp="${esc(t.slug)}">Entrar a su Xyro Apps ↗</button>`:'');
   const d48=new Date(Date.now()-2*864e5).toISOString();
   const [{data:M},seg,web]=await Promise.all([
@@ -1191,6 +1200,15 @@ document.addEventListener('click', async e=>{
         const tx=$('#tkTx'); if(tx&&j.borrador_respuesta&&!tx.value.trim())tx.value=j.borrador_respuesta; else if(tx&&j.borrador_respuesta)tx.value+='\n\n'+j.borrador_respuesta; tx&&tx.focus();
       }catch(ex){ box.innerHTML=''; toast(ex.message); } el.disabled=false; return; }
     if('tkback' in d){ tkSel=null; return go('tickets'); }
+    if('dmo' in d){ DMO=!DMO; tkSel=null; return go('tickets'); }
+    if('dmsend' in d){ const sid=$('#dmS').value,para=$('#dmP').value.split(','),as=$('#dmA').value.trim(),tx=$('#dmT').value.trim();
+      if(as.length<3)return toast('Escribe un asunto'); if(!tx)return toast('Escribe el mensaje');
+      const L=sid==='*'?(window.TKSI||[]):(window.TKSI||[]).filter(x=>String(x.id)===sid); if(!L.length)return toast('Elige un negocio');
+      if(sid==='*'&&!confirm(`¿Enviar este mensaje a ${L.length} negocios?`))return; el.disabled=true; let ok=0;
+      for(const x of L){ const {data:t,error}=await sb.from('xa_tickets').insert({sitio_id:String(x.id),slug:x.slug,negocio:x.negocio||x.slug,autor:me.id,autor_nombre:'XyroStudio',autor_rol:'gestor',categoria:'directo',asunto:as.slice(0,140),estado:'esperando',ultimo_gestor:true,para,contexto:{directo:true}}).select('id').single();
+        if(error){ el.disabled=false; if(/para|categoria|check/i.test(error.message||''))return toast('📨 Para mensajes directos, corre 51-xyro-mensajes-directos.sql en Supabase.'); throw error; }
+        const {error:e2}=await sb.from('xa_ticket_msgs').insert({ticket_id:t.id,autor:me.id,autor_nombre:'XyroStudio',de_gestor:true,texto:tx.slice(0,4000)}); if(e2){ el.disabled=false; throw e2; } ok++; }
+      touch(`Mensaje directo «${as}» a ${ok} negocio${ok===1?'':'s'}`); DMO=false; tkF='esp'; toast(`📨 Enviado a ${ok} negocio${ok===1?'':'s'}`); return go('tickets'); }
     if(d.tkres){ const tx=$('#tkTx').value.trim(); if(!tx)return toast('Escribe la respuesta'); el.disabled=true;
       let {error}=await sb.from('xa_ticket_msgs').insert({ticket_id:+d.tkres,autor:me.id,autor_nombre:'XyroStudio',de_gestor:true,texto:tx.slice(0,4000)}); if(error){ el.disabled=false; throw error; }
       ({error}=await sb.from('xa_tickets').update({estado:d.est,visto_gestor:new Date().toISOString()}).eq('id',+d.tkres)); if(error)throw error;
