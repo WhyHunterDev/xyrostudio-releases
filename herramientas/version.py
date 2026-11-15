@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Congela el panel de pruebas (web/public/app/dev/) como una versión nueva en web/public/app/v/<id>/.
-Uso: python3 herramientas/version.py "Título corto" "cambio 1" "cambio 2" ... [--sql "SQL 30"] [--rubro gym|consultorio]
+Uso: python3 herramientas/version.py "Título corto" "cambio 1" "cambio 2" ... [--sql "SQL 30"] [--rubro gym|consultorio|restaurante]
 --rubro: para qué ecosistema es (se puede repetir o separar con comas). Sin --rubro = para todos los negocios.
 Se ve en Panel XyroStudio → Actualizaciones → Historial. Los negocios NO cambian hasta que el gestor la sube."""
 import json, os, shutil, sys, datetime

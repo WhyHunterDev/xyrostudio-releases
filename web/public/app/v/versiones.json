@@ -1,5 +1,22 @@
 [
  {
+  "id": "20261115-0953",
+  "fecha": "2026-11-15 09:53",
+  "titulo": "Nuevo: restaurantes y cafeterías",
+  "notas": "Nuevo: restaurantes y cafeterías",
+  "cambios": [
+   "Mapa de mesas en vivo: libre, pidió, en cocina, por cobrar",
+   "El mozo toma pedidos por mesa o para llevar desde el celular o la PC",
+   "Pantalla de Cocina con tiempos (se pone naranja y roja si demora)",
+   "Carta con fotos y stock, caja, reportes de lo más vendido y horas fuertes",
+   "Sin socios, membresías ni asistencia: solo lo que usa un restaurante"
+  ],
+  "requiere": "SQL 56",
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-0930",
   "fecha": "2026-11-15 09:30",
   "titulo": "Elegir servicios del gym",
