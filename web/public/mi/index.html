@@ -260,6 +260,7 @@ textarea{width:100%;font:inherit;color:var(--tx);background:var(--c2);border:1px
 @media (max-width:360px){.tab{font-size:10px}.tab.scan{flex:0 0 62px}.tab.scan .fab{width:52px;height:52px}.kps{gap:8px}.kp{padding:12px}}
 #instb{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));z-index:8;max-width:500px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:18px;background:#14121fee;backdrop-filter:blur(12px);border:1px solid #7c5cff66;box-shadow:0 12px 40px #0009;animation:up .4s cubic-bezier(.2,1,.3,1)}
 #instb img{width:38px;height:38px;border-radius:10px;flex:none}#instb span{flex:1;min-width:0;display:grid;line-height:1.25}#instb small{color:var(--mu);font-size:12px}#instb .btn{width:auto;padding:9px 14px;font-size:14px;flex:none}#instb .ix{all:unset;cursor:pointer;color:var(--mu);padding:6px;font-size:14px}
+.nfb{display:inline-block;margin:2px 0 6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f7dc8a,#e6b84d 55%,#b8862b);box-shadow:0 4px 14px #e6b84d40}
 </style>
 </head>
 <body>
@@ -468,7 +469,7 @@ function pinta0(){
  const f=post;post=null;f&&f();
 }
 function barraNeg(){const L=negs();if(L.length<2)return'';
- return`<div class="negs">${L.map((n,i)=>{const lg=logoURL(n.logo);return`<button class="neg${i===CUR?' on':''}" data-n="${i}"><i>${lg?`<img src="${esc(lg)}" alt="">`:icoR(n.rubro)}</i>${esc(n.negocio)}</button>`}).join('')}</div>`}
+ return`<div class="negs">${L.map((n,i)=>{const lg=logoURL(n.logo);return`<button class="neg${i===CUR?' on':''}" data-n="${i}"><i>${lg?`<img src="${esc(lg)}" alt="">`:icoR(n.rubro)}</i>${esc(n.negocio)}${n.fundador?' <span style="color:#e6b84d">🏅</span>':''}</button>`}).join('')}</div>`}
 function avisos(){return((D&&D.avisos)||[]).map(a=>`<div class="aviso"><div class="row"><span class="dot" style="width:42px;height:42px;font-size:20px;overflow:hidden">${logoURL(a.logo)?`<img src="${esc(logoURL(a.logo))}" style="width:100%;height:100%;object-fit:cover" alt="">`:'🔔'}</span>
   <div class="sp"><b>${esc(a.negocio)}</b> quiere conectar tu cuenta</div></div>
   <p class="sm">Así verás aquí tu ${a.rubro==='consultorio'?'ficha de paciente, tus citas y tu tratamiento':'membresía, días que te quedan, tu QR y tus rutinas'}. Te registraron como <b>${esc(a.nombre)}</b>${a.quien?' ('+esc(a.quien)+')':''}.</p>
@@ -734,7 +735,7 @@ function vNegocio(slug){const n=NEG[slug];
  return`<div class="nwrap"><button class="back fl" data-back aria-label="Volver">‹</button>
  <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:'background:linear-gradient(135deg,var(--a),#000)'}"></div>
  <div class="nhead">${lg?`<img class="lg" src="${esc(lg)}" alt="">`:`<div class="lg" style="display:grid;place-items:center;font-size:34px">${icoR(rub)}</div>`}
-  <h1>${esc(n.negocio)}</h1>${n.descripcion?`<p class="sm" style="max-width:420px;opacity:.9">${esc(n.descripcion)}</p>`:''}${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
+  <h1>${esc(n.negocio)}</h1>${n.fundador?`<p class="nfb" title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador</p>`:''}${n.descripcion?`<p class="sm" style="max-width:420px;opacity:.9">${esc(n.descripcion)}</p>`:''}${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
  <div class="g" style="margin-top:14px">
   ${mi>=0?`<button class="btn p" id="sv">${rub==='consultorio'?'🦷 Ver mis citas y tratamiento':'🎟️ Ver mi membresía y mi QR'}</button>`
    :`<div class="row">${sesion?`<button class="btn ${n.guardado?'':'p'} sp" id="gd">${n.guardado?'✓ Guardado':'＋ Guardar negocio'}</button>`:`<button class="btn p sp" id="gd">＋ Guardar en mi app</button>`}${waBtn(n,'Hola, los vi en la app Mi Xyro. Quiero información.','💬')}</div>
@@ -1208,7 +1209,7 @@ function demoData(){const{gym,den}=demoBoth(),dent=DEMO==='consultorio';
   negocios:[dent?den:gym],guardados:[{slug:'demo-cafe',negocio:'Nativa Café',color:'#16a34a',rubro:'restaurante',promos:1}],
   pedidos:dent?[]:demoPedUsr(),
   avisos:[{id:'av1',negocio:dent?'Fuerza Gym':'Sonrisa Dental',color:dent?'#e11d48':'#0ea5e9',rubro:dent?'gym':'consultorio',nombre:'Valeria Torres',quien:'Recepción'}]}}
-function demoNeg(slug){const g=slug==='demo-gym'?{negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym'}:slug==='demo-dental'?{negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio'}:{negocio:'Nativa Café',color:'#16a34a',rubro:'restaurante'};
+function demoNeg(slug){const g=slug==='demo-gym'?{negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym',fundador:true}:slug==='demo-dental'?{negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio'}:{negocio:'Nativa Café',color:'#16a34a',rubro:'restaurante'};
  const rs=g.rubro==='restaurante';
  return{slug,...g,whatsapp:'936449066',descripcion:rs?'Café de especialidad, brunch y almuerzos caseros. Pide desde tu mesa con el QR.':g.rubro==='consultorio'?'Odontología para toda la familia, sin dolor y con citas puntuales.':'Entrena con nosotros: máquinas nuevas, clases todos los días y buen ambiente.',guardado:true,socio:negs().some(n=>n.slug===slug),
   promos:[{titulo:rs?'Postre gratis con tu almuerzo por la app':g.rubro==='consultorio'?'Limpieza a S/ 59 por la app':'Inscripción gratis + 1 semana extra',descripcion:'Solo para quienes nos guardaron en Mi Xyro.',hasta:''}],

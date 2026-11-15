@@ -63,3 +63,9 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 **Ecosistemas en el gestor (2026-11-15, pedido del usuario):** Clientes y Xyro Apps se dividen por ecosistema con la fila `ecoChips` (Todos + 🏋️ Gimnasios, 🦷 Consultorios, 🍽️ Restaurantes siempre visibles, + los que tengan negocios; `gEco` en localStorage `xg-geco`, clic `data-geco`) y títulos `ecoTit` por grupo. Rubro real de `contenido.app.rubro` (`cargarRubs`/`RUBS` por slug); clientes sin app caen por texto (`ecoTxt`) o en «Otros / solo web». Para un ecosistema nuevo basta sumarlo a `ECOS` y `PLANTILLAS`.
 - 2026-11-15: importador = servicio pagado: solo el gestor ve «📥 Pasar datos de otro sistema» (Inicio, Socios, Ajustes); el asistente dice que se pide por ticket. Sin nombres de otras marcas (se quitó «AppFit» de app/dev y de las copias en app/v).
 - Gestor: asegVer(slug) al «Entrar a su Xyro Apps»: si el negocio no tiene versión propia (o tiene una anterior a su rubro, p. ej. cafetería en versión de gym) le pone la más nueva de su ecosistema.
+
+## Negocio fundador (SQL 61, 2026-11-15)
+- 1 negocio por rubro (gym, consultorio, restaurante, cafeteria = restaurante tipo café, academia) en `xa_neg_fundadores` (pk rubro). Solo gestor: `xa_g_neg_fund(slug, dar)`, lista `xa_g_neg_funds()`. Público: `xa_neg_fund(slug)`.
+- Gestor: ficha → pestaña Xyros → tarjeta «🏅 Negocio fundador» (`nfCargar`, `data-nfund`).
+- Xyro Apps: `NFUND` (se pide al arrancar), «🏅 Fundador» en la marca del menú y banner `nfBan()` en Inicio (se cierra por negocio).
+- Mi Xyro: `xa_yo_negocio` devuelve `fundador` → pastilla dorada `.nfb` en la página del negocio. Web /restaurante/: pastilla en el hero.

@@ -1379,7 +1379,7 @@ function navGrupos(n){const chico=n.length<=(R.resto?7:8);
 const navNum=t=>{const m=String(t).match(/\((\d+)\)\s*$/);return m?+m[1]:0};
 function shell(){
  const n=NAV(),NG=navGrupos(n.filter(x=>x[0]!=='kiosco')),lnk=([k,i,t])=>`<a class="nav" href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`;
- $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>Xyro Apps · ${esc(R.n)}</small></div></div>`+NG.map(sec=>(NG.length>1&&sec.h?`<div class="nh">${esc(sec.h)}</div>`:'')+sec.top.map(lnk).join('')+sec.G.map(g=>{const c=g.L.reduce((a,x)=>a+navNum(x[2]),0),ab=LS.g('xa-ng-'+g.k,'')==='1'||c>0||g.L.some(x=>x[0]===ruta);return`<details class="ng" data-g="${g.k}" ${ab?'open':''}><summary class="nav"><em>${g.i}</em>${esc(g.t)}${c?`<b class="ngc">${c}</b>`:''}</summary><div class="ngl">${g.L.map(lnk).join('')}</div></details>`}).join('')).join('')+
+ $('#side').innerHTML=`<div class="brand"><img src="${esc(logoDe()||'/img/marca/logo-apps-app.svg')}" alt="" style="${logoDe()?'border-radius:10px;object-fit:contain':''}" onerror="this.src='/img/marca/logo-apps-app.svg'"><div><b>${esc(nombre())}</b><small>${NFUND?'<span style="color:#e6b84d" title="Negocio fundador de XyroStudio">🏅 Fundador</span> · ':''}Xyro Apps · ${esc(R.n)}</small></div></div>`+NG.map(sec=>(NG.length>1&&sec.h?`<div class="nh">${esc(sec.h)}</div>`:'')+sec.top.map(lnk).join('')+sec.G.map(g=>{const c=g.L.reduce((a,x)=>a+navNum(x[2]),0),ab=LS.g('xa-ng-'+g.k,'')==='1'||c>0||g.L.some(x=>x[0]===ruta);return`<details class="ng" data-g="${g.k}" ${ab?'open':''}><summary class="nav"><em>${g.i}</em>${esc(g.t)}${c?`<b class="ngc">${c}</b>`:''}</summary><div class="ngl">${g.L.map(lnk).join('')}</div></details>`}).join('')).join('')+
   `<div class="side-f"><a class="btn sm"${soporteTgt()} href="${soporteURL()}">🛟 Soporte XyroStudio<b class="tkb" ${TKN?'':'hidden'}>${TKN}</b></a><span>${esc(ME.nombre||ME.email||'')} · ${esc(ROLES[ME.rol]||'')}</span>${DEMO?'<a class="btn sm" href="./">Salir de la demo</a>':`${ME.gestor||NEG.length>1?'<button class="btn sm" id="cambia">🏢 Cambiar negocio</button>':''}<button class="btn sm" id="out">Cerrar sesión</button>`}</div>`;
  $('#bn').innerHTML=n.filter(x=>R.resto?['inicio','pedidos','cocina','caja'].includes(x[0])||(ME.rol==='cafetin'&&x[0]==='tienda'):['inicio','agenda','socios','kiosco','tienda','caja'].includes(x[0])||(ME.rol==='cafetin'&&x[0]==='pedidos')||(isCoach()&&x[0]==='rutinas')).concat([['mas','☰','Más']]).map(([k,i,t])=>`<a href="#/${k}" data-k="${k}"><em>${i}</em>${esc(t)}</a>`).join('');
  $$('#side details.ng').forEach(d=>d.ontoggle=()=>LS.s('xa-ng-'+d.dataset.g,d.open?'1':''));
@@ -1421,7 +1421,12 @@ addEventListener('hashchange',go);
 addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();if(ruta!=='socios')location.hash='#/socios';setTimeout(()=>{const s=$('#q2');s&&s.focus()},80)}});
 
 /* ===== Vistas ===== */
-function inicio(){
+let NFUND=null;
+const NFR={gym:'gimnasios',consultorio:'consultorios',restaurante:'restaurantes',cafeteria:'cafeterías',academia:'academias'};
+function nfBan(){if(!NFUND||LS.g('xa-nf-'+SLUG,'')==='1')return'';setTimeout(()=>{const x=$('#nfX');x&&(x.onclick=()=>{LS.s('xa-nf-'+SLUG,'1');$('#nfB').remove()})},0);
+ return`<div class="card" id="nfB" style="border:1px solid #e6b84d66;background:linear-gradient(135deg,#e6b84d1f,#14141400);display:flex;gap:14px;align-items:center;margin-bottom:14px"><span style="font-size:34px">🏅</span><div style="flex:1"><b style="color:#e6b84d">Negocio fundador de XyroStudio</b><p class="mu" style="margin:4px 0 0">Fueron los primeros ${esc(NFR[NFUND.rubro]||'negocios')} en creer en este proyecto. Gracias por confiar en nosotros: este reconocimiento es solo suyo y se ve en su app y en su carta.</p></div><button class="btn" id="nfX" style="padding:6px 10px">✕</button></div>`}
+function inicio(){return nfBan()+inicio0()}
+function inicio0(){
  if(R.resto)return inicioResto();
  if(R.citas&&citOn())return inicioDent();
  const H=hoy(),E=S.cli.map(c=>[c,est(c)]);
@@ -3806,6 +3811,7 @@ async function entrar(u){
  CFG=Object.assign({rubro:'gym',nombre:WEB.nombre||s.negocio||s.slug},C.app||{});R=rubDe(CFG);
  if(ME.gestor&&(!CFG.web||!CFG.panelWeb)){try{const{data:ca}=await sb.from('clientes_agencia').select('url,panel').ilike('url','%'+SLUG+'%').limit(1);const c0=ca&&ca[0]||{};CFG.web=CFG.web||c0.url||'';if(!CFG.panelWeb&&c0.panel){CFG.panelWeb=c0.panel;setTimeout(()=>DB.cfg({panelWeb:c0.panel}).catch(()=>{}),1500)}}catch(_){}}
  await DB.load();asegS();
+ try{const{data:nf}=await sb.rpc('xa_neg_fund',{p_slug:SLUG});NFUND=nf||null}catch(_){}
  start();
 
 }
