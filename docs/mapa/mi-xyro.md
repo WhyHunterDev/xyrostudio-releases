@@ -26,3 +26,4 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Foto de perfil: `subirFoto` (400 px webp) a medios/mi/<uid>/ (política en SQL 57); se guarda con p_foto de xa_yo_editar.
 - Fundador en toda la app (`body.fund`): botones, botón escanear, pestaña activa, aro del avatar, nombre, ID y partículas dorados.
 - Inicio premium (2026-11-15): Xyro Card por nivel (`nivel(per)`: f=fundador oro, p=`per.plus` Xyro+ titanio, n=normal morado), resumen del plan, beneficios por nivel y teaser «Xyro+ · Muy pronto». 3 tipos de cuenta: fundador, normal, Xyro+ (pago, aún sin cobrar).
+- Gestor: «⭐ Dar fundador» (siguiente número aunque estén llenos) / «🚫 Quitar fundador» (sanción, fund_bloq: no lo vuelve a recibir) → xa_yo_g_fund (SQL 58).
