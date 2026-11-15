@@ -641,7 +641,7 @@ function form(title,fields,onSave,extra){
 
 /* ===== Planes de entrenamiento y alimentación (gimnasio, SQL 29: xa_rutinas). cliente_id vacío = plantilla ===== */
 const rutOn=()=>(CFG.rubro||'gym')==='gym'&&(DEMO||!NEED29);
-const puedeTipo=t=>!ME||ME.rol!=='entrenador'&&ME.rol!=='nutricionista'?true:ME.rol==='entrenador'?t==='entreno':t==='nutri';
+const puedeTipo=t=>!svOff(t)&&(!ME||ME.rol!=='entrenador'&&ME.rol!=='nutricionista'?true:ME.rol==='entrenador'?t==='entreno':t==='nutri');
 const RT={entreno:{n:'Entrenamiento',ico:'🏋️',t:'Plan de entrenamiento'},nutri:{n:'Alimentación',ico:'🥗',t:'Plan de alimentación'}};
 const DIAS=[['d1','Lunes'],['d2','Martes'],['d3','Miércoles'],['d4','Jueves'],['d5','Viernes'],['d6','Sábado'],['d7','Domingo']];
 const COMIDAS=[['desayuno','🌅 Desayuno'],['media','🍎 Media mañana'],['almuerzo','🍽️ Almuerzo'],['merienda','🥤 Media tarde'],['cena','🌙 Cena']];
@@ -1304,11 +1304,21 @@ function webDent(){
 
 /* ===== Navegación ===== */
 const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||String(x.sede)===SEDE)).length;
-const NAV=()=>{let n=NAV0();if(R.citas&&!isProf()){n=n.filter(x=>!DENT_OFF.includes(x[0])).map(x=>x[0]==='planes'?['planes','🦷','Tratamientos']:x);if(citOn())n.splice(1,0,['agenda','🗓️','Agenda'])}return n};
+const NAV=()=>{let n=NAV0().filter(x=>!rutaOff(x[0]));if(R.citas&&!isProf()){n=n.filter(x=>!DENT_OFF.includes(x[0])).map(x=>x[0]==='planes'?['planes','🦷','Tratamientos']:x);if(citOn())n.splice(1,0,['agenda','🗓️','Agenda'])}return n};
 const NAV0=()=>{if(isProf())return[['agenda','🗓️','Mi agenda'],['socios','👥',R.clis],['cuenta','🔐','Mi cuenta']];if(isCoach())return[['rutinas','📋',(ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento')+(pdaN()?' ('+pdaN()+')':'')],['cuenta','🔐','Mi cuenta']];
  if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()]].concat(mpVis()?[['pedidos','🍽️','Pedidos'+(mpNuevos()?' ('+mpNuevos()+')':'')]]:[],[['caja','💰','Caja']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
  return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['miapp','📱','App de clientes'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas'+(pdaN()?' ('+pdaN()+')':'')]]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()]].concat(mpVis()?[['pedidos','🍽️','Pedidos de mesa'+(mpNuevos()?' ('+mpNuevos()+')':'')]]:[],[['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']])).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']],!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
+/* Servicios del gym: el admin apaga lo que su negocio no tiene y desaparece del menú (CFG.apagados). */
+const SVC=()=>[['tienda','🥤',tiendaN(),'Venta de productos con stock y caja propia',CTL()],['pedidos','🍽️','Pedidos de mesa','Los socios piden desde la mesa con un QR',CTL()&&!R.citas],['entreno','🏋️','Planes de entrenamiento','Rutinas y el rol Entrenador',rutOn()],['nutri','🥗','Nutrición','Dietas, citas con nutrición y el rol Nutricionista',rutOn()],['miapp','📱','App de clientes','Mi Xyro: QR, promos y planes en el celular de tus socios',true],['pruebas','🎟️','Días de prueba','Agenda de clases de prueba para interesados',!R.citas],['metas','🎯','Metas y bonos','Metas por sede y ranking de recepción',!R.citas],['solicitudes','📨','Solicitudes','Recepción pasa casos al supervisor',!R.citas]].filter(x=>x[4]);
+const svOff=k=>(CFG.apagados||[]).includes(k);
+const rutaOff=k=>k==='rutinas'?svOff('entreno')&&svOff('nutri'):k==='pedidos'?svOff('pedidos')||svOff('tienda'):['tienda','miapp','pruebas','metas','solicitudes'].includes(k)&&svOff(k);
+async function editServicios(){const off=new Set(CFG.apagados||[]);
+ sheet(`<h3>🧩 Servicios de tu ${esc(R.n.toLowerCase())}</h3><p class="mu sm">Apaga lo que tu negocio no tiene y desaparece del menú de todo tu equipo. Puedes volver a encenderlo cuando quieras; no se borra nada.</p>
+  <div class="tl" style="margin-top:8px">${SVC().map(([k,i,t,d])=>`<label class="row" style="gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln);cursor:pointer"><span style="font-size:24px">${i}</span><span style="flex:1"><b>${esc(t)}</b><small class="mu" style="display:block">${esc(d)}</small></span><input type="checkbox" data-sv="${k}" ${off.has(k)?'':'checked'} style="width:22px;height:22px;accent-color:var(--a)"></label>`).join('')}</div>
+  <div class="bt"><button class="btn p" id="svG">Guardar</button><button class="btn" data-x>Cancelar</button></div>`,(el,close)=>{
+  el.querySelector('#svG').onclick=async()=>{const a=[...el.querySelectorAll('[data-sv]')].filter(x=>!x.checked).map(x=>x.dataset.sv);
+   try{await DB.cfg({apagados:a});close();shell();go();toast('Servicios guardados ✓')}catch(e){toast(e.message)}}})}
 const NAVG=[['ventas','🧲','Ventas',['whatsapp','ventasbot','pruebas','seguimiento','miapp']],['gym','🏋️','Gimnasio',['rutinas','tienda','pedidos','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['web','equipo','xyros','ajustes','miplan','cuenta']]];
 function navGrupos(n){const top=[],G=NAVG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));n.forEach(x=>{const g=NAVG.findIndex(g=>g[3].includes(x[0]));(g<0||n.length<=8?top:G[g].L).push(x)});const G2=G.filter(g=>g.L.length);G2.filter(g=>g.L.length===1).forEach(g=>top.push(g.L[0]));return{top,G:G2.filter(g=>g.L.length>1)}}
 const navNum=t=>{const m=String(t).match(/\((\d+)\)\s*$/);return m?+m[1]:0};
@@ -1331,6 +1341,7 @@ function go(){
  if(R.citas&&DENT_OFF.includes(ruta)){ruta='inicio';history.replaceState(null,'','#/inicio')}
  if(isProf()&&!['agenda','socios','socio','cuenta','mas','soporte'].includes(ruta)){ruta='agenda';history.replaceState(null,'','#/agenda')}
  if(isCoach()&&!['rutinas','cuenta','mas','soporte'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
+ if(rutaOff(ruta)){ruta=isCoach()?'cuenta':'inicio';history.replaceState(null,'','#/'+ruta)}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
  {const a=$('#side .ngl .nav[data-k="'+ruta+'"]');a&&(a.closest('details').open=true)}
  $$('.nav,.bn a,.qk a').forEach(a=>a.classList.toggle('on',a.dataset.k===ruta||(ruta==='socio'&&a.dataset.k==='socios')||(a.dataset.k==='mas'&&['planes','reportes','ajustes','metas','equipo','cuenta','xyros','web','seguimiento','solicitudes','soporte','bots','whatsapp','ventasbot','pruebas','miplan','pedidos'].concat(isCoach()?[]:['rutinas']).includes(ruta))));
@@ -1733,7 +1744,7 @@ function ajustes(){
  const COL=[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo']];
  setTimeout(()=>{
   $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])},...(CTL()?[{k:'tienda',l:'Nombre de tu tienda',v:CFG.tienda||'',ph:R.tienda||'Cafetín'}]:[])],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
-  {const a=$('#asd');a&&(a.onclick=editSedes)}
+  {const a=$('#asd');a&&(a.onclick=editSedes)}{const a=$('#asv');a&&(a.onclick=editServicios)}
   $('#atu').onclick=()=>soloXyro('los turnos de caja')||form('🕐 Turnos de caja',[{k:'t',l:'Un turno por línea: nombre inicio-fin',t:'area',v:turnosL().map(t=>t.n+' '+t.a+'-'+t.b).join('\n'),ph:'Mañana 06:00-14:00\nTarde 14:00-18:00\nNoche 18:00-23:00'}],async v=>{
    const L=v.t.split('\n').map(s=>s.trim().match(/^(.+?)\s+(\d{1,2}:\d{2})\s*[-–a]+\s*(\d{1,2}:\d{2})$/)).filter(Boolean).map(m=>({n:m[1].slice(0,20),a:m[2].padStart(5,'0'),b:m[3].padStart(5,'0')}));
    if(!L.length)throw new Error('Escribe así: Mañana 06:00-14:00');await DB.cfg({turnos:L.slice(0,4)});toast('Turnos guardados ✓');go()});
@@ -1749,6 +1760,7 @@ function ajustes(){
  const sw=(c,t)=>c?`<span title="${t}" class="sw" style="background:${esc(c)}"></span>`:'';
  return`<div class="hi"><h2>Ajustes</h2></div><div class="g st" style="max-width:720px">
  <div class="card"><h3>${R.ico} ${esc(nombre())} <button class="btn sm" id="aj">✏️ Editar</button></h3><p class="mu sm">Rubro: ${esc(R.n)} · ${S.cli.length} ${esc(R.clis.toLowerCase())} · ${S.pla.length} ${R.citas?'tratamientos':'planes'}</p></div>
+ ${SVC().length?`<div class="card"><h3>🧩 Servicios de tu ${esc(R.n.toLowerCase())} <button class="btn sm" id="asv">✏️ Elegir</button></h3><p class="mu sm">${SVC().map(([k,i,t])=>`<span style="${svOff(k)||k==='pedidos'&&svOff('tienda')?'opacity:.45;text-decoration:line-through':''}">${i} ${esc(t)}</span>`).join(' · ')}</p><p class="mu sm">Apaga lo que tu negocio no tiene para que el menú quede limpio.</p></div>`:''}
  <div class="card"><h3>🕐 Turnos de caja <button class="btn sm" id="atu">${edL('✏️ Editar')}</button></h3><p class="mu sm">${turnosL().map(t=>esc(t.n)+' '+esc(t.a)+'–'+esc(t.b)).join(' · ')}. Cada turno (recepción y ${esc(tiendaN().toLowerCase())}) cierra lo que cobró; el último hace el cierre general.</p></div>
  ${isAdmin()?`<div class="card"><h3>📍 Sedes <button class="btn sm" id="asd">${edL('✏️ Agregar o quitar')}</button></h3><p class="mu sm">${sedesL().length?sedesL().map(s=>'📍 '+esc(s.nombre)).join(' · '):'Una sola sede. Agrega más si tu negocio tiene varios locales.'}</p></div>`:''}
  <div class="card"><h3>🎨 Marca y colores <span style="display:flex;gap:6px">${isXyro()?'<button class="btn sm" id="acp">✨ Copiar de mi web</button>':''}<button class="btn sm" id="amk">${edL('✏️ Editar')}</button></span></h3><div style="display:flex;gap:12px;align-items:center">${logoDe()?`<img class="lgo" src="${esc(logoDe())}" alt="">`:''}${sw(CFG.color||WEB.color||'#3ad6ff','Principal')}${sw(CFG.color2||WEB.color2,'Secundario')}${sw(CFG.bg,'Fondo')}<span class="mu sm">La app usa el logo y los colores de tu web, así tu equipo y tus ${esc(R.clis.toLowerCase())} sienten que es la misma marca.</span></div></div>
@@ -3012,7 +3024,7 @@ async function xpSubir(f,b){if(!/^image\//.test(f.type))return toast('Sube una i
 
 /* ===== Equipo: cuentas, permisos y claves (mismas cuentas que el panel de la web) ===== */
 let EQ=null,EQerr='',EQnew=null;
-const PERMS=()=>Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)&&((k!=='entrenador'&&k!=='nutricionista')||rutOn())&&(k!=='profesional'||citOn())&&(!R.citas||['admin','recepcion','profesional'].includes(k))).map(([k,v])=>[k,R.citas&&k==='recepcion'?['🛎️','Agenda, pacientes, cobros, presupuestos y seguimiento. No ve la historia clínica ni el odontograma']:v]).filter(Boolean).map(([k,v])=>[k,CTL()&&PERMC[k]&&!R.citas?[v[0],PERMC[k]]:v]));
+const PERMS=()=>Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)&&((k!=='entrenador'&&k!=='nutricionista')||rutOn()&&!svOff(k==='entrenador'?'entreno':'nutri'))&&(k!=='profesional'||citOn())&&(!R.citas||['admin','recepcion','profesional'].includes(k))).map(([k,v])=>[k,R.citas&&k==='recepcion'?['🛎️','Agenda, pacientes, cobros, presupuestos y seguimiento. No ve la historia clínica ni el odontograma']:v]).filter(Boolean).map(([k,v])=>[k,CTL()&&PERMC[k]&&!R.citas?[v[0],PERMC[k]]:v]));
 const PERM={admin:['👑','Todo y todas las sedes: planes, precios, reportes, ajustes, metas y el equipo'],supervisor:['📈','Toda la venta de su sede, reportes, solicitudes de revisión y el registro completo de cada socio'],recepcion:['🛎️','Socios, asistencia, cobros, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'],cafetin:['🥤','Vende, agrega productos, ve el stock y cierra su turno'],entrenador:['🏋️','Arma y envía los planes de entrenamiento de los socios'],nutricionista:['🥗','Arma y envía los planes de alimentación de los socios'],profesional:['🦷','Su agenda, sus pacientes, el odontograma y la historia clínica (privada: recepción no la ve)']};
 const PERMC={supervisor:'Toda la venta de su sede (recepción y cafetín), reportes, solicitudes de revisión y el registro completo de cada socio',recepcion:'Socios, asistencia, cobros, venta en cafetín, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'};
 const genClave=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789',r=crypto.getRandomValues(new Uint32Array(10));return'Xa-'+[...r].map(n=>a[n%a.length]).join('')};
