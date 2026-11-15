@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>(nombre del restaurante) · Carta y reservas</title>
+<meta name="description" content="Carta con fotos y precios al día, reserva de mesa por WhatsApp, horario y cómo llegar.">
+<meta name="theme-color" content="#0d0b09">
+<meta property="og:type" content="website"><meta property="og:locale" content="es_PE">
+<!-- Base Xyro Webs · Restaurante / Cafetería. Todo sale del negocio (?s=codigo): app (nombre, logo, color, perfil, mesas), carta en vivo (RPC xa_carta), sedes y resto {hero, sub, fotos}. -->
+<link rel="icon" href="/img/marca/logo-webs-app.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://images.unsplash.com">
+<style>
+:root{--a:#ff7a1a;--bg:#0d0b09;--c1:#17130f;--c2:#211b15;--ln:#ffffff14;--tx:#f7f1ea;--mu:#b3a597;--ok:#3ddc97;--r:24px;--dock:76px}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font:16px/1.55 "Plus Jakarta Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}img{display:block;max-width:100%}
+.serif{font-family:Fraunces,Georgia,serif;font-style:italic;font-weight:500;color:var(--a)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;letter-spacing:-.02em;line-height:1.02}
+.mu{color:var(--mu)}.sm{font-size:14px}.xs{font-size:12px}
+.mk{background:#f5b54433;color:#f5b544;border-radius:6px;padding:0 4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:999px;font-weight:700;font-size:15px;transition:transform .2s,box-shadow .2s,background .2s;white-space:nowrap}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:scale(.97)}
+.btn-p{background:var(--a);color:#160c03;box-shadow:0 14px 30px -14px var(--a)}.btn-o{background:#ffffff10;border:1px solid var(--ln);backdrop-filter:blur(10px)}
+.btn-wa{background:#25d366;color:#05210f}
+/* barra */
+.top{position:fixed;inset:0 0 auto;z-index:30;display:flex;align-items:center;gap:16px;padding:14px max(20px,calc((100% - 1180px)/2));transition:background .3s}
+.top.s{background:#0d0b09d9;backdrop-filter:blur(16px) saturate(1.5);box-shadow:0 1px 0 var(--ln)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;min-width:0}.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.brand i{width:40px;height:40px;flex:none;border-radius:14px;background:var(--a);display:grid;place-items:center;color:#160c03;font-style:normal;font-weight:800;overflow:hidden}.brand i img{width:100%;height:100%;object-fit:cover}
+.tabs{position:relative;display:flex;gap:2px;margin:0 auto;padding:5px;border-radius:999px;background:#ffffff0d;border:1px solid var(--ln);backdrop-filter:blur(10px)}
+.tabs a{position:relative;z-index:1;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;color:var(--mu);transition:color .25s}.tabs a.on{color:#160c03}
+.tabs .ind{position:absolute;top:5px;bottom:5px;border-radius:999px;background:var(--a);transition:left .35s cubic-bezier(.3,1.3,.4,1),width .35s}
+.dock{display:none}
+/* pantallas */
+main{min-height:100%}.scr{display:none;animation:in .45s cubic-bezier(.2,.9,.3,1) both}.scr.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.wrap{width:min(1180px,100% - 40px);margin:0 auto}
+/* inicio */
+.hero{position:relative;min-height:100svh;display:grid;align-items:end;padding:120px 0 64px;overflow:hidden}
+.hero .bg{position:absolute;inset:0;background:#2a1a0e center/cover no-repeat;transform:scale(1.06);animation:kb 18s ease-in-out infinite alternate}
+@keyframes kb{to{transform:scale(1.14) translate(-1%,-1%)}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0d0b0966 0%,#0d0b0933 35%,#0d0b09f0 82%,var(--bg))}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.25fr .75fr;gap:32px;align-items:end}
+.hero h1{font-size:clamp(46px,7.4vw,104px)}.hero p.ld{font-size:clamp(16px,1.5vw,19px);color:#efe4d8;max-width:52ch;margin:16px 0 26px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:999px;background:#ffffff10;border:1px solid var(--ln);font-size:13px;font-weight:600;white-space:nowrap;transition:.2s}
+.chip.on{background:var(--a);color:#160c03;border-color:transparent}
+.est{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:13px;padding:7px 13px;border-radius:999px;background:#00000066;border:1px solid var(--ln);margin-bottom:18px;backdrop-filter:blur(8px)}
+.est i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px #3ddc9733;animation:pu 1.8s infinite}.est.c i{background:#ff5c7a;box-shadow:0 0 0 4px #ff5c7a33}
+@keyframes pu{50%{box-shadow:0 0 0 8px transparent}}
+.hc{background:#17130fd9;border:1px solid var(--ln);border-radius:var(--r);padding:18px;backdrop-filter:blur(18px);display:grid;gap:12px;animation:fl 6s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-8px)}}
+.hc .it{display:flex;gap:12px;align-items:center}.hc .it img,.hc .it .e{width:56px;height:56px;border-radius:16px;object-fit:cover;flex:none;display:grid;place-items:center;font-size:28px;background:var(--c2)}
+.hc .it b{display:block;font-size:15px}.hc .pr{margin-left:auto;font-weight:800;color:var(--a)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* secciones */
+.sec{padding:110px 0 120px}.eyb{font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--a)}
+.sec h2{font-size:clamp(36px,5vw,64px);margin:8px 0 10px}
+.cats{position:sticky;top:68px;z-index:5;padding:12px 0;background:linear-gradient(var(--bg) 70%,transparent);overflow-x:auto;scrollbar-width:none}.cats::-webkit-scrollbar{display:none}.cats .chips{flex-wrap:nowrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:12px}
+.pl{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);overflow:hidden;display:grid;grid-template-rows:auto 1fr;transition:transform .25s,border-color .25s;animation:in .5s both;cursor:pointer;text-align:left}
+.pl:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--a) 50%,transparent)}
+.pl .ft{position:relative;aspect-ratio:4/3;background:var(--c2);display:grid;place-items:center;font-size:58px;overflow:hidden}.pl .ft img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s}.pl:hover .ft img{transform:scale(1.06)}
+.pl .tg{position:absolute;left:12px;top:12px;padding:5px 10px;border-radius:999px;background:var(--a);color:#160c03;font-size:11px;font-weight:800}.pl .tg.x{background:#000b;color:#fff}
+.pl .bd{padding:14px 16px 16px;display:grid;gap:4px;align-content:start}.pl h3{font-family:inherit;font-size:17px;letter-spacing:-.01em;font-weight:700}
+.pl .p{display:flex;gap:8px;align-items:baseline;margin-top:6px}.pl .p b{font-size:18px}.pl .p s{color:var(--mu);font-size:13px}
+.pl.ag{opacity:.5}
+/* reservar */
+.rs{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.card{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);padding:22px}
+.stp{display:flex;gap:8px;margin-bottom:16px}.stp i{flex:1;height:4px;border-radius:4px;background:var(--ln);transition:.3s}.stp i.on{background:var(--a)}
+.dias{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.dias button,.hrs button{padding:10px 4px;border-radius:14px;border:1px solid var(--ln);background:var(--c2);font-weight:700;font-size:13px;transition:.2s}
+.dias button small{display:block;font-weight:500;color:var(--mu);font-size:11px}.dias button.on,.hrs button.on{background:var(--a);color:#160c03;border-color:transparent}.dias button.on small{color:#160c03}
+.hrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px;max-height:220px;overflow:auto;margin-top:10px}
+.qty{display:flex;align-items:center;gap:16px;justify-content:center;margin:12px 0}.qty button{width:52px;height:52px;border-radius:50%;background:var(--c2);border:1px solid var(--ln);font-size:24px;font-weight:700}.qty b{font-size:46px;font-family:Fraunces,serif;min-width:70px;text-align:center}
+input,textarea{width:100%;padding:13px 15px;border-radius:14px;border:1px solid var(--ln);background:var(--c2);color:var(--tx);font:inherit;outline:none}input:focus,textarea:focus{border-color:var(--a)}
+label.f{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--mu);margin-top:10px}
+.res{display:grid;gap:8px;padding:16px;border-radius:18px;background:var(--c2);margin-top:14px}.res div{display:flex;justify-content:space-between;gap:10px}
+.ph{border-radius:var(--r);overflow:hidden;aspect-ratio:4/5;background:#2a1a0e center/cover;position:relative}
+.ph .q{position:absolute;left:16px;right:16px;bottom:16px;padding:16px;border-radius:18px;background:#0d0b09cc;backdrop-filter:blur(12px);font-size:14px}
+/* local */
+.lc{display:grid;grid-template-columns:1.1fr .9fr;gap:20px}.lc iframe{width:100%;height:100%;min-height:340px;border:0;border-radius:var(--r);filter:grayscale(.3) contrast(1.05)}
+.hr{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--ln)}.hr:last-child{border:0}
+.pg{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+/* hoja */
+.ov{position:fixed;inset:0;z-index:60;background:#000a;backdrop-filter:blur(6px);display:grid;place-items:end center;animation:fo .2s}
+@keyframes fo{from{opacity:0}}
+.sh{width:min(560px,100%);max-height:92vh;overflow:auto;background:var(--c1);border:1px solid var(--ln);border-radius:28px 28px 0 0;animation:up .35s cubic-bezier(.2,1.1,.3,1)}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.sh .im{aspect-ratio:16/10;background:var(--c2);display:grid;place-items:center;font-size:80px;position:relative;overflow:hidden}.sh .im img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sh .bd{padding:20px 22px 26px;display:grid;gap:8px}.xb{position:absolute;right:12px;top:12px;z-index:2;width:38px;height:38px;border-radius:50%;background:#000a;color:#fff;font-size:16px}
+.fab{position:fixed;right:20px;bottom:22px;z-index:25;width:58px;height:58px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 14px 30px -10px #25d366;animation:fl 4s ease-in-out infinite}.fab svg{width:28px;height:28px;fill:#fff}
+.foot{padding:30px 0 40px;text-align:center;color:var(--mu);font-size:13px;border-top:1px solid var(--ln)}.foot a{font-weight:700;color:var(--tx)}
+.demo{position:fixed;left:14px;bottom:14px;z-index:40;padding:6px 12px;border-radius:999px;background:#f5b544;color:#000;font-size:11px;font-weight:800}
+@media(max-width:860px){
+ .tabs{display:none}.top{padding:12px 16px}
+ .dock{display:flex;position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:30;height:var(--dock);padding:8px;border-radius:26px;background:#17130fe6;border:1px solid var(--ln);backdrop-filter:blur(18px) saturate(1.5);justify-content:space-around}
+ .dock a{display:grid;place-items:center;gap:2px;flex:1;border-radius:18px;font-size:11px;font-weight:700;color:var(--mu);transition:.25s}.dock a em{font-style:normal;font-size:21px;line-height:1}.dock a.on{background:color-mix(in srgb,var(--a) 18%,transparent);color:var(--tx)}
+ .hero{padding-bottom:calc(var(--dock) + 40px)}.hero .wrap{grid-template-columns:1fr}.hc{display:none}
+ .sec{padding:84px 0 calc(var(--dock) + 60px)}.rs,.lc{grid-template-columns:1fr}.ph{display:none}
+ .fab{bottom:calc(var(--dock) + 24px)}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.pl .bd{padding:10px 12px 12px}.pl h3{font-size:15px}.pl .ds{display:none}
+ .cats{top:60px}.foot{padding-bottom:calc(var(--dock) + 30px)}
+ .demo{bottom:auto;top:74px;left:16px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top" id="top"><a class="brand" href="#/"><i id="lg">🍽️</i><span data-nom></span></a>
+ <nav class="tabs" id="tabs"><span class="ind"></span><a href="#/" data-r="">Inicio</a><a href="#/carta" data-r="carta">Carta</a><a href="#/reservar" data-r="reservar">Reservar</a><a href="#/local" data-r="local">Cómo llegar</a></nav>
+ <a class="btn btn-p" href="#/reservar" style="padding:11px 18px;font-size:14px">Reservar mesa</a></header>
+<main id="app"></main>
+<a class="fab" id="fab" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.3-.7-2.8-1.1-4.6-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 .9c.3.2.5.2.6.4.1.1.1.8-.1 1.4z"/></svg></a>
+<nav class="dock" id="dock"><a href="#/" data-r=""><em>🏠</em>Inicio</a><a href="#/carta" data-r="carta"><em>📖</em>Carta</a><a href="#/reservar" data-r="reservar"><em>📅</em>Reservar</a><a href="#/local" data-r="local"><em>📍</em>Llegar</a></nav>
+<script>
+/* Base Xyro Webs · Restaurante / Cafetería. /restaurante/?s=slug lee lo público del negocio: nombre, logo, color, perfil y horario de Xyro Apps ('app'),
+   la carta EN VIVO (RPC xa_carta, SQL 56: lo que el restaurante cambia en su panel sale aquí al instante), sedes y textos/fotos propios ('resto').
+   Lo que falte sale de la base con marcadores «(nombre del restaurante)». Vista de venta: ?n=Nombre&c=hex&l=logo. Solo lectura. */
+(function(){
+const SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
+const Q=new URLSearchParams(location.search),SLUG=(Q.get('s')||'').toLowerCase().replace(/[^a-z0-9_-]/g,'');
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0'),hm=s=>{const[a,b]=String(s||'0:0').split(':');return(+a||0)*60+(+b||0)},mh=m=>pad(Math.floor(m/60)%24)+':'+pad(m%60);
+const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],MS=['ene','feb','mar','abr','may','jun','jul','ago','set','oct','nov','dic'];
+const U=i=>'https://images.unsplash.com/photo-'+i+'?auto=format&fit=crop&w=900&q=70';
+const IMG={hero:U('1517248135467-4c7edcad34c4'),reserva:U('1414235077428-338989a2e8c0'),local:U('1559339352-11d035aa65de')};
+const sol=v=>'S/ '+Number(v).toLocaleString('es-PE',{minimumFractionDigits:+v%1?2:0,maximumFractionDigits:2});
+const P0=[['Combos','🎁','Menú ejecutivo',22,'Entrada + fondo + refresco de la casa',U('1504674900247-0877df9cc836'),26,1],['Fondos','🥩','Lomo a la parrilla',42,'Con papas nativas y ensalada fresca.',U('1600891964092-4316c288032e'),0,1],['Fondos','🍢','Brochetas mixtas',34,'Pollo, res y verduras al carbón.',U('1555939594-58d7cb561ad1')],['Fondos','🍕','Pizza margarita',30,'Masa madre, tomate, mozzarella y albahaca.',U('1565299624946-b28f40a0ae38')],['Fondos','🍔','Hamburguesa clásica',24,'Carne 180 g, queso, tocino y salsas de la casa.',U('1568901346375-23c9450c58cd')],['Entradas','🥗','Ensalada César',19,'Lechuga, pollo, crutones y parmesano.',U('1546069901-ba9599a7e63c')],['Entradas','🥙','Bowl de pollo y quinua',21,'Pollo, quinua, palta y vegetales.',U('1512621776951-a57141f2eefd')],['Cafés','☕','Capuchino',10,'Doble shot y leche cremosa.',U('1509042239860-f550ce710b93'),0,1],['Cafés','☕','Americano',7,'Café de especialidad peruano.',U('1495474472287-4d71bcdd2085')],['Postres','🍰','Torta de chocolate',14,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Postres','🍨','Helado artesanal',11,'Dos bolas a elección.',U('1563805042-7684c019e1cb')],['Bebidas','🍋','Limonada frozen',12,'Limón, hierbabuena y hielo frappé.'],['Bebidas','🍇','Chicha morada (jarra)',15,'Receta de la casa.']]
+ .map((p,i)=>({id:'b'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||'',antes:p[6]||null,destacado:!!p[7]}));
+const BASE=n=>({nombre:n||'(nombre del restaurante)',wa:'51936449066',distrito:'(distrito)',desde:'12:00',hasta:'23:00',dias:[],
+ hero:'',sub:'Cocina casera, ingredientes frescos y la mejor atención. Mira la carta, reserva tu mesa o pide desde tu mesa con el QR.',
+ sedes:[{nombre:'(nombre del restaurante)',direccion:'Av. (dirección) 123, (distrito)',maps:''}],productos:P0,qr:true,
+ pagos:['💵 Efectivo','📱 Yape','📱 Plin','💳 Tarjeta'],redes:{}});
+async function rest(p){const r=await fetch(SB.url+'/rest/v1/'+p,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
+async function rpc(f,b){const r=await fetch(SB.url+'/rest/v1/rpc/'+f,{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify(b)});if(!r.ok)throw new Error(r.status);return r.json()}
+async function cargar(){
+ const B=BASE(SLUG?'':(Q.get('n')||'').slice(0,40));let D={...B,color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):'',logo:/^https:\/\//.test(Q.get('l')||'')?Q.get('l'):''};
+ if(!SLUG)return D;
+ try{const s=(await rest('sitios?select=id,negocio&slug=eq.'+encodeURIComponent(SLUG)))[0];if(!s)return D;
+  const C={};(await rest('contenido?select=clave,valor&sitio_id=eq.'+s.id)).forEach(r=>C[r.clave]=r.valor);
+  const app=C.app||{},pf=app.perfil||{},rs=C.resto||{},m=app.mesas||{};
+  D.nombre=app.nombre||s.negocio||D.nombre;D.color=app.color||'';D.logo=app.logo||'';D.qr=!!m.on;
+  if(m.desde)D.desde=m.desde;if(m.hasta)D.hasta=m.hasta;if(Array.isArray(m.dias))D.dias=m.dias;
+  if(pf.descripcion)D.sub=pf.descripcion;if(/^https:/.test(pf.portada||''))IMG.hero=pf.portada;if(pf.redes)D.redes=pf.redes;
+  const sd=(Array.isArray(pf.sedes)&&pf.sedes.length?pf.sedes:Array.isArray(C.sedes)?C.sedes:[]).filter(x=>x&&(x.nombre||x.direccion));if(sd.length)D.sedes=sd;
+  const w=pf.whatsapp||(D.sedes.find(x=>x.whatsapp)||{}).whatsapp||(C.bot&&C.bot.whatsapp);if(w)D.wa=String(w).replace(/\D/g,'').replace(/^9(\d{8})$/,'519$1');
+  if(rs.fotos&&typeof rs.fotos==='object')Object.keys(rs.fotos).forEach(k=>{if(/^https:/.test(rs.fotos[k]||''))IMG[k]=rs.fotos[k]});
+  ['hero','sub','pagos'].forEach(k=>{if(rs[k]!=null&&rs[k]!=='')D[k]=rs[k]});
+  try{const c=await rpc('xa_carta',{p_slug:SLUG});if(c&&Array.isArray(c.productos)&&c.productos.length)D.productos=c.productos;if(c&&/^https:/.test(c.portada||'')&&!/^https:/.test(pf.portada||''))IMG.hero=c.portada}catch(_){}
+ }catch(e){console.warn('Muestro la base',e)}
+ return D;
+}
+const mk=s=>esc(s).replace(/\((nombre[^)]*|distrito|dirección)\)/g,'<span class="mk">($1)</span>');
+const ft=(p,cls)=>p.foto&&/^https:\/\//.test(p.foto)?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.remove()">`:'';
+const abierto=D=>{const d=new Date(),dd=d.getDay(),t=d.getHours()*60+d.getMinutes(),a=hm(D.desde),b=hm(D.hasta);const dia=!D.dias.length||D.dias.includes(dd);return dia&&(b>a?t>=a&&t<b:t>=a||t<b)};
+
+cargar().then(D=>{
+ if(D.color)document.documentElement.style.setProperty('--a',D.color);
+ const N=D.nombre;document.title=N.replace(/[()]/g,'')+' · Carta y reservas';$$('[data-nom]').forEach(e=>e.innerHTML=mk(N));
+ if(D.logo)$('#lg').innerHTML=`<img src="${esc(D.logo)}" alt="">`;else $('#lg').textContent=(N.replace(/[()]/g,'').trim()[0]||'R').toUpperCase();
+ const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);$('#fab').href=wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.');
+ if(Q.has('demo')||!SLUG){const d=document.createElement('span');d.className='demo';d.textContent=SLUG?'DEMO':'VISTA PREVIA';document.body.appendChild(d)}
+ const P=D.productos||[],cats=[...new Set(P.map(p=>p.categoria||'Carta'))],dest=P.filter(p=>p.destacado&&!p.agotado).concat(P.filter(p=>!p.destacado&&!p.agotado)).slice(0,3);
+ const hor=()=>{const d=D.dias.length&&D.dias.length<7?D.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'Todos los días';return d+' · '+D.desde+' a '+D.hasta};
+ const ab=abierto(D);let CAT='',RV={d:0,h:'',n:2,nom:'',nota:''},paso=0;
+ const plC=(p,i)=>`<button class="pl ${p.agotado?'ag':''}" data-p="${esc(p.id)}" style="animation-delay:${Math.min(i,10)*.04}s"><div class="ft">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}${p.agotado?'<span class="tg x">Agotado</span>':+p.antes>+p.precio?'<span class="tg">Promo</span>':p.destacado?'<span class="tg">⭐ Favorito</span>':''}</div>
+  <div class="bd"><h3>${esc(p.nombre)}</h3>${p.detalle?`<span class="mu sm ds">${esc(p.detalle)}</span>`:''}<span class="p"><b>${sol(p.precio)}</b>${+p.antes>+p.precio?`<s>${sol(p.antes)}</s>`:''}</span></div></button>`;
+ const V={
+  '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
+   <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(D.hasta):'Cerrado ahora · abrimos '+esc(D.desde)}</span>
+   <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">sabor que vuelve.</span></h1><p class="ld">${esc(D.sub)}</p>
+   <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/reservar">📅 Reservar mesa</a></div>
+   <div class="chips" style="margin-top:22px">${cats.slice(0,6).map(c=>`<a class="chip" href="#/carta" data-gc="${esc(c)}">${esc(c)}</a>`).join('')}</div></div>
+   <div class="hc"><span class="eyb">Lo más pedido</span>${dest.map(p=>`<button class="it" data-p="${esc(p.id)}" style="text-align:left">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=e>${esc(p.emoji||'🍽️')}</span>'">`:`<span class="e">${esc(p.emoji||'🍽️')}</span>`}<span><b>${esc(p.nombre)}</b><span class="mu xs">${esc(p.categoria||'')}</span></span><span class="pr">${sol(p.precio)}</span></button>`).join('')}
+   ${D.qr?'<p class="mu xs">📱 En el local, escanea el QR de tu mesa y pide desde tu celular.</p>':''}</div></div></section>`,
+  carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta${SLUG?' · precios al día':''}</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">${D.qr?'Para pedir, escanea el QR de tu mesa en el local. ':''}Toca un plato para verlo en grande.</p>
+   <div class="cats"><div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div></div>
+   <div class="grid">${L.map(plC).join('')||'<p class="mu">Pronto subimos la carta.</p>'}</div></div></section>`},
+  reservar:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">Reserva en 3 pasos</span><h2>Tu mesa <span class="serif">te espera</span></h2><p class="mu" style="margin-bottom:18px">Eliges día, hora y personas. Te confirmamos por WhatsApp.</p>
+   <div class="card" id="rv"></div></div><div class="ph" style="background-image:url('${esc(IMG.reserva)}')"><div class="q">“Reservé en 1 minuto y nos tenían la mesa lista.” <b>— María Q.</b></div></div></div></section>`,
+  local:()=>{const s=D.sedes;return`<section class="sec"><div class="wrap"><span class="eyb">Visítanos</span><h2>Cómo <span class="serif">llegar</span></h2>
+   <div class="lc" style="margin-top:20px"><div style="display:grid;gap:14px">${s.map(x=>{const q=encodeURIComponent((x.direccion||x.distrito||'')+' '+String(N).replace(/[()]/g,''));return`<div class="card"><h3 style="font-family:inherit;font-size:20px;font-weight:800">${mk(x.nombre||N)}</h3><p class="mu sm">${mk([x.direccion,x.distrito].filter(Boolean).join(' · '))}</p>
+    <div style="margin:12px 0">${(Array.isArray(x.horario)&&x.horario.length?x.horario.map(h=>Array.isArray(h)?h:[h,'']):[[hor(),'']]).map(h=>`<div class="hr"><span>${esc(h[0])}</span><b>${esc(h[1]||'')}</b></div>`).join('')}</div>
+    <div class="row"><a class="btn btn-p" target="_blank" rel="noopener" href="${esc(/^https:\/\//.test(x.maps||'')?x.maps:'https://www.google.com/maps/search/?api=1&query='+q)}">🧭 Abrir en Maps</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola, ¿cómo llego a '+(x.nombre||'su local')+'?')}">💬 Preguntar</a></div></div>`}).join('')}
+    <div class="card"><b>Medios de pago</b><div class="pg">${(D.pagos||[]).map(p=>`<span class="chip">${esc(p)}</span>`).join('')}</div>
+    ${Object.keys(D.redes||{}).filter(k=>D.redes[k]).length?`<div class="pg" style="margin-top:12px">${['instagram','tiktok','facebook'].filter(k=>D.redes[k]).map(k=>`<a class="chip" target="_blank" rel="noopener" href="${esc(/^https?:/.test(D.redes[k])?D.redes[k]:'https://'+k+'.com/'+String(D.redes[k]).replace(/^@/,''))}">${{instagram:'📸 Instagram',tiktok:'🎵 TikTok',facebook:'👍 Facebook'}[k]}</a>`).join('')}</div>`:''}</div></div>
+    ${/\((dirección|distrito)\)/.test(s[0].direccion||'')?`<div class="ph" style="display:block;aspect-ratio:auto;min-height:340px;background-image:url('${esc(IMG.local)}')"></div>`:`<iframe loading="lazy" title="Mapa" src="https://www.google.com/maps?q=${encodeURIComponent((s[0].direccion||'')+' '+(s[0].distrito||''))}&output=embed"></iframe>`}</div></div></section>`}
+ };
+ function rvPinta(){const el=$('#rv');if(!el)return;const d0=new Date(),dias=Array.from({length:7},(_,i)=>{const d=new Date(d0);d.setDate(d0.getDate()+i);return d}).filter(d=>!D.dias.length||D.dias.includes(d.getDay()));
+  const sel=dias[RV.d]||dias[0],a=hm(D.desde),b0=hm(D.hasta),b=b0>a?b0:b0+1440,now=d0.getHours()*60+d0.getMinutes(),hoy=sel&&sel.toDateString()===d0.toDateString();
+  const H=[];for(let m=a;m<=b-60;m+=30)if(!hoy||m>now+30)H.push(mh(m));if(RV.h&&!H.includes(RV.h))RV.h='';
+  const fecha=sel?DL[sel.getDay()]+' '+sel.getDate()+' '+MS[sel.getMonth()]:'';
+  el.innerHTML=`<div class="stp">${[0,1,2].map(i=>`<i class="${i<=paso?'on':''}"></i>`).join('')}</div>`+(paso===0?`<b>¿Qué día y a qué hora?</b><div class="dias" style="margin-top:10px">${dias.map((d,i)=>`<button data-d="${i}" class="${i===RV.d?'on':''}">${i===0&&d.toDateString()===d0.toDateString()?'Hoy':DN[d.getDay()]}<small>${d.getDate()} ${MS[d.getMonth()]}</small></button>`).join('')}</div>
+   <div class="hrs">${H.map(h=>`<button data-h="${h}" class="${h===RV.h?'on':''}">${h}</button>`).join('')||'<p class="mu sm">Ya no hay horarios hoy. Elige otro día.</p>'}</div>
+   <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn btn-p" data-sg ${RV.h?'':'disabled style="opacity:.5"'}>Siguiente →</button></div>`
+  :paso===1?`<b>¿Cuántas personas?</b><div class="qty"><button data-n="-1">−</button><b>${RV.n}</b><button data-n="1">＋</button></div><p class="mu sm" style="text-align:center">${RV.n>=10?'Para grupos grandes te confirmamos disponibilidad.':'Te guardamos la mesa 15 minutos.'}</p>
+   <div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn btn-o" data-at>← Atrás</button><button class="btn btn-p" data-sg>Siguiente →</button></div>`
+  :`<b>Tus datos</b><label class="f">Nombre<input id="rvN" maxlength="60" placeholder="¿A nombre de quién?" value="${esc(RV.nom)}"></label><label class="f">Ocasión o nota (opcional)<input id="rvO" maxlength="140" placeholder="Cumpleaños, terraza, silla para bebé…" value="${esc(RV.nota)}"></label>
+   <div class="res"><div><span class="mu">Día</span><b>${esc(fecha)}</b></div><div><span class="mu">Hora</span><b>${esc(RV.h)}</b></div><div><span class="mu">Personas</span><b>${RV.n}</b></div></div>
+   <div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn btn-o" data-at>← Atrás</button><a class="btn btn-wa" id="rvW" target="_blank" rel="noopener">💬 Reservar por WhatsApp</a></div>`);
+  el.onclick=e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.d!=null){RV.d=+t.dataset.d;RV.h='';rvPinta()}else if(t.dataset.h){RV.h=t.dataset.h;rvPinta()}else if(t.dataset.n){RV.n=Math.min(30,Math.max(1,RV.n+ +t.dataset.n));rvPinta()}else if(t.dataset.sg!=null&&(paso||RV.h)){paso++;rvPinta()}else if(t.dataset.at!=null){keep();paso--;rvPinta()}};
+  const keep=()=>{const a=$('#rvN'),b=$('#rvO');if(a)RV.nom=a.value.trim();if(b)RV.nota=b.value.trim()};
+  const w=$('#rvW');if(w){const upd=()=>{keep();w.href=wa(`Hola ${String(N).replace(/[()]/g,'')} 👋 Quiero reservar una mesa:\n📅 ${fecha}\n⏰ ${RV.h}\n👥 ${RV.n} persona${RV.n>1?'s':''}\n🙋 ${RV.nom||'(mi nombre)'}${RV.nota?'\n📝 '+RV.nota:''}`)};upd();el.oninput=upd;w.onclick=e=>{keep();if(!RV.nom){e.preventDefault();$('#rvN').focus();$('#rvN').placeholder='Escribe tu nombre para reservar'}}}}
+ function ver(id){const p=P.find(x=>x.id===id);if(!p)return;const o=document.createElement('div');o.className='ov';
+  o.innerHTML=`<div class="sh" style="position:relative"><button class="xb" data-x aria-label="Cerrar">✕</button><div class="im">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}</div><div class="bd"><span class="eyb">${esc(p.categoria||'Carta')}</span><h2 style="font-size:32px">${esc(p.nombre)}</h2>${p.detalle?`<p class="mu">${esc(p.detalle)}</p>`:''}
+   <div class="row" style="justify-content:space-between;margin-top:6px"><span style="display:flex;gap:10px;align-items:baseline"><b style="font-size:28px">${sol(p.precio)}</b>${+p.antes>+p.precio?`<s class="mu">${sol(p.antes)}</s>`:''}</span>${p.agotado?'<span class="chip">Agotado hoy</span>':''}</div>
+   <p class="mu sm">${D.qr?'📱 Para pedirlo, escanea el QR de tu mesa en el local.':'Pídelo al mozo en el local.'}</p><div class="row"><a class="btn btn-p" href="#/reservar" data-x>📅 Reservar mesa</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola 👋 Pregunta sobre «'+p.nombre+'»: ')}">💬 Preguntar</a></div></div></div>`;
+  document.body.appendChild(o);o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()}}
+ function go(){const r=(location.hash.slice(2)||'').split('/')[0],k=V[r]?r:'';$('#app').innerHTML=`<div class="scr on">${V[k]()}${k?'<footer class="foot">© '+new Date().getFullYear()+' '+mk(N)+' · Hecho con <a href="https://xyrostudio.net" target="_blank" rel="noopener">XyroStudio</a></footer>':''}</div>`;scrollTo(0,0);
+  $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===k));const t=$('#tabs .on'),ind=$('#tabs .ind');if(t&&ind){ind.style.left=t.offsetLeft+'px';ind.style.width=t.offsetWidth+'px'}
+  $$('[data-p]').forEach(b=>b.onclick=()=>ver(b.dataset.p));$$('[data-c]').forEach(b=>b.onclick=()=>{CAT=b.dataset.c;go()});$$('[data-gc]').forEach(b=>b.onclick=()=>{CAT=b.dataset.gc});
+  if(k==='reservar'){paso=0;rvPinta()}top()}
+ const top=()=>$('#top').classList.toggle('s',scrollY>20||!!location.hash.slice(2));addEventListener('scroll',top,{passive:true});
+ addEventListener('hashchange',go);addEventListener('resize',()=>{const t=$('#tabs .on'),ind=$('#tabs .ind');if(t&&ind){ind.style.left=t.offsetLeft+'px';ind.style.width=t.offsetWidth+'px'}});go();
+});
+})();
+</script>
+</body>
+</html>

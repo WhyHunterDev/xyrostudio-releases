@@ -145,26 +145,33 @@ async function rpc(f,b){const t=token(),h={'Content-Type':'application/json',api
 // ---------- Demo para mostrar a negocios ----------
 const IM='https://whyhunterdev.github.io/santos-strength/img/cafe/';
 const DP=[['Combos','🎁','Combo Post-Entreno',18,'Batido Whey + Pancakes de Avena',IM+'1.jpg',21,1],['Combos','🎁','Combo Definición',21,'Batido Verde + Ensalada Atún Fit',IM+'4.jpg',24,1],['Batidos','🥤','Batido Whey Chocolate',12,'Proteína whey, leche descremada, plátano y cacao.',IM+'1.jpg',0,1],['Batidos','🥤','Batido Verde Detox',10,'Espinaca, piña, manzana verde, chía y proteína vegetal.',IM+'2.jpg'],['Platos','🥗','Bowl Pollo & Quinua',16,'Pechuga a la plancha, quinua, palta, tomate y huevo.',IM+'3.jpg',0,1],['Platos','🥗','Ensalada Atún Fit',14,'Atún, mix de hojas, choclo, huevo y limón.',IM+'4.jpg'],['Snacks','🥞','Pancakes de Avena',9,'Avena, claras, plátano y miel. Ideal pre-entreno.',IM+'5.jpg'],['Snacks','🍫','Barra Proteica + Agua',9,'Barra de 20 g de proteína y agua mineral.',IM+'6.jpg'],['Bebidas','💧','Agua 625 ml',2.5,''],['Bebidas','⚡','Bebida isotónica',5,'']];
+const U=i=>'https://images.unsplash.com/photo-'+i+'?auto=format&fit=crop&w=640&q=70';
+const RES=Q.get('r')==='resto'; // demo de restaurante / cafetería
+const DR=[['Combos','🎁','Menú ejecutivo',22,'Entrada + fondo + refresco de la casa',U('1504674900247-0877df9cc836'),26,1],['Combos','🎁','Combo burger',29,'Hamburguesa clásica + papas + bebida',U('1568901346375-23c9450c58cd'),34,1],['Fondos','🥩','Lomo a la parrilla',42,'Con papas nativas y ensalada fresca.',U('1600891964092-4316c288032e'),0,1],['Fondos','🍢','Brochetas mixtas',34,'Pollo, res y verduras al carbón.',U('1555939594-58d7cb561ad1')],['Fondos','🍕','Pizza margarita',30,'Masa madre, tomate, mozzarella y albahaca.',U('1565299624946-b28f40a0ae38')],['Fondos','🍔','Hamburguesa clásica',24,'Carne 180 g, queso, tocino y salsas de la casa.',U('1568901346375-23c9450c58cd')],['Entradas','🥗','Ensalada César',19,'Lechuga, pollo, crutones y parmesano.',U('1546069901-ba9599a7e63c')],['Entradas','🥙','Bowl de pollo y quinua',21,'Pollo, quinua, palta y vegetales.',U('1512621776951-a57141f2eefd')],['Cafés','☕','Capuchino',10,'Doble shot y leche cremosa.',U('1509042239860-f550ce710b93'),0,1],['Cafés','☕','Americano',7,'Café de especialidad peruano.',U('1495474472287-4d71bcdd2085')],['Postres','🍰','Torta de chocolate',14,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Postres','🍨','Helado artesanal',11,'Dos bolas a elección.',U('1563805042-7684c019e1cb')],['Bebidas','🍋','Limonada frozen',12,''],['Bebidas','🍇','Chicha morada (jarra)',15,''],['Bebidas','💧','Agua mineral',4,'']];
 let DEMO_ORD=[];
 async function api(f,b){if(!DEMO)return rpc(f,b);await new Promise(r=>setTimeout(r,350));
+ if(RES&&(f==='xa_mesa_menu'||f==='xa_carta')){const DP=DR;return{negocio:Q.get('n')||'Tu Restaurante',rubro:'restaurante',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):'#ff7a1a',tienda:'Carta',mesa:f==='xa_carta'?0:MESA||3,abierto:f!=='xa_carta',qr:true,desde:'12:00',hasta:'23:00',portada:U('1517248135467-4c7edcad34c4'),titulo:'Nuestra carta',texto:'Elige tus platos y te los llevamos a la mesa. Pagas al final en caja.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],agotado:i===13}))}}
  if(f==='xa_mesa_menu')return{negocio:Q.get('n')||'Tu Gimnasio',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):null,tienda:'Cafetín',mesa:MESA||3,abierto:true,desde:'07:00',hasta:'21:00',geo:Q.has('geo'),portada:IM+'hero.jpg',titulo:'Come como entrenas',texto:'Batidos, platos y snacks para antes o después de entrenar. Pide aquí y te lo llevamos a tu mesa.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],modelo:p[8]||(i===2&&/^https:\/\/\S+\.glb(\?\S*)?$/i.test(Q.get('glb')||'')?Q.get('glb'):null),agotado:i===9}))};
- if(f==='xa_mesa_pedir'){if(Q.has('lejos'))throw new Error('lejos');const it=b.p_items.map(x=>{const p=DP[+x.id.slice(1)];return{id:x.id,n:p[2],c:x.c,p:p[3],e:p[1]}}),o={id:'o'+Date.now(),num:DEMO_ORD.length+7,mesa:b.p_mesa,items:it,total:it.reduce((a,i)=>a+i.p*i.c,0),estado:'nuevo',creado:new Date().toISOString(),t0:Date.now()};DEMO_ORD.unshift(o);return o}
+ if(f==='xa_mesa_pedir'){if(Q.has('lejos'))throw new Error('lejos');const L=RES?DR:DP,it=b.p_items.map(x=>{const p=L[+x.id.slice(1)];return{id:x.id,n:p[2],c:x.c,p:p[3],e:p[1]}}),o={id:'o'+Date.now(),num:DEMO_ORD.length+7,mesa:b.p_mesa,items:it,total:it.reduce((a,i)=>a+i.p*i.c,0),estado:'nuevo',creado:new Date().toISOString(),t0:Date.now()};DEMO_ORD.unshift(o);return o}
  if(f==='xa_mesa_mios'){DEMO_ORD.forEach(o=>{if(o.estado==='cancelado')return;const s=(Date.now()-o.t0)/1e3;o.estado=s>30?'servido':s>12?'preparando':'nuevo'});return DEMO_ORD}
  if(f==='xa_mesa_cancelar_mio'){const o=DEMO_ORD.find(x=>x.id===b.p_id);if(o.estado!=='nuevo')throw new Error('Ya lo están preparando. Pide el cambio en el cafetín.');o.estado='cancelado';return o}}
 
 let M=null,CART=[],CAT='',MIOS=[],ENV=false;
+const RESTO=()=>M&&M.rubro==='restaurante',lug=()=>RESTO()?'caja':(M&&M.tienda||'cafetín').toLowerCase(); // dónde se paga
 const tot=()=>CART.reduce((a,i)=>a+i.p*i.c,0),cnt=()=>CART.reduce((a,i)=>a+i.c,0);
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 function horario(){if(!M.desde||!M.hasta)return'';const d=Array.isArray(M.dias)&&M.dias.length&&M.dias.length<7?' · '+M.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'';return M.desde+' a '+M.hasta+d}
 function err(e,t,s){app.innerHTML=`<div class="vac"><span class="e">${e}</span><h2>${esc(t)}</h2><p class="mu sm" style="max-width:320px">${s||''}</p></div>${pie()}`}
 const pie=()=>`<p class="ft"><img src="/img/marca/logo-xyrostudio-app.svg" alt="">Hecho con <b>XyroStudio</b></p>`;
 async function init(){
- if(!DEMO&&(!SLUG||!MESA))return err('🪑','Escanea el QR de tu mesa','Este enlace está incompleto. Usa la cámara de tu celular con el QR pegado en tu mesa.');
- try{M=await api('xa_mesa_menu',{p_slug:SLUG,p_mesa:MESA})}catch(e){return err('📶','No pudimos abrir el menú',esc(e.message))}
+ if(!DEMO&&!SLUG)return err('🪑','Escanea el QR de tu mesa','Este enlace está incompleto. Usa la cámara de tu celular con el QR pegado en tu mesa.');
+ const SOLO=!MESA&&(!DEMO||Q.has('carta')); // sin mesa: solo ver la carta
+ try{M=await api(SOLO?'xa_carta':'xa_mesa_menu',SOLO?{p_slug:SLUG}:{p_slug:SLUG,p_mesa:MESA})}catch(e){return err('📶','No pudimos abrir el menú',esc(e.message))}
  if(!M||M.error==='negocio')return err('🔎','No encontramos este negocio','Vuelve a escanear el QR de tu mesa.');
  if(M.color&&/^#[0-9a-f]{6}$/i.test(M.color))document.documentElement.style.setProperty('--a',M.color);
- if(M.error==='off')return err('🍽️','Pedidos por QR no disponibles',esc(M.negocio)+' aún no recibe pedidos desde la mesa. Pide directo en el cafetín.');
- if(M.error==='mesa')return err('🪑','Esta mesa no existe','Vuelve a escanear el QR de tu mesa o pregunta en el cafetín.');
+ if(M.error==='off')return err('🍽️',SOLO?'Carta no disponible':'Pedidos por QR no disponibles',esc(M.negocio)+(SOLO?' aún no publica su carta.':' aún no recibe pedidos desde la mesa. Pide directo en '+(M.rubro==='restaurante'?'caja.':'el cafetín.')));
+ if(SOLO){M.solo=true;M.abierto=false;document.title='Carta · '+M.negocio;CART=[];return pinta()}
+ if(M.error==='mesa')return err('🪑','Esta mesa no existe','Vuelve a escanear el QR de tu mesa o pregunta '+(M.rubro==='restaurante'?'al mozo.':'en el cafetín.'));
  document.title=(M.tienda||'Cafetín')+' · '+M.negocio;
  try{CART=JSON.parse(sessionStorage.getItem('xp-cart-'+SLUG)||'[]')}catch(_){CART=[]}
  CART=CART.filter(i=>M.productos.some(p=>p.id===i.id&&!p.agotado));
@@ -177,11 +184,11 @@ const PASOS=[['nuevo','📨','Recibido'],['preparando','👨‍🍳','Preparando
 function ordHTML(o){const k=PASOS.findIndex(p=>p[0]===o.estado);
  return`<div class="ord ${o.estado}"><div class="rw"><div class="t"><b>Pedido #${o.num}</b> <span class="mu xs">· Mesa ${o.mesa}</span><p class="mu xs">${(o.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ')}</p></div><b>${sol(o.total)}</b></div>
  ${o.estado==='cancelado'?'<p class="sm" style="color:var(--bad)">Pedido cancelado</p>':`<div class="stp">${PASOS.map((p,i)=>`<div class="${i<=k?'on':''} ${i===k&&k<3?'now':''}"><i>${p[1]}</i>${p[2]}</div>`).join('')}</div>`}
- ${o.estado==='servido'?`<div class="pg">💰 Cuando termines, acércate al ${esc((M.tienda||'cafetín').toLowerCase())} y paga <b>${sol(o.total)}</b>. Di tu mesa: <b>${o.mesa}</b>.</div>`:''}
+ ${o.estado==='servido'?`<div class="pg">💰 Cuando termines, acércate al ${esc(lug())} y paga <b>${sol(o.total)}</b>. Di tu mesa: <b>${o.mesa}</b>.</div>`:''}
  ${o.estado==='nuevo'?`<button class="btn" data-cx="${esc(o.id)}" style="padding:10px">Cancelar pedido</button>`:''}</div>`}
-const ft=(p,c)=>p.foto&&/^https:\/\//.test(p.foto)?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.remove()">`:'';
+const ft=(p,c)=>p.foto&&/^https:\/\//.test(p.foto)?`<img src="${esc(p.foto)}" alt="" loading="lazy" data-e="${esc(p.emoji||'🍽️')}" onerror="this.outerHTML=this.dataset.e">`:'';
 function titulo(){const t=String(M.titulo||((M.tienda||'Cafetín')+' a tu mesa')).trim().split(' ');if(t.length<2)return esc(t[0]);const u=t.pop();return esc(t.join(' '))+' <em>'+esc(u)+'</em>'}
-function qty(p,c,ab){return c?`<div class="q"><button data-d="${esc(p.id)}" aria-label="Quitar">−</button><b>${c}</b><button data-a="${esc(p.id)}" aria-label="Agregar">＋</button></div>`:`<button class="add" data-a="${esc(p.id)}" ${p.agotado||!ab?'disabled':''} aria-label="Agregar">＋</button>`}
+function qty(p,c,ab){if(M.solo)return'';return c?`<div class="q"><button data-d="${esc(p.id)}" aria-label="Quitar">−</button><b>${c}</b><button data-a="${esc(p.id)}" aria-label="Agregar">＋</button></div>`:`<button class="add" data-a="${esc(p.id)}" ${p.agotado||!ab?'disabled':''} aria-label="Agregar">＋</button>`}
 const esCombo=p=>/combo|promo/i.test(p.categoria||'')||(+p.antes>+p.precio);
 function pinta(){
  const P=M.productos||[],ab=M.abierto,act=MIOS.filter(o=>!['pagado','cancelado'].includes(o.estado)),deuda=act.reduce((a,o)=>a+ +o.total,0);
@@ -193,10 +200,10 @@ function pinta(){
  const ck=(p,i)=>`<div class="ck" style="animation-delay:${i*.06}s"><button class="ci" data-v="${esc(p.id)}">${ft(p)}<span class="tg">${esc(/promo/i.test(p.categoria||'')?'Promo':'Combo')}</span>${p.modelo?'<span class="a3">🪄 3D</span>':''}${p.foto?'':esc(p.emoji||'🎁')}</button><div class="bd"><h4>${esc(p.nombre)}</h4>${p.detalle?`<span class="mu xs">${esc(p.detalle)}</span>`:''}<div class="ft2"><span class="pr">${+p.antes>+p.precio?`<s>${sol(p.antes)}</s>`:''}<b>${sol(p.precio)}</b></span>${qty(p,cn(p.id),ab)}</div></div></div>`;
  const mc=(p,i)=>`<div class="mc ${p.agotado?'ag':''}" style="animation-delay:${Math.min(i,8)*.04}s"><div style="position:relative"><button class="mi" style="width:100%" data-v="${esc(p.id)}">${ft(p)}${p.foto?'':esc(p.emoji||'🛒')}${p.agotado?'<span class="tg x">Agotado</span>':p.destacado?'<span class="tg">⭐ Favorito</span>':''}${p.modelo?'<span class="a3">🪄 3D</span>':''}<span class="pp">${sol(p.precio)}</span></button><div class="ac">${qty(p,cn(p.id),ab)}</div></div><div class="mb"><h4>${esc(p.nombre)}</h4>${p.detalle?`<span class="ds">${esc(p.detalle)}</span>`:''}</div></div>`;
  app.innerHTML=`${DEMO?'<span class="demo">DEMO</span>':''}<header class="hero">${por?`<img class="bg" src="${esc(por)}" alt="" onerror="this.remove()">`:''}
-  <div class="top"><div class="lg">${lg}</div><span class="nm">${esc(M.negocio)}</span><div class="mesa"><span>MESA</span><b>${M.mesa}</b></div></div>
+  <div class="top"><div class="lg">${lg}</div><span class="nm">${esc(M.negocio)}</span>${M.solo?'':`<div class="mesa"><span>MESA</span><b>${M.mesa}</b></div>`}</div>
   <span class="eb">${esc(M.tienda||'Cafetín')}${M.yo?' · Hola, '+esc(String(M.yo).split(' ')[0]):''}</span><h1>${titulo()}</h1>${M.texto?`<p class="ld">${esc(M.texto)}</p>`:''}
-  <span class="st ${ab?'':'ce'}"><i></i>${ab?'Pedidos abiertos · te lo llevamos a la mesa '+M.mesa:M.pausa?'Pedidos en pausa por ahora':'Cerrado ahora'+(horario()?' · '+esc(horario()):'')}</span></header>
- ${ab?'':`<div class="bn cl"><b>🔒 ${M.pausa?'Pedidos en pausa por ahora':'Ahora no recibimos pedidos'}</b><p class="mu sm">${M.pausa?'Pide directo en el '+esc((M.tienda||'cafetín').toLowerCase())+'.':'Puedes ver el menú. Recibimos pedidos de '+esc(horario())+'.'}</p></div>`}
+  <span class="st ${ab||M.solo?'':'ce'}"><i></i>${M.solo?(horario()?'Atendemos '+esc(horario()):'Nuestra carta'):ab?'Pedidos abiertos · te lo llevamos a la mesa '+M.mesa:M.pausa?'Pedidos en pausa por ahora':'Cerrado ahora'+(horario()?' · '+esc(horario()):'')}</span></header>
+ ${M.solo?`<div class="bn"><b>📷 ¿Ya estás en el local?</b><p class="mu sm">${M.qr?'Escanea el QR de tu mesa para pedir desde tu celular y seguir tu pedido en vivo.':'Pide tu orden al mozo o en caja.'}</p></div>`:ab?'':`<div class="bn cl"><b>🔒 ${M.pausa?'Pedidos en pausa por ahora':'Ahora no recibimos pedidos'}</b><p class="mu sm">${M.pausa?'Pide directo en el '+esc(lug())+'.':'Puedes ver el menú. Recibimos pedidos de '+esc(horario())+'.'}</p></div>`}
  ${act.length?`<h2 class="h2">Tus <em>pedidos</em>${deuda?` <span class="mu sm" style="text-transform:none;font-weight:700">· por pagar ${sol(deuda)}</span>`:''}</h2>${act.map(ordHTML).join('')}`:''}${MIOS.filter(o=>o.estado==='pagado').slice(0,1).map(ordHTML).join('')}
  ${C.length?`<h2 class="h2">Combos <em>del momento</em></h2><div class="cmb">${C.map(ck).join('')}</div>`:''}
  ${N.length?`<h2 class="h2">Nuestro <em>menú</em></h2>${cats.length>1?`<div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div>`:''}<div class="menu">${L.map(mc).join('')}</div>`:''}
@@ -230,7 +237,7 @@ function carrito(){const o=document.createElement('div');o.className='ov';
   ${CART.map(i=>{const p=M.productos.find(x=>x.id===i.id)||{};return`<div class="rw">${p.foto?`<img class="th" src="${esc(p.foto)}" alt="">`:`<span class="th">${esc(i.e||'🛒')}</span>`}<div class="t"><b>${esc(i.n)}</b><p class="mu xs">${sol(i.p)} c/u</p></div><div class="q"><button data-d="${esc(i.id)}">−</button><b>${i.c}</b><button data-a="${esc(i.id)}">＋</button></div></div>`}).join('')}
   <input id="nm" maxlength="60" placeholder="Tu nombre (para llevártelo a la mesa)" value="${esc(ls.g('xp-nom','')||M.yo||'')}">
   <textarea id="nt" rows="2" maxlength="200" placeholder="Nota (opcional): sin azúcar, con hielo…"></textarea>
-  <div class="tot"><span class="mu">Total</span><b>${sol(tot())}</b></div><p class="mu xs" style="text-align:center">Pagas al terminar, en el ${esc((M.tienda||'cafetín').toLowerCase())}.</p>
+  <div class="tot"><span class="mu">Total</span><b>${sol(tot())}</b></div><p class="mu xs" style="text-align:center">Pagas al terminar, en el ${esc(lug())}.</p>
   <button class="btn p" id="go">Hacer pedido · ${sol(tot())}</button>${M.geo?'<p class="geo">📍 Te pediremos tu ubicación solo para confirmar que estás en el local.</p>':''}</div>`;
   o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.id===b.dataset.a);i.c=Math.min(20,i.c+1);guarda();keep(draw)});
   o.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.id===b.dataset.d);i.c--;if(i.c<=0)CART=CART.filter(x=>x!==i);guarda();keep(draw)});
@@ -265,7 +272,7 @@ async function verAR(p){const o=document.createElement('div');o.className='ov ar
  mv.addEventListener('error',()=>{box.innerHTML='<div class="vac"><span class="e">😕</span><p class="mu">Este producto aún no tiene su modelo 3D listo.</p></div>'})}
 function donde(){return new Promise((ok,ko)=>{if(!navigator.geolocation)return ko(new Error('ubicacion'));
  navigator.geolocation.getCurrentPosition(p=>ok(p.coords),()=>ko(new Error('ubicacion')),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})})}
-function geoAviso(k){const o=document.createElement('div');o.className='ov';const t=(M.tienda||'cafetín').toLowerCase();
+function geoAviso(k){const o=document.createElement('div');o.className='ov';const t=lug();
  o.innerHTML=`<div class="sh" style="text-align:center;justify-items:center"><span style="font-size:52px">${k==='lejos'?'🗺️':'📍'}</span><h2>${k==='lejos'?'Parece que no estás en el local':'Activa tu ubicación para pedir'}</h2>
  <p class="mu sm" style="max-width:380px">${k==='lejos'?'Solo se puede pedir desde las mesas de '+esc(M.negocio)+'. Si ya estás aquí, activa el GPS de tu celular e inténtalo otra vez, o pide directo en el '+esc(t)+'.':'Así evitamos pedidos falsos. Toca «Permitir» cuando tu celular te pregunte. Si dijiste que no, actívala en los ajustes del navegador (el candado 🔒 junto a la dirección).'}</p>
  <button class="btn p" data-x>Entendido</button></div>`;o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o)}
