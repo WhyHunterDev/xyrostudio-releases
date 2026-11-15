@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261115-1817",
+  "fecha": "2026-11-15 18:17",
+  "titulo": "Fotos en la carta base y sin stock no se vende",
+  "notas": "Fotos en la carta base y sin stock no se vende",
+  "cambios": [
+   "La carta base de cafetería y restaurante trae fotos de referencia; si ya la cargaste, el botón «Poner fotos de referencia» se las pone.",
+   "Sin stock ya no se puede vender (caja, mozo y QR). Los productos con receta se venden mientras alcancen sus insumos."
+  ],
+  "requiere": "SQL 60",
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-1752",
   "fecha": "2026-11-15 17:52",
   "titulo": "Menú ordenado por Xyro",
