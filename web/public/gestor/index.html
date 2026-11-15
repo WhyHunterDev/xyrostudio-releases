@@ -818,7 +818,7 @@ async function crearNegocio(){
   const {data:ya}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle(); if(ya)throw new Error('Ya existe un negocio con el código «'+slug+'». Cambia el nombre o el código en «Más opciones».');
   const {data:s,error:e1}=await sb.from('sitios').insert({slug,negocio}).select('id').single(); if(e1)throw new Error('No pude crear el negocio: '+e1.message);
   const {error:e2}=await sb.from('contenido').upsert([{sitio_id:s.id,clave:'config',valor:{xyros}},{sitio_id:s.id,clave:'app',valor:{rubro:plt.rub||plt.k,...(plt.tipo?{tipo:plt.tipo,stockNeg:true}:{}),nombre:negocio,color:v('aC')||plt.color||'#7c5cff',...(web?{web}:{})}}]); if(e2)throw new Error('Negocio creado, pero no pude guardar sus ajustes: '+e2.message);
-  if(xyros.includes('apps')){ try{ VERS=await fetch('/app/v/versiones.json',{cache:'no-store'}).then(r=>r.json()); const u=ultDe(plt.rub||plt.k); if(u)await sb.from('xa_versiones').upsert({clave:String(s.id),version:u,actualizado:new Date().toISOString()}); }catch(_){} }
+  if(xyros.includes('apps')){ try{ VERS=await fetch('/app/v/versiones.json',{cache:'no-store'}).then(r=>r.json()); const u=ultDe(plt.rub||plt.k); if(u){const{error:ev}=await sb.from('xa_versiones').upsert({clave:String(s.id),version:u,actualizado:new Date().toISOString()});if(ev)toast('Ojo: no pude ponerle su versión ('+ev.message+'). Súbela en 🚀 Actualizaciones.')} }catch(_){} }
   let webB='', aviso='';
   if(xyros.includes('webs')){ try{ webB=await sembrarWeb(slug); }catch(ex){ aviso='El panel se creó, pero no pude crear su web desde la base ('+ex.message+'). Vuelve a guardar sus Xyros.'; } }
   const mm=+v('aM')||0, modulos={}; ['webs','apps','control','bots','edits'].forEach(k=>modulos[k]={on:xyros.includes(k),precio:k==='apps'&&mm?mm:null});
@@ -839,6 +839,12 @@ let VERS=[];
 const ECOS={gym:['🏋️','Gimnasios','gimnasios'],consultorio:['🦷','Consultorios dentales','consultorios'],restaurante:['🍽️','Restaurantes y cafeterías','restaurantes'],academia:['🎓','Academias','academias']};
 const vPara=(v,r)=>!v.rubros||!v.rubros.length||v.rubros.includes(r);
 const ultDe=r=>(VERS.find(v=>vPara(v,r))||{}).id||'';
+// Un negocio sin versión propia (o con una de antes de que existiera su rubro) recibe la más nueva de su ecosistema.
+async function asegVer(slug){try{const{data:s}=await sb.from('sitios').select('id').eq('slug',slug).maybeSingle();if(!s)return;
+ const[{data:r},{data:a}]=await Promise.all([sb.from('xa_versiones').select('*').eq('clave',String(s.id)).maybeSingle(),sb.from('contenido').select('valor').eq('sitio_id',s.id).eq('clave','app').maybeSingle()]);
+ if(r&&r.fijo)return;const rb=(a&&a.valor&&a.valor.rubro)||'gym';if(!VERS||!VERS.length)VERS=await fetch('/app/v/versiones.json',{cache:'no-store'}).then(x=>x.json());
+ const pri=(VERS.filter(v=>v.rubros&&v.rubros.includes(rb)).pop()||{}).id||'',u=ultDe(rb);
+ if(u&&(!r||(rb!=='gym'&&(r.version||'')<pri))){const{error}=await sb.from('xa_versiones').upsert({clave:String(s.id),version:u,actualizado:new Date().toISOString()});if(error)toast('No pude ponerle su versión: '+error.message)}}catch(_){}}
 let vEco=localStorage.getItem('xg-veco')||'gym',VSIT=[];
 V.versiones=async ()=>{
   H('Actualizaciones','Cada ecosistema tiene sus propias actualizaciones: lo de consultorios no se ofrece a gimnasios y al revés. Los negocios no cambian hasta que tú lo subes, y nunca mientras lo están usando.');
@@ -1292,7 +1298,7 @@ document.addEventListener('click', async e=>{
     if(d.xadel){ if(!confirm('¿Borrar esta copia de Xyro Apps?'))return; const {error}=await sb.from('xa_respaldos').delete().eq('id',+d.xadel); if(error)throw error; return go('backups'); }
     if('segprune'in d){ if(!confirm('¿Borrar los registros de seguridad de más de 30 días?'))return; const {error}=await sb.from('xa_seguridad').delete().lt('creado',new Date(Date.now()-30*864e5).toISOString()); if(error)throw error; return go('seguridad'); }
     if(d.sop&&d.xapp){const c=clientes.find(x=>x.id===d.sop);if(c&&cfg().soporteSinRegistro)touch(`Entró en modo soporte a ${c.negocio}`)}
-    if(d.xapp){const w=window.open('about:blank','_blank');let u='../app/?s='+encodeURIComponent(d.xapp);try{const{data:c}=await sb.rpc('xa_pase');if(c)u+='#xa='+c}catch(_){}if(w){try{w.opener=null}catch(_){}w.location.href=u}else location.href=u;touch('Entró al Xyro Apps de '+d.xapp);return}
+    if(d.xapp){const w=window.open('about:blank','_blank');await asegVer(d.xapp);let u='../app/?s='+encodeURIComponent(d.xapp);try{const{data:c}=await sb.rpc('xa_pase');if(c)u+='#xa='+c}catch(_){}if(w){try{w.opener=null}catch(_){}w.location.href=u}else location.href=u;touch('Entró al Xyro Apps de '+d.xapp);return}
     if('logout'in d)return logout();
     if(el.id==='mb')return $('#side').classList.toggle('open');
     if(el.id==='swSop'){const c=cfg();c.soporteSinRegistro=!c.soporteSinRegistro;setCfg(c);return go('soporte');}
