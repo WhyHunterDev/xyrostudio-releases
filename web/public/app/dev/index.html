@@ -134,6 +134,7 @@ main{overflow:auto;height:100%;position:relative}
 .fl{display:grid;gap:5px;font-size:13px;color:var(--mu);font-weight:600}
 .fl input,.fl select,.fl textarea{padding:12px 13px;border-radius:12px;border:1px solid var(--ln);background:#0007;outline:0;width:100%;color:var(--tx);transition:.2s}
 .fl input:focus,.fl select:focus,.fl textarea:focus{border-color:var(--a);box-shadow:0 0 0 3px #3ad6ff22}
+:where(.ov) :where(input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]):not([type=color]):not([type=hidden]),select,textarea){background:#0007;color:var(--tx);border:1px solid var(--ln);border-radius:12px;padding:11px 13px;outline:0;color-scheme:dark}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .opts{display:flex;flex-wrap:wrap;gap:6px}
 .opts button{padding:9px 12px;border-radius:11px;border:1px solid var(--ln);background:#ffffff08;font-weight:600;font-size:13.5px}
@@ -821,8 +822,11 @@ async function pdaRpc(f,a){if(DEMO){const p=(PDA||[]).find(x=>x.id===(a||{}).p_i
 async function pdaCargar(){if(!rutOn()||!ME||!['gestor','admin','supervisor','recepcion','entrenador','nutricionista'].includes(ME.rol))return PDA=[];
  if(DEMO){PDA=PDA||pdaDemo();return PDA}
  try{const{data,error}=await sb.rpc('xa_neg_pedidos',{p_slug:SLUG||null,p_todos:false});if(error)throw error;PDA=data||[];NEED48=false}catch(_){PDA=PDA||[];NEED48=true}return PDA}
+/* Chat abierto: se refresca cada 6 s para ver al momento lo que escribe el socio desde su app */
+setInterval(async()=>{const ch=document.querySelector('#pdch[data-id]');if(!ch||document.hidden||DEMO||!ME||NEED48)return;const id=ch.dataset.id,j=JSON.stringify(((PDA||[]).find(x=>x.id===id)||{}).msgs||[]);await pdaCargar();const p=(PDA||[]).find(x=>x.id===id);
+ if(p&&ch.isConnected&&JSON.stringify(p.msgs||[])!==j){ch.innerHTML=pdaChat(p);ch.scrollTop=ch.scrollHeight;beep&&beep();if(p.visto_negocio===false){p.visto_negocio=true;sb.rpc('xa_neg_pedido_visto',{p_id:id}).then(()=>{},()=>{})}}},6000);
 function pdaPon(p){if(!p||!p.id)return;const o=(PDA||[]).find(x=>x.id===p.id);o?Object.assign(o,p):(PDA=PDA||[]).unshift(p)}
-setInterval(async()=>{if(document.hidden||DEMO||!ME||!rutOn()||NEED48||PDA==null)return;const n0=pdaN(),j=JSON.stringify(PDA);await pdaCargar();if(JSON.stringify(PDA)!==j&&!document.querySelector('.ov')&&/^#\/rutinas/.test(location.hash))go();if(pdaN()>n0)toast('📲 Nuevo pedido desde la app Mi Xyro')},60000);
+setInterval(async()=>{if(document.hidden||DEMO||!ME||!rutOn()||NEED48||PDA==null)return;const n0=pdaN(),j=JSON.stringify(PDA);await pdaCargar();if(JSON.stringify(PDA)!==j&&!document.querySelector('.ov')&&/^#\/rutinas/.test(location.hash))go();if(pdaN()>n0)toast('📲 Nuevo pedido desde la app Mi Xyro')},20000);
 function pdaCard(){if(!rutOn())return'';if(PDA==null){pdaCargar().then(()=>{if(/^#\/rutinas/.test(location.hash))go()});return''}if(NEED48&&!DEMO)return'';
  const L=PDA.filter(p=>p.estado==='pendiente'||p.estado==='agendado'||p.visto_negocio===false);if(!L.length)return'';
  setTimeout(()=>$$('[data-pda]').forEach(b=>b.onclick=e=>{e.stopPropagation();pdaVer(b.dataset.pda)}));
@@ -835,7 +839,7 @@ function pdaVer(id){const p=(PDA||[]).find(x=>x.id===id);if(!p)return;const ent=
   ${!ent&&p.cita&&p.estado!=='cancelado'?`<div class="card" style="border-color:var(--a)"><b>📅 ${fF(ymd(new Date(p.cita.inicio)))} · ${fH(p.cita.inicio)}${p.cita.nutri_nombre?' · '+esc(p.cita.nutri_nombre):''}</b>${p.cita.nota?`<p class="sm">📝 ${esc(p.cita.nota)}</p>`:''}${p.cita.por?`<p class="mu sm">Agendó: ${esc(p.cita.por)}</p>`:''}</div>`:''}
   <div class="card"><b>🎯 ${esc(p.objetivo||'—')}</b>${p.nota?`<p class="sm" style="white-space:pre-wrap">${esc(p.nota)}</p>`:''}<p class="mu sm">${pv?'Plan anterior: '+esc(pv.titulo||'Plan')+' · por '+esc(pv.quien||'—')+' · '+fF(ymd(new Date(pv.creado))):'Es su primer plan.'}</p></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">${p.estado!=='cancelado'&&pdaPlan(p)&&(ent||p.estado!=='pendiente')?`<button class="btn p" id="pdpl">${ent?'✍️ Armar y enviar a su app':'🥗 Crear plan de alimentación'}</button>`:''}${!ent&&ab&&pdaRecep()?`<button class="btn ${p.estado==='pendiente'?'p':''}" id="pdag">📅 ${p.estado==='agendado'?'Cambiar la cita':'Agendar cita con nutrición'}</button>`:''}${ab&&pdaRecep()?'<button class="btn" id="pdcn">Cerrar solicitud</button>':''}</div>
-  <div class="card"><b class="sm">💬 Chat con el ${R.cli.toLowerCase()} · lo ve en su app</b><div id="pdch" style="display:grid;gap:8px;max-height:280px;overflow:auto;margin:8px 0">${pdaChat(p)}</div>
+  <div class="card"><b class="sm">💬 Chat con el ${R.cli.toLowerCase()} · lo ve en su app</b><div id="pdch" data-id="${esc(p.id)}" style="display:grid;gap:8px;max-height:280px;overflow:auto;margin:8px 0">${pdaChat(p)}</div>
   ${p.estado==='cancelado'?'':`<div style="display:flex;gap:8px"><input id="pdm" style="flex:1" maxlength="1000" placeholder="${!ent&&p.estado==='pendiente'?'Ej.: Tenemos jueves 5 pm o viernes 7 pm':'Escribe un mensaje…'}"><button class="btn p" id="pds">Enviar</button></div>`}</div>
   <button class="btn" data-x style="width:100%">Cerrar</button>`,(o,close)=>{const q=s=>o.querySelector(s),ch=q('#pdch');ch.scrollTop=ch.scrollHeight;
   const env=async()=>{const i=q('#pdm'),t=i.value.trim();if(!t)return;q('#pds').disabled=true;try{const r=await pdaRpc('xa_neg_pedido_msg',{p_id:p.id,p_texto:t});pdaPon(r);i.value='';ch.innerHTML=pdaChat(p);ch.scrollTop=ch.scrollHeight}catch(er){toast(er.message||er)}q('#pds').disabled=false;i.focus()};
