@@ -2052,7 +2052,7 @@ function tienda(){
   const c=$('#tCob');c&&(c.onclick=cobrarVenta);const v=$('#tVac');v&&(v.onclick=()=>{carrito=[];go()});
   const i=$('#tInv');i&&(i.onclick=()=>{modoInv=true;go()});const nw=$('#tNew');nw&&(nw.onclick=()=>editProd());
  });
- return`<div class="hi"><div><h2>${esc(tiendaN())}</h2><p class="mu">Toca un producto para venderlo. El stock baja solo.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">${puedeProd()?'<button class="btn" id="tInv">📦 Stock</button><button class="btn" id="tNew">＋ Producto</button>':''}</div></div>
+ return`<div class="hi"><div><h2>${esc(tiendaN())}</h2><p class="mu">Toca un producto para venderlo. El stock baja solo.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">${mpVis()?`<a class="btn" href="#/pedidos">🍽️ Pedidos de mesa${mpNuevos()?' ('+mpNuevos()+')':''}</a>`:''}${puedeProd()?'<button class="btn" id="tInv">📦 Stock</button><button class="btn" id="tNew">＋ Producto</button>':''}</div></div>
  <div class="pos"><div>${cats.length?`<div class="chips">${['',...cats].map(c=>`<button class="chip ${c===catSel?'on':''}" data-cat="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div>`:''}
  <div class="pgr st">${L.map(p=>`<button class="prod ${+p.stock<=0?'out':''}" data-add="${p.id}"><span class="pe">${esc(p.emoji||'🛒')}</span><b>${esc(p.nombre)}</b><span class="pp">${sol(p.precio)}</span><span class="ps ${+p.stock<=+(p.minimo||0)?'low':''}">${+p.stock} en stock</span></button>`).join('')||`<div class="empty"><b>🥤</b>Aún no hay productos.${isAdmin()?'<br>Toca «＋ Producto».':''}</div>`}</div></div>
  <div class="card cart ${carrito.length?'':'vacio'}"><h3>🛒 Venta ${carrito.length?'<button class="btn sm" id="tVac">Vaciar</button>':''}</h3><div class="tl">${carrito.map((it,i)=>`<div class="row" style="padding:8px 4px"><span class="nm"><b>${esc(it.n)}</b><small>${sol(it.p)} c/u</small></span><span class="qty"><button data-q="${i}" data-d="-1">−</button><b>${it.c}</b><button data-q="${i}" data-d="1">＋</button></span><b style="min-width:64px;text-align:right">${sol(it.p*it.c)}</b></div>`).join('')||'<p class="mu sm">Toca productos para agregarlos.</p>'}</div>
@@ -2100,7 +2100,7 @@ function entrada(p){
 
 /* ===== Pedidos por QR de mesa (SQL 50, Xyro Control): el socio escanea /pedir/?s=slug&m=N, pide y paga al final en el cafetín ===== */
 let MP=null,NEED50=false,MPn=0;
-const mpVis=()=>mpOn()&&(mpCfg().on||isAdmin());
+const mpVis=()=>mpOn();
 const mpOn=()=>CTL()&&!R.citas&&!!ME&&['gestor','admin','supervisor','recepcion','cafetin'].includes(ME.rol);
 const mpCfg=()=>Object.assign({on:!!DEMO,n:DEMO?8:0,desde:'07:00',hasta:'21:00',dias:[]},CFG.mesas||{});
 const mpLink=n=>DEMO?location.origin+'/pedir/?demo=1&m='+n+'&n='+encodeURIComponent(nombre()):'https://xyrostudio.net/pedir/?s='+encodeURIComponent(SLUG)+'&m='+n;
@@ -2135,7 +2135,7 @@ function pedidosMesa(){
  if(NEED50&&!DEMO)return`<div class="hi"><div><h2>🍽️ Pedidos de mesa</h2></div></div><div class="empty"><b>🧩</b>Para recibir pedidos por QR falta activar la función en tu base (<b>SQL 50</b>). Avísale a XyroStudio.</div>`;
  if(!C.on)return`<div class="hi"><div><h2>🍽️ Pedidos desde la mesa</h2><p class="mu">Tus ${R.clis.toLowerCase()} escanean el QR de su mesa, eligen del ${esc(tiendaN().toLowerCase())} y piden sin hacer cola.</p></div></div>
   <div class="card mpHero"><div class="mpSt">${[['📷','Escanea el QR de su mesa'],['🛒','Elige combos, promos y productos'],['🔔','Te llega el pedido al instante'],['💰','Paga al terminar y queda registrado']].map(([i,t],k)=>`<div style="animation-delay:${k*.08}s"><span>${i}</span><b>${t}</b></div>`).join('')}</div>
-  <p class="mu sm">Solo muestra lo que tienes en stock y no recibe pedidos fuera de tu horario.</p>${adm?'<button class="btn p" id="mpAct">🚀 Activar pedidos por QR</button>':'<p class="sm">Pídele al administrador que lo active.</p>'}<button class="btn" id="mpVer" style="margin-left:6px">👀 Ver cómo lo ve el cliente</button></div>`;
+  <p class="mu sm">Solo muestra lo que tienes en stock y no recibe pedidos fuera de tu horario.</p>${adm?'<button class="btn p" id="mpAct">🚀 Activar pedidos por QR</button>':'<p class="sm">🔒 Solo el administrador del negocio puede activarlo (cuenta admin).</p>'}<button class="btn" id="mpVer" style="margin-left:6px">👀 Ver cómo lo ve el cliente</button></div>`;
  const A=mpAbiertos(),col=e=>A.filter(p=>p.estado===e),serv=col('servido'),mesas=[...new Set(serv.map(p=>p.mesa))].sort((a,b)=>a-b);
  const hoyP=(MP.pedidos||[]).filter(p=>p.estado==='pagado'),totH=hoyP.reduce((a,p)=>a+ +p.total,0);
  const card=p=>{const e=MPE[p.estado];return`<div class="card mpC ${p.estado}"><div class="mpH"><b class="mpM">Mesa ${p.mesa}</b><span class="mu sm">#${p.num} · ${mpHace(p.creado)}</span></div>

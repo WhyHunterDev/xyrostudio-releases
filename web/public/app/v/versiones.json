@@ -1,5 +1,18 @@
 [
  {
+  "id": "20261115-0130",
+  "fecha": "2026-11-15 01:30",
+  "titulo": "Pedidos de mesa visibles para todo el equipo",
+  "notas": "Pedidos de mesa visibles para todo el equipo",
+  "cambios": [
+   "La sección «🍽️ Pedidos de mesa» aparece en el menú y en el Cafetín para todo el equipo, aunque aún no esté activada",
+   "Solo el administrador la activa (mesas, horario y QR)"
+  ],
+  "rubros": [
+   "gym"
+  ]
+ },
+ {
   "id": "20261115-0126",
   "fecha": "2026-11-15 01:26",
   "titulo": "Editar perfil de la app",
