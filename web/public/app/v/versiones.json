@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261115-0126",
+  "fecha": "2026-11-15 01:26",
+  "titulo": "Editar perfil de la app",
+  "notas": "Editar perfil de la app",
+  "cambios": [
+   "Los botones para editar el perfil y publicar novedades ahora salen siempre en App de clientes",
+   "Tocar la portada abre el editor"
+  ],
+  "requiere": "SQL 52"
+ },
+ {
   "id": "20261115-0024",
   "fecha": "2026-11-15 00:24",
   "titulo": "Perfil del negocio en la app",

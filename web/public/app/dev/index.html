@@ -3230,13 +3230,13 @@ const PF=()=>CFG.perfil||{};
 async function pfGuardar(o){await DB.cfg({perfil:Object.assign({},PF(),o)})}
 async function pfFoto(inp,max,pref){const f=inp&&inp.files&&inp.files[0];if(!f)return null;if(DEMO)return URL.createObjectURL(f);return subirImg(f,max,pref)}
 const pfSedes=()=>{const L=PF().sedes;if(Array.isArray(L)&&L.length)return L;const S=sedesL();return(S.length?S:[{nombre:'Sede principal'}]).map(s=>({nombre:s.nombre}))};
-function perfilCard(){const p=PF(),N=(p.novedades||[]),hoyS=hoy(),ad=isAdmin(),sd=pfSedes().filter(s=>s.direccion||s.distrito),rd=p.redes||{};
- setTimeout(()=>{const q=s=>$(s);q('#pfE')&&(q('#pfE').onclick=editPerfil);q('#pfU')&&(q('#pfU').onclick=editUbic);q('#pfN')&&(q('#pfN').onclick=()=>editNovedad());$$('[data-nv]').forEach(b=>b.onclick=()=>editNovedad(+b.dataset.nv))});
+function perfilCard(){const p=PF(),N=(p.novedades||[]),hoyS=hoy(),ad=true,sd=pfSedes().filter(s=>s.direccion||s.distrito),rd=p.redes||{};
+ setTimeout(()=>{const q=s=>$(s);q('#pfE')&&(q('#pfE').onclick=editPerfil);q('#pfC')&&(q('#pfC').onclick=editPerfil);q('#pfU')&&(q('#pfU').onclick=editUbic);q('#pfN')&&(q('#pfN').onclick=()=>editNovedad());$$('[data-nv]').forEach(b=>b.onclick=()=>editNovedad(+b.dataset.nv))});
  const ok=(b,t)=>`<span class="pill" style="${b?'':'opacity:.55'}">${b?'✅':'○'} ${t}</span>`;
  return`<div class="card" style="margin-top:14px;display:grid;gap:12px"><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><div><h3>🏪 Tu perfil en la app</h3><p class="mu sm">Lo que ven las personas al abrir tu negocio en Mi Xyro. No necesitas página web: si la tienes, completamos con lo que falte de ella.</p></div>
   ${ad?'<div class="bt" style="margin:0"><button class="btn sm p" id="pfE">✏️ Editar perfil</button><button class="btn sm" id="pfU">📍 Dirección y horario</button></div>':''}</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;align-items:start" class="pfg">
-   <div style="border-radius:16px;overflow:hidden;aspect-ratio:16/9;background:${p.portada?`center/cover url('${esc(p.portada)}')`:'linear-gradient(135deg,var(--a),#000)'};display:grid;place-items:end start;padding:10px"><span class="pill" style="background:#000a">${esc(nombre())}</span></div>
+   <div id="pfC" title="Cambiar portada" style="cursor:pointer;border-radius:16px;overflow:hidden;aspect-ratio:16/9;background:${p.portada?`center/cover url('${esc(p.portada)}')`:'linear-gradient(135deg,var(--a),#000)'};display:grid;place-items:end start;padding:10px"><span class="pill" style="background:#000a">${esc(nombre())}</span></div>
    <div style="display:grid;gap:8px">${p.descripcion?`<p class="sm">${esc(p.descripcion)}</p>`:'<p class="mu sm">Sin descripción todavía.</p>'}
     <div style="display:flex;gap:6px;flex-wrap:wrap">${ok(p.portada,'Portada')}${ok(p.descripcion,'Descripción')}${ok(p.whatsapp,'WhatsApp')}${ok(rd.instagram||rd.tiktok||rd.facebook,'Redes')}${ok(sd.length,'Dirección y horario')}${ok(p.planes!==false&&(S.pla||[]).some(x=>x.activo!==false),'Planes y precios')}</div></div></div>
   <div class="row" style="justify-content:space-between;border-top:1px solid var(--ln);padding-top:10px"><h3>📢 Novedades</h3>${ad?'<button class="btn sm p" id="pfN">＋ Nueva</button>':''}</div>
