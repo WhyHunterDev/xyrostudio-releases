@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261115-0511",
+  "fecha": "2026-11-15 05:11",
+  "titulo": "Invitar socios a la app",
+  "notas": "Invitar socios a la app",
+  "cambios": [
+   "«Enviar carnets» ahora es «📲 Invitar a la app»: llega por WhatsApp un enlace a Mi Xyro (sin imagen de carnet)",
+   "El socio entra, crea su cuenta y queda conectado a su ficha con su QR, plan y rutinas"
+  ]
+ },
+ {
   "id": "20261115-0430",
   "fecha": "2026-11-15 04:30",
   "titulo": "Realidad aumentada con platos escaneados",
