@@ -9,7 +9,7 @@
    "Lo apagado desaparece del menú de todo el equipo; no se borra nada",
    "En la app Mi Xyro los socios ya no pueden pedir un servicio que el gym no tiene"
   ],
-  "requiere": "SQL 53",
+  "requiere": "SQL 55",
   "rubros": [
    "gym"
   ]
