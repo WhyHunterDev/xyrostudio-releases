@@ -399,6 +399,15 @@ const T={cli:'xa_clientes',pla:'xa_planes',mem:'xa_membresias',pag:'xa_pagos',as
 
 let REC=false,WEB={planes:[],sedes:[]},XY=[],NEED17=false,sb=null,ME=null,SID=null,SLUG='',CFG={},R=RUBROS.gym,S={cli:[],pla:[],mem:[],pag:[],asi:[],pro:[],mov:[],cie:[],sol:[]};
 const KS=['cli','pla','mem','pag','asi','pro','mov','cie','sol','rut','cit','his','pre'],asegS=()=>KS.forEach(k=>S[k]=S[k]||[]);
+const OPB={tam:{g:'Tamaño',o:[{n:'Regular',p:0},{n:'Grande',p:2}]},leche:{g:'Leche',o:[{n:'Entera',p:0},{n:'Deslactosada',p:0},{n:'De almendras',p:2.5}]},extC:{g:'Extras',m:1,o:[{n:'Shot extra',p:2},{n:'Crema batida',p:1.5},{n:'Jarabe de vainilla',p:1.5}]},tamF:{g:'Tamaño',o:[{n:'Regular',p:0},{n:'Grande',p:3}]},extF:{g:'Extras',m:1,o:[{n:'Crema batida',p:1.5},{n:'Shot de café',p:2},{n:'Galleta Oreo',p:2}]},extW:{g:'Agrégale',m:1,o:[{n:'Bola de helado',p:3},{n:'Fudge de chocolate',p:1.5},{n:'Fresas',p:2},{n:'Nutella',p:2.5}]},az:{g:'Endulzado',o:[{n:'Normal',p:0},{n:'Poco azúcar',p:0},{n:'Sin azúcar',p:0},{n:'Con stevia',p:0}]},esp:{g:'Tamaño',o:[{n:'Simple',p:0},{n:'Doble',p:2}]}};
+const opcBase=(n,c)=>{n=String(n||'').toLowerCase();c=String(c||'').toLowerCase();if(/espresso/.test(n))return[OPB.esp];if(/americano/.test(n))return[OPB.tam,OPB.az];if(/frapp/.test(n))return[OPB.tamF,OPB.leche,OPB.extF];if(/^caf[eé]s/.test(c))return[OPB.tam,OPB.leche,OPB.extC];if(/waffle|crepe/.test(n)&&!/pollo/.test(n))return[OPB.extW];if(/bebidas fr/.test(c))return[OPB.az];return null}; // opciones típicas de cafetería (carta base y demo)
+// Opciones por producto (SQL 59): [{g:'Tamaño',o:[{n,p}]},{g:'Extras',m:1,o:[…]}]. opc() = igual que xa_opc en la base.
+const OPS=p=>Array.isArray(p&&p.opciones)?p.opciones.filter(g=>g&&Array.isArray(g.o)&&g.o.length):[];
+const opc=(p,sel)=>{let x=0;const t=[];OPS(p).forEach(g=>{const m=g.m==1||g.m===true;let c=0;g.o.forEach((o,i)=>{if(sel.includes(o.n)&&(m||!c)){x+=Math.max(+o.p||0,0);c++;if(m||i>0)t.push(o.n)}});if(!m&&!c)x+=Math.max(+g.o[0].p||0,0)});return{x,t:t.join(', ').slice(0,120)}};
+const opcTxt=L=>(Array.isArray(L)?L:[]).map(g=>`${g.g}${g.m?' (varias)':''}: ${(g.o||[]).map(o=>o.n+(+o.p?' +'+(+o.p):'')).join(', ')}`).join('\n');
+const opcLee=t=>String(t||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf(':');if(i<1)return null;let g=l.slice(0,i).trim();const m=/\(varias?\)/i.test(g);g=g.replace(/\(varias?\)/i,'').trim().slice(0,30);
+ const o=l.slice(i+1).split(',').map(x=>x.trim()).filter(Boolean).slice(0,12).map(x=>{const r=x.match(/^(.*?)\s*\+\s*(\d+(?:[.,]\d+)?)$/);return{n:(r?r[1]:x).trim().slice(0,30),p:r?+r[2].replace(',','.'):0}}).filter(x=>x.n);return g&&o.length?Object.assign({g,o},m?{m:1}:{}):null}).filter(Boolean).slice(0,6);
+let NEED59=false;
 const rubDe=C=>C&&C.rubro==='restaurante'&&C.tipo==='cafe'?RUBROS.cafeteria:RUBROS[C&&C.rubro]||RUBROS.gym;
 const XYROS=[['apps','Xyro Apps','Tu sistema base: '],['control','Xyro Control','Punto de venta: tienda o cafetín, pedidos por QR desde la mesa, stock, inventario, márgenes y caja de productos'],['webs','Xyro Webs','Tu página web conectada: lo que publicas pasa solo a la app'],['bots','Xyro Bots','Asistente que atiende a tus clientes las 24 horas en tu web (y pronto en tu WhatsApp): precios, horarios, clases y sedes'],['edits','Xyro Edits','Videos y reels editados rápido para tus redes',1]];
 /* Vitrina para vender más: demos de los 3 diseños de web y temas de temporada (vista previa; usarlos se paga) */
@@ -2138,10 +2147,13 @@ function editProd(p){
  if(CTL()&&!NEED53)f.unshift({k:'foto',t:'img',l:'Foto del producto',v:p&&p.foto,pref:'prod',ayuda:'Una foto bonita vende más en el menú de mesas.'});
  if(CTL()&&!NEED50P)f.push({k:'detalle',l:'Detalle para el menú (opcional)',v:p&&p.detalle,ph:'Ej. Batido + barra de proteína'},{k:'en_mesa',l:'🍽️ Mostrar en el menú de mesas (QR)',t:'chk',v:!p||p.en_mesa!==false});
  if(CTL()&&!NEED53)f.push({k:'antes',l:'Precio antes (S/, para combos o promos)',t:'number',v:p&&p.antes,ph:'Opcional: se ve tachado'},{k:'destacado',l:'⭐ Destacar arriba del menú',t:'chk',v:p&&p.destacado});
+ if(R.resto&&!NEED59)f.push({k:'opciones',t:'area',rows:3,l:'🧩 Opciones (tamaño, leche, extras…) · una línea por grupo',v:opcTxt(p&&p.opciones),ph:'Tamaño: Regular, Grande +2\nLeche: Entera, Deslactosada, De almendras +2.5\nExtras (varias): Shot extra +2, Crema batida +1.5'});
  if(CTL()&&!NEED53&&isXyro())f.push({k:'modelo',t:'glb',l:'🪄 Realidad aumentada · modelo 3D del plato (solo XyroStudio)',v:p&&p.modelo});
  form(p?'Editar producto':'Nuevo producto',f,async v=>{
   const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};if(CTL()&&!NEED50P)Object.assign(row,{detalle:v.detalle||null,en_mesa:!!v.en_mesa});if(CTL()&&!NEED53)Object.assign(row,{foto:v.foto||null,antes:v.antes===''||!(+v.antes>+v.precio)?null:+v.antes,destacado:!!v.destacado});if(CTL()&&!NEED53&&isXyro())row.modelo=/^https:\/\/\S+\.glb(\?\S*)?$/i.test(v.modelo||'')?v.modelo:null;
-  if(p){await DB.upd('pro',p.id,row)}else{const n=await DB.ins('pro',Object.assign(row,{stock:0,creado:new Date().toISOString()}));if(+v.stock>0)await DB.stock(n.id,+v.stock,'entrada','Stock inicial')}
+  if(R.resto&&!NEED59){const L=opcLee(v.opciones);row.opciones=L.length?L:null}
+  const gu=async()=>{if(p){await DB.upd('pro',p.id,row)}else{const n=await DB.ins('pro',Object.assign(row,{stock:0,creado:new Date().toISOString()}));if(+v.stock>0)await DB.stock(n.id,+v.stock,'entrada','Stock inicial')}};
+  try{await gu()}catch(e){if(!/opciones/i.test(e.message||'')||!('opciones' in row))throw e;NEED59=true;delete row.opciones;await gu();toast('Guardado sin opciones: falta el SQL 59. Avísale a XyroStudio.')}
   S.pro.sort((a,b)=>a.nombre.localeCompare(b.nombre));toast('Producto guardado ✓');go();
  },p?'<button type="button" class="btn bad" id="prDel" style="margin-right:auto">Archivar</button>':'');
  const d=$('#prDel');d&&(d.onclick=async()=>{await DB.upd('pro',p.id,{activo:false});$('.ov').remove();toast('Producto archivado');go()});
@@ -2165,7 +2177,7 @@ const mpNuevos=()=>(MP&&MP.pedidos||[]).filter(p=>p.estado==='nuevo').length;
 const mpHace=t=>{const m=Math.max(0,Math.round((Date.now()-new Date(t))/6e4));return m<1?'ahora':m<60?'hace '+m+' min':'hace '+Math.floor(m/60)+' h'};
 /* Carta base: carga los productos típicos del rubro (cafetería o restaurante) para no empezar de cero. */
 async function cartaBase(){if(S.pro.length||!R.productos)return;const b=$('#tBase');b&&(b.disabled=true,b.textContent='Cargando…');
- try{for(const[nombre,categoria,precio,costo,emoji]of R.productos){const row={nombre,categoria,precio,costo,emoji,minimo:0,activo:true,stock:0,creado:new Date().toISOString()};if(CTL()&&!NEED50P)row.en_mesa=true;await DB.ins('pro',row)}
+ try{for(const[nombre,categoria,precio,costo,emoji]of R.productos){const row={nombre,categoria,precio,costo,emoji,minimo:0,activo:true,stock:0,creado:new Date().toISOString()};if(CTL()&&!NEED50P)row.en_mesa=true;const op=R.cafe&&!NEED59?opcBase(nombre,categoria):null;if(op)row.opciones=op;try{await DB.ins('pro',row)}catch(e){if(!op||!/opciones/i.test(e.message||''))throw e;NEED59=true;delete row.opciones;await DB.ins('pro',row)}}
   if(!CFG.stockNeg)await DB.cfg({stockNeg:true});toast('Carta cargada ✓ Edita precios y fotos a tu gusto');go()}catch(e){toast(e.message);b&&(b.disabled=false)}}
 function mpDemo(){if(R.resto)return mpDemoResto();const P=S.pro.filter(p=>p.activo!==false).slice(0,6),it=(i,c)=>{const p=P[i%Math.max(1,P.length)]||{id:'x',nombre:'Batido',precio:10,emoji:'🥤'};return{id:p.id,n:p.nombre,c,p:+p.precio,e:p.emoji}},t=m=>new Date(Date.now()-m*6e4).toISOString(),c=S.cli[0];
  const L=[{id:'m1',num:1,mesa:2,items:[it(2,2),it(4,1)],nota:'Sin azúcar porfa',nombre:c?c.nombre:'Lucía',cliente_id:c&&c.id,cliente_nombre:c&&c.nombre,estado:'servido',creado:t(34),cambio:t(20)},
@@ -2690,7 +2702,7 @@ function miWeb(){
 }
 // «Mi web» = editor de la web dentro de Xyro Apps (mismo dominio y misma sesión: sin login ni pases).
 function abrirWeb(){location.href='web/'+(SLUG?'?s='+encodeURIComponent(SLUG):'')}
-document.addEventListener('click',e=>{const a=e.target.closest('a[href="#/web"]');if(!a||DEMO||!tiene('webs'))return;e.preventDefault();e.stopPropagation();abrirWeb()},true);
+document.addEventListener('click',e=>{const a=e.target.closest('a[href="#/web"]');if(!a||DEMO||R.resto||!tiene('webs'))return;e.preventDefault();e.stopPropagation();abrirWeb()},true);
 
 /* ===== Integraciones: Xyro Apps es la base y el resto se activa en el mismo panel ===== */
 function xyros(){
@@ -3551,31 +3563,49 @@ function cocinaV(){
 async function mpTomar(m0){
  if(!mpOn())return toast('Falta activar la carta');
  if(MP==null)await mpCargar();
- const C=mpCfg(),P=S.pro.filter(p=>p.activo!==false),cats=[...new Set(P.map(p=>p.categoria||'Otros'))],it={};let mesa=m0!=null?m0:(+C.n?1:0),cat='';
+ const C=mpCfg(),P=S.pro.filter(p=>p.activo!==false),cats=[...new Set(P.map(p=>p.categoria||'Otros'))],it={};let mesa=m0!=null?m0:(+C.n?1:0),cat='',pick=null,sel=[];
+ const cnt=id=>Object.values(it).filter(l=>l.id===id).reduce((a,l)=>a+l.c,0),pu=l=>{const p=P.find(x=>x.id===l.id);return +p.precio+opc(p,l.o).x},suma=(id,o,d)=>{const p=P.find(x=>x.id===id),op=opc(p,o),k=id+(op.t?'|'+op.t:'');if(d>0){if(cnt(id)+1>+p.stock&&!CFG.stockNeg)return toast('Solo quedan '+(+p.stock));(it[k]=it[k]||{id,o:o.slice(),t:op.t,c:0}).c++}else{const l=it[k]||Object.values(it).filter(x=>x.id===id).pop();if(!l)return;l.c--;if(l.c<=0)for(const q in it)if(it[q]===l)delete it[q]}};
  if(!P.length)return toast('Primero agrega platos a tu '+tiendaN().toLowerCase());
  sheet(`<h3>🧾 Nuevo pedido</h3><div class="fl">¿Para dónde?<div class="opts tmM">${[0].concat(Array.from({length:+C.n||0},(_,i)=>i+1)).map(m=>`<button type="button" data-tm="${m}">${m?m:'🥡 Llevar'}</button>`).join('')}</div></div>
-  <div class="chips tmC"></div><div class="tmL"></div>
-  <div class="row" style="gap:8px"><input id="tmNom" placeholder="Nombre (opcional)" maxlength="60" style="flex:1"><input id="tmNo" placeholder="Nota: sin ají, término medio…" maxlength="200" style="flex:2"></div>
+  <div class="chips tmC"></div><div class="tmL"></div><div class="chips tmS" style="flex-wrap:wrap"></div>
+  <div class="row" style="gap:8px"><input id="tmNom" placeholder="Nombre (opcional)" maxlength="60" style="flex:1"><input id="tmNo" placeholder="${R.cafe?'Nota: sin azúcar, con hielo…':'Nota: sin ají, término medio…'}" maxlength="200" style="flex:2"></div>
   <div class="bt"><span class="mu" id="tmRes" style="margin-right:auto"></span><button class="btn" data-x>Cancelar</button><button class="btn p" id="tmOk" disabled>👨‍🍳 Enviar a cocina</button></div>`,(el,close)=>{
   const pinta=()=>{el.querySelectorAll('[data-tm]').forEach(b=>b.classList.toggle('on',+b.dataset.tm===mesa));
    el.querySelector('.tmC').innerHTML=['',...cats].map(c=>`<button type="button" class="chip ${c===cat?'on':''}" data-tc="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('');
-   el.querySelector('.tmL').innerHTML=P.filter(p=>!cat||(p.categoria||'Otros')===cat).map(p=>{const c=it[p.id]||0,ag=+p.stock<=0&&!CFG.stockNeg;return`<div class="tmP ${c?'on':''} ${ag?'ag':''}">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.remove()">`:`<span>${esc(p.emoji||'🍽️')}</span>`}<span class="nm"><b>${esc(p.nombre)}</b><small>${sol(p.precio)}${ag?' · agotado':''}</small></span><span class="qty"><button type="button" data-tq="${p.id}" data-d="-1" ${c?'':'disabled'}>−</button><b>${c}</b><button type="button" data-tq="${p.id}" data-d="1" ${ag?'disabled':''}>＋</button></span></div>`}).join('');
-   const n=Object.values(it).reduce((a,c)=>a+c,0),t=P.reduce((a,p)=>a+(it[p.id]||0)*p.precio,0);el.querySelector('#tmRes').innerHTML=n?`${n} plato${n>1?'s':''} · <b style="color:var(--a)">${sol(t)}</b>`:'Elige los platos';el.querySelector('#tmOk').disabled=!n};
-  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tm!=null){mesa=+b.dataset.tm;pinta()}else if(b.dataset.tc!=null){cat=b.dataset.tc;pinta()}else if(b.dataset.tq){const p=P.find(x=>x.id===b.dataset.tq),c=Math.max(0,(it[p.id]||0)+ +b.dataset.d);if(c>+p.stock&&!CFG.stockNeg)return toast('Solo quedan '+(+p.stock));it[p.id]=c;pinta()}};
+   if(pick){const p=pick;el.querySelector('.tmL').innerHTML=`<div class="tmO"><div class="row" style="gap:8px;align-items:center;padding:0"><button type="button" class="btn" data-tback>←</button><b style="flex:1">${esc(p.emoji||'')} ${esc(p.nombre)}</b><b style="color:var(--a)">${sol(+p.precio+opc(p,sel).x)}</b></div>${OPS(p).map((g,gi)=>`<p style="margin:12px 0 6px"><b>${esc(g.g)}</b> <span class="mu sm">· ${g.m?'puedes elegir varias':'elige una'}</span></p><div class="chips" style="flex-wrap:wrap;padding:0">${g.o.map((o,oi)=>`<button type="button" class="chip ${sel.includes(o.n)?'on':''}" data-tog="${gi}|${oi}">${esc(o.n)}${+o.p>0?' +'+sol(o.p):''}</button>`).join('')}</div>`).join('')}<button type="button" class="btn p" data-tadd style="width:100%">＋ Agregar al pedido</button></div>`}
+   else el.querySelector('.tmL').innerHTML=P.filter(p=>!cat||(p.categoria||'Otros')===cat).map(p=>{const c=cnt(p.id),ag=+p.stock<=0&&!CFG.stockNeg;return`<div class="tmP ${c?'on':''} ${ag?'ag':''}">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.remove()">`:`<span>${esc(p.emoji||'🍽️')}</span>`}<span class="nm"><b>${esc(p.nombre)}</b><small>${sol(p.precio)}${ag?' · agotado':''}</small></span><span class="qty"><button type="button" data-tq="${p.id}" data-d="-1" ${c?'':'disabled'}>−</button><b>${c}</b><button type="button" data-tq="${p.id}" data-d="1" ${ag?'disabled':''}>＋</button></span></div>`}).join('');
+   const LO=Object.entries(it).filter(([,l])=>l.t);el.querySelector('.tmS').innerHTML=LO.length&&!pick?LO.map(([k,l])=>{const p=P.find(x=>x.id===l.id);return`<span class="chip on" style="cursor:default">${l.c}× ${esc(p.nombre)} · ${esc(l.t)} <button type="button" data-tdl="${esc(k)}" style="background:none;border:0;color:inherit;font-weight:800;padding:0 0 0 6px">✕</button></span>`}).join(''):'';
+   const n=Object.values(it).reduce((a,l)=>a+l.c,0),t=Object.values(it).reduce((a,l)=>a+l.c*pu(l),0);el.querySelector('#tmRes').innerHTML=n?`${n} plato${n>1?'s':''} · <b style="color:var(--a)">${sol(t)}</b>`:'Elige los platos';el.querySelector('#tmOk').disabled=!n};
+  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tm!=null){mesa=+b.dataset.tm;pinta()}else if(b.dataset.tc!=null){cat=b.dataset.tc;pinta()}else if(b.dataset.tq){const p=P.find(x=>x.id===b.dataset.tq),d=+b.dataset.d;if(d>0&&OPS(p).length){pick=p;sel=OPS(p).filter(g=>!g.m).map(g=>g.o[0].n);return pinta()}suma(p.id,[],d);pinta()}
+   else if(b.dataset.tog){const[gi,oi]=b.dataset.tog.split('|').map(Number),g=OPS(pick)[gi],o=g.o[oi];sel=g.m?(sel.includes(o.n)?sel.filter(x=>x!==o.n):sel.concat(o.n)):sel.filter(x=>!g.o.some(y=>y.n===x)).concat(o.n);pinta()}
+   else if(b.dataset.tadd!=null){suma(pick.id,sel,1);pick=null;pinta()}else if(b.dataset.tback!=null){pick=null;pinta()}
+   else if(b.dataset.tdl){delete it[b.dataset.tdl];pinta()}};
   pinta();
   el.querySelector('#tmOk').onclick=async e=>{e.stopPropagation();const b=e.target;b.disabled=true;
-   const items=P.filter(p=>it[p.id]).map(p=>({id:p.id,c:it[p.id]})),nota=el.querySelector('#tmNo').value.trim(),nom=el.querySelector('#tmNom').value.trim();
-   try{if(DEMO){const L=items.map(x=>{const p=P.find(y=>y.id===x.id);return{id:p.id,n:p.nombre,c:x.c,p:+p.precio,e:p.emoji}});MP.pedidos.push({id:uid(),num:Math.max(0,...MP.pedidos.map(p=>+p.num||0))+1,mesa,items:L,total:L.reduce((a,i)=>a+i.p*i.c,0),nota,nombre:nom,estado:'nuevo',creado:new Date().toISOString(),cambio:new Date().toISOString(),atendio:QUIEN()})}
+   const items=Object.values(it).filter(l=>l.c>0).map(l=>l.o.length?{id:l.id,c:l.c,o:l.o}:{id:l.id,c:l.c}),nota=el.querySelector('#tmNo').value.trim(),nom=el.querySelector('#tmNom').value.trim();
+   try{if(DEMO){const L=items.map(x=>{const p=P.find(y=>y.id===x.id),op=opc(p,x.o||[]);return{id:p.id,n:p.nombre+(op.t?' · '+op.t:''),c:x.c,p:+p.precio+op.x,e:p.emoji}});MP.pedidos.push({id:uid(),num:Math.max(0,...MP.pedidos.map(p=>+p.num||0))+1,mesa,items:L,total:L.reduce((a,i)=>a+i.p*i.c,0),nota,nombre:nom,estado:'nuevo',creado:new Date().toISOString(),cambio:new Date().toISOString(),atendio:QUIEN()})}
     else{const{error}=await sb.rpc('xa_mesa_mozo',{p_slug:SLUG,p_mesa:mesa,p_items:items,p_nota:nota||null,p_nombre:nom||null});if(error){if(/xa_mesa_mozo|function|schema/i.test(error.message||'')){NEED56=true;throw new Error('Falta activar el SQL 56. Avísale a XyroStudio.')}throw error}await mpCargar()}
     close();beep(true);toast('👨‍🍳 '+mesaN(mesa)+' enviado a cocina');shell();go()}catch(er){toast(er.message);b.disabled=false}};
  },'wide');
 }
 function webResto(){
- const q='?n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||'#ff7a1a').replace('#','');
+ const q='?n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||'#ff7a1a').replace('#','')+(R.cafe?'&r=cafe':'');
  const uu=DEMO?'/restaurante/'+q+'&demo=1':(CFG.web||'/restaurante/?s='+encodeURIComponent(SLUG||''));
- setTimeout(()=>{const b=$('#wCam');b&&(b.onclick=()=>DEMO?toast('En tu versión llega a XyroStudio'):nuevoTicket('cambio','Cambio en mi web'))});
- return`<div class="hi"><div><h2>🌐 Mi web</h2><p class="mu">Se actualiza sola: tu carta, precios, fotos, horario y locales salen de aquí. Tus clientes ven la carta, reservan mesa y te escriben por WhatsApp.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn p" target="_blank" rel="noopener" href="${esc(uu)}">Ver mi web ↗</a><button class="btn" id="wCam">✏️ Pedir cambio de textos o fotos</button></div></div>
+ setTimeout(()=>{const b=$('#wCam');b&&(b.onclick=()=>DEMO?toast('En tu versión llega a XyroStudio'):nuevoTicket('cambio','Cambio en mi web'));const e=$('#wEd');e&&(e.onclick=editWebResto)});
+ return`<div class="hi"><div><h2>🌐 Mi web</h2><p class="mu">Se actualiza sola: tu carta, precios, fotos, horario y locales salen de aquí. Tus clientes ven la carta, reservan mesa y te escriben por WhatsApp.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn p" target="_blank" rel="noopener" href="${esc(uu)}">Ver mi web ↗</a>${ME&&['admin','supervisor','gestor'].includes(ME.rol)?'<button class="btn" id="wEd">✏️ Textos y fotos</button>':''}<button class="btn" id="wCam">✏️ Pedir cambio de textos o fotos</button></div></div>
  <div class="card" style="padding:0;overflow:hidden;height:70vh"><iframe src="${esc(uu)}" title="Mi web" style="width:100%;height:100%;border:0;background:#000" loading="lazy"></iframe></div>`;
+}
+// Mi web del restaurante/cafetería: título, frase, pagos y fotos (contenido 'resto'). Carta, horario, locales y redes salen solos del panel.
+async function editWebResto(){let v={};
+ try{if(DEMO)v=CFG._resto||{};else{const{data}=await sb.from('contenido').select('valor').eq('sitio_id',SID).eq('clave','resto').maybeSingle();v=(data&&data.valor)||{}}}catch(_){}
+ const fo=v.fotos||{};
+ form('🌐 Textos y fotos de mi web',[{k:'hero',l:'Título grande (opcional)',v:v.hero||'',ph:R.cafe?'Ej. Café París':'Ej. La Sazón de Rosa'},{k:'sub',l:'Frase debajo del título',t:'area',rows:2,v:v.sub||'',ph:R.cafe?'Ej. Frappés, waffles y el mejor café de VMT.':'Ej. Comida criolla hecha en casa, todos los días.'},
+  {k:'pagos',l:'Medios de pago (separados por coma)',v:(v.pagos||[]).join(', '),ph:'Efectivo, Yape, Plin, Tarjeta'},
+  {k:'f_hero',t:'img',l:'Foto principal (portada)',v:fo.hero,pref:'web',ayuda:'Portada de tu web.'},{k:'f_reserva',t:'img',l:'Foto de la sección «Reservar»',v:fo.reserva,pref:'web',ayuda:'Se ve donde reservan mesa.'},{k:'f_local',t:'img',l:'Foto del local',v:fo.local,pref:'web',ayuda:'Se ve en «Cómo llegar».'}],async x=>{
+  const val={hero:(x.hero||'').trim().slice(0,60)||null,sub:(x.sub||'').trim().slice(0,220)||null,pagos:(x.pagos||'').split(',').map(t=>t.trim()).filter(Boolean).slice(0,8),fotos:{hero:x.f_hero||null,reserva:x.f_reserva||null,local:x.f_local||null}};
+  if(!val.pagos.length)delete val.pagos;
+  if(DEMO){CFG._resto=val;saveDemo()}else{const{error}=await sb.from('contenido').upsert({sitio_id:SID,clave:'resto',valor:val});if(error)throw new Error('No pude guardar ('+error.message+'). Pídelo con «Pedir cambio».')}
+  toast('🌐 Tu web se actualizó');go()});
 }
 // Demo: ventas de un mes de restaurante y pedidos en curso
 function demoResto(){
@@ -3598,7 +3628,7 @@ function semilla(rubro){
  S={cli:[],pla:[],mem:[],pag:[],asi:[]};
  S.pro=[];S.mov=[];S.cie=[];S.cit=[];S.his=[];S.pre=[];
  R.planes.forEach(([n,p,d,c,se])=>S.pla.push({id:uid(),nombre:n,precio:p,dias:d,color:c,activo:true,sesiones:se||null}));
- (R.productos||[]).forEach(([n,cat,pr,co,em])=>S.pro.push({id:uid(),nombre:n,categoria:cat,precio:pr,costo:co,stock:12+Math.floor(Math.random()*30),minimo:5,emoji:em,activo:true}));if(S.pro[3])S.pro[3].stock=3;if(R.resto)S.pro.forEach(p=>p.stock+=60);
+ (R.productos||[]).forEach(([n,cat,pr,co,em])=>S.pro.push({id:uid(),nombre:n,categoria:cat,precio:pr,costo:co,stock:12+Math.floor(Math.random()*30),minimo:5,emoji:em,activo:true,opciones:R.cafe?opcBase(n,cat):null}));if(S.pro[3])S.pro[3].stock=3;if(R.resto)S.pro.forEach(p=>p.stock+=60);
  const pp=S.pla.filter(p=>p.dias>1);
  for(let i=0;i<(R.citas?80:R.resto?0:46);i++){
   const c={id:uid(),nombre:rnd(N)+' '+rnd(A)+' '+rnd(A),dni:String(40000000+Math.floor(Math.random()*39999999)),telefono:'9'+String(Math.floor(Math.random()*1e8)).padStart(8,'0'),num:String(1001+i),codigo:codigo(),creado:new Date().toISOString(),nacimiento:i===3?'1995'+H.slice(4):null};
