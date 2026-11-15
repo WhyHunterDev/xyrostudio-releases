@@ -54,6 +54,8 @@ em{font-style:italic;color:var(--a);font-weight:900}
 /* Filtros */
 .chips{display:flex;gap:8px;overflow:auto;padding:8px 16px 10px;position:sticky;top:0;background:linear-gradient(var(--bg) 78%,#07070b00);z-index:3;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
+.opg{margin:4px 0 12px}.opt{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:14px;margin:0 0 8px}.opt span{font-weight:600;font-size:11.5px;color:var(--mu,#8d8fa8)}
+.opo{display:flex;flex-wrap:wrap;gap:7px}.opo button{padding:9px 13px;border-radius:12px;border:1px solid var(--ln);background:var(--c);font-weight:700;font-size:13.5px;transition:.15s}.opo button small{font-weight:600;opacity:.75}.opo button.on{border-color:var(--a);background:color-mix(in srgb,var(--a) 22%,transparent);box-shadow:0 0 0 1px var(--a) inset}
 .chip{white-space:nowrap;padding:8px 15px;border-radius:999px;border:1px solid var(--ln);background:var(--c);font-weight:700;font-size:13.5px;transition:.2s}
 .chip.on{background:var(--a);border-color:var(--a);color:#fff}
 /* Menú */
@@ -150,16 +152,20 @@ const U=i=>'https://images.unsplash.com/photo-'+i+'?auto=format&fit=crop&w=640&q
 const CAF=Q.get('r')==='cafe',RES=Q.get('r')==='resto'||CAF; // demo de restaurante (r=resto) o cafetería (r=cafe)
 const DR=[['Combos','🎁','Menú ejecutivo',22,'Entrada + fondo + refresco de la casa',U('1504674900247-0877df9cc836'),26,1],['Combos','🎁','Combo burger',29,'Hamburguesa clásica + papas + bebida',U('1568901346375-23c9450c58cd'),34,1],['Fondos','🥩','Lomo a la parrilla',42,'Con papas nativas y ensalada fresca.',U('1600891964092-4316c288032e'),0,1],['Fondos','🍢','Brochetas mixtas',34,'Pollo, res y verduras al carbón.',U('1555939594-58d7cb561ad1')],['Fondos','🍕','Pizza margarita',30,'Masa madre, tomate, mozzarella y albahaca.',U('1565299624946-b28f40a0ae38')],['Fondos','🍔','Hamburguesa clásica',24,'Carne 180 g, queso, tocino y salsas de la casa.',U('1568901346375-23c9450c58cd')],['Entradas','🥗','Ensalada César',19,'Lechuga, pollo, crutones y parmesano.',U('1546069901-ba9599a7e63c')],['Entradas','🥙','Bowl de pollo y quinua',21,'Pollo, quinua, palta y vegetales.',U('1512621776951-a57141f2eefd')],['Cafés','☕','Capuchino',10,'Doble shot y leche cremosa.',U('1509042239860-f550ce710b93'),0,1],['Cafés','☕','Americano',7,'Café de especialidad peruano.',U('1495474472287-4d71bcdd2085')],['Postres','🍰','Torta de chocolate',14,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Postres','🍨','Helado artesanal',11,'Dos bolas a elección.',U('1563805042-7684c019e1cb')],['Bebidas','🍋','Limonada frozen',12,''],['Bebidas','🍇','Chicha morada (jarra)',15,''],['Bebidas','💧','Agua mineral',4,'']];
 const DC=[['Combos','🎁','Combo desayuno',14,'Café a elección + sándwich de pollo o triple',U('1509042239860-f550ce710b93'),17,1],['Combos','🎁','Combo dulce',25,'Frappé a elección + waffle con helado',U('1572490122747-3968b75cc699'),29,1],['Frappés','🧋','Frappé de Oreo',14,'Galleta Oreo, helado de vainilla y crema batida.',U('1572490122747-3968b75cc699'),0,1],['Frappés','🧋','Frappé moka',13,'Café, chocolate y crema batida.',''],['Frappés','🍓','Frappé de fresa',13,'Fresas naturales, leche y helado.',''],['Frappés','🧋','Frappé de caramelo',13,'Café, caramelo y crema batida.',''],['Cafés','☕','Capuchino',9,'Doble shot y espuma cremosa.',U('1509042239860-f550ce710b93')],['Cafés','☕','Latte',9,'Espresso con leche vaporizada.',''],['Cafés','☕','Americano',6,'Café de altura peruano.',U('1495474472287-4d71bcdd2085')],['Cafés','☕','Mocaccino',11,'Espresso, chocolate y leche.',''],['Waffles y crepes','🧇','Waffle con helado y fresas',16,'Waffle crocante, helado, fresas y miel de maple.',U('1562376552-0d160a2f238d'),0,1],['Waffles y crepes','🧇','Waffle Nutella y plátano',15,'Con Nutella, plátano y azúcar impalpable.',''],['Waffles y crepes','🥞','Crepe Nutella y fresa',14,'Crepe fino relleno de Nutella y fresas.',''],['Sándwiches','🥐','Croissant jamón y queso',10,'Croissant de mantequilla, caliente.',U('1555507036-ab1f4038808a')],['Sándwiches','🥪','Sándwich de pollo',11,'Pollo deshilachado, lechuga y mayonesa casera.',''],['Postres','🍰','Cheesecake de maracuyá',12,'Base de galleta y salsa de maracuyá.',U('1533134242443-d4fd215305ad')],['Postres','🍰','Torta de chocolate',10,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Bebidas frías','🥭','Smoothie de mango',11,'Mango, yogur y hielo.',U('1505252585461-04db1eb84625')],['Bebidas frías','🍋','Limonada frozen',9,'Limón, hierbabuena y hielo frappé.',''],['Bebidas frías','💧','Agua mineral',3,'']];
+const OPB={tam:{g:'Tamaño',o:[{n:'Regular',p:0},{n:'Grande',p:2}]},leche:{g:'Leche',o:[{n:'Entera',p:0},{n:'Deslactosada',p:0},{n:'De almendras',p:2.5}]},extC:{g:'Extras',m:1,o:[{n:'Shot extra',p:2},{n:'Crema batida',p:1.5},{n:'Jarabe de vainilla',p:1.5}]},tamF:{g:'Tamaño',o:[{n:'Regular',p:0},{n:'Grande',p:3}]},extF:{g:'Extras',m:1,o:[{n:'Crema batida',p:1.5},{n:'Shot de café',p:2},{n:'Galleta Oreo',p:2}]},extW:{g:'Agrégale',m:1,o:[{n:'Bola de helado',p:3},{n:'Fudge de chocolate',p:1.5},{n:'Fresas',p:2},{n:'Nutella',p:2.5}]},az:{g:'Endulzado',o:[{n:'Normal',p:0},{n:'Poco azúcar',p:0},{n:'Sin azúcar',p:0},{n:'Con stevia',p:0}]},esp:{g:'Tamaño',o:[{n:'Simple',p:0},{n:'Doble',p:2}]}};
+const opcBase=(n,c)=>{n=String(n||'').toLowerCase();c=String(c||'').toLowerCase();if(/espresso/.test(n))return[OPB.esp];if(/americano/.test(n))return[OPB.tam,OPB.az];if(/frapp/.test(n))return[OPB.tamF,OPB.leche,OPB.extF];if(/^caf[eé]s/.test(c))return[OPB.tam,OPB.leche,OPB.extC];if(/waffle|crepe/.test(n)&&!/pollo/.test(n))return[OPB.extW];if(/bebidas fr/.test(c))return[OPB.az];return null}; // opciones típicas de cafetería (demo y carta base)
 let DEMO_ORD=[];
 async function api(f,b){if(!DEMO)return rpc(f,b);await new Promise(r=>setTimeout(r,350));
- if(RES&&(f==='xa_mesa_menu'||f==='xa_carta')){const DP=CAF?DC:DR;return{negocio:Q.get('n')||(CAF?'Tu Cafetería':'Tu Restaurante'),rubro:'restaurante',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):CAF?'#c8873a':'#ff7a1a',tienda:'Carta',mesa:f==='xa_carta'?0:MESA||3,abierto:f!=='xa_carta',qr:true,desde:CAF?'08:00':'12:00',hasta:CAF?'22:00':'23:00',portada:CAF?U('1554118811-1e0d58224f24'):U('1517248135467-4c7edcad34c4'),titulo:CAF?'Tu café, a tu mesa':'Nuestra carta',texto:CAF?'Frappés, waffles, cafés y postres. Pide desde aquí y te lo llevamos a tu mesa. Pagas al final en caja.':'Elige tus platos y te los llevamos a la mesa. Pagas al final en caja.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],agotado:i===(CAF?5:13)}))}}
+ if(RES&&(f==='xa_mesa_menu'||f==='xa_carta')){const DP=CAF?DC:DR;return{negocio:Q.get('n')||(CAF?'Tu Cafetería':'Tu Restaurante'),rubro:'restaurante',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):CAF?'#c8873a':'#ff7a1a',tienda:'Carta',mesa:f==='xa_carta'?0:MESA||3,abierto:f!=='xa_carta',qr:true,desde:CAF?'08:00':'12:00',hasta:CAF?'22:00':'23:00',portada:CAF?U('1554118811-1e0d58224f24'):U('1517248135467-4c7edcad34c4'),titulo:CAF?'Tu café, a tu mesa':'Nuestra carta',texto:CAF?'Frappés, waffles, cafés y postres. Pide desde aquí y te lo llevamos a tu mesa. Pagas al final en caja.':'Elige tus platos y te los llevamos a la mesa. Pagas al final en caja.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],opciones:CAF?opcBase(p[2],p[0]):null,agotado:i===(CAF?5:13)}))}}
  if(f==='xa_mesa_menu')return{negocio:Q.get('n')||'Tu Gimnasio',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):null,tienda:'Cafetín',mesa:MESA||3,abierto:true,desde:'07:00',hasta:'21:00',geo:Q.has('geo'),portada:IM+'hero.jpg',titulo:'Come como entrenas',texto:'Batidos, platos y snacks para antes o después de entrenar. Pide aquí y te lo llevamos a tu mesa.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],modelo:p[8]||(i===2&&/^https:\/\/\S+\.glb(\?\S*)?$/i.test(Q.get('glb')||'')?Q.get('glb'):null),agotado:i===9}))};
- if(f==='xa_mesa_pedir'){if(Q.has('lejos'))throw new Error('lejos');const L=CAF?DC:RES?DR:DP,it=b.p_items.map(x=>{const p=L[+x.id.slice(1)];return{id:x.id,n:p[2],c:x.c,p:p[3],e:p[1]}}),o={id:'o'+Date.now(),num:DEMO_ORD.length+7,mesa:b.p_mesa,items:it,total:it.reduce((a,i)=>a+i.p*i.c,0),estado:'nuevo',creado:new Date().toISOString(),t0:Date.now()};DEMO_ORD.unshift(o);return o}
+ if(f==='xa_mesa_pedir'){if(Q.has('lejos'))throw new Error('lejos');const L=CAF?DC:RES?DR:DP,it=b.p_items.map(x=>{const p=L[+x.id.slice(1)],op=opc({opciones:CAF?opcBase(p[2],p[0]):null},x.o||[]);return{id:x.id,n:p[2]+(op.t?' · '+op.t:''),c:x.c,p:p[3]+op.x,e:p[1]}}),o={id:'o'+Date.now(),num:DEMO_ORD.length+7,mesa:b.p_mesa,items:it,total:it.reduce((a,i)=>a+i.p*i.c,0),estado:'nuevo',creado:new Date().toISOString(),t0:Date.now()};DEMO_ORD.unshift(o);return o}
  if(f==='xa_mesa_mios'){DEMO_ORD.forEach(o=>{if(o.estado==='cancelado')return;const s=(Date.now()-o.t0)/1e3;o.estado=s>30?'servido':s>12?'preparando':'nuevo'});return DEMO_ORD}
  if(f==='xa_mesa_cancelar_mio'){const o=DEMO_ORD.find(x=>x.id===b.p_id);if(o.estado!=='nuevo')throw new Error('Ya lo están preparando. Pide el cambio en el cafetín.');o.estado='cancelado';return o}}
 
 let M=null,CART=[],CAT='',MIOS=[],ENV=false;
 const RESTO=()=>M&&M.rubro==='restaurante',lug=()=>RESTO()?'caja':(M&&M.tienda||'cafetín').toLowerCase(); // dónde se paga
+const OPS=p=>Array.isArray(p&&p.opciones)?p.opciones.filter(g=>g&&Array.isArray(g.o)&&g.o.length):[];
+const opc=(p,sel)=>{let x=0;const t=[];OPS(p).forEach(g=>{const m=g.m==1||g.m===true;let c=0;g.o.forEach((o,i)=>{if(sel.includes(o.n)&&(m||!c)){x+=Math.max(+o.p||0,0);c++;if(m||i>0)t.push(o.n)}});if(!m&&!c)x+=Math.max(+g.o[0].p||0,0)});return{x,t:t.join(', ').slice(0,120)}}; // igual que xa_opc (SQL 59)
 const tot=()=>CART.reduce((a,i)=>a+i.p*i.c,0),cnt=()=>CART.reduce((a,i)=>a+i.c,0);
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 function horario(){if(!M.desde||!M.hasta)return'';const d=Array.isArray(M.dias)&&M.dias.length&&M.dias.length<7?' · '+M.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'';return M.desde+' a '+M.hasta+d}
@@ -176,7 +182,7 @@ async function init(){
  if(M.error==='mesa')return err('🪑','Esta mesa no existe','Vuelve a escanear el QR de tu mesa o pregunta '+(M.rubro==='restaurante'?'al mozo.':'en el cafetín.'));
  document.title=(M.tienda||'Cafetín')+' · '+M.negocio;
  try{CART=JSON.parse(sessionStorage.getItem('xp-cart-'+SLUG)||'[]')}catch(_){CART=[]}
- CART=CART.filter(i=>M.productos.some(p=>p.id===i.id&&!p.agotado));
+ CART=CART.filter(i=>M.productos.some(p=>p.id===i.id&&!p.agotado)).map(i=>Object.assign(i,{k:i.k||i.id,o:i.o||[]}));
  await cargarMios();pinta();setInterval(async()=>{if(document.hidden)return;const j=JSON.stringify(MIOS);await cargarMios();if(JSON.stringify(MIOS)!==j){avisos(j);pinta()}},DEMO?4000:8000);
 }
 async function cargarMios(){try{MIOS=(await api('xa_mesa_mios',{p_token:TOK})||[]).filter(o=>o.estado!=='cancelado'||Date.now()-new Date(o.cambio||o.creado)<3e5)}catch(_){}}
@@ -196,7 +202,7 @@ function pinta(){
  const P=M.productos||[],ab=M.abierto,act=MIOS.filter(o=>!['pagado','cancelado'].includes(o.estado)),deuda=act.reduce((a,o)=>a+ +o.total,0);
  const C=P.filter(esCombo),N=P.filter(p=>!esCombo(p)),cats=[...new Set(N.map(p=>p.categoria||'Otros'))];if(CAT&&!cats.includes(CAT))CAT='';
  const L=N.filter(p=>!CAT||(p.categoria||'Otros')===CAT).sort((a,b)=>(!!a.agotado-!!b.agotado)||(!!b.destacado-!!a.destacado));
- const cn=id=>(CART.find(i=>i.id===id)||{}).c||0;
+ const cn=id=>CART.filter(i=>i.id===id).reduce((a,i)=>a+i.c,0);
  const lg=/^https:\/\//.test(M.logo||'')?`<img src="${esc(M.logo)}" alt="" onerror="this.remove()">`:esc(String(M.negocio||'?').trim()[0]||'?');
  const por=/^https:\/\//.test(M.portada||'')?M.portada:(P.find(p=>/^https:\/\//.test(p.foto||''))||{}).foto;
  const ck=(p,i)=>`<div class="ck" style="animation-delay:${i*.06}s"><button class="ci" data-v="${esc(p.id)}">${ft(p)}<span class="tg">${esc(/promo/i.test(p.categoria||'')?'Promo':'Combo')}</span>${p.modelo?'<span class="a3">🪄 3D</span>':''}${p.foto?'':esc(p.emoji||'🎁')}</button><div class="bd"><h4>${esc(p.nombre)}</h4>${p.detalle?`<span class="mu xs">${esc(p.detalle)}</span>`:''}<div class="ft2"><span class="pr">${+p.antes>+p.precio?`<s>${sol(p.antes)}</s>`:''}<b>${sol(p.precio)}</b></span>${qty(p,cn(p.id),ab)}</div></div></div>`;
@@ -212,43 +218,45 @@ function pinta(){
  ${P.length?'':'<div class="vac"><span class="e">🥤</span><p class="mu">Aún no hay productos en el menú.</p></div>'}
  ${pie()}${cnt()?`<div class="bar"><button id="ver"><span class="n">${cnt()}</span><span>Ver mi pedido</span><span>${sol(tot())}</span></button></div>`:''}`;
  app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{CAT=b.dataset.c;pinta()});
- app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>mover(b.dataset.a,1));
+ app.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const p=M.productos.find(x=>x.id===b.dataset.a);if(p&&OPS(p).length)return ver(p.id);mover(b.dataset.a,1)});
  app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>mover(b.dataset.d,-1));
  app.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>ver(b.dataset.v));
  app.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>cancelar(b.dataset.cx));
  const v=$('#ver');v&&(v.onclick=carrito);
 }
-function ver(id){const p=M.productos.find(x=>x.id===id);if(!p)return;const o=document.createElement('div');o.className='ov';let c=1;
+function ver(id){const p=M.productos.find(x=>x.id===id);if(!p)return;const o=document.createElement('div');o.className='ov';let c=1;const G=OPS(p);let sel=G.filter(g=>!(g.m==1||g.m===true)).map(g=>g.o[0].n);const pu=()=>+p.precio+opc(p,sel).x;
  const dr=()=>{o.innerHTML=`<div class="sh ph" style="position:relative"><button class="xb" data-x aria-label="Cerrar">✕</button><div class="fi">${ft(p)}${p.foto?'':esc(p.emoji||'🛒')}</div>
   <span class="eb" style="color:var(--a)">${esc(p.categoria||M.tienda||'Cafetín')}</span><h2>${esc(p.nombre)}</h2>${p.detalle?`<p class="mu">${esc(p.detalle)}</p>`:''}
-  <div class="rw"><span class="pr t">${+p.antes>+p.precio?`<s>${sol(p.antes)}</s>`:''}<b style="font-size:26px">${sol(p.precio)}</b></span>${p.agotado||!M.abierto?'':`<div class="q" style="background:var(--c2)"><button data-m>−</button><b>${c}</b><button data-p>＋</button></div>`}</div>
+  ${G.map((g,gi)=>{const m=g.m==1||g.m===true;return`<div class="opg"><p class="opt">${esc(g.g||'Opciones')}<span>${m?'Puedes elegir varias':'Elige una'}</span></p><div class="opo">${g.o.map((x,oi)=>`<button class="${sel.includes(x.n)?'on':''}" data-og="${gi}" data-oo="${oi}">${esc(x.n)}${+x.p>0?` <small>+${sol(x.p)}</small>`:''}</button>`).join('')}</div></div>`}).join('')}<div class="rw"><span class="pr t">${+p.antes>+p.precio?`<s>${sol(p.antes)}</s>`:''}<b style="font-size:26px">${sol(pu())}</b></span>${p.agotado||!M.abierto?'':`<div class="q" style="background:var(--c2)"><button data-m>−</button><b>${c}</b><button data-p>＋</button></div>`}</div>
   ${p.modelo?`<button class="btn ar" data-ar>🪄 Verlo en mi mesa <small>realidad aumentada</small></button>`:''}
-  ${p.agotado?'<p style="color:var(--bad);font-weight:700">Agotado por ahora</p>':!M.abierto?'<p class="mu sm">Ahora no recibimos pedidos.</p>':`<button class="btn p" data-ok>Agregar · ${sol(p.precio*c)}</button>`}</div>`;
+  ${p.agotado?'<p style="color:var(--bad);font-weight:700">Agotado por ahora</p>':!M.abierto?'<p class="mu sm">Ahora no recibimos pedidos.</p>':`<button class="btn p" data-ok>Agregar · ${sol(pu()*c)}</button>`}</div>`;
   const ar=o.querySelector('[data-ar]');ar&&(ar.onclick=()=>verAR(p));
   const m=o.querySelector('[data-m]'),pl=o.querySelector('[data-p]'),ok=o.querySelector('[data-ok]');
   m&&(m.onclick=()=>{c=Math.max(1,c-1);dr()});pl&&(pl.onclick=()=>{c=Math.min(20,c+1);dr()});
-  ok&&(ok.onclick=()=>{for(let k=0;k<c;k++)mover(id,1,1);o.remove();pinta();toast('Agregado ✓');const b=$('#ver');b&&b.classList.add('bump')})};
+  o.querySelectorAll('[data-og]').forEach(b=>b.onclick=()=>{const g=G[+b.dataset.og],x=g.o[+b.dataset.oo],m=g.m==1||g.m===true;if(m)sel=sel.includes(x.n)?sel.filter(n=>n!==x.n):sel.concat(x.n);else sel=sel.filter(n=>!g.o.some(y=>y.n===n)).concat(x.n);vib();dr()});
+  ok&&(ok.onclick=()=>{for(let k=0;k<c;k++)mover(id,1,1,sel);o.remove();pinta();toast('Agregado ✓');const b=$('#ver');b&&b.classList.add('bump')})};
  o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o);dr()}
 function guarda(){try{sessionStorage.setItem('xp-cart-'+SLUG,JSON.stringify(CART))}catch(_){}}
-function mover(id,d,sil){const p=M.productos.find(x=>x.id===id);if(!p)return;if(d>0&&!M.abierto)return toast('Ahora no recibimos pedidos');vib();
- const i=CART.find(x=>x.id===id);if(i){i.c=Math.min(20,i.c+d);if(i.c<=0)CART=CART.filter(x=>x!==i)}else if(d>0)CART.push({id,n:p.nombre,p:+p.precio,e:p.emoji,c:1});
+function mover(id,d,sil,sel){const p=M.productos.find(x=>x.id===id);if(!p)return;if(d>0&&!M.abierto)return toast('Ahora no recibimos pedidos');vib();
+ sel=sel||[];const op=opc(p,sel),k=id+(op.t?'|'+op.t:'');
+ const i=d>0?CART.find(x=>x.k===k):CART.filter(x=>x.id===id).pop();if(i){i.c=Math.min(20,i.c+d);if(i.c<=0)CART=CART.filter(x=>x!==i)}else if(d>0)CART.push({k,id,o:sel.slice(),n:p.nombre+(op.t?' · '+op.t:''),p:+p.precio+op.x,e:p.emoji,c:1});
  guarda();if(sil)return;const y=scrollY;pinta();scrollTo(0,y);const b=$('#ver');b&&d>0&&b.classList.add('bump')}
 function carrito(){const o=document.createElement('div');o.className='ov';
  const draw=()=>{if(!CART.length){o.remove();pinta();return}
   o.innerHTML=`<div class="sh"><div class="rw"><h2 class="t">🛒 Tu pedido · Mesa ${M.mesa}</h2><button data-x style="font-size:22px;padding:4px 8px" aria-label="Cerrar">✕</button></div>
-  ${CART.map(i=>{const p=M.productos.find(x=>x.id===i.id)||{};return`<div class="rw">${p.foto?`<img class="th" src="${esc(p.foto)}" alt="">`:`<span class="th">${esc(i.e||'🛒')}</span>`}<div class="t"><b>${esc(i.n)}</b><p class="mu xs">${sol(i.p)} c/u</p></div><div class="q"><button data-d="${esc(i.id)}">−</button><b>${i.c}</b><button data-a="${esc(i.id)}">＋</button></div></div>`}).join('')}
+  ${CART.map(i=>{const p=M.productos.find(x=>x.id===i.id)||{};return`<div class="rw">${p.foto?`<img class="th" src="${esc(p.foto)}" alt="">`:`<span class="th">${esc(i.e||'🛒')}</span>`}<div class="t"><b>${esc(i.n)}</b><p class="mu xs">${sol(i.p)} c/u</p></div><div class="q"><button data-d="${esc(i.k)}">−</button><b>${i.c}</b><button data-a="${esc(i.k)}">＋</button></div></div>`}).join('')}
   <input id="nm" maxlength="60" placeholder="Tu nombre (para llevártelo a la mesa)" value="${esc(ls.g('xp-nom','')||M.yo||'')}">
   <textarea id="nt" rows="2" maxlength="200" placeholder="Nota (opcional): sin azúcar, con hielo…"></textarea>
   <div class="tot"><span class="mu">Total</span><b>${sol(tot())}</b></div><p class="mu xs" style="text-align:center">Pagas al terminar, en el ${esc(lug())}.</p>
   <button class="btn p" id="go">Hacer pedido · ${sol(tot())}</button>${M.geo?'<p class="geo">📍 Te pediremos tu ubicación solo para confirmar que estás en el local.</p>':''}</div>`;
-  o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.id===b.dataset.a);i.c=Math.min(20,i.c+1);guarda();keep(draw)});
-  o.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.id===b.dataset.d);i.c--;if(i.c<=0)CART=CART.filter(x=>x!==i);guarda();keep(draw)});
+  o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.k===b.dataset.a);i.c=Math.min(20,i.c+1);guarda();keep(draw)});
+  o.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.k===b.dataset.d);i.c--;if(i.c<=0)CART=CART.filter(x=>x!==i);guarda();keep(draw)});
   o.querySelector('#go').onclick=enviar};
  const keep=f=>{const a=o.querySelector('#nm').value,b=o.querySelector('#nt').value;f();const x=o.querySelector('#nm'),y=o.querySelector('#nt');x&&(x.value=a);y&&(y.value=b)};
  o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]')){o.remove();pinta()}};
  document.body.appendChild(o);draw();
  async function enviar(){if(ENV)return;const b=o.querySelector('#go'),nm=o.querySelector('#nm').value.trim(),nt=o.querySelector('#nt').value.trim();ENV=true;b.disabled=true;b.textContent='Enviando…';
-  try{const q={p_slug:SLUG,p_mesa:M.mesa,p_items:CART.map(i=>({id:i.id,c:i.c})),p_nombre:nm||null,p_nota:nt||null,p_token:TOK};
+  try{const q={p_slug:SLUG,p_mesa:M.mesa,p_items:CART.map(i=>i.o&&i.o.length?{id:i.id,c:i.c,o:i.o}:{id:i.id,c:i.c}),p_nombre:nm||null,p_nota:nt||null,p_token:TOK};
    if(M.geo){b.textContent='📍 Confirmando que estás en el local…';const g=await donde();Object.assign(q,{p_lat:g.latitude,p_lng:g.longitude,p_acc:Math.round(g.accuracy||0)});b.textContent='Enviando…'}
    const r=await api('xa_mesa_pedir',q);
    if(nm)ls.s('xp-nom',nm);CART=[];guarda();o.remove();MIOS.unshift(r);confeti();toast('🎉 ¡Pedido enviado! Te avisamos aquí');pinta();scrollTo({top:0,behavior:'smooth'})}

@@ -1,5 +1,20 @@
 [
  {
+  "id": "20261115-1734",
+  "fecha": "2026-11-15 17:34",
+  "titulo": "Cafeterías: tamaños, leche y extras",
+  "notas": "Cafeterías: tamaños, leche y extras",
+  "cambios": [
+   "Cada producto puede tener opciones con precio (tamaño, tipo de leche, extras). El mozo y el cliente por QR las eligen y salen en cocina.",
+   "La carta base de cafetería ya trae sus opciones.",
+   "Mi web del restaurante o cafetería: ya no abre el editor de gimnasio; ahora se editan título, frase, medios de pago y fotos."
+  ],
+  "requiere": "SQL 59",
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-1559",
   "fecha": "2026-11-15 15:59",
   "titulo": "Cafeterías",
