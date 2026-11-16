@@ -300,5 +300,11 @@ addEventListener('popstate',e=>{if(HN.skip){HN.skip--;return}if(hCierra())return
 init();
 })();
 </script>
+<script>/* Si llegó desde Mi Xyro (de=mi o dentro de la app), botón para volver a la app */
+(function(){var q=new URLSearchParams(location.search);if(q.get('de')!=='mi'&&!(matchMedia('(display-mode: standalone)').matches)&&!/^android-app:/.test(document.referrer))return;
+ try{sessionStorage.setItem('de-mi','1')}catch(_){}
+ var a=document.createElement('a');a.href='/mi/';a.textContent='‹ Mi Xyro';a.setAttribute('aria-label','Volver a Mi Xyro');
+ a.style.cssText='position:absolute;left:16px;top:calc(74px + env(safe-area-inset-top));z-index:60;padding:6px 12px;border-radius:999px;background:#7c5cffee;color:#fff;font:700 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 8px 20px -8px #7c5cff';
+ document.body.appendChild(a)})();</script>
 </body>
 </html>
