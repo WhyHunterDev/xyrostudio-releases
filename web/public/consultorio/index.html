@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>(nombre del consultorio) · Clínica dental</title>
-<meta name="description" content="Clínica dental: tratamientos, especialistas, sedes y reserva de cita en línea con confirmación por WhatsApp.">
+<meta name="description" content="Clínica dental: tratamientos, especialistas y sedes. Pide tu cita desde la app Mi Xyro.">
 <meta name="theme-color" content="#f6f9fb">
 <meta property="og:type" content="website"><meta property="og:locale" content="es_PE">
 <!-- Base Xyro Webs · Consultorio dental. Todo sale del negocio (?s=codigo): app (nombre, logo, color, profesionales), planes, sedes y clinica. -->
@@ -121,6 +121,9 @@ html,body{overflow-x:clip}.hero .btn-o{color:var(--ink)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:26px 0 26px}.chips button{padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;background:#fff;border:1px solid var(--ln);transition:.2s}.chips button:hover{border-color:var(--a)}.chips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
 .need .tc.hide{display:none}
 /* reserva */
+.qrw{background:#fff;border-radius:20px;padding:12px;display:grid;justify-items:center;gap:6px;color:#111;border:1px solid var(--ln)}.qrw svg{width:180px;height:180px}.qrw small{color:var(--mu);font-size:12px}
+.aps{display:grid;gap:16px;counter-reset:ap}.aps div{display:grid;grid-template-columns:46px 1fr;gap:14px;align-items:start}.aps i{font-style:normal;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--soft);font-size:22px}.aps b{display:block;font-size:16.5px}.aps small{color:var(--mu);font-size:14px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:22px;box-shadow:var(--sh)}
 .bk{display:grid;grid-template-columns:1.3fr .7fr;gap:20px;align-items:start}@media(max-width:900px){.bk{grid-template-columns:1fr}}
 .wz,.res{border-radius:26px;background:var(--card);border:1px solid var(--ln);box-shadow:var(--sh);padding:clamp(20px,3vw,30px)}
 .res{position:sticky;top:calc(var(--nav) + 16px)}
@@ -185,15 +188,15 @@ footer .lg{margin-top:36px;padding-top:20px;border-top:1px solid #ffffff1a;font-
 <nav class="nav" id="nav"><div class="wrap">
  <a href="#/" class="brand"><i id="lgI">🦷</i><span data-nom>(nombre del consultorio)</span></a>
  <div class="tabs" id="tabs"><span class="ind" id="ind"></span><a href="#/" data-r="inicio">Inicio</a><a href="#/tratamientos" data-r="tratamientos">Tratamientos</a><a href="#/especialistas" data-r="especialistas">Especialistas</a><a href="#/sedes" data-r="sedes">Sedes</a><a href="#/preguntas" data-r="preguntas">Preguntas</a></div>
- <a class="btn btn-p btn-sm" href="#/reservar">Reservar cita</a>
+ <a class="btn btn-p btn-sm" href="#/reservar">📱 Pide tu cita</a>
 </div></nav>
 
 <main id="app" aria-live="polite"></main>
 
 <footer><div class="wrap">
  <div class="g">
-  <div><a href="#/" class="brand"><i id="lgF">🦷</i><span data-nom>(nombre del consultorio)</span></a><p style="margin-top:14px;max-width:34ch">Odontología con trato humano, presupuesto claro y tu cita confirmada por WhatsApp.</p></div>
-  <div><h5>Explora</h5><ul><li><a href="#/tratamientos">Tratamientos</a></li><li><a href="#/especialistas">Especialistas</a></li><li><a href="#/reservar">Reservar cita</a></li><li><a href="#/preguntas">Preguntas frecuentes</a></li></ul></div>
+  <div><a href="#/" class="brand"><i id="lgF">🦷</i><span data-nom>(nombre del consultorio)</span></a><p style="margin-top:14px;max-width:34ch">Odontología con trato humano y presupuesto claro. Pide tu cita desde la app Mi Xyro.</p></div>
+  <div><h5>Explora</h5><ul><li><a href="#/tratamientos">Tratamientos</a></li><li><a href="#/especialistas">Especialistas</a></li><li><a href="#/reservar">Pide tu cita en la app</a></li><li><a href="#/preguntas">Preguntas frecuentes</a></li></ul></div>
   <div><h5>Sedes</h5><ul id="fSed"></ul></div>
   <div><h5>Horario</h5><ul id="fHor"></ul></div>
  </div>
@@ -203,7 +206,7 @@ footer .lg{margin-top:36px;padding-top:20px;border-top:1px solid #ffffff1a;font-
 <nav class="bbar" id="bbar" aria-label="Navegación">
  <a href="#/" data-r="inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Inicio</a>
  <a href="#/tratamientos" data-r="tratamientos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 3c-2.5 0-4 2-4 4.5 0 3 1.5 5 2 8s1 5.5 2.5 5.5 1.8-3 2.5-5 1-2 2-2 1.3 0 2 2 1 5 2.5 5S18.5 18.5 19 15.5s2-5 2-8C21 5 19.5 3 17 3c-2 0-3 1-5 1S9 3 7 3z"/></svg>Tratamientos</a>
- <a href="#/reservar" data-r="reservar" class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>Reservar</a>
+ <a href="#/reservar" data-r="reservar" class="go"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>Tu cita</a>
  <a href="#/especialistas" data-r="especialistas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Equipo</a>
  <button id="mas" data-r="mas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>Más</button>
 </nav>
@@ -232,8 +235,8 @@ const BASE=n=>({nombre:n||'(nombre del consultorio)',wa:'51936449066',distrito:'
  servicios:[['🦷','Consulta y diagnóstico','Evaluación completa y plan de tratamiento claro, sin sorpresas.',50],['✨','Limpieza dental','Profilaxis y destartraje para encías sanas y aliento fresco.',90],['🪥','Curación con resina','Resinas del color de tu diente, en una sola sesión.',120],['🩺','Endodoncia','Tratamiento de conducto sin dolor y con control.',380],['😁','Blanqueamiento','Hasta 3 tonos más blanco en una cita.',450],['📐','Ortodoncia','Brackets y alineadores con controles mensuales.',150],['👑','Corona de porcelana','Devuelve forma y función a tu diente con estética natural.',650],['🔩','Implante dental','Reemplaza una pieza perdida de forma fija y duradera.',2800],['🦷','Extracción simple','Procedimiento cuidadoso con indicaciones para tu recuperación.',100]],
  profs:[{id:'a',n:'Dra. (nombre)',esp:'Odontología general',color:'#0ea5a4',dias:[1,2,3,4,5,6],desde:'09:00',hasta:'18:00',dur:30},{id:'b',n:'Dr. (nombre)',esp:'Ortodoncia',color:'#6366f1',dias:[1,3,5],desde:'14:00',hasta:'20:00',dur:30},{id:'c',n:'Dra. (nombre)',esp:'Endodoncia',color:'#f59e0b',dias:[2,4,6],desde:'09:00',hasta:'17:00',dur:60}],
  sedes:[{nombre:'Sede (distrito)',direccion:'Av. (dirección) 123, (distrito)',horario:['Lun a Vie · 9:00 a.m. – 8:00 p.m.','Sáb · 9:00 a.m. – 2:00 p.m.'],maps:'',whatsapp:''}],
- opiniones:[['Me atendieron a la hora exacta y me explicaron todo con paciencia. Súper recomendado.','María Q.'],['El recordatorio por WhatsApp me salvó, siempre me olvido de mis citas 😅','Jorge R.'],['Excelente trato con mi hijo, ya no le tiene miedo al dentista.','Lucía T.']],
- faq:[['¿Necesito cita previa?','Sí, así no esperas. Reserva aquí o por WhatsApp; para urgencias escríbenos y te atendemos lo antes posible.'],['¿Cuánto cuesta la primera consulta?','La evaluación incluye revisión completa y un presupuesto claro. Escríbenos y te damos el precio de tu sede.'],['¿Qué medios de pago aceptan?','Efectivo, Yape, Plin, tarjeta y transferencia. Los tratamientos largos se pueden pagar en partes.'],['¿Cómo confirmo o cambio mi cita?','Un día antes te escribimos por WhatsApp. Responde SÍ para confirmar o pídenos otro horario.'],['¿Atienden a niños?','Sí, con especialistas y mucha paciencia para que su visita sea tranquila.'],['¿Atienden urgencias?','Sí. Si tienes dolor fuerte o un golpe, escríbenos por WhatsApp y te buscamos el primer espacio libre.']],
+ opiniones:[['Me atendieron a la hora exacta y me explicaron todo con paciencia. Súper recomendado.','María Q.'],['Pedí mi cita desde la app en un minuto y me confirmaron al toque 😅','Jorge R.'],['Excelente trato con mi hijo, ya no le tiene miedo al dentista.','Lucía T.']],
+ faq:[['¿Necesito cita previa?','Sí, así no esperas. Pídela desde la app Mi Xyro: eliges un horario libre y te confirmamos ahí mismo. Para urgencias escríbenos.'],['¿Cuánto cuesta la primera consulta?','La evaluación incluye revisión completa y un presupuesto claro. Escríbenos y te damos el precio de tu sede.'],['¿Qué medios de pago aceptan?','Efectivo, Yape, Plin, tarjeta y transferencia. Los tratamientos largos se pueden pagar en partes.'],['¿Cómo veo o cambio mi cita?','En la app Mi Xyro ves tu cita y te avisamos ahí. Si necesitas cambiarla, escríbenos desde la misma app.'],['¿Atienden a niños?','Sí, con especialistas y mucha paciencia para que su visita sea tranquila.'],['¿Atienden urgencias?','Sí. Si tienes dolor fuerte o un golpe, escríbenos por WhatsApp y te buscamos el primer espacio libre.']],
  pagos:['💵 Efectivo','📱 Yape','📱 Plin','💳 Tarjeta','🏦 Transferencia','🗓️ Pago en partes']});
 async function rest(p){const r=await fetch(SB.url+'/rest/v1/'+p,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
 async function cargar(){
@@ -247,7 +250,8 @@ async function cargar(){
   if(Array.isArray(C.sedes)&&C.sedes.length)D.sedes=C.sedes;
   const w=(D.sedes.find(x=>x.whatsapp)||{}).whatsapp||(C.bot&&C.bot.whatsapp)||cl.whatsapp;if(w)D.wa=String(w).replace(/\D/g,'').replace(/^9(\d{8})$/,'519$1');
   if(cl.fotos&&typeof cl.fotos==='object')Object.keys(cl.fotos).forEach(k=>{if(/^https:/.test(cl.fotos[k]||''))IMG[k]=cl.fotos[k]});
-  ['hero','sub','opiniones','faq','anios','distrito','precios','antes','despues','pagos'].forEach(k=>{if(cl[k]!=null&&cl[k]!=='')D[k]=cl[k]});
+  ['hero','lema','sub','opiniones','faq','anios','distrito','precios','antes','despues','pagos','sec','appT','appX'].forEach(k=>{if(cl[k]!=null&&cl[k]!=='')D[k]=cl[k]});
+  D.gal=(cl.fotos&&Array.isArray(cl.fotos.gal)?cl.fotos.gal:[]).filter(u=>/^https:/.test(u||''));if(/^https:/.test((cl.fotos||{}).antes||''))D.antes=cl.fotos.antes;if(/^https:/.test((cl.fotos||{}).despues||''))D.despues=cl.fotos.despues;
  }catch(e){console.warn('Muestro la base',e)}
  return D;
 }
@@ -260,87 +264,65 @@ cargar().then(D=>{
  const N=D.nombre;document.title=N.replace(/[()]/g,'')+' · Clínica dental';$$('[data-nom]').forEach(e=>e.innerHTML=mk(N));$('#yr').textContent=new Date().getFullYear();
  if(D.logo){$('#lgI').innerHTML=$('#lgF').innerHTML=`<img src="${esc(D.logo)}" alt="">`}
  const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);$('#fab').href=$('#shWa').href=wa('Hola '+N+', quiero información para una cita 🙂');
- const S=D.servicios.map(s=>({e:s[0],n:s[1],d:s[2]||'',p:s[3],f:s[4]||'',c:CAT(s[1])})),P=D.profs,pr=D.precios!==false;
+ const S=D.servicios.map(s=>({e:s[0],n:s[1],d:s[2]||'',p:s[3],f:s[4]||'',c:CAT(s[1])})),P=D.profs,pr=D.precios===true,SEC=k=>(D.sec||{})[k]!==false,APP='https://xyrostudio.net/mi/'+(SLUG?'?n='+encodeURIComponent(SLUG):''),APT=D.appT||'Pide tu cita desde la app',APX=D.appX||'Elige tu tratamiento, especialista y un horario libre. Te confirmamos en la app y ahí ves tus citas y promociones.';
  S.forEach(s=>{if(!s.f)s.f=IMG[s.c]||IMG.General});
  $('#fSed').innerHTML=D.sedes.map(s=>`<li>${mk(s.nombre||'Sede')}</li>`).join('');$('#fHor').innerHTML=((D.sedes[0]||{}).horario||[]).map(h=>`<li>${esc(typeof h==='string'?h:(h.d||'')+' '+(h.h||''))}</li>`).join('');
- const B={s:'',p:'',d:'',h:'',n:''};let cur='s';
  const tcard=(s,i)=>`<button class="tc rv" data-tr="${i}" data-c="${esc(s.c)}"><div class="im"><img src="${esc(s.f)}" alt="" loading="lazy" onerror="this.remove()"><span class="ct">${esc(s.c)}</span><span class="em">${esc(s.e)}</span></div><div class="bd"><h3>${esc(s.n)}</h3>${s.d?`<p>${esc(s.d)}</p>`:''}<div class="ft">${pr&&s.p?`<b>Desde ${sol(s.p)}</b>`:'<b>Evaluación previa</b>'}<span>Ver más</span></div></div></button>`;
- const drcard=p=>{const ds=p.dias||[1,2,3,4,5,6];return`<div class="dr rv" style="--c:${esc(p.color||'#0ea5a4')}"><div class="av">${p.foto?`<img src="${esc(p.foto)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:esc(ini(p.n))}</div><h3>${mk(p.n)}</h3><div class="es">${esc(p.esp||'Odontología')}</div><div class="ds">${[1,2,3,4,5,6,0].map(d=>`<i class="${ds.includes(d)?'on':''}">${DN[d]}</i>`).join('')}</div><small>🕘 ${esc(h12(p.desde||'09:00'))} – ${esc(h12(p.hasta||'19:00'))}</small><button class="btn btn-o btn-sm" data-pr="${esc(p.id)}">🗓️ Reservar con ${mk(String(p.n).split(' ').slice(0,2).join(' '))}</button></div>`};
+ const drcard=p=>{const ds=p.dias||[1,2,3,4,5,6];return`<div class="dr rv" style="--c:${esc(p.color||'#0ea5a4')}"><div class="av">${p.foto?`<img src="${esc(p.foto)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:esc(ini(p.n))}</div><h3>${mk(p.n)}</h3><div class="es">${esc(p.esp||'Odontología')}</div><div class="ds">${[1,2,3,4,5,6,0].map(d=>`<i class="${ds.includes(d)?'on':''}">${DN[d]}</i>`).join('')}</div><small>🕘 ${esc(h12(p.desde||'09:00'))} – ${esc(h12(p.hasta||'19:00'))}</small><a class="btn btn-o btn-sm" href="#/reservar">📱 Pedir cita con ${mk(String(p.n).split(' ').slice(0,2).join(' '))}</a></div>`};
  const opcard=o=>`<div class="op rv"><div class="s">★★★★★</div><p>“${esc(o[0]||o.t)}”</p><div class="who"><i>${esc(ini(o[1]||o.n))}</i>${esc(o[1]||o.n)}</div></div>`;
- const band=()=>`<section><div class="wrap"><div class="band rv"><div><h2>Tu próxima sonrisa empieza <span class="serif" style="color:#fff">con una cita.</span></h2><p>Reserva en menos de un minuto. Te recordamos un día antes por WhatsApp.</p></div><div class="cta"><a class="btn btn-p" href="#/reservar">🗓️ Reservar cita</a><a class="btn btn-wa" target="_blank" rel="noopener" href="${wa('Hola '+N+', tengo una consulta 🙂')}"><svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-wa"/></svg>WhatsApp</a></div></div></div></section>`;
+ const band=()=>`<section><div class="wrap"><div class="band rv"><div><h2>${esc(APT)}</h2><p>${esc(APX)}</p></div><div class="cta"><a class="btn btn-p" href="#/reservar">📱 Pedir mi cita</a><a class="btn btn-wa" target="_blank" rel="noopener" href="${wa('Hola '+N+', tengo una consulta 🙂')}"><svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-wa"/></svg>WhatsApp</a></div></div></div></section>`;
  const AG=['09:00','09:30','10:30','11:00','12:00','15:30','16:30'];let agi=0;
- const agenda=()=>{const el=$('#flt');if(!el)return;el.innerHTML='<h4>📅 Agenda de hoy</h4>'+[0,1,2].map(i=>{const p=P[(agi+i)%P.length],s=S[(agi+i*2)%S.length];return`<div class="it" style="--c:${esc(p.color||'var(--a)')};animation-delay:${i*.12}s"><span><b>${AG[(agi+i)%AG.length]} · ${esc(s.n)}</b><small>${mk(p.n)}</small></span><em>${i<2?'✓ Confirmada':'Nueva'}</em></div>`}).join('');agi++};
+ const agenda=()=>{const el=$('#flt');if(!el)return;el.innerHTML='<h4>📅 Agenda de hoy</h4>'+[0,1,2].map(i=>{const p=P[(agi+i)%P.length],s=S[(agi+i*2)%S.length];return`<div class="it" style="--c:${esc(p.color||'var(--a)')};animation-delay:${i*.12}s"><span><b>${h12(AG[(agi+i)%AG.length])} · ${esc(s.n)}</b><small>${mk(p.n)}</small></span><em>${i<2?'✓ Confirmada':'Nueva'}</em></div>`}).join('');agi++};
  setInterval(()=>{if(!document.hidden&&$('#flt'))agenda()},4200);
  const V={
  inicio:()=>`<div class="pg">
   <header class="hero"><div class="bgi"><img src="${esc(IMG.hero)}" alt="Consultorio de ${esc(N)}" fetchpriority="high" onerror="this.remove()"></div>
    <div class="wrap"><span class="eyb">Clínica dental · ${mk(D.distrito)}</span>
-    <h1>${D.hero?esc(D.hero):'Sonríe con <span class="serif">confianza.</span>'}</h1>
-    <p class="lead">${esc(D.sub||'Especialistas que te explican todo, presupuesto claro antes de empezar y tu cita confirmada por WhatsApp en minutos.')}</p>
-    <div class="cta"><a class="btn btn-p" href="#/reservar">🗓️ Reservar mi cita</a><a class="btn btn-o" href="#/tratamientos">Ver tratamientos</a></div>
+    <h1>${D.hero?esc(D.hero)+(D.lema?' <span class="serif">'+esc(D.lema)+'</span>':''):'Sonríe con <span class="serif">confianza.</span>'}</h1>
+    <p class="lead">${esc(D.sub||'Especialistas que te explican todo y presupuesto claro antes de empezar. Pide tu cita desde tu celular con la app Mi Xyro.')}</p>
+    <div class="cta"><a class="btn btn-p" href="#/reservar">📱 Pide tu cita en la app</a><a class="btn btn-o" href="#/tratamientos">Ver tratamientos</a></div>
     <div class="trust"><div><i>⭐</i><span><b>4.9</b><small>opinión de pacientes</small></span></div><div><i>👩‍⚕️</i><span><b>${P.length}</b><small>especialistas</small></span></div><div><i>⏱️</i><span><b>${esc(D.anios?'+'+D.anios:'+10')}</b><small>años cuidando sonrisas</small></span></div></div>
    </div><div class="float" id="flt"></div></header>
   <div class="rib" aria-hidden="true"><div class="tr">${[0,1].map(()=>`<span>Evaluación completa</span><span>Limpieza dental</span><span>Ortodoncia</span><span>Implantes</span><span>Blanqueamiento</span><span>Urgencias</span><span>Pago en partes</span>`).join('')}</div></div>
-  <section><div class="wrap"><div class="sh rv"><div><span class="eyb">¿Qué necesitas?</span><h2>Tratamientos para <span class="serif">cada sonrisa.</span></h2></div><a class="btn btn-o btn-sm" href="#/tratamientos">Ver todos →</a></div>
-   <div class="need">${S.slice(0,6).map(tcard).join('')}</div></div></section>
-  <section style="background:#fff"><div class="wrap"><div class="sh rv"><div><span class="eyb">Tu primera visita</span><h2>Simple, claro y <span class="serif">sin sorpresas.</span></h2></div><p class="lead">Así de fácil es atenderte con nosotros.</p></div>
-   <div class="steps"><div class="st rv"><h3>Reserva en línea</h3><p>Elige tratamiento, especialista y hora en menos de un minuto.</p></div><div class="st rv"><h3>Te recordamos</h3><p>Un día antes te escribimos por WhatsApp para confirmar.</p></div><div class="st rv"><h3>Evaluación y presupuesto</h3><p>Revisamos tu caso y te damos un presupuesto claro antes de empezar.</p></div><div class="st rv"><h3>Tu tratamiento</h3><p>Con controles y el mismo especialista de principio a fin.</p></div></div></div></section>
-  <section><div class="wrap ba"><div class="rv"><div class="cmp" id="cmp"><img src="${esc(D.despues||IMG.sonrisa)}" alt="Después" onerror="this.remove()"><img class="an" src="${esc(D.antes||D.despues||IMG.sonrisa)}" alt="Antes" onerror="this.remove()"><span class="lb l">Antes</span><span class="lb r">Después</span><div class="ln"></div>${D.antes?'':'<span class="note">Simulación de ejemplo</span>'}</div></div>
+  ${SEC('trat')?`<section><div class="wrap"><div class="sh rv"><div><span class="eyb">¿Qué necesitas?</span><h2>Tratamientos para <span class="serif">cada sonrisa.</span></h2></div><a class="btn btn-o btn-sm" href="#/tratamientos">Ver todos →</a></div>
+   <div class="need">${S.slice(0,6).map(tcard).join('')}</div></div></section>`:''}
+  ${SEC('pasos')?`<section style="background:#fff"><div class="wrap"><div class="sh rv"><div><span class="eyb">Tu primera visita</span><h2>Simple, claro y <span class="serif">sin sorpresas.</span></h2></div><p class="lead">Así de fácil es atenderte con nosotros.</p></div>
+   <div class="steps"><div class="st rv"><h3>Pide tu cita en la app</h3><p>Elige tratamiento, especialista y un horario libre desde Mi Xyro.</p></div><div class="st rv"><h3>Te confirmamos</h3><p>Te llega la confirmación y tu recordatorio en la app.</p></div><div class="st rv"><h3>Evaluación y presupuesto</h3><p>Revisamos tu caso y te damos un presupuesto claro antes de empezar.</p></div><div class="st rv"><h3>Tu tratamiento</h3><p>Con controles y el mismo especialista de principio a fin.</p></div></div></div></section>`:''}
+  ${SEC('ba')?`<section><div class="wrap ba"><div class="rv"><div class="cmp" id="cmp"><img src="${esc(D.despues||IMG.sonrisa)}" alt="Después" onerror="this.remove()"><img class="an" src="${esc(D.antes||D.despues||IMG.sonrisa)}" alt="Antes" onerror="this.remove()"><span class="lb l">Antes</span><span class="lb r">Después</span><div class="ln"></div>${D.antes?'':'<span class="note">Simulación de ejemplo</span>'}</div></div>
    <div class="rv"><span class="eyb">Resultados</span><h2>Una sonrisa que <span class="serif">da confianza.</span></h2><p class="lead" style="margin-top:12px">Desliza la imagen y mira la diferencia. Cada tratamiento empieza con una evaluación para elegir lo mejor para ti.</p>
     <div class="chk"><div><i>✓</i><span><b>Presupuesto claro</b><br><small class="nt">Sabes cuánto pagarás antes de empezar.</small></span></div><div><i>✓</i><span><b>Sin dolor</b><br><small class="nt">Anestesia y técnicas modernas.</small></span></div><div><i>✓</i><span><b>Pago en partes</b><br><small class="nt">Los tratamientos largos se pagan en cuotas.</small></span></div></div>
-    <div style="margin-top:24px"><a class="btn btn-p" href="#/reservar">Quiero mi evaluación</a></div></div></div></section>
-  <section style="background:#fff"><div class="wrap"><div class="sh rv"><div><span class="eyb">Especialistas</span><h2>Te atiende un equipo <span class="serif">que sí te explica.</span></h2></div><a class="btn btn-o btn-sm" href="#/especialistas">Conócelos →</a></div><div class="drs">${P.slice(0,3).map(drcard).join('')}</div></div></section>
-  <section><div class="wrap"><div class="sh rv"><div><span class="eyb">Opiniones</span><h2>Lo que dicen <span class="serif">nuestros pacientes.</span></h2></div></div><div class="ops">${(D.opiniones||[]).slice(0,3).map(opcard).join('')}</div></div></section>
-  ${band()}</div>`,
- tratamientos:()=>{const cs=[...new Set(S.map(s=>s.c))];return`<div class="pg"><div class="wrap ph"><span class="eyb">Tratamientos</span><h1>Todo lo que tu sonrisa <span class="serif">necesita.</span></h1><p class="lead">Toca un tratamiento para ver qué incluye y reservarlo en un minuto.</p>
+    <div style="margin-top:24px"><a class="btn btn-p" href="#/reservar">📱 Quiero mi evaluación</a></div></div></div></section>`:''}
+  ${SEC('gal')&&D.gal&&D.gal.length?`<section><div class="wrap"><div class="sh rv"><div><span class="eyb">Nuestro consultorio</span><h2>Así es <span class="serif">por dentro.</span></h2></div></div><div class="gal">${D.gal.map(u=>`<img class="rv" src="${esc(u)}" alt="" loading="lazy" onerror="this.remove()">`).join('')}</div></div></section>`:''}
+  ${SEC('equipo')?`<section style="background:#fff"><div class="wrap"><div class="sh rv"><div><span class="eyb">Especialistas</span><h2>Te atiende un equipo <span class="serif">que sí te explica.</span></h2></div><a class="btn btn-o btn-sm" href="#/especialistas">Conócelos →</a></div><div class="drs">${P.slice(0,3).map(drcard).join('')}</div></div></section>`:''}
+  ${SEC('ops')?`<section><div class="wrap"><div class="sh rv"><div><span class="eyb">Opiniones</span><h2>Lo que dicen <span class="serif">nuestros pacientes.</span></h2></div></div><div class="ops">${(D.opiniones||[]).slice(0,3).map(opcard).join('')}</div></div></section>`:''}
+  ${SEC('app')?band():''}</div>`,
+ tratamientos:()=>{const cs=[...new Set(S.map(s=>s.c))];return`<div class="pg"><div class="wrap ph"><span class="eyb">Tratamientos</span><h1>Todo lo que tu sonrisa <span class="serif">necesita.</span></h1><p class="lead">Toca un tratamiento para ver qué incluye. Tu cita la pides desde la app.</p>
   ${cs.length>1?`<div class="chips" id="fil"><button class="on" data-f="">Todos</button>${cs.map(c=>`<button data-f="${esc(c)}">${esc(c)}</button>`).join('')}</div>`:'<div style="height:26px"></div>'}
   <div class="need">${S.map(tcard).join('')}</div></div>${band()}</div>`},
  especialistas:()=>`<div class="pg"><div class="wrap ph"><span class="eyb">Especialistas</span><h1>Manos expertas, <span class="serif">trato humano.</span></h1><p class="lead">Elige con quién atenderte y mira qué días está en consulta.</p></div>
   <section style="padding-top:20px"><div class="wrap"><div class="drs">${P.map(drcard).join('')}</div></div></section>${band()}</div>`,
- reservar:()=>`<div class="pg"><div class="wrap ph"><span class="eyb">Reserva en línea</span><h1>Tu cita en <span class="serif">4 toques.</span></h1><p class="lead">Elige y te confirmamos por WhatsApp en minutos.</p></div>
-  <section style="padding-top:20px"><div class="wrap bk"><div class="wz"><div class="prg" id="prg"></div>
-   <div class="stp" data-st="s"><h3>¿Qué necesitas?</h3><p>Si no sabes, elige «Consulta y diagnóstico».</p><div class="opts" id="bS"></div></div>
-   <div class="stp" data-st="p"><h3>¿Con quién te quieres atender?</h3><p>Puedes elegir a cualquiera, todos te explican todo.</p><div class="opts" id="bP"></div></div>
-   <div class="stp" data-st="d"><h3>¿Qué día te queda mejor?</h3><p>Solo mostramos los días que atiende tu especialista.</p><div class="dias" id="bD"></div></div>
-   <div class="stp" data-st="h"><h3>¿A qué hora?</h3><p>Horarios disponibles para ese día.</p><div class="hrs" id="bH"></div></div>
-   <div class="stp" data-st="n"><h3>¿Cómo te llamas?</h3><p>Con tu nombre te escribimos para confirmar.</p><input class="in" id="bN" maxlength="60" placeholder="Nombre y apellido" autocomplete="name"><div style="margin-top:14px"><button class="btn btn-p" id="bOk">Continuar →</button></div></div>
-   <div class="stp" data-st="ok"><div class="done"><div class="ck">✓</div><h3>¡Todo listo!</h3><p class="nt" style="margin-top:6px">Toca «Reservar por WhatsApp» y envíanos el mensaje.<br>Te confirmamos en minutos.</p></div></div>
-   <div class="nv"><button class="btn btn-o btn-sm" id="bBk">← Atrás</button><span class="nt" id="bSt"></span></div></div>
-   <aside class="res"><h3>Tu reserva</h3><div class="row" data-ir="s"><span>Tratamiento</span><b id="rS">—</b></div><div class="row" data-ir="p"><span>Especialista</span><b id="rP">—</b></div><div class="row" data-ir="d"><span>Día</span><b id="rD">—</b></div><div class="row" data-ir="h"><span>Hora</span><b id="rH">—</b></div><div class="row" data-ir="n"><span>Nombre</span><b id="rN">—</b></div>
-   <a class="btn btn-wa" id="bGo" target="_blank" rel="noopener" aria-disabled="true"><svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-wa"/></svg>Reservar por WhatsApp</a><p class="nt" style="margin-top:10px;text-align:center">El horario queda sujeto a confirmación.</p></aside>
+ reservar:()=>`<div class="pg"><div class="wrap ph"><span class="eyb">Tu cita en la app</span><h1>Pide tu cita desde <span class="serif">tu celular.</span></h1><p class="lead">${esc(APX)}</p></div>
+  <section style="padding-top:20px"><div class="wrap bk"><div class="wz"><div class="aps">
+   <div><i>📲</i><span><b>1. Entra a Mi Xyro</b><small>Escanea el código o toca «Abrir Mi Xyro». Es gratis y no ocupa espacio.</small></span></div>
+   <div><i>⭐</i><span><b>2. Guarda ${mk(N)}</b><small>Así nos tienes a la mano con tus citas, tratamientos y promociones.</small></span></div>
+   <div><i>🗓️</i><span><b>3. Elige tu horario</b><small>Tratamiento, especialista y una hora libre. Solo ves horarios que de verdad están disponibles.</small></span></div>
+   <div><i>✅</i><span><b>4. Te confirmamos en la app</b><small>Ahí ves tu cita, te avisamos y puedes escribirnos si necesitas cambiarla.</small></span></div></div></div>
+   <aside class="res" style="display:grid;gap:14px;justify-items:center;text-align:center"><h3>Escanéalo con tu cámara</h3><div class="qrw" id="qrw"><small>Cargando QR…</small></div><a class="btn btn-p" href="${esc(APP)}" style="width:100%;justify-content:center">📱 Abrir Mi Xyro</a><a class="btn btn-o btn-sm" target="_blank" rel="noopener" href="${wa('Hola '+N+', tengo una consulta 🙂')}">¿Dudas? Escríbenos</a></aside>
   </div></section></div>`,
  sedes:()=>`<div class="pg"><div class="wrap ph"><span class="eyb">Sedes</span><h1>Te esperamos <span class="serif">cerca de ti.</span></h1><p class="lead">Atención con cita previa. También atendemos urgencias dentales.</p></div>
-  <section style="padding-top:20px"><div class="wrap"><div class="sds">${D.sedes.map(s=>{const q=s.direccion&&!/\(/.test(s.direccion)?s.direccion:'';return`<div class="sd rv"><div class="mp">${q?`<iframe loading="lazy" title="Mapa" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed"></iframe>`:`<img src="${esc(s.foto||IMG.sede)}" alt="" loading="lazy" onerror="this.remove()">`}</div><div class="bd"><h3>📍 ${mk(s.nombre||'Sede')}</h3><p>${mk(s.direccion||'')}</p><ul>${(Array.isArray(s.horario)?s.horario:[s.horario||'']).filter(Boolean).map(h=>`<li>🕘 ${esc(typeof h==='string'?h:(h.d||'')+' '+(h.h||''))}</li>`).join('')}</ul><div class="ac">${s.maps||q?`<a class="btn btn-o btn-sm" target="_blank" rel="noopener" href="${esc(s.maps||'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q))}">🗺️ Cómo llegar</a>`:''}<a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="${wa('Hola, una consulta sobre la '+(s.nombre||'sede'))}">WhatsApp</a><a class="btn btn-p btn-sm" href="#/reservar">Reservar</a></div></div></div>`}).join('')}</div>
+  <section style="padding-top:20px"><div class="wrap"><div class="sds">${D.sedes.map(s=>{const q=s.direccion&&!/\(/.test(s.direccion)?s.direccion:'';return`<div class="sd rv"><div class="mp">${q?`<iframe loading="lazy" title="Mapa" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed"></iframe>`:`<img src="${esc(s.foto||IMG.sede)}" alt="" loading="lazy" onerror="this.remove()">`}</div><div class="bd"><h3>📍 ${mk(s.nombre||'Sede')}</h3><p>${mk(s.direccion||'')}</p><ul>${(Array.isArray(s.horario)?s.horario:[s.horario||'']).filter(Boolean).map(h=>`<li>🕘 ${esc(typeof h==='string'?h:(h.d||'')+' '+(h.h||''))}</li>`).join('')}</ul><div class="ac">${s.maps||q?`<a class="btn btn-o btn-sm" target="_blank" rel="noopener" href="${esc(s.maps||'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q))}">🗺️ Cómo llegar</a>`:''}<a class="btn btn-wa btn-sm" target="_blank" rel="noopener" href="${wa('Hola, una consulta sobre la '+(s.nombre||'sede'))}">WhatsApp</a><a class="btn btn-p btn-sm" href="#/reservar">📱 Pedir cita</a></div></div></div>`}).join('')}</div>
   <div class="rv" style="margin-top:34px"><span class="eyb">Medios de pago</span><div class="pay">${(D.pagos||[]).map(p=>`<span>${esc(p)}</span>`).join('')}</div></div></div></section>${band()}</div>`,
  preguntas:()=>`<div class="pg"><div class="wrap ph"><span class="eyb">Preguntas frecuentes</span><h1>Resolvemos <span class="serif">tus dudas.</span></h1></div>
   <section style="padding-top:20px"><div class="wrap two"><div>${(D.faq||[]).map((f,i)=>`<details class="fq rv"${i?'':' open'}><summary>${esc(f[0]||f.p)}</summary><p>${esc(f[1]||f.r)}</p></details>`).join('')}</div>
-  <aside class="side rv"><h3 style="font-size:24px">¿Otra pregunta?</h3><p>Escríbenos y te respondemos en minutos, o reserva tu evaluación directamente.</p><div style="display:grid;gap:10px"><a class="btn btn-wa" target="_blank" rel="noopener" href="${wa('Hola '+N+', tengo una pregunta 🙂')}"><svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-wa"/></svg>Escribir por WhatsApp</a><a class="btn btn-p" href="#/reservar">Reservar cita</a></div></aside></div></section></div>`
+  <aside class="side rv"><h3 style="font-size:24px">¿Otra pregunta?</h3><p>Escríbenos y te respondemos en minutos, o pide tu evaluación desde la app.</p><div style="display:grid;gap:10px"><a class="btn btn-wa" target="_blank" rel="noopener" href="${wa('Hola '+N+', tengo una pregunta 🙂')}"><svg viewBox="0 0 24 24" fill="currentColor"><use href="#i-wa"/></svg>Escribir por WhatsApp</a><a class="btn btn-p" href="#/reservar">📱 Pedir mi cita</a></div></aside></div></section></div>`
  };
- // Reserva paso a paso
- const ST=['s','p','d','h','n'],hoy=new Date(),ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),fD=s=>{const d=new Date(s+'T12:00:00');return DL[d.getDay()]+' '+d.getDate()+' '+MS[d.getMonth()]};
- const dias=()=>{const p=P.find(x=>x.id===B.p),out=[];for(let i=0;out.length<14&&i<30;i++){const d=new Date(hoy);d.setDate(d.getDate()+i);if(p&&!(p.dias||[1,2,3,4,5,6]).includes(d.getDay()))continue;if(!p&&d.getDay()===0)continue;out.push(d)}return out};
- const horas=()=>{const p=P.find(x=>x.id===B.p)||P[0];if(!B.d)return[];const a=hm(p.desde||'09:00'),b=hm(p.hasta||'19:00'),st=+p.dur||30,now=new Date(),out=[];for(let m=a;m+st<=b;m+=st){if(B.d===ymd(now)&&m<=now.getHours()*60+now.getMinutes()+30)continue;out.push(mh(m))}return out};
- const sig=()=>ST.find(k=>!B[k])||'ok';
- const i0=d=>d.toDateString()===hoy.toDateString()?'Hoy':DN[d.getDay()];
- const pinta=()=>{if(!$('#bS'))return;
-  $('#bS').innerHTML=S.map(s=>`<button data-k="s" data-v="${esc(s.n)}" class="${B.s===s.n?'on':''}"><i style="background:var(--soft)">${esc(s.e)}</i><span>${esc(s.n)}<small>${esc(s.c)}</small></span></button>`).join('');
-  $('#bP').innerHTML=P.map(p=>`<button data-k="p" data-v="${esc(p.id)}" class="${B.p===p.id?'on':''}"><i style="background:${esc(p.color||'var(--a)')}">${esc(ini(p.n))}</i><span>${mk(p.n)}<small>${esc(p.esp||'')}</small></span></button>`).join('');
-  $('#bD').innerHTML=dias().map(d=>`<button data-k="d" data-v="${ymd(d)}" class="${B.d===ymd(d)?'on':''}"><small>${i0(d)}</small><b>${d.getDate()}</b><small>${MS[d.getMonth()]}</small></button>`).join('');
-  const H=horas(),am=H.filter(h=>hm(h)<720),pm=H.filter(h=>hm(h)>=720),hb=h=>`<button data-k="h" data-v="${h}" class="${B.h===h?'on':''}">${h}</button>`;
-  $('#bH').innerHTML=H.length?(am.length?'<h5>Mañana</h5>'+am.map(hb).join(''):'')+(pm.length?'<h5>Tarde</h5>'+pm.map(hb).join(''):''):'<p class="nt">No quedan horarios ese día. Vuelve y elige otro.</p>';
-  $$('.stp').forEach(x=>x.classList.toggle('on',x.dataset.st===cur));
-  const ix=cur==='ok'?ST.length:ST.indexOf(cur);$('#prg').innerHTML=ST.map((k,i)=>`<i class="${i<ix?'ok':''}"><b></b></i>`).join('');
-  $('#bBk').style.visibility=ix>0?'visible':'hidden';$('#bSt').textContent=cur==='ok'?'¡Listo!':'Paso '+(ix+1)+' de 5';
-  const p=P.find(x=>x.id===B.p);$('#rS').textContent=B.s||'—';$('#rP').innerHTML=p?mk(p.n):'—';$('#rD').textContent=B.d?fD(B.d):'—';$('#rH').textContent=B.h||'—';$('#rN').textContent=B.n||'—';
-  const ok=ST.every(k=>B[k]),g=$('#bGo');g.setAttribute('aria-disabled',ok?'false':'true');
-  g.href=ok?wa(`Hola ${N}, quiero reservar una cita:\n• Tratamiento: ${B.s}\n• Especialista: ${p.n}\n• Día: ${fD(B.d)}\n• Hora: ${B.h}\n• Nombre: ${B.n}\n¿Me confirman? 🙂`):'#';
-  const bn=$('#bN');if(bn&&document.activeElement!==bn)bn.value=B.n;
- };
- const ir=k=>{cur=k;pinta();if(k==='n')setTimeout(()=>$('#bN')&&$('#bN').focus(),300)};
+ // QR para abrir Mi Xyro (donde se piden las citas)
+ async function qrPinta(){const el=$('#qrw');if(!el)return;try{if(!window.qrcode)await new Promise((ok,ko)=>{const t=document.createElement('script');t.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';t.onload=ok;t.onerror=ko;document.head.appendChild(t)});
+  const q=qrcode(0,'M');q.addData(APP);q.make();el.innerHTML=q.createSvgTag({cellSize:5,margin:2,scalable:true})+'<small>Te abre Mi Xyro con '+esc(N.replace(/[()]/g,''))+'</small>'}catch(_){el.innerHTML='<a class="btn btn-p" href="'+esc(APP)+'">Abrir Mi Xyro</a>'}}
  // Modal de tratamiento
  const modal=i=>{const s=S[i],I=INFO[s.c]||INFO.General,m=$('#mdl');m.innerHTML=`<div class="bx"><div class="im"><img src="${esc(s.f)}" alt="" onerror="this.remove()"><button class="x" data-x aria-label="Cerrar">×</button></div><div class="bd"><span class="eyb">${esc(s.c)}</span><h3>${esc(s.e)} ${esc(s.n)}</h3><p class="nt" style="font-size:15px">${esc(s.d||'Te explicamos todo en tu evaluación.')}</p>
   <div class="kv"><div><small>Duración</small><b>${esc(I[0])}</b></div><div><small>Sesiones</small><b>${esc(I[1])}</b></div><div><small>Precio</small><b>${pr&&s.p?'Desde '+sol(s.p):'En tu evaluación'}</b></div></div>
-  <ul>${I.slice(2).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="ac"><button class="btn btn-p" data-sv="${esc(s.n)}">🗓️ Reservar este tratamiento</button><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N+', quiero información sobre '+s.n)}">Preguntar por WhatsApp</a></div></div></div>`;m.classList.add('on')};
+  <ul>${I.slice(2).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><div class="ac"><a class="btn btn-p" href="#/reservar">📱 Pedir este tratamiento en la app</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N+', quiero información sobre '+s.n)}">Preguntar por WhatsApp</a></div></div></div>`;m.classList.add('on')};
  const cerrar=()=>{$('#mdl').classList.remove('on');$('#sheet').classList.remove('on')};
  // Antes y después: se desliza con el dedo o el mouse; se mueve solo hasta que lo tocas
  const cmp=()=>{const c=$('#cmp');if(!c)return;let on=false,toc=false;const mv=x=>{const r=c.getBoundingClientRect();c.style.setProperty('--x',Math.max(4,Math.min(96,(x-r.left)/r.width*100))+'%')};
@@ -354,19 +336,14 @@ cargar().then(D=>{
   $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===k));ind();
   $$('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*.07+'s';io.observe(el)});
   if(k==='inicio'){agenda();cmp()}
-  if(k==='reservar'){cur=sig();pinta();$('#bN').addEventListener('input',e=>{B.n=e.target.value.trim().length>1?e.target.value.trim():'';pinta()});$('#bN').addEventListener('keydown',e=>{if(e.key==='Enter'&&B.n)ir('ok')})}
+  if(k==='reservar')qrPinta();
  };
  document.addEventListener('click',e=>{
   const t=e.target;let b;
   if(t.closest('[data-x]')||t===$('#mdl')||t===$('#sheet'))return cerrar();
-  if(b=t.closest('[data-k]')){const k=b.dataset.k;B[k]=b.dataset.v;if(k==='p'){B.d='';B.h=''}if(k==='d')B.h='';pinta();setTimeout(()=>ir(sig()),220);return}
+  if(t.closest('.mdl a[href^="#/"]'))cerrar();
   if(b=t.closest('[data-tr]')){modal(+b.dataset.tr);return}
-  if(b=t.closest('[data-sv]')){B.s=b.dataset.sv;cerrar();if(location.hash==='#/reservar'){cur=sig();pinta()}else location.hash='#/reservar';return}
-  if(b=t.closest('[data-pr]')){B.p=b.dataset.pr;B.d='';B.h='';if(location.hash==='#/reservar'){cur=sig();pinta()}else location.hash='#/reservar';return}
-  if(b=t.closest('[data-ir]')){ir(b.dataset.ir);return}
   if(b=t.closest('[data-f]')){$$('#fil button').forEach(x=>x.classList.toggle('on',x===b));$$('.need .tc').forEach(c=>c.classList.toggle('hide',!!b.dataset.f&&c.dataset.c!==b.dataset.f));return}
-  if(t.closest('#bBk')){const i=cur==='ok'?ST.length:ST.indexOf(cur);if(i>0)ir(ST[i-1]);return}
-  if(t.closest('#bOk')){if(B.n)ir('ok');else $('#bN').focus();return}
   if(t.closest('#mas')){$('#sheet').classList.add('on');return}
  });
  addEventListener('keydown',e=>{if(e.key==='Escape')cerrar()});

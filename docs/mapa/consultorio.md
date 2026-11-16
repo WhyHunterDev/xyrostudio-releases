@@ -9,3 +9,9 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Panel: módulo solicitudes (`sdCargar`, `sdCard`, `sdAgendar`, `sdRechazar`) en Agenda e Inicio; badge «Agenda (N)». RPC `xa_neg_cita_agendar`/`xa_neg_cita_rechazar` (rol profesional también). Apagar en Servicios: `citasapp`.
 - Sellos dental: `xa_sellos_calc` cuenta citas con `pago_id` (por='servicio'). Meta/premio en App de pacientes.
 - Menú: «App de pacientes», 🪥 Productos, vitrina 🔒 Productos/Mi web si no tiene Control/Webs.
+
+## Mensajes, web editable y QR (SQL 65, 2026-11-16)
+- Panel: `sdVis`/`sdVer` (chat con el paciente, `#sdch` se refresca 6 s, `xa_neg_pedido_msg`/`xa_neg_pedido_visto`); la tarjeta muestra pendientes y mensajes sin leer. Si falta SQL 64 el admin ve aviso. Mi Xyro modo negocio: chat en `nCitaPed`.
+- Web `/consultorio/`: sin reserva en la web; `#/reservar` = página «Pide tu cita en la app» con QR (`qrPinta`, `/mi/?n=slug`). Precios ocultos por defecto (`clinica.precios===true` los muestra). Secciones `clinica.sec` {trat,pasos,ba,gal,equipo,ops,app}, `lema`, `appT/appX`, `fotos.gal`. Editor `editWebDent` en «Mi web» (contenido `clinica`, mezcla con lo existente).
+- Demos web en Integraciones: iframe a 1280 px escalado con `--dz` (`dmRO`).
+- SQL 65: `xa_yo_negocio` devuelve `web` solo si `config.xyros` incluye 'webs' (Mi Xyro oculta «Ver su web»).

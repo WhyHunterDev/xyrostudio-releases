@@ -1,5 +1,21 @@
 [
  {
+  "id": "20261116-0022",
+  "fecha": "2026-11-16 00:22",
+  "titulo": "Mensajes de pacientes y web editable",
+  "notas": "Mensajes de pacientes y web editable",
+  "cambios": [
+   "Los mensajes que te escriben los pacientes desde la app ahora salen en Agenda e Inicio, con chat para responder",
+   "Tu web se edita desde «Mi web»: textos, fotos, galería, secciones, opiniones y preguntas",
+   "La web ya no toma reservas: muestra el QR de Mi Xyro para pedir la cita",
+   "La vista previa de la web en Integraciones se ve a tamaño normal"
+  ],
+  "requiere": "SQL 65",
+  "rubros": [
+   "consultorio"
+  ]
+ },
+ {
   "id": "20261115-2235",
   "fecha": "2026-11-15 22:35",
   "titulo": "Citas desde la app y sellos",
