@@ -1,5 +1,21 @@
 [
  {
+  "id": "20261115-2106",
+  "fecha": "2026-11-15 21:06",
+  "titulo": "Xyro Control: Ganancias",
+  "notas": "Xyro Control: Ganancias",
+  "cambios": [
+   "Nueva sección 💹 Ganancias: ventas menos costo de insumos y mermas = lo que ganas de verdad",
+   "Margen de cada producto, con ⭐ estrellas y ⚠️ los que conviene subir de precio",
+   "Proveedores, y compras con lo que pagaste: el costo se actualiza solo",
+   "Lista de compras para mañana por proveedor, lista para mandar por WhatsApp"
+  ],
+  "requiere": "SQL 62",
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-2101",
   "fecha": "2026-11-15 21:01",
   "titulo": "Horas en am/pm",

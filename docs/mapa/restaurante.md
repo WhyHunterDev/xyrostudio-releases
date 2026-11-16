@@ -33,3 +33,7 @@ Creado 2026-11-15. Lee solo la parte que necesitas (`grep -n palabra docs/mapa/r
 - /restaurante/: sin reserva de mesa ni precios. Ruta `#/app` con QR (qrcode-generator) a `https://xyrostudio.net/mi/?n=slug`, beneficios de la app y WhatsApp solo «Pedir información». Banner `appBan()` en Inicio y Carta.
 - Mi Xyro: en la página de un restaurante, «📅 Reservar mesa» (`reservar(slug)`) arma el mensaje y abre WhatsApp del negocio (no se guarda aún en el panel).
 - Xyro Apps (restaurante): `insOn()=tiene('control')` → Insumos solo si XyroStudio activó Xyro Control; la Carta (POS) cuenta como Xyro Apps (`xsDe`).
+
+## 2026-11-16 · Xyro Control = «cuánto ganas de verdad» (SQL 62)
+- Ruta `#/ganancias` (`ganancias()`, solo admin, requiere `insOn()`): KPIs ventas / costo insumos / mermas / ganancia; margen por producto (`cuP` = receta o costo manual, ⭐ top 3, ⚠️ margen <40%, 💤 sin ventas); lista de compras (`listaCompras`: uso diario = ventas 7 días × receta) agrupada por proveedor con WhatsApp; mermas valorizadas. Periodo `RG_G` sobre `rgo`/`rango()`.
+- Proveedores: `xa_proveedores` (`PROV`, `provCargar`, `proveedores()`, `editProv`), proveedor habitual en el insumo. Compra con total: RPC `xa_insumo_compra` (costo promedio ponderado). `NEED62` si falta el SQL.
