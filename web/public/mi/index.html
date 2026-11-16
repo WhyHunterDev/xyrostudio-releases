@@ -262,6 +262,7 @@ textarea{width:100%;font:inherit;color:var(--tx);background:var(--c2);border:1px
 #instb img{width:38px;height:38px;border-radius:10px;flex:none}#instb span{flex:1;min-width:0;display:grid;line-height:1.25}#instb small{color:var(--mu);font-size:12px}#instb .btn{width:auto;padding:9px 14px;font-size:14px;flex:none}#instb .ix{all:unset;cursor:pointer;color:var(--mu);padding:6px;font-size:14px}
 .nfb{display:inline-block;margin:2px 0 6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f7dc8a,#e6b84d 55%,#b8862b);box-shadow:0 4px 14px #e6b84d40}
 .tp{display:flex;gap:6px;width:100%}.tp select{flex:1;min-width:0}
+a.btn{color:var(--tx)}a.btn.p{color:#fff}
 </style>
 </head>
 <body>
@@ -752,7 +753,7 @@ function vNegocio(slug){const n=NEG[slug];
  <div class="g" style="margin-top:14px">
   ${mi>=0?`<button class="btn p" id="sv">${rub==='consultorio'?'🦷 Ver mis citas y tratamiento':'🎟️ Ver mi membresía y mi QR'}</button>`
    :`<div class="row">${sesion?`<button class="btn ${n.guardado?'':'p'} sp" id="gd">${n.guardado?'✓ Guardado':'＋ Guardar negocio'}</button>`:`<button class="btn p sp" id="gd">＋ Guardar en mi app</button>`}${waBtn(n,'Hola, los vi en la app Mi Xyro. Quiero información.','💬')}</div>
-   <button class="btn" data-yo>${I.id}Ya estoy registrado en este negocio</button>`}
+   ${rub==='restaurante'?'':`<button class="btn" data-yo>${I.id}Ya estoy registrado en este negocio</button>`}`}
   ${rub==='restaurante'?`<div class="row"><a class="btn p sp" style="text-decoration:none" href="/pedir/?s=${encodeURIComponent(slug)}">📖 Ver la carta</a>${String(n.whatsapp||'').replace(/\D/g,'').length>=9?`<button class="btn sp" data-resv="${esc(slug)}">📅 Reservar mesa</button>`:''}</div><p class="mu xs" style="text-align:center;margin-top:-4px">¿Ya estás en el local? Toca 📷 y escanea el QR de tu mesa para pedir.</p>`:''}
   ${PR.length?`<h2>🎁 Promos por usar la app</h2>${PR.map(p=>`<div class="promo"><span class="pill" style="background:var(--a);color:#fff;justify-self:start">Solo en la app</span><h2>${esc(p.titulo)}</h2>${p.descripcion?`<p class="sm">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Válido hasta el ${fF(p.hasta)}</p>`:''}<p class="mu xs">Muestra esta pantalla en ${rub==='consultorio'?'el consultorio':rub==='restaurante'?'caja':'recepción'}.</p></div>`).join('')}`:''}
   ${PB.length?`<h2>📢 Novedades</h2><div class="hs">${PB.map(p=>`<div class="card" style="padding:0;overflow:hidden">${p.media&&p.mediaTipo!=='video'?`<img src="${esc(media(p.media,rub))}" alt="" loading="lazy" onerror="this.remove()" style="width:100%;height:150px;object-fit:cover;display:block">`:''}<div style="padding:14px;display:grid;gap:4px">${p.tipo?`<span class="mu xs" style="font-weight:700;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}<h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}${p.fin?`<p class="mu xs">Hasta el ${fF(p.fin)}</p>`:''}</div></div>`).join('')}</div>`:''}
