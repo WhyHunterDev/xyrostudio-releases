@@ -41,3 +41,4 @@ Creado 2026-11-15. Lee solo la parte que necesitas (`grep -n palabra docs/mapa/r
 ## 2026-11-16 · Web de cafetería más completa
 - Inicio de /restaurante/ con `casa()`: favoritos con foto (carrusel), «Nuestro café» (texto = descripción + 3 puntos), galería del ambiente (fotos base `IMC` de cafetería + fotos de la carta), horario/ubicación y banner de la app. Clase `.caf` en cafeterías (paleta café). Restaurantes usan los mismos bloques con textos propios.
 - Mi Xyro: en restaurantes/cafeterías ya no sale «Ya estoy registrado en este negocio».
+- Reservas apagables: servicio 'reservas' en Ajustes → Servicios (CFG.apagados). Mi Xyro oculta «Reservar mesa» y la web quita las menciones (RES=false).
