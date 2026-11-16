@@ -909,7 +909,7 @@ async function escanear(onCode,txt){
 
 // ---------- Perfil ----------
 function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim()[0]||'?';
- const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=()=>modoNegocio();const s=$('#salir');s&&(s.onclick=salir);$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
+ const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=()=>modoNegocio();const s=$('#salir');s&&(s.onclick=salir);const bc=$('#bcta');bc&&(bc.onclick=e=>{e.preventDefault();borrarCuenta()});$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
  return`<div class="g"><div class="row"><div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
    <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p>${per.fundador?`<p style="margin-top:6px">${fBad(per)}</p>`:''}</div></div>
   ${per.fundador?`<div class="card fcard"><div class="row"><span style="font-size:28px">🏅</span><div class="sp"><h3>Fundador ${fNum(per.fundador)} de Mi Xyro</h3><p class="mu sm">Eres de las primeras 50 personas en la app. Tu insignia, tu carnet dorado y tu @ corto son para siempre.</p></div></div></div>`:''}
@@ -921,7 +921,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
   <div class="card pronto"><div class="row"><div class="ibox">${I.trophy}</div><div class="sp"><h3>Muy pronto: puntos y premios</h3><p class="mu sm">Suma puntos cada vez que vas a tus negocios y canjéalos por premios.</p></div></div></div>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
-  <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio</p></div>`}
+  <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/mi/privacidad.html" style="color:inherit">Privacidad</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
 async function subirFoto(fl){const img=await new Promise((ok,ko)=>{const u=URL.createObjectURL(fl),im=new Image();im.onload=()=>ok(im);im.onerror=ko;im.src=u});
  const S=400,c=document.createElement('canvas');c.width=c.height=S;const k=Math.min(img.naturalWidth,img.naturalHeight),cx=c.getContext('2d');cx.imageSmoothingQuality='high';
@@ -975,6 +975,15 @@ function reservar(slug){const n=NEG[slug];if(!n)return;const d0=new Date(),DN=['
    const w=String(n.whatsapp||'').replace(/\D/g,''),num=w.length===9?'51'+w:w,t=`Hola ${n.negocio} 👋 Quiero reservar una mesa (desde Mi Xyro):\n📅 ${DN[d.getDay()]} ${d.getDate()} ${MS[d.getMonth()]}\n⏰ ${v('#rvH')}\n👥 ${v('#rvP')} persona(s)\n🙋 ${nm}${v('#rvO')?'\n📝 '+v('#rvO'):''}`;
    window.open('https://wa.me/'+num+'?text='+encodeURIComponent(t),'_blank','noopener');close()}})}
 function hoja(h,fn){const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="sh">${h}</div>`;const close=()=>o.remove();o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))close()};document.body.appendChild(o);fn&&fn(o,close);return close}
+/* Eliminar cuenta (requisito de Google Play): borra la cuenta y todo lo suyo en la app (SQL 68). Los negocios conservan su ficha de socio/paciente. */
+function borrarCuenta(){if(DEMO)return toast('En la demo no se elimina nada');hoja(`<h3>Eliminar mi cuenta</h3>
+ <p class="mu sm">Se borran para siempre tu perfil, tu foto, tu ID, tus negocios guardados, tus sellos, tus avisos y tus solicitudes.</p>
+ <p class="mu sm">Los negocios conservan la ficha que ya tenían de ti (membresía, pagos, historia clínica), porque es parte de su registro. Si quieres que la borren, pídeselo a cada negocio.</p>
+ <p class="sm" style="margin-top:10px">Escribe <b>ELIMINAR</b> para confirmar:</p><input id="bcin" autocomplete="off" style="width:100%;margin:8px 0" placeholder="ELIMINAR">
+ <button class="btn" id="bcok" style="width:100%;background:#dc2626;color:#fff">Eliminar mi cuenta para siempre</button><button class="btn l" data-x style="width:100%">Cancelar</button>`,(o,close)=>{
+ o.querySelector('#bcok').onclick=async()=>{const v=o.querySelector('#bcin').value.trim().toUpperCase();if(v!=='ELIMINAR')return toast('Escribe ELIMINAR para confirmar');const b=o.querySelector('#bcok');b.disabled=true;
+  try{try{const{data:{session:ss}}=await sb.auth.getSession(),dir='mi/'+ss.user.id,{data:fs}=await sb.storage.from('medios').list(dir);fs&&fs.length&&await sb.storage.from('medios').remove(fs.map(f=>dir+'/'+f.name))}catch(_){}
+  const{error}=await sb.rpc('xa_yo_borrar_cuenta',{p_confirma:v});if(error)throw error;close();await salir();toast('Tu cuenta fue eliminada')}catch(e){b.disabled=false;toast(/negocio/.test(e.message||'')?e.message:'No se pudo eliminar. Intenta de nuevo.')}}})}
 async function salir(){try{await sb.auth.signOut()}catch(_){}ls.s('mi-data',null);ls.s('mi-neg',null);D=null;NEG={};TAB='inicio';SUB=null;pantallaEntrada()}
 function confeti(){const C=['#fff',getComputedStyle(document.documentElement).getPropertyValue('--a').trim()||ACC,'#facc15'];for(let i=0;i<40;i++){const d=document.createElement('i');const x=Math.random()*100,dl=Math.random()*.3;
  d.style.cssText=`position:fixed;z-index:20;top:-10px;left:${x}vw;width:8px;height:12px;border-radius:2px;background:${C[i%3]};pointer-events:none;transition:transform 1.4s cubic-bezier(.2,.8,.3,1) ${dl}s,opacity 1.4s ${dl}s`;
@@ -1412,10 +1421,11 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
   D=null;ls.s('mi-data',null);
   if(n){await cargaNeg(n);if(NEG[n]){pend.set({n,negocio:NEG[n].negocio});SUB={neg:n};TAB='negocios';return pinta()}}
   if(c&&c.length>=8){pend.set({c});return pantallaEntrada('Crea tu cuenta (o entra) para conectar tu carnet.','crear')}
-  return pantallaEntrada();
+  return pantallaEntrada(P.get('borrar')?'Entra a tu cuenta y ve a Perfil → «Eliminar mi cuenta».':undefined);
  }
  if(n)pend.set({n});else if(c&&c.length>=8)pend.set({c});
  await entrar();
+ if(P.get('borrar')){TAB='perfil';SUB=null;pinta();borrarCuenta()}
 })();
 </script>
 <script>/* Partículas Xyro */(function(){var cv=document.getElementById('fx');if(!cv)return;var cx=cv.getContext('2d'),P=[],W,H,DPR=Math.min(1.5,devicePixelRatio||1),m={x:-999,y:-999},RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
