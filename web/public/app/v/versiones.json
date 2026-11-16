@@ -1,5 +1,21 @@
 [
  {
+  "id": "20261115-2235",
+  "fecha": "2026-11-15 22:35",
+  "titulo": "Citas desde la app y sellos",
+  "notas": "Citas desde la app y sellos",
+  "cambios": [
+   "Tus pacientes piden cita desde Mi Xyro con el precio del tratamiento y solo horarios libres",
+   "Recepción y profesionales ven las solicitudes y agendan con un toque; al paciente le llega a su app",
+   "Sellos por cada cita pagada; el premio lo eliges tú",
+   "Menú dental ordenado por Xyro y horas en am/pm"
+  ],
+  "requiere": "SQL 64",
+  "rubros": [
+   "consultorio"
+  ]
+ },
+ {
   "id": "20261115-2157",
   "fecha": "2026-11-15 21:57",
   "titulo": "Comprobante más limpio",
