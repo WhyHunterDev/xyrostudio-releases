@@ -337,6 +337,7 @@ body:not(.dentro){background:#05060a}
 .tmP img,.tmP>span:first-child{width:44px;height:44px;border-radius:12px;object-fit:cover;display:grid;place-items:center;font-size:24px;flex:none}.tmP .nm{flex:1;display:grid}
 @media(max-width:600px){.rMes{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.rMe{padding:10px 4px;border-radius:14px}.rMe b{font-size:20px}.rMe span{font-size:10px}.rMe small{display:none}}
 @media(max-width:900px){.mpB{grid-template-columns:1fr}.mpSt{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tp{display:flex;gap:6px;width:100%}.tp select{flex:1;min-width:0;padding:12px 8px;border-radius:12px;border:1px solid var(--ln);background:#0007;color:var(--tx);outline:0}.tp select:focus{border-color:var(--a)}
 </style>
 </head>
 <body>
@@ -459,7 +460,18 @@ const addD=(s,n)=>{const d=new Date(s+'T12:00:00');d.setDate(d.getDate()+n);retu
 const diff=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
 const MES=['ene','feb','mar','abr','may','jun','jul','ago','set','oct','nov','dic'];
 const fF=s=>{if(!s)return'—';const d=new Date(s.length>10?s:s+'T12:00:00');return d.getDate()+' '+MES[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'')};
-const fH=s=>{const d=new Date(s);return pad(d.getHours())+':'+pad(d.getMinutes())};
+/* Horas en am/pm (nada de 24 h): cada input type=time se cambia por hora · minutos · am/pm; el input queda oculto con su valor HH:MM. */
+const h12=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||'');if(!m)return h||'';const x=+m[1];return(x%12||12)+':'+m[2]+' '+(x<12?'am':'pm')};
+function tpAmPm(root){(root||document).querySelectorAll('input[type=time]:not([data-tp])').forEach(i=>{i.dataset.tp=1;const st=+i.step||300,paso=Math.max(5,Math.round(st/60)),MI=[];for(let m=0;m<60;m+=paso)MI.push(m);
+ const w=document.createElement('span');w.className='tp';const sh=document.createElement('select'),sm=document.createElement('select'),sa=document.createElement('select');
+ sh.innerHTML='<option value="">--</option>'+[12,1,2,3,4,5,6,7,8,9,10,11].map(h=>`<option value="${h}">${h}</option>`).join('');sa.innerHTML='<option value="am">am</option><option value="pm">pm</option>';
+ const pinta=()=>{const m=/^(\d{1,2}):(\d{2})/.exec(i.value||'');const mm=m?+m[2]:0;if(!MI.includes(mm)){MI.push(mm);MI.sort((a,b)=>a-b)}sm.innerHTML=MI.map(x=>`<option value="${x}">${String(x).padStart(2,'0')}</option>`).join('');
+  if(m){const x=+m[1];sh.value=String(x%12||12);sm.value=String(mm);sa.value=x<12?'am':'pm'}else{sh.value='';sm.value='0';sa.value='am'}};
+ const lee=()=>{if(!sh.value){i.value='';}else{let x=+sh.value%12;if(sa.value==='pm')x+=12;i.value=String(x).padStart(2,'0')+':'+String(+sm.value).padStart(2,'0')}i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}))};
+ [sh,sm,sa].forEach(s=>{s.onchange=lee;w.appendChild(s)});sh.setAttribute('aria-label','Hora');sm.setAttribute('aria-label','Minutos');sa.setAttribute('aria-label','am o pm');
+ if(i.id)sh.id=i.id+'_h';pinta();i.type='hidden';i.after(w)})}
+new MutationObserver(()=>tpAmPm()).observe(document.documentElement,{childList:true,subtree:true});
+const fH24=s=>{const d=new Date(s);return pad(d.getHours())+':'+pad(d.getMinutes())},fH=s=>h12(fH24(s));
 const sol=n=>'S/ '+(+n||0).toLocaleString('es-PE',{maximumFractionDigits:2});
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
 const codigo=()=>{const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';const r=crypto.getRandomValues(new Uint8Array(10));r.forEach(x=>s+=a[x%a.length]);return s};
@@ -973,7 +985,7 @@ function nuevaCita(pre,x){
   {k:'prof',l:'Profesional',t:'opts',v:p0,o:PS.map(p=>[p.id,p.n])},
   {k:'servicio',l:'Servicio',t:'sel',v:x?x.servicio||'':'',o:[['','—']].concat(SV.map(p=>[p.nombre,p.nombre+' · '+sol(p.precio)]))},
   {k:'fecha',l:'Día',t:'date',v:x?ymd(new Date(x.inicio)):pre.fecha||agD||hoy(),half:1,req:1},
-  {k:'hora',l:'Hora',t:'time',v:x?fH(x.inicio):pre.hora||'',half:1,req:1},
+  {k:'hora',l:'Hora',t:'time',v:x?fH24(x.inicio):pre.hora||'',half:1,req:1},
   {k:'dur',l:'Duración',t:'opts',v:String(x?x.dur||30:(profDe(p0)||{}).dur||30),o:[15,20,30,45,60,90].map(m=>[String(m),m+' min']),on:(fm,val)=>{
    const tl=fm.querySelector('#f_tel').closest('label'),pc=fm.querySelector('#f_pac'),hr=fm.querySelector('#f_hora');
    const exi=()=>{const v=pc.value.trim().toLowerCase();return!v||S.cli.some(c=>lab(c).toLowerCase()===v||c.nombre.toLowerCase()===v)};
@@ -990,7 +1002,7 @@ function nuevaCita(pre,x){
   const ch=citVivas(v.fecha).find(y=>y.id!==(x&&x.id)&&y.prof===v.prof&&citMin(y)<b&&citFin(y)>a);
   if(ch&&!v.sobre)throw new Error(`Ese horario ya lo tiene ${(cli(ch.cliente_id)||{}).nombre||'otra cita'} (${fH(ch.inicio)}). Elige otro o marca sobreturno.`);
   if(!v.sobre&&!h)throw new Error(`${p.n} no atiende ese día. Elige otro día o marca sobreturno.`);
-  if(!v.sobre&&(a<h[0]||b>h[1]))throw new Error(`${p.n} atiende de ${mh(h[0])} a ${mh(h[1])}.`);
+  if(!v.sobre&&(a<h[0]||b>h[1]))throw new Error(`${p.n} atiende de ${h12(mh(h[0]))} a ${h12(mh(h[1]))}.`);
   const q=v.pac.trim().toLowerCase();let c=S.cli.find(c=>lab(c).toLowerCase()===q)||S.cli.find(c=>c.nombre.toLowerCase()===q);
   if(!c){c=await DB.ins('cli',{nombre:v.pac.trim().replace(/\s+/g,' '),telefono:v.tel||null,num:nextNum(),codigo:codigo(),creado:new Date().toISOString()});S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));ixOff()}
   const sv=SV.find(s=>s.nombre===v.servicio),row={cliente_id:c.id,prof:v.prof,servicio:v.servicio||null,inicio:ini.toISOString(),dur,nota:v.nota||null,precio:sv?+sv.precio:x?x.precio:null};
@@ -1013,7 +1025,7 @@ function verCita(id){
  if(abierta)B.push('<button class="btn" data-ca="can">✖️ Cancelar</button>');
  if(!abierta&&k!=='atendida')B.push('<button class="btn" data-ca="reab">↩️ Reabrir</button>');
  B.push(`<a class="btn" href="#/socio/${c.id}" data-x>👤 Ver ficha</a>`);
- sheet(`<div class="g" style="gap:12px"><div style="display:flex;gap:12px;align-items:center">${av(c,'width:56px;height:56px;border-radius:18px')}<div><h3>${esc(c.nombre)}</h3><p class="mu sm">${diaTxt(d).replace(/^el /,'')} · ${fH(x.inicio)}–${mh(citFin(x))} · <i class="agdot" style="background:${profC(x.prof)}"></i>${esc(profN(x.prof))}</p></div></div>
+ sheet(`<div class="g" style="gap:12px"><div style="display:flex;gap:12px;align-items:center">${av(c,'width:56px;height:56px;border-radius:18px')}<div><h3>${esc(c.nombre)}</h3><p class="mu sm">${diaTxt(d).replace(/^el /,'')} · ${fH(x.inicio)}–${h12(mh(citFin(x)))} · <i class="agdot" style="background:${profC(x.prof)}"></i>${esc(profN(x.prof))}</p></div></div>
  <div style="display:flex;gap:6px;flex-wrap:wrap">${ceP(x)}${x.servicio?`<span class="pill" style="background:#ffffff10">${esc(x.servicio)}${x.precio?' · '+sol(x.precio):''}</span>`:''}${pg?`<span class="pill act">💳 Pagado ${sol(pg.monto)} · ${esc(pg.metodo||'')}</span>`:''}${x.recordado?`<span class="pill" style="background:#ffffff10">📲 Recordado ${fF(x.recordado)} ${fH(x.recordado)}</span>`:''}</div>
  ${x.nota?`<p class="sm">📝 ${esc(x.nota)}</p>`:''}${c.telefono?`<p class="mu sm">📱 ${esc(c.telefono)}</p>`:''}<p class="mu sm">Agendada por ${esc(x.quien||'—')}${x.creado?' · '+fF(x.creado):''}</p>
  <div class="bt" style="flex-wrap:wrap;justify-content:flex-start">${B.join('')}${isSup()?'<button class="btn" data-ca="del" title="Borrar cita">🗑️</button>':''}</div></div>`,(el,close)=>{
@@ -1043,7 +1055,7 @@ function cobrarCita(x){
 function editProfs(){
  if(!isAdmin())return toast('Solo el administrador');
  const T0=profsT().filter(p=>p.activo!==false);
- sheet(`<div class="g" style="gap:12px"><h3>👩‍⚕️ Profesionales y horarios</h3><p class="mu sm">Quién atiende, qué días y en qué horario. La agenda solo deja citas dentro de su horario.</p><div class="tl">${T0.map(p=>`<div class="row"><i class="agdot" style="background:${esc(p.color||'#8d8fa8')};width:12px;height:12px"></i><span class="nm"><b>${esc(p.n)}</b><small>${esc(p.esp||'')} · ${esc((DPRE.find(d=>d[0]===(p.dias||[1,2,3,4,5,6]).join(','))||['','Días a medida'])[1])} · ${esc(p.desde||'09:00')}–${esc(p.hasta||'19:00')} · citas de ${p.dur||30} min${p.cuenta?' · 🔐 '+esc(p.cuenta):''}</small></span><button class="btn sm" data-pe="${p.id}">✏️</button></div>`).join('')||'<p class="mu">Aún no hay profesionales.</p>'}</div><div class="bt"><button class="btn" data-x>Cerrar</button><button class="btn p" data-pe="">＋ Profesional</button></div></div>`,(el,close)=>{
+ sheet(`<div class="g" style="gap:12px"><h3>👩‍⚕️ Profesionales y horarios</h3><p class="mu sm">Quién atiende, qué días y en qué horario. La agenda solo deja citas dentro de su horario.</p><div class="tl">${T0.map(p=>`<div class="row"><i class="agdot" style="background:${esc(p.color||'#8d8fa8')};width:12px;height:12px"></i><span class="nm"><b>${esc(p.n)}</b><small>${esc(p.esp||'')} · ${esc((DPRE.find(d=>d[0]===(p.dias||[1,2,3,4,5,6]).join(','))||['','Días a medida'])[1])} · ${esc(h12(p.desde||'09:00'))}–${esc(h12(p.hasta||'19:00'))} · citas de ${p.dur||30} min${p.cuenta?' · 🔐 '+esc(p.cuenta):''}</small></span><button class="btn sm" data-pe="${p.id}">✏️</button></div>`).join('')||'<p class="mu">Aún no hay profesionales.</p>'}</div><div class="bt"><button class="btn" data-x>Cerrar</button><button class="btn p" data-pe="">＋ Profesional</button></div></div>`,(el,close)=>{
   el.onclick=e=>{const b=e.target.closest('[data-pe]');if(!b)return;close();editProf(profDe(b.dataset.pe))};
  });
 }
@@ -2236,7 +2248,7 @@ function pedidosMesa(){
   ${p.nombre||p.cliente_nombre?`<p class="sm">👤 ${esc(p.cliente_nombre||p.nombre)}${p.cliente_id?' <span class="pill act" style="font-size:10px">socio</span>':''}</p>`:''}
   <div class="mpI">${(p.items||[]).map(i=>`<div><b>${+i.c}×</b> ${esc(i.e||'')} ${esc(i.n)}</div>`).join('')}</div>${p.nota?`<p class="sm mpN">📝 ${esc(p.nota)}</p>`:''}
   <div class="mpF"><b>${sol(p.total)}</b><span style="display:flex;gap:6px">${p.estado==='nuevo'?`<button class="btn sm" data-mpe="${p.id}|cancelado" title="Cancelar">✕</button><button class="btn sm p" data-mpe="${p.id}|preparando">👨‍🍳 Preparar</button>`:p.estado==='preparando'?`<button class="btn sm p" data-mpe="${p.id}|servido">${R.resto?'✅ Listo':'🍽️ Servido'}</button>`:''}</span></div></div>`};
- return`<div class="hi"><div><h2>${R.resto?'🧾 Pedidos':'🍽️ Pedidos de mesa'}</h2><p class="mu">${MP.abierto||DEMO?'<span style="color:var(--ok)">● Recibiendo pedidos</span>':'<span style="color:var(--bad)">● Cerrado ahora</span>'} · ${C.n} mesas · ${esc(C.desde||'')}–${esc(C.hasta||'')} · hoy ${hoyP.length} cobrados (${sol(totH)})</p></div>
+ return`<div class="hi"><div><h2>${R.resto?'🧾 Pedidos':'🍽️ Pedidos de mesa'}</h2><p class="mu">${MP.abierto||DEMO?'<span style="color:var(--ok)">● Recibiendo pedidos</span>':'<span style="color:var(--bad)">● Cerrado ahora</span>'} · ${C.n} mesas · ${esc(h12(C.desde||''))}–${esc(h12(C.hasta||''))} · hoy ${hoyP.length} cobrados (${sol(totH)})</p></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap">${R.resto?'<button class="btn p" id="mpTom">＋ Pedido</button>':''}${DEMO?'<button class="btn" id="mpSim">🧪 Simular pedido</button>':''}<button class="btn" id="mpQR">🖨️ QR de mesas</button>${adm?'<button class="btn" id="mpCfg">⚙️ Mesas y horario</button>':''}</div></div>
  <div class="mpB">
   <section><h3>🟡 Nuevos <span class="pill">${col('nuevo').length}</span></h3>${col('nuevo').map(card).join('')||'<p class="mu sm mpE">Sin pedidos nuevos. Suena cuando llega uno.</p>'}</section>

@@ -165,6 +165,7 @@ async function cargar(){
 }
 const mk=s=>esc(s).replace(/\((nombre[^)]*|distrito|dirección)\)/g,'<span class="mk">($1)</span>');
 const ft=(p,cls)=>p.foto&&/^https:\/\//.test(p.foto)?`<img src="${esc(p.foto)}" alt="" loading="lazy" data-e="${esc(p.emoji||'🍽️')}" onerror="this.outerHTML=this.dataset.e">`:'';
+const h12=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||'');if(!m)return h||'';const x=+m[1];return(x%12||12)+':'+m[2]+' '+(x<12?'am':'pm')};
 const abierto=D=>{const d=new Date(),dd=d.getDay(),t=d.getHours()*60+d.getMinutes(),a=hm(D.desde),b=hm(D.hasta);const dia=!D.dias.length||D.dias.includes(dd);return dia&&(b>a?t>=a&&t<b:t>=a||t<b)};
 
 cargar().then(D=>{
@@ -174,7 +175,7 @@ cargar().then(D=>{
  const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);$('#fab').href=wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.');
  if(Q.has('demo')||!SLUG){const d=document.createElement('span');d.className='demo';d.textContent=SLUG?'DEMO':'VISTA PREVIA';document.body.appendChild(d)}
  const P=D.productos||[],cats=[...new Set(P.map(p=>p.categoria||'Carta'))],dest=P.filter(p=>p.destacado&&!p.agotado).concat(P.filter(p=>!p.destacado&&!p.agotado)).slice(0,3);
- const hor=()=>{const d=D.dias.length&&D.dias.length<7?D.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'Todos los días';return d+' · '+D.desde+' a '+D.hasta};
+ const hor=()=>{const d=D.dias.length&&D.dias.length<7?D.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'Todos los días';return d+' · '+h12(D.desde)+' a '+h12(D.hasta)};
  const ab=abierto(D);let CAT='';const APP='https://xyrostudio.net/mi/?n='+encodeURIComponent(SLUG||'');
  const plC=(p,i)=>`<button class="pl ${p.agotado?'ag':''}" data-p="${esc(p.id)}" style="animation-delay:${Math.min(i,10)*.04}s"><div class="ft">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}${p.agotado?'<span class="tg x">Agotado</span>':+p.antes>+p.precio?'<span class="tg">Promo</span>':p.destacado?'<span class="tg">⭐ Favorito</span>':''}</div>
   <div class="bd"><h3>${esc(p.nombre)}</h3>${p.detalle?`<span class="mu sm ds">${esc(p.detalle)}</span>`:''}</div></button>`;
@@ -182,7 +183,7 @@ cargar().then(D=>{
  const V={
   '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
    <span class="nfb" id="nfb" ${D.fund?'':'hidden'} title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador · XyroStudio</span>
-   <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(D.hasta):'Cerrado ahora · abrimos '+esc(D.desde)}</span>
+   <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(h12(D.hasta)):'Cerrado ahora · abrimos '+esc(h12(D.desde))}</span>
    <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
    <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/app">📱 Reserva y pide en la app</a></div>
    <div class="chips" style="margin-top:22px">${cats.slice(0,6).map(c=>`<a class="chip" href="#/carta" data-gc="${esc(c)}">${esc(c)}</a>`).join('')}</div></div>
