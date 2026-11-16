@@ -31,3 +31,4 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 ## 2026-11-16 · Arreglo QR de mesa desde el escáner
 - Al escanear un QR /pedir/ con el escáner de Mi Xyro, cerrar la cámara hacía `history.go(-1)` (botón atrás) y cancelaba la ida al pedido. Ahora `HN.ir` guarda el destino y el observer navega con `location.assign` en vez de volver atrás.
 - Horas en am/pm: `h12()` y `tpAmPm()` (cambia todo input type=time por hora/minutos/am-pm; el input queda oculto con HH:MM). Igual en Xyro Apps; /pedir/, /restaurante/ y /consultorio/ muestran h12.
+- 2026-11-16: «Ver su web» en Mi Xyro abre FUERA de la app vía https://whyhunterdev.github.io/ir/?u= (otro dominio → navegador); dentro del APK un enlace a xyrostudio.net se quedaba en la app. /pedir/ muestra «‹ Mi Xyro» si viene de la app (de=mi).
