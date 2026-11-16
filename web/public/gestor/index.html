@@ -688,7 +688,7 @@ V.pruebas=async ()=>{
     <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="60" style="margin-top:6px">＋1 h</button> <button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="1440" style="margin-top:6px">＋1 día</button><button class="btn btn-g btn-sm" data-prmas="${esc(r.codigo)}" data-min="21600" style="margin-top:6px">＋15 días</button> ${q?`<button class="btn btn-g btn-sm" data-prfin="${esc(r.codigo)}" style="margin-top:6px">⏹️ Terminar</button>`:''} <button class="btn btn-g btn-sm" data-prdel="${esc(r.codigo)}" data-n="${esc(r.nombre)}" style="margin-top:6px" title="Eliminar">🗑️</button></td></tr>`}).join('');
   return `<div class="panel"><h3>＋ Nuevo acceso de prueba</h3><form class="form" id="prf" onsubmit="return false" style="margin-top:10px">
     <label class="full">Nombre del negocio<input id="prN" maxlength="40" placeholder="Ej: Santos Strength"></label>
-    <label>Rubro<select id="prR"><option value="gym">🏋️ Gimnasio</option><option value="consultorio">🩺 Consultorio</option><option value="restaurante">🍽️ Restaurante</option><option value="academia">🎓 Academia</option></select></label>
+    <label>Rubro<select id="prR"><option value="gym">🏋️ Gimnasio</option><option value="consultorio">🩺 Consultorio</option><option value="restaurante">🍽️ Restaurante</option><option value="cafeteria">☕ Cafetería</option><option value="academia">🎓 Academia</option></select></label>
     <label>Duración<select id="prD">${PR_DUR.map(([m,n])=>`<option value="${m}">${n}</option>`).join('')}</select></label>
     <label>Celular (opcional)<input id="prT" inputmode="tel" placeholder="Para enviarlo por WhatsApp"></label>
     <label>Color de su marca<input id="prC" type="color" value="#f5c400"></label>
