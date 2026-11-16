@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261115-2116",
+  "fecha": "2026-11-15 21:16",
+  "titulo": "Reservas: puedes apagarlas",
+  "notas": "Reservas: puedes apagarlas",
+  "cambios": [
+   "En Ajustes → Servicios ahora puedes apagar «Reservas de mesa» si tu negocio no toma reservas"
+  ],
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-2106",
   "fecha": "2026-11-15 21:06",
   "titulo": "Xyro Control: Ganancias",

@@ -143,7 +143,7 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc
 const pad=n=>String(n).padStart(2,'0'),hm=s=>{const[a,b]=String(s||'0:0').split(':');return(+a||0)*60+(+b||0)},mh=m=>pad(Math.floor(m/60)%24)+':'+pad(m%60);
 const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],DL=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],MS=['ene','feb','mar','abr','may','jun','jul','ago','set','oct','nov','dic'];
 const U=i=>'https://images.unsplash.com/photo-'+i+'?auto=format&fit=crop&w=900&q=70';
-let CAF=Q.get('r')==='cafe'; // cafetería: demo ?r=cafe o negocio con app.tipo 'cafe'
+let RES=true,CAF=Q.get('r')==='cafe'; // cafetería: demo ?r=cafe o negocio con app.tipo 'cafe'
 if(CAF)document.documentElement.classList.add('caf');
 const IMG={hero:U(CAF?'1554118811-1e0d58224f24':'1517248135467-4c7edcad34c4'),reserva:U('1414235077428-338989a2e8c0'),local:U('1559339352-11d035aa65de')};
 const IMC={arte:U('1551266681-ba5f0b95e2e5'),barra:U('1453614512568-c4024d13c247'),gente:U('1521017432531-fbd92d768814'),maq:U('1545418314-7ce0b9b53901')}; // ambiente de cafetería (base)
@@ -165,6 +165,7 @@ async function cargar(){
   const C={};(await rest('contenido?select=clave,valor&sitio_id=eq.'+s.id)).forEach(r=>C[r.clave]=r.valor);
   const app=C.app||{},pf=app.perfil||{},rs=C.resto||{},m=app.mesas||{};
   if(app.tipo==='cafe'&&!CAF){CAF=true;document.documentElement.classList.add('caf');IMG.reserva=IMC.arte;IMG.local=IMC.gente;const b2=BASE('');D.sub=b2.sub;D.productos=b2.productos;D.desde=b2.desde;D.hasta=b2.hasta;IMG.hero=U('1554118811-1e0d58224f24')}
+  if(Array.isArray(app.apagados)&&app.apagados.includes('reservas'))RES=false; // el negocio no toma reservas
   D.nombre=app.nombre||s.negocio||D.nombre;D.color=app.color||'';D.logo=app.logo||'';D.qr=!!m.on;
   if(m.desde)D.desde=m.desde;if(m.hasta)D.hasta=m.hasta;if(Array.isArray(m.dias))D.dias=m.dias;
   if(pf.descripcion)D.sub=pf.descripcion;if(/^https:/.test(pf.portada||''))IMG.hero=pf.portada;if(pf.redes)D.redes=pf.redes;
@@ -175,6 +176,7 @@ async function cargar(){
   rpc('xa_neg_fund',{p_slug:SLUG}).then(f=>{if(f){D.fund=f;const e=document.getElementById('nfb');e&&(e.hidden=false)}}).catch(()=>{});
   try{const c=await rpc('xa_carta',{p_slug:SLUG});if(c&&Array.isArray(c.productos)&&c.productos.length)D.productos=c.productos;if(c&&/^https:/.test(c.portada||'')&&!/^https:/.test(pf.portada||''))IMG.hero=c.portada}catch(_){}
  }catch(e){console.warn('Muestro la base',e)}
+ if(!RES&&D.sub)D.sub=D.sub.replace(' y reserva o pide',' y pide');
  return D;
 }
 const mk=s=>esc(s).replace(/\((nombre[^)]*|distrito|dirección)\)/g,'<span class="mk">($1)</span>');
@@ -206,23 +208,23 @@ cargar().then(D=>{
    <div class="card"><span class="eyb">Dónde estamos</span><h3 style="font-size:30px;margin:6px 0 10px">${mk((D.sedes[0]||{}).nombre||N)}</h3><p class="mu">${mk([(D.sedes[0]||{}).direccion,(D.sedes[0]||{}).distrito].filter(Boolean).join(' · '))}${D.sedes.length>1?` · y ${D.sedes.length-1} sede${D.sedes.length>2?'s':''} más`:''}</p>
    <div class="row" style="margin-top:14px"><a class="btn btn-p" href="#/local">🧭 Cómo llegar</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.')}">💬 Escríbenos</a></div></div></div></section>
   ${appBan()}`};
- const appBan=()=>`<section class="sec" style="padding-top:0"><div class="wrap"><a class="card apb" href="#/app"><span style="font-size:34px">📱</span><span><b>Reserva y pide desde la app Mi Xyro</b><span class="mu sm">Precios, promos solo por la app y pedidos desde tu mesa.</span></span><span class="btn btn-p">Descargar</span></a></div></section>`;
+ const appBan=()=>`<section class="sec" style="padding-top:0"><div class="wrap"><a class="card apb" href="#/app"><span style="font-size:34px">📱</span><span><b>${RES?'Reserva y pide':'Pide'} desde la app Mi Xyro</b><span class="mu sm">Precios, promos solo por la app y pedidos desde tu mesa.</span></span><span class="btn btn-p">Descargar</span></a></div></section>`;
  const V={
   '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
    <span class="nfb" id="nfb" ${D.fund?'':'hidden'} title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador · XyroStudio</span>
    <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(h12(D.hasta)):'Cerrado ahora · abrimos '+esc(h12(D.desde))}</span>
    <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
-   <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/app">📱 Reserva y pide en la app</a></div>
+   <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/app">📱 ${RES?'Reserva y pide':'Pide'} en la app</a></div>
    <div class="chips" style="margin-top:22px">${cats.slice(0,6).map(c=>`<a class="chip" href="#/carta" data-gc="${esc(c)}">${esc(c)}</a>`).join('')}</div></div>
    <div class="hc"><span class="eyb">Lo más pedido</span>${dest.map(p=>`<button class="it" data-p="${esc(p.id)}" style="text-align:left">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=e>${esc(p.emoji||'🍽️')}</span>'">`:`<span class="e">${esc(p.emoji||'🍽️')}</span>`}<span><b>${esc(p.nombre)}</b><span class="mu xs">${esc(p.categoria||'')}</span></span></button>`).join('')}
-   <a class="mu xs" href="#/app" style="text-decoration:none">📱 Precios, promos y reservas en la app Mi Xyro →</a></div></div></section>${casa()}`,
+   <a class="mu xs" href="#/app" style="text-decoration:none">📱 Precios, promos${RES?' y reservas':''} en la app Mi Xyro →</a></div></div></section>${casa()}`,
   carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">Toca ${CAF?'un producto':'un plato'} para verlo en grande. Precios, promos y pedidos en la app.</p>
    <div class="cats"><div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div></div>
    <div class="grid">${L.map(plC).join('')||'<p class="mu">Pronto subimos la carta.</p>'}</div></div></section>${appBan()}`},
-  app:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">App Mi Xyro · gratis</span><h2>Reserva y pide <span class="serif">desde tu celular</span></h2>
+  app:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">App Mi Xyro · gratis</span><h2>${RES?'Reserva y pide':'Pide y ahorra'} <span class="serif">desde tu celular</span></h2>
    <p class="mu" style="margin-bottom:18px">Escanea el código, guarda ${mk(N)} en tu app y listo.</p>
    <div class="card ap"><div class="qrw" id="qrw"><span class="mu xs">Cargando QR…</span></div><div class="apl">
-    <div>📅 <b>Reserva tu mesa</b><span class="mu sm">Eliges día, hora y personas.</span></div>
+    ${RES?'<div>📅 <b>Reserva tu mesa</b><span class="mu sm">Eliges día, hora y personas.</span></div>':''}
     <div>📱 <b>Pide desde tu mesa</b><span class="mu sm">Escanea el QR de la mesa y te lo llevamos.</span></div>
     <div>🎁 <b>Promos solo por la app</b><span class="mu sm">Precios y novedades al día.</span></div></div></div>
    <div class="row" style="margin-top:16px"><a class="btn btn-p" href="${esc(APP)}" target="_blank" rel="noopener">📲 Abrir la app</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.')}">💬 Pedir información</a></div></div>
