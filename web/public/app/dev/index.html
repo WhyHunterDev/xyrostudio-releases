@@ -44,6 +44,7 @@ main{overflow:auto;height:100%;position:relative}
 .top .sp{flex:1}
 .qk{display:flex;gap:8px}.qk a.on{background:var(--a);color:#000;border-color:var(--a)}.srch{display:flex;align-items:center;gap:8px;background:#ffffff0a;border:1px solid var(--ln);border-radius:12px;padding:8px 12px;width:min(300px,40vw)}
 .srch input{background:none;border:0;outline:0;width:100%}
+.gx{position:relative;box-shadow:inset 0 0 0 2px #b18cff!important;background:#7c5cff26!important;color:#e4dbff!important}.gx::after{content:'Solo XyroStudio';position:absolute;top:-8px;right:-4px;font-size:9px;line-height:1;padding:3px 6px;border-radius:8px;background:linear-gradient(90deg,#7c5cff,#3ad6ff);color:#fff;font-weight:800;letter-spacing:.2px;pointer-events:none;white-space:nowrap;z-index:2}.gxf{border:2px dashed #b18cff;border-radius:12px;padding:8px 10px;background:#7c5cff14}.gxf::before{content:'🟣 Solo XyroStudio';display:block;font-size:10px;font-weight:800;color:#c9b6ff;margin-bottom:4px}.gxl{display:flex;gap:8px;align-items:center;border:1px dashed #b18cff;background:#7c5cff1a;color:#d9ccff;border-radius:12px;padding:8px 12px;font-size:13px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:12px;font-weight:700;background:#ffffff10;border:1px solid var(--ln);transition:.2s;white-space:nowrap}
 .btn:hover{background:#ffffff1a;transform:translateY(-1px)}
 .btn.p{background:linear-gradient(135deg,var(--b),var(--a));border:0;color:var(--on,#fff);box-shadow:0 8px 30px -10px var(--a)}
@@ -471,7 +472,10 @@ function tpAmPm(root){(root||document).querySelectorAll('input[type=time]:not([d
  const lee=()=>{if(!sh.value){i.value='';}else{let x=+sh.value%12;if(sa.value==='pm')x+=12;i.value=String(x).padStart(2,'0')+':'+String(+sm.value).padStart(2,'0')}i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}))};
  [sh,sm,sa].forEach(s=>{s.onchange=lee;w.appendChild(s)});sh.setAttribute('aria-label','Hora');sm.setAttribute('aria-label','Minutos');sa.setAttribute('aria-label','am o pm');
  if(i.id)sh.id=i.id+'_h';pinta();i.type='hidden';i.after(w)})}
-new MutationObserver(()=>tpAmPm()).observe(document.documentElement,{childList:true,subtree:true});
+/* Lo que solo ve XyroStudio (gestor) se marca en morado para no confundirlo con lo del negocio */
+const GXSEL='#acp,#aim,#atu,#amk,#afi,#asd,#sdEd,#vtEd,#btEd,#dcAdd,#prRg,#waVin,#waPf,[data-dcdel],[onclick*="importar"]';
+const gxMark=()=>{if(!isXyro())return;document.querySelectorAll(GXSEL).forEach(e=>e.classList.contains('gx')||e.classList.add('gx'))};
+new MutationObserver(()=>{tpAmPm();gxMark()}).observe(document.documentElement,{childList:true,subtree:true});
 const fH24=s=>{const d=new Date(s);return pad(d.getHours())+':'+pad(d.getMinutes())},fH=s=>h12(fH24(s));
 const sol=n=>'S/ '+(+n||0).toLocaleString('es-PE',{maximumFractionDigits:2});
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
@@ -683,7 +687,8 @@ function form(title,fields,onSave,extra){
   if(f.t==='chk')return`<label class="fl" style="display:flex;gap:10px;align-items:center;color:var(--tx)"><input id="${id}" type="checkbox" ${f.v?'checked':''} style="width:20px;height:20px;accent-color:var(--a)">${f.l}</label>`;
   if(f.t==='area')return`<label class="fl">${f.l}<textarea id="${id}" rows="${f.rows||3}" placeholder="${esc(f.ph||'')}">${esc(f.v)}</textarea></label>`;
   return`<label class="fl">${f.l}<input id="${id}" type="${f.t||'text'}" value="${esc(f.v??'')}" ${f.req?'required':''} placeholder="${esc(f.ph||'')}" ${f.t==='number'?'step="any" min="0"':''} ${f.im?`inputmode="${f.im}"`:''} ${f.dl?`list="dl_${f.k}" autocomplete="off"`:''}>${f.dl?`<datalist id="dl_${f.k}">${f.dl.map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`:''}</label>`};
- const rows=[];for(let i=0;i<fields.length;i++){const f=fields[i];if(f.half&&fields[i+1]&&fields[i+1].half){rows.push(`<div class="f2">${fh(f)}${fh(fields[i+1])}</div>`);i++}else rows.push(fh(f))}
+ const fh1=fh,fhx=f=>{const h=fh1(f);return f.gx?h.replace('class="fl"','class="fl gxf"'):h};
+ const rows=[];for(let i=0;i<fields.length;i++){const f=fields[i];if(f.half&&fields[i+1]&&fields[i+1].half){rows.push(`<div class="f2">${fhx(f)}${fhx(fields[i+1])}</div>`);i++}else rows.push(fhx(f))}
  sheet(`<form class="g" style="gap:12px"><h3>${title}</h3>${rows.join('')}<p class="err" hidden></p><div class="bt">${extra||''}<button type="button" class="btn" data-x>Cancelar</button><button class="btn p">Guardar</button></div></form>`,(el,close)=>{
   const fm=el.querySelector('form');
   fm.querySelectorAll('.opts').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));g.dispatchEvent(new Event('change'))}));
@@ -1820,7 +1825,7 @@ function ajustes(){
  if(!isAdmin())return'<div class="empty">Solo el administrador.</div>';
  const COL=[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo']];
  setTimeout(()=>{
-  $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},{k:'rubro',l:'Rubro',t:'opts',v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])},...(CTL()?[{k:'tienda',l:'Nombre de tu tienda',v:CFG.tienda||'',ph:R.tienda||'Cafetín'}]:[])],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
+  $('#aj').onclick=()=>form('Datos del negocio',[{k:'nombre',l:'Nombre del negocio',v:nombre(),req:1},...(isXyro()?[{k:'rubro',l:'Rubro (cambia todo el panel)',t:'opts',gx:1,v:CFG.rubro||'gym',o:Object.entries(RUBROS).map(([k,r])=>[k,r.ico+' '+r.n])}]:[]),...(CTL()?[{k:'tienda',l:'Nombre de tu tienda',v:CFG.tienda||'',ph:R.tienda||'Cafetín'}]:[])],async v=>{await DB.cfg(v);shell();go();toast('Guardado ✓')});
   {const a=$('#asd');a&&(a.onclick=editSedes)}{const a=$('#asv');a&&(a.onclick=editServicios)}{const a=$('#apu');a&&(a.onclick=editPuestos)}
   $('#atu').onclick=()=>soloXyro('los turnos de caja')||form('🕐 Turnos de caja',[{k:'t',l:'Un turno por línea: nombre inicio-fin',t:'area',v:turnosL().map(t=>t.n+' '+t.a+'-'+t.b).join('\n'),ph:'Mañana 06:00-14:00\nTarde 14:00-18:00\nNoche 18:00-23:00'}],async v=>{
    const L=v.t.split('\n').map(s=>s.trim().match(/^(.+?)\s+(\d{1,2}:\d{2})\s*[-–a]+\s*(\d{1,2}:\d{2})$/)).filter(Boolean).map(m=>({n:m[1].slice(0,20),a:m[2].padStart(5,'0'),b:m[3].padStart(5,'0')}));
@@ -1836,6 +1841,7 @@ function ajustes(){
  });
  const sw=(c,t)=>c?`<span title="${t}" class="sw" style="background:${esc(c)}"></span>`:'';
  return`<div class="hi"><h2>Ajustes</h2></div><div class="g st" style="max-width:720px">
+ ${isXyro()?'<p class="gxl">🟣 Lo marcado en morado con «Solo XyroStudio» solo lo ves y cambias tú. El negocio ahí ve «Pedir cambio» o no lo ve.</p>':''}
  <div class="card"><h3>${R.ico} ${esc(nombre())} <button class="btn sm" id="aj">✏️ Editar</button></h3><p class="mu sm">Rubro: ${esc(R.n)} · ${S.cli.length} ${esc(R.clis.toLowerCase())} · ${S.pla.length} ${R.citas?'tratamientos':'planes'}</p></div>
  ${SVC().length?`<div class="card"><h3>🧩 Servicios de tu ${esc(R.n.toLowerCase())} <button class="btn sm" id="asv">✏️ Elegir</button></h3><p class="mu sm">${SVC().map(([k,i,t])=>`<span style="${svOff(k)||k==='pedidos'&&svOff('tienda')?'opacity:.45;text-decoration:line-through':''}">${i} ${esc(t)}</span>`).join(' · ')}</p><p class="mu sm">Apaga lo que tu negocio no tiene para que el menú quede limpio.</p></div>`:''}
  ${isAdmin()?`<div class="card"><h3>👥 Puestos de tu negocio <button class="btn sm" id="apu">✏️ Elegir</button></h3><p class="mu sm">${Object.keys(PERMS_()).map(k=>`<span style="${rolOn(k)?'':'opacity:.45;text-decoration:line-through'}">${PERMS_()[k][0]} ${esc(ROLES[k])}</span>`).join(' · ')}</p><p class="mu sm">Deja solo los que tu negocio usa: al crear cuentas solo salen esos.</p></div>`:''}
@@ -2182,7 +2188,7 @@ function editProd(p){
  if(CTL()&&!NEED50P)f.push({k:'detalle',l:'Detalle para el menú (opcional)',v:p&&p.detalle,ph:'Ej. Batido + barra de proteína'},{k:'en_mesa',l:'🍽️ Mostrar en el menú de mesas (QR)',t:'chk',v:!p||p.en_mesa!==false});
  if(CTL()&&!NEED53)f.push({k:'antes',l:'Precio antes (S/, para combos o promos)',t:'number',v:p&&p.antes,ph:'Opcional: se ve tachado'},{k:'destacado',l:'⭐ Destacar arriba del menú',t:'chk',v:p&&p.destacado});
  if(R.resto&&!NEED59)f.push({k:'opciones',t:'area',rows:3,l:'🧩 Opciones (tamaño, leche, extras…) · una línea por grupo',v:opcTxt(p&&p.opciones),ph:'Tamaño: Regular, Grande +2\nLeche: Entera, Deslactosada, De almendras +2.5\nExtras (varias): Shot extra +2, Crema batida +1.5'});
- if(CTL()&&!NEED53&&isXyro())f.push({k:'modelo',t:'glb',l:'🪄 Realidad aumentada · modelo 3D del plato (solo XyroStudio)',v:p&&p.modelo});
+ if(CTL()&&!NEED53&&isXyro())f.push({k:'modelo',t:'glb',gx:1,l:'🪄 Realidad aumentada · modelo 3D del plato',v:p&&p.modelo});
  form(p?'Editar producto':'Nuevo producto',f,async v=>{
   const row={nombre:v.nombre,categoria:v.categoria||null,precio:+v.precio,costo:v.costo===''?null:+v.costo,minimo:+v.minimo||0,emoji:v.emoji,activo:true};if(CTL()&&!NEED50P)Object.assign(row,{detalle:v.detalle||null,en_mesa:!!v.en_mesa});if(CTL()&&!NEED53)Object.assign(row,{foto:v.foto||null,antes:v.antes===''||!(+v.antes>+v.precio)?null:+v.antes,destacado:!!v.destacado});if(CTL()&&!NEED53&&isXyro())row.modelo=/^https:\/\/\S+\.glb(\?\S*)?$/i.test(v.modelo||'')?v.modelo:null;
   if(R.resto&&!NEED59){const L=opcLee(v.opciones);row.opciones=L.length?L:null}

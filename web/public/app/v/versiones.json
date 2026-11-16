@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261115-2142",
+  "fecha": "2026-11-15 21:42",
+  "titulo": "Lo tuyo en morado",
+  "notas": "Lo tuyo en morado",
+  "cambios": [
+   "Los botones que solo ve XyroStudio salen en morado con la etiqueta «Solo XyroStudio»",
+   "Cambiar el rubro ahora es solo de XyroStudio (el negocio ya no lo ve)"
+  ]
+ },
+ {
   "id": "20261115-2116",
   "fecha": "2026-11-15 21:16",
   "titulo": "Reservas: puedes apagarlas",
