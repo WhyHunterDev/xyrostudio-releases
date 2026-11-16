@@ -213,7 +213,7 @@ cargar().then(D=>{
  const appBan=()=>`<section class="sec" style="padding-top:0"><div class="wrap"><a class="card apb" href="#/app"><span style="font-size:34px">📱</span><span><b>Guarda ${mk(N)} en Mi Xyro</b><span class="mu sm">${esc(APX)}</span></span><span class="btn btn-p">Descargar</span></a></div></section>`;
  const V={
   '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
-   <span class="nfb" id="nfb" ${D.fund?'':'hidden'} title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador · XyroStudio</span>
+   <span class="nfb" id="nfb" ${D.fund?'':'hidden'} title="Uno de los primeros negocios de su rubro en confiar en XyroStudio">🏅 Negocio fundador · XyroStudio</span>
    <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(h12(D.hasta)):'Cerrado ahora · abrimos '+esc(h12(D.desde))}</span>
    <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${D.lema?esc(D.lema):CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
    <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/app">📱 Guárdanos en la app</a></div>

@@ -805,7 +805,7 @@ function vNegocio(slug){const n=NEG[slug];
  return`<div class="nwrap"><button class="back fl" data-back aria-label="Volver">‹</button>
  <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:'background:linear-gradient(135deg,var(--a),#000)'}"></div>
  <div class="nhead">${lg?`<img class="lg" src="${esc(lg)}" alt="">`:`<div class="lg" style="display:grid;place-items:center;font-size:34px">${icoR(rub)}</div>`}
-  <h1>${esc(n.negocio)}</h1>${n.fundador?`<p class="nfb" title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador</p>`:''}${n.descripcion?`<p class="sm" style="max-width:420px;opacity:.9">${esc(n.descripcion)}</p>`:''}${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
+  <h1>${esc(n.negocio)}</h1>${n.fundador?`<p class="nfb" title="Uno de los primeros negocios de su rubro en confiar en XyroStudio">🏅 Negocio fundador</p>`:''}${n.descripcion?`<p class="sm" style="max-width:420px;opacity:.9">${esc(n.descripcion)}</p>`:''}${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
  <div class="g" style="margin-top:14px">
   ${mi>=0?`<button class="btn p" id="sv">${rub==='consultorio'?'🦷 Ver mis citas y tratamiento':'🎟️ Ver mi membresía y mi QR'}</button>`
    :`<div class="row">${sesion?`<button class="btn ${n.guardado?'':'p'} sp" id="gd">${n.guardado?'✓ Guardado':'＋ Guardar negocio'}</button>`:`<button class="btn p sp" id="gd">＋ Guardar en mi app</button>`}${waBtn(n,'Hola, los vi en la app Mi Xyro. Quiero información.','💬')}</div>
