@@ -3420,7 +3420,7 @@ function miApp(){
   $('#maP').onclick=()=>cartelApp(true).catch(e=>toast(e.message));$('#maO').onclick=()=>cartelApp(false).catch(e=>toast(e.message));
   const nb=$('#maN');nb&&(nb.onclick=()=>editPromo());$$('[data-pe]').forEach(b=>b.onclick=()=>editPromo(+b.dataset.pe));
   if(SEG===null){try{SEG=DEMO?segDemo():await yoRpc('xa_yo_seguidores',{p_slug:SLUG})}catch(e){SEG=[];$('#maS').innerHTML=`<p class="mu sm">${esc(e.message)}</p>`;return}}
-  pintaSeg();
+  pintaSeg();R.resto&&selPinta();
  });
  return`<div class="hi"><div><h2>📱 App de clientes</h2><p class="mu">Tus clientes descargan <b>Mi Xyro</b>, escanean tu QR y guardan tu negocio: ${R.resto?'ven tu carta con fotos, tus promos y el estado de su pedido cuando piden desde la mesa':'ven tus promos y, si los conectas a su ficha, '+appDesc()}.</p></div></div>
  <div class="g2" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
@@ -3429,11 +3429,29 @@ function miApp(){
   <div class="card" style="display:grid;gap:10px"><div class="row" style="justify-content:space-between"><h3>🎁 Promos solo por la app</h3>${!isCoach()?'<button class="btn sm p" id="maN">＋ Nueva</button>':''}</div>
    ${PR.length?PR.map((p,i)=>`<div class="row" style="gap:10px;align-items:flex-start;border-top:1px solid var(--ln);padding-top:10px"><div style="flex:1"><b>${esc(p.titulo)}</b>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}<p class="mu sm">${p.hasta?(p.hasta<hoy()?'⛔ Venció el ':'Hasta el ')+fF(p.hasta):'Sin fecha de fin'}</p></div>${!isCoach()?`<button class="btn sm" data-pe="${i}">✏️</button>`:''}</div>`).join(''):'<p class="mu sm">Aún no tienes promos. Una promo solo por la app hace que más gente te guarde (ej. «Inscripción gratis por la app»).</p>'}</div>
  </div>
+ ${R.resto?`<div class="card" style="margin-top:14px" id="selC"></div>`:''}
  ${perfilCard()}
  <div class="card" style="margin-top:14px"><h3>👥 Te guardaron en su app</h3><div id="maS"><p class="mu sm">Cargando…</p></div></div>`}
+/* ===== Tarjeta de sellos (SQL 63): 1 sello por día que el cliente pide desde Mi Xyro y paga; caja entrega el premio ===== */
+let SELL=null,NEED63=false;
+const selCfg=()=>Object.assign({on:false,meta:8,premio:R.cafe?'Un café o frappé gratis':'Un postre gratis'},CFG.sellos||{});
+async function selCargar(){if(DEMO){SELL=SELL||[['Lucía Ramos','lu.ramos',8],['Diego Paredes','diegop',6],['Valeria Soto','vale.s',3],['Marco Ríos','mrios',1]].map(([n,u,k],i)=>({persona:'d'+i,nombre:n,usuario:u,sellos:Math.min(k,selCfg().meta),listo:k>=selCfg().meta,meta:selCfg().meta,premio:selCfg().premio,canjes:i?0:1}));return}
+ const{data,error}=await sb.rpc('xa_sellos_negocio',{p_sitio:String(SID)});if(error){if(/xa_sellos|function|schema/i.test(error.message||'')){NEED63=true;SELL=[];return}throw error}SELL=data||[]}
+async function selPinta(){const el=$('#selC');if(!el)return;const c=selCfg(),ad=isAdmin();
+ if(c.on&&SELL==null)try{await selCargar()}catch(e){SELL=[];toast(e.message)}
+ const L=SELL||[],listos=L.filter(x=>x.listo).length,dots=(n,m)=>Array.from({length:m},(_,i)=>`<i style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:3px;background:${i<n?'#c8873a':'var(--ln)'}"></i>`).join('');
+ el.innerHTML=`<div class="row" style="justify-content:space-between"><h3>☕ Tarjeta de sellos</h3>${ad?'<button class="btn sm" id="selE">✏️ Configurar</button>':''}</div>
+  <p class="mu sm">${c.on?`Activa: cada día que un cliente pide desde su app (QR de la mesa) y paga, gana 1 sello. Con <b>${+c.meta}</b> sellos se lleva <b>${esc(c.premio)}</b>. Así vuelven más seguido.`:'Haz que tus clientes vuelvan: 1 sello por cada día que piden desde su app y pagan. Al llenar la tarjeta, ganan un premio que tú eliges.'}</p>
+  ${!c.on?'':NEED63?'<p class="mu sm">⚙️ Falta activar el SQL 63. Avísale a XyroStudio.</p>':L.length?`${listos?`<p class="sm" style="color:#f2c27b"><b>🎁 ${listos} cliente${listos>1?'s':''} con premio listo</b></p>`:''}<div class="tl">${L.map((x,i)=>`<div class="row" style="gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--ln);flex-wrap:wrap"><span style="flex:1;min-width:150px"><b>${esc(x.nombre)}</b> <span class="mu sm">@${esc(x.usuario||'')}</span><small class="mu" style="display:block">${dots(+x.sellos,+x.meta)} ${+x.sellos}/${+x.meta}${+x.canjes?' · '+x.canjes+' premio'+(x.canjes>1?'s':'')+' canjeado'+(x.canjes>1?'s':''):''}</small></span>${x.listo?`<button class="btn sm p" data-sel="${i}">🎁 Entregar premio</button>`:''}</div>`).join('')}</div>`:'<p class="mu sm">Aún nadie junta sellos. Llegan cuando tus clientes piden desde la mesa con Mi Xyro.</p>'}`;
+ const e=$('#selE');e&&(e.onclick=selEditar);
+ $$('[data-sel]').forEach(b=>b.onclick=async()=>{const x=L[+b.dataset.sel];if(!confirm(`¿Entregar «${x.premio}» a ${x.nombre}? Su tarjeta vuelve a empezar.`))return;b.disabled=true;
+  try{if(DEMO){x.canjes=(+x.canjes||0)+1;x.sellos=0;x.listo=false}else{const{error}=await sb.rpc('xa_sellos_canjear',{p_sitio:String(SID),p_persona:x.persona});if(error)throw error;SELL=null}
+  toast('🎁 Premio entregado a '+x.nombre);selPinta()}catch(er){toast(er.message);b.disabled=false}})}
+function selEditar(){const c=selCfg();form('☕ Tarjeta de sellos',[{k:'on',t:'chk',l:'Activar la tarjeta de sellos en Mi Xyro',v:c.on},{k:'meta',l:'Sellos para ganar el premio',t:'sel',v:String(c.meta),o:[5,6,8,10,12].map(n=>[String(n),n+' sellos'])},{k:'premio',l:'Premio',v:c.premio,req:1,ph:'Ej. Un café gratis'}],async v=>{
+ await DB.cfg({sellos:{on:!!v.on,meta:+v.meta||8,premio:(v.premio||'').trim().slice(0,60)}});SELL=null;toast(v.on?'☕ Tarjeta de sellos activa':'Tarjeta de sellos apagada');go()})}
 function pintaSeg(){const el=$('#maS');if(!el)return;const L=SEG||[];
  el.innerHTML=L.length?`<div class="tl">${L.map((x,i)=>`<div class="row" style="gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln)">${avatar(x,40)}<div style="flex:1;min-width:0"><b>${esc(x.nombre||'')}</b> <span class="mu sm">@${esc(x.usuario||'')}</span><p class="mu sm">${[x.celular,x.email].filter(Boolean).map(esc).join(' · ')} · ${fF(String(x.creado).slice(0,10))}</p></div>
-   ${x.cliente&&cli(x.cliente)?`<a class="btn sm" href="#/socio/${x.cliente}">✅ ${esc(cli(x.cliente).nombre.split(' ')[0])}</a>`:`<button class="btn sm" data-sc="${i}">🔗 Conectar</button>`}</div>`).join('')}</div>`
+   ${R.resto?'':x.cliente&&cli(x.cliente)?`<a class="btn sm" href="#/socio/${x.cliente}">✅ ${esc(cli(x.cliente).nombre.split(' ')[0])}</a>`:`<button class="btn sm" data-sc="${i}">🔗 Conectar</button>`}</div>`).join('')}</div>`
   :'<p class="mu sm">Aún nadie. Comparte tu QR: cuando alguien lo escanee aparecerá aquí con su nombre y contacto.</p>';
  $$('[data-sc]').forEach(b=>b.onclick=()=>segConectar(L[+b.dataset.sc]))}
 function segConectar(x){

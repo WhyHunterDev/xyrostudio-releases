@@ -1,5 +1,19 @@
 [
  {
+  "id": "20261115-2151",
+  "fecha": "2026-11-15 21:51",
+  "titulo": "Tarjeta de sellos",
+  "notas": "Tarjeta de sellos",
+  "cambios": [
+   "Tus clientes ganan 1 sello por cada día que piden desde Mi Xyro y pagan; al llenar la tarjeta reciben el premio que tú eliges",
+   "En «App de clientes» configuras los sellos y entregas los premios"
+  ],
+  "requiere": "SQL 63",
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-2147",
   "fecha": "2026-11-15 21:47",
   "titulo": "Mi web más completa",
