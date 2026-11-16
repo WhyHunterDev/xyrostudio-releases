@@ -1,5 +1,18 @@
 [
  {
+  "id": "20261115-2019",
+  "fecha": "2026-11-15 20:19",
+  "titulo": "Insumos solo con Xyro Control",
+  "notas": "Insumos solo con Xyro Control",
+  "cambios": [
+   "Si tu negocio no tiene Xyro Control, Insumos ya no aparece en el menú",
+   "La Carta de ventas ahora está en la sección Xyro Apps"
+  ],
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-1830",
   "fecha": "2026-11-15 18:30",
   "titulo": "Insignia de negocio fundador",
