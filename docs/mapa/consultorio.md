@@ -15,3 +15,8 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Web `/consultorio/`: sin reserva en la web; `#/reservar` = página «Pide tu cita en la app» con QR (`qrPinta`, `/mi/?n=slug`). Precios ocultos por defecto (`clinica.precios===true` los muestra). Secciones `clinica.sec` {trat,pasos,ba,gal,equipo,ops,app}, `lema`, `appT/appX`, `fotos.gal`. Editor `editWebDent` en «Mi web» (contenido `clinica`, mezcla con lo existente).
 - Demos web en Integraciones: iframe a 1280 px escalado con `--dz` (`dmRO`).
 - SQL 65: `xa_yo_negocio` devuelve `web` solo si `config.xyros` incluye 'webs' (Mi Xyro oculta «Ver su web»).
+
+## Consultas y registro desde Mi Xyro (SQL 66, 2026-11-16)
+- `xa_yo_pedidos` tipos 'consulta' (sin cliente, estados abierta/invitado/cerrado) y 'registro' (datos jsonb). Vence: abierta 10 min sin mensajes, invitado 24 h (`xa_consulta_vencida`; front `sdVence`/`consVence`). Mensajes nunca se borran.
+- RPC: `xa_yo_consulta(slug,texto)`, `xa_yo_registro(slug,datos,pedido?)` (con invitación = listo al instante; sin ella = solicitud), `xa_neg_consulta_invitar`, `xa_neg_consulta_cerrar`, `xa_neg_registro_aceptar` (usa `xa_registro_crear`: conecta a ficha existente por DNI si no tiene app). `xa_yo_plan_msg`/`xa_neg_pedido_msg` rechazan chats vencidos.
+- Panel: `sdFila`/`sdVer2`/`sdAccion`/`sdHist` («🗂️ Historial de chats», también en App de pacientes). Mi Xyro: `consultaChat`, `registroForm` (página del consultorio); modo negocio `nConsPed`.

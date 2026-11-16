@@ -479,6 +479,8 @@ function pinta0(){
  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{vib();const[i,sb]=b.dataset.go.split('|');CUR=+i;ls.s('mi-neg',CUR);TAB='negocios';SUB=sb;window._dia=undefined;pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{vib();CUR=+b.dataset.n;ls.s('mi-neg',CUR);TAB='negocios';SUB='mi';pinta();$('#sc').scrollTop=0});
  app.querySelectorAll('[data-yo]').forEach(b=>b.onclick=yaRegistrado);
+ app.querySelectorAll('[data-cons]').forEach(b=>b.onclick=()=>consultaChat(b.dataset.cons));
+ app.querySelectorAll('[data-regp]').forEach(b=>b.onclick=()=>registroForm(b.dataset.regp));
  app.querySelectorAll('[data-av]').forEach(b=>b.onclick=()=>responder(b.dataset.av,b.dataset.ok==='1',b));
  app.querySelectorAll('[data-scan]').forEach(b=>b.onclick=()=>escanear());
  app.querySelectorAll('#ayu').forEach(b=>b.onclick=ayuda);
@@ -577,7 +579,10 @@ function feed(){const h=hoyL(),out=[],M=negs();
  const fc=(ic,t,s,attr,extra,cls)=>`<button class="card fd${cls?' '+cls:''}" ${attr}><div class="row"><div class="ibox">${ic}</div><div class="sp" style="min-width:0"><b>${t}</b>${s?`<p class="mu sm">${s}</p>`:''}</div><span class="mu">›</span></div>${extra||''}</button>`;
  // 1) Respuestas y novedades de tus solicitudes
  const vis={};pedNuevos().forEach(p=>{vis[p.id]=1;const ul=(p.msgs||[]).slice(-1)[0],ng=esc(p.negocio||'Tu negocio');
-  out.push(p.estado==='listo'?fc('🎉',p.tipo==='entreno'?'¡Tu plan de entrenamiento llegó!':'¡Tu plan de alimentación llegó!',ng+' te lo envió a la app.',`data-ped="${esc(p.id)}"`,'','nv')
+  out.push(p.tipo==='registro'&&p.estado==='listo'?fc('🎉','¡Ya eres paciente de '+ng+'!','Ya puedes pedir tu cita desde la app.',`data-ped="${esc(p.id)}"`,'','nv')
+   :p.tipo==='consulta'&&p.estado==='invitado'?fc('📝',ng+' te invitó a registrarte','Toca para completar tus datos y quedar como paciente.',`data-ped="${esc(p.id)}"`,'','nv')
+   :p.tipo==='registro'&&p.estado==='cancelado'?fc('ℹ️',ng+' no pudo registrarte',ul?esc(String(ul.texto).slice(0,90)):'Escríbeles para más información.',`data-ped="${esc(p.id)}"`,'','nv')
+   :p.estado==='listo'?fc('🎉',p.tipo==='entreno'?'¡Tu plan de entrenamiento llegó!':'¡Tu plan de alimentación llegó!',ng+' te lo envió a la app.',`data-ped="${esc(p.id)}"`,'','nv')
    :p.estado==='agendado'&&ul&&/agendada/.test(ul.texto)?fc('📅',p.tipo==='cita'?'¡Tu cita quedó confirmada!':'Tu cita con nutrición quedó agendada',esc(citaTxt(p.cita))+(p.cita&&(p.cita.nutri_nombre||p.cita.prof_nombre)?' · '+esc(p.cita.nutri_nombre||p.cita.prof_nombre):'')+(p.tipo==='cita'?' · '+ng:''),`data-ped="${esc(p.id)}"`,'','nv')
    :p.estado==='cancelado'&&p.tipo==='cita'?fc('📅',ng+' no pudo darte ese horario',ul?esc(String(ul.texto).slice(0,90)):'Pide otro horario desde la app.',`data-ped="${esc(p.id)}"`,'','nv')
    :p.estado==='cancelado'?fc('ℹ️',ng+' cerró tu solicitud','Puedes pedir otra cuando quieras.',`data-ped="${esc(p.id)}"`,'','nv')
@@ -648,7 +653,7 @@ async function cargaPed(){if(!D)return;if(DEMO){D.pedidos=D.pedidos||[];return}t
 function pedPon(p){if(!p||!p.id)return;D.pedidos=[p,...PEDS().filter(x=>x.id!==p.id)]}
 const PEST={pendiente:['Enviado','wa'],agendado:['Cita agendada','ok'],listo:['Listo','ok'],cancelado:['Cancelado','ko']};
 const citaTxt=c=>c&&c.inicio?fF(c.inicio,{weekday:'long',day:'numeric',month:'short'})+' · '+fH(c.inicio):'';
-function pedLinea(p){if(p.tipo==='cita')return p.estado==='pendiente'?'⏳ Pediste '+(p.objetivo||'tu cita')+' · '+citaTxt(p.cita)+' · esperando confirmación':p.estado==='agendado'?'📅 Cita confirmada: '+citaTxt(p.cita):p.estado==='cancelado'?'No pudieron darte ese horario':'✅ Listo';
+function pedLinea(p){if(p.tipo==='consulta')return p.estado==='invitado'?'📝 Te invitaron a registrarte como paciente':'💬 Consulta con el consultorio';if(p.tipo==='registro')return p.estado==='pendiente'?'⏳ Enviaste tus datos para ser paciente':p.estado==='listo'?'✅ ¡Ya eres paciente!':'No pudieron registrarte';if(p.tipo==='cita')return p.estado==='pendiente'?'⏳ Pediste '+(p.objetivo||'tu cita')+' · '+citaTxt(p.cita)+' · esperando confirmación':p.estado==='agendado'?'📅 Cita confirmada: '+citaTxt(p.cita):p.estado==='cancelado'?'No pudieron darte ese horario':'✅ Listo';
  if(p.tipo==='entreno')return p.estado==='pendiente'?'⏳ Tu entrenador está armando tu plan':p.estado==='listo'?'✅ Tu plan ya llegó':'Solicitud cancelada';
  return p.estado==='pendiente'?'⏳ Recepción te escribirá para darte horarios':p.estado==='agendado'?'📅 Cita: '+citaTxt(p.cita)+(p.cita&&p.cita.nutri_nombre?' · '+p.cita.nutri_nombre:''):p.estado==='listo'?'✅ Tu plan de alimentación ya llegó':'Solicitud cancelada'}
 function pedEst(n,t){const p=pedAb(n,t),R=n.rutinas||[],ya=R.find(r=>r.tipo===t);
@@ -678,7 +683,7 @@ function pedirPlan(n,t){if(!n)return;const ent=t==='entreno',prev=(n.rutinas||[]
    b.disabled=true;b.textContent='Enviando…';
    try{const r=await rpc('xa_yo_plan_pedir',{p_cliente:n.cliente,p_tipo:t,p_objetivo:S.o,p_nota:nota||null});pedPon(r);close();confeti();toast(ent?'✅ Listo. Tu entrenador ya lo tiene.':'✅ Listo. Recepción te escribirá aquí.');abrirPed(r.id)}
    catch(e){m.textContent=/xa_yo_plan|function|PGRST202/i.test(String(e&&(e.message||e)))?'Tu negocio aún está activando esta función. Pídelo en recepción.':errDe(e);m.className='msg on';b.disabled=false;b.textContent='Intentar de nuevo'}}})}
-function abrirPed(id){const p=PEDS().find(x=>x.id===id);if(!p)return;vib();const i=idxCli(p.cliente_id);if(i>=0){CUR=i;ls.s('mi-neg',i)}
+function abrirPed(id){const p=PEDS().find(x=>x.id===id);if(!p)return;vib();if(p.tipo==='consulta'||p.tipo==='registro'){if(p.visto_persona===false){p.visto_persona=true;if(!DEMO)rpc('xa_yo_plan_visto',{p_id:id}).catch(()=>{})}return consultaChat(p.slug,p.tipo==='registro'?p:null)}const i=idxCli(p.cliente_id);if(i>=0){CUR=i;ls.s('mi-neg',i)}
  PEDID=id;TAB='negocios';SUB='pedido';pinta();$('#sc')&&($('#sc').scrollTop=0);
  if(p.visto_persona===false){p.visto_persona=true;if(!DEMO)rpc('xa_yo_plan_visto',{p_id:id}).catch(()=>{})}}
 const chatHTML=p=>{const M=p.msgs||[];if(!M.length)return`<p class="mu sm" style="text-align:center;padding:8px 4px">${p.tipo==='cita'?'El consultorio te confirmará tu cita aquí. Si necesitas algo, escríbeles.':p.tipo==='nutri'?'Recepción te escribirá aquí con los horarios disponibles.':'Tu entrenador te escribirá aquí si necesita saber algo más.'}</p>`;
@@ -804,7 +809,9 @@ function vNegocio(slug){const n=NEG[slug];
  <div class="g" style="margin-top:14px">
   ${mi>=0?`<button class="btn p" id="sv">${rub==='consultorio'?'🦷 Ver mis citas y tratamiento':'🎟️ Ver mi membresía y mi QR'}</button>`
    :`<div class="row">${sesion?`<button class="btn ${n.guardado?'':'p'} sp" id="gd">${n.guardado?'✓ Guardado':'＋ Guardar negocio'}</button>`:`<button class="btn p sp" id="gd">＋ Guardar en mi app</button>`}${waBtn(n,'Hola, los vi en la app Mi Xyro. Quiero información.','💬')}</div>
+   ${rub==='consultorio'?(()=>{const rg=PEDS().find(p=>p.slug===slug&&p.tipo==='registro'&&p.estado==='pendiente');return rg?`<div class="card" style="border-color:var(--a)"><p class="sm">⏳ <b>Enviaste tus datos.</b> Te avisamos aquí apenas el consultorio te registre.</p></div>`:`<button class="btn s2" data-regp="${esc(slug)}">📝 Quiero ser paciente · enviar mis datos</button>`})():''}
    ${rub==='restaurante'?'':`<button class="btn" data-yo>${I.id}Ya estoy registrado en este negocio</button>`}`}
+  ${rub==='consultorio'?`<button class="btn" data-cons="${esc(slug)}">💬 Preguntar al consultorio${PEDS().some(p=>p.slug===slug&&p.tipo==='consulta'&&p.visto_persona===false)?' <span class="nvd"></span>':''}</button>`:''}
   ${rub==='restaurante'?`<div class="row"><a class="btn p sp" style="text-decoration:none" href="/pedir/?s=${encodeURIComponent(slug)}&de=mi">📖 Ver la carta</a>${String(n.whatsapp||'').replace(/\D/g,'').length>=9&&!(n.apagados||[]).includes('reservas')?`<button class="btn sp" data-resv="${esc(slug)}">📅 Reservar mesa</button>`:''}</div><p class="mu xs" style="text-align:center;margin-top:-4px">¿Ya estás en el local? Toca 📷 y escanea el QR de tu mesa para pedir.</p><div id="sel"></div>`:''}
   ${rub==='consultorio'?'<div id="sel"></div>':''}
   ${PR.length?`<h2>🎁 Promos por usar la app</h2>${PR.map(p=>`<div class="promo"><span class="pill" style="background:var(--a);color:#fff;justify-self:start">Solo en la app</span><h2>${esc(p.titulo)}</h2>${p.descripcion?`<p class="sm">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Válido hasta el ${fF(p.hasta)}</p>`:''}<p class="mu xs">Muestra esta pantalla en ${rub==='consultorio'?'el consultorio':rub==='restaurante'?'caja':'recepción'}.</p></div>`).join('')}`:''}
@@ -819,6 +826,32 @@ function vNegocio(slug){const n=NEG[slug];
   ${RD.length||n.web?`<div class="row" style="flex-wrap:wrap">${RD.map(([k,t])=>`<a class="btn" style="text-decoration:none;flex:1" target="_blank" rel="noopener" href="${esc(/^https?:/.test(red[k])?red[k]:'https://'+k+'.com/'+String(red[k]).replace(/^@/,''))}">${t}</a>`).join('')}${n.web&&/^https:\/\//.test(n.web)?`<a class="btn" style="text-decoration:none;flex:1" target="_blank" rel="noopener" data-fuera href="${esc(n.web)}">🌐 Ver su web</a>`:''}</div>`:''}
   ${!PR.length&&!PB.length&&!PL.length&&!SE.length?'<div class="card vacio"><span class="e">✨</span><p class="mu">Este negocio aún está preparando sus promos para la app.</p></div>':''}
  </div>`}
+// ---------- Consultas (SQL 66): cualquiera pregunta al consultorio; se cierra solo a los 10 min sin mensajes ----------
+const consVence=p=>p.tipo==='consulta'&&(p.estado==='cerrado'||p.estado==='cancelado'||(p.estado==='abierta'&&Date.now()-new Date(p.actualizado||p.creado)>6e5)||(p.estado==='invitado'&&Date.now()-new Date(p.actualizado||p.creado)>864e5));
+const consDe=slug=>PEDS().filter(p=>p.slug===slug&&p.tipo==='consulta').sort((a,b)=>new Date(b.actualizado||b.creado)-new Date(a.actualizado||a.creado))[0];
+function consultaChat(slug,reg){if(!D)return toast('Inicia sesión para escribirles');const n=NEG[slug]||negs().find(x=>x.slug===slug)||{negocio:(reg&&reg.negocio)||'el consultorio'};
+ const cuerpo=()=>{const p=consDe(slug),cer=!p||consVence(p),rg=PEDS().find(x=>x.slug===slug&&x.tipo==='registro'&&x.estado!=='cancelado'),min=p&&!cer&&p.estado==='abierta'?Math.max(1,10-Math.floor((Date.now()-new Date(p.actualizado||p.creado))/6e4)):0;
+  return`${rg?`<div class="card" style="border-color:var(--a)"><p class="sm">${rg.estado==='listo'?'✅ <b>Ya eres paciente.</b> Desde la página del consultorio puedes pedir tu cita.':'⏳ <b>Enviaste tus datos.</b> Te avisamos cuando te registren.'}</p></div>`:''}
+  ${p&&p.estado==='invitado'&&!cer?`<div class="card" style="border-color:var(--a)"><p class="sm">📝 <b>${esc(n.negocio)}</b> te invitó a registrarte como paciente.</p><button class="btn p" id="cdat">📝 Completar mis datos</button></div>`:''}
+  <div class="chat" id="ccht" style="max-height:46vh;overflow:auto">${p&&(p.msgs||[]).length?chatHTML(p):`<p class="mu sm" style="text-align:center;padding:8px 4px">Pregúntales lo que necesites: precios, horarios, tratamientos…</p>`}</div>
+  <p class="mu xs" style="text-align:center">${cer&&p?'🔒 Este chat se cerró. Si escribes, se abre uno nuevo.':min?'Si nadie escribe en '+min+' min, el chat se cierra solo.':'El chat se cierra solo si nadie escribe en 10 minutos.'}</p>`};
+ hoja(`<p class="mu xs" style="font-weight:700">CHAT CON ${esc(String(n.negocio).toUpperCase())}</p><div id="ccb">${cuerpo()}</div>
+  <div class="cin"><input id="cci" placeholder="Escribe tu pregunta…" maxlength="1000" enterkeyhint="send" autocomplete="off"><button class="btn p" id="ccs" aria-label="Enviar">${I.send}</button></div><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  const q=k=>o.querySelector(k),i=q('#cci'),b=q('#ccs');
+  const pin=()=>{q('#ccb').innerHTML=cuerpo();const c=q('#ccht');c&&(c.scrollTop=c.scrollHeight);const d=q('#cdat');d&&(d.onclick=()=>{const p=consDe(slug);close();registroForm(slug,p&&p.id)});
+   const p=consDe(slug);if(p&&p.visto_persona===false){p.visto_persona=true;if(!DEMO)rpc('xa_yo_plan_visto',{p_id:p.id}).catch(()=>{})}};pin();
+  const env=async()=>{const t=i.value.trim();if(!t)return;b.disabled=true;try{const p=consDe(slug),r=p&&!consVence(p)?await rpc('xa_yo_plan_msg',{p_id:p.id,p_texto:t}).catch(e=>{if(/cerr/i.test(errDe(e)))return rpc('xa_yo_consulta',{p_slug:slug,p_texto:t});throw e}):await rpc('xa_yo_consulta',{p_slug:slug,p_texto:t});pedPon(r);i.value='';pin()}catch(er){toast(errDe(er))}b.disabled=false;i.focus()};
+  b.onclick=env;i.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();env()}};
+  const tk=setInterval(async()=>{if(!o.isConnected)return clearInterval(tk);if(document.hidden||DEMO)return pin();try{const L=await rpc('xa_yo_plan_pedidos');const j=JSON.stringify(consDe(slug)||{});if(Array.isArray(L)){D.pedidos=L;if(JSON.stringify(consDe(slug)||{})!==j){vib();pin()}else pin()}}catch(_){}},5000)})}
+function registroForm(slug,ped){if(!D)return toast('Inicia sesión primero');const P=(D&&D.persona)||{},n=NEG[slug]||{negocio:'el consultorio'};
+ hoja(`<h2>📝 Quiero ser paciente</h2><p class="mu sm">${ped?'Confirma tus datos y quedas registrado(a) en '+esc(n.negocio)+' al instante.':'Envía tus datos a '+esc(n.negocio)+'. Cuando te registren, podrás pedir tus citas desde aquí.'}</p>
+  <label class="fl">Nombre y apellido<input id="rn" maxlength="80" value="${esc(P.nombre||'')}" autocomplete="name"></label>
+  <div class="row"><label class="fl sp">DNI<input id="rd" inputmode="numeric" maxlength="12"></label><label class="fl sp">Celular<input id="rt" inputmode="tel" maxlength="20" value="${esc(P.celular||'')}"></label></div>
+  <label class="fl">Fecha de nacimiento (opcional)<input id="rc" type="date"></label>
+  <button class="btn p" id="rok">${ped?'✅ Confirmar y registrarme':'📨 Enviar mis datos'}</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{const q=k=>o.querySelector(k).value.trim(),b=o.querySelector('#rok');
+  b.onclick=async()=>{const d={nombre:q('#rn'),dni:q('#rd'),tel:q('#rt'),nac:q('#rc')||null};if(d.nombre.length<3)return toast('Escribe tu nombre completo');if(d.tel.replace(/\D/g,'').length<7)return toast('Escribe tu celular');b.disabled=true;
+   try{const r=DEMO?{estado:ped?'listo':'pendiente',pedido:{id:'r'+Date.now(),slug,negocio:n.negocio,tipo:'registro',estado:'pendiente',datos:d,creado:new Date().toISOString(),msgs:[]}}:await rpc('xa_yo_registro',{p_slug:slug,p_datos:d,p_pedido:ped||null});
+    close();if(r.estado==='listo'){confeti();toast('✅ ¡Listo! Ya eres paciente de '+n.negocio);if(!DEMO){try{await cargar()}catch(_){}}}else{r.pedido&&pedPon(r.pedido);toast('📨 Enviado. Te avisamos cuando te registren.')}pinta()}catch(e){toast(errDe(e));b.disabled=false}}})}
 // ---------- Tarjeta de sellos (SQL 63): 1 sello por día que pides desde la app y pagas ----------
 const SEL={};
 async function sellosPinta(slug,sel){sel=sel||'#sel';const el=$(sel);if(!el)return;
@@ -1125,21 +1158,35 @@ const nRol=()=>NB&&NB.rol,nCoach=()=>['entrenador','nutricionista'].includes(nRo
 const nPuedePlan=p=>['gestor','admin','supervisor'].includes(nRol())||(nRol()==='entrenador'&&p.tipo==='entreno')||(nRol()==='nutricionista'&&p.tipo==='nutri');
 const nPedOn=()=>NB&&(nDent()?['gestor','admin','supervisor','recepcion','profesional'].includes(nRol()):['gestor','admin','supervisor','recepcion','entrenador','nutricionista'].includes(nRol()));
 async function nPedCarga(){if(!nPedOn())return NPED=[];try{NPED=await nrpc('xa_neg_pedidos',{p_slug:NSLUG,p_todos:false})||[];NPX=false}catch(e){NPED=NPED||[];NPX=true}return NPED}
-const nPorAtender=p=>p.tipo==='cita'?p.estado==='pendiente'||(p.estado!=='cancelado'&&p.visto_negocio===false):p.estado!=='cancelado'&&(p.visto_negocio===false||(p.estado==='pendiente'&&(p.tipo==='entreno'?nRol()!=='recepcion':nRecep()))||(p.estado==='agendado'&&nRol()==='nutricionista'));
+const nPorAtender=p=>p.tipo==='consulta'?!consVence(p)&&(p.visto_negocio===false||p.estado==='abierta'):p.tipo==='registro'?p.estado==='pendiente':p.tipo==='cita'?p.estado==='pendiente'||(p.estado!=='cancelado'&&p.visto_negocio===false):p.estado!=='cancelado'&&(p.visto_negocio===false||(p.estado==='pendiente'&&(p.tipo==='entreno'?nRol()!=='recepcion':nRecep()))||(p.estado==='agendado'&&nRol()==='nutricionista'));
 const nPedN=()=>(NPED||[]).filter(nPorAtender).length;
-const NPE={pendiente:['Nuevo','#f59e0b'],agendado:['Cita agendada','#3ad6ff'],listo:['Plan enviado','#22c55e'],cancelado:['Cancelado','#ef4444']};
+const NPE={abierta:['Chat abierto','#3ad6ff'],invitado:['Invitado','#a78bfa'],cerrado:['Chat cerrado','#8d8fa8'],pendiente:['Nuevo','#f59e0b'],agendado:['Cita agendada','#3ad6ff'],listo:['Plan enviado','#22c55e'],cancelado:['Cancelado','#ef4444']};
 function nPedPon(p){if(!p||!p.id)return;const o=(NPED||[]).find(x=>x.id===p.id);if(o){Object.assign(o,p)}else(NPED=NPED||[]).unshift(p)}
 function nPedidos(){if(NPED==null){nPedCarga().then(()=>{if(MODO==='negocio'&&NTAB==='pedidos')pinta()});return`${nHead('SOLICITUDES')}<div class="card vacio"><span class="e">⏳</span></div>`}
  const L=(NPED||[]).filter(p=>NPF==='todos'||p.estado==='pendiente'||p.estado==='agendado'||p.visto_negocio===false);
  const sub=nRol()==='entrenador'?'Planes de entrenamiento que te pidieron tus socios.':nRol()==='nutricionista'?'Tus citas agendadas y los planes que debes enviar.':'Planes y citas que piden tus socios desde Mi Xyro.';
- post=()=>{app.querySelectorAll('[data-npf]').forEach(b=>b.onclick=()=>{NPF=b.dataset.npf;pinta()});app.querySelectorAll('[data-np]').forEach(b=>b.onclick=()=>{const p=(NPED||[]).find(x=>x.id===b.dataset.np);p&&p.tipo==='cita'?nCitaPed(p):nAbrirPed(b.dataset.np)})};
+ post=()=>{app.querySelectorAll('[data-npf]').forEach(b=>b.onclick=()=>{NPF=b.dataset.npf;pinta()});app.querySelectorAll('[data-np]').forEach(b=>b.onclick=()=>{const p=(NPED||[]).find(x=>x.id===b.dataset.np);p&&['cita','consulta','registro'].includes(p.tipo)?nCitaPed(p):nAbrirPed(b.dataset.np)})};
  return`${nHead('SOLICITUDES DESDE LA APP')}<div class="g"><p class="mu sm">${sub}</p>
   <div class="sel"><button class="opt${NPF==='abiertos'?' on':''}" data-npf="abiertos">Por atender${nPedN()?' · '+nPedN():''}</button><button class="opt${NPF==='todos'?' on':''}" data-npf="todos">Todas</button></div>
   ${NPX?`<div class="card"><p class="sm">⚙️ Esta función se activa cuando XyroStudio termina de instalarla en tu negocio.</p></div>`:''}
-  ${L.length?L.map(p=>{const e=NPE[p.estado]||[p.estado,'var(--mu)'],nv=nPorAtender(p);return`<button class="card np" data-np="${esc(p.id)}"><div class="row"><span class="dot big">${p.tipo==='cita'?'🦷':p.tipo==='entreno'?'🏋️':'🥗'}</span><div class="sp" style="min-width:0"><b>${esc(p.cliente_nombre||'Socio')}</b>${nv?' <span class="nvd"></span>':''}<p class="mu xs">${p.tipo==='cita'?'Pide cita · '+esc(citaTxt(p.cita)):p.tipo==='entreno'?'Plan de entrenamiento':'Cita y plan de nutrición'} · ${haceCuanto(p.creado).toLowerCase()}</p></div><span class="xs" style="font-weight:800;color:${e[1]};text-align:right">${e[0]}</span></div>
-    ${p.objetivo?`<p class="sm">🎯 ${esc(p.objetivo)}</p>`:''}${p.estado==='agendado'&&p.cita?`<p class="sm" style="color:#7dd3fc">📅 ${esc(citaTxt(p.cita))}${p.cita.nutri_nombre?' · '+esc(p.cita.nutri_nombre):''}</p>`:''}</button>`}).join('')
+  ${L.length?L.map(p=>{const e=NPE[p.estado]||[p.estado,'var(--mu)'],nv=nPorAtender(p);return`<button class="card np" data-np="${esc(p.id)}"><div class="row"><span class="dot big">${p.tipo==='consulta'?'💬':p.tipo==='registro'?'📝':p.tipo==='cita'?'🦷':p.tipo==='entreno'?'🏋️':'🥗'}</span><div class="sp" style="min-width:0"><b>${esc(p.cliente_nombre||(p.datos&&p.datos.nombre)||p.persona_nombre||'Socio')}</b>${nv?' <span class="nvd"></span>':''}<p class="mu xs">${p.tipo==='consulta'?(p.cliente_id?'Paciente · ':'Prospecto · ')+'pregunta por chat':p.tipo==='registro'?'Quiere ser paciente':p.tipo==='cita'?'Pide cita · '+esc(citaTxt(p.cita)):p.tipo==='entreno'?'Plan de entrenamiento':'Cita y plan de nutrición'} · ${haceCuanto(p.creado).toLowerCase()}</p></div><span class="xs" style="font-weight:800;color:${e[1]};text-align:right">${e[0]}</span></div>
+    ${p.objetivo&&!['consulta','registro'].includes(p.tipo)?`<p class="sm">🎯 ${esc(p.objetivo)}</p>`:''}${p.estado==='agendado'&&p.cita?`<p class="sm" style="color:#7dd3fc">📅 ${esc(citaTxt(p.cita))}${p.cita.nutri_nombre?' · '+esc(p.cita.nutri_nombre):''}</p>`:''}</button>`}).join('')
    :`<div class="card vacio"><span class="e">📥</span><h2>Todo atendido</h2><p class="mu sm" style="max-width:300px">Cuando un socio pida su plan o una cita con nutrición desde su app Mi Xyro, te llegará aquí.</p></div>`}</div>`}
-function nCitaPed(p){const c=p.cita||{},ab=p.estado==='pendiente';
+function nConsPed(p){const pro=!p.cliente_id,reg=p.tipo==='registro',d=p.datos||{},cer=consVence(p);
+ hoja(`<div style="display:grid;gap:6px"><p class="mu xs" style="font-weight:700">${reg?'QUIERE SER PACIENTE':pro?'PROSPECTO · CONSULTA POR CHAT':'PACIENTE · CONSULTA POR CHAT'}</p><h2>${esc(p.cliente_nombre||d.nombre||p.persona_nombre||'Persona')}</h2></div>
+  ${reg?`<div class="card"><p class="sm">🪪 DNI: <b>${esc(d.dni||'—')}</b></p><p class="sm">📱 ${esc(d.tel||'—')}</p>${d.nac?`<p class="sm">🎂 ${esc(fF(d.nac))}</p>`:''}</div>${p.estado==='pendiente'?'<button class="btn p" id="ncra">✅ Registrar como paciente</button><button class="btn" id="ncrn">✖️ No registrar</button>':''}`:''}
+  <div class="card"><p class="mu xs" style="font-weight:700">CHAT · LO VE EN SU APP${cer?' · CERRADO':''}</p><div class="chat" id="ncpc">${nChat(p)}</div>${cer||reg?'':`<div style="display:flex;gap:8px;margin-top:8px"><input id="ncpi" style="flex:1" maxlength="1000" placeholder="Escribe un mensaje…"><button class="btn p" id="ncps" style="width:auto">Enviar</button></div>`}
+  <p class="mu xs">${cer?'🔒 Chat cerrado. Queda guardado como registro.':'Se cierra solo si nadie escribe en 10 minutos.'}</p></div>
+  ${!reg&&pro&&!cer&&p.estado==='abierta'?'<button class="btn p" id="ncin">➕ Agregar como paciente</button><p class="mu xs" style="text-align:center">Le llega a su app para completar sus datos y confirmar.</p>':''}${!reg&&p.estado==='invitado'&&!cer?'<p class="sm" style="text-align:center">📝 Invitación enviada. Falta que complete sus datos.</p>':''}
+  ${!reg&&!cer?'<button class="btn" id="ncce">🔒 Cerrar chat</button>':''}<button class="btn l" data-x>Cerrar</button>`,(o,close)=>{const q=k=>o.querySelector(k);
+  if(p.visto_negocio===false){p.visto_negocio=true;if(!DEMO)nrpc('xa_neg_pedido_visto',{p_id:p.id}).catch(()=>{})}
+  const cc=q('#ncpc');cc&&(cc.scrollTop=cc.scrollHeight);const ci=q('#ncpi'),cs=q('#ncps');
+  const env=async()=>{const t=ci.value.trim();if(!t)return;cs.disabled=true;try{const r=await nrpc('xa_neg_pedido_msg',{p_id:p.id,p_texto:t});nPedPon(r);Object.assign(p,r||{});ci.value='';cc.innerHTML=nChat(p);cc.scrollTop=cc.scrollHeight}catch(er){toast(errDe(er))}cs.disabled=false;ci.focus()};
+  cs&&(cs.onclick=env);ci&&(ci.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();env()}});
+  const act=(id,f,ok,dm)=>{const b=q(id);b&&(b.onclick=async()=>{b.disabled=true;try{const r=DEMO?Object.assign({},p,dm):await nrpc(f,{p_id:p.id});nPedPon(r);close();toast(ok);pinta()}catch(e){toast(errDe(e));b.disabled=false}})};
+  act('#ncin','xa_neg_consulta_invitar','📝 Le llegó a su app para completar sus datos',{estado:'invitado'});act('#ncce','xa_neg_consulta_cerrar','Chat cerrado · queda guardado',{estado:'cerrado'});
+  act('#ncra','xa_neg_registro_aceptar','✅ Paciente registrado · ya le llegó a su app',{estado:'listo'});act('#ncrn','xa_neg_pedido_cancelar','Listo, le avisamos',{estado:'cancelado'})})}
+function nCitaPed(p){if(p.tipo!=='cita')return nConsPed(p);const c=p.cita||{},ab=p.estado==='pendiente';
  hoja(`<div style="display:grid;gap:6px"><p class="mu xs" style="font-weight:700">PIDE CITA DESDE LA APP</p><h2>${esc(p.cliente_nombre||'Paciente')}</h2>${p.cliente_tel?`<p class="mu sm">📱 ${esc(p.cliente_tel)}</p>`:''}</div>
   <div class="card" style="border-color:var(--a)"><h3>${esc(c.servicio||p.objetivo||'Consulta')}${c.precio!=null?' · '+money(c.precio):''}</h3><p class="sm" style="text-transform:capitalize">${esc(citaTxt(c))}${c.prof_nombre?' · '+esc(c.prof_nombre):''}</p>${p.nota?`<p class="sm">📝 ${esc(p.nota)}</p>`:''}</div>
   ${ab?`<p class="mu sm">El horario estaba libre cuando lo pidió. Al confirmarlo queda en la agenda y le llega a su app.</p><button class="btn p" id="ncok">✅ Confirmar ese horario</button><button class="btn" id="ncno">✖️ No puedo darle ese horario</button><p class="mu xs" style="text-align:center">Para darle otro horario, escríbele aquí o agéndalo desde el panel.</p>`:`<p class="sm">${p.estado==='agendado'?'✅ Ya está agendada.':'Solicitud cerrada.'}</p>`}
@@ -1330,7 +1377,7 @@ function demoPlanRpc(f,a){const now=new Date().toISOString();
   setTimeout(()=>{p.msgs.push(a.p_tipo==='nutri'?{de:'negocio',autor:'Rosa · Recepción',texto:'¡Hola! 👋 Tenemos jueves 6 pm o sábado 10 am con la nutricionista. ¿Cuál te acomoda?',creado:new Date().toISOString()}:{de:'negocio',autor:'Coach Diego',texto:'¡Recibido! 💪 Hoy te lo armo y te llega aquí.',creado:new Date().toISOString()});
    if(SUB==='pedido'&&PEDID===p.id){const c=$('#cht');c&&(c.innerHTML=chatHTML(p),c.scrollTop=c.scrollHeight)}else{p.visto_persona=false;if(!document.querySelector('.ov'))pinta()}vib()},4500);return p}
  const p=PEDS().find(x=>x.id===a.p_id);
- if(f==='xa_yo_plan_msg'){p.msgs.push({de:'persona',texto:a.p_texto,creado:now});return p}
+ if(f==='xa_yo_plan_msg'){p.msgs.push({de:'persona',texto:a.p_texto,creado:now});p.actualizado=now;return p}
  if(f==='xa_yo_plan_cancelar'){p.estado='cancelado';return null}
  return null}
 async function demoRpc(f,a){
@@ -1339,6 +1386,8 @@ async function demoRpc(f,a){
  if(f==='xa_yo_guardar'){toast('En la demo no se guarda de verdad');return true}
  if(f==='xa_yo_responder'){const av=D.avisos.shift(),{gym,den}=demoBoth();if(a.p_ok)D.negocios.push(av.rubro==='consultorio'?den:gym);return{ok:true}}
  if(/^xa_yo_plan/.test(f))return demoPlanRpc(f,a);
+ if(f==='xa_yo_consulta'){const now=new Date().toISOString(),n=NEG[a.p_slug]||{},p={id:'c'+Date.now(),slug:a.p_slug,negocio:n.negocio||'Consultorio',tipo:'consulta',estado:'abierta',creado:now,actualizado:now,visto_persona:true,msgs:[{de:'persona',texto:a.p_texto,creado:now}]};
+  setTimeout(()=>{p.msgs.push({de:'negocio',autor:'Rosa · Recepción',texto:'¡Hola! 👋 Claro, te ayudamos. ¿Te gustaría registrarte como paciente para agendar tu evaluación?',creado:new Date().toISOString()});p.estado='invitado';p.actualizado=new Date().toISOString();p.visto_persona=false},4000);return p}
  if(f==='xa_yo_editar'){const us=String(a.p_usuario||'');if(us.length<5&&!D.persona.fundador&&us!==D.persona.usuario)return{error:'usuario_corto'}}if(f==='xa_yo_editar')return{...D.persona,...(a.p_foto!==undefined?{foto:a.p_foto||null}:{}),nombre:a.p_nombre,apodo:a.p_apodo,usuario:a.p_usuario,celular:a.p_celular};
  throw 'codigo'}
 
