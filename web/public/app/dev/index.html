@@ -417,13 +417,13 @@ let TEMP=[];
 const TEMAS_X=[['navidad','🎄','Navidad'],['halloween','🎃','Halloween'],['anionuevo','🎆','Año Nuevo'],['fiestaspatrias','🇵🇪','Fiestas Patrias'],['sanvalentin','❤️','San Valentín']];
 const temasDe=c=>c.temasPermitidos&&c.temasPermitidos.length?c.temasPermitidos:c.temaExtra?TEMAS_X.map(t=>t[0]):[];
 const DISENOS_X=[['fuerza','Fuerza','Foto a pantalla completa y letras gigantes. El clásico de gimnasio.'],['impacto','Impacto','Portada dividida, sello «desde S/ al mes», planes y clases de hoy en la portada.'],['comunidad','Comunidad','Collage de fotos, historias tipo Instagram y «¿cuál es tu objetivo?».']];
-const DIS_R=[['resto','Restaurante','Portada con foto, carta en vivo desde tu panel, reserva de mesa en 3 pasos por WhatsApp y cómo llegar.']];
+const DIS_R=[['resto','Restaurante','Portada con foto, carta en vivo sin precios, cómo llegar y tu QR para descargar la app Mi Xyro (ahí reservan y piden).']];
 const DIS_C=[['clinica','Clínica','Portada con agenda animada, servicios, especialistas con sus días y reserva de cita en 4 pasos por WhatsApp.']];
 const demoURL=(e,t)=>(R.citas?'/consultorio/':R.resto?'/restaurante/':'/sitio/')+'?n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||WEB.color||'#f5c400').replace('#','')+(CFG.logo&&/^https:/.test(CFG.logo)?'&l='+encodeURIComponent(CFG.logo):'')+'&e='+e+(t?'&tema='+t:'');
 const conTema=(u,t)=>u?u.replace(/#.*$/,'')+(u.includes('?')?'&':'?')+'tema='+t:'';
 // Consultorio dental: qué hace cada Xyro en una clínica (disponibles y pensados, «muy pronto»).
 const XYROS_R=[['apps','Xyro Apps','Mapa de mesas en vivo, pedidos por QR desde la mesa, mozo que toma pedidos en el celular, pantalla de cocina, para llevar, carta con fotos y stock, caja por turnos y reportes de lo más vendido y las horas fuertes.',0,['🪑 Mesas en vivo','📱 Pedidos por QR','👨‍🍳 Cocina','🥡 Para llevar','📖 Carta y stock','💰 Caja']],
- ['webs','Xyro Webs','La web de tu restaurante con tu carta en vivo (sale sola de este panel), fotos, horario, cómo llegar y reserva de mesa en 3 pasos que llega a tu WhatsApp.',0,['🌐 Web con tu dominio','📖 Carta siempre al día','📅 Reserva de mesa']],
+ ['webs','Xyro Webs','La web de tu restaurante con tu carta en vivo sin precios (sale sola de este panel), fotos, horario, cómo llegar y tu QR para que descarguen la app Mi Xyro, donde reservan y piden.',0,['🌐 Web con tu dominio','📖 Carta siempre al día','📅 Reserva de mesa']],
  ['bots','Xyro Bots','Asistente por WhatsApp que responde la carta, horarios y ubicación, toma reservas y pedidos para llevar a cualquier hora.',1,['🤖 Atiende 24 h','📅 Reservas','🥡 Pedidos por WhatsApp']],
  ['edits','Xyro Edits','Videos y reels de tus platos editados rápido para tus redes.',1,['🎬 Reels de platos','📸 Fotos para la carta']]];
 const XYROS_D=[['apps','Xyro Apps','Agenda por odontólogo, pacientes, odontograma, historia clínica privada, presupuestos con abonos, cobros y caja, seguimiento de pacientes por volver y equipo con roles.',0,['🗓️ Agenda por especialista','🦷 Odontograma','📋 Historia clínica','💸 Presupuestos y abonos','🔁 Pacientes por volver']],
@@ -1371,7 +1371,7 @@ async function editServicios(){const off=new Set(CFG.apagados||[]);
 // Menú por Xyro: cada sección dice de qué Xyro viene la función (Xyro Apps, Bots, Control, Webs) y al final Configuración.
 const NAVG=[['ventas','🧲','Ventas',['seguimiento','miapp','pruebas']],['gym','🏋️','Gimnasio',['rutinas','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['equipo','xyros','ajustes','miplan','cuenta']]];
 const XSEC=[['app','Xyro Apps'],['bot','Xyro Bots'],['ctl','Xyro Control'],['web','Xyro Webs'],['cfg','']];
-const xsDe=k=>['whatsapp','ventasbot','bots'].includes(k)?'bot':['tienda','insumos'].includes(k)||(k==='pedidos'&&!R.resto)?'ctl':k==='web'?'web':['equipo','xyros','ajustes','miplan','cuenta'].includes(k)?'cfg':'app';
+const xsDe=k=>['whatsapp','ventasbot','bots'].includes(k)?'bot':(k==='tienda'&&!R.resto)||k==='insumos'||(k==='pedidos'&&!R.resto)?'ctl':k==='web'?'web':['equipo','xyros','ajustes','miplan','cuenta'].includes(k)?'cfg':'app';
 function navGrupos(n){const chico=n.length<=(R.resto?7:8);
  return XSEC.map(([x,h])=>{const L=n.filter(it=>xsDe(it[0])===x),top=[],G=NAVG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));
   L.forEach(it=>{const g=R.resto&&x==='app'?-1:NAVG.findIndex(g=>g[3].includes(it[0]));(g<0||chico&&x!=='cfg'?top:G[g].L).push(it)});
@@ -3541,8 +3541,9 @@ function confeti(n){const cs=['#7c5cff','#3ad6ff','#3ddc97','#f5b544','#ff5c7a']
 const RES_OFF=['kiosco','pruebas','whatsapp','ventasbot','rutinas','solicitudes','metas','planes','seguimiento','socios','socio','agenda'];
 const mesaN=m=>+m?'Mesa '+m:'🥡 Para llevar';
 let NEED56=false;
-const navMozo=()=>[['pedidos','🧾','Pedidos'+(mpNuevos()?' ('+mpNuevos()+')':'')],['cocina','👨‍🍳','Cocina'],['tienda','📖',tiendaN()],['insumos','🧂','Insumos'+(insBajos()?' ('+insBajos()+')':'')],['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]);
-const navResto=()=>[['inicio','✨','Inicio'],['pedidos','🧾','Pedidos'+(mpNuevos()?' ('+mpNuevos()+')':'')],['cocina','👨‍🍳','Cocina'],['tienda','📖',tiendaN()],['insumos','🧂','Insumos'+(insBajos()?' ('+insBajos()+')':'')],['caja','💰','Caja'],['miapp','📱','App de clientes'],['reportes','📊','Reportes']]
+const insOn=()=>tiene('control'); // insumos y recetas = Xyro Control (si XyroStudio lo quita, no aparece)
+const navMozo=()=>[['pedidos','🧾','Pedidos'+(mpNuevos()?' ('+mpNuevos()+')':'')],['cocina','👨‍🍳','Cocina'],['tienda','📖',tiendaN()],...(insOn()?[['insumos','🧂','Insumos'+(insBajos()?' ('+insBajos()+')':'')]]:[]),['caja','💰','Caja']].concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]);
+const navResto=()=>[['inicio','✨','Inicio'],['pedidos','🧾','Pedidos'+(mpNuevos()?' ('+mpNuevos()+')':'')],['cocina','👨‍🍳','Cocina'],['tienda','📖',tiendaN()],...(insOn()?[['insumos','🧂','Insumos'+(insBajos()?' ('+insBajos()+')':'')]]:[]),['caja','💰','Caja'],['miapp','📱','App de clientes'],['reportes','📊','Reportes']]
  .concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo'],['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']].concat(!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]);
 const enDia=(p,d)=>p.fecha&&ymd(new Date(p.fecha))===d;
 // Estado de cada mesa según sus pedidos abiertos
@@ -3657,6 +3658,7 @@ async function insCargar(){if(DEMO){if(!S.ins){S.ins=insSemilla();S.pro.forEach(
  NEED60=!!a.error;INS=a.data||[];INSM=b.data||[];insT=Date.now()}
 const costoRec=p=>(Array.isArray(p.receta)?p.receta:[]).reduce((a,r)=>{const i=(INS||[]).find(x=>x.id===r.i);return a+(i&&+i.costo?(+r.q||0)*+i.costo:0)},0);
 function insumosV(){
+ if(!insOn())return`<div class="empty"><b>🧂</b>Insumos y recetas vienen con Xyro Control. <a href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero activar Xyro Control para '+nombre())}" target="_blank" rel="noopener">Pedirlo por WhatsApp</a></div>`;
  if(INS==null||(!DEMO&&Date.now()-insT>15000&&!insumosV.cargando)){insumosV.cargando=1;insCargar().catch(e=>{NEED60=true;INS=INS||[]}).then(()=>{insumosV.cargando=0;ruta==='insumos'&&go()});if(INS==null)return'<div class="empty"><b>⏳</b>Cargando insumos…</div>'}
  if(NEED60)return'<div class="empty"><b>🧂</b>Insumos y recetas está listo, solo falta activarlo (SQL 60). Avísale a XyroStudio.</div>';
  const ed=puedeProd(),L=INS.slice().sort((a,b)=>(+a.stock<=+a.minimo?0:1)-(+b.stock<=+b.minimo?0:1)||a.nombre.localeCompare(b.nombre)),bajos=L.filter(i=>+i.stock<=+i.minimo),val=L.reduce((a,i)=>a+(+i.stock>0&&+i.costo?+i.stock*+i.costo:0),0);

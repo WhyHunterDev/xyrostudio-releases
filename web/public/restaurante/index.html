@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>(nombre del restaurante) · Carta y reservas</title>
-<meta name="description" content="Carta con fotos y precios al día, reserva de mesa por WhatsApp, horario y cómo llegar.">
+<title>(nombre del restaurante) · Carta y app</title>
+<meta name="description" content="Carta con fotos, horario y cómo llegar. Reserva y pide desde la app Mi Xyro.">
 <meta name="theme-color" content="#0d0b09">
 <meta property="og:type" content="website"><meta property="og:locale" content="es_PE">
 <!-- Base Xyro Webs · Restaurante / Cafetería. Todo sale del negocio (?s=codigo): app (nombre, logo, color, perfil, mesas), carta en vivo (RPC xa_carta), sedes y resto {hero, sub, fotos}. -->
@@ -107,15 +107,19 @@ label.f{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--mu);marg
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .nfb{display:inline-flex;margin:0 8px 10px 0;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f7dc8a,#e6b84d 55%,#b8862b);box-shadow:0 4px 14px #e6b84d40}.nfb[hidden]{display:none}
+.ap{display:grid;grid-template-columns:170px 1fr;gap:20px;align-items:center}.qrw{background:#fff;border-radius:16px;padding:10px;display:grid;justify-items:center;gap:4px;color:#111}.qrw svg{width:150px;height:150px}.qrw .mu{color:#555}
+.apl{display:grid;gap:12px}.apl div{display:grid;grid-template-columns:28px 1fr;column-gap:6px}.apl .mu{grid-column:2}
+.apb{display:flex;gap:16px;align-items:center;text-decoration:none;color:inherit}.apb>span:nth-child(2){flex:1;display:grid;gap:4px}
+@media(max-width:620px){.ap{grid-template-columns:1fr;justify-items:center}.apb .btn{display:none}header.top>.btn{display:none}}
 </style>
 </head>
 <body>
 <header class="top" id="top"><a class="brand" href="#/"><i id="lg">🍽️</i><span data-nom></span></a>
- <nav class="tabs" id="tabs"><span class="ind"></span><a href="#/" data-r="">Inicio</a><a href="#/carta" data-r="carta">Carta</a><a href="#/reservar" data-r="reservar">Reservar</a><a href="#/local" data-r="local">Cómo llegar</a></nav>
- <a class="btn btn-p" href="#/reservar" style="padding:11px 18px;font-size:14px">Reservar mesa</a></header>
+ <nav class="tabs" id="tabs"><span class="ind"></span><a href="#/" data-r="">Inicio</a><a href="#/carta" data-r="carta">Carta</a><a href="#/app" data-r="app">App</a><a href="#/local" data-r="local">Cómo llegar</a></nav>
+ <a class="btn btn-p" href="#/app" style="padding:11px 18px;font-size:14px">📱 Descarga la app</a></header>
 <main id="app"></main>
 <a class="fab" id="fab" target="_blank" rel="noopener" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.3-.7-2.8-1.1-4.6-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.7-.1l2 .9c.3.2.5.2.6.4.1.1.1.8-.1 1.4z"/></svg></a>
-<nav class="dock" id="dock"><a href="#/" data-r=""><em>🏠</em>Inicio</a><a href="#/carta" data-r="carta"><em>📖</em>Carta</a><a href="#/reservar" data-r="reservar"><em>📅</em>Reservar</a><a href="#/local" data-r="local"><em>📍</em>Llegar</a></nav>
+<nav class="dock" id="dock"><a href="#/" data-r=""><em>🏠</em>Inicio</a><a href="#/carta" data-r="carta"><em>📖</em>Carta</a><a href="#/app" data-r="app"><em>📱</em>App</a><a href="#/local" data-r="local"><em>📍</em>Llegar</a></nav>
 <script>
 /* Base Xyro Webs · Restaurante / Cafetería. /restaurante/?s=slug lee lo público del negocio: nombre, logo, color, perfil y horario de Xyro Apps ('app'),
    la carta EN VIVO (RPC xa_carta, SQL 56: lo que el restaurante cambia en su panel sale aquí al instante), sedes y textos/fotos propios ('resto').
@@ -135,7 +139,7 @@ const P0=[['Combos','🎁','Menú ejecutivo',22,'Entrada + fondo + refresco de l
 const PC=[['Combos','🎁','Combo desayuno',14,'Café a elección + sándwich de pollo o triple',U('1509042239860-f550ce710b93'),17,1],['Combos','🎁','Combo dulce',25,'Frappé a elección + waffle con helado',U('1572490122747-3968b75cc699'),29],['Frappés','🧋','Frappé de Oreo',14,'Galleta Oreo, helado de vainilla y crema batida.',U('1572490122747-3968b75cc699'),0,1],['Frappés','🧋','Frappé moka',13,'Café, chocolate y crema batida.'],['Frappés','🍓','Frappé de fresa',13,'Fresas naturales, leche y helado.'],['Cafés','☕','Capuchino',9,'Doble shot y espuma cremosa.',U('1509042239860-f550ce710b93')],['Cafés','☕','Americano',6,'Café de altura peruano.',U('1495474472287-4d71bcdd2085')],['Cafés','☕','Mocaccino',11,'Espresso, chocolate y leche.'],['Waffles y crepes','🧇','Waffle con helado y fresas',16,'Waffle crocante, helado, fresas y miel de maple.',U('1562376552-0d160a2f238d'),0,1],['Waffles y crepes','🧇','Waffle Nutella y plátano',15,'Con Nutella, plátano y azúcar impalpable.'],['Waffles y crepes','🥞','Crepe Nutella y fresa',14,'Crepe fino relleno de Nutella y fresas.'],['Sándwiches','🥐','Croissant jamón y queso',10,'Croissant de mantequilla, caliente.',U('1555507036-ab1f4038808a')],['Sándwiches','🥪','Sándwich de pollo',11,'Pollo deshilachado, lechuga y mayonesa casera.'],['Postres','🍰','Cheesecake de maracuyá',12,'Base de galleta y salsa de maracuyá.',U('1533134242443-d4fd215305ad')],['Postres','🍰','Torta de chocolate',10,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Bebidas frías','🥭','Smoothie de mango',11,'Mango, yogur y hielo.',U('1505252585461-04db1eb84625')],['Bebidas frías','🍋','Limonada frozen',9,'Limón, hierbabuena y hielo frappé.']]
  .map((p,i)=>({id:'c'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4]||'',foto:p[5]||'',antes:p[6]||null,destacado:!!p[7]}));
 const BASE=n=>({nombre:n||(CAF?'(nombre de la cafetería)':'(nombre del restaurante)'),wa:'51936449066',distrito:'(distrito)',desde:CAF?'08:00':'12:00',hasta:CAF?'22:00':'23:00',dias:[],
- hero:'',sub:CAF?'Cafés de altura, frappés, waffles y postres hechos al momento. Mira la carta, reserva tu mesa o pide desde tu mesa con el QR.':'Cocina casera, ingredientes frescos y la mejor atención. Mira la carta, reserva tu mesa o pide desde tu mesa con el QR.',
+ hero:'',sub:CAF?'Cafés de altura, frappés, waffles y postres hechos al momento. Mira la carta y reserva o pide desde la app Mi Xyro.':'Cocina casera, ingredientes frescos y la mejor atención. Mira la carta y reserva o pide desde la app Mi Xyro.',
  sedes:[{nombre:CAF?'(nombre de la cafetería)':'(nombre del restaurante)',direccion:'Av. (dirección) 123, (distrito)',maps:''}],productos:CAF?PC:P0,qr:true,
  pagos:['💵 Efectivo','📱 Yape','📱 Plin','💳 Tarjeta'],redes:{}});
 async function rest(p){const r=await fetch(SB.url+'/rest/v1/'+p,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
@@ -165,29 +169,36 @@ const abierto=D=>{const d=new Date(),dd=d.getDay(),t=d.getHours()*60+d.getMinute
 
 cargar().then(D=>{
  if(!D.color&&CAF)D.color='#c8873a';if(D.color)document.documentElement.style.setProperty('--a',D.color);
- const N=D.nombre;document.title=N.replace(/[()]/g,'')+' · Carta y reservas';$$('[data-nom]').forEach(e=>e.innerHTML=mk(N));
+ const N=D.nombre;document.title=N.replace(/[()]/g,'')+' · Carta y app';$$('[data-nom]').forEach(e=>e.innerHTML=mk(N));
  if(D.logo)$('#lg').innerHTML=`<img src="${esc(D.logo)}" alt="">`;else $('#lg').textContent=(N.replace(/[()]/g,'').trim()[0]||'R').toUpperCase();
  const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);$('#fab').href=wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.');
  if(Q.has('demo')||!SLUG){const d=document.createElement('span');d.className='demo';d.textContent=SLUG?'DEMO':'VISTA PREVIA';document.body.appendChild(d)}
  const P=D.productos||[],cats=[...new Set(P.map(p=>p.categoria||'Carta'))],dest=P.filter(p=>p.destacado&&!p.agotado).concat(P.filter(p=>!p.destacado&&!p.agotado)).slice(0,3);
  const hor=()=>{const d=D.dias.length&&D.dias.length<7?D.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'Todos los días';return d+' · '+D.desde+' a '+D.hasta};
- const ab=abierto(D);let CAT='',RV={d:0,h:'',n:2,nom:'',nota:''},paso=0;
+ const ab=abierto(D);let CAT='';const APP='https://xyrostudio.net/mi/?n='+encodeURIComponent(SLUG||'');
  const plC=(p,i)=>`<button class="pl ${p.agotado?'ag':''}" data-p="${esc(p.id)}" style="animation-delay:${Math.min(i,10)*.04}s"><div class="ft">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}${p.agotado?'<span class="tg x">Agotado</span>':+p.antes>+p.precio?'<span class="tg">Promo</span>':p.destacado?'<span class="tg">⭐ Favorito</span>':''}</div>
-  <div class="bd"><h3>${esc(p.nombre)}</h3>${p.detalle?`<span class="mu sm ds">${esc(p.detalle)}</span>`:''}<span class="p"><b>${sol(p.precio)}</b>${+p.antes>+p.precio?`<s>${sol(p.antes)}</s>`:''}</span></div></button>`;
+  <div class="bd"><h3>${esc(p.nombre)}</h3>${p.detalle?`<span class="mu sm ds">${esc(p.detalle)}</span>`:''}</div></button>`;
+ const appBan=()=>`<section class="sec" style="padding-top:0"><div class="wrap"><a class="card apb" href="#/app"><span style="font-size:34px">📱</span><span><b>Reserva y pide desde la app Mi Xyro</b><span class="mu sm">Precios, promos solo por la app y pedidos desde tu mesa.</span></span><span class="btn btn-p">Descargar</span></a></div></section>`;
  const V={
   '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
    <span class="nfb" id="nfb" ${D.fund?'':'hidden'} title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador · XyroStudio</span>
    <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(D.hasta):'Cerrado ahora · abrimos '+esc(D.desde)}</span>
    <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
-   <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/reservar">📅 Reservar mesa</a></div>
+   <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/app">📱 Reserva y pide en la app</a></div>
    <div class="chips" style="margin-top:22px">${cats.slice(0,6).map(c=>`<a class="chip" href="#/carta" data-gc="${esc(c)}">${esc(c)}</a>`).join('')}</div></div>
-   <div class="hc"><span class="eyb">Lo más pedido</span>${dest.map(p=>`<button class="it" data-p="${esc(p.id)}" style="text-align:left">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=e>${esc(p.emoji||'🍽️')}</span>'">`:`<span class="e">${esc(p.emoji||'🍽️')}</span>`}<span><b>${esc(p.nombre)}</b><span class="mu xs">${esc(p.categoria||'')}</span></span><span class="pr">${sol(p.precio)}</span></button>`).join('')}
-   ${D.qr?'<p class="mu xs">📱 En el local, escanea el QR de tu mesa y pide desde tu celular.</p>':''}</div></div></section>`,
-  carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta${SLUG?' · precios al día':''}</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">${D.qr?'Para pedir, escanea el QR de tu mesa en el local. ':''}Toca ${CAF?'un producto':'un plato'} para verlo en grande.</p>
+   <div class="hc"><span class="eyb">Lo más pedido</span>${dest.map(p=>`<button class="it" data-p="${esc(p.id)}" style="text-align:left">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=e>${esc(p.emoji||'🍽️')}</span>'">`:`<span class="e">${esc(p.emoji||'🍽️')}</span>`}<span><b>${esc(p.nombre)}</b><span class="mu xs">${esc(p.categoria||'')}</span></span></button>`).join('')}
+   <a class="mu xs" href="#/app" style="text-decoration:none">📱 Precios, promos y reservas en la app Mi Xyro →</a></div></div></section>${appBan()}`,
+  carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">Toca ${CAF?'un producto':'un plato'} para verlo en grande. Precios, promos y pedidos en la app.</p>
    <div class="cats"><div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div></div>
-   <div class="grid">${L.map(plC).join('')||'<p class="mu">Pronto subimos la carta.</p>'}</div></div></section>`},
-  reservar:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">Reserva en 3 pasos</span><h2>Tu mesa <span class="serif">te espera</span></h2><p class="mu" style="margin-bottom:18px">Eliges día, hora y personas. Te confirmamos por WhatsApp.</p>
-   <div class="card" id="rv"></div></div><div class="ph" style="background-image:url('${esc(IMG.reserva)}')"><div class="q">“Reservé en 1 minuto y nos tenían la mesa lista.” <b>— María Q.</b></div></div></div></section>`,
+   <div class="grid">${L.map(plC).join('')||'<p class="mu">Pronto subimos la carta.</p>'}</div></div></section>${appBan()}`},
+  app:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">App Mi Xyro · gratis</span><h2>Reserva y pide <span class="serif">desde tu celular</span></h2>
+   <p class="mu" style="margin-bottom:18px">Escanea el código, guarda ${mk(N)} en tu app y listo.</p>
+   <div class="card ap"><div class="qrw" id="qrw"><span class="mu xs">Cargando QR…</span></div><div class="apl">
+    <div>📅 <b>Reserva tu mesa</b><span class="mu sm">Eliges día, hora y personas.</span></div>
+    <div>📱 <b>Pide desde tu mesa</b><span class="mu sm">Escanea el QR de la mesa y te lo llevamos.</span></div>
+    <div>🎁 <b>Promos solo por la app</b><span class="mu sm">Precios y novedades al día.</span></div></div></div>
+   <div class="row" style="margin-top:16px"><a class="btn btn-p" href="${esc(APP)}" target="_blank" rel="noopener">📲 Abrir la app</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.')}">💬 Pedir información</a></div></div>
+   <div class="ph" style="background-image:url('${esc(IMG.reserva)}')"><div class="q">Tu mesa, tus pedidos y tus promos en un solo lugar. <b>— Mi Xyro</b></div></div></div></section>`,
   local:()=>{const s=D.sedes;return`<section class="sec"><div class="wrap"><span class="eyb">Visítanos</span><h2>Cómo <span class="serif">llegar</span></h2>
    <div class="lc" style="margin-top:20px"><div style="display:grid;gap:14px">${s.map(x=>{const q=encodeURIComponent((x.direccion||x.distrito||'')+' '+String(N).replace(/[()]/g,''));return`<div class="card"><h3 style="font-family:inherit;font-size:20px;font-weight:800">${mk(x.nombre||N)}</h3><p class="mu sm">${mk([x.direccion,x.distrito].filter(Boolean).join(' · '))}</p>
     <div style="margin:12px 0">${(Array.isArray(x.horario)&&x.horario.length?x.horario.map(h=>Array.isArray(h)?h:[h,'']):[[hor(),'']]).map(h=>`<div class="hr"><span>${esc(h[0])}</span><b>${esc(h[1]||'')}</b></div>`).join('')}</div>
@@ -196,30 +207,17 @@ cargar().then(D=>{
     ${Object.keys(D.redes||{}).filter(k=>D.redes[k]).length?`<div class="pg" style="margin-top:12px">${['instagram','tiktok','facebook'].filter(k=>D.redes[k]).map(k=>`<a class="chip" target="_blank" rel="noopener" href="${esc(/^https?:/.test(D.redes[k])?D.redes[k]:'https://'+k+'.com/'+String(D.redes[k]).replace(/^@/,''))}">${{instagram:'📸 Instagram',tiktok:'🎵 TikTok',facebook:'👍 Facebook'}[k]}</a>`).join('')}</div>`:''}</div></div>
     ${/\((dirección|distrito)\)/.test(s[0].direccion||'')?`<div class="ph" style="display:block;aspect-ratio:auto;min-height:340px;background-image:url('${esc(IMG.local)}')"></div>`:`<iframe loading="lazy" title="Mapa" src="https://www.google.com/maps?q=${encodeURIComponent((s[0].direccion||'')+' '+(s[0].distrito||''))}&output=embed"></iframe>`}</div></div></section>`}
  };
- function rvPinta(){const el=$('#rv');if(!el)return;const d0=new Date(),dias=Array.from({length:7},(_,i)=>{const d=new Date(d0);d.setDate(d0.getDate()+i);return d}).filter(d=>!D.dias.length||D.dias.includes(d.getDay()));
-  const sel=dias[RV.d]||dias[0],a=hm(D.desde),b0=hm(D.hasta),b=b0>a?b0:b0+1440,now=d0.getHours()*60+d0.getMinutes(),hoy=sel&&sel.toDateString()===d0.toDateString();
-  const H=[];for(let m=a;m<=b-60;m+=30)if(!hoy||m>now+30)H.push(mh(m));if(RV.h&&!H.includes(RV.h))RV.h='';
-  const fecha=sel?DL[sel.getDay()]+' '+sel.getDate()+' '+MS[sel.getMonth()]:'';
-  el.innerHTML=`<div class="stp">${[0,1,2].map(i=>`<i class="${i<=paso?'on':''}"></i>`).join('')}</div>`+(paso===0?`<b>¿Qué día y a qué hora?</b><div class="dias" style="margin-top:10px">${dias.map((d,i)=>`<button data-d="${i}" class="${i===RV.d?'on':''}">${i===0&&d.toDateString()===d0.toDateString()?'Hoy':DN[d.getDay()]}<small>${d.getDate()} ${MS[d.getMonth()]}</small></button>`).join('')}</div>
-   <div class="hrs">${H.map(h=>`<button data-h="${h}" class="${h===RV.h?'on':''}">${h}</button>`).join('')||'<p class="mu sm">Ya no hay horarios hoy. Elige otro día.</p>'}</div>
-   <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn btn-p" data-sg ${RV.h?'':'disabled style="opacity:.5"'}>Siguiente →</button></div>`
-  :paso===1?`<b>¿Cuántas personas?</b><div class="qty"><button data-n="-1">−</button><b>${RV.n}</b><button data-n="1">＋</button></div><p class="mu sm" style="text-align:center">${RV.n>=10?'Para grupos grandes te confirmamos disponibilidad.':'Te guardamos la mesa 15 minutos.'}</p>
-   <div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn btn-o" data-at>← Atrás</button><button class="btn btn-p" data-sg>Siguiente →</button></div>`
-  :`<b>Tus datos</b><label class="f">Nombre<input id="rvN" maxlength="60" placeholder="¿A nombre de quién?" value="${esc(RV.nom)}"></label><label class="f">Ocasión o nota (opcional)<input id="rvO" maxlength="140" placeholder="Cumpleaños, terraza, silla para bebé…" value="${esc(RV.nota)}"></label>
-   <div class="res"><div><span class="mu">Día</span><b>${esc(fecha)}</b></div><div><span class="mu">Hora</span><b>${esc(RV.h)}</b></div><div><span class="mu">Personas</span><b>${RV.n}</b></div></div>
-   <div class="row" style="margin-top:16px;justify-content:space-between"><button class="btn btn-o" data-at>← Atrás</button><a class="btn btn-wa" id="rvW" target="_blank" rel="noopener">💬 Reservar por WhatsApp</a></div>`);
-  el.onclick=e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.d!=null){RV.d=+t.dataset.d;RV.h='';rvPinta()}else if(t.dataset.h){RV.h=t.dataset.h;rvPinta()}else if(t.dataset.n){RV.n=Math.min(30,Math.max(1,RV.n+ +t.dataset.n));rvPinta()}else if(t.dataset.sg!=null&&(paso||RV.h)){paso++;rvPinta()}else if(t.dataset.at!=null){keep();paso--;rvPinta()}};
-  const keep=()=>{const a=$('#rvN'),b=$('#rvO');if(a)RV.nom=a.value.trim();if(b)RV.nota=b.value.trim()};
-  const w=$('#rvW');if(w){const upd=()=>{keep();w.href=wa(`Hola ${String(N).replace(/[()]/g,'')} 👋 Quiero reservar una mesa:\n📅 ${fecha}\n⏰ ${RV.h}\n👥 ${RV.n} persona${RV.n>1?'s':''}\n🙋 ${RV.nom||'(mi nombre)'}${RV.nota?'\n📝 '+RV.nota:''}`)};upd();el.oninput=upd;w.onclick=e=>{keep();if(!RV.nom){e.preventDefault();$('#rvN').focus();$('#rvN').placeholder='Escribe tu nombre para reservar'}}}}
+ async function qrPinta(){const el=$('#qrw');if(!el)return;try{if(!window.qrcode)await new Promise((ok,ko)=>{const t=document.createElement('script');t.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';t.onload=ok;t.onerror=ko;document.head.appendChild(t)});
+  const q=qrcode(0,'M');q.addData(APP);q.make();el.innerHTML=q.createSvgTag({cellSize:5,margin:2,scalable:true})+'<span class="mu xs">Escanéalo con tu cámara</span>'}catch(_){el.innerHTML='<a class="btn btn-p" href="'+esc(APP)+'">Abrir la app</a>'}}
  function ver(id){const p=P.find(x=>x.id===id);if(!p)return;const o=document.createElement('div');o.className='ov';
   o.innerHTML=`<div class="sh" style="position:relative"><button class="xb" data-x aria-label="Cerrar">✕</button><div class="im">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}</div><div class="bd"><span class="eyb">${esc(p.categoria||'Carta')}</span><h2 style="font-size:32px">${esc(p.nombre)}</h2>${p.detalle?`<p class="mu">${esc(p.detalle)}</p>`:''}
-   <div class="row" style="justify-content:space-between;margin-top:6px"><span style="display:flex;gap:10px;align-items:baseline"><b style="font-size:28px">${sol(p.precio)}</b>${+p.antes>+p.precio?`<s class="mu">${sol(p.antes)}</s>`:''}</span>${p.agotado?'<span class="chip">Agotado hoy</span>':''}</div>
-   <p class="mu sm">${D.qr?'📱 Para pedirlo, escanea el QR de tu mesa en el local.':'Pídelo al mozo en el local.'}</p><div class="row"><a class="btn btn-p" href="#/reservar" data-x>📅 Reservar mesa</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola 👋 Pregunta sobre «'+p.nombre+'»: ')}">💬 Preguntar</a></div></div></div>`;
+   <div class="row" style="justify-content:space-between;margin-top:6px"><span></span>${p.agotado?'<span class="chip">Agotado hoy</span>':''}</div>
+   <p class="mu sm">Precios, promos y pedidos en la app Mi Xyro. En el local, escanea el QR de tu mesa.</p><div class="row"><a class="btn btn-p" href="#/app" data-x>📱 Pídelo desde la app</a></div></div></div>`;
   document.body.appendChild(o);o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()}}
  function go(){const r=(location.hash.slice(2)||'').split('/')[0],k=V[r]?r:'';$('#app').innerHTML=`<div class="scr on">${V[k]()}${k?'<footer class="foot">© '+new Date().getFullYear()+' '+mk(N)+' · Hecho con <a href="https://xyrostudio.net" target="_blank" rel="noopener">XyroStudio</a></footer>':''}</div>`;scrollTo(0,0);
   $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===k));const t=$('#tabs .on'),ind=$('#tabs .ind');if(t&&ind){ind.style.left=t.offsetLeft+'px';ind.style.width=t.offsetWidth+'px'}
   $$('[data-p]').forEach(b=>b.onclick=()=>ver(b.dataset.p));$$('[data-c]').forEach(b=>b.onclick=()=>{CAT=b.dataset.c;go()});$$('[data-gc]').forEach(b=>b.onclick=()=>{CAT=b.dataset.gc});
-  if(k==='reservar'){paso=0;rvPinta()}top()}
+  if(k==='app')qrPinta();top()}
  const top=()=>$('#top').classList.toggle('s',scrollY>20||!!location.hash.slice(2));addEventListener('scroll',top,{passive:true});
  addEventListener('hashchange',go);addEventListener('resize',()=>{const t=$('#tabs .on'),ind=$('#tabs .ind');if(t&&ind){ind.style.left=t.offsetLeft+'px';ind.style.width=t.offsetWidth+'px'}});go();
 });

@@ -28,3 +28,8 @@ Creado 2026-11-15. Lee solo la parte que necesitas (`grep -n palabra docs/mapa/r
 - **Menú por Xyro (todas las rubros):** `XSEC` + `xsDe(k)` arman secciones Xyro Apps / Bots / Control / Webs / Configuración (encabezados `.nh`); dentro de Xyro Apps del gym siguen los grupos `NAVG` (Ventas, Gimnasio, Resultados). «Más» (celular) usa las mismas secciones.
 - **Fotos de referencia:** `FOTOB` (nombre → id Unsplash) + `fotoBase(n)` en app/dev (carta base, demo) y /pedir/ demo; botón «🖼️ Poner fotos de referencia» (`fotosBase`) para cartas ya cargadas.
 - **Sin stock no se vende (2026-11-15):** `stockNeg` ya no se activa solo (carta base/plantilla gestor); al abrir, el admin migra `stockNeg:false, stockV2:1`. `dispo(p)` (cliente) = `xa_disp` (SQL 60): con receta, lo que alcancen los insumos; sin receta, el stock. SQL 60 redefine menú/carta/mozo/pedir con `xa_disp`.
+
+## 2026-11-16 · Web sin reservas ni precios; Control respetado
+- /restaurante/: sin reserva de mesa ni precios. Ruta `#/app` con QR (qrcode-generator) a `https://xyrostudio.net/mi/?n=slug`, beneficios de la app y WhatsApp solo «Pedir información». Banner `appBan()` en Inicio y Carta.
+- Mi Xyro: en la página de un restaurante, «📅 Reservar mesa» (`reservar(slug)`) arma el mensaje y abre WhatsApp del negocio (no se guarda aún en el panel).
+- Xyro Apps (restaurante): `insOn()=tiene('control')` → Insumos solo si XyroStudio activó Xyro Control; la Carta (POS) cuenta como Xyro Apps (`xsDe`).
