@@ -193,7 +193,7 @@ cargar().then(D=>{
  const P=(D.productos||[]).map(p=>({...p,agotado:false})),cats=[...new Set(P.map(p=>p.categoria||'Carta'))],dest=P.filter(p=>p.destacado).concat(P.filter(p=>!p.destacado)).slice(0,3);
  const SEC=k=>(D.sec||{})[k]!==false,CF=D.cafe||{},APT=D.appT||'Guárdanos en tu app',APX=D.appX||'Entérate de nuestros nuevos productos y de las promociones que tenemos para ti.';
  const hor=()=>{const d=D.dias.length&&D.dias.length<7?D.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'Todos los días';return d+' · '+h12(D.desde)+' a '+h12(D.hasta)};
- const ab=abierto(D);let CAT='';const APP='https://xyrostudio.net/mi/?n='+encodeURIComponent(SLUG||'');
+ const ab=abierto(D);let CAT='';const APP='https://xyrostudio.net/mi/?n='+encodeURIComponent(SLUG||(Q.get('m')||'').toLowerCase().replace(/[^a-z0-9-]/g,''));
  const plC=(p,i)=>`<button class="pl ${p.agotado?'ag':''}" data-p="${esc(p.id)}" style="animation-delay:${Math.min(i,10)*.04}s"><div class="ft">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}${+p.antes>+p.precio?'<span class="tg">Promo</span>':p.destacado?'<span class="tg">⭐ Favorito</span>':''}</div>
   <div class="bd"><h3>${esc(p.nombre)}</h3>${p.detalle?`<span class="mu sm ds">${esc(p.detalle)}</span>`:''}</div></button>`;
  const casa=()=>{const fav=P.filter(p=>!p.agotado&&p.foto).sort((a,b)=>(b.destacado?1:0)-(a.destacado?1:0)).slice(0,8),fo=P.filter(p=>p.foto).map(p=>p.foto),G=D.gal&&D.gal.length?D.gal.slice(0,6):[CAF?IMC.barra:IMG.local,...fo.slice(0,2),CAF?IMC.gente:IMG.reserva,...fo.slice(2,4),CAF?IMC.maq:IMG.hero].filter(Boolean).slice(0,6);

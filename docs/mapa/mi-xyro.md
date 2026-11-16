@@ -35,3 +35,4 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 
 ## Pedir cita dental (SQL 64)
 - `citPedBox`, `pedirCita`, `libresMi`, `limaD`, `demoCitaInfo`; pedidos tipo 'cita' (feed, chat, vPedido). Modo negocio: `nCitaPed` confirma/rechaza. `sellosPinta(slug, sel)` con toast «¡Ganaste un sello!».
+- 2026-11-16: «Cancelar solicitud» en rojo con motivo opcional (se envía al chat antes de cancelar); en cita ya agendada solo «✓ Listo, cerrar». `profNom`/`profsDe`: nombre del profesional desde contenido 'app' público (la cita guarda el código). Modo negocio dental: al escanear el QR del paciente, la ficha muestra «Cita de hoy». Webs con `&m=slug` (vista previa del panel) para que el QR abra el negocio.
