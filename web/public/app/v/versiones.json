@@ -1,5 +1,14 @@
 [
  {
+  "id": "20261116-0042",
+  "fecha": "2026-11-16 00:42",
+  "titulo": "QR de tu web lleva a tu negocio",
+  "notas": "QR de tu web lleva a tu negocio",
+  "cambios": [
+   "En la vista de cómo se vería tu web, el QR de la app ya abre tu negocio en Mi Xyro"
+  ]
+ },
+ {
   "id": "20261116-0022",
   "fecha": "2026-11-16 00:22",
   "titulo": "Mensajes de pacientes y web editable",
