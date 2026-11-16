@@ -1,5 +1,21 @@
 [
  {
+  "id": "20261116-0052",
+  "fecha": "2026-11-16 00:52",
+  "titulo": "Consultas y registro desde la app",
+  "notas": "Consultas y registro desde la app",
+  "cambios": [
+   "Cualquier persona con Mi Xyro puede preguntarte por chat, aunque aún no sea paciente",
+   "Con «Agregar como paciente» le llega a su app para completar sus datos y queda registrado",
+   "Quien quiera ser paciente te envía sus datos y tú lo registras con un toque",
+   "Los chats se cierran solos a los 10 minutos sin mensajes y quedan guardados en «Historial de chats»"
+  ],
+  "requiere": "SQL 66",
+  "rubros": [
+   "consultorio"
+  ]
+ },
+ {
   "id": "20261116-0042",
   "fecha": "2026-11-16 00:42",
   "titulo": "QR de tu web lleva a tu negocio",
