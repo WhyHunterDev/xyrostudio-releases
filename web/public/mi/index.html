@@ -261,6 +261,7 @@ textarea{width:100%;font:inherit;color:var(--tx);background:var(--c2);border:1px
 #instb{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));z-index:8;max-width:500px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:18px;background:#14121fee;backdrop-filter:blur(12px);border:1px solid #7c5cff66;box-shadow:0 12px 40px #0009;animation:up .4s cubic-bezier(.2,1,.3,1)}
 #instb img{width:38px;height:38px;border-radius:10px;flex:none}#instb span{flex:1;min-width:0;display:grid;line-height:1.25}#instb small{color:var(--mu);font-size:12px}#instb .btn{width:auto;padding:9px 14px;font-size:14px;flex:none}#instb .ix{all:unset;cursor:pointer;color:var(--mu);padding:6px;font-size:14px}
 .nfb{display:inline-block;margin:2px 0 6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f7dc8a,#e6b84d 55%,#b8862b);box-shadow:0 4px 14px #e6b84d40}
+.tp{display:flex;gap:6px;width:100%}.tp select{flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -280,6 +281,17 @@ const cel=t=>String(t||'').replace(/\D/g,'').slice(-9);
 const hoyL=()=>new Date(Date.now()-5*36e5).toISOString().slice(0,10);
 const dLima=t=>new Date(new Date(t).getTime()-5*36e5).toISOString().slice(0,10);
 const fF=(d,o)=>new Date(String(d).length===10?d+'T12:00:00-05:00':d).toLocaleDateString('es-PE',{timeZone:'America/Lima',...(o||{day:'numeric',month:'short',year:'numeric'})});
+/* Horas en am/pm (nada de 24 h): cada input type=time se cambia por hora · minutos · am/pm; el input queda oculto con su valor HH:MM. */
+const h12=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||'');if(!m)return h||'';const x=+m[1];return(x%12||12)+':'+m[2]+' '+(x<12?'am':'pm')};
+function tpAmPm(root){(root||document).querySelectorAll('input[type=time]:not([data-tp])').forEach(i=>{i.dataset.tp=1;const st=+i.step||300,paso=Math.max(5,Math.round(st/60)),MI=[];for(let m=0;m<60;m+=paso)MI.push(m);
+ const w=document.createElement('span');w.className='tp';const sh=document.createElement('select'),sm=document.createElement('select'),sa=document.createElement('select');
+ sh.innerHTML='<option value="">--</option>'+[12,1,2,3,4,5,6,7,8,9,10,11].map(h=>`<option value="${h}">${h}</option>`).join('');sa.innerHTML='<option value="am">am</option><option value="pm">pm</option>';
+ const pinta=()=>{const m=/^(\d{1,2}):(\d{2})/.exec(i.value||'');const mm=m?+m[2]:0;if(!MI.includes(mm)){MI.push(mm);MI.sort((a,b)=>a-b)}sm.innerHTML=MI.map(x=>`<option value="${x}">${String(x).padStart(2,'0')}</option>`).join('');
+  if(m){const x=+m[1];sh.value=String(x%12||12);sm.value=String(mm);sa.value=x<12?'am':'pm'}else{sh.value='';sm.value='0';sa.value='am'}};
+ const lee=()=>{if(!sh.value){i.value='';}else{let x=+sh.value%12;if(sa.value==='pm')x+=12;i.value=String(x).padStart(2,'0')+':'+String(+sm.value).padStart(2,'0')}i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}))};
+ [sh,sm,sa].forEach(s=>{s.onchange=lee;w.appendChild(s)});sh.setAttribute('aria-label','Hora');sm.setAttribute('aria-label','Minutos');sa.setAttribute('aria-label','am o pm');
+ if(i.id)sh.id=i.id+'_h';pinta();i.type='hidden';i.after(w)})}
+new MutationObserver(()=>tpAmPm()).observe(document.documentElement,{childList:true,subtree:true});
 const fH=d=>new Date(d).toLocaleTimeString('es-PE',{timeZone:'America/Lima',hour:'numeric',minute:'2-digit'});
 const dias=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
 const money=n=>'S/ '+(Math.round(+n*100)/100).toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:2});
@@ -421,9 +433,10 @@ async function entrar(){
 }
 
 // ---------- Botón «atrás» del celular: cierra la ventana abierta en vez de salir ----------
-const HN={k:'',st:[],skip:0,ov:0,pop:false},HSEL='.ov,.cam,.qrfull';
+const HN={k:'',st:[],skip:0,ov:0,pop:false,ir:''},HSEL='.ov,.cam,.qrfull';
 new MutationObserver(()=>{const c=document.querySelectorAll(HSEL).length;
  while(HN.ov<c){HN.ov++;try{history.pushState(Object.assign({},history.state||{},{_ov:HN.ov}),'')}catch(_){}}
+ if(HN.ov>c&&HN.ir){HN.ov=c;const u=HN.ir;HN.ir='';location.assign(u);return}
  if(HN.ov>c){const d=HN.ov-c;HN.ov=c;if(history.state&&history.state._ov){HN.skip++;history.go(-d)}}}).observe(document.body,{childList:true});
 function hCierra(){const els=document.querySelectorAll(HSEL);if(!els.length||HN.ov<1)return false;HN.ov--;const el=els[els.length-1],x=el.querySelector('#cx,[data-x]');try{x?x.click():el.click()}catch(_){}if(el.isConnected)el.remove();return true}
 const hSnap=()=>({m:MODO,t:TAB,s:SUB,nt:NTAB,np:NPID,pe:PEDID,c:CUR});
@@ -788,7 +801,7 @@ async function escanear(onCode,txt){
   try{if(det){const r=await det.detect(v);t=r[0]&&r[0].rawValue||''}
    else if(window.jsQR&&v.videoWidth){const w=480,h=Math.round(v.videoHeight*w/v.videoWidth);cv.width=w;cv.height=h;cx.drawImage(v,0,0,w,h);const r=jsQR(cx.getImageData(0,0,w,h).data,w,h);t=r&&r.data||''}}catch(_){}
   if(t&&onCode){if(t===escanear.u&&Date.now()-escanear.t<3500){setTimeout(leer,250);return}escanear.u=t;escanear.t=Date.now();vib();if(await onCode(t)){fin();return}setTimeout(leer,900);return}
-  if(t&&/^https:\/\/(www\.)?xyrostudio\.net\/pedir\/\?/.test(t)){vib();fin();location.href=t;return}
+  if(t&&/^https:\/\/(www\.)?xyrostudio\.net\/pedir\/\?/.test(t)){vib();HN.ir=t;fin();setTimeout(()=>{if(HN.ir){const u=HN.ir;HN.ir='';location.assign(u)}},400);return} // sin esto, el «atrás» del cierre cancelaba la ida al pedido
   if(t){const s=slugDe(t),c=/[?&]c=/.test(t)?codigoDe(t):'';
    if(s){vib();fin();await abrirNeg(s);if(D&&NEG[s]&&!NEG[s].guardado&&!NEG[s].socio)guardarNeg(s,true);return}
    if(c){vib();fin();return conCodigo(c)}

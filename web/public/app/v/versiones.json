@@ -1,5 +1,14 @@
 [
  {
+  "id": "20261115-2101",
+  "fecha": "2026-11-15 21:01",
+  "titulo": "Horas en am/pm",
+  "notas": "Horas en am/pm",
+  "cambios": [
+   "Todas las horas se eligen y se ven en am/pm (nada de 24 horas)"
+  ]
+ },
+ {
   "id": "20261115-2019",
   "fecha": "2026-11-15 20:19",
   "titulo": "Insumos solo con Xyro Control",

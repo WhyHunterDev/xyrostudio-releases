@@ -27,3 +27,7 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Fundador en toda la app (`body.fund`): botones, botón escanear, pestaña activa, aro del avatar, nombre, ID y partículas dorados.
 - Inicio premium (2026-11-15): Xyro Card por nivel (`nivel(per)`: f=fundador oro, p=`per.plus` Xyro+ titanio, n=normal morado), resumen del plan, beneficios por nivel y teaser «Xyro+ · Muy pronto». 3 tipos de cuenta: fundador, normal, Xyro+ (pago, aún sin cobrar).
 - Gestor: «⭐ Dar fundador» (siguiente número aunque estén llenos) / «🚫 Quitar fundador» (sanción, fund_bloq: no lo vuelve a recibir) → xa_yo_g_fund (SQL 58).
+
+## 2026-11-16 · Arreglo QR de mesa desde el escáner
+- Al escanear un QR /pedir/ con el escáner de Mi Xyro, cerrar la cámara hacía `history.go(-1)` (botón atrás) y cancelaba la ida al pedido. Ahora `HN.ir` guarda el destino y el observer navega con `location.assign` en vez de volver atrás.
+- Horas en am/pm: `h12()` y `tpAmPm()` (cambia todo input type=time por hora/minutos/am-pm; el input queda oculto con HH:MM). Igual en Xyro Apps; /pedir/, /restaurante/ y /consultorio/ muestran h12.
