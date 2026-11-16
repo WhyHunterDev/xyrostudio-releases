@@ -250,7 +250,7 @@ async function nfCargar(){const b=$('#nfBox');if(!b||b.dataset.ok)return;b.datas
   if(a.error&&/xa_neg_fund|function|schema cache/i.test(a.error.message)){b.querySelector('.d').textContent='Corre 61-xyro-negocio-fundador.sql en Supabase para activarlo.';return}
   const f=a.data,L=l.data||[];
   b.innerHTML=`<h3>🏅 Negocio fundador ${f?'<span class="tag" style="background:#e6b84d22;color:#e6b84d">Fundador de '+esc(NFR[f.rubro]||f.rubro)+'</span>':''}</h3>
-  <p class="d">Reconocimiento al primer negocio de cada rubro que creyó en XyroStudio. Solo hay uno por rubro y lleva insignia dorada en su panel, en Mi Xyro y en su carta.</p>
+  <p class="d">Reconocimiento a los primeros negocios de cada rubro que creyeron en XyroStudio. Hasta 3 por rubro; llevan insignia dorada en su panel, en Mi Xyro y en su carta.</p>
   ${L.length?`<p class="sub">${L.map(x=>`<b>${esc(NFR[x.rubro]||x.rubro)}</b>: ${esc(x.negocio)} <small style="color:var(--mu)">desde ${esc(x.desde)}</small>`).join(' · ')}</p>`:'<p class="sub">Aún no hay negocios fundadores.</p>'}
   <button class="btn ${f?'btn-g':'btn-p'}" data-nfund="${f?0:1}" data-slug="${esc(slug)}" style="margin-top:8px">${f?'Quitar título de fundador':'🏅 Nombrar negocio fundador'}</button>`;
 }
@@ -1313,7 +1313,7 @@ document.addEventListener('click', async e=>{
     if(el.id==='mb')return $('#side').classList.toggle('open');
     if(el.id==='swSop'){const c=cfg();c.soporteSinRegistro=!c.soporteSinRegistro;setCfg(c);return go('soporte');}
     if(d.flt){flt=d.flt;return go('clientes');}
-    if(d.nfund){const dar=d.nfund==='1';if(!confirm(dar?'¿Nombrar a este negocio fundador de su rubro? Solo puede haber uno por rubro.':'¿Quitarle el título de negocio fundador?'))return;el.disabled=true;const{error}=await sb.rpc('xa_g_neg_fund',{p_slug:d.slug,p_dar:dar});if(error){toast(error.message);el.disabled=false;return}toast(dar?'🏅 Ahora es negocio fundador':'Título quitado');const b=$('#nfBox');if(b){delete b.dataset.ok;nfCargar()}return;}
+    if(d.nfund){const dar=d.nfund==='1';if(!confirm(dar?'¿Nombrar a este negocio fundador de su rubro? Puede haber hasta 3 por rubro.':'¿Quitarle el título de negocio fundador?'))return;el.disabled=true;const{error}=await sb.rpc('xa_g_neg_fund',{p_slug:d.slug,p_dar:dar});if(error){toast(error.message);el.disabled=false;return}toast(dar?'🏅 Ahora es negocio fundador':'Título quitado');const b=$('#nfBox');if(b){delete b.dataset.ok;nfCargar()}return;}
     if(d.xyt){ const on=!el.classList.contains('save'); el.classList.toggle('save',on); el.style.cssText=on?'border-color:var(--ok);color:var(--ok)':''; el.textContent=on?'✅ Activo':'➕ Activar'; el.closest('.xy').classList.toggle('on',on); xyTot(); return; }
     if(d.xysave){ el.disabled=true; try{ await guardarXyros(d.xysave,d.slug); await cargar(); toast('Xyros guardados ✓'); fichaTab='xyros'; return go('clientes'); }catch(ex){ toast(ex.message); el.disabled=false; } return; }
     if(d.ftab){ fichaTab=d.ftab; $$('.ftabs button').forEach(b=>b.classList.toggle('on',b.dataset.ftab===fichaTab)); $('.fbody').dataset.cur=fichaTab; return; }
