@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>(nombre del restaurante) · Carta y app</title>
-<meta name="description" content="Carta con fotos, horario y cómo llegar. Reserva y pide desde la app Mi Xyro.">
+<meta name="description" content="Carta con fotos, horario y cómo llegar. Guárdanos en la app Mi Xyro y entérate de nuestras novedades y promociones.">
 <meta name="theme-color" content="#0d0b09">
 <meta property="og:type" content="website"><meta property="og:locale" content="es_PE">
 <!-- Base Xyro Webs · Restaurante / Cafetería. Todo sale del negocio (?s=codigo): app (nombre, logo, color, perfil, mesas), carta en vivo (RPC xa_carta), sedes y resto {hero, sub, fotos}. -->
@@ -153,7 +153,7 @@ const P0=[['Combos','🎁','Menú ejecutivo',22,'Entrada + fondo + refresco de l
 const PC=[['Combos','🎁','Combo desayuno',14,'Café a elección + sándwich de pollo o triple',U('1509042239860-f550ce710b93'),17,1],['Combos','🎁','Combo dulce',25,'Frappé a elección + waffle con helado',U('1572490122747-3968b75cc699'),29],['Frappés','🧋','Frappé de Oreo',14,'Galleta Oreo, helado de vainilla y crema batida.',U('1572490122747-3968b75cc699'),0,1],['Frappés','🧋','Frappé moka',13,'Café, chocolate y crema batida.'],['Frappés','🍓','Frappé de fresa',13,'Fresas naturales, leche y helado.'],['Cafés','☕','Capuchino',9,'Doble shot y espuma cremosa.',U('1509042239860-f550ce710b93')],['Cafés','☕','Americano',6,'Café de altura peruano.',U('1495474472287-4d71bcdd2085')],['Cafés','☕','Mocaccino',11,'Espresso, chocolate y leche.'],['Waffles y crepes','🧇','Waffle con helado y fresas',16,'Waffle crocante, helado, fresas y miel de maple.',U('1562376552-0d160a2f238d'),0,1],['Waffles y crepes','🧇','Waffle Nutella y plátano',15,'Con Nutella, plátano y azúcar impalpable.'],['Waffles y crepes','🥞','Crepe Nutella y fresa',14,'Crepe fino relleno de Nutella y fresas.'],['Sándwiches','🥐','Croissant jamón y queso',10,'Croissant de mantequilla, caliente.',U('1555507036-ab1f4038808a')],['Sándwiches','🥪','Sándwich de pollo',11,'Pollo deshilachado, lechuga y mayonesa casera.'],['Postres','🍰','Cheesecake de maracuyá',12,'Base de galleta y salsa de maracuyá.',U('1533134242443-d4fd215305ad')],['Postres','🍰','Torta de chocolate',10,'Húmeda, con fudge casero.',U('1578985545062-69928b1d9587')],['Bebidas frías','🥭','Smoothie de mango',11,'Mango, yogur y hielo.',U('1505252585461-04db1eb84625')],['Bebidas frías','🍋','Limonada frozen',9,'Limón, hierbabuena y hielo frappé.']]
  .map((p,i)=>({id:'c'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4]||'',foto:p[5]||'',antes:p[6]||null,destacado:!!p[7]}));
 const BASE=n=>({nombre:n||(CAF?'(nombre de la cafetería)':'(nombre del restaurante)'),wa:'51936449066',distrito:'(distrito)',desde:CAF?'08:00':'12:00',hasta:CAF?'22:00':'23:00',dias:[],
- hero:'',sub:CAF?'Cafés de altura, frappés, waffles y postres hechos al momento. Mira la carta y reserva o pide desde la app Mi Xyro.':'Cocina casera, ingredientes frescos y la mejor atención. Mira la carta y reserva o pide desde la app Mi Xyro.',
+ hero:'',sub:CAF?'Cafés de altura, frappés, waffles y postres hechos al momento. Mira la carta y guárdanos en la app Mi Xyro.':'Cocina casera, ingredientes frescos y la mejor atención. Mira la carta y guárdanos en la app Mi Xyro.',
  sedes:[{nombre:CAF?'(nombre de la cafetería)':'(nombre del restaurante)',direccion:'Av. (dirección) 123, (distrito)',maps:''}],productos:CAF?PC:P0,qr:true,
  pagos:['💵 Efectivo','📱 Yape','📱 Plin','💳 Tarjeta'],redes:{}});
 async function rest(p){const r=await fetch(SB.url+'/rest/v1/'+p,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
@@ -172,11 +172,11 @@ async function cargar(){
   const sd=(Array.isArray(pf.sedes)&&pf.sedes.length?pf.sedes:Array.isArray(C.sedes)?C.sedes:[]).filter(x=>x&&(x.nombre||x.direccion));if(sd.length)D.sedes=sd;
   const w=pf.whatsapp||(D.sedes.find(x=>x.whatsapp)||{}).whatsapp||(C.bot&&C.bot.whatsapp);if(w)D.wa=String(w).replace(/\D/g,'').replace(/^9(\d{8})$/,'519$1');
   if(rs.fotos&&typeof rs.fotos==='object')Object.keys(rs.fotos).forEach(k=>{if(/^https:/.test(rs.fotos[k]||''))IMG[k]=rs.fotos[k]});
-  ['hero','sub','pagos'].forEach(k=>{if(rs[k]!=null&&rs[k]!=='')D[k]=rs[k]});
+  ['hero','lema','sub','pagos'].forEach(k=>{if(rs[k]!=null&&rs[k]!=='')D[k]=rs[k]});
+  D.gal=(rs.fotos&&Array.isArray(rs.fotos.gal)?rs.fotos.gal:[]).filter(u=>/^https:/.test(u||''));D.sec=rs.sec&&typeof rs.sec==='object'?rs.sec:{};D.cafe=rs.cafe&&typeof rs.cafe==='object'?rs.cafe:{};D.ocultos=Array.isArray(rs.ocultos)?rs.ocultos:[];D.appT=rs.appT||'';D.appX=rs.appX||'';
   rpc('xa_neg_fund',{p_slug:SLUG}).then(f=>{if(f){D.fund=f;const e=document.getElementById('nfb');e&&(e.hidden=false)}}).catch(()=>{});
-  try{const c=await rpc('xa_carta',{p_slug:SLUG});if(c&&Array.isArray(c.productos)&&c.productos.length)D.productos=c.productos;if(c&&/^https:/.test(c.portada||'')&&!/^https:/.test(pf.portada||''))IMG.hero=c.portada}catch(_){}
+  try{const c=await rpc('xa_carta',{p_slug:SLUG});if(c&&Array.isArray(c.productos)&&c.productos.length)D.productos=c.productos.filter(p=>!D.ocultos.includes(p.id));if(c&&/^https:/.test(c.portada||'')&&!/^https:/.test(pf.portada||''))IMG.hero=c.portada}catch(_){}
  }catch(e){console.warn('Muestro la base',e)}
- if(!RES&&D.sub)D.sub=D.sub.replace(' y reserva o pide',' y pide');
  return D;
 }
 const mk=s=>esc(s).replace(/\((nombre[^)]*|distrito|dirección)\)/g,'<span class="mk">($1)</span>');
@@ -190,45 +190,47 @@ cargar().then(D=>{
  if(D.logo)$('#lg').innerHTML=`<img src="${esc(D.logo)}" alt="">`;else $('#lg').textContent=(N.replace(/[()]/g,'').trim()[0]||'R').toUpperCase();
  const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);$('#fab').href=wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.');
  if(Q.has('demo')||!SLUG){const d=document.createElement('span');d.className='demo';d.textContent=SLUG?'DEMO':'VISTA PREVIA';document.body.appendChild(d)}
- const P=D.productos||[],cats=[...new Set(P.map(p=>p.categoria||'Carta'))],dest=P.filter(p=>p.destacado&&!p.agotado).concat(P.filter(p=>!p.destacado&&!p.agotado)).slice(0,3);
+ const P=(D.productos||[]).map(p=>({...p,agotado:false})),cats=[...new Set(P.map(p=>p.categoria||'Carta'))],dest=P.filter(p=>p.destacado).concat(P.filter(p=>!p.destacado)).slice(0,3);
+ const SEC=k=>(D.sec||{})[k]!==false,CF=D.cafe||{},APT=D.appT||'Guárdanos en tu app',APX=D.appX||'Entérate de nuestros nuevos productos y de las promociones que tenemos para ti.';
  const hor=()=>{const d=D.dias.length&&D.dias.length<7?D.dias.slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(x=>DN[x]).join(', '):'Todos los días';return d+' · '+h12(D.desde)+' a '+h12(D.hasta)};
  const ab=abierto(D);let CAT='';const APP='https://xyrostudio.net/mi/?n='+encodeURIComponent(SLUG||'');
- const plC=(p,i)=>`<button class="pl ${p.agotado?'ag':''}" data-p="${esc(p.id)}" style="animation-delay:${Math.min(i,10)*.04}s"><div class="ft">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}${p.agotado?'<span class="tg x">Agotado</span>':+p.antes>+p.precio?'<span class="tg">Promo</span>':p.destacado?'<span class="tg">⭐ Favorito</span>':''}</div>
+ const plC=(p,i)=>`<button class="pl ${p.agotado?'ag':''}" data-p="${esc(p.id)}" style="animation-delay:${Math.min(i,10)*.04}s"><div class="ft">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}${+p.antes>+p.precio?'<span class="tg">Promo</span>':p.destacado?'<span class="tg">⭐ Favorito</span>':''}</div>
   <div class="bd"><h3>${esc(p.nombre)}</h3>${p.detalle?`<span class="mu sm ds">${esc(p.detalle)}</span>`:''}</div></button>`;
- const casa=()=>{const fav=P.filter(p=>!p.agotado&&p.foto).sort((a,b)=>(b.destacado?1:0)-(a.destacado?1:0)).slice(0,8),fo=P.filter(p=>p.foto).map(p=>p.foto),G=[CAF?IMC.barra:IMG.local,...fo.slice(0,2),CAF?IMC.gente:IMG.reserva,...fo.slice(2,4),CAF?IMC.maq:IMG.hero].filter(Boolean).slice(0,6);
-  const PT=CAF?[['☕','Café de altura','Granos seleccionados y molidos al momento para cada taza.'],['🧇','Hecho aquí','Waffles, postres y sándwiches que preparamos al pedirlos.'],['🛋️','Para quedarse','Un rincón tranquilo para conversar, leer o trabajar.']]:[['🔥','Cocina al momento','Cada plato sale de la cocina recién hecho.'],['🥬','Ingredientes frescos','Compramos cada mañana para que todo sepa mejor.'],['🤝','Atención de casa','Te atendemos como en familia.']];
-  return`${fav.length?`<section class="sec cs"><div class="wrap"><span class="eyb">${CAF?'Favoritos de la casa':'Lo más pedido'}</span><h2>${CAF?'Lo que todos <span class="serif">piden</span>':'Platos que <span class="serif">vuelven</span>'}</h2>
+ const casa=()=>{const fav=P.filter(p=>!p.agotado&&p.foto).sort((a,b)=>(b.destacado?1:0)-(a.destacado?1:0)).slice(0,8),fo=P.filter(p=>p.foto).map(p=>p.foto),G=D.gal&&D.gal.length?D.gal.slice(0,6):[CAF?IMC.barra:IMG.local,...fo.slice(0,2),CAF?IMC.gente:IMG.reserva,...fo.slice(2,4),CAF?IMC.maq:IMG.hero].filter(Boolean).slice(0,6);
+  const PT0=CAF?[['☕','Café de altura','Granos seleccionados y molidos al momento para cada taza.'],['🧇','Hecho aquí','Waffles, postres y sándwiches que preparamos al pedirlos.'],['🛋️','Para quedarse','Un rincón tranquilo para conversar, leer o trabajar.']]:[['🔥','Cocina al momento','Cada plato sale de la cocina recién hecho.'],['🥬','Ingredientes frescos','Compramos cada mañana para que todo sepa mejor.'],['🤝','Atención de casa','Te atendemos como en familia.']];
+  const PT=PT0.map((d,i)=>{const x=(CF.pts||[])[i]||[];return[x[0]||d[0],x[1]||d[1],x[2]!=null&&x[1]?x[2]:d[2]]}).filter(x=>x[1]);
+  return`${fav.length&&SEC('fav')?`<section class="sec cs"><div class="wrap"><span class="eyb">${CAF?'Favoritos de la casa':'Lo más pedido'}</span><h2>${CAF?'Lo que todos <span class="serif">piden</span>':'Platos que <span class="serif">vuelven</span>'}</h2>
    <div class="fv">${fav.map(p=>`<button class="fvc" data-p="${esc(p.id)}"><img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.style.display='none'"><span><b>${esc(p.nombre)}</b>${p.detalle?`<small>${esc(p.detalle)}</small>`:''}</span></button>`).join('')}</div>
    <a class="btn btn-o" href="#/carta" style="margin-top:22px">📖 Ver toda la carta</a></div></section>`:''}
-  <section class="sec cs"><div class="wrap hs"><div class="hsi" style="background-image:url('${esc(CAF?IMG.reserva:IMG.local)}')"></div><div><span class="eyb">${CAF?'Nuestro café':'Nuestra cocina'}</span><h2>${CAF?'Hecho con calma, <span class="serif">servido con cariño</span>':'Sabor de casa, <span class="serif">todos los días</span>'}</h2><p class="mu" style="max-width:52ch">${esc(D.sub)}</p>
-   <div class="pts">${PT.map(([e,t,d])=>`<div><em>${e}</em><b>${t}</b><span class="mu sm">${d}</span></div>`).join('')}</div></div></div></section>
-  <section class="sec cs"><div class="wrap"><span class="eyb">${CAF?'El ambiente':'Nuestro local'}</span><h2>Ven a <span class="serif">conocernos</span></h2><div class="gal">${G.map((u,i)=>`<div class="gi g${i}" style="background-image:url('${esc(u)}')"></div>`).join('')}</div></div></section>
-  <section class="sec cs"><div class="wrap vis"><div class="card"><span class="eyb">Horario</span><h3 style="font-size:30px;margin:6px 0 10px">${ab?'Abierto ahora':'Hoy abrimos a las '+esc(h12(D.desde))}</h3><p class="mu">${esc(hor())}</p>
+  ${SEC('cafe')?`<section class="sec cs"><div class="wrap hs"><div class="hsi" style="background-image:url('${esc(CAF||IMG.cafe?IMG.cafe||IMG.reserva:IMG.local)}')"></div><div><span class="eyb">${esc(CF.eyb||(CAF?'Nuestro café':'Nuestra cocina'))}</span><h2>${CF.tit?esc(CF.tit):CAF?'Hecho con calma, <span class="serif">servido con cariño</span>':'Sabor de casa, <span class="serif">todos los días</span>'}</h2><p class="mu" style="max-width:52ch">${esc(CF.txt||D.sub)}</p>
+   <div class="pts">${PT.map(([e,t,d])=>`<div><em>${esc(e)}</em><b>${esc(t)}</b><span class="mu sm">${esc(d)}</span></div>`).join('')}</div></div></div></section>`:''}
+  ${SEC('gal')?`<section class="sec cs"><div class="wrap"><span class="eyb">${CAF?'El ambiente':'Nuestro local'}</span><h2>Ven a <span class="serif">conocernos</span></h2><div class="gal">${G.map((u,i)=>`<div class="gi g${i}" style="background-image:url('${esc(u)}')"></div>`).join('')}</div></div></section>`:''}
+  ${SEC('visita')?`<section class="sec cs"><div class="wrap vis"><div class="card"><span class="eyb">Horario</span><h3 style="font-size:30px;margin:6px 0 10px">${ab?'Abierto ahora':'Hoy abrimos a las '+esc(h12(D.desde))}</h3><p class="mu">${esc(hor())}</p>
    <div class="pg" style="margin-top:14px">${(D.pagos||[]).map(p=>`<span class="chip">${esc(p)}</span>`).join('')}</div></div>
    <div class="card"><span class="eyb">Dónde estamos</span><h3 style="font-size:30px;margin:6px 0 10px">${mk((D.sedes[0]||{}).nombre||N)}</h3><p class="mu">${mk([(D.sedes[0]||{}).direccion,(D.sedes[0]||{}).distrito].filter(Boolean).join(' · '))}${D.sedes.length>1?` · y ${D.sedes.length-1} sede${D.sedes.length>2?'s':''} más`:''}</p>
-   <div class="row" style="margin-top:14px"><a class="btn btn-p" href="#/local">🧭 Cómo llegar</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.')}">💬 Escríbenos</a></div></div></div></section>
-  ${appBan()}`};
- const appBan=()=>`<section class="sec" style="padding-top:0"><div class="wrap"><a class="card apb" href="#/app"><span style="font-size:34px">📱</span><span><b>${RES?'Reserva y pide':'Pide'} desde la app Mi Xyro</b><span class="mu sm">Precios, promos solo por la app y pedidos desde tu mesa.</span></span><span class="btn btn-p">Descargar</span></a></div></section>`;
+   <div class="row" style="margin-top:14px"><a class="btn btn-p" href="#/local">🧭 Cómo llegar</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.')}">💬 Escríbenos</a></div></div></div></section>`:''}
+  ${SEC('app')?appBan():''}`};
+ const appBan=()=>`<section class="sec" style="padding-top:0"><div class="wrap"><a class="card apb" href="#/app"><span style="font-size:34px">📱</span><span><b>Guarda ${mk(N)} en Mi Xyro</b><span class="mu sm">${esc(APX)}</span></span><span class="btn btn-p">Descargar</span></a></div></section>`;
  const V={
   '':()=>`<section class="hero"><div class="bg" style="background-image:url('${esc(IMG.hero)}')"></div><div class="wrap"><div>
    <span class="nfb" id="nfb" ${D.fund?'':'hidden'} title="Fue el primer negocio de su rubro en confiar en XyroStudio">🏅 Negocio fundador · XyroStudio</span>
    <span class="est ${ab?'':'c'}"><i></i>${ab?'Abierto ahora · hasta las '+esc(h12(D.hasta)):'Cerrado ahora · abrimos '+esc(h12(D.desde))}</span>
-   <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
-   <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/app">📱 ${RES?'Reserva y pide':'Pide'} en la app</a></div>
+   <h1>${D.hero?esc(D.hero):`${mk(N)}`}<br><span class="serif">${D.lema?esc(D.lema):CAF?'tu café de cada día.':'sabor que vuelve.'}</span></h1><p class="ld">${esc(D.sub)}</p>
+   <div class="row"><a class="btn btn-p" href="#/carta">📖 Ver la carta</a><a class="btn btn-o" href="#/app">📱 Guárdanos en la app</a></div>
    <div class="chips" style="margin-top:22px">${cats.slice(0,6).map(c=>`<a class="chip" href="#/carta" data-gc="${esc(c)}">${esc(c)}</a>`).join('')}</div></div>
    <div class="hc"><span class="eyb">Lo más pedido</span>${dest.map(p=>`<button class="it" data-p="${esc(p.id)}" style="text-align:left">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.outerHTML='<span class=e>${esc(p.emoji||'🍽️')}</span>'">`:`<span class="e">${esc(p.emoji||'🍽️')}</span>`}<span><b>${esc(p.nombre)}</b><span class="mu xs">${esc(p.categoria||'')}</span></span></button>`).join('')}
-   <a class="mu xs" href="#/app" style="text-decoration:none">📱 Precios, promos${RES?' y reservas':''} en la app Mi Xyro →</a></div></div></section>${casa()}`,
-  carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">Toca ${CAF?'un producto':'un plato'} para verlo en grande. Precios, promos y pedidos en la app.</p>
+   <a class="mu xs" href="#/app" style="text-decoration:none">📱 Novedades y promos en la app Mi Xyro →</a></div></div></section>${casa()}`,
+  carta:()=>{const L=P.filter(p=>!CAT||(p.categoria||'Carta')===CAT);return`<section class="sec"><div class="wrap"><span class="eyb">Carta</span><h2>Nuestra <span class="serif">carta</span></h2><p class="mu">Toca ${CAF?'un producto':'un plato'} para verlo en grande.</p>
    <div class="cats"><div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div></div>
    <div class="grid">${L.map(plC).join('')||'<p class="mu">Pronto subimos la carta.</p>'}</div></div></section>${appBan()}`},
-  app:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">App Mi Xyro · gratis</span><h2>${RES?'Reserva y pide':'Pide y ahorra'} <span class="serif">desde tu celular</span></h2>
-   <p class="mu" style="margin-bottom:18px">Escanea el código, guarda ${mk(N)} en tu app y listo.</p>
+  app:()=>`<section class="sec"><div class="wrap rs"><div><span class="eyb">App Mi Xyro · gratis</span><h2>${esc(APT)}</h2>
+   <p class="mu" style="margin-bottom:18px">Escanea el código y guarda ${mk(N)} en Mi Xyro. ${esc(APX)}</p>
    <div class="card ap"><div class="qrw" id="qrw"><span class="mu xs">Cargando QR…</span></div><div class="apl">
-    ${RES?'<div>📅 <b>Reserva tu mesa</b><span class="mu sm">Eliges día, hora y personas.</span></div>':''}
-    <div>📱 <b>Pide desde tu mesa</b><span class="mu sm">Escanea el QR de la mesa y te lo llevamos.</span></div>
-    <div>🎁 <b>Promos solo por la app</b><span class="mu sm">Precios y novedades al día.</span></div></div></div>
+    <div>✨ <b>Lo nuevo primero</b><span class="mu sm">Te enteras cuando sacamos algo nuevo.</span></div>
+    <div>🎁 <b>Promos para ti</b><span class="mu sm">Ofertas que solo ven quienes nos guardan.</span></div>
+    <div>📍 <b>Siempre a la mano</b><span class="mu sm">Carta, horario y cómo llegar en tu celular.</span></div></div></div>
    <div class="row" style="margin-top:16px"><a class="btn btn-p" href="${esc(APP)}" target="_blank" rel="noopener">📲 Abrir la app</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+N.replace(/[()]/g,'')+' 👋 Quiero información.')}">💬 Pedir información</a></div></div>
-   <div class="ph" style="background-image:url('${esc(IMG.reserva)}')"><div class="q">Tu mesa, tus pedidos y tus promos en un solo lugar. <b>— Mi Xyro</b></div></div></div></section>`,
+   <div class="ph" style="background-image:url('${esc(IMG.app||IMG.reserva)}')"><div class="q">Tus lugares favoritos y sus promos en un solo lugar. <b>— Mi Xyro</b></div></div></div></section>`,
   local:()=>{const s=D.sedes;return`<section class="sec"><div class="wrap"><span class="eyb">Visítanos</span><h2>Cómo <span class="serif">llegar</span></h2>
    <div class="lc" style="margin-top:20px"><div style="display:grid;gap:14px">${s.map(x=>{const q=encodeURIComponent((x.direccion||x.distrito||'')+' '+String(N).replace(/[()]/g,''));return`<div class="card"><h3 style="font-family:inherit;font-size:20px;font-weight:800">${mk(x.nombre||N)}</h3><p class="mu sm">${mk([x.direccion,x.distrito].filter(Boolean).join(' · '))}</p>
     <div style="margin:12px 0">${(Array.isArray(x.horario)&&x.horario.length?x.horario.map(h=>Array.isArray(h)?h:[h,'']):[[hor(),'']]).map(h=>`<div class="hr"><span>${esc(h[0])}</span><b>${esc(h[1]||'')}</b></div>`).join('')}</div>
@@ -241,8 +243,7 @@ cargar().then(D=>{
   const q=qrcode(0,'M');q.addData(APP);q.make();el.innerHTML=q.createSvgTag({cellSize:5,margin:2,scalable:true})+'<span class="mu xs">Escanéalo con tu cámara</span>'}catch(_){el.innerHTML='<a class="btn btn-p" href="'+esc(APP)+'">Abrir la app</a>'}}
  function ver(id){const p=P.find(x=>x.id===id);if(!p)return;const o=document.createElement('div');o.className='ov';
   o.innerHTML=`<div class="sh" style="position:relative"><button class="xb" data-x aria-label="Cerrar">✕</button><div class="im">${ft(p)}${p.foto?'':esc(p.emoji||'🍽️')}</div><div class="bd"><span class="eyb">${esc(p.categoria||'Carta')}</span><h2 style="font-size:32px">${esc(p.nombre)}</h2>${p.detalle?`<p class="mu">${esc(p.detalle)}</p>`:''}
-   <div class="row" style="justify-content:space-between;margin-top:6px"><span></span>${p.agotado?'<span class="chip">Agotado hoy</span>':''}</div>
-   <p class="mu sm">Precios, promos y pedidos en la app Mi Xyro. En el local, escanea el QR de tu mesa.</p><div class="row"><a class="btn btn-p" href="#/app" data-x>📱 Pídelo desde la app</a></div></div></div>`;
+   <p class="mu sm">Guárdanos en la app Mi Xyro y entérate de nuestras novedades y promociones.</p><div class="row"><a class="btn btn-p" href="#/app" data-x>📱 Guárdanos en la app</a></div></div></div>`;
   document.body.appendChild(o);o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()}}
  function go(){const r=(location.hash.slice(2)||'').split('/')[0],k=V[r]?r:'';$('#app').innerHTML=`<div class="scr on">${V[k]()}${'<footer class="foot">© '+new Date().getFullYear()+' '+mk(N)+' · Hecho con <a href="https://xyrostudio.net" target="_blank" rel="noopener">XyroStudio</a></footer>'}</div>`;scrollTo(0,0);
   $$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===k));const t=$('#tabs .on'),ind=$('#tabs .ind');if(t&&ind){ind.style.left=t.offsetLeft+'px';ind.style.width=t.offsetWidth+'px'}
