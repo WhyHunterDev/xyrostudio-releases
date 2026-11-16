@@ -1,5 +1,18 @@
 [
  {
+  "id": "20261115-2147",
+  "fecha": "2026-11-15 21:47",
+  "titulo": "Mi web más completa",
+  "notas": "Mi web más completa",
+  "cambios": [
+   "Ahora puedes editar casi todo tu web: portada, textos, fotos de tu local, galería, secciones y qué productos salen",
+   "La web ya no muestra «agotado» ni reservas: invita a guardar el negocio en Mi Xyro"
+  ],
+  "rubros": [
+   "restaurante"
+  ]
+ },
+ {
   "id": "20261115-2142",
   "fecha": "2026-11-15 21:42",
   "titulo": "Lo tuyo en morado",
