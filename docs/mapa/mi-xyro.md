@@ -42,3 +42,5 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 ## Eliminar cuenta y privacidad (2026-11-16, SQL 68)
 - Perfil → pie «Eliminar mi cuenta» (`borrarCuenta`, escribe ELIMINAR) → RPC `xa_yo_borrar_cuenta` borra auth.users (cascada). Rechaza cuentas con `perfiles` (staff/dueños). Borra fotos `medios/mi/<id>/` antes.
 - `/mi/?borrar=1` abre el diálogo tras entrar. Política de la app: `/mi/privacidad.html` (#eliminar = URL de borrado para Google Play).
+
+- 2026-11-17: portada xyrostudio.net tiene ruta `#/entrar` (botón «Entrar» arriba + chip en Inicio): «Soy cliente» inicia/crea cuenta Mi Xyro (storageKey `xyro-mi-auth`, Google/correo, redirige a /mi/); «Soy negocio» entra a Xyro Apps (usuario@negocio, `xyro-apps-auth`, xa_login_espera/fallo) y va a /app/. Pase 3D con QR decorativo. Código al final de `web/public/index.html`.
