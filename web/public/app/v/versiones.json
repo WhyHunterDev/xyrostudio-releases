@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261117-1718",
+  "fecha": "2026-11-17 17:18",
+  "titulo": "Todo en Mi Xyro web",
+  "notas": "Todo en Mi Xyro web",
+  "cambios": [
+   "Ya no dice «app» para tus clientes: ahora dice Mi Xyro (funciona desde la web, sin descargar)",
+   "Ej.: «Pacientes desde Mi Xyro», «Invitar a Mi Xyro», «Tu perfil en Mi Xyro»"
+  ]
+ },
+ {
   "id": "20261117-1607",
   "fecha": "2026-11-17 16:07",
   "titulo": "Mi Xyro sin descargas",
