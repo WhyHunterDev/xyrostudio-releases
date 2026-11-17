@@ -263,6 +263,57 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 @keyframes fb{0%,100%{box-shadow:0 0 0 0 #25d36666,0 14px 40px -12px #25d366}50%{box-shadow:0 0 0 12px #25d36600,0 14px 40px -12px #25d366}}
 @media(max-width:600px){.fab span{display:none}.fab{padding:14px;right:14px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01s!important}}
+
+/* ===== Entrar (cuenta Xyro) ===== */
+body.v-entrar .fab{opacity:0;pointer-events:none}
+.ubtn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:99px;font-size:14px;font-weight:600;border:1px solid var(--line2);background:#ffffff0a;backdrop-filter:blur(8px);transition:all .2s;margin-left:auto}
+.ubtn:hover,.ubtn.on{border-color:var(--ac);background:#7c5cff22}
+.ubtn .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--ac),var(--cy));font-size:12px;font-weight:800;color:#fff}
+.top .wa{margin-left:0}
+@media(max-width:820px){.ubtn .t{display:none}.ubtn{padding:5px}}
+.echip{display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:8px 14px 8px 8px;border-radius:99px;border:1px solid var(--line2);background:#ffffff08;font-size:14px;transition:all .25s}
+.echip:hover{border-color:var(--cy);transform:translateY(-2px)}
+.echip b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--cy));font-size:14px}
+.echip span{color:var(--mut)}.echip span i{font-style:normal;color:var(--tx);font-weight:600}
+.ent{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,5vw,72px);align-items:center;width:100%;max-width:1120px}
+.ent h2{font-size:clamp(30px,4.2vw,52px);margin:14px 0}
+.ent .lead2{max-width:46ch;margin-bottom:26px}
+.pase{position:relative;width:min(400px,100%);aspect-ratio:1.58;border-radius:24px;padding:22px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;gap:10px;color:#fff;
+ background:radial-gradient(120% 140% at 0% 0%,#7c5cff 0%,#2a1d6e 38%,#0b0d18 70%),#0b0d18;box-shadow:0 0 0 1px #ffffff26 inset,0 40px 80px -30px #7c5cffaa,0 20px 40px -20px #000;transform-style:preserve-3d;transition:transform .15s ease-out;will-change:transform;overflow:hidden}
+.pase::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff40 45%,#3ad6ff33 50%,transparent 62%);background-size:250% 100%;background-position:var(--sx,100%) 0;mix-blend-mode:screen;pointer-events:none}
+.pase::after{content:"";position:absolute;width:260px;height:260px;right:-90px;bottom:-120px;border-radius:50%;background:radial-gradient(closest-side,#3ad6ff55,transparent);pointer-events:none}
+.pase .pt{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;font-size:12px}.pase .pt img{width:34px;height:34px;border-radius:9px}
+.pase .pq{grid-row:1/3;grid-column:2;width:96px;height:96px;background:#fff;border-radius:12px;padding:7px;transform:translateZ(30px)}
+.pase .pq svg{width:100%;height:100%;display:block}
+.pase .pn{align-self:end;transform:translateZ(20px)}.pase .pn small{display:block;font-size:11px;letter-spacing:.12em;opacity:.65;text-transform:uppercase}
+.pase .pn b{font-size:22px;letter-spacing:-.02em;display:block;max-width:15ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pase .pr{grid-column:1/3;display:flex;gap:6px;flex-wrap:wrap;transform:translateZ(14px)}
+.pase .pr span{font-size:12px;padding:4px 9px;border-radius:99px;background:#ffffff1f;border:1px solid #ffffff2a;transition:all .3s}
+.pase .pr span.on{background:#fff;color:#111}
+.pase .ok{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;background:#0b0d18e6;opacity:0;transition:opacity .4s;text-align:center;font-weight:700}
+.pase .ok i{font-style:normal;font-size:46px;transform:scale(.3);transition:transform .5s cubic-bezier(.2,1.6,.4,1)}
+.pase.done .ok{opacity:1}.pase.done .ok i{transform:none}
+.pfeat{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:14px;color:var(--mut)}.pfeat b{color:var(--tx)}
+.ecard{background:#0d1019d9;border:1px solid var(--line2);border-radius:24px;padding:26px;display:grid;gap:14px;backdrop-filter:blur(18px);box-shadow:0 30px 80px -30px #000,0 0 0 1px #7c5cff22;position:relative}
+.ecard h3{font-size:24px}
+.eseg{display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:14px;background:#ffffff0a;border:1px solid var(--line);position:relative}
+.eseg button{position:relative;z-index:1;padding:10px;border-radius:10px;font-weight:600;font-size:14px;color:var(--mut);transition:color .3s}
+.eseg button.on{color:#fff}
+.eseg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:10px;background:linear-gradient(135deg,var(--ac),var(--ac2));transition:transform .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 8px 20px -8px #7c5cff}
+.eseg.r .pill{transform:translateX(100%)}
+.efl{display:grid;gap:12px}
+.efl label{display:grid;gap:6px;font-size:13px;color:var(--mut);font-weight:600}
+.efl input{width:100%;padding:13px 14px;border-radius:12px;background:#ffffff08;border:1px solid var(--line2);font-size:16px;transition:border-color .2s,box-shadow .2s}
+.efl input:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 4px #7c5cff2e}
+.efl .btn{width:100%}
+.egg{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:12px;background:#fff;color:#1f1f1f;font-weight:600;transition:transform .2s}.egg:hover{transform:translateY(-2px)}
+.eor{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mut)}.eor::before,.eor::after{content:"";flex:1;height:1px;background:var(--line2)}
+.emsg{display:none;font-size:14px;padding:10px 12px;border-radius:10px;background:#ef444422;border:1px solid #ef444455}.emsg.on{display:block}.emsg.ok{background:#3ddc9722;border-color:#3ddc9755}
+.elk{font-size:13px;color:var(--mut);text-align:center}.elk a,.elk button{color:var(--tx);font-weight:600;text-decoration:underline;text-decoration-color:var(--cy);text-underline-offset:3px}
+.esub{display:flex;gap:16px;font-size:14px}.esub button{color:var(--mut);font-weight:600;padding-bottom:4px;border-bottom:2px solid transparent}.esub button.on{color:var(--tx);border-color:var(--cy)}
+.ehp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.ewho{display:grid;gap:12px;text-align:center;justify-items:center}.ewho .av{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--ac),var(--cy))}
+@media(max-width:900px){.ent{grid-template-columns:1fr;gap:22px}.ent-l{order:2}.ent h2{font-size:30px}.pase{width:min(360px,100%)}.ecard{padding:20px}}
 </style></head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="tt" viewBox="0 0 24 24"><path fill="currentColor" d="M16.6 2h-3.3v13.3a2.9 2.9 0 1 1-2.1-2.8V9.1a6.3 6.3 0 1 0 5.4 6.2V8.6a7.7 7.7 0 0 0 4.4 1.4V6.7a4.4 4.4 0 0 1-4.4-4.4Z"/></symbol><symbol id="ig" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></symbol><symbol id="fb" viewBox="0 0 24 24"><path fill="currentColor" d="M14 8.5V6.8c0-.8.2-1.3 1.4-1.3H17V2.2A21 21 0 0 0 14.6 2C12.2 2 10.6 3.5 10.6 6.1v2.4H8v3.7h2.6V22H14v-9.8h2.7l.4-3.7H14Z"/></symbol><symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3Z"/></symbol></svg>
@@ -271,6 +322,7 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 <header class="top">
 <a class="logo" href="#/" aria-label="XyroStudio, inicio"><img class="tile" src="img/marca/logo-xyrostudio-app.svg" alt="" width="32" height="32"><span><b>Xyro</b>Studio</span></a>
 <nav class="tnav" aria-label="Secciones"><a href="#/" data-v="home">Inicio</a><a href="#/negocios" data-v="negocios">Gimnasios y clínicas</a><a href="#/webs" data-v="webs">Ecosistema</a><a href="#/arma" data-v="arma">Arma el tuyo</a><a href="#/resultados" data-v="resultados">Resultados</a></nav>
+<a class="ubtn" id="ubtn" href="#/entrar" data-v="entrar"><span class="av"><svg class="ico" style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span class="t">Entrar</span></a>
 <a class="btn btn-p wa" data-msg="quiero mejorar mi negocio" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg><span>Hablemos</span></a>
 </header>
 
@@ -283,7 +335,7 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 <h1 id="h1"></h1>
 <p class="lead mut in-2">Webs, apps, control, bots y contenido con IA conectados entre sí. <a href="#/negocios" style="color:var(--tx);font-weight:700;text-decoration:underline;text-decoration-color:var(--cy);text-underline-offset:4px">Ya listos para gimnasios y consultorios dentales →</a></p>
 <div class="in-3"><div class="pick" id="rubros" role="group" aria-label="Tu rubro"></div>
-<div class="inrow"><input id="nom" maxlength="28" placeholder="Nombre de tu negocio" autocomplete="off" aria-label="Nombre de tu negocio"><a class="btn btn-p" href="#/webs">Entrar al ecosistema →</a></div><div class="redes" aria-label="Síguenos"><a href="https://www.tiktok.com/@xyrostudio.net" target="_blank" rel="noopener" aria-label="TikTok"><svg class="ico"><use href="#tt"/></svg></a><a href="https://www.instagram.com/xyrostudio_/" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ico"><use href="#ig"/></svg></a><a href="https://www.facebook.com/profile.php?id=61596799371612" target="_blank" rel="noopener" aria-label="Facebook"><svg class="ico"><use href="#fb"/></svg></a></div></div>
+<div class="inrow"><input id="nom" maxlength="28" placeholder="Nombre de tu negocio" autocomplete="off" aria-label="Nombre de tu negocio"><a class="btn btn-p" href="#/webs">Entrar al ecosistema →</a></div><a class="echip" href="#/entrar" id="echip"><b>✦</b><span><i>Tu cuenta Xyro</i> · entra o regístrate gratis</span></a><div class="redes" aria-label="Síguenos"><a href="https://www.tiktok.com/@xyrostudio.net" target="_blank" rel="noopener" aria-label="TikTok"><svg class="ico"><use href="#tt"/></svg></a><a href="https://www.instagram.com/xyrostudio_/" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ico"><use href="#ig"/></svg></a><a href="https://www.facebook.com/profile.php?id=61596799371612" target="_blank" rel="noopener" aria-label="Facebook"><svg class="ico"><use href="#fb"/></svg></a></div></div>
 </div>
 <div class="in-4"><div class="orb" id="orb">
 <div class="ring" id="ring"></div>
@@ -415,6 +467,24 @@ main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
 </div></section>
 
 <!-- RESULTADOS -->
+<!-- ENTRAR -->
+<section class="view" data-v="entrar" aria-label="Entrar a tu cuenta"><div class="wrap ent">
+<div class="ent-l in-1">
+<span class="eti"><i></i>Una cuenta, todos tus lugares</span>
+<h2>Tu gimnasio, tu dentista y tu café <span class="grad">en un solo pase.</span></h2>
+<p class="lead mut lead2">Con tu cuenta Xyro tienes tu QR de entrada, tus citas, tus pedidos y tus sellos de cada negocio que usa XyroStudio. Funciona desde la web, sin descargar nada.</p>
+<div class="pase" id="pase" aria-hidden="true">
+ <div class="pt"><img src="img/marca/logo-xyrostudio-app.svg" alt="" width="34" height="34">PASE XYRO</div>
+ <div class="pq" id="pq"></div>
+ <div class="pn"><small id="pk">Bienvenido</small><b id="pn">Tu nombre aquí</b></div>
+ <div class="pr" id="pr"><span>🏋️ Gym</span><span>🦷 Dental</span><span>☕ Café</span><span>🍽️ Resto</span></div>
+ <div class="ok"><i>✓</i><span id="pok">¡Listo! Entrando…</span></div>
+</div>
+<div class="pfeat"><span>🎟️ <b>QR de entrada</b></span><span>📅 <b>Citas y reservas</b></span><span>🎁 <b>Promos y sellos</b></span></div>
+</div>
+<div class="ent-c in-2"><div class="ecard" id="ecard"></div></div>
+</div></section>
+
 <section class="view" data-v="resultados" aria-label="Resultados"><div class="cards">
 <a class="card in-1" href="https://whyhunterdev.github.io/santos-strength/" target="_blank" rel="noopener" style="--acc:#f5b544">
 <div class="ph"><img src="img/santos.webp" srcset="img/santos-480.webp 480w,img/santos.webp 800w" sizes="(max-width:900px) 100vw,640px" alt="Gimnasio Santos Strength" loading="lazy" width="800" height="450"><div class="lg"><img src="img/santos-logo.webp" alt="" width="30" height="30" loading="lazy">Santos Strength</div></div>
@@ -443,7 +513,7 @@ restaurante:{n:'Restaurante',def:'Sabor Norteño',em:'🍽️',c:'#dc2626',tit:'
 };
 var D=[['webs','Webs','#7c5cff'],['apps','Apps','#3ad6ff'],['control','Control','#f5b544'],['bots','Bots','#3ddc97'],['edits','Edits','#b06bff']];
 var ORDER=['home','negocios','webs','apps','control','bots','edits','arma','resultados'];
-var ACC={home:'#7c5cff',negocios:'#14b8a6',arma:'#7c5cff',resultados:'#3ad6ff'};D.forEach(function(d){ACC[d[0]]=d[2]});
+var ACC={entrar:'#7c5cff',home:'#7c5cff',negocios:'#14b8a6',arma:'#7c5cff',resultados:'#3ad6ff'};D.forEach(function(d){ACC[d[0]]=d[2]});
 var st={r:'panaderia',nom:'',v:'home',color:null,tit:null,sel:{webs:1,bots:1}};
 function rb(){return R[st.r]}function name(){return st.nom||rb().def}
 function money(v){return 'S/ '+v.toFixed(2)}
@@ -469,14 +539,14 @@ if(matchMedia('(hover:hover)').matches&&!RM){dock.addEventListener('mousemove',f
 var lastPt=null;
 document.addEventListener('click',function(e){var g=e.target.closest('[data-go]');if(g){e.preventDefault();lastPt=[e.clientX,e.clientY];location.hash='#/'+(g.dataset.go==='home'?'':g.dataset.go);return}
  var a=e.target.closest('a[href^="#/"]');if(a){lastPt=[e.clientX,e.clientY]}},true);
-function route(){var v=(location.hash.match(/^#\/(\w+)/)||[])[1]||'home';if(ORDER.indexOf(v)<0)v='home';show(v)}
+function route(){var v=(location.hash.match(/^#\/(\w+)/)||[])[1]||'home';if(ORDER.indexOf(v)<0&&v!=='entrar')v='home';show(v)}
 function show(v){var prev=st.v;st.v=v;var acc=ACC[v];document.documentElement.style.setProperty('--acc',acc);
  if(prev!==v&&lastPt&&!RM){var f=$('#flash');f.style.setProperty('--fx',lastPt[0]+'px');f.style.setProperty('--fy',lastPt[1]+'px');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
  lastPt=null;
  $$('.view').forEach(function(s){var on=s.dataset.v===v;s.classList.toggle('on',on);if(on)s.scrollTop=0});
  dbs.forEach(function(b){b.classList.toggle('on',b.dataset.go===v)});
  $$('.tnav a').forEach(function(a){a.classList.toggle('on',a.dataset.v===v||(a.dataset.v==='webs'&&D.some(function(d){return d[0]===v})))});
- if(v==='bots')botReset();if(v==='edits')reelStart();else reelStop();
+ var ub=$('#ubtn');if(ub)ub.classList.toggle('on',v==='entrar');document.body.classList.toggle('v-entrar',v==='entrar');if(v==='entrar'&&window.entShow)entShow();if(v==='bots')botReset();if(v==='edits')reelStart();else reelStop();
  document.title=(v==='home'?'XyroStudio · El ecosistema digital para tu negocio':($('.view[data-v="'+v+'"]').getAttribute('aria-label')+' · XyroStudio'))}
 addEventListener('hashchange',route);
 addEventListener('keydown',function(e){if(/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;var i=ORDER.indexOf(st.v);if(e.key==='ArrowRight'&&i<ORDER.length-1)location.hash='#/'+ORDER[i+1];if(e.key==='ArrowLeft'&&i>0)location.hash='#/'+(ORDER[i-1]==='home'?'':ORDER[i-1])});
@@ -572,6 +642,77 @@ function frame(){if(!run)return;cx.clearRect(0,0,W,H);var a=hex(ACC[st.v]||'#7c5
 size();addEventListener('resize',size);
 if(!RM)requestAnimationFrame(frame);else{run=false}
 document.addEventListener('visibilitychange',function(){var r=!document.hidden&&!RM;if(r&&!run){run=true;requestAnimationFrame(frame)}else run=r});
+})();
+</script>
+<script>(function(){
+var SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'},MI=location.origin+'/mi/',APP=location.origin+'/app/';
+var q=function(x,r){return (r||document).querySelector(x)},card=q('#ecard'),pase=q('#pase'),RMx=matchMedia('(prefers-reduced-motion:reduce)').matches;
+var T={tab:'cli',sub:'entrar'},sbM=null,sbA=null,lib=null;
+function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function ses(k){try{var j=JSON.parse(localStorage.getItem(k)||'null');if(j&&j.user&&j.expires_at&&(j.refresh_token||j.expires_at*1000>Date.now()))return j.user}catch(_){}return null}
+function nomDe(u){var m=(u&&u.user_metadata)||{};return String(m.nombre||m.full_name||m.name||(u&&u.email||'').split('@')[0]||'').trim()}
+function libSB(){if(lib)return lib;lib=new Promise(function(ok,ko){if(window.supabase)return ok();var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';s.onload=ok;s.onerror=function(){lib=null;ko(new Error('Sin conexión. Revisa tu internet.'))};document.head.appendChild(s)});return lib}
+function cMi(){return libSB().then(function(){return sbM||(sbM=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-mi-auth',persistSession:true,autoRefreshToken:false,detectSessionInUrl:false}}))})}
+function cApp(){return libSB().then(function(){return sbA||(sbA=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-apps-auth',persistSession:true,autoRefreshToken:false,detectSessionInUrl:false}}))})}
+function err(e){var t=String(e&&(e.message||e.error)||e||'');
+ if(/Invalid login/i.test(t))return 'Correo o clave incorrectos.';if(/already registered|already been registered/i.test(t))return 'Ese correo ya tiene cuenta. Toca «Entrar».';
+ if(/Password should/i.test(t))return 'Tu clave debe tener al menos 6 caracteres.';if(/not confirmed/i.test(t))return 'Confirma tu correo: te enviamos un enlace.';
+ if(/rate limit|security purposes|too many/i.test(t))return 'Espera un minuto y vuelve a intentar.';if(/provider is not enabled|Unsupported provider/i.test(t))return 'El ingreso con Google se activa muy pronto. Usa tu correo por ahora.';
+ if(/fetch|network/i.test(t))return 'Sin conexión. Revisa tu internet.';return t||'Algo salió mal. Intenta de nuevo.'}
+/* QR decorativo que cambia con tu nombre */
+function hash(x){var h=2166136261;for(var i=0;i<x.length;i++){h^=x.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function qr(seed){var n=21,h=hash(seed||'xyro'),r='',fz=function(x,y){return (x<8&&y<8)||(x>n-9&&y<8)||(x<8&&y>n-9)};
+ for(var y=0;y<n;y++)for(var x=0;x<n;x++){if(fz(x,y))continue;h^=h<<13;h^=h>>>17;h^=h<<5;h>>>=0;if(h%100<48)r+='M'+x+' '+y+'h1v1h-1z'}
+ var f=function(x,y){return 'M'+x+' '+y+'h7v7h-7zM'+(x+1)+' '+(y+1)+'v5h5v-5zM'+(x+2)+' '+(y+2)+'h3v3h-3z'};
+ q('#pq').innerHTML='<svg viewBox="0 0 21 21" shape-rendering="crispEdges"><path fill="#0b0d18" fill-rule="evenodd" d="'+f(0,0)+f(14,0)+f(0,14)+r+'"/></svg>'}
+function paseNom(v,k){q('#pn').textContent=v||'Tu nombre aquí';if(k)q('#pk').textContent=k;qr(v)}
+var pi=0;setInterval(function(){if(document.hidden||!pase.offsetParent)return;var c=pase.querySelectorAll('.pr span');c.forEach(function(e,i){e.classList.toggle('on',i===pi%c.length)});pi++},1600);
+if(!RMx&&matchMedia('(hover:hover)').matches){var ar=q('.ent');ar.addEventListener('mousemove',function(e){var b=pase.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;x=Math.max(-.8,Math.min(.8,x));y=Math.max(-.8,Math.min(.8,y));pase.style.transform='perspective(900px) rotateY('+(x*18).toFixed(2)+'deg) rotateX('+(-y*14).toFixed(2)+'deg)';pase.style.setProperty('--sx',(50+x*-90)+'%')});ar.addEventListener('mouseleave',function(){pase.style.transform='';pase.style.setProperty('--sx','100%')})}
+function listo(txt,url){q('#pok').textContent=txt;pase.classList.add('done');setTimeout(function(){location.href=url},RMx?200:1100)}
+function say(t,ok){var m=q('#em',card);m.textContent=t;m.className='emsg on'+(ok?' ok':'')}
+var GG='<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
+function pinta(){var um=ses('xyro-mi-auth'),ua=ses('xyro-apps-auth'),h='';
+ h+='<div class="eseg'+(T.tab==='neg'?' r':'')+'" role="tablist"><span class="pill"></span><button type="button" data-t="cli" class="'+(T.tab==='cli'?'on':'')+'">👤 Soy cliente</button><button type="button" data-t="neg" class="'+(T.tab==='neg'?'on':'')+'">🏪 Soy negocio</button></div>';
+ if(T.tab==='cli'&&um){var n=nomDe(um);h+='<div class="ewho"><div class="av">'+esc((n[0]||'X').toUpperCase())+'</div><h3>Hola, '+esc(n.split(' ')[0])+' 👋</h3><p class="mut">Ya tienes tu sesión abierta en este equipo.</p><a class="btn btn-p" style="width:100%" href="/mi/">Abrir Mi Xyro →</a><button type="button" class="elk" id="eout" style="background:none">No soy yo · cerrar sesión</button></div>';paseNom(n,'Pase activo')}
+ else if(T.tab==='neg'&&ua){h+='<div class="ewho"><div class="av">🏪</div><h3>Tu panel está abierto</h3><p class="mut">'+esc(String(ua.email||'').replace(/\.xyrostudio\.net$/,''))+'</p><a class="btn btn-p" style="width:100%" href="/app/">Ir a mi panel →</a><button type="button" class="elk" id="eout" style="background:none">Entrar con otra cuenta</button></div>'}
+ else if(T.tab==='cli'){var cr=T.sub==='crear';
+  h+='<div><h3>'+(cr?'Crea tu cuenta gratis':'Entra a tu cuenta')+'</h3><p class="mut" style="font-size:14px;margin-top:4px">'+(cr?'En 20 segundos. Luego escanea el QR de tu negocio favorito.':'Tu QR, tus citas y tus promos te esperan.')+'</p></div>';
+  h+='<button type="button" class="egg" id="egg">'+GG+'Continuar con Google</button><div class="eor">o con tu correo</div>';
+  h+='<div class="esub"><button type="button" data-s="entrar" class="'+(!cr?'on':'')+'">Entrar</button><button type="button" data-s="crear" class="'+(cr?'on':'')+'">Crear cuenta</button></div>';
+  h+='<form class="efl" id="ef" novalidate>'+(cr?'<label>Tu nombre<input id="en" autocomplete="name" maxlength="80" required placeholder="Ej. Ana Torres"></label>':'')+'<label>Correo<input id="ee" type="email" inputmode="email" autocomplete="email" required maxlength="120" placeholder="tucorreo@gmail.com"></label><label>Clave<input id="ep" type="password" autocomplete="'+(cr?'new-password':'current-password')+'" required minlength="6" maxlength="128" placeholder="'+(cr?'Mínimo 6 caracteres':'••••••')+'"></label><div class="emsg" id="em"></div><button class="btn btn-p" id="eb">'+(cr?'Crear mi cuenta ✦':'Entrar →')+'</button></form>';
+  h+='<p class="elk">'+(cr?'Al crearla aceptas los <a href="/terminos.html">términos</a> y la <a href="/mi/privacidad.html">privacidad</a>.':'<button type="button" id="eolv" style="background:none">¿Olvidaste tu clave?</button>')+'</p>'}
+ else{h+='<div><h3>Entra a tu panel</h3><p class="mut" style="font-size:14px;margin-top:4px">Para dueños y equipo de negocios con Xyro Apps.</p></div>';
+  h+='<form class="efl" id="ef" novalidate><label>Usuario o correo<input id="ee" autocomplete="username" required maxlength="120" placeholder="ana@tu-negocio"></label><label>Clave<input id="ep" type="password" autocomplete="current-password" required maxlength="128"></label><input class="ehp" id="ehp" tabindex="-1" autocomplete="off" aria-hidden="true"><div class="emsg" id="em"></div><button class="btn btn-p" id="eb">Entrar al panel →</button></form>';
+  h+='<p class="elk">¿Aún no tienes tu sistema? <a href="/app/?demo=gym">Pruébalo en vivo</a> · <a href="#/arma">Arma el tuyo</a></p>'}
+ card.innerHTML=h;
+ card.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){T.tab=b.dataset.t;pinta()}});
+ card.querySelectorAll('[data-s]').forEach(function(b){b.onclick=function(){T.sub=b.dataset.s;pinta()}});
+ var o=q('#eout',card);if(o)o.onclick=function(){var k=T.tab==='cli'?'xyro-mi-auth':'xyro-apps-auth';(T.tab==='cli'?cMi():cApp()).then(function(c){return c.auth.signOut()}).catch(function(){}).then(function(){try{localStorage.removeItem(k)}catch(_){}paseNom('','Bienvenido');pinta();cabeza()})};
+ var f=q('#ef',card);if(!f)return;
+ var ee=q('#ee',card),en=q('#en',card);try{var sv=localStorage.getItem(T.tab==='cli'?'mi-email':'xs-neg');if(sv)ee.value=sv}catch(_){}
+ var vivo=function(){paseNom((en&&en.value.trim())||(ee.value.split('@')[0]||'').replace(/[._-]+/g,' ').trim(),T.tab==='cli'?(T.sub==='crear'?'Nuevo pase':'Bienvenido'):'Panel del negocio')};
+ ee.oninput=vivo;if(en)en.oninput=vivo;vivo();
+ cMi().catch(function(){});
+ var g=q('#egg',card);if(g)g.onclick=function(){cMi().then(function(c){return c.auth.signInWithOAuth({provider:'google',options:{redirectTo:MI}})}).then(function(r){if(r&&r.error)throw r.error}).catch(function(e){say(err(e))})};
+ var ol=q('#eolv',card);if(ol)ol.onclick=function(){var em=ee.value.trim();if(!/@.+\./.test(em))return say('Escribe tu correo y vuelve a tocar «¿Olvidaste tu clave?».');cMi().then(function(c){return c.auth.resetPasswordForEmail(em,{redirectTo:MI})}).then(function(r){if(r&&r.error)throw r.error;say('📩 Te enviamos un correo para crear una clave nueva.',1)}).catch(function(e){say(err(e))})};
+ f.onsubmit=function(e){e.preventDefault();var b=q('#eb',card),t0=b.textContent,pw=q('#ep',card).value,em=ee.value.trim().toLowerCase();q('#em',card).className='emsg';
+  var fin=function(m){say(m);b.disabled=false;b.textContent=t0};
+  if(T.tab==='cli'){if(!/@.+\./.test(em))return say('Escribe un correo válido.');if(pw.length<6)return say('Tu clave debe tener al menos 6 caracteres.');if(en&&!en.value.trim())return say('Escribe tu nombre.');
+   b.disabled=true;b.textContent='Un momento…';try{localStorage.setItem('mi-email',em)}catch(_){}
+   cMi().then(function(c){return T.sub==='crear'?c.auth.signUp({email:em,password:pw,options:{data:{nombre:en.value.trim()},emailRedirectTo:MI}}):c.auth.signInWithPassword({email:em,password:pw})}).then(function(r){if(r.error)throw r.error;
+    if(T.sub==='crear'&&!r.data.session)return fin('📩 Te enviamos un correo a '+em+'. Ábrelo y toca el enlace para activar tu cuenta.'),q('#em',card).classList.add('ok');
+    listo('¡Bienvenido! Abriendo Mi Xyro…',MI)}).catch(function(e){fin(err(e))})}
+  else{if(q('#ehp',card).value)return setTimeout(function(){say('Usuario o contraseña incorrectos.')},1500);
+   var x=em;if(x.indexOf('@')<0)return say('Escribe tu usuario completo, ej. ana@tu-negocio.');var pp=x.split('@');if(pp[1]&&pp[1].indexOf('.')<0)x=pp[0]+'@'+pp[1]+'.xyrostudio.net';
+   if(!pw)return say('Escribe tu clave.');b.disabled=true;b.textContent='Un momento…';try{localStorage.setItem('xs-neg',em)}catch(_){}
+   var c;cApp().then(function(cc){c=cc;return c.rpc('xa_login_espera',{p_email:x}).then(function(r){return r.error?0:(r.data|0)},function(){return 0})}).then(function(w){if(w>0)throw new Error('🔒 Por seguridad, espera '+(w>=90?Math.ceil(w/60)+' min':w+' s')+' antes de volver a intentar.');
+    return c.auth.signInWithPassword({email:x,password:pw}).then(function(r){if(r.error){q('#ep',card).value='';return c.rpc('xa_login_fallo',{p_email:x,p_ua:navigator.userAgent.slice(0,200)}).then(function(){},function(){}).then(function(){throw new Error(/confirm/i.test(r.error.message)?'Tu correo aún no está confirmado.':/rate|too many/i.test(r.error.message)?'Espera un minuto y vuelve a intentar.':'Usuario o contraseña incorrectos.')})}
+     listo('¡Listo! Abriendo tu panel…',APP)})}).catch(function(e){fin(e.message||err(e))})}
+ }}
+function cabeza(){var um=ses('xyro-mi-auth'),ua=ses('xyro-apps-auth'),b=q('#ubtn'),c=q('#echip');if(!b)return;
+ if(um||ua){var n=um?nomDe(um):'Mi panel';b.querySelector('.av').textContent=(n[0]||'X').toUpperCase();b.querySelector('.t').textContent=um?n.split(' ')[0]:'Mi panel';if(c)c.querySelector('span').innerHTML='<i>Hola'+(um?', '+esc(n.split(' ')[0]):'')+'</i> · abre tu cuenta Xyro →'}}
+window.entShow=function(){T.tab=ses('xyro-apps-auth')&&!ses('xyro-mi-auth')?'neg':T.tab;pinta()};
+cabeza();qr('xyro');if(/^#\/entrar/.test(location.hash))entShow();
 })();
 </script>
 </body></html>
