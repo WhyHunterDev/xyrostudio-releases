@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261117-1845",
+  "fecha": "2026-11-17 18:45",
+  "titulo": "Cobrar con Yape en pedidos de mesa",
+  "notas": "Cobrar con Yape en pedidos de mesa",
+  "cambios": [
+   "Tus clientes pagan su pedido con Yape desde su mesa (QR o número del negocio) y escriben el N.º de operación",
+   "Te llega el aviso «Dice que pagó con Yape»: confirmas cuando lo ves en tu Yape y queda en Caja como Yape",
+   "Configúralo en Pedidos → «📱 Yape» (número, titular y foto de tu QR). Sin comisiones"
+  ],
+  "requiere": "SQL 71"
+ },
+ {
   "id": "20261117-1718",
   "fecha": "2026-11-17 17:18",
   "titulo": "Todo en Mi Xyro web",
