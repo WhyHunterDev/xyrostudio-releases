@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261117-1607",
+  "fecha": "2026-11-17 16:07",
+  "titulo": "Mi Xyro sin descargas",
+  "notas": "Mi Xyro sin descargas",
+  "cambios": [
+   "Los textos ya no dicen «descarga la app»: tus clientes se registran en Mi Xyro desde la web, sin descargar nada",
+   "El mensaje de invitación por WhatsApp ahora dice «Regístrate en Mi Xyro»"
+  ]
+ },
+ {
   "id": "20261116-0052",
   "fecha": "2026-11-16 00:52",
   "titulo": "Consultas y registro desde la app",
