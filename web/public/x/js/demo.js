@@ -149,7 +149,7 @@ export async function demoRpc(f, a) {
   if (f === 'xy_video_set') { const v = VID.find((x) => x.id === a.p_job); if (a.p_status === 'DONE' && !/^https:\/\/\S{4,}$/.test(a.p_link || '')) throw new Error('Pega el enlace del video (https://)'); if (v) { v.status = a.p_status; if (a.p_status === 'DONE') v.r2_key = a.p_link; } return { ok: true }; }
   if (f === 'xy_paymethods_get') return JSON.parse(JSON.stringify(PMD));
   if (f === 'xy_paymethods_set') { PMD.length = 0; PMD.push(...(a.p_methods || []).slice(0, 4)); return { ok: true }; }
-  if (f === 'xy_entity_features') { const e = E.find((x) => x.id === a.p_entity) || E[0], pro = e.plan !== 'FREE'; return { plan: e.plan, pro, type: e.type, max_students: pro ? null : 5, max_items: pro ? null : 5, students: 3, items: 4, edits_free_left: Math.max(0, 2 - VID.length), edits_credits: pro ? 15 : 0, watermark: !pro, bots: pro, business_points: 312 }; }
+  if (f === 'xy_entity_features') { const e = E.find((x) => x.id === a.p_entity) || E[0], pro = e.plan !== 'FREE'; return { plan: e.plan, tier: e.plan, pro, type: e.type, max_students: pro ? null : 50, max_clients: pro ? null : 50, max_items: pro ? null : 6, max_qrs: pro ? null : 2, qrs: 2, web: e.plan === 'PRO', students: 3, clients: 38, items: 4, edits_free_left: Math.max(0, 2 - VID.length), edits_credits: pro ? 15 : 0, watermark: !pro, bots: pro, business_points: 312 }; }
   if (f === 'xy_set_plan') { const e = E.find((x) => x.id === a.p_entity); if (e) { e.plan = a.p_plan; e.plan_until = a.p_plan === 'FREE' ? null : new Date(Date.now() + 864e5 * 30).toISOString(); } return { ok: true }; }
   if (f === 'xy_users_public') return [{ id: 'u9', display_name: 'Carlos M.' }];
   return { ok: true };

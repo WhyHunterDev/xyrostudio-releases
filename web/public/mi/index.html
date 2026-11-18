@@ -1801,7 +1801,7 @@ function vMiPro(){const p=PROM;
  if(PROM===undefined){proMioCarga().then(()=>SUB==='mipro'&&pinta());return'<button class="back" id="mpb">‹ Volver</button><div class="exsk"></div>'}
  if(PCH===null)pchCarga().then(()=>SUB==='mipro'&&pinta());
  const f0=post;post=()=>{f0&&f0();const q=s=>$(s);q('#mpb').onclick=()=>{SUB=null;TAB='perfil';pinta()};q('#mpe')&&(q('#mpe').onclick=()=>proEditar());q('#mpq')&&(q('#mpq').onclick=()=>proQR(p));q('#mpv')&&(q('#mpv').onclick=()=>{PRO[p.slug]=null;abrirPro(p.slug)});
-  q('#mpp')&&(q('#mpp').onclick=()=>window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent('Hola XyroStudio, quiero el plan PRO para mi perfil @'+p.slug),'_blank'));
+  q('#mpp')&&(q('#mpp').onclick=()=>window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent('Hola XyroStudio, quiero mejorar mi plan (perfil @'+p.slug+')'),'_blank'));
   app.querySelectorAll('[data-ctl]').forEach(b=>b.onclick=()=>{try{p.entity_id&&localStorage.setItem('x-ent',p.entity_id);localStorage.setItem('x-modo','control')}catch(_){}location.href='/x/'+(DEMO?'?demo=1':'')+'#/'+b.dataset.ctl});
   app.querySelectorAll('[data-chat]').forEach(b=>b.onclick=()=>abrirChat(b.dataset.chat))};
  if(!p)return`<button class="back" id="mpb">‹ Volver</button><div class="g"><div class="card prohero"><span style="font-size:44px">🧑‍🏫</span><h2>Tu perfil profesional, gratis</h2><p class="mu sm">Para entrenadores personales, profesores, nutricionistas y todo el que da su servicio con su celular.</p>
@@ -1934,16 +1934,17 @@ async function ordenHoja(slug,oid,pi){try{pi=pi||await rpc('xy_order_payinfo',{p
   clearInterval(ORDT);ORDT=setInterval(ver,5000);
   if(sb&&!DEMO){canal=sb.channel('mi-ord-'+pi.order_id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders',filter:'id=eq.'+pi.order_id},ver).subscribe()}})}
 function proCobrosHTML(p){const X=p.xyro;if(!X)return'';const pro=X.pro;
- return`<div class="card"><div class="row"><b class="sp">💳 Cobros en Xyro</b><span class="pill${pro?' dst':''}">${pro?'PRO':'FREE'}</span></div>
+ return`<div class="card"><div class="row"><b class="sp">💳 Cobros en Xyro</b><span class="pill${pro?' dst':''}">${({FREE:'Gratis',PLUS:'Plus',PRO:'Pro',ENTERPRISE:'Empresa'})[X.tier||(pro?'PRO':'FREE')]}</span></div>
   <div class="kps k3"><div class="kp"><b>${X.students}${X.max_students?'/'+X.max_students:''}</b><span class="mu xs">Alumnos activos</span></div><div class="kp"><b>${X.items}${X.max_items?'/'+X.max_items:''}</b><span class="mu xs">Planes</span></div><div class="kp"><b data-pts="business_points">${nfmt(X.business_points)}</b><span class="mu xs">Puntos negocio</span></div></div>
   ${+p.por_confirmar?`<button class="btn p" data-ctl="c-pedidos">💸 ${p.por_confirmar} pago${p.por_confirmar>1?'s':''} por confirmar</button>`:''}
   <div class="row"><button class="btn sp" data-ctl="c-catalogo">📋 Mis planes</button><button class="btn sp" data-ctl="c-inicio">💳 Cómo me pagan</button></div>
   <p class="mu xs">Tus alumnos eligen su plan aquí, te pagan directo (Yape, Plin o transferencia) y tú confirmas en Xyro Control: se activa su Pase QR y ganan puntos.</p></div>`}
-function proPlanHTML(p){const X=p.xyro||{},pro=p.plus||X.pro;
- const B=[['👥','Alumnos y planes','5 como máximo','Ilimitados'],['🎬','Videos Xyro Edits','2 gratis al mes con marca','2 + 15 créditos al mes, sin marca'],['🤖','Xyro Bots','—','Incluido al lanzarse'],['🏷️','Tu perfil público','«Hecho con Mi Xyro»','Sin marca de agua'],['⭐','Explorar','Normal','Insignia PRO y sales antes']];
- return`<div class="card plusc"><div class="row"><span style="font-size:26px">💎</span><div class="sp"><h3>${pro?'Tienes el plan PRO':'Plan PRO'}</h3><p class="mu sm">${pro?'Todo esto ya está activo en tu cuenta:':'Lo que desbloqueas al instante:'}</p></div></div>
-  ${B.map(b=>`<div class="li"><span class="dot">${b[0]}</span><span class="sp sm"><b>${b[1]}</b><br><span class="mu xs">${pro?b[3]:'FREE: '+b[2]+' · PRO: '+b[3]}</span></span></div>`).join('')}
-  ${pro?(X.edits_credits!=null?`<p class="mu xs">Créditos de videos este mes: <b>${X.edits_credits}</b></p>`:''):'<button class="btn p" id="mpp">Quiero el plan PRO</button><p class="mu xs">Se paga a XyroStudio y lo activamos el mismo día.</p>'}</div>`}
+/* Planes Gratis → Plus → Pro (SQL 81): un solo camino, se muestra solo lo que cambia */
+const TIERS=[['FREE','Gratis'],['PLUS','Plus'],['PRO','Pro']],TB=[['👥','Alumnos','5','2,000','Sin límite'],['🏷️','Planes que vendes','5','25','Sin límite'],['🎬','Videos Xyro Edits al mes','2 con marca','2 + 5 sin marca','2 + 15 sin marca'],['🌐','Web xyrostudio.net/tu-nombre','—','—','✓']];
+function proPlanHTML(p){const X=p.xyro||{},t=X.tier||(p.plus?'PRO':'FREE'),i=Math.max(0,TIERS.findIndex(x=>x[0]===t)),sig=TIERS[i+1];
+ return`<div class="card plusc"><div class="row"><span style="font-size:26px">💎</span><div class="sp"><h3>Tu plan: ${TIERS[i][1]}</h3><p class="mu sm">${sig?'Con '+sig[1]+' tienes:':'Tienes todo desbloqueado.'}</p></div></div>
+  ${TB.map(b=>`<div class="li"><span class="dot">${b[0]}</span><span class="sp sm"><b>${b[1]}</b></span><span class="sm" style="text-align:right">${sig?`<span class="mu xs" style="text-decoration:line-through">${b[2+i]}</span> <b>${b[3+i]}</b>`:`<b>${b[2+i]}</b>`}</span></div>`).join('')}
+  ${sig?`<button class="btn p" id="mpp">Quiero ${sig[1]}</button><p class="mu xs">Se paga a XyroStudio y lo activamos el mismo día.</p>`:''}</div>`}
 
 // Demo (?demo=1): datos de ejemplo de Explorar y entrenadores
 const demoRpc0=demoRpc;

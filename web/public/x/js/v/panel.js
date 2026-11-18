@@ -35,7 +35,7 @@ async function inicio(el) {
 
 async function negocios(el) {
   el.innerHTML = `<div><h1>Negocios por revisar</h1><p class="mu">Al aprobar, el negocio aparece en Explorar. Verificado = revisaste sus documentos.</p></div><div class="card" id="ln"><div class="sk" style="height:120px"></div></div>
-    <div class="card"><b>⚡ Boost y ⭐ Plan PRO pagados</b><span class="mu sm">Cuando un negocio o entrenador te pague por Yape, búscalo y actívalo aquí (rol Finanzas o Superadmin). PRO dura 30 días por pago.</span>
+    <div class="card"><b>⚡ Boost y planes pagados</b><span class="mu sm">Cuando un negocio o entrenador te pague por Yape, búscalo y actívalo aquí (rol Finanzas o Superadmin). Plus o Pro duran 30 días por pago.</span>
       <div class="row"><input id="bq" placeholder="Nombre del negocio" autocomplete="off"><button class="btn" id="bb">Buscar</button></div><div id="br"></div></div>`;
   $('#bb', el).onclick = async () => {
     const t = $('#bq', el).value.trim(); if (t.length < 2) return toast('Escribe al menos 2 letras');
@@ -44,10 +44,10 @@ async function negocios(el) {
         : await tabla('entities', (q) => q.select('id,name,slug,boost_until,plan,plan_until,type').in('status', ['ACTIVE', 'PENDING']).ilike('name', '*' + t.replace(/[^\p{L}\p{N} .-]/gu, '') + '*').limit(8));
       $('#br', el).innerHTML = L.length ? L.map((e) => `<div class="li wrap"><span class="sp"><b>${esc(e.name)}</b><br><span class="mu xs">${e.boost_until && new Date(e.boost_until) > new Date() ? 'Boost hasta ' + fecha(e.boost_until) + ' ' + hora(e.boost_until) : 'Sin Boost'} · ${e.plan === 'FREE' || !e.plan ? 'Plan gratis' : '⭐ ' + esc(e.plan) + (e.plan_until ? ' hasta ' + fecha(e.plan_until) : '')}</span></span>
         <span class="row">${[[24, '1 día'], [168, '7 días'], [720, '30 días']].map(([h, t2]) => `<button class="btn sm" data-bo="${e.id}" data-h="${h}">${t2}</button>`).join('')}
-          <button class="btn sm p" data-pl="${e.id}" data-v="PRO">⭐ PRO 30 días</button>${e.plan && e.plan !== 'FREE' ? `<button class="btn sm l" data-pl="${e.id}" data-v="FREE">Quitar PRO</button>` : ''}</span></div>`).join('') : '<p class="mu sm">Sin resultados.</p>';
+          <button class="btn sm" data-pl="${e.id}" data-v="PLUS">Plus 30 días</button><button class="btn sm p" data-pl="${e.id}" data-v="PRO">⭐ Pro 30 días</button>${e.plan && e.plan !== 'FREE' ? `<button class="btn sm l" data-pl="${e.id}" data-v="FREE">Volver a gratis</button>` : ''}</span></div>`).join('') : '<p class="mu sm">Sin resultados.</p>';
       $$('[data-pl]', el).forEach((b) => b.onclick = async () => {
         b.disabled = true;
-        try { await rpc('xy_set_plan', { p_entity: b.dataset.pl, p_plan: b.dataset.v, p_days: 30 }); toast(b.dataset.v === 'PRO' ? 'PRO activado ⭐' : 'Volvió al plan gratis'); $('#bb', el).click(); }
+        try { await rpc('xy_set_plan', { p_entity: b.dataset.pl, p_plan: b.dataset.v, p_days: 30 }); toast(b.dataset.v === 'FREE' ? 'Volvió al plan gratis' : b.dataset.v + ' activado ⭐'); $('#bb', el).click(); }
         catch (e) { toast(errDe(e)); b.disabled = false; }
       });
       $$('[data-bo]', el).forEach((b) => b.onclick = async () => {
