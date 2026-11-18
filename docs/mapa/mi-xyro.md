@@ -80,3 +80,6 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 
 ## SQL 93 (2026-11-18) · Empleos
 Bolsa de trabajo: `empAbrir` (overlay `.emov`, en HSEL), `empVer`, `empPostular` (CV a `privado/<uid>/cv/`, `subirPriv`), `empMias`; negocio `empNegCardHTML`/`empNeg`/`empForm`/`empPostulantes` (CV con `abrirPriv` = signed URL)/`empDestacar` (pagoTicket con `o.rpc='xy_empleo_destacar_pagar'`). Enlaces `/mi/?empleos=1`, `?empleo=<id>`, `?misempleos=<slug>` (Xyro Apps → Mi app). Límites: Gratis 1, Plus 3, Pro 50 activos; 30 días. Gestor vista `empleos` (moderar, precio US$/día en `system_settings.empleo_boost`). Tickets tipo `EMPLEO` (resolver envuelve `xy_solicitud_resolver_89`).
+
+## Rubro digital (SQL 95)
+Software / productos digitales: rubro `digital`, país `WW` (global, sin mapa ni sede), Explorar → 💻 Digital. Venden en SU web; Xyro = publicidad. `contenido.app.digital` {web, descarga, discord, video, planes[≤6], cupon{codigo,texto}} vía `xy_digital_guardar`; público `xy_digital`. Clics `xy_clic` (tabla `xy_clics`, 1/h por persona) y `xy_clics_resumen` (Gratis total, Plus por día, Pro por país). Front: `DIG`, `digSec`, `digCardHTML`, `digEditar`, `digStats`. Demo `/mi/?demo=1&gratis=digital`, «StreamKit» en Explorar. SQL 95 también arregla `xy_es_admin_sitio` para dueños de negocios Gratis (empleos/Boost).
