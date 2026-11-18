@@ -14,10 +14,10 @@ const PROD = [
   ['Clase de inglés online', 'Profe Lucía Torres', 'profe-lucia', 15, 'USD', 5, 9, null, false, '📚', 'SESSION', 'PROFESSIONAL'],
 ].map((p, i) => ({ item_id: 'p' + i, title: p[0], entity_name: p[1], entity_slug: p[2], price: p[3], currency: p[4], rating_avg: p[5], rating_count: p[6], distance_m: p[7], boosted: p[8], photo: null, emoji: p[9], kind: p[10], entity_type: p[11], remote_ok: p[7] == null, entity_id: 'e1' }));
 const MKT = [
-  { id: 'm1', title: 'Mancuernas 10 kg (par)', price: 120, currency: 'PEN', condition: 'USED', ships: false, status: 'ACTIVE', photos: [], emoji: '🏋️', created_at: new Date(Date.now() - 36e5 * 5).toISOString() },
-  { id: 'm2', title: 'Zapatillas running talla 42', price: 180, currency: 'PEN', condition: 'LIKE_NEW', ships: true, status: 'ACTIVE', photos: [], emoji: '👟', created_at: new Date(Date.now() - 864e5).toISOString() },
-  { id: 'm3', title: 'Bicicleta spinning casera', price: 650, currency: 'PEN', condition: 'USED', ships: false, status: 'ACTIVE', photos: [], emoji: '🚲', created_at: new Date(Date.now() - 864e5 * 2).toISOString() },
-  { id: 'm4', title: 'Proteína whey 2 kg (sellada)', price: 210, currency: 'PEN', condition: 'NEW', ships: true, status: 'ACTIVE', photos: [], emoji: '🥤', created_at: new Date(Date.now() - 864e5 * 3).toISOString() },
+  { id: 'm1', seller_id: 'u9', description: 'Poco uso, sin óxido. Entrego en Miraflores.', protected_available: true, title: 'Mancuernas 10 kg (par)', price: 120, currency: 'PEN', condition: 'USED', ships: false, status: 'ACTIVE', photos: [], emoji: '🏋️', created_at: new Date(Date.now() - 36e5 * 5).toISOString() },
+  { id: 'm2', seller_id: 'u9', protected_available: true, title: 'Zapatillas running talla 42', price: 180, currency: 'PEN', condition: 'LIKE_NEW', ships: true, status: 'ACTIVE', photos: [], emoji: '👟', created_at: new Date(Date.now() - 864e5).toISOString() },
+  { id: 'm3', seller_id: 'u9', protected_available: true, title: 'Bicicleta spinning casera', price: 650, currency: 'PEN', condition: 'USED', ships: false, status: 'ACTIVE', photos: [], emoji: '🚲', created_at: new Date(Date.now() - 864e5 * 2).toISOString() },
+  { id: 'm4', seller_id: 'u9', protected_available: true, title: 'Proteína whey 2 kg (sellada)', price: 210, currency: 'PEN', condition: 'NEW', ships: true, status: 'ACTIVE', photos: [], emoji: '🥤', created_at: new Date(Date.now() - 864e5 * 3).toISOString() },
 ];
 const ORD = [
   { id: 'o1', code: 'A7F3K2Q9', fulfillment_mode: 'IN_STORE', status: 'AWAITING_PAYMENT', total: 36, currency: 'PEN', created_at: new Date(Date.now() - 6e5).toISOString(), buyer_id: 'u2', entity_id: 'e1' },
@@ -34,6 +34,25 @@ const MY = [
   { id: 'my2', code: 'R8T2W5Q0', status: 'COMPLETED', total: 129, currency: 'PEN', fulfillment_mode: 'IN_STORE', created_at: new Date(Date.now() - 864e5 * 6).toISOString(), mystery_prize: 20, entity_id: 'iron', entities: { name: 'Iron Gym Miraflores' }, order_items: [{ title: 'Plan mensual libre', qty: 1, line_total: 129 }] },
 ];
 const LOCS = [];
+MKT.push({ id: 'm5', seller_id: 'demo-user', title: 'Guantes de box 12 oz', price: 85, currency: 'PEN', condition: 'LIKE_NEW', ships: true, protected_available: true, status: 'ACTIVE', photos: [], emoji: '🥊', created_at: new Date(Date.now() - 864e5 * 4).toISOString() });
+const P2P = [
+  { id: 'pp1', code: 'P2P7Q4K1', status: 'PAID', total: 180, currency: 'PEN', protected: true, commission_amount: 10.8, buyer_id: 'demo-user', seller_user_id: 'u9', listing_id: 'm2', created_at: new Date(Date.now() - 36e5 * 20).toISOString(), payout_at: null, fulfillment_mode: 'P2P', marketplace_listings: { title: 'Zapatillas running talla 42', photos: [] } },
+  { id: 'pp2', code: 'P2P3M8X2', status: 'CREATED', total: 85, currency: 'PEN', protected: false, commission_amount: 0, buyer_id: 'u7', seller_user_id: 'demo-user', listing_id: 'm5', created_at: new Date(Date.now() - 36e5 * 3).toISOString(), payout_at: null, fulfillment_mode: 'P2P', marketplace_listings: { title: 'Guantes de box 12 oz', photos: [] } },
+  { id: 'pp3', code: 'P2P9T2W6', status: 'AWAITING_PAYMENT', total: 650, currency: 'PEN', protected: true, commission_amount: 39, buyer_id: 'u5', seller_user_id: 'u9', listing_id: 'm3', created_at: new Date(Date.now() - 36e5 * 2).toISOString(), payout_at: null, fulfillment_mode: 'P2P', marketplace_listings: { title: 'Bicicleta spinning casera', photos: [] } },
+  { id: 'pp4', code: 'P2P1R5Z8', status: 'COMPLETED', total: 210, currency: 'PEN', protected: true, commission_amount: 12.6, buyer_id: 'u6', seller_user_id: 'u8', listing_id: 'm4', created_at: new Date(Date.now() - 864e5 * 2).toISOString(), payout_at: null, fulfillment_mode: 'P2P', marketplace_listings: { title: 'Proteína whey 2 kg (sellada)', photos: [] } },
+];
+const MSG = { pp1: [{ id: 1, sender_id: 'u9', body: '¡Hola! Te las envío mañana por Olva.', created_at: new Date(Date.now() - 36e5 * 19).toISOString() }, { id: 2, sender_id: 'demo-user', body: 'Perfecto, gracias 🙌', created_at: new Date(Date.now() - 36e5 * 18).toISOString() }], pp2: [{ id: 3, sender_id: 'u7', body: '¿Los puedo ver el sábado en el parque Kennedy?', created_at: new Date(Date.now() - 36e5 * 2).toISOString() }] };
+const TK = [
+  { id: 't1', user_id: 'demo-user', subject: 'Pedido #P2P7Q4K1', category: 'P2P_DISPUTE', status: 'PENDING_USER', priority: 1, order_id: 'pp1', messages: [{ de: 'user', t: 'Las zapatillas aún no llegan.', at: new Date(Date.now() - 36e5 * 5).toISOString() }, { de: 'staff', t: 'Hola Valeria, ya escribimos al vendedor. Tu dinero sigue protegido.', at: new Date(Date.now() - 36e5 * 4).toISOString() }], updated_at: new Date(Date.now() - 36e5 * 4).toISOString(), created_at: new Date(Date.now() - 36e5 * 5).toISOString() },
+  { id: 't2', user_id: 'u5', subject: 'No me llegó el código de mi pedido', category: 'GENERAL', status: 'OPEN', priority: 2, messages: [{ de: 'user', t: 'Pagué con Yape y no veo el código.', at: new Date(Date.now() - 36e5).toISOString() }], updated_at: new Date(Date.now() - 36e5).toISOString(), created_at: new Date(Date.now() - 36e5).toISOString() },
+];
+const VAULT = [{ order_id: 'my9', item_id: 'p4', title: 'Ebook: 12 semanas de fuerza', entity_name: 'Coach Diego Ramírez', bought_at: new Date(Date.now() - 864e5 * 3).toISOString(), ready: true }, { order_id: 'my8', item_id: 'p8', title: 'Rutina en casa (PDF)', entity_name: 'Yoga con Ana', bought_at: new Date(Date.now() - 864e5).toISOString(), ready: false }];
+const VID = [
+  { id: 'v1', entity_id: 'e1', status: 'DONE', template: 'promo', prompt: 'Waffles del día con música alegre', r2_key: 'https://xyrostudio.net/', watermark: true, created_at: new Date(Date.now() - 864e5 * 40).toISOString(), entities: { name: 'Café Aurora' } },
+  { id: 'v2', entity_id: 'e1', status: 'QUEUED', template: 'menu', prompt: 'Carta de bebidas', r2_key: null, watermark: true, created_at: new Date(Date.now() - 36e5).toISOString(), entities: { name: 'Café Aurora' } },
+];
+let DIGI = {};
+export function demoMkSave(m) { const i = MKT.findIndex((x) => x.id === m.id); if (i >= 0) MKT[i] = { ...MKT[i], ...m }; else MKT.unshift(m); }
 const PEND = [
   { id: 'e9', slug: 'nomada', name: 'Nómada Store', type: 'DELIVERY_ECOMMERCE', category: 'ropa', status: 'PENDING', country: 'PE', created_at: new Date(Date.now() - 36e5 * 2).toISOString() },
   { id: 'e8', slug: 'yoga-ana', name: 'Yoga con Ana', type: 'PROFESSIONAL', category: 'entrenador', status: 'PENDING', country: 'MX', created_at: new Date(Date.now() - 36e5 * 9).toISOString() },
@@ -47,9 +66,15 @@ export function demoFrom(t) {
   if (t === 'entity_staff') return [];
   if (t === 'marketplace_listings') return c(MKT);
   if (t === 'orders') return c(ORD);
-  if (t === 'my_orders') return c(MY);
+  if (t === 'my_orders') return c([...MY, ...P2P.filter((o) => o.buyer_id === 'demo-user' || o.seller_user_id === 'demo-user')]);
   if (t === 'catalog_items') return c(CAT_DEMO);
   if (t === 'locations') return c(LOCS);
+  if (t === 'p2p_orders') return c(P2P);
+  if (t.startsWith('p2p_messages:')) return c(MSG[t.split(':')[1]] || []);
+  if (t === 'my_tickets') return c(TK.filter((x) => x.user_id === 'demo-user'));
+  if (t === 'tickets') return c(TK);
+  if (t === 'video_jobs') return c(VID);
+  if (t === 'listings_reported') return c(MKT.filter((m) => m.reports).length ? MKT.filter((m) => m.reports) : [{ ...MKT[2], reports: 3 }]);
   if (t === 'points_balances') return [
     { user_id: 'demo-user', entity_id: null, bucket: 'USER_GLOBAL', available: 684, pending: 22 },
     { user_id: 'demo-user', entity_id: 'e1', bucket: 'USER_LOCAL', available: 1240, pending: 0, entity_name: 'Café Aurora' },
@@ -101,5 +126,26 @@ export async function demoRpc(f, a) {
     return { ok: true, visit_id: 1, entity_name: 'Iron Gym Miraflores', checkpoint: 'Entrada', kind: 'PASS', days_left: 18, sessions_left: null };
   }
   if (f === 'xy_boost') { E[0].boost_until = new Date(Date.now() + 36e5 * (a.p_hours || 1)).toISOString(); return { ok: true }; }
+  if (f === 'xy_create_p2p_order') { const l = MKT.find((x) => x.id === a.p_listing); if (!l) throw new Error('Publicación no disponible'); if (l.seller_id === 'demo-user') throw new Error('No puedes comprar tu propia publicación');
+    const id = 'pp' + Date.now(); l.status = 'RESERVED'; P2P.unshift({ id, code: Math.random().toString(36).slice(2, 10).toUpperCase(), status: a.p_protected ? 'AWAITING_PAYMENT' : 'CREATED', total: l.price, currency: l.currency, protected: !!a.p_protected, commission_amount: a.p_protected ? +(l.price * 0.06).toFixed(2) : 0, buyer_id: 'demo-user', seller_user_id: l.seller_id, listing_id: l.id, created_at: new Date().toISOString(), payout_at: null, fulfillment_mode: 'P2P', marketplace_listings: { title: l.title, photos: l.photos } });
+    if (a.p_protected) setTimeout(() => { const o = P2P.find((x) => x.id === id); if (o && o.status === 'AWAITING_PAYMENT') o.status = 'PAID'; }, 5000);
+    return { ok: true, order_id: id, protected: !!a.p_protected }; }
+  const po = P2P.find((x) => x.id === a.p_order);
+  if (f === 'xy_p2p_release') { po.status = 'COMPLETED'; const l = MKT.find((x) => x.id === po.listing_id); if (l) l.status = 'SOLD'; return { ok: true, points: { global: Math.round(po.total * 0.27 * 2) } }; }
+  if (f === 'xy_p2p_close') { if (a.p_action === 'SOLD') { po.status = 'COMPLETED'; const l = MKT.find((x) => x.id === po.listing_id); if (l) l.status = 'SOLD'; } else { po.status = 'CANCELLED'; const l = MKT.find((x) => x.id === po.listing_id); if (l && l.status === 'RESERVED') l.status = 'ACTIVE'; } return { ok: true }; }
+  if (f === 'xy_p2p_mark_paid') { po.status = 'PAID'; return { ok: true }; }
+  if (f === 'xy_p2p_payout') { po.payout_at = new Date().toISOString(); return { ok: true, amount: po.total - po.commission_amount }; }
+  if (f === 'p2p_msg') { (MSG[a.p_order] = MSG[a.p_order] || []).push({ id: Date.now(), sender_id: 'demo-user', body: a.body, created_at: new Date().toISOString() }); return { ok: true }; }
+  if (f === 'xy_order_dispute') { if (String(a.p_text || '').trim().length < 10) throw new Error('Cuéntanos un poco más (mínimo 10 letras)'); const o = po || MY.find((x) => x.id === a.p_order) || {}; if (po && po.status === 'PAID') po.status = 'DISPUTED';
+    TK.unshift({ id: 't' + Date.now(), user_id: 'demo-user', subject: 'Pedido #' + (o.code || ''), category: po ? 'P2P_DISPUTE' : 'ORDER', status: 'OPEN', priority: 1, messages: [{ de: 'user', t: a.p_text, at: new Date().toISOString() }], updated_at: new Date().toISOString(), created_at: new Date().toISOString() }); return { ok: true }; }
+  if (f === 'ticket_new') { TK.unshift({ id: 't' + Date.now(), user_id: 'demo-user', subject: a.subject, category: 'GENERAL', status: 'OPEN', priority: 2, messages: [{ de: 'user', t: a.t, at: new Date().toISOString() }], updated_at: new Date().toISOString(), created_at: new Date().toISOString() }); return { ok: true }; }
+  if (f === 'xy_ticket_reply') { const t = TK.find((x) => x.id === a.p_ticket); if (t) { if (String(a.p_text || '').trim()) t.messages.push({ de: a.p_status ? 'staff' : 'user', t: a.p_text, at: new Date().toISOString() }); t.status = a.p_status || 'OPEN'; t.updated_at = new Date().toISOString(); } return { ok: true }; }
+  if (f === 'xy_vault') return JSON.parse(JSON.stringify(VAULT));
+  if (f === 'xy_digital_get') return { ok: true, url: 'https://xyrostudio.net/terminos.html' };
+  if (f === 'xy_digital_set') { if (a.p_link && !/^https:\/\/\S{4,}$/.test(a.p_link)) throw new Error('Pega un enlace que empiece con https://'); DIGI[a.p_item] = a.p_link; return { ok: true }; }
+  if (f === 'xy_listing_report') return { ok: true, reports: 1 };
+  if (f === 'xy_queue_video') { if (VID.filter((v) => new Date(v.created_at).getMonth() === new Date().getMonth()).length >= 2) throw new Error('Usaste tus 2 videos gratis de este mes. Compra créditos para más.'); VID.unshift({ id: 'v' + Date.now(), entity_id: a.p_entity, status: 'QUEUED', template: a.p_template, prompt: a.p_prompt, r2_key: null, watermark: true, created_at: new Date().toISOString(), entities: { name: 'Café Aurora' } }); return { ok: true, free_left: 0 }; }
+  if (f === 'xy_video_set') { const v = VID.find((x) => x.id === a.p_job); if (a.p_status === 'DONE' && !/^https:\/\/\S{4,}$/.test(a.p_link || '')) throw new Error('Pega el enlace del video (https://)'); if (v) { v.status = a.p_status; if (a.p_status === 'DONE') v.r2_key = a.p_link; } return { ok: true }; }
+  if (f === 'xy_users_public') return [{ id: 'u9', display_name: 'Carlos M.' }];
   return { ok: true };
 }

@@ -5,14 +5,14 @@ import { S, $, $$, esc, I, MODOS, puedeModo, cargarCuenta, cliente, toast, hoja,
 const NAV = {
   user: [['explorar', 'Explorar', I.explore], ['market', 'Marketplace', I.market], ['escanear', 'Escanear', I.scan, 1], ['billetera', 'Billetera', I.wallet], ['perfil', 'Perfil', I.user]],
   control: [['c-inicio', 'Resumen', I.chart], ['c-pedidos', 'Pedidos', I.orders], ['c-qr', 'QR', I.qr, 1], ['c-boost', 'Boost', I.bolt], ['c-catalogo', 'Catálogo', I.catalog]],
-  panel: [['p-inicio', 'Resumen', I.chart], ['p-negocios', 'Negocios', I.shield], ['p-soporte', 'Soporte', I.ticket]],
+  panel: [['p-inicio', 'Resumen', I.chart], ['p-negocios', 'Negocios', I.shield], ['p-pagos', 'Pagos', I.wallet], ['p-videos', 'Videos', I.film], ['p-soporte', 'Soporte', I.ticket]],
 };
 // Ruta → módulo de vista
 const VISTA = {
-  explorar: 'usuario', market: 'usuario', billetera: 'usuario', perfil: 'usuario', escanear: 'escanear',
+  explorar: 'usuario', market: 'p2p', trato: 'p2p', boveda: 'p2p', ayuda: 'p2p', billetera: 'usuario', perfil: 'usuario', escanear: 'escanear',
   carta: 'compras', pedido: 'compras', pedidos: 'compras',
-  'c-inicio': 'control', 'c-pedidos': 'control', 'c-qr': 'control', 'c-boost': 'control', 'c-catalogo': 'control',
-  'p-inicio': 'panel', 'p-negocios': 'panel', 'p-soporte': 'panel',
+  'c-inicio': 'control', 'c-pedidos': 'control', 'c-qr': 'control', 'c-boost': 'control', 'c-catalogo': 'control', 'c-videos': 'control',
+  'p-inicio': 'panel', 'p-negocios': 'panel', 'p-soporte': 'panel', 'p-pagos': 'panel', 'p-videos': 'panel',
 };
 const INICIO = { user: 'explorar', control: 'c-inicio', panel: 'p-inicio' };
 const modoDe = (r) => r.startsWith('c-') ? 'control' : r.startsWith('p-') ? 'panel' : 'user';
@@ -94,6 +94,7 @@ async function ir() {
   const m = modoDe(r);
   if (!puedeModo(m)) { location.replace('#/' + INICIO.user); return; }
   if (m !== S.modo) { S.modo = m; ls.s('x-modo', m); }
+  document.querySelectorAll('.ov').forEach((o) => o.remove());   // una hoja abierta no sobrevive al cambio de pantalla
   if (limpiar) { try { limpiar(); } catch (_) {} limpiar = null; }
   pintarMarco(r);
   const v = $('#view');

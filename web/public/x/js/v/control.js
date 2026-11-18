@@ -1,6 +1,6 @@
-// Xyro · Xyro Control (negocios y servicios): resumen, pedidos, QR, Boost y catálogo.
+// Xyro · Xyro Control (negocios y servicios): resumen, pedidos, QR, Boost, catálogo (con fotos y digitales) y videos (Xyro Edits).
 // Todo pasa por funciones de la base (SQL 76): el navegador nunca reparte puntos ni cambia montos.
-import { S, $, $$, esc, I, rpc, tabla, money, num, hora, fecha, toast, hoja, errDe, cargaJS, ls, ubicar } from '../core.js';
+import { S, $, $$, esc, I, rpc, tabla, money, num, hora, fecha, toast, hoja, errDe, cargaJS, ls, ubicar, subirFoto } from '../core.js';
 
 const EST = { CREATED: ['Nuevo', ''], AWAITING_PAYMENT: ['Por cobrar', 'warn'], PAID: ['Pagado', 'ok'], READY: ['Listo', 'ok'], IN_TRANSIT: ['En camino', ''], COMPLETED: ['Completado', 'ok'], CANCELLED: ['Cancelado', 'bad'], DISPUTED: ['En disputa', 'bad'], REFUNDED: ['Devuelto', 'bad'] };
 const MOD = { IN_STORE: 'En el local', PICKUP: 'Para recoger', DELIVERY: 'Delivery', DIGITAL: 'Digital', P2P: 'P2P' };
@@ -26,6 +26,7 @@ export async function vista(r, el) {
   if (r === 'c-qr') return qrs(el);
   if (r === 'c-boost') return boost(el);
   if (r === 'c-catalogo') return catalogo(el);
+  if (r === 'c-videos') return videos(el);
 }
 
 const deHoy = (o) => new Date(o.created_at).toDateString() === new Date().toDateString();
@@ -43,6 +44,7 @@ async function inicio(el) {
     <div class="card"><b>Accesos rápidos</b>
       <a class="li" href="#/c-qr" style="text-decoration:none"><span class="ico">${I.qr}</span><span class="sp">Crear QR de mesa o mostrador</span>›</a>
       <a class="li" href="#/c-boost" style="text-decoration:none"><span class="ico">${I.bolt}</span><span class="sp">Destacar mi negocio (Boost)</span>›</a>
+      <a class="li" href="#/c-videos" style="text-decoration:none"><span class="ico">${I.film}</span><span class="sp">Pedir un video para redes<br><span class="mu xs">Xyro Edits · 2 gratis al mes</span></span>›</a>
       <a class="li" href="/app/" style="text-decoration:none"><span class="ico">${I.catalog}</span><span class="sp">Abrir mi panel completo</span>›</a></div></div>`);
   try {
     const [O, P] = await Promise.all([cargarPedidos(), ptsNegocio()]);
@@ -188,14 +190,14 @@ async function boost(el) {
 }
 
 const KIND = { PRODUCT: 'Producto', SERVICE: 'Servicio', SESSION: 'Sesión', CLASS_PACK: 'Paquete de clases', MEMBERSHIP: 'Membresía', DIGITAL: 'Digital' };
-const MODOS_V = [['IN_STORE', '🍽️ En el local'], ['PICKUP', '🛍️ Para recoger'], ['DELIVERY', '🛵 Delivery']];
+const MODOS_V = [['IN_STORE', '🍽️ En el local'], ['PICKUP', '🛍️ Para recoger'], ['DELIVERY', '🛵 Delivery'], ['DIGITAL', '💾 Digital']];
 let DEMO_CAT = null;
 async function catalogo(el) {
   cabecera(el, 'Catálogo', 'Tus productos y servicios: aparecen en tu carta al escanear el QR y en Explorar.');
   el.insertAdjacentHTML('beforeend', `<div class="row"><span class="sp"></span><button class="btn p" id="nuevo">＋ Agregar</button></div><div class="card" id="lc"><div class="sk" style="height:120px"></div></div>`);
   let L = [];
   const pinta = () => {
-    $('#lc', el).innerHTML = L.length ? L.map((x) => `<div class="li"><span class="ico">${esc(x.emoji || '🏷️')}</span><span class="sp"><b class="ell">${esc(x.title)}</b><br>
+    $('#lc', el).innerHTML = L.length ? L.map((x) => `<div class="li"><span class="ico"${x.photos && x.photos[0] ? ` style="background:url('${esc(x.photos[0])}') center/cover"` : ''}>${x.photos && x.photos[0] ? '' : esc(x.emoji || (x.kind === 'DIGITAL' ? '💾' : '🏷️'))}</span><span class="sp"><b class="ell">${esc(x.title)}</b><br>
       <span class="mu xs">${esc(x.category || 'Sin categoría')} · ${KIND[x.kind] || ''} · ${(x.fulfillment_modes || []).map((m) => (MODOS_V.find((v) => v[0] === m) || ['', m])[1].split(' ')[0]).join(' ')}${x.stock != null ? ' · stock ' + num(x.stock) : ''}</span></span>
       <span style="text-align:right"><b>${money(x.price, x.currency)}</b><br><span class="pill ${x.active ? 'ok' : ''}">${x.active ? 'Visible' : 'Oculto'}</span></span><button class="btn sm" data-ed="${x.id}">Editar</button></div>`).join('')
       : '<div class="vacio"><div class="e">🏷️</div><b>Aún no tienes productos</b><span class="mu sm">Agrega lo que vendes para que tus clientes pidan desde la mesa o para recoger.</span></div>';
@@ -204,26 +206,40 @@ async function catalogo(el) {
   const cargar = async () => {
     try {
       if (S.demo || S.sinCore) { DEMO_CAT = DEMO_CAT || await tabla('catalog_items', (q) => q); L = DEMO_CAT; }
-      else L = await tabla('catalog_items', (q) => q.select('id,title,description,category,price,currency,kind,fulfillment_modes,stock,active').eq('entity_id', S.entidad.id).order('category').order('title'));
+      else L = await tabla('catalog_items', (q) => q.select('id,title,description,category,price,currency,kind,fulfillment_modes,stock,active,photos').eq('entity_id', S.entidad.id).order('category').order('title'));
       pinta();
     } catch (e) { toast(errDe(e)); }
   };
-  const form = (x) => hoja(`<h2>${x ? 'Editar' : 'Nuevo'} producto o servicio</h2>
+  const form = (x) => { let fotoU = (x && x.photos && x.photos[0]) || null; hoja(`<h2>${x ? 'Editar' : 'Nuevo'} producto o servicio</h2>
+    <div class="fotos" id="cf"></div>
     <label>Nombre<input id="fT" maxlength="120" value="${esc(x ? x.title : '')}" required></label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Precio (${esc(S.entidad.currency || 'PEN')})<input id="fP" type="number" min="0" step="0.1" inputmode="decimal" value="${x ? esc(x.price) : ''}"></label>
       <label>Categoría<input id="fC" maxlength="40" placeholder="Bebidas, Postres…" value="${esc((x && x.category) || '')}"></label></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Tipo<select id="fK">${Object.entries(KIND).filter(([k]) => k !== 'DIGITAL').map(([k, t]) => `<option value="${k}" ${x && x.kind === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Tipo<select id="fK">${Object.entries(KIND).map(([k, t]) => `<option value="${k}" ${x && x.kind === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <label>Stock<input id="fS" type="number" min="0" placeholder="Sin control" value="${x && x.stock != null ? esc(x.stock) : ''}"></label></div>
     <label>Descripción<input id="fD" maxlength="300" value="${esc((x && x.description) || '')}"></label>
-    <b class="sm">¿Cómo se puede pedir?</b><div class="chips" style="margin:0;padding:0;flex-wrap:wrap">${MODOS_V.map(([k, t]) => `<button type="button" class="chip${!x || (x.fulfillment_modes || []).includes(k) ? ' on' : ''}" data-mo="${k}">${t}</button>`).join('')}</div>
+    <div id="mdw"><b class="sm">¿Cómo se puede pedir?</b><div class="chips" style="margin:0;padding:0;flex-wrap:wrap">${MODOS_V.filter((v) => v[0] !== 'DIGITAL').map(([k, t]) => `<button type="button" class="chip${!x || (x.fulfillment_modes || []).includes(k) ? ' on' : ''}" data-mo="${k}">${t}</button>`).join('')}</div></div>
+    <div id="dgw" class="card" style="background:var(--c2)"><b class="sm">🔐 Archivo para el cliente</b><span class="mu xs">Pega el enlace privado (Google Drive, Dropbox…). Solo lo ve quien pagó, en su Bóveda digital.${x && x.kind === 'DIGITAL' ? ' Déjalo vacío para no cambiar el actual.' : ''}</span>
+      <input id="fL" type="url" maxlength="600" placeholder="https://drive.google.com/…" autocomplete="off"></div>
     <label class="row" style="color:var(--tx)"><input type="checkbox" id="fA" style="width:auto" ${!x || x.active ? 'checked' : ''}> Visible para clientes</label>
-    <p class="mu xs">Fotos y productos digitales: muy pronto.</p>
     <button class="btn p" id="gd">Guardar</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
     $$('[data-mo]', h).forEach((b) => b.onclick = () => b.classList.toggle('on'));
+    const dig = () => { const d = $('#fK', h).value === 'DIGITAL'; $('#mdw', h).hidden = d; $('#dgw', h).hidden = !d; };
+    $('#fK', h).onchange = dig; dig();
+    const pf = () => {
+      $('#cf', h).innerHTML = fotoU ? `<span class="fto" style="background-image:url('${esc(fotoU)}')"><button type="button" id="cq" aria-label="Quitar foto">✕</button></span>`
+        : '<label class="fto add">📷<span class="xs">Foto</span><input type="file" accept="image/*" id="ci" hidden></label>';
+      const q = $('#cq', h); q && (q.onclick = () => { fotoU = null; pf(); });
+      const i = $('#ci', h); i && (i.onchange = async () => { if (!i.files[0]) return; i.parentElement.classList.add('cargando'); try { fotoU = await subirFoto(i.files[0], 800); } catch (e) { toast(errDe(e)); } pf(); });
+    };
+    pf();
     $('#gd', h).onclick = async (ev) => {
       const d = { title: $('#fT', h).value.trim(), price: +$('#fP', h).value, category: $('#fC', h).value.trim() || null, kind: $('#fK', h).value,
         stock: $('#fS', h).value === '' ? null : Math.max(0, parseInt($('#fS', h).value, 10) || 0), description: $('#fD', h).value.trim() || null,
-        fulfillment_modes: $$('[data-mo].on', h).map((b) => b.dataset.mo), active: $('#fA', h).checked };
+        fulfillment_modes: $('#fK', h).value === 'DIGITAL' ? ['DIGITAL'] : $$('[data-mo].on', h).map((b) => b.dataset.mo), active: $('#fA', h).checked, photos: fotoU ? [fotoU] : [] };
+      const link = $('#fL', h).value.trim();
+      if (d.kind === 'DIGITAL' && link && !/^https:\/\/\S{4,}$/.test(link)) return toast('El enlace debe empezar con https://');
+      if (d.kind === 'DIGITAL' && !x && !link) return toast('Pega el enlace del archivo');
       if (d.title.length < 2) return toast('Escribe el nombre');
       if (!(d.price >= 0) || $('#fP', h).value === '') return toast('Escribe el precio');
       if (!d.fulfillment_modes.length) return toast('Elige al menos una forma de pedir');
@@ -231,13 +247,50 @@ async function catalogo(el) {
       try {
         if (S.demo || S.sinCore) { if (x) Object.assign(x, d); else DEMO_CAT.unshift({ id: 'n' + Date.now(), currency: 'PEN', ...d }); }
         else {
-          const q = x ? S.sb.from('catalog_items').update(d).eq('id', x.id) : S.sb.from('catalog_items').insert({ ...d, entity_id: S.entidad.id, currency: S.entidad.currency || 'PEN' });
-          const { error } = await q; if (error) throw error;
+          const q = x ? S.sb.from('catalog_items').update(d).eq('id', x.id).select('id') : S.sb.from('catalog_items').insert({ ...d, entity_id: S.entidad.id, currency: S.entidad.currency || 'PEN' }).select('id');
+          const { data, error } = await q; if (error) throw error;
+          if (d.kind === 'DIGITAL' && link) await rpc('xy_digital_set', { p_item: (data && data[0] && data[0].id) || x.id, p_link: link });
         }
         close(); toast('Guardado ✓'); cargar();
       } catch (e) { toast(errDe(e)); ev.target.disabled = false; }
     };
-  });
+  }); };
   $('#nuevo', el).onclick = () => form(null);
+  await cargar();
+}
+
+// ---------- Videos para redes (Xyro Edits): 2 gratis al mes con marca de agua; el equipo los edita y deja el enlace ----------
+const PLANT = [['promo', '⚡ Promo del día', 'Un producto o promo con música y texto grande'], ['menu', '📋 Carta o servicios', 'Recorrido rápido por lo que vendes'], ['local', '🏪 Conoce el local', 'Ambiente, equipo y ubicación']];
+const VEST = { QUEUED: ['En cola', 'warn'], PROCESSING: ['Editando', ''], DONE: ['Listo', 'ok'], FAILED: ['No se pudo', 'bad'], EXPIRED: ['Vencido', ''] };
+async function videos(el) {
+  cabecera(el, 'Videos para redes', 'Xyro Edits: pídenos un video vertical (9:16) para TikTok, Reels o Shorts.');
+  el.insertAdjacentHTML('beforeend', `<div class="dos"><form class="card" id="fv"><b>Pedir un video</b>
+      <div class="g" id="tp">${PLANT.map(([k, t, d], i) => `<button type="button" class="mopt${i ? '' : ' on'}" data-t="${k}"><span class="sp"><b class="sm">${t}</b><br><span class="mu xs">${d}</span></span></button>`).join('')}</div>
+      <label>Productos que salen (opcional)<select id="vp" multiple size="4"></select></label>
+      <label>¿Qué quieres que diga o muestre?<textarea id="vt" rows="3" maxlength="1000" placeholder="Ej: 2x1 en waffles este viernes, música alegre"></textarea></label>
+      <p class="mu xs">Los gratis llevan marca de agua de Xyro. Para más videos o sin marca, escríbenos.</p>
+      <button class="btn p">Enviar pedido</button></form>
+    <div class="card"><b>Mis videos</b><span class="mu xs">El enlace dura 30 días: descárgalo cuando esté listo.</span><div id="lv"><div class="sk" style="height:90px"></div></div></div></div>`);
+  let plant = 'promo';
+  $$('#tp [data-t]', el).forEach((b) => b.onclick = () => { plant = b.dataset.t; $$('#tp [data-t]', el).forEach((x) => x.classList.toggle('on', x === b)); });
+  tabla('catalog_items', (q) => q.select('id,title').eq('entity_id', S.entidad.id).eq('active', true).order('title').limit(100))
+    .then((C) => { $('#vp', el).innerHTML = C.map((c) => `<option value="${esc(c.id)}">${esc(c.title)}</option>`).join(''); }).catch(() => {});
+  const cargar = async () => {
+    try {
+      const L = await tabla('video_jobs', (q) => q.select('id,status,template,prompt,r2_key,watermark,error,created_at,expires_at').eq('entity_id', S.entidad.id).order('created_at', { ascending: false }).limit(30));
+      $('#lv', el).innerHTML = L.length ? L.map((v) => `<div class="li"><span class="ico">${I.film}</span><span class="sp"><b>${esc((PLANT.find((p) => p[0] === v.template) || ['', 'Video'])[1])}</b> <span class="pill ${VEST[v.status][1]}">${VEST[v.status][0]}</span><br>
+        <span class="mu xs">${fecha(v.created_at)} · ${esc(v.prompt || '')}</span>${v.error ? `<br><span class="xs" style="color:#f87171">${esc(v.error)}</span>` : ''}</span>
+        ${v.status === 'DONE' && v.r2_key ? `<a class="btn p sm" href="${esc(v.r2_key)}" target="_blank" rel="noopener">Ver</a>` : ''}</div>`).join('')
+        : '<div class="vacio"><div class="e">🎬</div><span class="mu sm">Aún no pides videos.</span></div>';
+    } catch (e) { $('#lv', el).innerHTML = `<p class="mu sm">${esc(errDe(e))}</p>`; }
+  };
+  $('#fv', el).onsubmit = async (e) => {
+    e.preventDefault(); const b = $('button.p', e.target); b.disabled = true;
+    try {
+      const d = await rpc('xy_queue_video', { p_entity: S.entidad.id, p_items: [...$('#vp', el).selectedOptions].map((o) => o.value).slice(0, 6), p_template: plant, p_prompt: $('#vt', el).value.trim() || null });
+      toast(d && d.free_left > 0 ? 'Pedido enviado ✓ Te queda 1 gratis este mes' : 'Pedido enviado ✓'); $('#vt', el).value = ''; cargar();
+    } catch (er) { toast(errDe(er)); }
+    b.disabled = false;
+  };
   await cargar();
 }

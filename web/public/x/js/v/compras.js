@@ -1,6 +1,7 @@
 // Xyro · Compras (Sprint 3): carta del negocio, carrito, pedido en el local / retiro / delivery, «Mis pedidos» y caja sorpresa.
 // El precio y los puntos los calcula la base (xy_create_order, confirm_*, xy_mystery_open): el navegador solo muestra.
 import { S, $, $$, esc, I, rpc, tabla, money, num, hora, fecha, toast, hoja, errDe, vib } from '../core.js';
+import { disputa } from './p2p.js';
 
 const qp = () => new URLSearchParams(location.hash.split('?')[1] || '');
 const MODO = { IN_STORE: ['🍽️', 'En el local'], PICKUP: ['🛍️', 'Para recoger'], DELIVERY: ['🛵', 'Delivery'], DIGITAL: ['💾', 'Digital'] };
@@ -105,7 +106,9 @@ async function pedido(el) {
         ${['PAID', 'READY', 'IN_TRANSIT'].includes(o.status) ? '<button class="btn w" id="rec">Ya lo recibí</button>' : ''}</div>` : ''}
       <div id="caja"></div></div>
       <div class="card"><b>Detalle</b>${(o.order_items || []).map((x) => `<div class="li"><b>${x.qty}×</b><span class="sp ell">${esc(x.title)}</span><span>${money(x.line_total, o.currency)}</span></div>`).join('') || '<span class="mu sm">—</span>'}
-        <div class="row"><b class="sp">Total</b><b>${money(o.total, o.currency)}</b></div><span class="mu xs">${fecha(o.created_at)} · ${hora(o.created_at)}</span></div></div>`;
+        <div class="row"><b class="sp">Total</b><b>${money(o.total, o.currency)}</b></div><span class="mu xs">${fecha(o.created_at)} · ${hora(o.created_at)}</span>
+        ${o.status !== 'CANCELLED' ? '<button class="btn l sm" id="prob">⚠️ Tengo un problema con este pedido</button>' : ''}</div></div>`;
+    const pb = $('#prob', el); pb && (pb.onclick = () => disputa(o.id, () => { location.hash = '#/ayuda'; }));
     const rec = $('#rec', el); rec && (rec.onclick = async () => { rec.disabled = true; try { await rpc('xy_confirm_handoff', { p_order: o.id, p_pin: null }); toast('¡Recibido! Puntos liberados'); refrescar(); } catch (e) { toast(errDe(e)); rec.disabled = false; } });
     if (fin) caja($('#caja', el), o);
   };
@@ -147,12 +150,14 @@ function caja(box, o) {
 
 // ---------- Mis pedidos ----------
 async function pedidos(el) {
-  el.innerHTML = `<div><h1>Mis pedidos</h1><p class="mu">Tus compras en negocios Xyro y su estado.</p></div><div class="card" id="lp"><div class="sk" style="height:120px"></div></div>`;
+  el.innerHTML = `<div><h1>Mis pedidos y ventas</h1><p class="mu">Tus compras en negocios Xyro y tus tratos del Marketplace.</p></div><div class="card" id="lp"><div class="sk" style="height:120px"></div></div>`;
   try {
-    const L = await tabla('orders', (q) => q.select('id,code,status,total,currency,fulfillment_mode,created_at,mystery_prize,entities(name)').eq('buyer_id', S.user.id).order('created_at', { ascending: false }).limit(40), 'my_orders');
-    $('#lp', el).innerHTML = L.length ? L.map((o) => `<a class="li" href="#/pedido?o=${encodeURIComponent(o.id)}">
-      <span class="ico">${MODO[o.fulfillment_mode] ? MODO[o.fulfillment_mode][0] : '🧾'}</span><span class="sp"><b class="ell">${esc((o.entities && o.entities.name) || 'Pedido')}</b><br><span class="mu xs">#${esc(o.code)} · ${fecha(o.created_at)} ${hora(o.created_at)}</span></span>
-      <span style="text-align:right"><b>${money(o.total, o.currency)}</b><br><span class="pill ${PILL[o.status] || ''}">${EST[o.status] || esc(o.status)}</span>${o.status === 'COMPLETED' && o.mystery_prize == null ? ' 🎁' : ''}</span></a>`).join('')
+    const L = await tabla('orders', (q) => q.select('id,code,status,total,currency,fulfillment_mode,created_at,mystery_prize,buyer_id,seller_user_id,entities(name),marketplace_listings(title)')
+      .or(`buyer_id.eq.${S.user.id},and(seller_user_id.eq.${S.user.id},fulfillment_mode.eq.P2P)`).order('created_at', { ascending: false }).limit(50), 'my_orders');
+    L.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    $('#lp', el).innerHTML = L.length ? L.map((o) => { const p2p = o.fulfillment_mode === 'P2P', vendo = p2p && o.seller_user_id === S.user.id; return `<a class="li" href="#/${p2p ? 'trato' : 'pedido'}?o=${encodeURIComponent(o.id)}">
+      <span class="ico">${p2p ? (vendo ? '💰' : '🤝') : MODO[o.fulfillment_mode] ? MODO[o.fulfillment_mode][0] : '🧾'}</span><span class="sp"><b class="ell">${esc(p2p ? (o.marketplace_listings && o.marketplace_listings.title) || 'Marketplace' : (o.entities && o.entities.name) || 'Pedido')}</b><br><span class="mu xs">${p2p ? (vendo ? 'Vendes · ' : 'Compras · ') : ''}#${esc(o.code)} · ${fecha(o.created_at)} ${hora(o.created_at)}</span></span>
+      <span style="text-align:right"><b>${money(o.total, o.currency)}</b><br><span class="pill ${PILL[o.status] || ''}">${p2p && o.status === 'CREATED' ? 'Coordinando' : EST[o.status] || esc(o.status)}</span>${o.status === 'COMPLETED' && o.mystery_prize == null && !p2p ? ' 🎁' : ''}</span></a>`; }).join('')
       : `<div class="vacio"><div class="e">🛍️</div><b>Aún no tienes pedidos</b><a class="btn p" href="#/explorar">Explorar</a></div>`;
   } catch (e) { $('#lp', el).innerHTML = `<p class="mu">${esc(errDe(e))}</p>`; }
 }

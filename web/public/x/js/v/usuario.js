@@ -1,9 +1,8 @@
-// Xyro · Modo Usuario: Explorar, Marketplace, Billetera y Socios, Perfil.
+// Xyro · Modo Usuario: Explorar, Billetera y Socios, Perfil. (Marketplace, Bóveda y Ayuda → p2p.js)
 import { S, $, $$, esc, I, rpc, tabla, money, num, dist, fecha, hora, toast, hoja, errDe, ubicar, NIVELES, CAT, ls } from '../core.js';
 
 export async function vista(r, el) {
   if (r === 'explorar') return explorar(el);
-  if (r === 'market') return market(el);
   if (r === 'billetera') return billetera(el);
   if (r === 'perfil') return perfil(el);
 }
@@ -50,27 +49,12 @@ function detalle(p) {
     <div><span class="mu sm">${esc(p.entity_name)}</span><h2>${esc(p.title)}</h2></div>
     <div class="row"><b style="font-size:22px">${money(p.price, p.currency)}</b><span class="sp"></span>${estrellas(p.rating_avg, p.rating_count)}</div>
     <div class="card" style="background:var(--c2)"><b class="sm">¿Cómo se compra?</b>
-      <span class="mu sm">${p.entity_type === 'PHYSICAL' ? 'En el local: escanea el QR de la mesa o del mostrador y paga ahí. Sumas puntos al confirmar el pago.' : p.kind === 'DIGITAL' ? 'Producto digital: la entrega en tu Bóveda llega muy pronto. Mientras, coordina con el vendedor.' : 'Escríbele por chat o escanea su QR para coordinar.'}</span></div>
+      <span class="mu sm">${p.entity_type === 'PHYSICAL' ? 'En el local: escanea el QR de la mesa o del mostrador y paga ahí. Sumas puntos al confirmar el pago.' : p.kind === 'DIGITAL' ? 'Producto digital: pídelo desde su carta y, cuando el negocio confirme tu pago, queda en tu Bóveda digital (Billetera).' : 'Escríbele por chat o escanea su QR para coordinar.'}</span></div>
     <div class="dos" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <a class="btn" href="#/carta?e=${encodeURIComponent(p.entity_id || '')}" data-x>🍽️ Ver carta</a>
       <a class="btn p" href="#/escanear" data-x>${I.scan} Escanear QR</a></div>
     <a class="btn l" href="/mi/?n=${encodeURIComponent(p.entity_slug)}">Ver su perfil en Mi Xyro</a>
     <button class="btn l" data-x>Cerrar</button>`);
-}
-
-// ---------- Marketplace (P2P) ----------
-async function market(el) {
-  el.innerHTML = `<div class="row wrap"><div class="sp"><h1>Marketplace</h1><p class="mu">Compra y vende entre personas, con Compra Protegida.</p></div>
-    <button class="btn p" id="pub">＋ Publicar</button></div><div class="grid" id="mk">${Array(4).fill('<div class="sk" style="height:200px"></div>').join('')}</div>`;
-  $('#pub', el).onclick = () => hoja(`<h2>Publicar algo</h2><div class="card pronto"><b>Muy pronto</b><span class="mu sm">Podrás publicar tus cosas con fotos y elegir entrega en persona o envío. Tu dinero queda protegido hasta que el comprador confirme.</span></div><button class="btn" data-x>Entendido</button>`);
-  const C = { NEW: 'Nuevo', LIKE_NEW: 'Como nuevo', USED: 'Usado' };
-  try {
-    const L = await tabla('marketplace_listings', (q) => q.select('id,title,price,currency,condition,ships,status,photos,created_at').eq('status', 'ACTIVE').order('created_at', { ascending: false }).limit(40));
-    $('#mk', el).innerHTML = L.length ? L.map((m) => `<div class="prod"><div class="ph" ${m.photos && m.photos[0] ? `style="background-image:url('${esc(m.photos[0])}')"` : ''}>${m.photos && m.photos[0] ? '' : esc(m.emoji || '📦')}</div>
-      <div class="bd"><b class="ell">${esc(m.title)}</b><span class="pr">${money(m.price, m.currency)}</span>
-      <span class="mu xs">${C[m.condition] || ''}${m.ships ? ' · Envío' : ' · En persona'} · ${fecha(m.created_at)}</span></div></div>`).join('')
-      : `<div class="vacio" style="grid-column:1/-1"><div class="e">📦</div><b>Aún no hay publicaciones</b></div>`;
-  } catch (e) { $('#mk', el).innerHTML = `<div class="vacio"><span>${esc(errDe(e))}</span></div>`; }
 }
 
 // ---------- Billetera y Socios ----------
@@ -87,6 +71,7 @@ async function billetera(el) {
     <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
       <div class="kpi"><span class="mu xs">Racha</span><b>${I.flame.replace('<svg', '<svg style="width:18px;height:18px;color:#fb923c;vertical-align:-2px"')} ${num(me.current_streak_weeks)} sem</b><span class="mu xs">${num(me.streak_week_count)}/2 compras esta semana</span></div>
       <div class="kpi"><span class="mu xs">Xyro Pass</span><b>${me.xyro_pass_until && new Date(me.xyro_pass_until) > new Date() ? 'Activo' : '—'}</b><span class="mu xs">${me.xyro_pass_until ? 'Hasta ' + fecha(me.xyro_pass_until) : 'Muy pronto'}</span></div></div>
+    <a class="li card" href="#/boveda" style="text-decoration:none;padding:14px 16px"><span class="ico">🔐</span><span class="sp"><b>Bóveda digital</b><br><span class="mu xs">Tus ebooks, rutinas y cursos comprados</span></span>›</a>
     <div class="card"><b>Puntos por negocio</b><span class="mu xs">Se canjean solo en ese negocio.</span><div id="loc"><div class="sk" style="height:60px"></div></div></div>
   </div><div class="g"><div class="row"><h2 class="sp">Mis membresías activas</h2></div><div class="g" id="mem"><div class="sk" style="height:170px"></div></div></div></div>`;
   try {
@@ -144,7 +129,8 @@ function perfil(el) {
       <label>Moneda<select id="pM">${[...new Set(P.map((x) => x[2]))].map((c) => `<option ${c === me.currency ? 'selected' : ''}>${c}</option>`).join('')}</select></label></div>
       <div class="msg" id="pE"></div><button class="btn p">Guardar</button></form>
     <div class="g"><div class="card"><b>Tu cuenta</b>
-      <a class="li" href="#/pedidos" style="text-decoration:none"><span class="ico">${I.orders}</span><span class="sp">Mis pedidos<br><span class="mu xs">Estado, código y cajas sorpresa</span></span>›</a>
+      <a class="li" href="#/pedidos" style="text-decoration:none"><span class="ico">${I.orders}</span><span class="sp">Mis pedidos y ventas<br><span class="mu xs">Estado, código, cajas sorpresa y tratos del Marketplace</span></span>›</a>
+      <a class="li" href="#/ayuda" style="text-decoration:none"><span class="ico">💬</span><span class="sp">Ayuda<br><span class="mu xs">Tus consultas y reclamos con Xyro</span></span>›</a>
       <a class="li" href="/mi/" style="text-decoration:none"><span class="ico">🪪</span><span class="sp">Mi Xyro<br><span class="mu xs">Tus negocios guardados, carnet y chat</span></span>›</a>
       <a class="li" href="/#/entrar" style="text-decoration:none"><span class="ico">🏪</span><span class="sp">Registrar mi negocio o servicio<br><span class="mu xs">Gratis: perfil, QR y promos</span></span>›</a>
       <div class="li"><span class="ico">🕑</span><span class="sp">Miembro desde<br><span class="mu xs">${me.created_at ? fecha(me.created_at, { month: 'long', year: 'numeric' }) : '—'}</span></span></div></div>
