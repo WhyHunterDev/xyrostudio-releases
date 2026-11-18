@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261118-0358",
+  "fecha": "2026-11-18 03:58",
+  "titulo": "Equipo solo por ID",
+  "notas": "Equipo solo por ID",
+  "cambios": [
+   "Ya no se crean cuentas con usuario y clave: el equipo se agrega con el ID de Mi Xyro",
+   "El cuadro para escribir el ID ya se ve bien",
+   "Las cuentas antiguas siguen y se muestran aparte"
+  ]
+ },
+ {
   "id": "20261118-0338",
   "fecha": "2026-11-18 03:38",
   "titulo": "Equipo con ID de Xyro",
