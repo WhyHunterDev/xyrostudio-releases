@@ -187,3 +187,6 @@ select[multiple]{padding:6px}select[multiple] option{padding:6px 8px;border-radi
 .li.wrap{flex-wrap:wrap}.li.wrap>.sp{min-width:60%}.dos>*,.in>*{min-width:0}
 .li>.sp{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .card>*{min-width:0}
+
+.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#a855f7,#c026d3);color:#fff;box-shadow:0 20px 60px #a855f766;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}
+@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}

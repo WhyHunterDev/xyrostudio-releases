@@ -670,6 +670,7 @@ function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||
  const it=feed(),pr=promosFeed();
  return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
   ${per.idn?xCard(per):''}
+  ${ptsHTML()}
   ${M.length?`<div class="qk">${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}<button class="qkb" data-scan>${I.scan}<span><b>Escanear</b><small>QR de un negocio</small></span></button></div>`:''}
   ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}${av}<div class="g">${it.join('')}${pr}
   ${M.length?'':`<div class="card" style="text-align:center;justify-items:center;padding:26px 18px 18px;gap:12px"><div class="ibox big">${I.qr.replace('width="22" height="22"','width="40" height="40"')}</div><h2>Escanea el QR de tu negocio</h2>
@@ -951,6 +952,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
  return`<div class="g"><div class="row"><div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
    <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p>${per.fundador?`<p style="margin-top:6px">${fBad(per)}</p>`:''}</div></div>
   ${per.fundador?`<div class="card fcard"><div class="row"><span style="font-size:28px">🏅</span><div class="sp"><h3>Fundador ${fNum(per.fundador)} de Mi Xyro</h3><p class="mu sm">Eres de las primeras 50 personas en Mi Xyro. Tu insignia, tu carnet dorado y tu @ corto son para siempre.</p></div></div></div>`:''}
+  ${ptsHTML()}
   <button class="btn" id="ed">✏️ Editar mi perfil</button>
   <div class="idbox"><span class="mu xs" style="font-weight:700;display:inline-flex;gap:6px;align-items:center;justify-content:center;color:var(--a)">${I.id}ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><p class="mu xs">Es tuyo y nunca cambia. Dáselo a recepción para que conecten tu membresía a Mi Xyro.</p><button class="btn" id="cpi">📋 Copiar mi ID</button></div>
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
@@ -1729,7 +1731,7 @@ function resPoner(k,slug){if(!D){toast('Entra a Mi Xyro para calificar');return 
 
 // ---------- Entrenadores y profesores: perfil público (sin mapa), QR, solicitudes y chat ----------
 async function abrirPro(slug){vib();SUB={pro:slug};TAB='negocios';if(!PRO[slug]){app.querySelector('#sc')&&($('#sc').innerHTML='<div class="vacio"><span class="e">⏳</span></div>');await proCarga(slug)}pinta();$('#sc')&&($('#sc').scrollTop=0)}
-async function proCarga(slug){try{const d=await rpc('xa_pro_ver',{p_slug:slug});if(d)PRO[slug]=d}catch(_){}}
+async function proCarga(slug){try{const d=await rpc('xa_pro_ver',{p_slug:slug});if(d){try{d.x=D?await rpc('xy_pro_planes',{p_slug:slug}):null}catch(_){d.x=null}PRO[slug]=d}}catch(_){}}
 const ytId=u=>{const m=/(?:youtu\.be\/|v=|shorts\/|embed\/)([A-Za-z0-9_-]{6,15})/.exec(u||'');return m&&m[1]};
 function vPro(slug){const p=PRO[slug];
  if(!p)return`<button class="back" data-back>‹ Volver</button><div class="card vacio"><span class="e">🤔</span><h2>No encontramos este perfil</h2><p class="mu">Revisa el enlace o escanea otra vez su QR.</p></div>`;
@@ -1738,6 +1740,7 @@ function vPro(slug){const p=PRO[slug];
   q('#pqr')&&(q('#pqr').onclick=()=>proQR(p));q('#ped')&&(q('#ped').onclick=()=>proEditar());
   app.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>proContactar(slug,b.dataset.pc));
   q('#pch')&&(q('#pch').onclick=()=>abrirChat(p.chat.id));
+  app.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>proComprar(slug,b.dataset.plan));q('#ppend')&&(q('#ppend').onclick=()=>ordenHoja(slug,p.x.pendiente));
   app.querySelectorAll('[data-foto]').forEach(b=>b.onclick=()=>{const d=document.createElement('div');d.className='qrfull';d.innerHTML=`<img src="${esc(b.dataset.foto)}" alt="" style="max-width:94vw;max-height:84vh;border-radius:18px">`;d.onclick=()=>d.remove();document.body.appendChild(d)})};
  return`<div class="nwrap"><button class="back fl" data-back aria-label="Volver">‹</button>
  <div class="cover" style="${/^https:|^blob:/.test(p.portada||'')?`background-image:url('${esc(p.portada)}')`:'background:radial-gradient(120% 90% at 20% 0%,#7c5cff,#1b1340 55%,#05060a)'}"></div>
@@ -1751,18 +1754,19 @@ function vPro(slug){const p=PRO[slug];
    :p.chat?`<button class="btn p" id="pch">${I.chat}Ver mi conversación</button>`
    :p.soyAlumno?`<button class="btn p" data-pc="mensaje">${I.chat}Escribirle</button>`
    :`<button class="btn p" data-pc="entreno">🔥 Quiero entrenar contigo</button><div class="row"><button class="btn sp" data-pc="alumno">🙋 Ya soy su alumno</button><button class="btn sp" data-pc="mensaje">${I.chat}Mensaje</button></div>`}
-  ${p.whatsapp&&!p.mio?waBtn({whatsapp:p.whatsapp},'Hola, soy tu alumno de Mi Xyro.','💬 WhatsApp'):''}
+  ${p.mio?'':planesHTML(p)}
+  ${p.whatsapp&&p.socio&&!p.mio?waBtn({whatsapp:p.whatsapp},'Hola, soy tu alumno de Mi Xyro.','💬 WhatsApp (consultas de socio)'):''}
   ${E.length?`<div class="chips" style="justify-content:flex-start">${E.map(e=>`<span class="chip">${esc(e)}</span>`).join('')}</div>`:''}
   ${p.bio?`<div class="card"><p class="sm" style="white-space:pre-wrap">${esc(p.bio)}</p></div>`:''}
   ${V.length?`<h2>🎬 Videos</h2><div class="hs">${V.map(u=>{const y=ytId(u);return y?`<div class="pvid"><iframe src="https://www.youtube-nocookie.com/embed/${esc(y)}" title="Video" loading="lazy" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>`:`<a class="card pvid lnk" href="${esc(u)}" target="_blank" rel="noopener"><span style="font-size:30px">▶️</span><b class="sm">Ver en ${/tiktok/.test(u)?'TikTok':'Instagram'}</b></a>`}).join('')}</div>`:''}
   ${F.length?`<h2>📸 Fotos</h2><div class="pgal">${F.map(u=>`<button data-foto="${esc(u)}"><img src="${esc(u)}" alt="" loading="lazy"></button>`).join('')}</div>`:''}
   ${Object.keys(red).length?`<div class="row" style="flex-wrap:wrap">${['instagram','tiktok','youtube'].filter(k=>red[k]).map(k=>`<a class="btn" style="text-decoration:none;flex:1" target="_blank" rel="noopener" href="${esc(/^https:/.test(red[k])?red[k]:'https://'+(k==='youtube'?'youtube.com/@':k+'.com/'+(k==='tiktok'?'@':''))+String(red[k]).replace(/^@/,''))}">${k==='instagram'?'📸 Instagram':k==='tiktok'?'🎵 TikTok':'▶️ YouTube'}</a>`).join('')}</div>`:''}
   ${resSec('p',slug)}
-  <p class="mu xs" style="text-align:center">Mi Xyro te conecta con ${esc(p.nombre.split(' ')[0])}. Pagos y horarios los acuerdan entre ustedes.</p>
+  <p class="mu xs" style="text-align:center">🔒 Pagas dentro de Xyro: tu pago queda registrado, se activa tu Pase QR y sumas Xyro Points.${p.plus?'':'<br>Perfil hecho con Mi Xyro · xyrostudio.net'}</p>
  </div>`}
 function proContactar(slug,tipo){if(!D){pend.set({t:slug});return pantallaEntrada('Crea tu cuenta (o entra) para escribirle.','crear')}
  const p=PRO[slug],en=tipo==='entreno',al=tipo==='alumno';
- hoja(`<h2>${en?'🔥 Quiero entrenar contigo':al?'🙋 Ya soy su alumno':'💬 Mensaje'}</h2><p class="mu sm">${en?`Cuéntale a ${esc(p.nombre)} qué buscas. Te responde por aquí.`:al?'Te confirmará y quedarás como su alumno en Mi Xyro (podrás calificarlo como verificado).':'Escríbele lo que necesites.'}</p>
+ hoja(`<h2>${en?'🔥 Quiero entrenar contigo':al?'🙋 Ya soy su alumno':'💬 Mensaje'}</h2><p class="mu sm">${en?`Cuéntale a ${esc(p.nombre)} qué buscas. Te responde por aquí.`:al?'Te confirmará por aquí. Luego eliges tu plan y pagas dentro de Xyro para quedar como su alumno verificado.':'Escríbele lo que necesites.'}</p>
   ${en?`<div class="chips" style="justify-content:flex-start">${['Bajar de peso','Ganar músculo','Fuerza','Salud','Deporte','Clases online'].map(o=>`<button class="chip" data-ob="${o}">${o}</button>`).join('')}</div>`:''}
   <textarea id="pmt" rows="3" maxlength="600" placeholder="${en?'Ej. Quiero entrenar 3 veces por semana en las mañanas.':al?'Ej. Hola, entreno contigo los martes.':'Hola…'}"></textarea><div class="msg" id="pmm"></div><button class="btn p" id="pmb">Enviar</button>`,(o,close)=>{
   let ob='';o.querySelectorAll('[data-ob]').forEach(b=>b.onclick=()=>{o.querySelectorAll('[data-ob]').forEach(x=>x.classList.remove('on'));b.classList.add('on');ob=b.dataset.ob});
@@ -1785,7 +1789,8 @@ function vMiPro(){const p=PROM;
  if(PROM===undefined){proMioCarga().then(()=>SUB==='mipro'&&pinta());return'<button class="back" id="mpb">‹ Volver</button><div class="exsk"></div>'}
  if(PCH===null)pchCarga().then(()=>SUB==='mipro'&&pinta());
  const f0=post;post=()=>{f0&&f0();const q=s=>$(s);q('#mpb').onclick=()=>{SUB=null;TAB='perfil';pinta()};q('#mpe')&&(q('#mpe').onclick=()=>proEditar());q('#mpq')&&(q('#mpq').onclick=()=>proQR(p));q('#mpv')&&(q('#mpv').onclick=()=>{PRO[p.slug]=null;abrirPro(p.slug)});
-  q('#mpp')&&(q('#mpp').onclick=()=>window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent('Hola XyroStudio, quiero el Perfil Pro de Mi Xyro para mi perfil @'+p.slug),'_blank'));
+  q('#mpp')&&(q('#mpp').onclick=()=>window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent('Hola XyroStudio, quiero el plan PRO para mi perfil @'+p.slug),'_blank'));
+  app.querySelectorAll('[data-ctl]').forEach(b=>b.onclick=()=>{try{p.entity_id&&localStorage.setItem('x-ent',p.entity_id);localStorage.setItem('x-modo','control')}catch(_){}location.href='/x/'+(DEMO?'?demo=1':'')+'#/'+b.dataset.ctl});
   app.querySelectorAll('[data-chat]').forEach(b=>b.onclick=()=>abrirChat(b.dataset.chat))};
  if(!p)return`<button class="back" id="mpb">‹ Volver</button><div class="g"><div class="card prohero"><span style="font-size:44px">🧑‍🏫</span><h2>Tu perfil profesional, gratis</h2><p class="mu sm">Para entrenadores personales, profesores, nutricionistas y todo el que da su servicio con su celular.</p>
   <div class="li"><span class="dot">📲</span><span class="sp sm"><b>Tu QR y tu enlace</b> para compartir con tus alumnos.</span></div><div class="li"><span class="dot">🎬</span><span class="sp sm"><b>Videos, fotos y especialidades</b> en un perfil que se ve pro.</span></div>
@@ -1796,8 +1801,9 @@ function vMiPro(){const p=PROM;
   ${p.estado==='pendiente'?'<div class="card" style="border-color:#f5a524"><p class="sm">⏳ <b>Tu perfil está en revisión.</b> Ya puedes compartir tu QR con tus alumnos. Cuando lo aprobemos sales en Explorar para todo el mundo.</p></div>':p.estado==='suspendido'?`<div class="card" style="border-color:#e5484d"><p class="sm">⛔ Tu perfil está suspendido.${p.motivo?' Motivo: '+esc(p.motivo):''} Escríbenos desde «Necesito ayuda».</p></div>`:''}
   <div class="kps k3"><div class="kp"><b>${p.alumnos||0}</b><span class="mu xs">Alumnos</span></div><div class="kp"><b>${R.n?'★ '+(+R.prom).toFixed(1):'—'}</b><span class="mu xs">${R.n||0} opiniones</span></div><div class="kp"><b>${p.nuevos||0}</b><span class="mu xs">Nuevos</span></div></div>
   <div class="row"><button class="btn p sp" id="mpq">${I.qr}Mi QR</button><button class="btn sp" id="mpv">👁️ Ver</button><button class="btn sp" id="mpe">✏️ Editar</button></div>
+  ${proCobrosHTML(p)}
   <h2>📥 Solicitudes y mensajes</h2>${B.length?B.map(c=>`<button class="card" data-chat="${esc(c.id)}" style="text-align:left;width:100%;cursor:pointer"><div class="row"><span class="dot rav">${/^https:/.test(c.foto||'')?`<img src="${esc(c.foto)}" alt="" referrerpolicy="no-referrer">`:esc(String(c.nombre||'?')[0].toUpperCase())}</span><div class="sp" style="min-width:0"><b>${esc(c.nombre)}${c.alumno?' <span class="pill ver">Alumno</span>':''}</b><p class="mu xs">${TT[c.tipo]||''}${c.objetivo?' · '+esc(c.objetivo):''} · ${haceCuanto(c.act)}</p><p class="sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.ult||'')}</p></div>${c.nuevo?'<span class="nvd"></span>':''}</div></button>`).join(''):'<p class="mu sm">Aún no tienes mensajes. Comparte tu QR con tus alumnos para que te sigan y te escriban.</p>'}
-  ${p.plus?'':`<div class="card plusc"><div class="row"><span style="font-size:26px">💎</span><div class="sp"><h3>Perfil Pro</h3><p class="mu sm">Sal primero en Explorar, insignia PRO, hasta 20 fotos y 12 videos, y más funciones para crecer.</p></div></div><button class="btn" id="mpp">Quiero el Perfil Pro</button></div>`}</div>`}
+  ${proPlanHTML(p)}</div>`}
 function proEditar(){const p=PROM||{},per=(D&&D.persona)||{},E=p.especialidades||[],mx=p.plus?20:6,mv=p.plus?12:3;let foto=p.foto||per.foto||'',portada=p.portada||'',fotos=(p.fotos||[]).slice();
  hoja(`<h2>${PROM?'✏️ Editar mi perfil':'🧑‍🏫 Crear mi perfil'}</h2>
  <form class="g" id="pf"><div class="row"><button type="button" class="av" id="pff" style="cursor:pointer">${foto?`<img src="${esc(foto)}" alt="">`:'📷'}</button><div class="sp"><p class="sm"><b>Tu foto</b></p><p class="mu xs">Una foto clara de tu cara da confianza.</p></div></div>
@@ -1843,14 +1849,15 @@ async function abrirChat(id){CHID=id;CH=null;TAB=TAB==='perfil'?'perfil':TAB;SUB
 async function chCarga(){try{CH=await rpc('xa_pro_chat',{p_id:CHID})}catch(e){CH={err:errDe(e)}}PCH=null}
 function vProChat(){const c=CH;
  const f0=post;post=()=>{f0&&f0();const q=s=>$(s);q('#pcb').onclick=()=>{const v=CH;SUB=v&&v.soyPro?'mipro':null;if(v&&!v.soyPro&&v.otro&&v.otro.slug){PRO[v.otro.slug]=null;abrirPro(v.otro.slug)}else pinta()};
-  const x=q('#pcht');x&&(x.scrollTop=x.scrollHeight);
-  app.querySelectorAll('[data-pe]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await rpc('xa_pro_estado',{p_id:CHID,p_accion:b.dataset.pe});if(b.dataset.pe==='aceptar'){confeti();toast('🎉 ¡Nuevo alumno!')}PROM=undefined;await chCarga();pinta()}catch(e){toast(errDe(e));b.disabled=false}});
+  const x=q('#pcht');x&&(x.scrollTop=x.scrollHeight);const pl=q('#pcpl');pl&&(pl.onclick=()=>{PRO[CH.otro.slug]=null;abrirPro(CH.otro.slug)});
+  app.querySelectorAll('[data-pe]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await rpc('xa_pro_estado',{p_id:CHID,p_accion:b.dataset.pe});if(b.dataset.pe==='aceptar'){confeti();toast('✅ Aceptado: ahora elige su plan y paga en Xyro')}PROM=undefined;await chCarga();pinta()}catch(e){toast(errDe(e));b.disabled=false}});
   const f=q('#pcf');f&&(f.onsubmit=async e=>{e.preventDefault();const i=q('#pci'),t=i.value.trim();if(!t)return;i.value='';try{await rpc('xa_pro_msg',{p_id:CHID,p_texto:t});await chCarga();pinta();const j=$('#pci');j&&j.focus()}catch(er){toast(errDe(er));i.value=t}})};
  if(!c)return'<button class="back" id="pcb">‹ Volver</button><div class="exsk"></div>';
  if(c.err)return`<button class="back" id="pcb">‹ Volver</button><div class="card vacio"><span class="e">🤔</span><p class="mu">${esc(c.err)}</p></div>`;
  const o=c.otro||{},M=c.msgs||[],fin=c.estado==='cerrada'||c.estado==='rechazada';
  return`<button class="back" id="pcb">‹ Volver</button><div class="g"><div class="row"><span class="dot rav" style="width:46px;height:46px">${/^https:|^blob:/.test(o.foto||'')?`<img src="${esc(o.foto)}" alt="" referrerpolicy="no-referrer">`:esc(String(o.nombre||'?')[0].toUpperCase())}</span><div class="sp"><h2>${esc(o.nombre||'')}</h2><p class="mu xs">${c.soyPro?(c.alumno?'Tu alumno':c.tipo==='entreno'?'🔥 Quiere entrenar contigo'+(c.objetivo?' · '+esc(c.objetivo):''):c.tipo==='alumno'?'🙋 Dice que es tu alumno':'Mensaje'):(c.alumno?'Eres su alumno':c.estado==='abierta'?'Esperando su respuesta':'')}</p></div></div>
-  ${c.soyPro&&!c.alumno&&c.estado==='abierta'&&c.tipo!=='mensaje'?`<div class="row"><button class="btn p sp" data-pe="aceptar">✅ Aceptar como alumno</button><button class="btn sp" data-pe="rechazar">No tengo cupo</button></div>`:''}
+  ${!c.soyPro&&c.estado==='aceptada'&&!c.alumno&&o.slug?`<button class="btn p" id="pcpl">💪 Elegir mi plan y pagar en Xyro</button>`:''}
+  ${c.soyPro&&!c.alumno&&c.estado==='abierta'&&c.tipo!=='mensaje'?`<div class="row"><button class="btn p sp" data-pe="aceptar">✅ Aceptar (elige plan y paga en Xyro)</button><button class="btn sp" data-pe="rechazar">No tengo cupo</button></div>`:''}
   <div class="card"><div class="chat" id="pcht">${M.length?M.map(m=>m.de==='sis'?`<p class="mu xs" style="text-align:center;justify-self:center;max-width:90%">${esc(m.t)}</p>`:`<div class="bb${m.de==='yo'?' yo':''}">${esc(m.t)}<small>${fF(m.f,{day:'numeric',month:'short'})} · ${fH(m.f)}</small></div>`).join(''):'<p class="mu sm" style="text-align:center">Aún no hay mensajes.</p>'}</div></div>
   ${fin?'<p class="mu sm" style="text-align:center">Esta conversación terminó.</p>':`<form class="row" id="pcf"><input id="pci" maxlength="600" placeholder="Escribe un mensaje…" autocomplete="off" class="sp"><button class="btn p" style="flex:0 0 auto" aria-label="Enviar">${I.send}</button></form>
   <button class="btn l xs" data-pe="cerrar">Terminar conversación</button>`}
@@ -1859,6 +1866,72 @@ setInterval(async()=>{if(document.hidden||MODO!=='cliente'||SUB!=='prochat'||!CH
 function proAvisos(){if(PCH===null&&D&&!DEMO)pchCarga().then(()=>{if(TAB==='avisos'&&!SUB&&pchNuevos())pinta()});
  const L=PCH?[...(PCH.mios||[]).filter(c=>c.nuevo).map(c=>({...c,de:c.nombre})),...(PCH.bandeja||[]).filter(c=>c.nuevo&&c.estado!=='cerrada').map(c=>({...c,de:c.nombre,pro:1}))]:[];
  return L.length?`<p class="mu xs" style="font-weight:700">MENSAJES</p>${L.map(c=>`<button class="card" data-chat="${esc(c.id)}" style="text-align:left;width:100%;cursor:pointer;border-color:var(--a)"><div class="row"><div class="ibox">${I.chat}</div><div class="sp" style="min-width:0"><b>${esc(c.de)}</b><p class="mu sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.ult||'Nuevo mensaje')}</p></div><span class="nvd"></span></div></button>`).join('')}`:''}
+
+
+// ---------- Entrenadores: planes y pago dentro de Xyro + saldos de puntos en vivo (SQL 80) ----------
+let PTS=null,PTSV=null,PTSCH=null,ORDT=0;
+const moneyX=(n,c)=>{try{return new Intl.NumberFormat('es-PE',{style:'currency',currency:c||'PEN',currencyDisplay:'narrowSymbol'}).format(+n||0)}catch(_){return(c||'S/')+' '+(+n||0).toFixed(2)}};
+const nfmt=n=>new Intl.NumberFormat('es').format(Math.round(+n||0));
+async function ptsCarga(fx){if(!D)return;try{const r=await rpc('xy_my_points');const antes=PTS;PTS=r||PTS;
+  if(fx&&antes&&PTS){const d=(+PTS.global_points+ +PTS.local_points)-(+antes.global_points+ +antes.local_points),b=(+PTS.business_points)-(+antes.business_points);if(d>0)ptsFx(d,'Xyro Points');else if(b>0)ptsFx(b,'puntos de negocio')}
+  app.querySelectorAll('[data-pts]').forEach(e=>{const k=e.dataset.pts;e.textContent=nfmt(PTS[k])})}catch(_){PTS=PTS||{global_points:0,local_points:0,business_points:0}}
+ if(!PTSCH&&sb&&!DEMO&&D){try{const{data:{session}}=await sb.auth.getSession();const uid=session&&session.user.id;if(uid){PTSCH=sb.channel('mi-pts').on('postgres_changes',{event:'*',schema:'public',table:'points_ledger',filter:'user_id=eq.'+uid},()=>ptsCarga(true)).subscribe()}}catch(_){}}}
+setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB==='mipro'))ptsCarga(true)},30000);
+function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;ptsCarga().then(()=>{if(!document.querySelector('.ov'))pinta()})}
+ const P=PTS||{},biz=+P.business_points>0||(PROM&&PROM.entity_id);
+ return`<div class="card"><div class="row"><b class="sp">⭐ Mis puntos Xyro</b><span class="pill" style="background:#7c5cff22;color:var(--a)">en vivo</span></div>
+  <div class="kps ${biz?'k3':''}" style="${biz?'':'grid-template-columns:1fr 1fr'}"><div class="kp"><b data-pts="global_points">${nfmt(P.global_points)}</b><span class="mu xs">Globales</span></div><div class="kp"><b data-pts="local_points">${nfmt(P.local_points)}</b><span class="mu xs">Locales</span></div>${biz?`<div class="kp"><b data-pts="business_points">${nfmt(P.business_points)}</b><span class="mu xs">De tu negocio</span></div>`:''}</div>
+  <p class="mu xs">Globales: úsalos en cualquier negocio Xyro. Locales: solo donde los ganaste. Sumas puntos cuando el negocio confirma tu pago.</p></div>`}
+function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'Xyro Points')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+(function(){const st=document.createElement('style');st.textContent='.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff;box-shadow:0 20px 60px #7c5cff66;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}.plan{display:grid;gap:4px;text-align:left;width:100%;cursor:pointer}.plan .row b{font-size:18px}.mpag{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14}.mpag .sp{min-width:0}';document.head.appendChild(st)})();
+const PLK={MEMBERSHIP:'Plan',CLASS_PACK:'Paquete',SESSION:'Sesión',SERVICE:'Servicio'};
+function planesHTML(p){const x=p.x;if(!D)return`<div class="card"><b>💪 Planes y paquetes</b><p class="mu sm">Entra a tu cuenta para ver sus planes y pagar dentro de Xyro.</p></div>`;
+ if(!x)return'';const L=x.planes||[],mio=x.mio;
+ const dias=mio&&mio.valid_until?Math.max(0,Math.ceil((new Date(mio.valid_until)-Date.now())/864e5)):null;
+ return`${mio?`<div class="card" style="border-color:#22c55e66"><div class="row"><span style="font-size:26px">🎟️</span><div class="sp"><b>Eres su alumno activo</b><p class="mu sm">${mio.kind==='CLASS_PACK'?`Te quedan <b>${mio.sessions_left||0}</b> sesiones`:`Te quedan <b>${dias}</b> días`}${mio.valid_until?' · vence '+fF(mio.valid_until):''}</p></div></div><a class="btn" style="text-decoration:none" href="/x/${DEMO?'?demo=1':''}#/billetera">🎫 Ver mi Pase QR</a></div>`:''}
+ ${x.pendiente?`<button class="btn" id="ppend" style="border-color:#f5a524">⏳ Tienes un pago por confirmar · ver</button>`:''}
+ ${L.length?`<h2>💪 Planes y paquetes</h2><div class="g">${L.map(c=>`<button class="card plan" data-plan="${esc(c.id)}"><div class="row"><span class="sp"><span class="mu xs">${PLK[c.kind]||'Plan'}${c.days?' · '+c.days+' días':''}${c.sessions?' · '+c.sessions+' sesiones':''}</span><br><b>${esc(c.title)}</b></span><b>${moneyX(c.price,c.currency)}</b></div>${c.description?`<p class="mu sm">${esc(c.description)}</p>`:''}<span class="sm" style="color:var(--a);font-weight:700">${mio?'Renovar / sumar':'Elegir y pagar'} ›</span></button>`).join('')}</div>`
+  :`<p class="mu sm" style="text-align:center">Aún no publica sus planes. Escríbele por el chat.</p>`}`}
+async function proComprar(slug,item){if(!D){pend.set({t:slug});return pantallaEntrada('Crea tu cuenta (o entra) para elegir tu plan.','crear')}
+ vib();try{const pi=await rpc('xy_pro_comprar',{p_slug:slug,p_item:item});PRO[slug].x&&(PRO[slug].x.pendiente=pi.order_id);ordenHoja(slug,pi.order_id,pi)}catch(e){toast(errDe(e))}}
+const MPN={YAPE:['🟣','Yape'],PLIN:['🔵','Plin'],TRANSFER:['🏦','Transferencia']};
+async function ordenHoja(slug,oid,pi){try{pi=pi||await rpc('xy_order_payinfo',{p_order:oid})}catch(e){return toast(errDe(e))}
+ let met=(pi.methods[0]||{}).tipo||'YAPE',canal=null;
+ hoja(`<div id="ordb"></div>`,(o,close)=>{
+  const pinta2=()=>{const done=pi.status==='COMPLETED',rep=!!pi.buyer_paid_at,b=o.querySelector('#ordb'),it=(pi.items||[])[0]||{};
+   if(done){const pt=(+((pi.points||{}).USER_GLOBAL)||0)+(+((pi.points||{}).USER_LOCAL)||0),m=pi.membership;
+    b.innerHTML=`<div style="text-align:center;display:grid;gap:8px;justify-items:center"><span style="font-size:52px">🎉</span><h2>¡Pago confirmado!</h2><p class="sm">${esc(it.title||'Tu plan')} está activo${m&&m.valid_until?' hasta el '+fF(m.valid_until):''}.</p>
+     ${pt?`<p class="pill" style="background:#7c5cff22;color:var(--a);font-size:15px">+${nfmt(pt)} puntos · ${nfmt((pi.points||{}).USER_LOCAL||0)} locales + ${nfmt((pi.points||{}).USER_GLOBAL||0)} globales</p>`:''}
+     <a class="btn p" style="text-decoration:none;width:100%" href="/x/${DEMO?'?demo=1':''}#/billetera">🎫 Ver mi Pase QR</a><p class="mu xs">Ya puedes dejarle una opinión verificada en su perfil.</p><button class="btn l" data-cx>Listo</button></div>`;
+    o.querySelector('[data-cx]').onclick=()=>{close();PRO[slug]=null;abrirPro(slug)};return}
+   b.innerHTML=`<h2>${rep?'⏳ Esperando confirmación':'Tu orden en Xyro'}</h2>
+    <div class="card"><div class="row"><span class="sp"><b>${esc(it.title||'Plan')}</b><br><span class="mu xs">${esc((pi.entity||{}).name||'')} · código <b>${esc(pi.code)}</b></span></span><b style="font-size:20px">${moneyX(pi.total,pi.currency)}</b></div></div>
+    ${rep?`<p class="sm">Le avisamos a ${esc(String((pi.entity||{}).name||'').split(' ')[0])} que pagaste por ${(MPN[pi.buyer_pay_method]||['','otro medio'])[1]}. Cuando lo confirme en Xyro se activa tu plan y te damos tus puntos aquí mismo.</p><div class="exsk" style="height:6px"></div>`
+    :pi.methods.length?`<p class="mu xs" style="font-weight:700">PÁGALE DIRECTO AL ENTRENADOR</p>${pi.methods.map(m=>`<div class="mpag"><span style="font-size:22px">${(MPN[m.tipo]||['💳'])[0]}</span><span class="sp"><b>${(MPN[m.tipo]||['',m.tipo])[1]}</b><br><span class="sm">${esc(m.dato)}</span>${m.titular?`<br><span class="mu xs">${esc(m.titular)}</span>`:''}</span><button class="btn" data-cp="${esc(m.dato)}" style="flex:0 0 auto;padding:0 12px">📋</button></div>`).join('')}
+     <p class="mu xs">En el mensaje del pago pon el código <b>${esc(pi.code)}</b>.</p>
+     <p class="mu xs" style="font-weight:700">¿CÓMO PAGASTE?</p><div class="chips" style="justify-content:flex-start">${pi.methods.map(m=>m.tipo).filter((v,i,a)=>a.indexOf(v)===i).map(t=>`<button class="chip${t===met?' on':''}" data-mt="${t}">${(MPN[t]||['',t])[1]}</button>`).join('')}</div>
+     <input id="oref" maxlength="40" placeholder="N.º de operación (opcional)" autocomplete="off"><button class="btn p" id="opag">✅ Ya pagué</button>`
+    :`<div class="card" style="border-color:#f5a524"><p class="sm">Aún no configura cómo cobrar. Escríbele por el chat de Xyro y vuelve aquí: tu orden queda guardada.</p></div>`}
+    <p class="mu xs" style="text-align:center">🔒 Tu pago queda registrado en Xyro. Nunca pagues por fuera de esta orden.</p><button class="btn l" data-cx>Cerrar</button>`;
+   o.querySelector('[data-cx]').onclick=close;
+   o.querySelectorAll('[data-cp]').forEach(x=>x.onclick=()=>navigator.clipboard.writeText(x.dataset.cp).then(()=>toast('📋 Copiado'),()=>toast(x.dataset.cp)));
+   o.querySelectorAll('[data-mt]').forEach(x=>x.onclick=()=>{met=x.dataset.mt;o.querySelectorAll('[data-mt]').forEach(y=>y.classList.toggle('on',y===x))});
+   const pg=o.querySelector('#opag');pg&&(pg.onclick=async()=>{pg.disabled=true;try{await rpc('xy_order_report_payment',{p_order:pi.order_id,p_method:met,p_ref:o.querySelector('#oref').value});pi.buyer_paid_at=new Date().toISOString();pi.buyer_pay_method=met;vib();pinta2()}catch(e){toast(errDe(e));pg.disabled=false}})};
+  pinta2();
+  const ver=async()=>{if(!document.body.contains(o)){clearInterval(ORDT);canal&&sb.removeChannel(canal);return}try{const n=await rpc('xy_order_payinfo',{p_order:pi.order_id});const ya=pi.status==='COMPLETED';pi=n;if(!ya&&n.status==='COMPLETED'){pinta2();const pt=(+((n.points||{}).USER_GLOBAL)||0)+(+((n.points||{}).USER_LOCAL)||0);ptsFx(pt,'Xyro Points');ptsCarga()}}catch(_){}};
+  clearInterval(ORDT);ORDT=setInterval(ver,5000);
+  if(sb&&!DEMO){canal=sb.channel('mi-ord-'+pi.order_id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders',filter:'id=eq.'+pi.order_id},ver).subscribe()}})}
+function proCobrosHTML(p){const X=p.xyro;if(!X)return'';const pro=X.pro;
+ return`<div class="card"><div class="row"><b class="sp">💳 Cobros en Xyro</b><span class="pill${pro?' dst':''}">${pro?'PRO':'FREE'}</span></div>
+  <div class="kps k3"><div class="kp"><b>${X.students}${X.max_students?'/'+X.max_students:''}</b><span class="mu xs">Alumnos activos</span></div><div class="kp"><b>${X.items}${X.max_items?'/'+X.max_items:''}</b><span class="mu xs">Planes</span></div><div class="kp"><b data-pts="business_points">${nfmt(X.business_points)}</b><span class="mu xs">Puntos negocio</span></div></div>
+  ${+p.por_confirmar?`<button class="btn p" data-ctl="c-pedidos">💸 ${p.por_confirmar} pago${p.por_confirmar>1?'s':''} por confirmar</button>`:''}
+  <div class="row"><button class="btn sp" data-ctl="c-catalogo">📋 Mis planes</button><button class="btn sp" data-ctl="c-inicio">💳 Cómo me pagan</button></div>
+  <p class="mu xs">Tus alumnos eligen su plan aquí, te pagan directo (Yape, Plin o transferencia) y tú confirmas en Xyro Control: se activa su Pase QR y ganan puntos.</p></div>`}
+function proPlanHTML(p){const X=p.xyro||{},pro=p.plus||X.pro;
+ const B=[['👥','Alumnos y planes','5 como máximo','Ilimitados'],['🎬','Videos Xyro Edits','2 gratis al mes con marca','2 + 15 créditos al mes, sin marca'],['🤖','Xyro Bots','—','Incluido al lanzarse'],['🏷️','Tu perfil público','«Hecho con Mi Xyro»','Sin marca de agua'],['⭐','Explorar','Normal','Insignia PRO y sales antes']];
+ return`<div class="card plusc"><div class="row"><span style="font-size:26px">💎</span><div class="sp"><h3>${pro?'Tienes el plan PRO':'Plan PRO'}</h3><p class="mu sm">${pro?'Todo esto ya está activo en tu cuenta:':'Lo que desbloqueas al instante:'}</p></div></div>
+  ${B.map(b=>`<div class="li"><span class="dot">${b[0]}</span><span class="sp sm"><b>${b[1]}</b><br><span class="mu xs">${pro?b[3]:'FREE: '+b[2]+' · PRO: '+b[3]}</span></span></div>`).join('')}
+  ${pro?(X.edits_credits!=null?`<p class="mu xs">Créditos de videos este mes: <b>${X.edits_credits}</b></p>`:''):'<button class="btn p" id="mpp">Quiero el plan PRO</button><p class="mu xs">Se paga a XyroStudio y lo activamos el mismo día.</p>'}</div>`}
 
 // Demo (?demo=1): datos de ejemplo de Explorar y entrenadores
 const demoRpc0=demoRpc;
@@ -1883,14 +1956,19 @@ demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
  if(f==='xa_resena_reportar'||f==='xa_resena_responder')return{ok:true};
  if(f==='xa_pro_ver'){if(W.mio&&a.p_slug===W.mio.slug)return{...W.mio,mio:true};if(a.p_slug!=='coach-diego'&&a.p_slug!=='profe-lucia')return null;const p=a.p_slug==='profe-lucia'?{...W.pro,slug:'profe-lucia',tipo:'profesor',nombre:'Lucía Torres',titulo:'Profesora de inglés online',pais:'CO',ciudad:'Bogotá',modalidad:'online',especialidades:['Inglés','Conversación','Exámenes'],plus:false,alumnos:9}:W.pro;
   const c=W.chats.find(x=>x.slug===p.slug&&x.estado!=='cerrada');return{...p,chat:c?{id:c.id,tipo:c.tipo,estado:c.estado}:null}}
- if(f==='xa_pro_mio')return W.mio?{...W.mio,res:{n:0},nuevos:W.chats.filter(c=>c.pro&&c.nuevo).length}:null;
+ if(f==='xy_pro_planes'){const w=W.px||(W.px={pendiente:null,mio:null});return{entity_id:'e-diego',plan:'PRO',currency:'PEN',vende:true,mio:w.mio,pendiente:w.pendiente,planes:[{id:'pl1',title:'Plan mensual presencial',description:'3 sesiones por semana en Miraflores + rutina en la app.',price:280,currency:'PEN',kind:'MEMBERSHIP',days:30},{id:'pl2',title:'Paquete 8 sesiones',price:360,currency:'PEN',kind:'CLASS_PACK',sessions:8,days:60},{id:'pl3',title:'Plan online',description:'Rutina y seguimiento semanal por chat.',price:120,currency:'PEN',kind:'MEMBERSHIP',days:30}]}}
+ if(f==='xy_pro_comprar'){const w=W.px||(W.px={});const pl={pl1:['Plan mensual presencial',280],pl2:['Paquete 8 sesiones',360],pl3:['Plan online',120]}[a.p_item]||['Plan',100];w.ord={order_id:'do1',code:'K7Q2M9X4',status:'AWAITING_PAYMENT',total:pl[1],currency:'PEN',entity:{name:'Diego Ramírez'},items:[{title:pl[0],qty:1,line_total:pl[1]}],methods:[{tipo:'YAPE',dato:'999 888 777',titular:'Diego R.'},{tipo:'TRANSFER',dato:'BCP 191-12345678-0-12',titular:'Diego Ramírez'}],points:{}};w.pendiente='do1';return JSON.parse(JSON.stringify(w.ord))}
+ if(f==='xy_order_payinfo'){const w=W.px||{};if(!w.ord)throw new Error('sin acceso');if(w.ord.buyer_paid_at&&w.ord.status!=='COMPLETED'&&Date.now()-new Date(w.ord.buyer_paid_at)>5000){w.ord.status='COMPLETED';w.ord.methods=[];w.ord.points={USER_LOCAL:Math.round(w.ord.total*0.27*8),USER_GLOBAL:Math.round(w.ord.total*0.27*2)};w.ord.membership={kind:'PASS',valid_until:new Date(Date.now()+864e5*30).toISOString()};w.pendiente=null;w.mio={kind:'PASS',valid_until:w.ord.membership.valid_until};W.pro.socio=true;W.pro.whatsapp='51936449066';if(W.pts){W.pts.global_points+=w.ord.points.USER_GLOBAL;W.pts.local_points+=w.ord.points.USER_LOCAL}}return JSON.parse(JSON.stringify(w.ord))}
+ if(f==='xy_order_report_payment'){const w=W.px;w.ord.buyer_paid_at=new Date().toISOString();w.ord.buyer_pay_method=a.p_method;return{ok:true}}
+ if(f==='xy_my_points'){W.pts=W.pts||{global_points:684,local_points:1240,business_points:W.mio?312:0,pending:0};return{...W.pts}}
+ if(f==='xa_pro_mio')return W.mio?{...W.mio,res:{n:0},nuevos:W.chats.filter(c=>c.pro&&c.nuevo).length,entity_id:'e1',por_confirmar:1,xyro:{plan:'FREE',pro:false,students:3,max_students:5,items:2,max_items:5,business_points:312,edits_credits:0}}:null;
  if(f==='xa_pro_guardar'){const p=a.p;W.mio={...(W.mio||{slug:'mi-perfil',estado:'pendiente',alumnos:0,plus:false}),...p};if(!W.chats.some(c=>c.pro)){const c={id:'dch2',pro:1,nombre:'Martín',tipo:'entreno',objetivo:'Ganar músculo',estado:'abierta',nuevo:true,act:new Date().toISOString(),msgs:[{de:'el',t:'Hola, vi tu perfil en Mi Xyro. ¿Tienes cupo para entrenar 3 veces por semana?',f:new Date().toISOString()}]};W.chats.push(c)}return{ok:true,slug:W.mio.slug}}
  if(f==='xa_pro_chats')return{mios:W.chats.filter(c=>!c.pro).map(c=>({...c,ult:(c.msgs.slice(-1)[0]||{}).t})),bandeja:W.chats.filter(c=>c.pro).map(c=>({...c,ult:(c.msgs.slice(-1)[0]||{}).t}))};
  if(f==='xa_pro_contactar'){let c=W.chats.find(x=>x.slug===a.p_slug&&x.estado!=='cerrada');const now=new Date().toISOString();if(!c){c={id:'dch'+Date.now(),slug:a.p_slug,nombre:a.p_slug==='profe-lucia'?'Lucía Torres':'Diego Ramírez',tipo:a.p_tipo,estado:'abierta',msgs:[],act:now};W.chats.push(c)}
   if(a.p_texto)c.msgs.push({de:'yo',t:a.p_texto,f:now});setTimeout(()=>{c.msgs.push({de:'el',t:'¡Hola! 💪 Gracias por escribirme. Cuéntame tu horario y armamos tu plan.',f:new Date().toISOString()});c.nuevo=true},3500);return{ok:true,id:c.id}}
  if(f==='xa_pro_chat'){const c=W.chats.find(x=>x.id===a.p_id);if(!c)throw new Error('sin acceso');c.nuevo=false;return{id:c.id,tipo:c.tipo,estado:c.estado,objetivo:c.objetivo,soyPro:!!c.pro,alumno:!!c.alumno,otro:c.pro?{nombre:c.nombre}:{nombre:c.nombre,slug:c.slug},msgs:c.msgs.map(m=>c.pro?{...m,de:m.de==='el'?'el':m.de}:m)}}
  if(f==='xa_pro_msg'){const c=W.chats.find(x=>x.id===a.p_id);c.msgs.push({de:'yo',t:a.p_texto,f:new Date().toISOString()});return{ok:true}}
- if(f==='xa_pro_estado'){const c=W.chats.find(x=>x.id===a.p_id);if(a.p_accion==='aceptar'){c.alumno=true;c.estado='aceptada';c.msgs.push({de:'sis',t:'✅ Lo aceptaste como alumno.',f:new Date().toISOString()});if(W.mio)W.mio.alumnos=(W.mio.alumnos||0)+1}else if(a.p_accion==='rechazar'){c.estado='rechazada'}else if(a.p_accion==='cerrar')c.estado='cerrada';return{ok:true}}
+ if(f==='xa_pro_estado'){const c=W.chats.find(x=>x.id===a.p_id);if(a.p_accion==='aceptar'){c.alumno=true;c.estado='aceptada';c.msgs.push({de:'sis',t:'✅ Lo aceptaste. Ahora elige su plan y paga dentro de Xyro.',f:new Date().toISOString()})}else if(a.p_accion==='rechazar'){c.estado='rechazada'}else if(a.p_accion==='cerrar')c.estado='cerrada';return{ok:true}}
  return demoRpc0(f,a)};
 
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&D&&!DEMO&&!document.querySelector('.ov,.cam')){try{await cargar();pinta()}catch(_){}}});

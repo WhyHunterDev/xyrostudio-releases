@@ -1,6 +1,6 @@
 // Xyro · Xyro Control (negocios y servicios): resumen, pedidos, QR, Boost, catálogo (con fotos y digitales) y videos (Xyro Edits).
 // Todo pasa por funciones de la base (SQL 76): el navegador nunca reparte puntos ni cambia montos.
-import { S, $, $$, esc, I, rpc, tabla, money, num, hora, fecha, toast, hoja, errDe, cargaJS, ls, ubicar, subirFoto } from '../core.js';
+import { S, $, $$, esc, I, rpc, tabla, money, num, hora, fecha, toast, hoja, errDe, cargaJS, ls, ubicar, subirFoto, ptsFx, WA_XYRO } from '../core.js';
 
 const EST = { CREATED: ['Nuevo', ''], AWAITING_PAYMENT: ['Por cobrar', 'warn'], PAID: ['Pagado', 'ok'], READY: ['Listo', 'ok'], IN_TRANSIT: ['En camino', ''], COMPLETED: ['Completado', 'ok'], CANCELLED: ['Cancelado', 'bad'], DISPUTED: ['En disputa', 'bad'], REFUNDED: ['Devuelto', 'bad'] };
 const MOD = { IN_STORE: 'En el local', PICKUP: 'Para recoger', DELIVERY: 'Delivery', DIGITAL: 'Digital', P2P: 'P2P' };
@@ -30,7 +30,7 @@ export async function vista(r, el) {
 }
 
 const deHoy = (o) => new Date(o.created_at).toDateString() === new Date().toDateString();
-const cargarPedidos = () => tabla('orders', (q) => q.select('id,code,fulfillment_mode,status,total,currency,created_at,payment_method,notes,delivery_address,order_items(title,qty)').eq('entity_id', S.entidad.id).order('created_at', { ascending: false }).limit(60))
+const cargarPedidos = () => tabla('orders', (q) => q.select('id,code,fulfillment_mode,status,total,currency,created_at,payment_method,buyer_paid_at,buyer_pay_method,buyer_pay_ref,notes,delivery_address,order_items(title,qty)').eq('entity_id', S.entidad.id).order('created_at', { ascending: false }).limit(60))
   .then((L) => L.filter((o) => !o.entity_id || o.entity_id === S.entidad.id));
 const ptsNegocio = async () => {
   const B = await tabla('points_balances', (q) => q.select('available,pending').eq('entity_id', S.entidad.id).eq('bucket', 'ENTITY_GLOBAL'), 'entity_points');
@@ -45,7 +45,9 @@ async function inicio(el) {
       <a class="li" href="#/c-qr" style="text-decoration:none"><span class="ico">${I.qr}</span><span class="sp">Crear QR de mesa o mostrador</span>›</a>
       <a class="li" href="#/c-boost" style="text-decoration:none"><span class="ico">${I.bolt}</span><span class="sp">Destacar mi negocio (Boost)</span>›</a>
       <a class="li" href="#/c-videos" style="text-decoration:none"><span class="ico">${I.film}</span><span class="sp">Pedir un video para redes<br><span class="mu xs">Xyro Edits · 2 gratis al mes</span></span>›</a>
-      <a class="li" href="/app/" style="text-decoration:none"><span class="ico">${I.catalog}</span><span class="sp">Abrir mi panel completo</span>›</a></div></div>`);
+      <a class="li" href="/app/" style="text-decoration:none"><span class="ico">${I.catalog}</span><span class="sp">Abrir mi panel completo</span>›</a></div></div>
+    <div class="dos"><div class="card" id="pm"><div class="sk" style="height:60px"></div></div><div class="card" id="pl"><div class="sk" style="height:60px"></div></div></div>`);
+  pagosCard($('#pm', el)); planCard($('#pl', el));
   try {
     const [O, P] = await Promise.all([cargarPedidos(), ptsNegocio()]);
     const H = O.filter(deHoy), cobrado = H.filter((o) => ['PAID', 'READY', 'IN_TRANSIT', 'COMPLETED'].includes(o.status)).reduce((a, o) => a + (+o.total || 0), 0);
@@ -58,9 +60,48 @@ async function inicio(el) {
   } catch (e) { toast(errDe(e)); }
 }
 
+// ---------- Cómo te pagan (privado: solo se muestra dentro de una orden) y tu plan ----------
+const PMT = [['YAPE', 'Yape'], ['PLIN', 'Plin'], ['TRANSFER', 'Transferencia']];
+async function pagosCard(box) {
+  let M = [];
+  const pinta = () => {
+    box.innerHTML = `<div class="row"><b class="sp">💳 Cómo te pagan</b><button class="btn sm" id="pmE">Editar</button></div>
+      <span class="mu xs">Tus clientes los ven solo dentro de su orden en Xyro, nunca en público.</span>
+      ${M.length ? M.map((m) => `<div class="li"><span class="ico">💸</span><span class="sp"><b class="sm">${esc((PMT.find((p) => p[0] === m.type) || ['', m.type])[1])}</b><br><span class="mu xs">${esc(m.dato || '')}${m.titular ? ' · ' + esc(m.titular) : ''}</span></span></div>`).join('')
+        : '<p class="sm" style="color:#fbbf24">Aún no agregas cómo te pagan: tus clientes no podrán pagarte.</p>'}`;
+    $('#pmE', box).onclick = editar;
+  };
+  const editar = () => hoja(`<h2>Cómo te pagan</h2><p class="mu sm">Hasta 3. Número de Yape/Plin o cuenta/CCI.</p>
+    ${[0, 1, 2].map((i) => { const m = M[i] || {}; return `<div class="card" style="background:var(--c2);gap:6px"><select data-ty="${i}"><option value="">— Ninguno —</option>${PMT.map(([k, t]) => `<option value="${k}" ${m.type === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <input data-da="${i}" maxlength="120" placeholder="Número o cuenta" value="${esc(m.dato || '')}"><input data-ti="${i}" maxlength="80" placeholder="A nombre de (opcional)" value="${esc(m.titular || '')}"></div>`; }).join('')}
+    <button class="btn p" id="ok">Guardar</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
+    $('#ok', h).onclick = async (ev) => {
+      const L = [0, 1, 2].map((i) => ({ type: $(`[data-ty="${i}"]`, h).value, dato: $(`[data-da="${i}"]`, h).value.trim(), titular: $(`[data-ti="${i}"]`, h).value.trim() || null })).filter((m) => m.type);
+      if (L.some((m) => m.dato.length < 6)) return toast('Escribe el número o cuenta completo');
+      ev.target.disabled = true;
+      try { await rpc('xy_paymethods_set', { p_entity: S.entidad.id, p_methods: L }); M = L; close(); pinta(); toast('Guardado ✓'); } catch (e) { toast(errDe(e)); ev.target.disabled = false; }
+    };
+  });
+  try { const d = await rpc('xy_paymethods_get', { p_entity: S.entidad.id }); M = Array.isArray(d) ? d : (d && d.methods) || []; } catch (_) {}
+  pinta();
+}
+async function planCard(box) {
+  let f = null; try { f = await rpc('xy_entity_features', { p_entity: S.entidad.id }); } catch (_) {}
+  if (!f) { box.innerHTML = '<b>Tu plan</b><p class="mu sm">No disponible por ahora.</p>'; return; }
+  const lim = (n, m) => m == null ? `${num(n)} (ilimitado)` : `${num(n)} de ${num(m)}`;
+  box.innerHTML = `<div class="row"><b class="sp">Tu plan</b><span class="pill ${f.pro ? 'ok' : ''}">${f.pro ? '⭐ PRO' : 'Gratis'}</span></div>
+    ${f.type === 'PROFESSIONAL' ? `<div class="li"><span class="ico">👥</span><span class="sp sm">Alumnos activos: <b>${lim(f.students, f.max_students)}</b></span></div>` : ''}
+    <div class="li"><span class="ico">🏷️</span><span class="sp sm">Planes o productos: <b>${lim(f.items, f.max_items)}</b></span></div>
+    <div class="li"><span class="ico">${I.film}</span><span class="sp sm">Xyro Edits: <b>${f.pro ? num(f.edits_credits) + ' créditos este mes' : num(f.edits_free_left) + ' gratis este mes (con marca)'}</b></span></div>
+    <div class="li"><span class="ico">🌐</span><span class="sp sm">Perfil público ${f.watermark ? 'con marca Xyro' : '<b>sin marca de agua</b>'}</span></div>
+    <div class="li"><span class="ico">🤖</span><span class="sp sm">Xyro Bots: <b>${f.pro ? 'incluido al lanzarse' : 'solo PRO'}</b></span></div>
+    ${f.pro ? '' : `<a class="btn p w" target="_blank" rel="noopener" href="https://wa.me/${WA_XYRO}?text=${encodeURIComponent('Hola XyroStudio, quiero el plan PRO para ' + (S.entidad.name || 'mi negocio'))}">⭐ Pasar a PRO</a><span class="mu xs">PRO: alumnos y planes ilimitados, 15 créditos de Edits al mes, sin marca de agua y Bots al lanzarse.</span>`}`;
+}
+
 const filaPedido = (o) => `<div class="li"><span class="ico">${I.orders}</span><span class="sp"><b>#${esc(o.code)}</b> <span class="pill ${EST[o.status] ? EST[o.status][1] : ''}">${EST[o.status] ? EST[o.status][0] : esc(o.status)}</span><br>
   <span class="mu xs">${MOD[o.fulfillment_mode] || ''} · ${hora(o.created_at)}</span>
   ${o.order_items && o.order_items.length ? `<br><span class="xs">${o.order_items.map((x) => `${x.qty}× ${esc(x.title)}`).join(', ')}</span>` : ''}
+  ${o.buyer_paid_at && ['CREATED', 'AWAITING_PAYMENT'].includes(o.status) ? `<br><span class="pill warn">💸 Dice que pagó${o.buyer_pay_method ? ' por ' + ((PAGO.find((p) => p[0] === o.buyer_pay_method) || ['', 'transferencia'])[1]) : ''}${o.buyer_pay_ref ? ' · op. ' + esc(o.buyer_pay_ref) : ''}</span>` : ''}
   ${o.notes ? `<br><span class="xs mu">📝 ${esc(o.notes)}</span>` : ''}${o.delivery_address && o.delivery_address.direccion ? `<br><span class="xs mu">📍 ${esc(o.delivery_address.direccion)}</span>` : ''}</span><b>${money(o.total, o.currency)}</b></div>`;
 
 async function pedidos(el) {
@@ -89,10 +130,11 @@ async function pedidos(el) {
   };
   const recargar = async () => { try { O = await cargarPedidos(); pinta(); } catch (e) { toast(errDe(e)); } };
   const cobrar = (o) => hoja(`<h2>Confirmar pago</h2><p class="mu">Pedido <b>#${esc(o.code)}</b> · ${money(o.total, o.currency)}</p>
-    <b class="sm">¿Cómo pagó?</b><div class="chips" style="margin:0;padding:0;flex-wrap:wrap">${PAGO.map(([k, t], i) => `<button class="chip${i ? '' : ' on'}" data-p="${k}">${t}</button>`).join('')}</div>
+    <b class="sm">¿Cómo pagó?</b><div class="chips" style="margin:0;padding:0;flex-wrap:wrap">${PAGO.map(([k, t], i) => `<button class="chip${k === (o.buyer_pay_method || 'YAPE') ? ' on' : ''}" data-p="${k}">${t}</button>`).join('')}</div>
+    ${o.buyer_paid_at ? `<p class="sm">💸 El cliente avisó que pagó${o.buyer_pay_ref ? ` · op. <b>${esc(o.buyer_pay_ref)}</b>` : ''}. Revisa tu Yape/Plin/banco.</p>` : ''}
     <p class="mu xs">Confirma solo si ya viste el pago. Quien atiende no puede ser el comprador: la base lo bloquea.</p>
     <button class="btn p" id="ok">Sí, ya pagó</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
-    let m = 'YAPE';
+    let m = o.buyer_pay_method || 'YAPE';
     $$('[data-p]', h).forEach((b) => b.onclick = () => { m = b.dataset.p; $$('[data-p]', h).forEach((x) => x.classList.toggle('on', x === b)); });
     $('#ok', h).onclick = async (ev) => {
       ev.target.disabled = true;
@@ -100,6 +142,7 @@ async function pedidos(el) {
         const d = await rpc('confirm_order_and_distribute_points', { p_order: o.id, p_payment_method: m });
         close(); const p = d && d.points;
         toast(p ? `Pago confirmado ✓ Cliente: +${num(p.local)} pts locales y +${num(p.global)} globales` : 'Pago confirmado ✓');
+        if (p && +p.entity) setTimeout(() => ptsFx(p.entity, 'puntos para tu negocio'), 300);
         recargar();
       } catch (e) { toast(errDe(e)); ev.target.disabled = false; }
     };
@@ -206,7 +249,7 @@ async function catalogo(el) {
   const cargar = async () => {
     try {
       if (S.demo || S.sinCore) { DEMO_CAT = DEMO_CAT || await tabla('catalog_items', (q) => q); L = DEMO_CAT; }
-      else L = await tabla('catalog_items', (q) => q.select('id,title,description,category,price,currency,kind,fulfillment_modes,stock,active,photos').eq('entity_id', S.entidad.id).order('category').order('title'));
+      else L = await tabla('catalog_items', (q) => q.select('id,title,description,category,price,currency,kind,fulfillment_modes,stock,active,photos,membership_days,sessions_included').eq('entity_id', S.entidad.id).order('category').order('title'));
       pinta();
     } catch (e) { toast(errDe(e)); }
   };
@@ -218,13 +261,15 @@ async function catalogo(el) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Tipo<select id="fK">${Object.entries(KIND).map(([k, t]) => `<option value="${k}" ${x && x.kind === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <label>Stock<input id="fS" type="number" min="0" placeholder="Sin control" value="${x && x.stock != null ? esc(x.stock) : ''}"></label></div>
     <label>Descripción<input id="fD" maxlength="300" value="${esc((x && x.description) || '')}"></label>
+    <div id="mbw" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Días del plan<input id="fDy" type="number" min="1" max="730" placeholder="30" value="${x && x.membership_days ? esc(x.membership_days) : ''}"></label>
+      <label>Sesiones<input id="fSe" type="number" min="1" max="500" placeholder="—" value="${x && x.sessions_included ? esc(x.sessions_included) : ''}"></label></div>
     <div id="mdw"><b class="sm">¿Cómo se puede pedir?</b><div class="chips" style="margin:0;padding:0;flex-wrap:wrap">${MODOS_V.filter((v) => v[0] !== 'DIGITAL').map(([k, t]) => `<button type="button" class="chip${!x || (x.fulfillment_modes || []).includes(k) ? ' on' : ''}" data-mo="${k}">${t}</button>`).join('')}</div></div>
     <div id="dgw" class="card" style="background:var(--c2)"><b class="sm">🔐 Archivo para el cliente</b><span class="mu xs">Pega el enlace privado (Google Drive, Dropbox…). Solo lo ve quien pagó, en su Bóveda digital.${x && x.kind === 'DIGITAL' ? ' Déjalo vacío para no cambiar el actual.' : ''}</span>
       <input id="fL" type="url" maxlength="600" placeholder="https://drive.google.com/…" autocomplete="off"></div>
     <label class="row" style="color:var(--tx)"><input type="checkbox" id="fA" style="width:auto" ${!x || x.active ? 'checked' : ''}> Visible para clientes</label>
     <button class="btn p" id="gd">Guardar</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
     $$('[data-mo]', h).forEach((b) => b.onclick = () => b.classList.toggle('on'));
-    const dig = () => { const d = $('#fK', h).value === 'DIGITAL'; $('#mdw', h).hidden = d; $('#dgw', h).hidden = !d; };
+    const dig = () => { const k = $('#fK', h).value, d = k === 'DIGITAL'; $('#mdw', h).hidden = d; $('#dgw', h).hidden = !d; $('#mbw', h).hidden = !['MEMBERSHIP', 'CLASS_PACK', 'SESSION'].includes(k); };
     $('#fK', h).onchange = dig; dig();
     const pf = () => {
       $('#cf', h).innerHTML = fotoU ? `<span class="fto" style="background-image:url('${esc(fotoU)}')"><button type="button" id="cq" aria-label="Quitar foto">✕</button></span>`
@@ -236,7 +281,8 @@ async function catalogo(el) {
     $('#gd', h).onclick = async (ev) => {
       const d = { title: $('#fT', h).value.trim(), price: +$('#fP', h).value, category: $('#fC', h).value.trim() || null, kind: $('#fK', h).value,
         stock: $('#fS', h).value === '' ? null : Math.max(0, parseInt($('#fS', h).value, 10) || 0), description: $('#fD', h).value.trim() || null,
-        fulfillment_modes: $('#fK', h).value === 'DIGITAL' ? ['DIGITAL'] : $$('[data-mo].on', h).map((b) => b.dataset.mo), active: $('#fA', h).checked, photos: fotoU ? [fotoU] : [] };
+        fulfillment_modes: $('#fK', h).value === 'DIGITAL' ? ['DIGITAL'] : $$('[data-mo].on', h).map((b) => b.dataset.mo), active: $('#fA', h).checked, photos: fotoU ? [fotoU] : [],
+        membership_days: parseInt($('#fDy', h).value, 10) || null, sessions_included: parseInt($('#fSe', h).value, 10) || null };
       const link = $('#fL', h).value.trim();
       if (d.kind === 'DIGITAL' && link && !/^https:\/\/\S{4,}$/.test(link)) return toast('El enlace debe empezar con https://');
       if (d.kind === 'DIGITAL' && !x && !link) return toast('Pega el enlace del archivo');
@@ -268,9 +314,10 @@ async function videos(el) {
       <div class="g" id="tp">${PLANT.map(([k, t, d], i) => `<button type="button" class="mopt${i ? '' : ' on'}" data-t="${k}"><span class="sp"><b class="sm">${t}</b><br><span class="mu xs">${d}</span></span></button>`).join('')}</div>
       <label>Productos que salen (opcional)<select id="vp" multiple size="4"></select></label>
       <label>¿Qué quieres que diga o muestre?<textarea id="vt" rows="3" maxlength="1000" placeholder="Ej: 2x1 en waffles este viernes, música alegre"></textarea></label>
-      <p class="mu xs">Los gratis llevan marca de agua de Xyro. Para más videos o sin marca, escríbenos.</p>
+      <p class="mu xs" id="vcr">Los gratis llevan marca de agua de Xyro. Para más videos o sin marca, pasa a PRO.</p>
       <button class="btn p">Enviar pedido</button></form>
     <div class="card"><b>Mis videos</b><span class="mu xs">El enlace dura 30 días: descárgalo cuando esté listo.</span><div id="lv"><div class="sk" style="height:90px"></div></div></div></div>`);
+  rpc('xy_entity_features', { p_entity: S.entidad.id }).then((f) => { if (f) $('#vcr', el).textContent = f.pro ? `PRO: te quedan ${num(f.edits_credits)} créditos este mes, sin marca de agua.` : `Te quedan ${num(f.edits_free_left)} gratis este mes (con marca de agua). Con PRO: 15 al mes sin marca.`; }).catch(() => {});
   let plant = 'promo';
   $$('#tp [data-t]', el).forEach((b) => b.onclick = () => { plant = b.dataset.t; $$('#tp [data-t]', el).forEach((x) => x.classList.toggle('on', x === b)); });
   tabla('catalog_items', (q) => q.select('id,title').eq('entity_id', S.entidad.id).eq('active', true).order('title').limit(100))
