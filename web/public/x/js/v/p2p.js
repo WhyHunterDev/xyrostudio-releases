@@ -20,7 +20,7 @@ export async function vista(r, el) {
 // ---------- Marketplace ----------
 async function market(el) {
   let ver = qp().get('v') === 'mias' ? 'mias' : 'todo', L = [], q = '';
-  el.innerHTML = `<div class="row wrap"><div class="sp"><h1>Marketplace</h1><p class="mu">Compra y vende entre personas. Con Compra Protegida tu dinero queda seguro hasta que recibes.</p></div>
+  el.innerHTML = `<div class="row wrap"><div class="sp"><h1>Marketplace</h1><p class="mu">Compra y vende entre personas. Pagas directo a quien vende y, con la captura del pago, sumas Xyro Points.</p></div>
     <button class="btn p" id="pub">＋ Publicar</button></div>
     <div class="row wrap"><div class="seg" id="vv" style="flex:1;min-width:220px"><button data-v="todo">Explorar</button><button data-v="mias">Mis publicaciones</button></div>
       <div class="srch" style="flex:2;min-width:220px">${I.search}<input id="mq" type="search" placeholder="Busca «bici», «mancuernas»…" autocomplete="off"></div></div>
@@ -30,7 +30,7 @@ async function market(el) {
     $('#mk', el).innerHTML = V.length ? V.map((m, i) => `<button class="prod" data-i="${L.indexOf(m)}" style="animation-delay:${Math.min(i, 8) * 40}ms">
       <div class="ph" ${foto(m) ? `style="background-image:url('${esc(foto(m))}')"` : ''}>${foto(m) ? '' : esc(m.emoji || '📦')}${m.status !== 'ACTIVE' ? `<span class="pill ${m.status === 'SOLD' ? 'ok' : 'warn'}">${{ RESERVED: 'Reservado', SOLD: 'Vendido', REMOVED: 'Oculto', BANNED: 'Bloqueado' }[m.status] || ''}</span>` : ''}</div>
       <div class="bd"><b class="ell">${esc(m.title)}</b><span class="pr">${money(m.price, m.currency)}</span>
-      <span class="mu xs">${COND[m.condition] || ''}${m.ships ? ' · Envío' : ' · En persona'}${m.protected_available !== false ? ' · 🛡️' : ''} · ${fecha(m.created_at)}</span></div></button>`).join('')
+      <span class="mu xs">${COND[m.condition] || ''}${m.ships ? ' · Envío' : ' · En persona'} · ${fecha(m.created_at)}</span></div></button>`).join('')
       : `<div class="vacio" style="grid-column:1/-1"><div class="e">📦</div><b>${ver === 'mias' ? 'Aún no publicas nada' : 'No hay publicaciones'}</b>${ver === 'mias' ? '<span class="mu sm">Vende lo que ya no usas: toma una foto y publícalo en 1 minuto.</span>' : ''}</div>`;
     $$('#mk .prod', el).forEach((b) => b.onclick = () => detalle(L[+b.dataset.i], cargar));
   };
@@ -63,7 +63,6 @@ function publicar(x, listo) {
     <label>Estado<select id="pC">${Object.entries(COND).map(([k, t]) => `<option value="${k}" ${(x ? x.condition : 'USED') === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
     <label>Descripción<textarea id="pD" maxlength="2000" rows="3" placeholder="Medidas, detalles, dónde lo entregas…">${esc((x && x.description) || '')}</textarea></label>
     <label class="row" style="color:var(--tx)"><input type="checkbox" id="pS" style="width:auto" ${x && x.ships ? 'checked' : ''}> Puedo enviarlo</label>
-    <label class="row" style="color:var(--tx)"><input type="checkbox" id="pR" style="width:auto" ${!x || x.protected_available !== false ? 'checked' : ''}> Aceptar Compra Protegida (recibes el pago menos 6 %)</label>
     <p class="mu xs">Al publicar aceptas los <a href="/terminos.html" target="_blank" rel="noopener">términos</a>. Nada de armas, medicinas, animales ni cosas robadas.</p>
     <button class="btn p" id="ok">${x ? 'Guardar cambios' : 'Publicar'}</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
     const pf = () => {
@@ -80,7 +79,7 @@ function publicar(x, listo) {
     pf();
     $('#ok', h).onclick = async (ev) => {
       const d = { title: $('#pT', h).value.trim(), price: +$('#pP', h).value, currency: $('#pM', h).value, condition: $('#pC', h).value,
-        description: $('#pD', h).value.trim() || null, ships: $('#pS', h).checked, protected_available: $('#pR', h).checked, photos: fotos };
+        description: $('#pD', h).value.trim() || null, ships: $('#pS', h).checked, protected_available: false, photos: fotos };
       if (d.title.length < 3) return toast('Escribe qué vendes');
       if ($('#pP', h).value === '' || !(d.price >= 0)) return toast('Escribe el precio');
       ev.target.disabled = true;
@@ -107,8 +106,8 @@ function detalle(m, recargar) {
     ${mia ? `<div class="card" style="background:var(--c2)"><b class="sm">Es tu publicación</b><span class="mu xs">Las conversaciones con compradores están en Perfil → Mis pedidos y ventas.</span></div>
       <button class="btn" id="ed">✏️ Editar</button>${m.status === 'ACTIVE' ? '<button class="btn l" id="qt">Quitar publicación</button>' : m.status === 'REMOVED' ? '<button class="btn" id="rp">Volver a publicar</button>' : ''}`
     : m.status !== 'ACTIVE' ? '<div class="card"><b>Ya no está disponible</b></div>' : `
-      ${m.protected_available !== false ? `<button class="btn p" id="cp" style="flex-direction:column;gap:2px;padding:10px 16px">🛡️ Compra Protegida<span class="xs" style="display:block;font-weight:500;opacity:.85">Pagas a Xyro y el vendedor cobra cuando confirmas que lo recibiste. Sumas Xyro Points.</span></button>` : ''}
-      <button class="btn" id="cd" style="flex-direction:column;gap:2px;padding:10px 16px">🤝 Trato directo<span class="xs mu" style="display:block;font-weight:500">Coordinan por chat y pagan entre ustedes. Sin protección ni puntos.</span></button>
+      <button class="btn p" id="cd" style="flex-direction:column;gap:2px;padding:10px 16px">🤝 Lo quiero<span class="xs" style="display:block;font-weight:500;opacity:.85">Coordinan por chat y pagas directo a quien vende. Sube la captura del pago y suma Xyro Points.</span></button>
+      <span class="mu xs">Xyro no recibe tu dinero: solo los conecta. Paga cuando estés seguro, mejor al recibir el producto.</span>
       <button class="btn l sm" id="rep">🚩 Reportar</button>`}
     <button class="btn l" data-x>Cerrar</button>`, (h, close) => {
     if (!S.demo && !S.sinCore && m.seller_id) rpc('xy_users_public', { p_ids: [m.seller_id] }).then((u) => { u = u && u[0]; const v = $('#vend', h); if (v && u) v.textContent = 'Vende: ' + (u.display_name || (u.username ? '@' + u.username : 'Usuario Xyro')); }).catch(() => {});
@@ -118,7 +117,7 @@ function detalle(m, recargar) {
       catch (e) { toast(errDe(e)); ev.target.disabled = false; }
     };
     const on = (id, fn) => { const b = $(id, h); b && (b.onclick = fn); };
-    on('#cp', comprar(true)); on('#cd', comprar(false));
+    on('#cd', comprar(false));
     on('#ed', () => { close(); publicar(m, recargar); });
     const estado = (s, txt) => async () => {
       try { if (S.demo || S.sinCore) demoMkSave({ ...m, status: s }); else { const { error } = await S.sb.from('marketplace_listings').update({ status: s }).eq('id', m.id); if (error) throw error; } close(); toast(txt); recargar(); }
@@ -137,7 +136,7 @@ async function trato(el) {
   const id = qp().get('o');
   let canal = null, poll = 0, ultimo = -1;
   const cargar = async () => {
-    const O = await tabla('orders', (q) => q.select('id,code,status,total,currency,protected,commission_amount,buyer_id,seller_user_id,listing_id,created_at,payout_at,marketplace_listings(title,photos)').eq('id', id).limit(1), 'p2p_orders');
+    const O = await tabla('orders', (q) => q.select('id,code,status,total,currency,protected,commission_amount,buyer_id,seller_user_id,listing_id,created_at,payout_at,buyer_paid_at,buyer_pay_method,buyer_pay_ref,buyer_pay_foto,marketplace_listings(title,photos)').eq('id', id).limit(1), 'p2p_orders');
     return O.find((o) => o.id === id);
   };
   const pinta = (o) => {
@@ -150,7 +149,8 @@ async function trato(el) {
       PAID: yoC ? 'Tu dinero está protegido. Cuando tengas el producto en la mano, libera el pago.' : '¡Pago protegido! Coordina la entrega por el chat. Cobras cuando el comprador confirme.',
       COMPLETED: yoC ? '¡Listo! Gracias por comprar con Compra Protegida.' : o.payout_at ? 'Xyro ya te transfirió el pago.' : 'El comprador confirmó. Xyro te transfiere el pago (menos 6 %) en breve.',
       DISPUTED: 'Xyro está revisando este caso. Te escribimos por Ayuda.' }[o.status]
-      : { CREATED: 'Trato directo: coordinen precio, lugar y pago por el chat. Sin protección ni puntos.', COMPLETED: 'Vendido. ¡Gracias por usar Xyro!', DISPUTED: 'Xyro está revisando este caso.' }[o.status];
+      : { CREATED: o.buyer_paid_at ? (yoC ? 'Avisaste que pagaste. Cuando quien vende lo confirme, sumas tus puntos.' : 'El comprador dice que ya pagó. Revisa tu Yape o efectivo y confirma la venta.') : (yoC ? 'Coordina por el chat. Paga directo a quien vende y luego toca «Ya pagué» con tu captura.' : 'Coordina la entrega por el chat. El comprador te paga directo a ti.'),
+        COMPLETED: yoC ? (o.buyer_pay_foto ? '¡Listo! Tus puntos ya están en camino.' : 'Vendido. Sin captura del pago no hubo puntos.') : 'Vendido. ¡Gracias por usar Xyro!', DISPUTED: 'Xyro está revisando este caso.' }[o.status];
     el.innerHTML = `<div class="row"><a class="btn sm" href="#/pedidos">‹ Mis pedidos</a><span class="sp"></span><span class="pill ${PILL[o.status] || ''}">${EST[o.status] || esc(o.status)}</span></div>
       <div class="dos"><div class="g">
         <div class="card" style="text-align:center;justify-items:center;padding:20px">
@@ -166,14 +166,27 @@ async function trato(el) {
     const acc = $('#acc', el), B = [];
     if (o.protected && o.status === 'AWAITING_PAYMENT' && yoC) B.push(`<a class="btn p" target="_blank" rel="noopener" href="https://wa.me/${WA_XYRO}?text=${encodeURIComponent(`Hola Xyro, pagué la Compra Protegida ${o.code} (${money(o.total, o.currency)}). Adjunto la captura.`)}">💳 Pagar y enviar captura</a>`);
     if (o.protected && o.status === 'PAID' && yoC) B.push('<button class="btn p" id="lib">✅ Ya lo recibí: liberar pago</button>');
-    if (!o.protected && o.status === 'CREATED' && !yoC) B.push('<button class="btn p" id="vnd">✅ Marcar como vendido</button>');
+    if (!o.protected && o.status === 'CREATED' && yoC && !o.buyer_paid_at) B.push('<button class="btn p" id="pag">💳 Ya pagué · subir captura</button>');
+    if (!o.protected && o.status === 'CREATED' && !yoC) {
+      if (o.buyer_paid_at) B.push(`<div class="card" style="gap:6px"><b class="sm">Pago reportado: ${esc({ YAPE: 'Yape', PLIN: 'Plin', TRANSFER: 'Transferencia', CASH: 'Efectivo' }[o.buyer_pay_method] || 'Otro')}${o.buyer_pay_ref ? ' · N.º ' + esc(o.buyer_pay_ref) : ''}</b>${o.buyer_pay_foto ? `<a href="${esc(o.buyer_pay_foto)}" target="_blank" rel="noopener"><img src="${esc(o.buyer_pay_foto)}" alt="Captura del pago" style="max-width:200px;max-height:260px;border-radius:12px"></a>` : '<span class="mu xs">Sin captura</span>'}<span class="mu xs">Revisa que el dinero llegó a tu cuenta antes de confirmar.</span></div>`);
+      B.push('<button class="btn p" id="vnd">✅ Recibí el pago · confirmar venta</button>');
+    }
     if (['CREATED', 'AWAITING_PAYMENT'].includes(o.status)) B.push('<button class="btn l" id="can">Cancelar trato</button>');
     if (['PAID', 'COMPLETED', 'CREATED'].includes(o.status)) B.push('<button class="btn l sm" id="dis">⚠️ Tengo un problema</button>');
     acc.innerHTML = B.join('');
     const on = (s, fn) => { const b = $(s, el); b && (b.onclick = fn); };
     on('#lib', () => hoja(`<h2>¿Ya tienes el producto?</h2><p class="mu sm">Al liberar, Xyro le paga al vendedor y tú sumas Xyro Points. Esto no se puede deshacer.</p>
       <button class="btn p" id="si">Sí, lo recibí bien</button><button class="btn l" data-x>Todavía no</button>`, (h, c) => { $('#si', h).onclick = async () => { try { const r = await rpc('xy_p2p_release', { p_order: o.id }); c(); vib(); toast('¡Listo! +' + ((r.points && r.points.global) || 0) + ' Xyro Points'); refrescar(); } catch (e) { toast(errDe(e)); } }; }));
-    on('#vnd', async () => { try { await rpc('xy_p2p_close', { p_order: o.id, p_action: 'SOLD' }); toast('Vendido ✓'); refrescar(); } catch (e) { toast(errDe(e)); } });
+    on('#pag', () => hoja(`<h2>💳 ¿Cómo pagaste?</h2><p class="mu sm">Pagaste directo a quien vende. Sube la captura para sumar tus Xyro Points cuando confirme.</p>
+      <select id="pm"><option value="YAPE">Yape</option><option value="PLIN">Plin</option><option value="TRANSFER">Transferencia</option><option value="CASH">Efectivo</option><option value="OTHER">Otro</option></select>
+      <input id="pr" maxlength="40" placeholder="N.º de operación (opcional)"><input type="file" id="pf" accept="image/*" hidden><button class="btn" id="pfb">📎 Subir captura del pago</button>
+      <button class="btn p" id="pok">Avisar que pagué</button><button class="btn l" data-x>Cancelar</button>`, (h, c) => {
+      let foto = ''; const fb = $('#pfb', h), fi = $('#pf', h);
+      fb.onclick = () => fi.click();
+      fi.onchange = async () => { const fl = fi.files[0]; if (!fl) return; fb.disabled = true; fb.textContent = 'Subiendo…'; try { foto = await subirFoto(fl, 1400); fb.textContent = '✅ Captura lista'; } catch (e) { toast(errDe(e)); fb.textContent = '📎 Subir captura del pago'; } fb.disabled = false; };
+      $('#pok', h).onclick = async (ev) => { ev.target.disabled = true; try { await rpc('xy_order_report_payment', Object.assign({ p_order: o.id, p_method: $('#pm', h).value, p_ref: $('#pr', h).value }, foto && /^https:/.test(foto) ? { p_foto: foto } : {})); c(); vib(); toast('Listo. Avisamos a quien vende'); refrescar(); } catch (e) { toast(errDe(e)); ev.target.disabled = false; } };
+    }));
+    on('#vnd', async () => { try { await rpc('xy_p2p_close', { p_order: o.id, p_action: 'SOLD' }); toast(o.buyer_pay_foto ? 'Vendido ✓ · el comprador suma sus puntos' : 'Vendido ✓'); refrescar(); } catch (e) { toast(errDe(e)); } });
     on('#can', async () => { try { await rpc('xy_p2p_close', { p_order: o.id, p_action: 'CANCEL' }); toast('Trato cancelado'); refrescar(); } catch (e) { toast(errDe(e)); } });
     on('#dis', () => disputa(o.id, refrescar));
     const f = $('#fm', el); f && (f.onsubmit = async (e) => {
@@ -209,7 +222,7 @@ async function trato(el) {
 }
 
 function disputa(orderId, listo) {
-  hoja(`<h2>¿Qué pasó?</h2><p class="mu sm">Cuéntanos y el equipo de Xyro te responde en Ayuda. Si pagaste con Compra Protegida, el dinero queda retenido mientras revisamos.</p>
+  hoja(`<h2>¿Qué pasó?</h2><p class="mu sm">Cuéntanos y el equipo de Xyro te responde en Ayuda. Xyro no guarda dinero: te ayudamos a revisar el caso y podemos sancionar a quien incumplió.</p>
     <textarea id="dt" rows="4" maxlength="1000" placeholder="Ej: el producto llegó roto, no responde el vendedor…"></textarea>
     <button class="btn p" id="ok">Enviar a Xyro</button><button class="btn l" data-x>Cancelar</button>`, (h, c) => {
     $('#ok', h).onclick = async (ev) => {

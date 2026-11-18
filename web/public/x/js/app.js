@@ -5,7 +5,7 @@ import { S, $, $$, esc, I, MODOS, puedeModo, cargarCuenta, cliente, toast, hoja,
 const NAV = {
   user: [['explorar', 'Explorar', I.explore], ['market', 'Marketplace', I.market], ['escanear', 'Escanear', I.scan, 1], ['billetera', 'Billetera', I.wallet], ['perfil', 'Perfil', I.user]],
   control: [['c-inicio', 'Resumen', I.chart], ['c-pedidos', 'Pedidos', I.orders], ['c-qr', 'QR', I.qr, 1], ['c-boost', 'Boost', I.bolt], ['c-catalogo', 'Catálogo', I.catalog]],
-  panel: [['p-inicio', 'Resumen', I.chart], ['p-negocios', 'Negocios', I.shield], ['p-pagos', 'Pagos', I.wallet], ['p-soporte', 'Soporte', I.ticket]],
+  panel: [['p-inicio', 'Resumen', I.chart], ['p-negocios', 'Negocios', I.shield], ['p-soporte', 'Soporte', I.ticket]],
 };
 // Ruta → módulo de vista
 const VISTA = {
