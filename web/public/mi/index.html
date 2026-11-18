@@ -261,6 +261,8 @@ textarea{width:100%;font:inherit;color:var(--tx);background:var(--c2);border:1px
 @media (max-width:360px){.tab{font-size:10px}.tab.scan{flex:0 0 62px}.tab.scan .fab{width:52px;height:52px}.kps{gap:8px}.kp{padding:12px}}
 #instb{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));z-index:8;max-width:500px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:18px;background:#14121fee;backdrop-filter:blur(12px);border:1px solid #7c5cff66;box-shadow:0 12px 40px #0009;animation:up .4s cubic-bezier(.2,1,.3,1)}
 #instb img{width:38px;height:38px;border-radius:10px;flex:none}#instb span{flex:1;min-width:0;display:grid;line-height:1.25}#instb small{color:var(--mu);font-size:12px}#instb .btn{width:auto;padding:9px 14px;font-size:14px;flex:none}#instb .ix{all:unset;cursor:pointer;color:var(--mu);padding:6px;font-size:14px}
+.vchk{display:inline-grid;place-items:center;width:.95em;height:.95em;margin-left:6px;border-radius:50%;background:#1d9bf0;color:#fff;font-size:.62em;font-weight:900;vertical-align:.08em;line-height:1}
+.nvb{display:inline-block;margin:2px 0 6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800;color:#e8f5fe;background:#1d9bf033;border:1px solid #1d9bf066}
 .nfb{display:inline-block;margin:2px 0 6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800;color:#1a1204;background:linear-gradient(135deg,#f7dc8a,#e6b84d 55%,#b8862b);box-shadow:0 4px 14px #e6b84d40}
 .tp{display:flex;gap:6px;width:100%}.tp select{flex:1;min-width:0}
 a.btn{color:var(--tx)}a.btn.p{color:#fff}
@@ -826,7 +828,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
   <button class="btn" data-yo>${I.id}Ya estoy registrado en un negocio</button>
   <div class="card pronto"><div class="row"><div class="ibox">${I.map}</div><div class="sp"><h3>Muy pronto: negocios cerca de ti</h3><p class="mu sm">Un mapa con los negocios Xyro a tu alrededor y sus promos por usar Mi Xyro.</p></div></div></div></div>`}
 async function abrirNeg(slug){vib();SUB={neg:slug};TAB='negocios';if(!NEG[slug]){app.querySelector('#sc')&&($('#sc').innerHTML='<div class="vacio"><span class="e">⏳</span></div>');await cargaNeg(slug)}pinta();$('#sc')&&($('#sc').scrollTop=0)}
-async function cargaNeg(slug){try{const d=await rpc('xa_yo_negocio',{p_slug:slug});if(d)NEG[slug]=d}catch(_){}}
+async function cargaNeg(slug){try{const[d,v]=await Promise.all([rpc('xa_yo_negocio',{p_slug:slug}),rpc('xa_verificado',{p_slug:slug}).catch(()=>false)]);if(d){d.ver=!!v;NEG[slug]=d}}catch(_){}}
 function vNegocio(slug){const n=NEG[slug];
  if(!n)return`<button class="back" data-back>‹ Volver</button><div class="card vacio"><span class="e">🤔</span><h2>No encontramos este negocio</h2><p class="mu">Revisa tu internet o escanea otra vez su QR.</p></div>`;
  WEBN=n.web||'';const rub=n.gratis&&n.rubro!=='restaurante'?'otro':n.rubro,lg=logoURL(n.logo),mi=negs().findIndex(x=>x.slug===slug),sesion=!!D;
@@ -838,7 +840,7 @@ function vNegocio(slug){const n=NEG[slug];
  return`<div class="nwrap"><button class="back fl" data-back aria-label="Volver">‹</button>
  <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:'background:linear-gradient(135deg,var(--a),#000)'}"></div>
  <div class="nhead">${lg?`<img class="lg" src="${esc(lg)}" alt="">`:`<div class="lg" style="display:grid;place-items:center;font-size:34px">${icoR(n.rubro)}</div>`}
-  <h1>${esc(n.negocio)}</h1><p id="resh">${RES['n'+slug]?estr(RES['n'+slug].prom,RES['n'+slug].n,1):''}</p>${n.fundador?`<p class="nfb" title="Uno de los primeros negocios de su rubro en confiar en XyroStudio">🏅 Negocio fundador</p>`:''}${n.descripcion?`<p class="sm" style="max-width:420px;opacity:.9">${esc(n.descripcion)}</p>`:''}${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
+  <h1>${esc(n.negocio)}${n.ver?' <span class="vchk" title="Negocio verificado por Xyro">✓</span>':''}</h1>${n.ver?'<p class="nvb">✓ Negocio verificado · Xyro revisó sus documentos</p>':''}<p id="resh">${RES['n'+slug]?estr(RES['n'+slug].prom,RES['n'+slug].n,1):''}</p>${n.fundador?`<p class="nfb" title="Uno de los primeros negocios de su rubro en confiar en XyroStudio">🏅 Negocio fundador</p>`:''}${n.descripcion?`<p class="sm" style="max-width:420px;opacity:.9">${esc(n.descripcion)}</p>`:''}${SE[0]&&(SE[0].distrito||SE[0].direccion)?`<p class="mu sm">📍 ${esc(SE[0].distrito||SE[0].direccion)}${SE.length>1?` · ${SE.length} sedes`:''}</p>`:''}</div></div>
  <div class="g" style="margin-top:14px">
   ${mi>=0?`<button class="btn p" id="sv">${rub==='barberia'?'💈 Ver mis citas y sellos':rub==='consultorio'?'🦷 Ver mis citas y tratamiento':'🎟️ Ver mi membresía y mi QR'}</button>`
    :`<div class="row">${sesion?`<button class="btn ${n.guardado?'':'p'} sp" id="gd">${n.guardado?'✓ Guardado':'＋ Guardar negocio'}</button>`:`<button class="btn p sp" id="gd">＋ Guardar en Mi Xyro</button>`}${waBtn(n,'Hola, los vi en Mi Xyro. Quiero información.','💬')}</div>
@@ -987,7 +989,7 @@ let GR=null,GRN=false;const WAV='51936449066',GRMAX=3;
 const RUBG=[['gym','🏋️','Gimnasio'],['consultorio','🦷','Consultorio dental'],['barberia','💈','Barbería'],['restaurante','🍽️','Restaurante'],['cafeteria','☕','Cafetería'],['otro','🏪','Otro tipo de negocio']];
 const G0=()=>(GR||[])[0]||null;
 async function grCarga(){try{GR=await rpc('xa_gr_mio')||[];GRN=false}catch(e){GR=GR||[];GRN=/PGRST202|Could not find|does not exist|schema cache/i.test(String(e&&(e.message||e)))}return GR}
-const GREST={pendiente:['wa','🕓 En revisión','XyroStudio revisa tu negocio (normalmente el mismo día). Mientras, arma tu perfil y tus promos: salen en Mi Xyro apenas lo aprobemos.'],
+const GREST={pendiente:['wa','🕓 En revisión','Tu nombre se parece a una marca conocida, así que XyroStudio lo revisa antes de publicarlo. Si la marca es tuya, pide la verificación con tus documentos.'],
  activo:['ok','✅ Publicado en Mi Xyro','Tus clientes ya te encuentran y te guardan con tu QR.'],suspendido:['ko','⛔ Suspendido','Escríbenos por «Necesito ayuda» para revisarlo.'],
  pago:['ok','⭐ Panel completo','Tu negocio ya tiene Xyro Apps. Manéjalo desde tu panel.']};
 const grWA=t=>window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent(t),'_blank','noopener');
@@ -1022,7 +1024,7 @@ function grRegistro(tipo){if(!D)return;const RB=tipo==='producto'?RUBG.filter(r=
    if(!q('#rk').checked)return say('Confirma que eres el dueño o encargado.');
    const b=q('#rb');b.disabled=true;b.textContent='Registrando…';
    try{await rpc('xa_gr_registrar',{p_nombre:q('#rn').value.trim(),p_rubro:q('#rr').value,p_telefono:t,p_distrito:q('#rd').value.trim(),p_direccion:q('#ra').value.trim(),...(pe?{}:{p_pais:pa})});
-    await grCarga();close();TAB='perfil';SUB='migr';pinta();$('#sc')&&($('#sc').scrollTop=0);toast('🎉 ¡Listo! Arma tu perfil mientras lo revisamos')}
+    await grCarga();close();TAB='perfil';SUB='migr';pinta();$('#sc')&&($('#sc').scrollTop=0);toast('🎉 ¡Listo! Tu negocio ya está en Xyro. Completa tu perfil')}
    catch(er){say(errDe(er));b.disabled=false;b.textContent='Registrar gratis'}}})}
 /* Perfil: UNA sola tarjeta de negocio (decisión del usuario 2026-11-18: menos cosas, no confundir) */
 function negCard(){const g=GRN?null:G0(),p=PROM;
@@ -1078,14 +1080,14 @@ function vMiGr(){const g=G0();
  const logo=/^(https:|blob:)/.test(g.logo||'')?`<img src="${esc(g.logo)}" alt="">`:esc(rg[1]);
  return`<div class="g"><div class="row"><div class="av">${logo}</div><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">MI NEGOCIO · ${g.estado==='pago'?'PANEL COMPLETO':'PLAN GRATIS'}</p><h2>${esc(g.nombre)}</h2><span class="pill ${ec}">${et}</span></div></div>
   <p class="mu sm">${esc(g.estado==='suspendido'&&g.motivo?g.motivo:ed)}</p>
-  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${boostCardHTML(g.slug,g.nombre)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
+  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${boostCardHTML(g.slug,g.nombre)}${verifCardHTML(g)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
   <div class="card"><div class="row"><div class="ibox">${I.store}</div><div class="sp"><h3>Tu perfil</h3><p class="mu sm">${lis===5?'✅ Completo. ¡Se ve muy bien!':lis+' de 5 listos · '+['logo','portada','descripción','dirección','horario'].filter((_,i)=>!ok[i]).join(', ')}</p></div></div>
    <button class="btn" id="gped">✏️ Editar perfil</button><button class="btn l" id="gver">Ver cómo lo ven tus clientes ›</button></div>
   <div class="card"><div class="row"><div class="ibox">${I.gift}</div><div class="sp"><h3>Promos por Mi Xyro</h3><p class="mu sm">${P.length} de ${GRMAX} · solo para quienes te tienen en Mi Xyro</p></div></div>
    ${P.length?`<div>${P.map((p,i)=>`<button class="li" data-gpr="${i}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="dot">🎁</span><span class="sp"><b>${esc(p.titulo)}</b>${p.plus?' <span class="pill" style="background:#7c5cff33;color:#c4b5fd">Xyro+</span>':''}<br><span class="mu xs">${p.hasta?(p.hasta<hoyL()?'Venció el ':'Hasta el ')+fF(p.hasta,{day:'numeric',month:'long'}):'Sin fecha de fin'}</span></span><span class="mu">›</span></button>`).join('')}</div>`:''}
    ${P.length<GRMAX?'<button class="btn" id="gpn">＋ Nueva promo</button>':'<p class="mu xs">Llegaste a 3 promos. Con el panel completo publicas más.</p>'}</div>
   ${gcHTML(g)}
-  ${g.estado==='activo'?boostCardHTML(g.slug,g.nombre):''}
+  ${g.estado==='activo'?boostCardHTML(g.slug,g.nombre)+verifCardHTML(g):''}
   <div class="card" style="justify-items:center;text-align:center"><h3>QR para que te guarden</h3><div id="gqr" style="background:#fff;padding:12px;border-radius:18px;width:210px;aspect-ratio:1"></div>
    <p class="mu xs" style="max-width:300px">Ponlo en tu caja o mostrador: al escanearlo, tus clientes te guardan en Mi Xyro y ven tus promos.</p>
    <p class="sm"><b>${g.seguidores||0}</b> ${(g.seguidores|0)===1?'persona te guardó':'personas te guardaron'}</p><button class="btn" id="gsh" style="width:100%">Compartir mi enlace</button></div>
@@ -1660,6 +1662,7 @@ async function demoRpc(f,a){
  if(f==='xa_gr_guardar'){const g=(window._GRD||[])[0],d=a.p_datos;if(!g)throw new Error('sin acceso');if(d.promos&&d.promos.length>3)throw new Error('El plan Gratis tiene hasta 3 promos. Mejora tu plan para tener más.');
   if(d.nombre)g.nombre=d.nombre;if('logo'in d)g.logo=d.logo;const pf=g.perfil;['portada','descripcion','whatsapp','redes'].forEach(k=>{if(k in d)pf[k]=d[k]});if(d.sede)pf.sedes=[Object.assign({nombre:'Principal'},d.sede)];if(d.promos)g.promos=d.promos;return{ok:true}}
  if(f==='xa_gr_mejorar'){const g=(window._GRD||[])[0];g&&(g.mejora=a.p_plan,g.mejora_t=new Date().toISOString());return{ok:true}}
+ if(f==='xa_verificado')return /santos|dental|la-mar/.test(a.p_slug||'');
  if(f==='xa_yo_negocio'){const g=(window._GRD||[]).find(x=>x.slug===a.p_slug);if(g)return{slug:g.slug,negocio:g.nombre,logo:g.logo,rubro:g.rubro==='cafeteria'?'restaurante':g.rubro,gratis:true,portada:g.perfil.portada,descripcion:g.perfil.descripcion,whatsapp:g.perfil.whatsapp,redes:g.perfil.redes,sedes:g.perfil.sedes,promos:g.promos,publicaciones:[],planes:[],clases:[]};return demoNeg(a.p_slug)}
  if(f==='xa_yo_guardar'){toast('En la demo no se guarda de verdad');return true}
  if(f==='xa_yo_responder'){const av=D.avisos.shift(),{gym,den}=demoBoth();if(a.p_ok)D.negocios.push(av.rubro==='consultorio'?den:gym);return{ok:true}}
@@ -1695,7 +1698,7 @@ function exCard(x){const c=CATS.find(k=>k[0]===x.cat)||CATS[7],img=logoURL(x.log
  const lugar=[x.distrito,x.pais&&x.pais!=='PE'?paisN(x.pais):''].filter(Boolean).join(' · ');
  return`<button class="card exc${x.dest?' dest':''}" ${pro?`data-pro="${esc(x.slug)}"`:`data-neg="${esc(x.slug)}"`}>
   <span class="exi${pro?' r':''}">${img?`<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">`:c[1]}</span>
-  <span class="sp" style="min-width:0"><span class="exn"><b>${esc(x.nombre)}</b>${x.dest?'<span class="pill dst">Destacado</span>':''}${x.plus?'<span class="pill dst">PRO</span>':''}</span>
+  <span class="sp" style="min-width:0"><span class="exn"><b>${esc(x.nombre)}</b>${x.ver?'<span class="vchk" title="Verificado">✓</span>':''}${x.dest?'<span class="pill dst">Destacado</span>':''}${x.plus?'<span class="pill dst">PRO</span>':''}</span>
    <span class="mu xs">${pro?(PROT[x.tipo]||PROT.otro)[1]+(x.modalidad?' · '+MODT[x.modalidad]:''):c[2].replace(/s$/,'').replace(/ería$/,'ería')}${lugar?' · 📍 '+esc(lugar):''}${x.km!=null?` · ${x.km<1?Math.round(x.km*1000)+' m':x.km+' km'}`:''}</span>
    <span class="exm">${estr(x.prom,x.n)}${+x.promos?`<span class="pill gft">🎁 ${x.promos} promo${x.promos>1?'s':''}</span>`:''}${pro&&+x.alumnos?`<span class="mu xs">👥 ${x.alumnos} alumno${x.alumnos>1?'s':''}</span>`:''}</span></span><span class="mu">›</span></button>`}
 function exLista(){const L=EX.items;
@@ -1710,9 +1713,12 @@ function exBind(){const r=$('#exr');r&&(r.onclick=()=>{EX.items=null;exCarga();p
    Leaflet precargado, caché por zona, búsqueda por nombre y lista de lugares abajo ---------- */
 const MAPC={gym:'🏋️',cafeteria:'☕',restaurante:'🍽️',barberia:'💈',consultorio:'🦷',otro:'🏪'};
 const MAPK={gym:'#7c5cff',cafeteria:'#b45309',restaurante:'#e11d48',barberia:'#0891b2',consultorio:'#0ea5e9',otro:'#475569'};
-const MP={cat:'',top:false,geo:null,map:null,capa:null,t:0,items:[],mk:{},caja:null,key:'',seq:0,qs:0,qt:0,abierta:false};
+const MP={cat:'',top:false,ver:false,pais:'',orden:'cerca',modo:'zona',todos:null,paises:null,geo:null,map:null,capa:null,t:0,items:[],mk:{},caja:null,key:'',seq:0,qs:0,qt:0,abierta:false};
 try{const g=JSON.parse(ls.g('mi-geo')||'null');if(g&&g.lat)MP.geo=g}catch(_){}
 let MPL=null;
+const flagDe=c=>/^[A-Z]{2}$/.test(c||'')?String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0))):'🌎';
+const paisNom=c=>{try{return new Intl.DisplayNames(['es'],{type:'region'}).of(c)||c}catch(_){return c}};
+const verTag=x=>x&&x.ver?' <span class="mver" title="Negocio verificado por Xyro">✓</span>':'';
 function mapaLib(){if(window.L)return Promise.resolve();if(MPL)return MPL;
  const c=document.createElement('link');c.rel='stylesheet';c.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';document.head.appendChild(c);
  const pc=document.createElement('link');pc.rel='preconnect';pc.href='https://tile.openstreetmap.org';pc.crossOrigin='';document.head.appendChild(pc);
@@ -1721,10 +1727,10 @@ function mapaPre(){const f=()=>mapaLib().catch(()=>{});window.requestIdleCallbac
 async function mapaAbrir(){vib();
  const ov=document.createElement('div');ov.className='mapov';ov.innerHTML=`<div id="mapa"></div>
   <div class="maptop"><div class="mapsr"><button class="mapi" id="mpx" aria-label="Volver">‹</button><input id="mpq" type="search" placeholder="Buscar negocios en Xyro" autocomplete="off" enterkeyhint="search"><button class="mapi" id="mpqx" aria-label="Borrar" hidden>✕</button></div>
-   <div class="mapres" id="mpr" hidden></div>
-   <div class="mapch">${CATS.filter(c=>c[0]!=='entrenadores').map(([k,i,t])=>`<button class="mchip${MP.cat===k?' on':''}" data-mc="${k}">${i} ${t}</button>`).join('')}<button class="mchip${MP.top?' on':''}" id="mptop">⭐ 4.5+</button></div></div>
+   <div class="mapres" id="mpr" hidden></div><div class="mapres" id="mpp" hidden></div>
+   <div class="mapch" id="mpch"><button class="mchip${MP.pais?' on':''}" id="mppais">${MP.pais?flagDe(MP.pais)+' '+esc(paisNom(MP.pais)):'🌎 Todos los países'} ▾</button><button class="mchip" id="mpord">${MP.orden==='top'?'⭐ Mejor puntuados':'📍 Más cerca'}</button><button class="mchip${MP.ver?' on':''}" id="mpver">✓ Verificados</button><button class="mchip${MP.top?' on':''}" id="mptop">⭐ 4.5+</button>${CATS.filter(c=>c[0]!=='entrenadores').map(([k,i,t])=>`<button class="mchip${MP.cat===k?' on':''}" data-mc="${k}">${i} ${t}</button>`).join('')}</div></div>
   <button class="mapfab" id="mpyo" aria-label="Mi ubicación"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
-  <div class="mapsheet" id="mps"><button class="mapgrip" id="mpg" aria-label="Ver lista"><i></i><b id="mpn">Buscando lugares…</b><span id="mpa">▴</span></button><div class="maplist" id="mpl"></div></div>
+  <div class="mapsheet" id="mps"><button class="mapgrip" id="mpg" aria-label="Ver lista"><i></i><b id="mpn">Buscando lugares…</b><span id="mpa">▴</span></button><div class="mseg" id="mpm"><button data-mm="zona">En esta zona</button><button data-mm="todo">Todos</button></div><div class="maplist" id="mpl"></div></div>
   <div class="mapcard" id="mpc" hidden></div>`;
  document.body.appendChild(ov);history.pushState({mapa:1},'');
  const cerrar=()=>{if(MP.map){MP.map.remove();MP.map=null;MP.mk={};MP.caja=null}ov.remove();window.removeEventListener('popstate',pop)};const pop=()=>cerrar();window.addEventListener('popstate',pop);
@@ -1737,11 +1743,20 @@ async function mapaAbrir(){vib();
  MP.capa=L.layerGroup().addTo(MP.map);if(g)mapaYoPunto();
  MP.map.on('moveend',()=>{clearTimeout(MP.t);MP.t=setTimeout(()=>mapaCarga(),220)});
  MP.map.on('click',()=>{$('#mpc').hidden=true;$('#mpr').hidden=true;mapaHoja(false)});
- MP.map.on('movestart',()=>{$('#mpr').hidden=true});
- ov.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{vib();MP.cat=b.dataset.mc;ov.querySelectorAll('[data-mc]').forEach(x=>x.classList.toggle('on',x===b));mapaCarga(true)});
- ov.querySelector('#mptop').onclick=e=>{vib();MP.top=!MP.top;e.currentTarget.classList.toggle('on',MP.top);mapaCarga(true)};
+ MP.map.on('movestart',()=>{$('#mpr').hidden=true;$('#mpp').hidden=true});
+ const refil=()=>{MP.todos=null;mapaCarga(true)};
+ ov.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{vib();MP.cat=b.dataset.mc;ov.querySelectorAll('[data-mc]').forEach(x=>x.classList.toggle('on',x===b));refil()});
+ ov.querySelector('#mptop').onclick=e=>{vib();MP.top=!MP.top;e.currentTarget.classList.toggle('on',MP.top);refil()};
+ ov.querySelector('#mpver').onclick=e=>{vib();MP.ver=!MP.ver;e.currentTarget.classList.toggle('on',MP.ver);refil()};
+ ov.querySelector('#mpord').onclick=e=>{vib();MP.orden=MP.orden==='top'?'cerca':'top';e.currentTarget.textContent=MP.orden==='top'?'⭐ Mejor puntuados':'📍 Más cerca';MP.todos=null;mapaLista()};
+ ov.querySelector('#mppais').onclick=()=>mapaPaises();
+ ov.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{vib();MP.modo=b.dataset.mm;mapaLista()});
+ const ch=ov.querySelector('#mpch');ch.addEventListener('wheel',e=>{if(ch.scrollWidth>ch.clientWidth&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){ch.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
+ {let dx=null,sl=0,mv=0;ch.onpointerdown=e=>{if(e.pointerType!=='mouse')return;dx=e.clientX;sl=ch.scrollLeft;mv=0};
+  window.addEventListener('pointermove',e=>{if(dx==null)return;mv=Math.max(mv,Math.abs(e.clientX-dx));ch.scrollLeft=sl-(e.clientX-dx)});
+  window.addEventListener('pointerup',()=>{dx=null});ch.addEventListener('click',e=>{if(mv>6){e.stopPropagation();e.preventDefault();mv=0}},true)}
  ov.querySelector('#mpyo').onclick=()=>mapaYo(true);
- ov.querySelector('#mpg').onclick=()=>mapaHoja(!MP.abierta);
+ ov.querySelector('#mpg').onclick=()=>{if(!MP.abierta&&!mapaVis().length)MP.modo='todo';mapaHoja(!MP.abierta)};
  const qi=ov.querySelector('#mpq'),qx=ov.querySelector('#mpqx');
  qi.oninput=()=>{qx.hidden=!qi.value;clearTimeout(MP.qt);MP.qt=setTimeout(()=>mapaBuscar(qi.value),260)};
  qi.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const f=$('#mpr [data-ms]');f?f.click():mapaBuscar(qi.value)}};
@@ -1753,11 +1768,11 @@ function mapaYoPunto(){if(!MP.map||!MP.geo)return;MP.yo&&MP.yo.remove();MP.yo=L.
 function mapaYo(avisar){if(!navigator.geolocation)return avisar&&toast('Tu equipo no comparte la ubicación.');
  navigator.geolocation.getCurrentPosition(p=>{MP.geo={lat:+p.coords.latitude.toFixed(4),lng:+p.coords.longitude.toFixed(4)};ls.s('mi-geo',JSON.stringify(MP.geo));if(!MP.map)return;MP.map.setView([MP.geo.lat,MP.geo.lng],avisar?15:Math.max(MP.map.getZoom(),13.5));mapaYoPunto()},
   ()=>avisar&&toast('Activa el permiso de ubicación para ver lo que está cerca.'),{timeout:12000,maximumAge:3e5})}
-function mapaIco(x){const c=MAPK[x.cat]||MAPK.otro;return L.divIcon({className:'',html:`<div class="pin${x.dest?' dst':''}" style="--pc:${x.dest?'#f59e0b':c}"><span>${MAPC[x.cat]||'🏪'}</span></div>`,iconSize:[34,40],iconAnchor:[17,38]})}
-async function mapaCarga(force){if(!MP.map)return;const b=MP.map.getBounds(),k=MP.cat+'|'+(MP.top?1:0);
+function mapaIco(x){const c=MAPK[x.cat]||MAPK.otro;return L.divIcon({className:'',html:`<div class="pin${x.dest?' dst':''}" style="--pc:${x.dest?'#f59e0b':c}"><span>${MAPC[x.cat]||'🏪'}</span>${x.ver?'<i class="pv">✓</i>':''}</div>`,iconSize:[34,40],iconAnchor:[17,38]})}
+async function mapaCarga(force){if(!MP.map)return;const b=MP.map.getBounds(),k=[MP.cat,MP.top,MP.ver,MP.pais].join('|');
  if(!force&&MP.caja&&MP.key===k&&MP.caja.contains(b)){mapaLista();return}
  const pb=b.pad(.6),s=++MP.seq;mapaMsg('');
- try{const r=await rpc('xa_mapa',{p:{s:pb.getSouth(),n:pb.getNorth(),w:pb.getWest(),e:pb.getEast(),cat:MP.cat,top:MP.top}});if(s!==MP.seq||!MP.map)return;
+ try{const r=await rpc('xa_mapa',{p:{s:pb.getSouth(),n:pb.getNorth(),w:pb.getWest(),e:pb.getEast(),cat:MP.cat,top:MP.top,ver:MP.ver,pais:MP.pais}});if(s!==MP.seq||!MP.map)return;
   MP.items=(r&&r.items)||[];MP.caja=MP.items.length>=300?b:pb;MP.key=k}catch(e){if(s===MP.seq)mapaMsg(errDe(e));return}
  mapaPinta()}
 function mapaPinta(){const ids=new Set();
@@ -1766,25 +1781,42 @@ function mapaPinta(){const ids=new Set();
 function mapaMsg(t){const n=$('#mpn');n&&t&&(n.textContent=t)}
 function mapaKm(x){const g=MP.geo;if(!g)return'';const k=xaKm(g.lat,g.lng,x.lat,x.lng);return k<1?Math.round(k*1000)+' m':k.toFixed(1)+' km'}
 function mapaVis(){if(!MP.map)return[];const b=MP.map.getBounds(),c=MP.geo||MP.map.getCenter();
- return MP.items.filter(x=>b.contains([x.lat,x.lng])).map(x=>({x,d:xaKm(c.lat,c.lng,x.lat,x.lng)})).sort((a,z)=>(z.x.dest?1:0)-(a.x.dest?1:0)||a.d-z.d).map(o=>o.x)}
-function mapaFila(x){return`<button class="mrow" data-ms="${esc(x.slug)}"><span class="mico" style="--pc:${MAPK[x.cat]||MAPK.otro}">${MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b>${esc(x.nombre)}</b>${x.boost?' <span class="mtag">⚡ Destacado</span>':''}<br><span class="mmu">${x.n?`<b class="mst">★ ${(+x.prom).toFixed(1)}</b> (${x.n}) · `:''}${esc((CATS.find(c=>c[0]===x.cat)||[,,'Negocio'])[2].replace(/s$/,''))}${x.dir?' · '+esc(x.dir):''}</span>${+x.promos?`<br><span class="mgft">🎁 ${x.promos} promo${x.promos>1?'s':''} por Mi Xyro</span>`:''}</span><span class="mmu">${mapaKm(x)}</span></button>`}
+ return MP.items.filter(x=>b.contains([x.lat,x.lng])).map(x=>({x,d:xaKm(c.lat,c.lng,x.lat,x.lng)})).sort((a,z)=>(z.x.dest?1:0)-(a.x.dest?1:0)||(MP.orden==='top'?(+z.x.prom||0)-(+a.x.prom||0):0)||a.d-z.d).map(o=>o.x)}
+function mapaFila(x){return`<button class="mrow" data-ms="${esc(x.slug)}"><span class="mico" style="--pc:${MAPK[x.cat]||MAPK.otro}">${MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b>${esc(x.nombre)}</b>${verTag(x)}${x.boost?' <span class="mtag">⚡ Destacado</span>':''}<br><span class="mmu">${x.n?`<b class="mst">★ ${(+x.prom).toFixed(1)}</b> (${x.n}) · `:''}${esc((CATS.find(c=>c[0]===x.cat)||[,,'Negocio'])[2].replace(/s$/,''))}${x.dir?' · '+esc(x.dir):''}${x.pais&&x.pais!==MP.pais?' · '+flagDe(x.pais):''}</span>${+x.promos?`<br><span class="mgft">🎁 ${x.promos} promo${x.promos>1?'s':''} por Mi Xyro</span>`:''}</span><span class="mmu">${mapaKm(x)}</span></button>`}
 function mapaLista(){const V=mapaVis(),n=$('#mpn'),l=$('#mpl');if(!n)return;
- n.textContent=V.length?`${V.length} lugar${V.length>1?'es':''} en esta zona`:'Aún no hay negocios Xyro aquí';
+ n.textContent=V.length?`${V.length} lugar${V.length>1?'es':''} en esta zona`:'Nada en esta zona · ver los más cercanos';
+ document.querySelectorAll('#mpm [data-mm]').forEach(b=>b.classList.toggle('on',b.dataset.mm===MP.modo));
  if(!MP.abierta||!l)return;
- l.innerHTML=V.length?V.slice(0,60).map(mapaFila).join(''):`<p class="mmu" style="padding:8px 4px">Aleja el mapa o busca por nombre. ¿Conoces uno? Invítalo: registrarse es gratis.</p>`;
+ if(MP.modo==='todo'){if(!MP.todos){l.innerHTML='<p class="mmu" style="padding:12px 4px">Cargando…</p>';mapaTodos();return}
+  const T=MP.todos;l.innerHTML=T.length?`<p class="mmu" style="padding:4px">${MP.orden==='top'?'Mejor puntuados':'Más cerca de ti'}${MP.pais?' en '+esc(paisNom(MP.pais)):' en todo el mundo'}</p>`+T.map(mapaFila).join(''):`<p class="mmu" style="padding:8px 4px">Aún no hay negocios con estos filtros. ¿Conoces uno? Invítalo: registrarse es gratis.</p>`;
+  l.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=T.find(i=>i.slug===b.dataset.ms);x&&mapaIr(x)});return}
+ l.innerHTML=V.length?V.slice(0,60).map(mapaFila).join(''):`<p class="mmu" style="padding:8px 4px">No hay negocios Xyro en esta parte del mapa.</p><button class="mbtn p" id="mptd" style="width:100%">Ver los más cercanos</button>`;
+ const td=l.querySelector('#mptd');td&&(td.onclick=()=>{MP.modo='todo';mapaLista()});
  l.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MP.items.find(i=>i.slug===b.dataset.ms);x&&mapaIr(x)})}
+async function mapaTodos(fit){const c=MP.geo||(MP.map&&MP.map.getCenter());
+ try{const r=await rpc('xa_mapa',{p:{todo:true,lat:c&&c.lat,lng:c&&c.lng,orden:MP.orden,cat:MP.cat,top:MP.top,ver:MP.ver,pais:MP.pais}});if(!MP.map)return;
+  MP.todos=(r&&r.items)||[];
+  if(fit&&MP.todos.length){const B=L.latLngBounds(MP.todos.map(x=>[x.lat,x.lng]));MP.map.fitBounds(B.pad(.15),{maxZoom:14})}
+  else if(fit&&MP.pais)toast('Aún no hay negocios en '+paisNom(MP.pais)+'. ¡Invita al primero!')}catch(e){MP.todos=[];toast(errDe(e))}
+ mapaLista()}
+async function mapaPaises(){vib();const p=$('#mpp');if(!p)return;if(!p.hidden){p.hidden=true;return}$('#mpr').hidden=true;p.hidden=false;
+ if(!MP.paises){p.innerHTML='<p class="mmu" style="padding:12px">Cargando países…</p>';try{MP.paises=await rpc('xa_mapa_paises',{})||[]}catch(_){MP.paises=[]}}
+ if(p.hidden)return;
+ p.innerHTML=`<button class="mrow" data-pp=""><span class="mico" style="--pc:#1a73e8">🌎</span><span class="sp"><b>Todos los países</b></span></button>`+MP.paises.map(x=>`<button class="mrow" data-pp="${esc(x.pais)}"><span class="mico" style="--pc:#1a73e8">${flagDe(x.pais)}</span><span class="sp"><b>${esc(paisNom(x.pais))}</b><br><span class="mmu">${x.n} negocio${x.n>1?'s':''}</span></span>${MP.pais===x.pais?'<b style="color:#1a73e8">✓</b>':''}</button>`).join('');
+ p.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{vib();MP.pais=b.dataset.pp;p.hidden=true;const c=$('#mppais');c.textContent=(MP.pais?flagDe(MP.pais)+' '+paisNom(MP.pais):'🌎 Todos los países')+' ▾';c.classList.toggle('on',!!MP.pais);
+  MP.todos=null;mapaCarga(true);if(MP.pais){MP.modo='todo';mapaTodos(true)}else{MP.modo='zona';if(MP.geo)MP.map.setView([MP.geo.lat,MP.geo.lng],13.5);mapaLista()}})}
 function mapaIr(x){mapaHoja(false);$('#mpr').hidden=true;if(!MP.items.some(i=>i.slug===x.slug)){MP.items.push(x);mapaPinta()}
  MP.map.setView([x.lat,x.lng],Math.max(MP.map.getZoom(),16));setTimeout(()=>mapaCard(x),80)}
 async function mapaBuscar(t){t=String(t||'').trim();const r=$('#mpr');if(!r)return;if(t.length<2){r.hidden=true;return}
  const s=++MP.qs;r.hidden=false;r.innerHTML='<p class="mmu" style="padding:12px">Buscando…</p>';
  const loc=MP.items.filter(x=>x.nombre.toLowerCase().includes(t.toLowerCase()));
- let L2=[];try{const q=await rpc('xa_mapa',{p:{q:t,cat:MP.cat}});L2=(q&&q.items)||[]}catch(_){}
- if(s!==MP.qs)return;const vis=new Set(),R=[...loc,...L2].filter(x=>!vis.has(x.slug)&&vis.add(x.slug)).slice(0,8);
+ let L2=[];try{const c=MP.geo||MP.map.getCenter(),q=await rpc('xa_mapa',{p:{q:t,cat:MP.cat,pais:MP.pais,ver:MP.ver,lat:c.lat,lng:c.lng,orden:'cerca'}});L2=(q&&q.items)||[]}catch(_){}
+ if(s!==MP.qs)return;const vis=new Set(),R=[...loc,...L2].filter(x=>!MP.pais||!x.pais||x.pais===MP.pais).filter(x=>!vis.has(x.slug)&&vis.add(x.slug)).slice(0,8);
  r.innerHTML=R.length?R.map(mapaFila).join(''):`<p class="mmu" style="padding:12px">No encontramos «${esc(t)}». Prueba con otro nombre o distrito.</p>`;
  r.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=R.find(i=>i.slug===b.dataset.ms);$('#mpq').blur();x&&mapaIr(x)})}
 function mapaCard(x){vib();const c=$('#mpc');if(!c)return;mapaHoja(false);const img=logoURL(x.logo),km=mapaKm(x);
- c.innerHTML=`<div class="row"><span class="mico big" style="--pc:${MAPK[x.cat]||MAPK.otro}">${img?`<img src="${esc(img)}" alt="" onerror="this.remove()">`:MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b style="font-size:17px">${esc(x.nombre)}</b>${x.boost?' <span class="mtag">⚡ Destacado</span>':x.dest?' <span class="mtag">Destacado</span>':''}<br>
-  <span class="mmu">${x.n?`<b class="mst">★ ${(+x.prom).toFixed(1)}</b> (${x.n} reseña${x.n>1?'s':''})`:'✨ Nuevo en Xyro'}${km?' · '+km:''}</span><br><span class="mmu">${x.dir?'📍 '+esc(x.dir):''}</span>${+x.promos?`<br><span class="mgft">🎁 ${x.promos} promo${x.promos>1?'s':''} por Mi Xyro</span>`:''}</span><button class="mapi" id="mpcx" aria-label="Cerrar">✕</button></div>
+ c.innerHTML=`<div class="row"><span class="mico big" style="--pc:${MAPK[x.cat]||MAPK.otro}">${img?`<img src="${esc(img)}" alt="" onerror="this.remove()">`:MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b style="font-size:17px">${esc(x.nombre)}</b>${verTag(x)}${x.boost?' <span class="mtag">⚡ Destacado</span>':x.dest?' <span class="mtag">Destacado</span>':''}<br>
+  <span class="mmu">${x.n?`<b class="mst">★ ${(+x.prom).toFixed(1)}</b> (${x.n} reseña${x.n>1?'s':''})`:'✨ Nuevo en Xyro'}${km?' · '+km:''}</span><br><span class="mmu">${x.dir?'📍 '+esc(x.dir):''}${x.pais?' '+flagDe(x.pais):''}</span>${x.ver?'<br><span class="mgft" style="color:#1a73e8">✓ Negocio verificado: compra con confianza</span>':''}${+x.promos?`<br><span class="mgft">🎁 ${x.promos} promo${x.promos>1?'s':''} por Mi Xyro</span>`:''}</span><button class="mapi" id="mpcx" aria-label="Cerrar">✕</button></div>
   <div class="row"><a class="mbtn p sp" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}">🧭 Cómo llegar</a><button class="mbtn sp" id="mpv">Ver negocio</button></div>`;
  c.hidden=false;c.querySelector('#mpcx').onclick=()=>{c.hidden=true};c.querySelector('#mpv').onclick=()=>{history.back();setTimeout(()=>abrirNeg(x.slug),60)}}
 function xaKm(a,b,c,d){const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 12742*Math.asin(Math.sqrt(x))}
@@ -1796,7 +1828,11 @@ function xaKm(a,b,c,d){const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r
 .mapsr input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:16px;color:#202124;padding:0 4px;height:100%;box-shadow:none}.mapsr input::-webkit-search-cancel-button{display:none}
 .mapi{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:none;color:#5f6368;font-size:22px;cursor:pointer;display:grid;place-items:center}
 .mapres{max-width:640px;width:100%;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 16px #0003;max-height:55vh;overflow:auto}
-.mapch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;max-width:640px;width:100%;margin:0 auto}.mapch::-webkit-scrollbar{display:none}
+.mapch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;max-width:640px;width:100%;margin:0 auto;cursor:grab;user-select:none}.mapch::-webkit-scrollbar{display:none}
+@media(min-width:760px){.mapch{flex-wrap:wrap;max-width:760px;justify-content:center}.mapsr,.mapres{max-width:760px}}
+.mver{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#1a73e8;color:#fff;font-size:11px;font-weight:900;vertical-align:1px}
+.pin{position:relative}.pin .pv{position:absolute;right:-5px;top:-5px;transform:rotate(45deg);width:15px;height:15px;border-radius:50%;background:#1a73e8;color:#fff;font:900 9px/15px system-ui;text-align:center;font-style:normal;border:2px solid #fff}
+.mseg{display:none;gap:6px;padding:0 14px 8px}.mapsheet.on .mseg{display:flex}.mseg button{flex:1;border:1px solid #dadce0;border-radius:18px;padding:7px;background:#fff;color:#3c4043;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.mseg button.on{background:#e8f0fe;border-color:#1a73e8;color:#1a73e8}
 .mchip{flex:0 0 auto;border:0;border-radius:18px;padding:8px 14px;background:#fff;color:#3c4043;font:inherit;font-size:14px;font-weight:600;box-shadow:0 1px 4px #0003;cursor:pointer;white-space:nowrap}.mchip.on{background:#1a73e8;color:#fff}
 .mapfab{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 84px);z-index:500;width:48px;height:48px;border:0;border-radius:50%;background:#fff;color:#1a73e8;box-shadow:0 2px 8px #0004;display:grid;place-items:center;cursor:pointer}
 .mapsheet{position:absolute;left:0;right:0;bottom:0;z-index:501;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -2px 12px #0003;padding:0 0 env(safe-area-inset-bottom);max-width:680px;margin:0 auto;transition:max-height .25s}
@@ -2045,13 +2081,14 @@ async function ordenHoja(slug,oid,pi){try{pi=pi||await rpc('xy_order_payinfo',{p
     :pi.methods.length?`<p class="mu xs" style="font-weight:700">PÁGALE DIRECTO AL ENTRENADOR</p>${pi.methods.map(m=>`<div class="mpag"><span style="font-size:22px">${(MPN[m.tipo]||['💳'])[0]}</span><span class="sp"><b>${(MPN[m.tipo]||['',m.tipo])[1]}</b><br><span class="sm">${esc(m.dato)}</span>${m.titular?`<br><span class="mu xs">${esc(m.titular)}</span>`:''}</span><button class="btn" data-cp="${esc(m.dato)}" style="flex:0 0 auto;padding:0 12px">📋</button></div>`).join('')}
      <p class="mu xs">En el mensaje del pago pon el código <b>${esc(pi.code)}</b>.</p>
      <p class="mu xs" style="font-weight:700">¿CÓMO PAGASTE?</p><div class="chips" style="justify-content:flex-start">${pi.methods.map(m=>m.tipo).filter((v,i,a)=>a.indexOf(v)===i).map(t=>`<button class="chip${t===met?' on':''}" data-mt="${t}">${(MPN[t]||['',t])[1]}</button>`).join('')}</div>
-     <input id="oref" maxlength="40" placeholder="N.º de operación (opcional)" autocomplete="off"><button class="btn p" id="opag">✅ Ya pagué</button>`
+     <input id="oref" maxlength="40" placeholder="N.º de operación (opcional)" autocomplete="off"><input type="file" id="ofo" accept="image/*" hidden><button type="button" class="btn" id="ofb">📎 Subir captura del pago</button><p class="mu xs">Con la captura ganas tus puntos.</p><button class="btn p" id="opag">✅ Ya pagué</button>`
     :`<div class="card" style="border-color:#f5a524"><p class="sm">Aún no configura cómo cobrar. Escríbele por el chat de Xyro y vuelve aquí: tu orden queda guardada.</p></div>`}
     <p class="mu xs" style="text-align:center">🔒 Tu pago queda registrado en Xyro. Nunca pagues por fuera de esta orden.</p><button class="btn l" data-cx>Cerrar</button>`;
    o.querySelector('[data-cx]').onclick=close;
    o.querySelectorAll('[data-cp]').forEach(x=>x.onclick=()=>navigator.clipboard.writeText(x.dataset.cp).then(()=>toast('📋 Copiado'),()=>toast(x.dataset.cp)));
    o.querySelectorAll('[data-mt]').forEach(x=>x.onclick=()=>{met=x.dataset.mt;o.querySelectorAll('[data-mt]').forEach(y=>y.classList.toggle('on',y===x))});
-   const pg=o.querySelector('#opag');pg&&(pg.onclick=async()=>{pg.disabled=true;try{await rpc('xy_order_report_payment',{p_order:pi.order_id,p_method:met,p_ref:o.querySelector('#oref').value});pi.buyer_paid_at=new Date().toISOString();pi.buyer_pay_method=met;vib();pinta2()}catch(e){toast(errDe(e));pg.disabled=false}})};
+   let ofo='';const fb=o.querySelector('#ofb'),fi=o.querySelector('#ofo');fb&&(fb.onclick=()=>fi.click(),fi.onchange=async()=>{const f=fi.files[0];if(!f)return;fb.disabled=true;fb.textContent='Subiendo…';try{ofo=await subirCaptura(f);fb.textContent='✅ Captura lista'}catch(e){toast(errDe(e));fb.textContent='📎 Subir captura del pago'}fb.disabled=false});
+   const pg=o.querySelector('#opag');pg&&(pg.onclick=async()=>{pg.disabled=true;try{await rpc('xy_order_report_payment',Object.assign({p_order:pi.order_id,p_method:met,p_ref:o.querySelector('#oref').value},ofo?{p_foto:ofo}:{}));pi.buyer_paid_at=new Date().toISOString();pi.buyer_pay_method=met;vib();pinta2()}catch(e){toast(errDe(e));pg.disabled=false}})};
   pinta2();
   const ver=async()=>{if(!document.body.contains(o)){clearInterval(ORDT);canal&&sb.removeChannel(canal);return}try{const n=await rpc('xy_order_payinfo',{p_order:pi.order_id});const ya=pi.status==='COMPLETED';pi=n;if(!ya&&n.status==='COMPLETED'){pinta2();const pt=(+((n.points||{}).USER_GLOBAL)||0)+(+((n.points||{}).USER_LOCAL)||0);ptsFx(pt,'Xyro Points');ptsCarga()}}catch(_){}};
   clearInterval(ORDT);ORDT=setInterval(ver,5000);
@@ -2079,9 +2116,9 @@ const estF=()=>{const a=XST&&XST.actual;if(!a||!a.frame||!FRM[a.frame])return'';
 const estC=()=>{const a=XST&&XST.actual;if(!a||!a.color||!XST.plus)return'';return((XST.catalogo||{}).colors||{})[a.color]||''};
 const avMarco=(h,f,cl)=>f&&FRM[f]?`<span class="avf${f==='neon'||f==='arcoiris'?' gira':''}${cl?' '+cl:''}" style="--fr:${FRM[f]}">${h}</span>`:h;
 document.addEventListener('click',e=>{const b=e.target.closest('[data-xy]');if(!b)return;const k=b.dataset.xy;
- if(k==='ruleta')ruletaAbrir();else if(k==='ranking')rankAbrir();else if(k==='plus')plusAbrir();else if(k==='estilo')estiloAbrir();else if(k==='boost')boostAbrir(b.dataset.slug,b.dataset.nom)});
+ if(k==='ruleta')ruletaAbrir();else if(k==='ranking')rankAbrir();else if(k==='plus')plusAbrir();else if(k==='estilo')estiloAbrir();else if(k==='retos')retosAbrir();else if(k==='boost')boostAbrir(b.dataset.slug,b.dataset.nom)});
 function xJuegosHTML(){const g=XR?+XR.giros||0:0;
- return`<div class="row" style="gap:8px"><button class="btn sp" data-xy="ruleta">🎡 Ruleta${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button><button class="btn sp" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo" aria-label="Mi estilo" style="flex:0 0 52px">🎨</button></div>`}
+ return`<div class="row" style="gap:8px"><button class="btn sp" data-xy="ruleta">🎡 Ruleta${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button><button class="btn sp" data-xy="ranking">🏆 Ranking</button><button class="btn sp" data-xy="retos">🎯 Retos</button><button class="btn" data-xy="estilo" aria-label="Mi estilo" style="flex:0 0 52px">🎨</button></div>`}
 const PLB=[['⚡','+50% de puntos','En cada compra con Xyro'],['🎡','Ruleta a mitad','Giros más baratos'],['🎨','Tu perfil único','Marcos y colores'],['🎁','Promos exclusivas','Solo para Xyro+'],['⭐','Reseñas x2','Tu opinión pesa el doble'],['🏆','Destaca','Insignia en el ranking']];
 function xPlusHTML(per){const on=per&&(per.plus||(PLI&&PLI.activo));
  if(on)return`<div class="xplus on" style="margin-top:14px"><span class="tag">ACTIVO</span><h3>Eres Xyro+ ⭐</h3><p class="mu sm">${PLI&&PLI.hasta?'Hasta el '+fF(PLI.hasta,{day:'numeric',month:'long'})+'. ':''}Ganas 50% más puntos, la ruleta te cuesta la mitad y tus reseñas pesan el doble.</p><div class="row" style="gap:8px"><button class="btn sp" data-xy="estilo">🎨 Mi estilo</button><button class="btn sp" data-xy="plus">Renovar</button></div></div>`;
@@ -2237,6 +2274,54 @@ async function planesAbrir(slug,nom){vib();let P,mon;
   el.querySelectorAll('[data-an]').forEach(b=>b.onclick=()=>{an=b.dataset.an==='1';el.querySelectorAll('[data-an]').forEach(x=>x.classList.toggle('on',x===b));pinta2()});pinta2();
   el.querySelector('#plg').onclick=()=>{const x=P[an?pl+'12':pl];close();
    pagoTicket({titulo:`Plan ${pl==='PRO'?'Pro':'Plus'}${an?' · 1 año':' · 1 mes'}`,detalle:nom?`<p class="mu sm">Para ${esc(nom)}</p>`:'',monto:x.monto,moneda:x.moneda,args:{p_tipo:'PLAN',p_slug:slug||null,p_plan:pl,p_meses:an?12:1},ok:()=>{try{grCarga().then(()=>pinta())}catch(_){}}})}})}
+/* ---------- Negocio VERIFICADO (SQL 90): requisitos, datos legales y documentos al bucket privado. XyroStudio aprueba ---------- */
+function verifCardHTML(g){if(!g||g.estado==='suspendido')return'';
+ return`<div class="card" style="border-color:#1d9bf066"><div class="row"><div class="ibox" style="color:#1d9bf0;font-weight:900">✓</div><div class="sp"><h3>Negocio verificado</h3><p class="mu sm">Sello ✓ en el mapa y en tu ficha, +20% de puntos para ti y tus clientes, y más confianza al comprar.</p></div></div><button class="btn" data-verif="${esc(g.slug)}" data-nom="${esc(g.nombre)}">✓ Verificar mi negocio</button></div>`}
+async function subirDocPriv(fl){const im=/^image\//.test(fl.type),pdf=fl.type==='application/pdf';if(!im&&!pdf)throw new Error('Sube una foto o un PDF');
+ if(fl.size>8e6)throw new Error('El archivo pesa mucho (máx. 8 MB)');let b=fl,ext=pdf?'pdf':'jpg';
+ if(im){const img=await new Promise((ok,ko)=>{const u=URL.createObjectURL(fl),i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=u});
+  const k=Math.min(1,1800/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);b=await new Promise(r=>c.toBlob(r,'image/jpeg',.85))}
+ if(DEMO)return'demo/verif/doc-'+Date.now()+'.'+ext;
+ const{data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Inicia sesión');
+ const path=session.user.id+'/verif/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'.'+ext;
+ const{error}=await sb.storage.from('privado').upload(path,b,{contentType:pdf?'application/pdf':'image/jpeg'});if(error)throw error;return path}
+async function verifAbrir(slug,nom){vib();let I;try{I=await rpc('xa_verif_info',{p_slug:slug})}catch(e){return toast(errDe(e))}
+ const u=I.ultima||{},ck=(ok,t)=>`<p class="sm">${ok?'✅':'⬜'} ${t}</p>`;
+ if(I.verificado)return hoja(`<h2>✓ ${esc(nom)} está verificado</h2><p class="mu sm">Tu sello sale en el mapa, en Explorar y en tu ficha. Tú y tus clientes ganan +20% de puntos.</p><button class="btn p" data-x>Listo</button>`);
+ if(u.estado==='PENDIENTE')return hoja(`<h2>⏳ Verificación en revisión</h2><p class="mu sm">Enviaste tus documentos el ${fF(u.fecha,{day:'numeric',month:'long'})}. XyroStudio los revisa y te avisa aquí.</p><button class="btn p" data-x>Entendido</button>`);
+ const req=`<div class="card" style="gap:4px"><p class="mu xs" style="font-weight:700">REQUISITOS</p>${ck(I.resenas>=5&&(+I.promedio||0)>=4,`5 reseñas con 4.0 ★ o más <span class="mu xs">(tienes ${I.resenas||0}${I.promedio?' · '+(+I.promedio).toFixed(1)+' ★':''})</span>`)}${ck(I.dias>=14,`14 días en Xyro <span class="mu xs">(llevas ${I.dias||0})</span>`)}${ck(I.direccion,'Dirección de tu local en tu perfil')}</div>`;
+ const rech=u.estado==='RECHAZADA'?`<div class="card" style="border-color:#ef444466"><p class="sm">❌ <b>La última vez no se aprobó.</b>${u.motivo?' '+esc(u.motivo):''}</p></div>`:'';
+ if(!I.cumple)return hoja(`<h2>✓ Verifica ${esc(nom)}</h2><p class="mu sm">El sello ✓ le dice a la gente que eres un negocio real. Así evitamos negocios falsos o que usan marcas ajenas.</p>${rech}${req}<p class="mu xs">Pide a tus clientes que te dejen su reseña desde Mi Xyro después de comprar.</p><button class="btn p" data-x>Entendido</button>`);
+ const D0=(D&&D.persona)||{},F=[['razon_social','Razón social o nombre del titular','Ej. Inversiones Sol SAC'],['id_fiscal','N.º de registro del negocio (RUC, NIT, RFC…)','Ej. 20123456789'],['representante','Nombre del dueño o representante',D0.nombre||''],['doc_representante','Su documento (DNI, CE, pasaporte)','Ej. 12345678'],['telefono','Teléfono del negocio',''],['web','Web o red social (opcional)','instagram.com/…']];
+ const DOCS=[['id','🪪 Documento de identidad del dueño (foto)'],['ruc','📄 Ficha RUC, licencia de funcionamiento o registro'],['local','🏪 Foto de tu local con el letrero (opcional)']];const up={};
+ hoja(`<h2>✓ Verifica ${esc(nom)}</h2><p class="mu sm">¡Cumples los requisitos! Manda tus datos. Solo XyroStudio ve tus documentos.</p>${rech}
+  ${F.map(([k,t,ph])=>`<label>${t}<input id="vf_${k}" maxlength="160" placeholder="${esc(ph)}"></label>`).join('')}
+  <div class="card" style="gap:8px"><p class="mu xs" style="font-weight:700">DOCUMENTOS</p>${DOCS.map(([k,t])=>`<input type="file" id="vd_${k}" accept="image/*,application/pdf" hidden><button type="button" class="btn" data-vd="${k}">${t}</button>`).join('')}</div>
+  <div class="msg" id="vfm"></div><button class="btn p" id="vfs">Enviar para verificar</button><p class="mu xs" style="text-align:center">Al enviar confirmas que los datos son reales. Usar marcas o documentos ajenos hace que tu negocio se suspenda.</p><button class="btn l" data-x>Cancelar</button>`,(el,close)=>{
+  const q=s=>el.querySelector(s),say=t=>{const m=q('#vfm');m.textContent=t;m.className='msg on'};
+  el.querySelectorAll('[data-vd]').forEach(b=>{const k=b.dataset.vd,t=b.textContent,inp=q('#vd_'+k);b.onclick=()=>inp.click();
+   inp.onchange=async()=>{const f=inp.files[0];if(!f)return;b.disabled=true;b.textContent='Subiendo…';try{up[k]=await subirDocPriv(f);b.textContent='✅ '+t.replace(/^\S+\s/,'')}catch(e){say(errDe(e));b.textContent=t}b.disabled=false}});
+  q('#vfs').onclick=async()=>{const d={pais:(D0.pais||'PE')};F.forEach(([k])=>d[k]=q('#vf_'+k).value.trim());
+   if(!up.id||!up.ruc)return say('Sube tu documento de identidad y la ficha RUC o licencia.');const b=q('#vfs');b.disabled=true;
+   try{await rpc('xa_verif_enviar',{p_slug:slug,p_datos:d,p_docs:Object.values(up)});close();confeti();toast('📨 Enviado. Te avisamos al revisarlo')}catch(e){b.disabled=false;say(errDe(e))}}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-verif]');if(b)verifAbrir(b.dataset.verif,b.dataset.nom)});
+/* ---------- Retos y campañas (SQL 90): XyroStudio los crea; la persona ve su avance y reclama puntos globales ---------- */
+async function retosAbrir(){vib();let L;try{L=await rpc('xy_retos')||[]}catch(e){return toast(errDe(e))}
+ const R=L.filter(x=>x.tipo==='RETO'),M=L.filter(x=>x.tipo==='MULT'),mt=x=>x.meta_tipo==='NEGOCIOS'?`Compra en ${x.meta} negocio${x.meta>1?'s':''} distinto${x.meta>1?'s':''}`:x.meta_tipo==='CATEGORIA'?`Haz ${x.meta} compra${x.meta>1?'s':''} en ${esc((CATS.find(c=>c[0]===x.categoria)||[,,x.categoria])[2]||'')}`:`Haz ${x.meta} compra${x.meta>1?'s':''} con Xyro`;
+ hoja(`<h2>🎯 Retos</h2><p class="mu sm">Completa retos comprando en negocios Xyro y gana puntos globales.</p>
+  ${M.map(x=>`<div class="card" style="border-color:#facc1566"><p class="sm">⚡ <b>${esc(x.titulo)}</b> · puntos x${(+x.mult).toString()}${x.solo_plus?' · solo Xyro+':''}</p>${x.descripcion?`<p class="mu xs">${esc(x.descripcion)}</p>`:''}<p class="mu xs">Hasta el ${fF(x.fin,{day:'numeric',month:'long'})}</p></div>`).join('')}
+  ${R.length?R.map(x=>{const p=Math.min(+x.progreso||0,+x.meta||1),ok=p>=(+x.meta||1);return`<div class="card" style="gap:6px"><div class="row"><b class="sp">${esc(x.titulo)}</b><b style="color:#facc15">+${nfmt(x.premio)}</b></div>
+   <p class="mu xs">${mt(x)}${x.solo_plus?' · solo Xyro+':''} · hasta el ${fF(x.fin,{day:'numeric',month:'short'})}</p>${x.descripcion?`<p class="mu xs">${esc(x.descripcion)}</p>`:''}
+   <div style="height:8px;border-radius:8px;background:#ffffff14;overflow:hidden"><i style="display:block;height:100%;width:${Math.round(p/(+x.meta||1)*100)}%;background:linear-gradient(90deg,#7c5cff,#22d3ee)"></i></div>
+   ${x.reclamado?'<p class="sm">✅ Premio reclamado</p>':x.agotado?'<p class="mu xs">Se acabaron los premios de este reto</p>':ok?`<button class="btn p" data-rt="${x.id}">🎁 Reclamar ${nfmt(x.premio)} puntos</button>`:`<p class="mu xs">${p} de ${x.meta}</p>`}</div>`}).join(''):'<div class="card vacio"><span class="e">🎯</span><p class="mu sm">No hay retos activos ahora. ¡Vuelve pronto!</p></div>'}
+  <p class="mu xs">Solo cuentan compras con su captura de pago. Los puntos de retos van a tus puntos globales.</p><button class="btn l" data-x>Cerrar</button>`,(el,close)=>{
+  el.querySelectorAll('[data-rt]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const r=await rpc('xy_reto_reclamar',{p_id:b.dataset.rt});close();confeti();vib();toast('🎉 +'+nfmt(r.puntos)+' puntos globales');try{XR=null}catch(_){}if(TAB==='perfil'||TAB==='inicio')pinta()}catch(e){b.disabled=false;toast(errDe(e))}})})}
+{const d2=demoRpc;demoRpc=async function(f,a){
+ if(f==='xa_verif_info')return{verificado:false,resenas:6,promedio:4.7,dias:21,direccion:true,cumple:true,ultima:null};
+ if(f==='xa_verif_enviar')return{ok:true};
+ if(f==='xy_retos'){const fin=new Date(Date.now()+864e5*9).toISOString();return[{id:'m1',tipo:'MULT',titulo:'Fin de semana doble',mult:2,fin},{id:'r1',tipo:'RETO',titulo:'Explorador Xyro',meta_tipo:'NEGOCIOS',meta:3,premio:500,progreso:2,fin},{id:'r2',tipo:'RETO',titulo:'Primera compra con Xyro',meta_tipo:'COMPRAS',meta:1,premio:200,progreso:1,fin}]}
+ if(f==='xy_reto_reclamar')return{ok:true,puntos:200};
+ return d2(f,a)}}
 const demoRpc0=demoRpc;
 demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
   items:[{t:'n',slug:'demo',nombre:'Iron Gym Miraflores',cat:'gym',distrito:'Miraflores',prom:4.8,n:126,km:0.6,promos:2,dest:true,logo:''},
@@ -2250,7 +2335,8 @@ demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
   res:{n:3,prom:4.7,dist:{5:2,4:1},lista:[{id:'r1',estrellas:5,texto:'Excelente atención y muy buen ambiente. ¡Lo recomiendo!',v:true,creado:new Date(Date.now()-864e5*2).toISOString(),nombre:'Carla',fundador:true},{id:'r2',estrellas:5,texto:'Me ayudó a bajar 8 kg en 3 meses 💪',v:true,creado:new Date(Date.now()-864e5*9).toISOString(),nombre:'Jorge'},{id:'r3',estrellas:4,texto:'Muy bueno, a veces hay que esperar un poco.',v:false,creado:new Date(Date.now()-864e5*20).toISOString(),nombre:'Ana'}]},
   pro:{slug:'coach-diego',tipo:'entrenador',nombre:'Diego Ramírez',titulo:'Coach de fuerza e hipertrofia',bio:'8 años entrenando personas reales con objetivos reales. Certificado NSCA. Planes a tu medida, presencial en Miraflores o 100% online.',especialidades:['Fuerza','Hipertrofia','Bajar de peso','Funcional'],modalidad:'ambas',pais:'PE',ciudad:'Lima',zona:'Miraflores',foto:'',portada:'',fotos:[],videos:[],redes:{instagram:'@coachdiego'},estado:'activo',plus:true,alumnos:24,soyAlumno:false},
   chats:[],mio:null});
- if(f==='xa_mapa'){const p=a.p||{},C0=[-12.12,-77.03];return{items:W.items.filter(x=>x.t!=='p'&&(!p.cat||x.cat===p.cat)&&(!p.q||(x.nombre+' '+x.distrito).toLowerCase().includes(String(p.q).toLowerCase()))&&(!p.top||(+x.prom||0)>=4.5)).map((x,i)=>({slug:x.slug,nombre:x.nombre,logo:x.logo,cat:x.cat,lat:C0[0]+Math.sin(i*2.3)*0.03,lng:C0[1]+Math.cos(i*1.7)*0.035,dir:x.distrito,prom:x.prom,n:x.n,dest:x.dest,boost:x.dest,promos:x.promos}))}}
+ if(f==='xa_mapa'){const p=a.p||{},C0=[-12.12,-77.03];return{items:W.items.filter(x=>x.t!=='p'&&(!p.cat||x.cat===p.cat)&&(!p.q||(x.nombre+' '+x.distrito).toLowerCase().includes(String(p.q).toLowerCase()))&&(!p.top||(+x.prom||0)>=4.5)).map((x,i)=>({slug:x.slug,nombre:x.nombre,logo:x.logo,cat:x.cat,pais:x.pais||'PE',ver:i%2===0,lat:x.pais==='MX'?19.43:C0[0]+Math.sin(i*2.3)*0.03,lng:x.pais==='MX'?-99.13:C0[1]+Math.cos(i*1.7)*0.035,dir:x.distrito,prom:x.prom,n:x.n,dest:x.dest,boost:x.dest,promos:x.promos})).filter(x=>(!p.ver||x.ver)&&(!p.pais||x.pais===p.pais))}}
+ if(f==='xa_mapa_paises'){const n=W.items.filter(x=>x.t!=='p'),m=n.filter(x=>x.pais==='MX').length;return[{pais:'PE',n:n.length-m},{pais:'MX',n:m}]}
  if(f==='xa_explorar'){const p=a.p||{},q=(p.q||'').toLowerCase(),l=(p.lugar||'').toLowerCase();let L=W.items.filter(x=>(!p.cat||x.cat===p.cat)&&(!q||x.nombre.toLowerCase().includes(q))&&(!l||(x.distrito+' '+(x.pais||'')).toLowerCase().includes(l)));
   L=L.slice().sort((x,y)=>(y.dest?1:0)-(x.dest?1:0)||(p.orden==='cerca'?(x.km??1e6)-(y.km??1e6):p.orden==='nuevos'?0:(y.prom||0)-(x.prom||0)));return{items:p.off?[]:L,off:0}}
  if(f==='xa_resenas_de')return a.p_pro&&W.mio&&a.p_pro===W.mio.slug?{n:0,lista:[]}:JSON.parse(JSON.stringify(W.res));

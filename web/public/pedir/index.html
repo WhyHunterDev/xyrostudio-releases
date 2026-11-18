@@ -302,12 +302,21 @@ function yapear(L){if(!YP||!L.length)return;const t=Math.round(L.reduce((a,o)=>a
   <ol><li>Abre tu Yape y ${YP.qr?'escanea el QR o ':''}yapea al número.</li><li>Paga exacto <b>${sol(t)}</b>${L.length>1?' ('+L.length+' pedidos)':''}.</li><li>Escribe abajo el <b>N.º de operación</b> que sale en tu constancia.</li></ol>
   <input id="yop" inputmode="numeric" maxlength="14" autocomplete="off" placeholder="N.º de operación">
   <input id="ynm" maxlength="60" placeholder="Tu nombre como sale en Yape (opcional)" value="${esc(ls.g('xp-nom','')||M.yo||'')}" style="font-size:15px;letter-spacing:0;font-weight:600">
+  ${token()||DEMO?'<input type="file" id="yfo" accept="image/*" hidden><button class="btn" id="yfb" style="padding:10px">📎 Subir captura del Yape</button><p class="mu xs" style="margin:0">Con la captura ganas tus puntos en Mi Xyro.</p>':''}
   <button class="btn yb" id="yok">Ya pagué</button><p class="mu xs" style="margin:0">${esc(elL().replace(/^./,c=>c.toUpperCase()))} revisa su Yape y te confirma aquí mismo. El dinero va directo a ${esc(M.negocio)}.</p></div>`;
  o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o);
  o.querySelector('#ycp').onclick=async()=>{try{await navigator.clipboard.writeText(YP.num);toast('📋 Número copiado')}catch(_){toast(YP.num)}};
+ let yfo='';const fb=o.querySelector('#yfb'),fi=o.querySelector('#yfo');fb&&(fb.onclick=()=>fi.click(),fi.onchange=async()=>{const f=fi.files[0];if(!f)return;fb.disabled=true;fb.textContent='Subiendo…';try{yfo=await subirCap(f);fb.textContent='✅ Captura lista'}catch(e){toast(e.message||'No se pudo subir');fb.textContent='📎 Subir captura del Yape'}fb.disabled=false});
  const ok=o.querySelector('#yok');ok.onclick=async()=>{const op=o.querySelector('#yop').value.replace(/\D/g,''),nm=o.querySelector('#ynm').value.trim();if(op.length<4)return toast('Escribe el N.º de operación de tu Yape');
-  ok.disabled=true;ok.textContent='Enviando…';try{await api('xa_mesa_yapee',{p_token:TOK,p_ids:L.map(x=>x.id),p_op:op,p_nombre:nm||null});o.remove();vib();toast('📱 ¡Listo! Te avisamos aquí cuando confirmen tu Yape');await cargarMios();pinta()}
+  ok.disabled=true;ok.textContent='Enviando…';try{await api('xa_mesa_yapee',Object.assign({p_token:TOK,p_ids:L.map(x=>x.id),p_op:op,p_nombre:nm||null},yfo?{p_foto:yfo}:{}));o.remove();vib();toast('📱 ¡Listo! Te avisamos aquí cuando confirmen tu Yape');await cargarMios();pinta()}
   catch(e){toast(e.message);ok.disabled=false;ok.textContent='Ya pagué'}}}
+async function subirCap(fl){if(!/^image\//.test(fl.type))throw new Error('Sube una imagen (captura)');
+ const img=await new Promise((ok,ko)=>{const u=URL.createObjectURL(fl),im=new Image();im.onload=()=>ok(im);im.onerror=ko;im.src=u});
+ const k=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+ const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.82));if(DEMO)return'https://demo.xyrostudio.net/captura.jpg';
+ const t=token();if(!t)throw new Error('Entra a Mi Xyro para subir tu captura');const uid=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).sub;
+ const p='mi/'+uid+'/pago-'+Date.now()+'.jpg',r=await fetch(SB+'/storage/v1/object/medios/'+p,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+t,'Content-Type':'image/jpeg'},body:b});
+ if(!r.ok)throw new Error('No se pudo subir la captura');return SB+'/storage/v1/object/public/medios/'+p}
 async function cancelar(id){if(!confirm('¿Cancelar este pedido?'))return;try{await api('xa_mesa_cancelar_mio',{p_token:TOK,p_id:id});await cargarMios();pinta();toast('Pedido cancelado')}catch(e){toast(e.message)}}
 function confeti(){const C=['#fff',getComputedStyle(document.documentElement).getPropertyValue('--a').trim(),'#facc15','#3ad6ff'];for(let i=0;i<36;i++){const d=document.createElement('i');d.className='cf';d.style.left=Math.random()*100+'vw';d.style.background=C[i%C.length];d.style.animationDelay=Math.random()*.3+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}}
 // ---------- Botón «atrás» del celular: cierra la ventana abierta en vez de salir ----------

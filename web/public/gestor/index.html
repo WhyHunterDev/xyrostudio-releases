@@ -384,14 +384,14 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['mixyro','📲','Mi Xyro'],['gratis','🆓','Registros gratis'],['pagos','⭐','Planes y pagos'],['cobros','💳','Cobros'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['tickets','🎫','Tickets'],['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['pendientes','📋','Pendientes'],['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['mixyro','📲','Mi Xyro'],['gratis','🆓','Registros gratis'],['pagos','⭐','Planes y pagos'],['verif','✅','Verificaciones'],['retos','🎯','Puntos y retos'],['cobros','💳','Cobros'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['tickets','🎫','Tickets'],['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['pendientes','📋','Pendientes'],['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
-    NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}${id==='tickets'&&TKG?` <b class="tkb">${TKG}</b>`:''}${id==='pendientes'&&PDN?` <b class="tkb">${PDN}</b>`:''}${id==='cobros'&&XGN?` <b class="tkb">${XGN}</b>`:''}${id==='mixyro'&&MXN?` <b class="tkb">${MXN}</b>`:''}${id==='gratis'&&GRP?` <b class="tkb">${GRP}</b>`:''}${id==='pagos'&&PGN?` <b class="tkb">${PGN}</b>`:''}</button>`).join('')).join('')+
+    NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}${id==='tickets'&&TKG?` <b class="tkb">${TKG}</b>`:''}${id==='pendientes'&&PDN?` <b class="tkb">${PDN}</b>`:''}${id==='cobros'&&XGN?` <b class="tkb">${XGN}</b>`:''}${id==='mixyro'&&MXN?` <b class="tkb">${MXN}</b>`:''}${id==='gratis'&&GRP?` <b class="tkb">${GRP}</b>`:''}${id==='pagos'&&PGN?` <b class="tkb">${PGN}</b>`:''}${id==='verif'&&VFN?` <b class="tkb">${VFN}</b>`:''}</button>`).join('')).join('')+
     `<div class="me"><b>${esc(me.nombre)}</b><small>${esc(ROL_NOMBRE[me.rol]||me.rol)} · ${esc(me.email)}</small><button class="btn btn-g btn-sm" data-logout style="width:100%">Cerrar sesión</button></div>`;
 }
 async function go(v){ document.querySelectorAll('body>.vmenu').forEach(m=>m.remove()); if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); if($('#nfBox'))nfCargar().catch(()=>{}); }
-async function start(){ show('app'); setTimeout(tkCuenta,1500); setTimeout(pdCuenta,2500); setTimeout(xgCuenta,3000); setTimeout(mxCuenta,3500); setTimeout(grCuenta,4000); setTimeout(pgCuenta,4500); setInterval(pgCuenta,120000); setInterval(tkCuenta,120000); setInterval(xgCuenta,300000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
+async function start(){ show('app'); setTimeout(tkCuenta,1500); setTimeout(pdCuenta,2500); setTimeout(xgCuenta,3000); setTimeout(mxCuenta,3500); setTimeout(grCuenta,4000); setTimeout(pgCuenta,4500); setTimeout(vfCuenta,5000); setInterval(vfCuenta,300000); setInterval(pgCuenta,120000); setInterval(tkCuenta,120000); setInterval(xgCuenta,300000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
 
 const H=(t,s)=>{$('#h').innerHTML=`<div><h1>${esc(t)}</h1>${s?`<p class="sub" style="margin:4px 0 0">${esc(s)}</p>`:''}</div>`;};
 
@@ -648,6 +648,71 @@ document.addEventListener('click',async e=>{const t=e.target.closest('[data-pgf]
 document.addEventListener('change',async e=>{const t=e.target.closest('[data-pgp]');if(!t||!me||!t.value)return;const[pl,m]=t.value.split('|'),sl=t.dataset.pgp;
  if(!confirm(`¿Poner ${pl==='GRATIS'?'Gratis':pl==='PRO'?'Pro':'Plus'} a ${sl}?${pl==='GRATIS'?' Se le quita el panel completo.':''}`)){t.value='';return}
  try{const{error}=await sb.rpc('xa_plan_g_set',{p_slug:sl,p_plan:pl,p_meses:+m});if(error)throw error;touch('Puso plan '+pl+' a '+sl);toast('✅ Plan actualizado');go('pagos')}catch(ex){t.value='';toast(ex.message||String(ex))}});
+/* ===== Verificaciones (SQL 90): negocios que piden el sello ✓ con datos legales y documentos (bucket privado) ===== */
+let VFN=0;
+async function vfCuenta(){try{const{data,error}=await sb.rpc('xa_verif_g_lista');if(error)return;VFN=(data||[]).filter(x=>x.estado==='PENDIENTE').length;side()}catch(_){}}
+const VFE={PENDIENTE:['pend','🕓 Por revisar'],APROBADA:['activo','✅ Verificado'],RECHAZADA:['baja','⛔ Rechazado'],QUITADA:['baja','Quitado']};
+const VFD={razon_social:'Razón social',id_fiscal:'N.º de registro (RUC…)',pais:'País',representante:'Representante',doc_representante:'Documento',direccion:'Dirección',telefono:'Teléfono',web:'Web / redes'};
+V.verif=async ()=>{
+ H('Verificaciones','Negocios que piden el sello ✓. Revisa que el RUC exista (SUNAT), que el documento coincida con el representante y que no use una marca ajena.');
+ $('#acts').innerHTML='<button class="btn btn-p" data-v="verif">↻ Actualizar</button>';
+ const{data,error}=await sb.rpc('xa_verif_g_lista');if(error)return '<div class="note">✅ Falta correr <b>90-xyro-verificados-retos.sql</b> en Supabase (después del 89).</div>';
+ const L=data||[],P=L.filter(x=>x.estado==='PENDIENTE');VFN=P.length;side();
+ const f=t=>new Date(t).toLocaleString('es-PE',{timeZone:'America/Lima',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+ const fila=x=>{const[c,t]=VFE[x.estado]||['',x.estado],d=x.datos||{};return`<div class="cl"><div class="in" style="width:100%"><h4>${esc(x.negocio)} <span class="tag ${c}">${t}</span></h4>
+  <div class="meta"><span>${esc(x.slug)}</span><span>👤 ${esc(x.persona||'—')}${x.usuario?' @'+esc(x.usuario):''}${x.idn?' · ID '+esc(String(x.idn)):''}</span><span>★ ${x.promedio??'—'} (${x.resenas} reseñas)</span><span>${f(x.creado)}</span></div>
+  ${Object.keys(d).filter(k=>d[k]).length?`<div class="meta" style="margin-top:6px">${Object.entries(VFD).filter(([k])=>d[k]).map(([k,l])=>`<span>${l}: <b>${esc(d[k])}</b></span>`).join('')}</div>`:''}
+  ${x.motivo?`<p class="d" style="margin:6px 0 0;color:var(--warn)">Motivo: ${esc(x.motivo)}</p>`:''}
+  ${(x.docs||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${x.docs.map((p,i)=>`<button class="btn btn-g btn-sm" data-vfdoc="${esc(p)}">📄 Documento ${i+1}</button>`).join('')}</div>`:''}</div>
+  <div class="acts">${x.estado==='PENDIENTE'?`<button class="btn btn-p btn-sm" data-vfok="${x.id}">✅ Verificar</button><button class="btn btn-g btn-sm" data-vfno="${x.id}">Rechazar</button>`:x.estado==='APROBADA'?`<button class="btn btn-g btn-sm" data-vfq="${esc(x.slug)}">Quitar sello</button>`:''}</div></div>`};
+ const k=(v,l,c)=>`<div class="kpi${c?' '+c:''}"><b>${v}</b><small>${l}</small></div>`;
+ return`<div class="grid4">${k(P.length,'Por revisar',P.length?'w':'')}${k(L.filter(x=>x.estado==='APROBADA').length,'Verificados','g')}${k(L.filter(x=>x.estado==='RECHAZADA').length,'Rechazados')}${k(L.length,'Solicitudes')}</div>
+  <div class="panel">${L.length?`<div class="clients">${L.map(fila).join('')}</div>`:'<div class="empty">Aún no hay solicitudes. Los negocios las piden desde Mi Xyro cuando tienen 5 reseñas buenas, 14 días y su dirección.</div>'}</div>
+  <div class="note"><span>💡 Verificado = +20% de puntos para el negocio y sus clientes y sello ✓. No verificado gana la mitad de puntos globales. Los documentos solo los ves tú (enlace de 10 minutos).</span></div>`};
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-vfdoc],[data-vfok],[data-vfno],[data-vfq]');if(!t||!me)return;e.preventDefault();const d=t.dataset;
+ try{if(d.vfdoc){const w=window.open('','_blank');const{data,error}=await sb.storage.from('privado').createSignedUrl(d.vfdoc,600);if(error){w&&w.close();throw error}if(w)w.location=data.signedUrl;else location.href=data.signedUrl;return}
+  if(d.vfok){if(!confirm('¿Dar el sello ✓ verificado a este negocio?'))return;const{error}=await sb.rpc('xa_verif_g_resolver',{p_id:d.vfok,p_ok:true,p_motivo:null});if(error)throw error;touch('Verificó un negocio');toast('✅ Negocio verificado');return go('verif')}
+  if(d.vfno){const m=prompt('¿Por qué se rechaza? (lo verá el negocio)','Los documentos no coinciden con el negocio');if(m==null)return;const{error}=await sb.rpc('xa_verif_g_resolver',{p_id:d.vfno,p_ok:false,p_motivo:m});if(error)throw error;touch('Rechazó una verificación');toast('Rechazado');return go('verif')}
+  if(d.vfq){const m=prompt('¿Por qué se le quita el sello?','');if(m==null)return;const{error}=await sb.rpc('xa_verif_g_quitar',{p_slug:d.vfq,p_motivo:m});if(error)throw error;touch('Quitó el sello a '+d.vfq);toast('Sello quitado');return go('verif')}
+ }catch(ex){toast(ex.message||String(ex))}});
+/* ===== Puntos y retos (SQL 90): dar/quitar puntos globales por ID, retos con premio y campañas de puntos x2 ===== */
+V.retos=async ()=>{
+ H('Puntos y retos','Crea retos (la gente compra y gana puntos), campañas de puntos x2 y regala puntos globales a una persona por su ID.');
+ $('#acts').innerHTML='<button class="btn btn-p" data-v="retos">↻ Actualizar</button>';
+ const[c,m]=await Promise.all([sb.rpc('xy_g_campanas'),sb.rpc('xy_g_puntos_movs')]);if(c.error)return '<div class="note">🎯 Falta correr <b>90-xyro-verificados-retos.sql</b> en Supabase (después del 89).</div>';
+ const C=c.data||[],M=m.data||[],f=t=>new Date(t).toLocaleString('es-PE',{timeZone:'America/Lima',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+ const hoy=new Date(Date.now()-5*36e5).toISOString().slice(0,10),fin=new Date(Date.now()+86400000*7-5*36e5).toISOString().slice(0,10);
+ const desc=x=>x.tipo==='MULT'?`Puntos x${+x.mult}${x.categoria?' en '+(GRR[x.categoria]||x.categoria):''}`:`${x.meta_tipo==='NEGOCIOS'?x.meta+' negocios distintos':x.meta_tipo==='CATEGORIA'?x.meta+' compras en '+(GRR[x.categoria]||x.categoria):x.meta+' compras'} → ${(+x.premio).toLocaleString('es-PE')} pts${x.cupo?' · cupo '+x.cupo:''}`;
+ return`<div class="panel"><h3>🎯 Nuevo reto o campaña</h3>
+  <form class="form" onsubmit="return false"><label>Tipo<select id="rtT"><option value="RETO">🎯 Reto con premio</option><option value="MULT">⚡ Campaña de puntos extra (x2…)</option></select></label>
+   <label>Título<input id="rtN" maxlength="80" placeholder="Ej. Explorador de cafeterías"></label>
+   <label class="full">Descripción (opcional)<input id="rtD" maxlength="300" placeholder="Lo que la persona verá en Mi Xyro"></label>
+   <label data-rt1>Meta<select id="rtMT"><option value="COMPRAS">Número de compras</option><option value="NEGOCIOS">Negocios distintos</option><option value="CATEGORIA">Compras en un rubro</option></select></label>
+   <label data-rt1>¿Cuántas?<input id="rtM" type="number" min="1" max="100" value="3"></label>
+   <label>Rubro (opcional)<select id="rtC"><option value="">Todos</option>${Object.entries(GRR).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+   <label data-rt1>Premio en puntos (máx. 5,000)<input id="rtP" type="number" min="1" max="5000" value="300"></label>
+   <label data-rt2 hidden>Multiplicador (x1.1 a x3)<input id="rtX" type="number" min="1.1" max="3" step="0.1" value="2"></label>
+   <label data-rt1>Cupo de premios (vacío = sin tope)<input id="rtQ" type="number" min="0" placeholder="Ej. 100"></label>
+   <label>Desde<input id="rtI" type="date" value="${hoy}"></label><label>Hasta (máx. 90 días)<input id="rtF" type="date" value="${fin}"></label>
+   <label><span><input id="rtS" type="checkbox" style="width:auto"> Solo para Xyro+</span></label>
+   <div class="full"><button class="btn btn-p" data-rtsave>Crear</button></div></form>
+  <p class="d">Anti-inflación: solo cuentan compras con captura del pago; premio máx. 5,000 pts; campañas no se suman (gana la mayor, tope x3).</p></div>
+ <div class="panel tbl"><h3>Retos y campañas</h3><table><tr><th>Nombre</th><th>Qué pide</th><th>Fechas</th><th>Reclamos</th><th></th></tr>${C.map(x=>`<tr><td><b>${x.tipo==='MULT'?'⚡':'🎯'} ${esc(x.titulo)}</b>${x.solo_plus?'<br><small style="color:var(--mu)">Solo Xyro+</small>':''}</td><td>${esc(desc(x))}</td><td><small>${f(x.inicio)}<br>→ ${f(x.fin)}</small></td><td>${x.tipo==='RETO'?`${x.reclamos} · ${(+x.puntos_dados).toLocaleString('es-PE')} pts`:'—'}</td>
+  <td style="text-align:right"><button class="btn btn-sm ${x.activa?'btn-g':'btn-p'}" data-rton="${x.id}" data-on="${x.activa?0:1}">${x.activa?'Pausar':'Activar'}</button></td></tr>`).join('')||'<tr><td colspan="5">Aún no hay retos.</td></tr>'}</table></div>
+ <div class="panel"><h3>🎁 Dar o quitar puntos globales</h3><form class="form" onsubmit="return false"><label>ID de la persona (8 dígitos)<input id="dpI" inputmode="numeric" maxlength="9" placeholder="1234 5678"></label><label>Puntos (negativo para quitar)<input id="dpP" type="number" min="-10000" max="10000" value="100"></label><label class="full">Motivo<input id="dpM" maxlength="200" placeholder="Ej. Ganó el sorteo de Instagram"></label><div class="full"><button class="btn btn-p" data-dpgo>Dar puntos</button></div></form>
+  <p class="d">Tope: 10,000 por vez y 50,000 al día en total. Todo queda en tu registro.</p>
+  ${M.length?`<div class="tbl"><table><tr><th>Persona</th><th>Puntos</th><th>Motivo</th><th>Fecha</th></tr>${M.map(x=>`<tr><td>${esc(x.nombre||'—')}${x.idn?'<br><small style="color:var(--mu)">ID '+esc(String(x.idn))+'</small>':''}</td><td><b style="color:${x.delta>0?'var(--ok)':'var(--warn)'}">${x.delta>0?'+':''}${(+x.delta).toLocaleString('es-PE')}</b></td><td>${esc(x.motivo||'')}</td><td><small>${f(x.fecha)}</small></td></tr>`).join('')}</table></div>`:''}</div>`};
+document.addEventListener('change',e=>{if(e.target.id!=='rtT')return;const m=e.target.value==='MULT';document.querySelectorAll('[data-rt1]').forEach(x=>x.hidden=m);document.querySelectorAll('[data-rt2]').forEach(x=>x.hidden=!m)});
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-rtsave],[data-rton],[data-dpgo]');if(!t||!me)return;e.preventDefault();const d=t.dataset,v=id=>$('#'+id).value.trim();
+ try{if(d.rtsave!==undefined){const ti=v('rtT'),p={tipo:ti,titulo:v('rtN'),descripcion:v('rtD'),categoria:v('rtC')||null,inicio:v('rtI')+'T00:00:00-05:00',fin:v('rtF')+'T23:59:59-05:00',solo_plus:$('#rtS').checked};
+   if(ti==='RETO')Object.assign(p,{meta_tipo:v('rtMT'),meta:+v('rtM'),premio:+v('rtP'),cupo:+v('rtQ')||null});else p.mult=+v('rtX');
+   if(p.meta_tipo==='CATEGORIA'&&!p.categoria)return toast('Elige el rubro del reto');
+   const{error}=await sb.rpc('xy_g_campana_guardar',{p});if(error)throw error;touch('Creó '+(ti==='RETO'?'reto':'campaña')+': '+p.titulo);toast('✅ Creado: ya sale en Mi Xyro');return go('retos')}
+  if(d.rton){const{error}=await sb.rpc('xy_g_campana_activa',{p_id:d.rton,p_activa:d.on==='1'});if(error)throw error;return go('retos')}
+  if(d.dpgo!==undefined){const idn=+v('dpI').replace(/\D/g,''),pt=+v('dpP'),mo=v('dpM');if(!idn||!pt)return toast('Pon el ID y los puntos');
+   if(!confirm(`¿${pt>0?'Dar':'Quitar'} ${Math.abs(pt).toLocaleString('es-PE')} puntos globales al ID ${idn}?`))return;
+   const{error}=await sb.rpc('xy_g_dar_puntos',{p_idn:idn,p_puntos:pt,p_motivo:mo});if(error)throw error;touch(`${pt>0?'Dio':'Quitó'} ${pt} puntos a ${idn}`);toast('✅ Listo');return go('retos')}
+ }catch(ex){toast(ex.message||String(ex))}});
 /* ===== Registros gratis (SQL 72): negocios que se registran solos desde Mi Xyro. Tú apruebas, suspendes o los pasas a pago ===== */
 let GRP=0,GRL=null,GRF='todos';
 const GRE={pendiente:['pend','🕓 Por revisar'],activo:['activo','✅ Publicado'],suspendido:['baja','⛔ Suspendido'],pago:['pg','⭐ Pasó a pago']};
@@ -655,7 +720,7 @@ let DLX=null;const PRE={pendiente:['pend','🕓 Por revisar'],activo:['activo','
 const GRR={gym:'🏋️ Gimnasio',barberia:'💈 Barbería',consultorio:'🦷 Consultorio',restaurante:'🍽️ Restaurante',cafeteria:'☕ Cafetería',otro:'🏪 Otro'};
 async function grCuenta(){try{const{data,error}=await sb.rpc('xa_gr_g_lista');if(error)return;GRL=data||[];GRP=GRL.filter(x=>x.estado==='pendiente').length;side()}catch(_){}}
 V.gratis=async ()=>{
- H('Registros gratis','Negocios que se registraron solos desde Mi Xyro (plan Gratis: perfil, 3 promos y QR). Salen en Mi Xyro solo cuando los apruebas.');
+ H('Registros gratis','Negocios que se registraron solos desde Mi Xyro (plan Gratis). Salen al toque; solo quedan «Por revisar» los que usan nombres de marcas conocidas. Lo ilegal no se puede registrar.');
  $('#acts').innerHTML='<a class="btn btn-g" href="/mi/?registro=1" target="_blank" rel="noopener">Ver registro ↗</a> <button class="btn btn-p" data-v="gratis">↻ Actualizar</button>';
  const{data,error}=await sb.rpc('xa_gr_g_lista');
  if(error)return /function|schema cache|does not exist/i.test(error.message)?'<div class="note">🆓 Falta activar el registro gratis. Corre <b>72-xyro-registro-gratis.sql</b> en Supabase → SQL Editor y vuelve aquí.</div>':`<div class="note">⚠️ ${esc(error.message)}</div>`;
