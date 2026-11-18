@@ -600,7 +600,8 @@ V.mixyro=async ()=>{
 /* ===== Registros gratis (SQL 72): negocios que se registran solos desde Mi Xyro. Tú apruebas, suspendes o los pasas a pago ===== */
 let GRP=0,GRL=null,GRF='todos';
 const GRE={pendiente:['pend','🕓 Por revisar'],activo:['activo','✅ Publicado'],suspendido:['baja','⛔ Suspendido'],pago:['pg','⭐ Pasó a pago']};
-const GRR={gym:'🏋️ Gimnasio',consultorio:'🦷 Consultorio',restaurante:'🍽️ Restaurante',cafeteria:'☕ Cafetería',otro:'🏪 Otro'};
+let DLX=null;const PRE={pendiente:['pend','🕓 Por revisar'],activo:['activo','✅ En Explorar'],suspendido:['baja','⛔ Suspendido']},PRT={entrenador:'🏋️ Entrenador',profesor:'📚 Profesor',nutricionista:'🥗 Nutricionista',otro:'⭐ Profesional'};
+const GRR={gym:'🏋️ Gimnasio',barberia:'💈 Barbería',consultorio:'🦷 Consultorio',restaurante:'🍽️ Restaurante',cafeteria:'☕ Cafetería',otro:'🏪 Otro'};
 async function grCuenta(){try{const{data,error}=await sb.rpc('xa_gr_g_lista');if(error)return;GRL=data||[];GRP=GRL.filter(x=>x.estado==='pendiente').length;side()}catch(_){}}
 V.gratis=async ()=>{
  H('Registros gratis','Negocios que se registraron solos desde Mi Xyro (plan Gratis: perfil, 3 promos y QR). Salen en Mi Xyro solo cuando los apruebas.');
@@ -608,25 +609,56 @@ V.gratis=async ()=>{
  const{data,error}=await sb.rpc('xa_gr_g_lista');
  if(error)return /function|schema cache|does not exist/i.test(error.message)?'<div class="note">🆓 Falta activar el registro gratis. Corre <b>72-xyro-registro-gratis.sql</b> en Supabase → SQL Editor y vuelve aquí.</div>':`<div class="note">⚠️ ${esc(error.message)}</div>`;
  GRL=data||[];GRP=GRL.filter(x=>x.estado==='pendiente').length;side();
+ try{const r=await sb.rpc('xa_dir_g_lista');DLX=r.error?null:r.data}catch(_){DLX=null}
+ if(GRF==='pros'||GRF==='resenas')return dirVista();
  const n=k=>GRL.filter(x=>k==='todos'||(k==='mejora'?x.mejora_t&&x.estado!=='pago':x.estado===k)).length;
  const F=[['todos','Todos'],['pendiente','Por revisar'],['mejora','Quieren pagar'],['activo','Publicados'],['suspendido','Suspendidos'],['pago','Pasaron a pago']];
  const L=GRL.filter(x=>GRF==='todos'||(GRF==='mejora'?x.mejora_t&&x.estado!=='pago':x.estado===GRF));
  const k=(v,l,c)=>`<div class="kpi${c?' '+c:''}"><b>${v}</b><small>${l}</small></div>`;
  const f=t=>t?new Date(t).toLocaleString('es-PE',{timeZone:'America/Lima',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true}):'';
  return`<div class="grid4">${k(GRL.length,'Registrados')}${k(n('pendiente'),'Por revisar',n('pendiente')?'w':'')}${k(n('activo'),'Publicados','g')}${k(n('mejora'),'Quieren el panel completo',n('mejora')?'g':'')}</div>
- <div class="panel"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${F.map(([id,t])=>`<button class="btn btn-sm ${GRF===id?'btn-p':'btn-g'}" data-grf="${id}">${t} · ${n(id)}</button>`).join('')}</div>
+ <div class="panel"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${F.map(([id,t])=>`<button class="btn btn-sm ${GRF===id?'btn-p':'btn-g'}" data-grf="${id}">${t} · ${n(id)}</button>`).join('')}${dirBtns()}</div>
  ${L.length?`<div class="clients">${L.map(x=>{const[ec,et]=GRE[x.estado]||GRE.pendiente,w=String(x.telefono||'').replace(/\D/g,'');
   return`<div class="cl"><div class="in"><h4>${x.logo?`<img src="${esc(x.logo)}" alt="" style="width:26px;height:26px;border-radius:8px;object-fit:cover;vertical-align:middle;margin-right:6px">`:''}${esc(x.negocio)} <span class="tag ${ec}">${et}</span>${x.mejora_t&&x.estado!=='pago'?` <span class="tag x">⭐ Quiere plan ${esc(x.mejora||'')}</span>`:''}</h4>
-   <div class="meta"><span>${GRR[x.rubro]||esc(x.rubro)}</span><span>📍 ${esc(x.distrito||'—')}</span><span>📱 ${esc(w||'—')}</span><span>Se registró ${f(x.creado)}</span><span>${x.seguidores||0} lo guardaron · ${x.promos||0} promos</span></div>
+   <div class="meta"><span>${GRR[x.rubro]||esc(x.rubro)}</span><span>📍 ${esc(x.distrito||'—')}${x.pais&&x.pais!=='PE'?' · '+esc(x.pais):''}</span><span>📱 ${esc(w||'—')}</span><span>Se registró ${f(x.creado)}</span><span>${x.seguidores||0} lo guardaron · ${x.promos||0} promos</span></div>
    <p class="d" style="margin:6px 0">Dueño: <b>${esc(x.dueno||'—')}</b> <small style="color:var(--mu)">@${esc(x.usuario||'')} · ID ${esc(String(x.idn||'').replace(/(\d{4})(\d{4})/,'$1 $2'))} · ${esc(x.email||'')}</small></p>
    ${x.descripcion?`<p class="d" style="margin:0;color:var(--mu)">${esc(x.descripcion)}</p>`:''}${x.motivo?`<p class="d" style="margin:6px 0 0;color:var(--warn)">Motivo: ${esc(x.motivo)}</p>`:''}</div>
    <div class="acts">${x.estado==='pendiente'||x.estado==='suspendido'?`<button class="btn btn-p btn-sm" data-grok="${esc(x.slug)}">✅ Aprobar</button>`:''}
     ${x.estado==='pendiente'||x.estado==='activo'?`<button class="btn btn-g btn-sm" data-grno="${esc(x.slug)}">⛔ Suspender</button>`:''}
     ${x.estado!=='pago'?`<button class="btn btn-g btn-sm" data-grpay="${esc(x.slug)}" data-n="${esc(x.negocio)}" data-r="${esc(x.rubro)}">⭐ Pasar a pago</button>`:''}
+    ${DLX&&x.estado!=='suspendido'?`<button class="btn btn-g btn-sm" data-dneg="${esc(x.slug)}">📣 Destacar 30 días</button>`:''}
     <a class="btn btn-g btn-sm" href="/mi/?n=${encodeURIComponent(x.slug)}" target="_blank" rel="noopener">Ver ↗</a>
-    ${w?`<a class="btn btn-g btn-sm" href="https://wa.me/51${w}?text=${encodeURIComponent('Hola, te escribimos de XyroStudio por tu negocio «'+x.negocio+'» en Mi Xyro 👋')}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div></div>`}).join('')}</div>`:'<div class="empty">Nada por aquí todavía.</div>'}</div>
+    ${w?`<a class="btn btn-g btn-sm" href="https://wa.me/${w.length===9?'51'+w:w}?text=${encodeURIComponent('Hola, te escribimos de XyroStudio por tu negocio «'+x.negocio+'» en Mi Xyro 👋')}" target="_blank" rel="noopener">WhatsApp</a>`:''}</div></div>`}).join('')}</div>`:'<div class="empty">Nada por aquí todavía.</div>'}</div>
  <div class="note"><span>💡 <b>Pasar a pago</b>: cobra primero (Yape/transferencia). Al pasarlo, el negocio recibe Xyro Apps con lo que ya armó, el dueño entra con su misma cuenta como administrador y queda en tu lista de clientes. Ponle su mensualidad en Clientes.</span></div>`;
 };
+
+/* ===== Explorar de Mi Xyro (SQL 75): entrenadores/profesores y opiniones. Van dentro de «Registros gratis» para no sumar menús ===== */
+function dirBtns(){if(!DLX)return'';const P=DLX.pros||[],R=DLX.resenas||[],pp=P.filter(x=>x.estado==='pendiente').length,rr=R.filter(x=>x.reportes>0||x.estado==='oculta').length;
+ return` <button class="btn btn-sm ${GRF==='pros'?'btn-p':'btn-g'}" data-grf="pros">🧑‍🏫 Entrenadores · ${P.length}${pp?' ('+pp+' por revisar)':''}</button> <button class="btn btn-sm ${GRF==='resenas'?'btn-p':'btn-g'}" data-grf="resenas">⭐ Opiniones${rr?' · '+rr+' reportadas':''}</button>`}
+function dirVista(){const f=t=>t?new Date(t).toLocaleString('es-PE',{timeZone:'America/Lima',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true}):'';
+ const tabs=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button class="btn btn-sm btn-g" data-grf="todos">← Negocios gratis</button>${dirBtns()}</div>`;
+ if(!DLX)return'<div class="note">🧑‍🏫 Falta activar Explorar. Corre <b>75-xyro-explorar-entrenadores.sql</b> en Supabase → SQL Editor y vuelve aquí.</div>';
+ if(GRF==='pros'){const L=DLX.pros||[],hoy=new Date().toISOString().slice(0,10);
+  return`<div class="panel">${tabs}${L.length?`<div class="clients">${L.map(x=>{const[ec,et]=PRE[x.estado]||PRE.pendiente,dst=x.dest&&x.dest>=hoy;
+   return`<div class="cl"><div class="in"><h4>${esc(x.nombre)} <span class="tag ${ec}">${et}</span>${x.plus?' <span class="tag x">💎 Pro</span>':''}${dst?` <span class="tag x">📣 Destacado hasta ${esc(x.dest)}</span>`:''}</h4>
+    <div class="meta"><span>${PRT[x.tipo]||esc(x.tipo)}</span><span>📍 ${esc([x.ciudad,x.pais].filter(Boolean).join(' · ')||'—')}</span><span>👥 ${x.alumnos||0} alumnos</span><span>Se registró ${f(x.creado)}</span></div>
+    <p class="d" style="margin:6px 0">${esc(x.titulo||'')} <small style="color:var(--mu)">${esc(x.email||'')}</small></p></div>
+    <div class="acts">${x.estado!=='activo'?`<button class="btn btn-p btn-sm" data-dpro="${esc(x.id)}" data-e="activo">✅ Aprobar</button>`:''}${x.estado!=='suspendido'?`<button class="btn btn-g btn-sm" data-dpro="${esc(x.id)}" data-e="suspendido">⛔ Suspender</button>`:''}
+     <button class="btn btn-g btn-sm" data-dpro="${esc(x.id)}" data-dd="${dst?0:30}">${dst?'Quitar destacado':'📣 Destacar 30 días'}</button>
+     <button class="btn btn-g btn-sm" data-dpro="${esc(x.id)}" data-pl="${x.plus?0:1}">${x.plus?'Quitar Pro':'💎 Dar Perfil Pro'}</button>
+     <a class="btn btn-g btn-sm" href="/mi/?t=${encodeURIComponent(x.slug)}" target="_blank" rel="noopener">Ver ↗</a></div></div>`}).join('')}</div>`:'<div class="empty">Aún no hay entrenadores ni profesores.</div>'}</div>
+   <div class="note"><span>💡 <b>Perfil Pro</b> y <b>Destacado</b> se cobran por Yape/transferencia; cobra primero y luego actívalo aquí.</span></div>`}
+ const L=DLX.resenas||[];
+ return`<div class="panel">${tabs}<p class="d" style="color:var(--mu);margin:0 0 10px">Opiniones de los últimos 7 días y las reportadas. Con 3 reportes se ocultan solas hasta que las revises.</p>${L.length?`<div class="clients">${L.map(x=>`<div class="cl"><div class="in"><h4>${'★'.repeat(x.estrellas)}${'☆'.repeat(5-x.estrellas)} · ${esc(x.para||'')} ${x.estado==='oculta'?'<span class="tag baja">Oculta</span>':''}${x.reportes?` <span class="tag pend">🚩 ${x.reportes} reporte${x.reportes>1?'s':''}</span>`:''}${x.v?' <span class="tag activo">Verificada</span>':''}</h4>
+   <p class="d" style="margin:6px 0">${esc(x.texto||'(sin texto)')}</p><div class="meta"><span>De @${esc(x.de||'')}</span><span>${f(x.creado)}</span></div></div>
+   <div class="acts">${x.estado==='oculta'||x.reportes?`<button class="btn btn-p btn-sm" data-dres="${esc(x.id)}" data-e="visible">✅ Está bien</button>`:''}${x.estado!=='oculta'?`<button class="btn btn-g btn-sm" data-dres="${esc(x.id)}" data-e="oculta">🙈 Ocultar</button>`:''}<button class="btn btn-g btn-sm" data-dres="${esc(x.id)}" data-e="borrar">🗑️ Borrar</button></div></div>`).join('')}</div>`:'<div class="empty">Sin opiniones nuevas ni reportadas.</div>'}</div>`}
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-dpro],[data-dres],[data-dneg]');if(!t||!me)return;e.preventDefault();const d=t.dataset;
+ try{let r;
+  if(d.dpro){let mo=null;if(d.e==='suspendido'){mo=prompt('¿Por qué lo suspendes? (lo verá en su perfil)','Contenido no permitido');if(mo===null)return}
+   r=await sb.rpc('xa_dir_g_pro',{p_id:d.dpro,p_estado:d.e||null,p_motivo:mo,p_destacar_dias:d.dd!=null?+d.dd:null,p_plus:d.pl!=null?d.pl==='1':null});if(r.error)throw r.error;touch('Explorar: entrenador '+(d.e||(d.dd!=null?'destacado '+d.dd:'pro '+d.pl)));toast('✅ Listo')}
+  if(d.dres){if(d.e==='borrar'&&!confirm('¿Borrar esta opinión para siempre?'))return;r=await sb.rpc('xa_dir_g_resena',{p_id:d.dres,p_estado:d.e});if(r.error)throw r.error;touch('Explorar: opinión '+d.e);toast('✅ Listo')}
+  if(d.dneg){r=await sb.rpc('xa_dir_g_negocio',{p_slug:d.dneg,p_oculto:null,p_destacar_dias:30});if(r.error)throw r.error;touch('Explorar: destacó '+d.dneg);toast('📣 Destacado 30 días')}
+  go('gratis')}catch(er){toast(er.message||er)}});
 document.addEventListener('click',async e=>{const t=e.target.closest('[data-grf],[data-grok],[data-grno],[data-grpay]');if(!t||!me)return;e.preventDefault();const d=t.dataset;
  try{
   if(d.grf){GRF=d.grf;return go('gratis')}
