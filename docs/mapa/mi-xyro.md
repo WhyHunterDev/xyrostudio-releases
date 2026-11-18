@@ -61,3 +61,4 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Registro gratis de cualquier país: select `#rpa` (`PAISES`), `xa_gr_registrar(..., p_pais)` + `xa_tel_ok` (Perú 9 dígitos; otros 8–15 con código). Solo manda `p_pais` si no es PE (funciona antes de correr el 75).
 - Gestor → «Registros gratis»: botones «🧑‍🏫 Entrenadores» y «⭐ Opiniones» (`dirBtns`, `dirVista`, `xa_dir_g_*`), «📣 Destacar 30 días» en negocios gratis.
 - Portada `#/entrar`: 3 opciones Persona / Negocio / Entrenador.
+- Perfil de entrenador (SQL 80): «Aceptar» ya no da WhatsApp; el alumno elige plan (`planesHTML`) y paga en `ordenHoja` (métodos del entrenador + «Ya pagué», espera con Realtime/sondeo, pantalla de éxito con puntos y Pase QR). WhatsApp solo «consultas de socio». Tarjeta de puntos `ptsHTML/ptsCarga` en Inicio y Perfil. `vMiPro`: `proCobrosHTML` (alumnos x/5, cobros pendientes → /x/ Control) y `proPlanHTML` (FREE vs PRO).

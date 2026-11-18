@@ -143,3 +143,6 @@ export async function subirFoto(fl, max = 1080) {
   return S.sb.storage.from('medios').getPublicUrl(path).data.publicUrl;
 }
 export const WA_XYRO = '51936449066';
+
+// Animación de puntos ganados
+export function ptsFx(n, txt) { vib(); const d = document.createElement('div'); d.className = 'ptsfx'; d.innerHTML = `<b>+${num(n)}</b><span>${esc(txt || 'Xyro Points')}</span>`; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }

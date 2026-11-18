@@ -19,8 +19,9 @@ const MKT = [
   { id: 'm3', seller_id: 'u9', protected_available: true, title: 'Bicicleta spinning casera', price: 650, currency: 'PEN', condition: 'USED', ships: false, status: 'ACTIVE', photos: [], emoji: '🚲', created_at: new Date(Date.now() - 864e5 * 2).toISOString() },
   { id: 'm4', seller_id: 'u9', protected_available: true, title: 'Proteína whey 2 kg (sellada)', price: 210, currency: 'PEN', condition: 'NEW', ships: true, status: 'ACTIVE', photos: [], emoji: '🥤', created_at: new Date(Date.now() - 864e5 * 3).toISOString() },
 ];
+const PMD = [{ type: 'YAPE', dato: '999 888 777', titular: 'Café Aurora' }];
 const ORD = [
-  { id: 'o1', code: 'A7F3K2Q9', fulfillment_mode: 'IN_STORE', status: 'AWAITING_PAYMENT', total: 36, currency: 'PEN', created_at: new Date(Date.now() - 6e5).toISOString(), buyer_id: 'u2', entity_id: 'e1' },
+  { id: 'o1', code: 'A7F3K2Q9', fulfillment_mode: 'IN_STORE', status: 'AWAITING_PAYMENT', total: 36, currency: 'PEN', created_at: new Date(Date.now() - 6e5).toISOString(), buyer_paid_at: new Date(Date.now() - 3e5).toISOString(), buyer_pay_method: 'YAPE', buyer_pay_ref: '4821', buyer_id: 'u2', entity_id: 'e1' },
   { id: 'o2', code: 'B2M8P1X4', fulfillment_mode: 'PICKUP', status: 'PAID', total: 54, currency: 'PEN', created_at: new Date(Date.now() - 36e5).toISOString(), buyer_id: 'u3', entity_id: 'e1' },
   { id: 'o3', code: 'C9Q4T7L1', fulfillment_mode: 'IN_STORE', status: 'COMPLETED', total: 18, currency: 'PEN', created_at: new Date(Date.now() - 36e5 * 3).toISOString(), buyer_id: 'u4', entity_id: 'e1' },
 ];
@@ -146,6 +147,10 @@ export async function demoRpc(f, a) {
   if (f === 'xy_listing_report') return { ok: true, reports: 1 };
   if (f === 'xy_queue_video') { if (VID.filter((v) => new Date(v.created_at).getMonth() === new Date().getMonth()).length >= 2) throw new Error('Usaste tus 2 videos gratis de este mes. Compra créditos para más.'); VID.unshift({ id: 'v' + Date.now(), entity_id: a.p_entity, status: 'QUEUED', template: a.p_template, prompt: a.p_prompt, r2_key: null, watermark: true, created_at: new Date().toISOString(), entities: { name: 'Café Aurora' } }); return { ok: true, free_left: 0 }; }
   if (f === 'xy_video_set') { const v = VID.find((x) => x.id === a.p_job); if (a.p_status === 'DONE' && !/^https:\/\/\S{4,}$/.test(a.p_link || '')) throw new Error('Pega el enlace del video (https://)'); if (v) { v.status = a.p_status; if (a.p_status === 'DONE') v.r2_key = a.p_link; } return { ok: true }; }
+  if (f === 'xy_paymethods_get') return JSON.parse(JSON.stringify(PMD));
+  if (f === 'xy_paymethods_set') { PMD.length = 0; PMD.push(...(a.p_methods || []).slice(0, 4)); return { ok: true }; }
+  if (f === 'xy_entity_features') { const e = E.find((x) => x.id === a.p_entity) || E[0], pro = e.plan !== 'FREE'; return { plan: e.plan, pro, type: e.type, max_students: pro ? null : 5, max_items: pro ? null : 5, students: 3, items: 4, edits_free_left: Math.max(0, 2 - VID.length), edits_credits: pro ? 15 : 0, watermark: !pro, bots: pro, business_points: 312 }; }
+  if (f === 'xy_set_plan') { const e = E.find((x) => x.id === a.p_entity); if (e) { e.plan = a.p_plan; e.plan_until = a.p_plan === 'FREE' ? null : new Date(Date.now() + 864e5 * 30).toISOString(); } return { ok: true }; }
   if (f === 'xy_users_public') return [{ id: 'u9', display_name: 'Carlos M.' }];
   return { ok: true };
 }
