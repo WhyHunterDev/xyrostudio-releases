@@ -1884,7 +1884,7 @@ function proAvisos(){if(PCH===null&&D&&!DEMO)pchCarga().then(()=>{if(TAB==='avis
 let PTS=null,PTSV=null,PTSCH=null,ORDT=0;
 const moneyX=(n,c)=>{try{return new Intl.NumberFormat('es-PE',{style:'currency',currency:c||'PEN',currencyDisplay:'narrowSymbol'}).format(+n||0)}catch(_){return(c||'S/')+' '+(+n||0).toFixed(2)}};
 const nfmt=n=>new Intl.NumberFormat('es').format(Math.round(+n||0));
-async function ptsCarga(fx){if(!D)return;try{const r=await rpc('xy_my_points');const antes=PTS;PTS=r||PTS;
+async function ptsCarga(fx){if(!D)return;try{if(!DEMO&&!PTSR){PTSR=1;try{await rpc('xy_points_release')}catch(_){}}const r=await rpc('xy_my_points');const antes=PTS;PTS=r||PTS;
   if(fx&&antes&&PTS){const d=(+PTS.global_points+ +PTS.local_points)-(+antes.global_points+ +antes.local_points),b=(+PTS.business_points)-(+antes.business_points);if(d>0)ptsFx(d,'Xyro Points');else if(b>0)ptsFx(b,'puntos de negocio')}
   app.querySelectorAll('[data-pts]').forEach(e=>{const k=e.dataset.pts;e.textContent=nfmt(PTS[k])})}catch(_){PTS=PTS||{global_points:0,local_points:0,business_points:0}}
  if(!PTSCH&&sb&&!DEMO&&D){try{const{data:{session}}=await sb.auth.getSession();const uid=session&&session.user.id;if(uid){PTSCH=sb.channel('mi-pts').on('postgres_changes',{event:'*',schema:'public',table:'points_ledger',filter:'user_id=eq.'+uid},()=>ptsCarga(true)).subscribe()}}catch(_){}}}
@@ -1893,7 +1893,9 @@ function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;ptsCarga().then((
  const P=PTS||{},biz=+P.business_points>0||(PROM&&PROM.entity_id);
  return`<div class="card"><div class="row"><b class="sp">⭐ Mis puntos Xyro</b><span class="pill" style="background:#7c5cff22;color:var(--a)">en vivo</span></div>
   <div class="kps ${biz?'k3':''}" style="${biz?'':'grid-template-columns:1fr 1fr'}"><div class="kp"><b data-pts="global_points">${nfmt(P.global_points)}</b><span class="mu xs">Globales</span></div><div class="kp"><b data-pts="local_points">${nfmt(P.local_points)}</b><span class="mu xs">Locales</span></div>${biz?`<div class="kp"><b data-pts="business_points">${nfmt(P.business_points)}</b><span class="mu xs">De tu negocio</span></div>`:''}</div>
+  ${+P.pending>0?`<p class="sm">⏳ <b>${nfmt(P.pending)}</b> en espera: se liberan a los 7 días de tu compra.</p>`:''}
   <p class="mu xs">Globales: úsalos en cualquier negocio Xyro. Locales: solo donde los ganaste. Sumas puntos cuando el negocio confirma tu pago.</p></div>`}
+let PTSR=0;
 function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'Xyro Points')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 (function(){const st=document.createElement('style');st.textContent='.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff;box-shadow:0 20px 60px #7c5cff66;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}.plan{display:grid;gap:4px;text-align:left;width:100%;cursor:pointer}.plan .row b{font-size:18px}.mpag{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14}.mpag .sp{min-width:0}';document.head.appendChild(st)})();
 const PLK={MEMBERSHIP:'Plan',CLASS_PACK:'Paquete',SESSION:'Sesión',SERVICE:'Servicio'};
