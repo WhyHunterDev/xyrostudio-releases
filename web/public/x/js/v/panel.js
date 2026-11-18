@@ -77,12 +77,32 @@ async function negocios(el) {
 // ---------- Soporte: tickets de Xyro (compras, P2P, disputas) + publicaciones reportadas ----------
 const TEST = { OPEN: ['Abierto', 'warn'], PENDING_USER: ['Esperando a la persona', ''], RESOLVED: ['Resuelto', 'ok'], CLOSED: ['Cerrado', ''] };
 const TCAT = { GENERAL: '💬', ORDER: '🧾', PAYMENT: '💳', FRAUD: '🚨', VERIFICATION: '🪪', P2P_DISPUTE: '🤝', ACCOUNT: '👤' };
+// ---------- Alertas de puntos (SQL 82): patrones de farmeo y castigo (deja de dar globales y anula los que están en espera)
+const FTIPO = { CONCENTRACION: '👥 Siempre los mismos clientes', CUENTAS_NUEVAS: '🆕 Compradores con cuentas nuevas', CRUZADAS: '🔁 Se compran entre ellos', RAPIDAS: '⚡ Confirmaciones al instante', TOPES: '🧱 Choca con los topes' };
+async function alertas(el) {
+  el.insertAdjacentHTML('beforeend', `<div class="card"><b>🚩 Alertas de puntos</b><span class="mu xs">Últimos 14 días. Los puntos globales quedan 7 días en espera: si bloqueas, se anulan los que aún no se liberan.</span><div id="fa"><div class="sk" style="height:60px"></div></div></div>`);
+  const box = $('#fa', el);
+  const carga = async () => { try {
+    const L = await rpc('xy_fraud_signals') || [];
+    box.innerHTML = L.length ? L.map((a) => `<div class="li wrap"><span class="sp"><b>${esc(a.name)}</b> ${a.blocked ? '<span class="pill bad">Bloqueado</span>' : ''}<br><span class="xs">${FTIPO[a.tipo] || esc(a.tipo)}</span><br><span class="mu xs">${esc(a.detalle)}</span></span>
+      <button class="btn sm ${a.blocked ? '' : 'p'}" data-fb="${esc(a.entity)}" data-v="${a.blocked ? '0' : '1'}">${a.blocked ? 'Desbloquear' : 'Bloquear puntos'}</button></div>`).join('')
+      : '<p class="mu sm">Sin alertas. Todo en orden ✓</p>';
+    $$('[data-fb]', box).forEach((b) => b.onclick = async () => {
+      b.disabled = true;
+      try { const r = await rpc('xy_entity_points_block', { p_entity: b.dataset.fb, p_block: b.dataset.v === '1', p_reason: 'Alerta de puntos' }); toast(b.dataset.v === '1' ? `Bloqueado ✓ ${r && r.reversed ? r.reversed + ' asientos anulados' : ''}` : 'Desbloqueado ✓'); carga(); }
+      catch (e) { toast(errDe(e)); b.disabled = false; }
+    });
+  } catch (e) { box.innerHTML = `<p class="mu sm">${esc(errDe(e))}</p>`; } };
+  carga();
+}
+
 async function soporte(el) {
   if (!tiene('SUPPORT', 'MODERATOR', 'SECURITY')) { el.innerHTML = sinRol('Tickets y moderación son para Soporte, Moderación o Seguridad.'); return; }
   el.innerHTML = `<div><h1>Soporte</h1><p class="mu">Tickets de Xyro con prioridad. Los de Xyro Apps siguen en el <a href="/gestor/">Panel XyroStudio</a>.</p></div>
     <div class="seg" id="tf"><button data-f="OPEN" class="on">Abiertos</button><button data-f="PENDING_USER">Esperando</button><button data-f="RESOLVED">Resueltos</button></div>
     <div class="dos"><div class="card" id="lt"><div class="sk" style="height:120px"></div></div>
     <div class="card"><b>🚩 Publicaciones reportadas</b><span class="mu xs">Con 5 reportes se ocultan solas. Revisa y decide.</span><div id="lr"><div class="sk" style="height:80px"></div></div></div></div>`;
+  alertas(el);
   let f = 'OPEN';
   const cargar = async () => {
     try {
