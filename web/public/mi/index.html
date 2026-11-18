@@ -948,7 +948,8 @@ async function escanear(onCode,txt){
 function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim()[0]||'?';
  if(GR===null)grCarga().then(()=>{if(TAB==='perfil'&&!SUB&&MODO!=='negocio'&&!document.querySelector('.ov'))pinta()});
  if(PROM===undefined&&D)proMioCarga().then(()=>{if(TAB==='perfil'&&!SUB&&MODO!=='negocio'&&!document.querySelector('.ov'))pinta()});
- const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=()=>modoNegocio();const s=$('#salir');s&&(s.onclick=salir);const bc=$('#bcta');bc&&(bc.onclick=e=>{e.preventDefault();borrarCuenta()});const gr=$('#greg');gr&&(gr.onclick=grRegistro);const mp=$('#mpro');mp&&(mp.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
+ const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=e=>{e.preventDefault();modoNegocio()};const s=$('#salir');s&&(s.onclick=salir);const bc=$('#bcta');bc&&(bc.onclick=e=>{e.preventDefault();borrarCuenta()});const gr=$('#greg');gr&&(gr.onclick=()=>grRegistro());const mp=$('#mpro');mp&&(mp.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});
+  const nN=$('#ngN');nN&&(nN.onclick=negNuevo);const nG=$('#ngG');nG&&(nG.onclick=()=>{vib();SUB='migr';pinta();$('#sc')&&($('#sc').scrollTop=0)});const nP=$('#ngP');nP&&(nP.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
  return`<div class="g"><div class="row"><div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
    <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p>${per.fundador?`<p style="margin-top:6px">${fBad(per)}</p>`:''}</div></div>
   ${per.fundador?`<div class="card fcard"><div class="row"><span style="font-size:28px">🏅</span><div class="sp"><h3>Fundador ${fNum(per.fundador)} de Mi Xyro</h3><p class="mu sm">Eres de las primeras 50 personas en Mi Xyro. Tu insignia, tu carnet dorado y tu @ corto son para siempre.</p></div></div></div>`:''}
@@ -957,11 +958,8 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   <div class="idbox"><span class="mu xs" style="font-weight:700;display:inline-flex;gap:6px;align-items:center;justify-content:center;color:var(--a)">${I.id}ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><p class="mu xs">Es tuyo y nunca cambia. Dáselo a recepción para que conecten tu membresía a Mi Xyro.</p><button class="btn" id="cpi">📋 Copiar mi ID</button></div>
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
-  ${grCard()}
-  ${proCard()}
-  <div class="card"><div class="row"><div class="ibox">${I.brief}</div><div class="sp"><h3>¿Ya usas Xyro Apps?</h3><p class="mu sm">Dueños y personal autorizado: mira ventas, ingresos y socios, y marca asistencias desde aquí.</p></div></div><button class="btn" id="mneg">Entrar a mi negocio</button></div>
+  ${negCard()}
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
-  <div class="card pronto"><div class="row"><div class="ibox">${I.trophy}</div><div class="sp"><h3>Muy pronto: puntos y premios</h3><p class="mu sm">Suma puntos cada vez que vas a tus negocios y canjéalos por premios.</p></div></div></div>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
@@ -1005,11 +1003,11 @@ async function grFoto(fl,g,tipo){const img=await new Promise((ok,ko)=>{const u=U
  const path=g.sid+'/gr/'+tipo+'-'+Date.now()+'.'+ext;const{error}=await sb.storage.from('medios').upload(path,b,{contentType:b.type,cacheControl:'31536000'});if(error)throw error;
  return sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
 async function grGuardar(g,datos){await rpc('xa_gr_guardar',{p_slug:g.slug,p_datos:datos});await grCarga()}
-function grRegistro(){if(!D)return;
+function grRegistro(tipo){if(!D)return;const RB=tipo==='producto'?RUBG.filter(r=>['restaurante','cafeteria','otro'].includes(r[0])):tipo==='servicio'?RUBG.filter(r=>!['restaurante','cafeteria'].includes(r[0])):RUBG;
  hoja(`<div style="display:grid;justify-items:center;gap:8px;text-align:center"><div class="ibox big">${I.store.replace('width="22" height="22"','width="34" height="34"')}</div><h2>Registra tu negocio gratis</h2>
   <p class="mu sm" style="max-width:330px">Sale en Mi Xyro con tu perfil, hasta 3 promos y tu QR para que tus clientes te guarden. Sin pagar nada.</p></div>
  <form class="g" id="rf"><label>Nombre del negocio<input id="rn" maxlength="60" required placeholder="Ej. Café Aurora"></label>
-  <label>Tipo de negocio<select id="rr">${RUBG.map(([k,i,t])=>`<option value="${k}">${i} ${t}</option>`).join('')}</select></label>
+  <label>Tipo de negocio<select id="rr">${RB.map(([k,i,t])=>`<option value="${k}">${i} ${t}</option>`).join('')}</select></label>
   <label>País<select id="rpa">${PAISES.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></label>
   <label>WhatsApp del negocio<input id="rt" inputmode="tel" maxlength="18" required placeholder="9XX XXX XXX"></label>
   <label>Distrito o ciudad<input id="rd" maxlength="60" required placeholder="Ej. Miraflores"></label>
@@ -1028,6 +1026,20 @@ function grRegistro(){if(!D)return;
    try{await rpc('xa_gr_registrar',{p_nombre:q('#rn').value.trim(),p_rubro:q('#rr').value,p_telefono:t,p_distrito:q('#rd').value.trim(),p_direccion:q('#ra').value.trim(),...(pe?{}:{p_pais:pa})});
     await grCarga();close();TAB='perfil';SUB='migr';pinta();$('#sc')&&($('#sc').scrollTop=0);toast('🎉 ¡Listo! Arma tu perfil mientras lo revisamos')}
    catch(er){say(errDe(er));b.disabled=false;b.textContent='Registrar gratis'}}})}
+/* Perfil: UNA sola tarjeta de negocio (decisión del usuario 2026-11-18: menos cosas, no confundir) */
+function negCard(){const g=GRN?null:G0(),p=PROM;
+ const fila=(id,ic,t,d)=>`<button class="li" id="${id}" style="all:unset;display:flex;gap:12px;align-items:center;cursor:pointer;padding:6px 0"><div class="ibox">${ic}</div><span class="sp"><b>${t}</b><br><span class="mu xs">${d}</span></span><span class="mu">›</span></button>`;
+ return`<div class="card"><p class="mu xs" style="font-weight:700">MODO NEGOCIO</p>
+  ${g?fila('ngG',I.store,esc(g.nombre),(GREST[g.estado]||GREST.pendiente)[1]+' · Plan '+(g.estado==='pago'?'completo':'Gratis')):''}
+  ${p?fila('ngP',I.dumb,'Mi perfil de '+esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase()),(p.estado==='activo'?'✅ Visible en Explorar':p.estado==='suspendido'?'⛔ Suspendido':'⏳ En revisión')+(p.nuevos?` · <b style="color:var(--a)">${p.nuevos} nuevo${p.nuevos>1?'s':''}</b>`:'')):''}
+  ${g||p?'':`<p class="mu sm">¿Vendes productos o das un servicio? Regístralo gratis y cobra dentro de Xyro.</p><button class="btn p" id="ngN">Registrar mi negocio gratis</button>`}
+  <a href="#" id="mneg" class="mu xs" style="text-align:center;color:var(--mu)">¿Trabajas en un negocio con Xyro Apps? Entra aquí</a></div>`}
+function negNuevo(){vib();hoja(`<h2>¿Qué ofreces?</h2>
+ <button class="card" data-nt="producto" style="text-align:left"><b>🛍️ Productos</b><span class="mu sm">Comida, bebidas, ropa, accesorios, cosas digitales…</span></button>
+ <button class="card" data-nt="servicio" style="text-align:left"><b>🏋️ Servicio con muchos clientes</b><span class="mu sm">Gimnasio, consultorio, barbería: socios, citas y control.</span></button>
+ <button class="card" data-nt="indep" style="text-align:left"><b>💪 Servicio independiente</b><span class="mu sm">Entrenador, profesor o freelancer: cobras a tus alumnos por Xyro.</span></button>
+ <button class="btn l" data-x>Ahora no</button>`,(o,close)=>{o.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{close();const t=b.dataset.nt;
+  if(t==='indep'){SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)}else grRegistro(t)})})}
 function grCard(){if(GRN)return'';const g=G0();
  return`<div class="card"><div class="row"><div class="ibox">${I.store}</div><div class="sp"><h3>${g?esc(g.nombre):'¿Tienes un negocio?'}</h3><p class="mu sm">${g?(GREST[g.estado]||GREST.pendiente)[1]+' · Plan '+(g.estado==='pago'?'completo':'Gratis'):'Regístralo gratis: sale en Mi Xyro con tu perfil, tus promos y tu QR.'}</p></div></div>
   ${g?'<button class="btn p" data-sub="migr">Manejar mi negocio</button>':'<button class="btn p" id="greg">Registrar mi negocio gratis</button>'}</div>`}
