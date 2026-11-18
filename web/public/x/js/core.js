@@ -70,6 +70,7 @@ export const I = {
   ticket: sv('<path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z"/>'),
   swap: sv('<path d="M7 7h13l-4-4M17 17H4l4 4"/>'),
   out: sv('<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3"/>'),
+  film: sv('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4"/>'),
   flame: sv('<path d="M12 22c4 0 7-3 7-7 0-3-2-5-3-7-1 2-2 3-3 3 0-3-1-6-4-9 0 4-4 7-4 12 0 4.5 3 8 7 8z"/>'),
 };
 
@@ -126,3 +127,19 @@ export const MODOS = {
 export const puedeModo = (m) => m === 'user' || (m === 'control' && S.entidades.length > 0) || (m === 'panel' && !!(S.me && S.me.staff_role));
 export const NIVELES = { BRONZE: ['Bronce', 0], SILVER: ['Plata', 2000], GOLD: ['Oro', 10000], BLACK: ['Black', 50000] };
 export const CAT = [['', '✨', 'Todo'], ['gym', '🏋️', 'Gimnasios'], ['entrenador', '🧑‍🏫', 'Entrenadores'], ['cafeteria', '☕', 'Cafeterías'], ['restaurante', '🍽️', 'Restaurantes'], ['ropa', '👕', 'Ropa'], ['barberia', '💈', 'Barberías'], ['digital', '💾', 'Digitales']];
+
+// Foto liviana (webp ≤ max px) a medios/mi/<id>/ (permiso del SQL 57). En demo queda solo en este navegador.
+export async function subirFoto(fl, max = 1080) {
+  const img = await new Promise((ok, ko) => { const u = URL.createObjectURL(fl), im = new Image(); im.onload = () => ok(im); im.onerror = () => ko(new Error('No pudimos leer esa imagen')); im.src = u; });
+  const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+  c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+  const cx = c.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, 0, 0, c.width, c.height);
+  let b = await new Promise((r) => c.toBlob(r, 'image/webp', 0.82)), ext = 'webp';
+  if (!b || b.type !== 'image/webp') { b = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.82)); ext = 'jpg'; }
+  if (S.demo || S.sinCore) return URL.createObjectURL(b);
+  const path = 'mi/' + S.user.id + '/' + Date.now() + Math.random().toString(36).slice(2, 6) + '.' + ext;
+  const { error } = await S.sb.storage.from('medios').upload(path, b, { contentType: b.type, cacheControl: '31536000' });
+  if (error) throw error;
+  return S.sb.storage.from('medios').getPublicUrl(path).data.publicUrl;
+}
+export const WA_XYRO = '51936449066';
