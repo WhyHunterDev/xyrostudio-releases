@@ -965,13 +965,15 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
+/* nombre no adivinable: el bucket medios es público y las capturas de pago tienen datos personales */
+const rnd=()=>{try{return crypto.randomUUID().replace(/-/g,'').slice(0,16)}catch(_){return Math.random().toString(36).slice(2,12)}};
 async function subirFoto(fl){const img=await new Promise((ok,ko)=>{const u=URL.createObjectURL(fl),im=new Image();im.onload=()=>ok(im);im.onerror=ko;im.src=u});
  const S=400,c=document.createElement('canvas');c.width=c.height=S;const k=Math.min(img.naturalWidth,img.naturalHeight),cx=c.getContext('2d');cx.imageSmoothingQuality='high';
  cx.drawImage(img,(img.naturalWidth-k)/2,(img.naturalHeight-k)/2,k,k,0,0,S,S);
  let b=await new Promise(r=>c.toBlob(r,'image/webp',.85)),ext='webp';if(!b||b.type!=='image/webp'){b=await new Promise(r=>c.toBlob(r,'image/jpeg',.85));ext='jpg'}
  if(DEMO)return URL.createObjectURL(b);
  const{data:{session}}=await sb.auth.getSession();if(!session)throw new Error('sesion');
- const path='mi/'+session.user.id+'/'+Date.now()+'.'+ext;const{error}=await sb.storage.from('medios').upload(path,b,{contentType:b.type,cacheControl:'31536000'});if(error)throw error;
+ const path='mi/'+session.user.id+'/'+Date.now()+'-'+rnd()+'.'+ext;const{error}=await sb.storage.from('medios').upload(path,b,{contentType:b.type,cacheControl:'31536000'});if(error)throw error;
  return sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
 function editarPerfil(){const per=(D&&D.persona)||{};
  let foto;
@@ -2030,7 +2032,7 @@ async function subirFotoAncha(fl){const img=await new Promise((ok,ko)=>{const u=
  let b=await new Promise(r=>c.toBlob(r,'image/webp',.8)),ext='webp';if(!b||b.type!=='image/webp'){b=await new Promise(r=>c.toBlob(r,'image/jpeg',.8));ext='jpg'}
  if(DEMO)return URL.createObjectURL(b);
  const{data:{session}}=await sb.auth.getSession();if(!session)throw new Error('sesion');
- const path='mi/'+session.user.id+'/'+Date.now()+'.'+ext;const{error}=await sb.storage.from('medios').upload(path,b,{contentType:b.type,cacheControl:'31536000'});if(error)throw error;
+ const path='mi/'+session.user.id+'/'+Date.now()+'-'+rnd()+'.'+ext;const{error}=await sb.storage.from('medios').upload(path,b,{contentType:b.type,cacheControl:'31536000'});if(error)throw error;
  return sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
 
 // Chat persona ↔ entrenador (se refresca cada 6 s con el chat abierto)
@@ -2257,7 +2259,7 @@ async function subirCaptura(fl){if(!/^image\//.test(fl.type))throw new Error('Su
  const k=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
  const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.82));if(DEMO)return'https://demo.xyrostudio.net/captura.jpg';
  const{data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Inicia sesión');
- const path='mi/'+session.user.id+'/pago-'+Date.now()+'.jpg';const{error}=await sb.storage.from('medios').upload(path,b,{contentType:'image/jpeg'});if(error)throw error;
+ const path='mi/'+session.user.id+'/pago-'+Date.now()+'-'+rnd()+'.jpg';const{error}=await sb.storage.from('medios').upload(path,b,{contentType:'image/jpeg'});if(error)throw error;
  return sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
 async function pagoTicket(o){const C=await cobCarga(),pe=String(o.moneda||'PEN').toUpperCase()==='PEN';let foto='';
  const cp=(l,v)=>v?`<div class="row" style="padding:6px 0"><span class="sp"><span class="mu xs">${l}</span><br><b>${esc(v)}</b></span><button type="button" class="btn s2" data-cp="${esc(v)}" style="flex:0 0 auto;width:auto">📋</button></div>`:'';
