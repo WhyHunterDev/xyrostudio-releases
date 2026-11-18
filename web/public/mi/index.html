@@ -532,7 +532,7 @@ function cabeza(n){const lg=logoURL(n.logo),h=new Date().toLocaleString('en-US',
 const saludo=()=>{const h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0;return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
 const fNum=n=>'#'+String(n).padStart(3,'0'),fBad=per=>per&&per.fundador?`<span class="fbad">★ Fundador ${fNum(per.fundador)}</span>`:'';
 function fundBienvenida(){const per=D&&D.persona;if(!per||!per.fundador||ls.g('mi-fund-'+per.idn))return;ls.s('mi-fund-'+per.idn,'1');setTimeout(()=>{hoja(`<div style="text-align:center;display:grid;gap:10px;justify-items:center"><div style="font-size:52px">🏅</div>${fBad(per)}<h2>¡Eres fundador de Mi Xyro!</h2><p class="mu sm">Eres de las primeras 50 personas en tener Mi Xyro. Tu número es tuyo para siempre y nadie más lo tendrá.</p><div class="card fcard" style="text-align:left;width:100%"><p class="sm">★ Insignia de fundador en tu perfil</p><p class="sm">✨ Carnet dorado en todos tus negocios</p><p class="sm">@ Puedes usar un @usuario corto, de 3 o 4 letras</p></div><button class="btn p" data-x>¡Genial!</button></div>`);confeti()},600)}
-const avatarHTML=(per,id)=>`<div class="av"${id?` id="${id}"`:''}>${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc((String(per.nombre||'?').trim()[0]||'?').toUpperCase())}</div>`;
+const avatarHTML=(per,id)=>{const h=`<div class="av"${id?` id="${id}"`:''}>${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc((String(per.nombre||'?').trim()[0]||'?').toUpperCase())}</div>`;return D&&per===D.persona&&typeof estF==='function'?avMarco(h,estF()):h};
 function tarjNeg(g){const lg=logoURL(g.logo);
  const ma=g._i!=null&&!citR(g.rubro)?memAct(g):null,mt=ma?(ma.act?'activo hasta '+fF(ma.act.fin,{day:'numeric',month:'short'}):ma.fin?'venció el '+fF(ma.fin,{day:'numeric',month:'short'}):'sin plan activo'):'';
  return`<button class="card" ${g._i!=null?`data-n="${g._i}"`:`data-neg="${esc(g.slug)}"`} style="text-align:left;cursor:pointer;width:100%"><div class="row"><span class="dot" style="width:46px;height:46px;font-size:22px;overflow:hidden">${lg?`<img src="${esc(lg)}" style="width:100%;height:100%;object-fit:cover" alt="">`:(citR(g.rubro)?icoR(g.rubro):'🏋️')}</span>
@@ -641,9 +641,10 @@ function promosFeed(){const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.gu
   (n.promos||[]).filter(p=>!p.hasta||p.hasta>=h).forEach(p=>P.push({n,p}));
   (n.publicaciones||[]).forEach(p=>B.push({n,p}))});
  const lg=n=>{const l=logoURL(n.logo);return`<span class="fl2">${l?`<img src="${esc(l)}" alt="">`:icoR(n.rubro)}</span>`};
- return(P.length?`<p class="mu xs sec">🎁 PROMOS PARA TI</p><div class="hs">${P.slice(0,8).map(({n,p})=>`<button class="promo" data-neg="${esc(n.slug)}" style="text-align:left;cursor:pointer"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b><span class="pill" style="background:var(--a);color:#fff">Solo app</span></div><h3 style="font-size:17px">${esc(p.titulo)}</h3>${p.descripcion?`<p class="sm mu">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Hasta el ${fF(p.hasta,{day:'numeric',month:'short'})}</p>`:''}</button>`).join('')}</div>`:'')
+ return(P.length?`<p class="mu xs sec">🎁 PROMOS PARA TI</p><div class="hs">${P.slice(0,8).map(({n,p})=>`<button class="promo" data-neg="${esc(n.slug)}" style="text-align:left;cursor:pointer"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b><span class="pill" style="background:${p.plus?'linear-gradient(135deg,#7c5cff,#c026d3)':'var(--a)'};color:#fff">${p.plus?'⭐ Xyro+':'Solo Mi Xyro'}</span></div><h3 style="font-size:17px">${esc(p.titulo)}</h3>${p.descripcion?`<p class="sm mu">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Hasta el ${fF(p.hasta,{day:'numeric',month:'short'})}</p>`:''}</button>`).join('')}</div>`:'')
   +(B.length?`<p class="mu xs sec">📢 NOVEDADES</p>${B.slice(0,4).map(({n,p})=>{const im=p.media&&p.mediaTipo!=='video'?medDe(n,p.media):'';return`<button class="card fd" data-neg="${esc(n.slug)}" style="padding:0;overflow:hidden">${im?`<img src="${esc(im)}" alt="" loading="lazy" onerror="this.remove()" style="width:100%;height:160px;object-fit:cover;display:block">`:''}<div style="padding:14px;display:grid;gap:4px"><div class="row">${lg(n)}<b class="xs sp">${esc(n.negocio)}</b>${p.tipo?`<span class="xs" style="font-weight:800;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}</div><h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}</div></button>`}).join('')}`:'')}
 /* ---------- Inicio premium: Xyro Card por nivel, resumen, beneficios y Xyro+ ---------- */
+const esPlus=()=>!!((D&&D.persona&&D.persona.plus)||(typeof PLI!=='undefined'&&PLI&&PLI.activo));
 const nivel=per=>!per?'n':per.rango==='owner'?'o':per.rango==='staff'?'s':per.fundador?'f':per.plus?'p':'n';
 function xCard(per){const t=nivel(per),xm=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
  const lab=t==='o'?'XYRO<small>OWNER · XYROSTUDIO</small>':t==='s'?'XYRO<small>STAFF · XYROSTUDIO</small>':t==='f'?'XYRO<small>FOUNDER EDITION</small>':t==='p'?'XYRO+<small>MEMBER</small>':'XYRO<small>MEMBER</small>';
@@ -658,15 +659,14 @@ function perksHTML(per){const t=nivel(per);
  const L=t==='o'?[['🛠️','Panel XyroStudio','Clientes, cobros y equipo'],['👥','Equipo','Crea cuentas staff'],['⭐','Xyro+','Altas y movimientos'],['📊','Métricas','Uso de Mi Xyro']]
   :t==='s'?[['🎧','Soporte','Chats y ayuda'],['🧾','Clientes','Atiende negocios'],['📲','App','Prueba lo nuevo primero']]
   :t==='f'?[['🏅','Insignia #'+String(per.fundador).padStart(3,'0'),'Tuya para siempre'],['✨','Carnet dorado','En todos tus negocios'],['@','@ corto','De 3 o 4 letras'],['⭐','Xyro+ gratis','3 meses al lanzar']]
-  :t==='p'?[['🎟️','Descuentos','En negocios Xyro'],['📈','Mi progreso','Peso, medidas y rachas'],['🤖','Coach IA','Rutinas y comidas'],['⚡','Pide sin cola','En cafeterías']]
+  :t==='p'?[['⚡','+50% de puntos','En cada compra'],['🎡','Ruleta a mitad','Giros más baratos'],['🎁','Promos exclusivas','Solo Xyro+'],['⭐','Reseñas x2','Tu opinión pesa el doble']]
   :[['🎁','Promos solo app','De tus negocios'],['📱','Tu QR','Entra sin carnet'],['📋','Rutinas y citas','Todo en un lugar']];
  return`<div class="tsec"><h3>${t==='o'?'Cuenta de dueño':t==='s'?'Cuenta del equipo':t==='f'?'Beneficios de fundador':t==='p'?'Tu Xyro+':'Tu cuenta'}</h3>${t==='o'||t==='s'?'<a class="mu sm" href="/gestor/" style="color:var(--a);font-weight:700">Abrir panel ›</a>':''}</div><div class="perks">${L.map(([i,b,x])=>`<div class="perk"><i>${i}</i><b>${esc(b)}</b><span>${esc(x)}</span></div>`).join('')}</div>`}
-function xPlusHTML(per){if(per&&(per.plus||per.rango))return'';return`<div class="xplus" style="margin-top:14px"><span class="tag">MUY PRONTO</span><h3>Xyro+</h3><p class="mu sm">Descuentos en todos los negocios Xyro, tu progreso con gráficos, coach con IA y pedidos sin cola.${per&&per.fundador?' <b style="color:#f3d68a">Como fundador, tendrás 3 meses gratis.</b>':''}</p></div>`}
 function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||[],av=avisos();
  feedCarga();
  const f0=post;post=()=>{f0&&f0();xCardFx();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
  const it=feed(),pr=promosFeed();
- return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
+ return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1${estC()?` style="color:${estC()}"`:''}>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
   ${per.idn?xCard(per):''}
   ${ptsHTML()}
   ${M.length?`<div class="qk">${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}<button class="qkb" data-scan>${I.scan}<span><b>Escanear</b><small>QR de un negocio</small></span></button></div>`:''}
@@ -847,7 +847,7 @@ function vNegocio(slug){const n=NEG[slug];
   ${citR(rub)?`<button class="btn" data-cons="${esc(slug)}">💬 Preguntar a ${lugW(rub)}${PEDS().some(p=>p.slug===slug&&p.tipo==='consulta'&&p.visto_persona===false)?' <span class="nvd"></span>':''}</button>`:''}
   ${rub==='restaurante'?`<div class="row"><a class="btn p sp" style="text-decoration:none" href="/pedir/?s=${encodeURIComponent(slug)}&de=mi">📖 Ver la carta</a>${!n.gratis&&String(n.whatsapp||'').replace(/\D/g,'').length>=9&&!(n.apagados||[]).includes('reservas')?`<button class="btn sp" data-resv="${esc(slug)}">📅 Reservar mesa</button>`:''}</div><p class="mu xs" style="text-align:center;margin-top:-4px">¿Ya estás en el local? Toca 📷 y escanea el QR de tu mesa para pedir.</p><div id="sel"></div>`:''}
   ${citR(rub)?'<div id="sel"></div>':''}
-  ${PR.length?`<h2>🎁 Promos por usar Mi Xyro</h2>${PR.map(p=>`<div class="promo"><span class="pill" style="background:var(--a);color:#fff;justify-self:start">Solo en Mi Xyro</span><h2>${esc(p.titulo)}</h2>${p.descripcion?`<p class="sm">${esc(p.descripcion)}</p>`:''}${p.hasta?`<p class="mu xs">Válido hasta el ${fF(p.hasta)}</p>`:''}<p class="mu xs">Muestra esta pantalla en ${citR(rub)?lugW(rub):rub==='restaurante'||(n.gratis&&n.rubro!=='gym')?'caja':'recepción'}.</p></div>`).join('')}`:''}
+  ${PR.length?`<h2>🎁 Promos por usar Mi Xyro</h2>${PR.map(p=>{const lk=p.plus&&!esPlus();return`<div class="promo"><span class="pill" style="background:${p.plus?'linear-gradient(135deg,#7c5cff,#c026d3)':'var(--a)'};color:#fff;justify-self:start">${p.plus?'⭐ Solo Xyro+':'Solo en Mi Xyro'}</span><h2>${esc(p.titulo)}</h2>${p.descripcion?`<p class="sm"${lk?' style="filter:blur(5px);user-select:none"':''}>${esc(p.descripcion)}</p>`:''}${lk?'<button class="btn p" data-xy="plus">⭐ Desbloquear con Xyro+</button>':''}${p.hasta?`<p class="mu xs">Válido hasta el ${fF(p.hasta)}</p>`:''}<p class="mu xs">Muestra esta pantalla en ${citR(rub)?lugW(rub):rub==='restaurante'||(n.gratis&&n.rubro!=='gym')?'caja':'recepción'}${p.plus?' con tu tarjeta Xyro+':''}.</p></div>`}).join('')}`:''}
   ${PB.length?`<h2>📢 Novedades</h2><div class="hs">${PB.map(p=>`<div class="card" style="padding:0;overflow:hidden">${p.media&&p.mediaTipo!=='video'?`<img src="${esc(media(p.media,rub))}" alt="" loading="lazy" onerror="this.remove()" style="width:100%;height:150px;object-fit:cover;display:block">`:''}<div style="padding:14px;display:grid;gap:4px">${p.tipo?`<span class="mu xs" style="font-weight:700;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}<h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}${p.fin?`<p class="mu xs">Hasta el ${fF(p.fin)}</p>`:''}</div></div>`).join('')}</div>`:''}
   ${PL.length?`<h2>${rub==='barberia'?'✂️ Servicios':rub==='consultorio'?'🦷 Tratamientos':'💪 Planes'}</h2><div class="hs">${PL.map(p=>`<div class="plan${p.destacado?' dest':''}">${p.destacado?'<span class="pill" style="background:var(--a);color:#fff;justify-self:start">⭐ Recomendado</span>':''}<h3>${esc(p.nombre)}</h3>
     ${+p.precio?(ev(p)?`<p class="mu sm" style="text-decoration:line-through">${money(p.precio)}</p><b class="pr" style="color:var(--a)">${money(p.precioEvento)}</b>${p.eventoTexto?`<p class="xs" style="color:var(--a)">${esc(p.eventoTexto)}</p>`:''}`:`<b class="pr">${citR(rub)?'<span class="mu sm">Desde </span>':''}${money(p.precio)}</b>`):''}
@@ -1078,13 +1078,14 @@ function vMiGr(){const g=G0();
  const logo=/^(https:|blob:)/.test(g.logo||'')?`<img src="${esc(g.logo)}" alt="">`:esc(rg[1]);
  return`<div class="g"><div class="row"><div class="av">${logo}</div><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">MI NEGOCIO · ${g.estado==='pago'?'PANEL COMPLETO':'PLAN GRATIS'}</p><h2>${esc(g.nombre)}</h2><span class="pill ${ec}">${et}</span></div></div>
   <p class="mu sm">${esc(g.estado==='suspendido'&&g.motivo?g.motivo:ed)}</p>
-  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
+  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${boostCardHTML(g.slug,g.nombre)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
   <div class="card"><div class="row"><div class="ibox">${I.store}</div><div class="sp"><h3>Tu perfil</h3><p class="mu sm">${lis===5?'✅ Completo. ¡Se ve muy bien!':lis+' de 5 listos · '+['logo','portada','descripción','dirección','horario'].filter((_,i)=>!ok[i]).join(', ')}</p></div></div>
    <button class="btn" id="gped">✏️ Editar perfil</button><button class="btn l" id="gver">Ver cómo lo ven tus clientes ›</button></div>
   <div class="card"><div class="row"><div class="ibox">${I.gift}</div><div class="sp"><h3>Promos por Mi Xyro</h3><p class="mu sm">${P.length} de ${GRMAX} · solo para quienes te tienen en Mi Xyro</p></div></div>
-   ${P.length?`<div>${P.map((p,i)=>`<button class="li" data-gpr="${i}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="dot">🎁</span><span class="sp"><b>${esc(p.titulo)}</b><br><span class="mu xs">${p.hasta?(p.hasta<hoyL()?'Venció el ':'Hasta el ')+fF(p.hasta,{day:'numeric',month:'long'}):'Sin fecha de fin'}</span></span><span class="mu">›</span></button>`).join('')}</div>`:''}
+   ${P.length?`<div>${P.map((p,i)=>`<button class="li" data-gpr="${i}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="dot">🎁</span><span class="sp"><b>${esc(p.titulo)}</b>${p.plus?' <span class="pill" style="background:#7c5cff33;color:#c4b5fd">Xyro+</span>':''}<br><span class="mu xs">${p.hasta?(p.hasta<hoyL()?'Venció el ':'Hasta el ')+fF(p.hasta,{day:'numeric',month:'long'}):'Sin fecha de fin'}</span></span><span class="mu">›</span></button>`).join('')}</div>`:''}
    ${P.length<GRMAX?'<button class="btn" id="gpn">＋ Nueva promo</button>':'<p class="mu xs">Llegaste a 3 promos. Con el panel completo publicas más.</p>'}</div>
   ${gcHTML(g)}
+  ${g.estado==='activo'?boostCardHTML(g.slug,g.nombre):''}
   <div class="card" style="justify-items:center;text-align:center"><h3>QR para que te guarden</h3><div id="gqr" style="background:#fff;padding:12px;border-radius:18px;width:210px;aspect-ratio:1"></div>
    <p class="mu xs" style="max-width:300px">Ponlo en tu caja o mostrador: al escanearlo, tus clientes te guardan en Mi Xyro y ven tus promos.</p>
    <p class="sm"><b>${g.seguidores||0}</b> ${(g.seguidores|0)===1?'persona te guardó':'personas te guardaron'}</p><button class="btn" id="gsh" style="width:100%">Compartir mi enlace</button></div>
@@ -1136,12 +1137,13 @@ function grPromo(g,i){const L=(g.promos||[]).slice(),p=i!=null?L[i]:null;
   <label>Título<input id="pt" maxlength="80" value="${esc(p&&p.titulo||'')}" placeholder="Ej. 2x1 en cafés por Mi Xyro"></label>
   <label>Detalle<textarea id="pd" rows="3" maxlength="300" placeholder="Ej. Muestra Mi Xyro al pagar. De lunes a jueves.">${esc(p&&p.descripcion||'')}</textarea></label>
   <label>Válida hasta <span class="mu xs">(opcional)</span><input id="ph" type="date" value="${esc(p&&p.hasta||'')}"></label>
+  <label class="row" style="gap:10px;cursor:pointer"><input id="pplus" type="checkbox" style="width:22px;height:22px;flex:none"${p&&p.plus?' checked':''}><span class="sp sm">⭐ Solo para Xyro+ <span class="mu xs">(la ven todos, pero solo la usa quien muestra su tarjeta Xyro+)</span></span></label>
   <div class="msg" id="pm"></div><button class="btn p" id="ps">Publicar en Mi Xyro</button>${p?'<button class="btn" id="px" style="color:var(--ko)">🗑️ Quitar promo</button>':''}<button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
   const q=s=>o.querySelector(s),say=t=>{const m=q('#pm');m.textContent=t;m.className='msg on'};
   const go=async(N,msg)=>{try{await grGuardar(g,{promos:N});delete NEG[g.slug];close();pinta();toast(msg)}catch(e){say(errDe(e))}};
   q('#px')&&(q('#px').onclick=()=>{L.splice(i,1);go(L,'Promo quitada')});
   q('#ps').onclick=()=>{const t=q('#pt').value.trim();if(t.length<2)return say('Escribe un título.');
-   const o2={titulo:t,descripcion:q('#pd').value.trim(),hasta:q('#ph').value||''};if(p)L[i]=o2;else L.unshift(o2);go(L.slice(0,GRMAX),'🎁 Promo publicada')}})}
+   const o2={titulo:t,descripcion:q('#pd').value.trim(),hasta:q('#ph').value||'',plus:q('#pplus').checked};if(p)L[i]=o2;else L.unshift(o2);go(L.slice(0,GRMAX),'🎁 Promo publicada')}})}
 // ---------- Plan Gratis de cafeterías y restaurantes (SQL 73): 1 mesa con QR, carta de 3 productos y Yape sin ir a caja ----------
 let GC=null,GCN=false,GCT=0,GCK='';const GPMAX=3,grResto=g=>g&&(g.rubro==='restaurante'||g.rubro==='cafeteria');
 const grMesaURL=g=>location.origin+'/pedir/?s='+encodeURIComponent(g.slug)+'&m=1';
@@ -1714,54 +1716,111 @@ function exLista(){const L=EX.items;
 function exBind(){const r=$('#exr');r&&(r.onclick=()=>{EX.items=null;exCarga();pinta()});const m=$('#exmas');m&&(m.onclick=()=>exCarga(true));
  const iv=$('#exinv');iv&&(iv.onclick=exInvitar);
  app.querySelectorAll('#exl [data-neg]').forEach(b=>b.onclick=()=>abrirNeg(b.dataset.neg));app.querySelectorAll('#exl [data-pro]').forEach(b=>b.onclick=()=>abrirPro(b.dataset.pro))}
-/* ---------- Mapa de negocios (SQL 84, xa_mapa): Leaflet + OpenStreetMap con filtro oscuro, sin API de pago ---------- */
+/* ---------- Mapa de negocios (SQL 84/88, xa_mapa): estilo Google Maps. Mapa claro de OpenStreetMap SIN filtro (el filtro oscuro hacía lento el celular),
+   Leaflet precargado, caché por zona, búsqueda por nombre y lista de lugares abajo ---------- */
 const MAPC={gym:'🏋️',cafeteria:'☕',restaurante:'🍽️',barberia:'💈',consultorio:'🦷',otro:'🏪'};
-const MP={cat:'',top:false,geo:null,map:null,capa:null,t:0,sel:null,items:[]};
-async function mapaLib(){if(window.L)return;const c=document.createElement('link');c.rel='stylesheet';c.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';document.head.appendChild(c);await js('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js')}
+const MAPK={gym:'#7c5cff',cafeteria:'#b45309',restaurante:'#e11d48',barberia:'#0891b2',consultorio:'#0ea5e9',otro:'#475569'};
+const MP={cat:'',top:false,geo:null,map:null,capa:null,t:0,items:[],mk:{},caja:null,key:'',seq:0,qs:0,qt:0,abierta:false};
+try{const g=JSON.parse(ls.g('mi-geo')||'null');if(g&&g.lat)MP.geo=g}catch(_){}
+let MPL=null;
+function mapaLib(){if(window.L)return Promise.resolve();if(MPL)return MPL;
+ const c=document.createElement('link');c.rel='stylesheet';c.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';document.head.appendChild(c);
+ const pc=document.createElement('link');pc.rel='preconnect';pc.href='https://tile.openstreetmap.org';pc.crossOrigin='';document.head.appendChild(pc);
+ MPL=js('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js').catch(e=>{MPL=null;throw e});return MPL}
+function mapaPre(){const f=()=>mapaLib().catch(()=>{});window.requestIdleCallback?requestIdleCallback(f,{timeout:2500}):setTimeout(f,1200)}
 async function mapaAbrir(){vib();
  const ov=document.createElement('div');ov.className='mapov';ov.innerHTML=`<div id="mapa"></div>
-  <div class="maptop"><button class="mapb" id="mpx" aria-label="Volver">‹</button><div class="hs mapch">${CATS.filter(c=>c[0]!=='entrenadores').map(([k,i,t])=>`<button class="chip${MP.cat===k?' on':''}" data-mc="${k}">${i} ${t}</button>`).join('')}<button class="chip${MP.top?' on':''}" id="mptop">⭐ 4.5+</button></div></div>
-  <button class="mapb mapyo" id="mpyo" aria-label="Mi ubicación">◎</button><div class="mapcard" id="mpc" hidden></div><div class="mapmsg" id="mpm" hidden></div>`;
+  <div class="maptop"><div class="mapsr"><button class="mapi" id="mpx" aria-label="Volver">‹</button><input id="mpq" type="search" placeholder="Buscar negocios en Xyro" autocomplete="off" enterkeyhint="search"><button class="mapi" id="mpqx" aria-label="Borrar" hidden>✕</button></div>
+   <div class="mapres" id="mpr" hidden></div>
+   <div class="mapch">${CATS.filter(c=>c[0]!=='entrenadores').map(([k,i,t])=>`<button class="mchip${MP.cat===k?' on':''}" data-mc="${k}">${i} ${t}</button>`).join('')}<button class="mchip${MP.top?' on':''}" id="mptop">⭐ 4.5+</button></div></div>
+  <button class="mapfab" id="mpyo" aria-label="Mi ubicación"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+  <div class="mapsheet" id="mps"><button class="mapgrip" id="mpg" aria-label="Ver lista"><i></i><b id="mpn">Buscando lugares…</b><span id="mpa">▴</span></button><div class="maplist" id="mpl"></div></div>
+  <div class="mapcard" id="mpc" hidden></div>`;
  document.body.appendChild(ov);history.pushState({mapa:1},'');
- const cerrar=()=>{if(MP.map){MP.map.remove();MP.map=null}ov.remove();window.removeEventListener('popstate',pop)};const pop=()=>cerrar();window.addEventListener('popstate',pop);
+ const cerrar=()=>{if(MP.map){MP.map.remove();MP.map=null;MP.mk={};MP.caja=null}ov.remove();window.removeEventListener('popstate',pop)};const pop=()=>cerrar();window.addEventListener('popstate',pop);
  ov.querySelector('#mpx').onclick=()=>history.back();
  try{await mapaLib()}catch(_){toast('No se pudo cargar el mapa. Revisa tu internet.');return history.back()}
+ if(!document.body.contains(ov))return;
  const g=MP.geo||EX.geo;
- MP.map=L.map('mapa',{zoomControl:false,attributionControl:true}).setView(g?[g.lat,g.lng]:[-12.08,-77.03],g?14:12);
- L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(MP.map);
- MP.capa=L.layerGroup().addTo(MP.map);
- MP.map.on('moveend',()=>{clearTimeout(MP.t);MP.t=setTimeout(mapaCarga,350)});MP.map.on('click',()=>{const c=$('#mpc');c&&(c.hidden=true)});
- ov.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{vib();MP.cat=b.dataset.mc;ov.querySelectorAll('[data-mc]').forEach(x=>x.classList.toggle('on',x===b));mapaCarga()});
- ov.querySelector('#mptop').onclick=e=>{vib();MP.top=!MP.top;e.currentTarget.classList.toggle('on',MP.top);mapaCarga()};
+ MP.map=L.map('mapa',{zoomControl:false,attributionControl:true,preferCanvas:true,zoomSnap:.5,wheelPxPerZoomLevel:90}).setView(g?[g.lat,g.lng]:[-12.08,-77.03],g?13.5:12);
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:4,updateWhenZooming:false,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(MP.map);
+ MP.capa=L.layerGroup().addTo(MP.map);if(g)mapaYoPunto();
+ MP.map.on('moveend',()=>{clearTimeout(MP.t);MP.t=setTimeout(()=>mapaCarga(),220)});
+ MP.map.on('click',()=>{$('#mpc').hidden=true;$('#mpr').hidden=true;mapaHoja(false)});
+ MP.map.on('movestart',()=>{$('#mpr').hidden=true});
+ ov.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{vib();MP.cat=b.dataset.mc;ov.querySelectorAll('[data-mc]').forEach(x=>x.classList.toggle('on',x===b));mapaCarga(true)});
+ ov.querySelector('#mptop').onclick=e=>{vib();MP.top=!MP.top;e.currentTarget.classList.toggle('on',MP.top);mapaCarga(true)};
  ov.querySelector('#mpyo').onclick=()=>mapaYo(true);
- mapaCarga();if(!g)mapaYo(false)}
+ ov.querySelector('#mpg').onclick=()=>mapaHoja(!MP.abierta);
+ const qi=ov.querySelector('#mpq'),qx=ov.querySelector('#mpqx');
+ qi.oninput=()=>{qx.hidden=!qi.value;clearTimeout(MP.qt);MP.qt=setTimeout(()=>mapaBuscar(qi.value),260)};
+ qi.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const f=$('#mpr [data-ms]');f?f.click():mapaBuscar(qi.value)}};
+ qi.onfocus=()=>{if(qi.value)mapaBuscar(qi.value)};
+ qx.onclick=()=>{qi.value='';qx.hidden=true;$('#mpr').hidden=true;qi.focus()};
+ mapaCarga(true);if(!g)mapaYo(false)}
+function mapaHoja(on){MP.abierta=on;const s=$('#mps');if(!s)return;s.classList.toggle('on',on);$('#mpa').textContent=on?'▾':'▴';if(on){$('#mpc').hidden=true;mapaLista()}}
+function mapaYoPunto(){if(!MP.map||!MP.geo)return;MP.yo&&MP.yo.remove();MP.yo=L.circleMarker([MP.geo.lat,MP.geo.lng],{radius:8,color:'#fff',weight:3,fillColor:'#1a73e8',fillOpacity:1}).addTo(MP.map)}
 function mapaYo(avisar){if(!navigator.geolocation)return avisar&&toast('Tu equipo no comparte la ubicación.');
- navigator.geolocation.getCurrentPosition(p=>{MP.geo={lat:p.coords.latitude,lng:p.coords.longitude};if(!MP.map)return;MP.map.setView([MP.geo.lat,MP.geo.lng],14);
-  MP.yo&&MP.yo.remove();MP.yo=L.circleMarker([MP.geo.lat,MP.geo.lng],{radius:8,color:'#fff',weight:3,fillColor:'#7c5cff',fillOpacity:1}).addTo(MP.map)},
+ navigator.geolocation.getCurrentPosition(p=>{MP.geo={lat:+p.coords.latitude.toFixed(4),lng:+p.coords.longitude.toFixed(4)};ls.s('mi-geo',JSON.stringify(MP.geo));if(!MP.map)return;MP.map.setView([MP.geo.lat,MP.geo.lng],avisar?15:Math.max(MP.map.getZoom(),13.5));mapaYoPunto()},
   ()=>avisar&&toast('Activa el permiso de ubicación para ver lo que está cerca.'),{timeout:12000,maximumAge:3e5})}
-async function mapaCarga(){if(!MP.map)return;const b=MP.map.getBounds(),m=$('#mpm');
- try{const r=await rpc('xa_mapa',{p:{s:b.getSouth(),n:b.getNorth(),w:b.getWest(),e:b.getEast(),cat:MP.cat,top:MP.top}});MP.items=(r&&r.items)||[]}catch(e){MP.items=[];m&&(m.hidden=false,m.textContent=errDe(e));return}
- if(!MP.map)return;MP.capa.clearLayers();
- MP.items.forEach(x=>{const ic=L.divIcon({className:'',html:`<div class="pin${x.dest?' dst':''}"><span>${MAPC[x.cat]||'🏪'}</span></div>`,iconSize:[40,46],iconAnchor:[20,44]});
-  L.marker([x.lat,x.lng],{icon:ic,title:x.nombre}).addTo(MP.capa).on('click',()=>mapaCard(x))});
- m&&(m.hidden=!!MP.items.length,m.textContent='Aún no hay negocios Xyro en esta zona. Aleja el mapa o invita a uno.')}
-function mapaCard(x){vib();const c=$('#mpc');if(!c)return;const img=logoURL(x.logo),g=MP.geo,km=g?xaKm(g.lat,g.lng,x.lat,x.lng):null;
- c.innerHTML=`<div class="row"><span class="exi">${img?`<img src="${esc(img)}" alt="" onerror="this.remove()">`:MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b>${esc(x.nombre)}</b>${x.dest?' <span class="pill dst">Destacado</span>':''}<br>${estr(x.prom,x.n)}<br>
-  <span class="mu xs">${x.dir?'📍 '+esc(x.dir):''}${km!=null?` · ${km<1?Math.round(km*1000)+' m':km.toFixed(1)+' km'}`:''}</span>${+x.promos?` <span class="pill gft">🎁 ${x.promos} promo${x.promos>1?'s':''}</span>`:''}</span></div>
-  <div class="row"><button class="btn p sp" id="mpv">Ver negocio</button><a class="btn sp" style="text-decoration:none;color:var(--tx)" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}">🧭 Cómo llegar</a></div>`;
- c.hidden=false;c.querySelector('#mpv').onclick=()=>{history.back();setTimeout(()=>abrirNeg(x.slug),60)}}
+function mapaIco(x){const c=MAPK[x.cat]||MAPK.otro;return L.divIcon({className:'',html:`<div class="pin${x.dest?' dst':''}" style="--pc:${x.dest?'#f59e0b':c}"><span>${MAPC[x.cat]||'🏪'}</span></div>`,iconSize:[34,40],iconAnchor:[17,38]})}
+async function mapaCarga(force){if(!MP.map)return;const b=MP.map.getBounds(),k=MP.cat+'|'+(MP.top?1:0);
+ if(!force&&MP.caja&&MP.key===k&&MP.caja.contains(b)){mapaLista();return}
+ const pb=b.pad(.6),s=++MP.seq;mapaMsg('');
+ try{const r=await rpc('xa_mapa',{p:{s:pb.getSouth(),n:pb.getNorth(),w:pb.getWest(),e:pb.getEast(),cat:MP.cat,top:MP.top}});if(s!==MP.seq||!MP.map)return;
+  MP.items=(r&&r.items)||[];MP.caja=MP.items.length>=300?b:pb;MP.key=k}catch(e){if(s===MP.seq)mapaMsg(errDe(e));return}
+ mapaPinta()}
+function mapaPinta(){const ids=new Set();
+ MP.items.forEach(x=>{ids.add(x.slug);if(!MP.mk[x.slug])MP.mk[x.slug]=L.marker([x.lat,x.lng],{icon:mapaIco(x),title:x.nombre,riseOnHover:true,zIndexOffset:x.dest?500:0}).on('click',()=>mapaCard(x)).addTo(MP.capa)});
+ Object.keys(MP.mk).forEach(k=>{if(!ids.has(k)){MP.capa.removeLayer(MP.mk[k]);delete MP.mk[k]}});mapaLista()}
+function mapaMsg(t){const n=$('#mpn');n&&t&&(n.textContent=t)}
+function mapaKm(x){const g=MP.geo;if(!g)return'';const k=xaKm(g.lat,g.lng,x.lat,x.lng);return k<1?Math.round(k*1000)+' m':k.toFixed(1)+' km'}
+function mapaVis(){if(!MP.map)return[];const b=MP.map.getBounds(),c=MP.geo||MP.map.getCenter();
+ return MP.items.filter(x=>b.contains([x.lat,x.lng])).map(x=>({x,d:xaKm(c.lat,c.lng,x.lat,x.lng)})).sort((a,z)=>(z.x.dest?1:0)-(a.x.dest?1:0)||a.d-z.d).map(o=>o.x)}
+function mapaFila(x){return`<button class="mrow" data-ms="${esc(x.slug)}"><span class="mico" style="--pc:${MAPK[x.cat]||MAPK.otro}">${MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b>${esc(x.nombre)}</b>${x.boost?' <span class="mtag">⚡ Destacado</span>':''}<br><span class="mmu">${x.n?`<b class="mst">★ ${(+x.prom).toFixed(1)}</b> (${x.n}) · `:''}${esc((CATS.find(c=>c[0]===x.cat)||[,,'Negocio'])[2].replace(/s$/,''))}${x.dir?' · '+esc(x.dir):''}</span>${+x.promos?`<br><span class="mgft">🎁 ${x.promos} promo${x.promos>1?'s':''} por Mi Xyro</span>`:''}</span><span class="mmu">${mapaKm(x)}</span></button>`}
+function mapaLista(){const V=mapaVis(),n=$('#mpn'),l=$('#mpl');if(!n)return;
+ n.textContent=V.length?`${V.length} lugar${V.length>1?'es':''} en esta zona`:'Aún no hay negocios Xyro aquí';
+ if(!MP.abierta||!l)return;
+ l.innerHTML=V.length?V.slice(0,60).map(mapaFila).join(''):`<p class="mmu" style="padding:8px 4px">Aleja el mapa o busca por nombre. ¿Conoces uno? Invítalo: registrarse es gratis.</p>`;
+ l.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=MP.items.find(i=>i.slug===b.dataset.ms);x&&mapaIr(x)})}
+function mapaIr(x){mapaHoja(false);$('#mpr').hidden=true;if(!MP.items.some(i=>i.slug===x.slug)){MP.items.push(x);mapaPinta()}
+ MP.map.setView([x.lat,x.lng],Math.max(MP.map.getZoom(),16));setTimeout(()=>mapaCard(x),80)}
+async function mapaBuscar(t){t=String(t||'').trim();const r=$('#mpr');if(!r)return;if(t.length<2){r.hidden=true;return}
+ const s=++MP.qs;r.hidden=false;r.innerHTML='<p class="mmu" style="padding:12px">Buscando…</p>';
+ const loc=MP.items.filter(x=>x.nombre.toLowerCase().includes(t.toLowerCase()));
+ let L2=[];try{const q=await rpc('xa_mapa',{p:{q:t,cat:MP.cat}});L2=(q&&q.items)||[]}catch(_){}
+ if(s!==MP.qs)return;const vis=new Set(),R=[...loc,...L2].filter(x=>!vis.has(x.slug)&&vis.add(x.slug)).slice(0,8);
+ r.innerHTML=R.length?R.map(mapaFila).join(''):`<p class="mmu" style="padding:12px">No encontramos «${esc(t)}». Prueba con otro nombre o distrito.</p>`;
+ r.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const x=R.find(i=>i.slug===b.dataset.ms);$('#mpq').blur();x&&mapaIr(x)})}
+function mapaCard(x){vib();const c=$('#mpc');if(!c)return;mapaHoja(false);const img=logoURL(x.logo),km=mapaKm(x);
+ c.innerHTML=`<div class="row"><span class="mico big" style="--pc:${MAPK[x.cat]||MAPK.otro}">${img?`<img src="${esc(img)}" alt="" onerror="this.remove()">`:MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b style="font-size:17px">${esc(x.nombre)}</b>${x.boost?' <span class="mtag">⚡ Destacado</span>':x.dest?' <span class="mtag">Destacado</span>':''}<br>
+  <span class="mmu">${x.n?`<b class="mst">★ ${(+x.prom).toFixed(1)}</b> (${x.n} reseña${x.n>1?'s':''})`:'✨ Nuevo en Xyro'}${km?' · '+km:''}</span><br><span class="mmu">${x.dir?'📍 '+esc(x.dir):''}</span>${+x.promos?`<br><span class="mgft">🎁 ${x.promos} promo${x.promos>1?'s':''} por Mi Xyro</span>`:''}</span><button class="mapi" id="mpcx" aria-label="Cerrar">✕</button></div>
+  <div class="row"><a class="mbtn p sp" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}">🧭 Cómo llegar</a><button class="mbtn sp" id="mpv">Ver negocio</button></div>`;
+ c.hidden=false;c.querySelector('#mpcx').onclick=()=>{c.hidden=true};c.querySelector('#mpv').onclick=()=>{history.back();setTimeout(()=>abrirNeg(x.slug),60)}}
 function xaKm(a,b,c,d){const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 12742*Math.asin(Math.sqrt(x))}
 (()=>{const st=document.createElement('style');st.textContent=`.mapbtn{position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;width:100%;padding:14px 16px;border-radius:18px;border:1px solid var(--ln);color:var(--tx);text-align:left;cursor:pointer;background:#10131f}
 .mapbg{position:absolute;inset:0;background:radial-gradient(circle at 80% 30%,#7c5cff55,transparent 45%),repeating-linear-gradient(35deg,#ffffff08 0 2px,transparent 2px 26px),repeating-linear-gradient(-55deg,#ffffff06 0 2px,transparent 2px 34px)}
-.mapov{position:fixed;inset:0;z-index:60;background:#0b0d16}#mapa{position:absolute;inset:0}
-.maptop{position:absolute;left:0;right:0;top:0;z-index:500;display:flex;gap:8px;align-items:center;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;background:linear-gradient(#0b0d16ee,#0b0d1600)}
-.mapch{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.mapch .chip{flex:0 0 auto;width:auto}.mapb{width:44px;height:44px;flex:0 0 44px;border-radius:14px;border:1px solid var(--ln);background:#151826;color:var(--tx);font-size:24px;cursor:pointer}
-.mapyo{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 24px);z-index:500;font-size:20px}
-.mapcard{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:500;display:grid;gap:12px;padding:14px;border-radius:20px;background:#151826;border:1px solid var(--ln);box-shadow:0 20px 50px #000a;max-width:520px;margin:0 auto}
-.mapmsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:500;background:#151826ee;border:1px solid var(--ln);padding:12px 16px;border-radius:14px;font-size:14px;max-width:80%;text-align:center}
-.pin{width:40px;height:40px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:linear-gradient(135deg,#7c5cff,#38bdf8);display:grid;place-items:center;box-shadow:0 6px 16px #0008;border:2px solid #fff}
-.pin span{transform:rotate(45deg);font-size:18px}.pin.dst{background:linear-gradient(135deg,#f5c542,#d4a017);width:46px;height:46px}
-.leaflet-container{background:#0b0d16;font:inherit}.leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) brightness(.85) contrast(.85) saturate(.6)}.leaflet-control-attribution{background:#0b0d16aa!important;color:#888!important;font-size:10px}.leaflet-control-attribution a{color:#aaa!important}`;document.head.appendChild(st)})();
+.mapov{position:fixed;inset:0;z-index:60;background:#e8eaed;color:#202124}#mapa{position:absolute;inset:0}
+.maptop{position:absolute;left:0;right:0;top:0;z-index:500;display:grid;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 12px 0;pointer-events:none}.maptop>*{pointer-events:auto}
+.mapsr{display:flex;align-items:center;gap:4px;height:48px;padding:0 4px;border-radius:24px;background:#fff;box-shadow:0 2px 6px #0003,0 1px 2px #0002;max-width:640px;width:100%;margin:0 auto}
+.mapsr input{flex:1;min-width:0;border:0;outline:0;background:none;font:inherit;font-size:16px;color:#202124;padding:0 4px;height:100%;box-shadow:none}.mapsr input::-webkit-search-cancel-button{display:none}
+.mapi{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:none;color:#5f6368;font-size:22px;cursor:pointer;display:grid;place-items:center}
+.mapres{max-width:640px;width:100%;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 4px 16px #0003;max-height:55vh;overflow:auto}
+.mapch{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px;max-width:640px;width:100%;margin:0 auto}.mapch::-webkit-scrollbar{display:none}
+.mchip{flex:0 0 auto;border:0;border-radius:18px;padding:8px 14px;background:#fff;color:#3c4043;font:inherit;font-size:14px;font-weight:600;box-shadow:0 1px 4px #0003;cursor:pointer;white-space:nowrap}.mchip.on{background:#1a73e8;color:#fff}
+.mapfab{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 84px);z-index:500;width:48px;height:48px;border:0;border-radius:50%;background:#fff;color:#1a73e8;box-shadow:0 2px 8px #0004;display:grid;place-items:center;cursor:pointer}
+.mapsheet{position:absolute;left:0;right:0;bottom:0;z-index:501;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -2px 12px #0003;padding:0 0 env(safe-area-inset-bottom);max-width:680px;margin:0 auto;transition:max-height .25s}
+.mapgrip{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px;width:100%;border:0;background:none;font:inherit;color:#202124;padding:10px 18px 14px;cursor:pointer;text-align:left}.mapgrip i{grid-column:1/-1;justify-self:center;width:36px;height:4px;border-radius:4px;background:#dadce0;margin-bottom:6px}.mapgrip b{font-size:15px}
+.maplist{display:none;max-height:52vh;overflow:auto;padding:0 10px 10px}.mapsheet.on .maplist{display:block}
+.mrow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid #f1f3f4;background:none;font:inherit;color:#202124;padding:12px 8px;cursor:pointer}.mrow:hover{background:#f8f9fa}
+.mico{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;font-size:19px;background:color-mix(in srgb,var(--pc) 16%,#fff);overflow:hidden}.mico.big{width:56px;height:56px;flex-basis:56px;border-radius:16px;font-size:26px}.mico img{width:100%;height:100%;object-fit:cover}
+.mmu{color:#5f6368;font-size:13px}.mst{color:#202124}.mst::first-letter{color:#f9ab00}.mtag{display:inline-block;font-size:11px;font-weight:800;color:#b06000;background:#fef7e0;border-radius:8px;padding:1px 7px;vertical-align:2px}.mgft{font-size:12px;font-weight:700;color:#188038}
+.mapcard{position:absolute;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:502;display:grid;gap:12px;padding:14px;border-radius:20px;background:#fff;color:#202124;box-shadow:0 6px 24px #0004;max-width:560px;margin:0 auto;animation:mup .2s ease}
+@keyframes mup{from{transform:translateY(20px);opacity:0}}
+.mbtn{display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid #dadce0;border-radius:20px;padding:10px 14px;background:#fff;color:#1a73e8;font:inherit;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}.mbtn.p{background:#1a73e8;border-color:#1a73e8;color:#fff}
+.pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--pc);display:grid;place-items:center;box-shadow:0 3px 8px #0005;border:2px solid #fff}
+.pin span{transform:rotate(45deg);font-size:15px}.pin.dst{width:40px;height:40px;margin:-6px 0 0 -3px}
+.leaflet-container{background:#e8eaed;font:inherit}.leaflet-control-attribution{font-size:10px}.mapov .leaflet-bottom.leaflet-right{bottom:auto;top:calc(env(safe-area-inset-top) + 112px)}`;document.head.appendChild(st)})();
 function exInvitar(){const u=location.origin+'/mi/?registro=1',t='Registra tu negocio gratis en Mi Xyro y aparece ante miles de personas: '+u;
  if(navigator.share)navigator.share({title:'Mi Xyro',text:t}).catch(()=>{});else{navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('📋 Enlace copiado'),()=>toast(u))}}
 function exGeo(){if(!navigator.geolocation){toast('Tu equipo no comparte la ubicación.');return}
@@ -1773,7 +1832,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
  const f0=post;post=()=>{f0&&f0();exBind();
   app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{vib();EX.cat=b.dataset.cat;ls.s('mi-excat',EX.cat);EX.items=null;pinta();const h=$('.exch .on');h&&h.scrollIntoView({inline:'center',block:'nearest'})});
   app.querySelectorAll('[data-ord]').forEach(b=>b.onclick=()=>{vib();const o=b.dataset.ord;if(o==='cerca'&&!EX.geo){EX.orden='cerca';return exGeo()}EX.orden=o;ls.s('mi-exord',o);EX.items=null;pinta()});
-  const mb=$('#exmap');mb&&(mb.onclick=mapaAbrir);
+  const mb=$('#exmap');mb&&(mb.onclick=mapaAbrir);mb&&mapaPre();
   const q=$('#exq');let tq;q&&(q.oninput=()=>{clearTimeout(tq);tq=setTimeout(()=>{EX.q=q.value.trim();EX.items=null;exCarga();const l=$('#exl');l&&(l.innerHTML=exLista())},450)});
   const lu=$('#exlu');lu&&(lu.onclick=()=>hoja(`<h2>📍 ¿Dónde buscas?</h2><p class="mu sm">Escribe un distrito, ciudad o país.</p><input id="lgi" maxlength="40" value="${esc(EX.lugar)}" placeholder="Ej. Miraflores, Bogotá, México"><button class="btn p" id="lgb">Buscar ahí</button>${EX.lugar?'<button class="btn" id="lgx">Ver todo el mundo 🌎</button>':''}`,(o,close)=>{
    const i=o.querySelector('#lgi');i.focus();const ir=v=>{EX.lugar=v;EX.items=null;close();pinta()};o.querySelector('#lgb').onclick=()=>ir(i.value.trim());i.onkeydown=e=>{if(e.key==='Enter')ir(i.value.trim())};const x=o.querySelector('#lgx');x&&(x.onclick=()=>ir(''))}))};
@@ -1961,12 +2020,12 @@ async function ptsCarga(fx){if(!D)return;try{if(!DEMO&&!PTSR){PTSR=1;try{await r
   app.querySelectorAll('[data-pts]').forEach(e=>{const k=e.dataset.pts;e.textContent=nfmt(PTS[k])})}catch(_){PTS=PTS||{global_points:0,local_points:0,business_points:0}}
  if(!PTSCH&&sb&&!DEMO&&D){try{const{data:{session}}=await sb.auth.getSession();const uid=session&&session.user.id;if(uid){PTSCH=sb.channel('mi-pts').on('postgres_changes',{event:'*',schema:'public',table:'points_ledger',filter:'user_id=eq.'+uid},()=>ptsCarga(true)).subscribe()}}catch(_){}}}
 setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB==='mipro'))ptsCarga(true)},30000);
-function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;ptsCarga().then(()=>{if(!document.querySelector('.ov'))pinta()})}
+function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga()]).then(()=>{if(!document.querySelector('.ov'))pinta()})}
  const P=PTS||{},biz=true; // siempre las 3 columnas (pedido del usuario 2026-11-18: que no aparezcan y desaparezcan)
  return`<div class="card"><div class="row"><b class="sp">⭐ Mis puntos Xyro</b><span class="pill" style="background:#7c5cff22;color:var(--a)">en vivo</span></div>
   <div class="kps ${biz?'k3':''}" style="${biz?'':'grid-template-columns:1fr 1fr'}"><div class="kp"><b data-pts="global_points">${nfmt(P.global_points)}</b><span class="mu xs">Globales</span></div><div class="kp"><b data-pts="local_points">${nfmt(P.local_points)}</b><span class="mu xs">Locales</span></div>${biz?`<div class="kp"><b data-pts="business_points">${nfmt(P.business_points)}</b><span class="mu xs">De tu negocio</span></div>`:''}</div>
   ${+P.pending>0?`<p class="sm">⏳ <b>${nfmt(P.pending)}</b> en espera: se liberan a los 7 días de tu compra.</p>`:''}
-  <p class="mu xs">Globales: úsalos en cualquier negocio Xyro. Locales: solo donde los ganaste. Sumas puntos cuando el negocio confirma tu pago.</p></div>`}
+  <p class="mu xs">Globales: úsalos en cualquier negocio Xyro. Locales: solo donde los ganaste. Sumas puntos cuando el negocio confirma tu pago.</p>${xJuegosHTML()}</div>`}
 let PTSR=0;
 function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'Xyro Points')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 (function(){const st=document.createElement('style');st.textContent='.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff;box-shadow:0 20px 60px #7c5cff66;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}.plan{display:grid;gap:4px;text-align:left;width:100%;cursor:pointer}.plan .row b{font-size:18px}.mpag{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14}.mpag .sp{min-width:0}';document.head.appendChild(st)})();
@@ -2021,6 +2080,123 @@ function proPlanHTML(p){const X=p.xyro||{},t=X.tier||(p.plus?'PRO':'FREE'),i=Mat
   ${sig?`<button class="btn p" id="mpp">Quiero ${sig[1]}</button><p class="mu xs">Se paga a XyroStudio y lo activamos el mismo día.</p>`:''}</div>`}
 
 // Demo (?demo=1): datos de ejemplo de Explorar y entrenadores
+/* ---------- Xyro+, ruleta, ranking, estilo del perfil y Boost por hora (SQL 88) ---------- */
+const FRM={aura:'linear-gradient(135deg,#7c5cff,#c026d3)',neon:'conic-gradient(#22d3ee,#a855f7,#ec4899,#22d3ee)',oro:'linear-gradient(135deg,#fff3c4,#d4a017,#f3d68a,#9a6b12)',fuego:'linear-gradient(160deg,#facc15,#f97316,#dc2626)',hielo:'linear-gradient(135deg,#e0f2fe,#7dd3fc,#3b82f6)',arcoiris:'conic-gradient(#ef4444,#f59e0b,#eab308,#22c55e,#06b6d4,#6366f1,#d946ef,#ef4444)'};
+let XST=null,XR=null,PLI=null,XEC=0;
+async function xEstCarga(){if(!D||XEC)return;XEC=1;
+ await Promise.all([rpc('xy_estilo').then(r=>XST=r).catch(()=>{}),rpc('xy_ruleta_estado').then(r=>XR=r).catch(()=>{}),rpc('xy_plus_info').then(r=>PLI=r).catch(()=>{})])}
+const estF=()=>{const a=XST&&XST.actual;if(!a||!a.frame||!FRM[a.frame])return'';const C=(XST.catalogo||{}),ok=(XST.mios||[]).includes('frame:'+a.frame)||(XST.plus&&(C.plus||[]).includes(a.frame));return ok?a.frame:''};
+const estC=()=>{const a=XST&&XST.actual;if(!a||!a.color||!XST.plus)return'';return((XST.catalogo||{}).colors||{})[a.color]||''};
+const avMarco=(h,f,cl)=>f&&FRM[f]?`<span class="avf${f==='neon'||f==='arcoiris'?' gira':''}${cl?' '+cl:''}" style="--fr:${FRM[f]}">${h}</span>`:h;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-xy]');if(!b)return;const k=b.dataset.xy;
+ if(k==='ruleta')ruletaAbrir();else if(k==='ranking')rankAbrir();else if(k==='plus')plusAbrir();else if(k==='estilo')estiloAbrir();else if(k==='boost')boostAbrir(b.dataset.slug,b.dataset.nom)});
+function xJuegosHTML(){const g=XR?+XR.giros||0:0;
+ return`<div class="row" style="gap:8px"><button class="btn sp" data-xy="ruleta">🎡 Ruleta${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button><button class="btn sp" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo" aria-label="Mi estilo" style="flex:0 0 52px">🎨</button></div>`}
+const PLB=[['⚡','+50% de puntos','En cada compra con Xyro'],['🎡','Ruleta a mitad','Giros más baratos'],['🎨','Tu perfil único','Marcos y colores'],['🎁','Promos exclusivas','Solo para Xyro+'],['⭐','Reseñas x2','Tu opinión pesa el doble'],['🏆','Destaca','Insignia en el ranking']];
+function xPlusHTML(per){const on=per&&(per.plus||(PLI&&PLI.activo));
+ if(on)return`<div class="xplus on" style="margin-top:14px"><span class="tag">ACTIVO</span><h3>Eres Xyro+ ⭐</h3><p class="mu sm">${PLI&&PLI.hasta?'Hasta el '+fF(PLI.hasta,{day:'numeric',month:'long'})+'. ':''}Ganas 50% más puntos, la ruleta te cuesta la mitad y tus reseñas pesan el doble.</p><div class="row" style="gap:8px"><button class="btn sp" data-xy="estilo">🎨 Mi estilo</button><button class="btn sp" data-xy="plus">Renovar</button></div></div>`;
+ return`<div class="xplus" style="margin-top:14px"><span class="tag">NUEVO</span><h3>Xyro+</h3><p class="mu sm">Gana <b>50% más puntos</b> en cada compra, ruleta a mitad de precio, marcos y colores para tu perfil, promos exclusivas y reseñas que pesan el doble.${per&&per.fundador?' <b style="color:#f3d68a">Como fundador, tienes 3 meses gratis: pídelos aquí.</b>':''}</p><button class="btn p" data-xy="plus">⭐ Hazte Xyro+${PLI&&PLI.precio?' · '+moneyX(PLI.precio,PLI.moneda)+' al mes':''}</button></div>`}
+async function plusAbrir(){vib();if(!D)return toast('Entra a tu cuenta');let I2;try{I2=PLI=await rpc('xy_plus_info')}catch(e){return toast(errDe(e))}
+ const per=(D&&D.persona)||{};
+ hoja(`<div style="text-align:center;display:grid;gap:4px;justify-items:center"><span class="pill" style="background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff">XYRO+</span><h2>Más puntos en cada compra</h2>
+  <p><b style="font-size:34px">${moneyX(I2.precio,I2.moneda)}</b> <span class="mu">al mes</span></p>${I2.moneda!=='USD'?`<p class="mu xs">US$ ${(+I2.usd).toFixed(0)} en tu moneda</p>`:''}${+I2.descuento?`<p class="sm" style="color:#86efac">🎉 Incluye ${Math.round(I2.descuento*100)}% de descuento que ganaste en la ruleta</p>`:''}</div>
+  <div class="perks">${PLB.map(([i,b,x])=>`<div class="perk"><i>${i}</i><b>${esc(b)}</b><span>${esc(x)}</span></div>`).join('')}</div>
+  ${I2.activo?`<p class="sm">✅ Lo tienes hasta el ${fF(I2.hasta,{day:'numeric',month:'long'})}. Si renuevas, se suma un mes.</p>`:''}
+  ${I2.pendiente?'<div class="card"><p class="sm">⏳ Ya lo pediste. Lo activamos apenas confirmemos tu pago.</p></div>':`<p class="mu sm">Te enviamos por WhatsApp los datos para pagar (Yape, Plin, transferencia o el medio de tu país). Al confirmar tu pago se activa.</p>
+  <label>Nº de operación <span class="mu xs">(si ya pagaste)</span><input id="xpr" maxlength="40" inputmode="numeric"></label>`}
+  <div class="msg" id="xpm"></div><button class="btn p" id="xpg">${I2.pendiente?'Escribir por WhatsApp':'⭐ Quiero Xyro+'}</button><button class="btn l" data-x>Ahora no</button>`,(o,close)=>{
+  o.querySelector('#xpg').onclick=async()=>{const ri=o.querySelector('#xpr'),ref=ri?ri.value.trim():'';let r=null;
+   if(!I2.pendiente){try{r=await rpc('xy_plus_pedir',{p_ref:ref||null})}catch(e){const m=o.querySelector('#xpm');m.textContent=errDe(e);m.className='msg on';return}}
+   const t=`Hola XyroStudio, quiero Xyro+ (${moneyX((r&&r.precio)||I2.precio,(r&&r.moneda)||I2.moneda)} al mes). Mi ID: ${idTxt(per.idn)}${ref?' · Nº de operación: '+ref:''}${per.fundador?' · Soy fundador #'+per.fundador:''}`;
+   window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent(t),'_blank','noopener');PLI=null;XEC=0;close();toast('Listo. Te confirmamos por WhatsApp')}})}
+const rulLab=p=>p.tipo==='pts'?'+'+p.valor:p.tipo==='mult'?'x'+p.valor:p.tipo==='frame'?'🖼️':p.tipo==='plus_day'?'⭐ 1d':p.tipo==='plus_disc'?'-'+Math.round(p.valor*100)+'%':'🎁';
+async function ruletaAbrir(){vib();if(!D)return toast('Entra a tu cuenta');try{XR=await rpc('xy_ruleta_estado')}catch(e){return toast(errDe(e))}
+ const P=XR.premios||[],n=P.length||1,seg=360/n;let rot=0,gira=false;
+ const bg=`conic-gradient(${P.map((_,i)=>`${['#7c5cff','#231f45','#c026d3','#1b2240'][i%4]} ${(i*seg).toFixed(2)}deg ${((i+1)*seg).toFixed(2)}deg`).join(',')})`;
+ hoja(`<h2>🎡 Ruleta Xyro</h2><p class="mu sm">Ganas 1 giro con cada compra que te da puntos globales (vence en 30 días). Sin giros, cómpralo con tus puntos globales.</p>
+  <div class="rul"><div class="rulw" id="rw" style="background:${bg}">${P.map((p,i)=>`<span style="transform:rotate(${(i*seg+seg/2).toFixed(2)}deg)"><b>${esc(rulLab(p))}</b></span>`).join('')}</div><i class="rulp"></i><button class="rulc" id="rg" aria-label="Girar">GIRAR</button></div>
+  <div class="rulr" id="rr" hidden></div><p class="sm" id="ri" style="text-align:center"></p><div class="msg" id="rm"></div>
+  <button class="btn p" id="rgo"></button><p class="mu xs" style="text-align:center">Premios: puntos globales, más % en tu próxima compra, marcos para tu perfil, días y descuentos de Xyro+.</p><button class="btn l" data-x>Cerrar</button>`,(o)=>{
+  const q=s=>o.querySelector(s),pon=()=>{const g=+XR.giros||0;q('#ri').innerHTML=g?`Tienes <b>${g}</b> giro${g>1?'s':''}`:`No tienes giros · cuesta <b>${XR.costo}</b> puntos globales${XR.plus?' (precio Xyro+)':''}`;
+   q('#rgo').textContent=g?'🎡 Girar':'Comprar giro · '+XR.costo+' pts';q('#rgo').disabled=gira};
+  pon();
+  const go=async()=>{if(gira)return;gira=true;pon();const m=q('#rm');m.className='msg';q('#rr').hidden=true;let r;
+   try{r=await rpc('xy_ruleta_girar',{p_comprar:!(+XR.giros>0)})}catch(e){gira=false;pon();m.textContent=errDe(e);m.className='msg on';return}
+   const pr=r.premio||{},idx=pr.idx>=0?pr.idx:0,obj=(360-(idx*seg+seg/2)+(Math.random()-.5)*seg*.6+360)%360;
+   rot=rot+360*6+((obj-rot%360)+360)%360;const w=q('#rw');w.style.transform=`rotate(${rot}deg)`;vib();
+   setTimeout(()=>{gira=false;XR.giros=r.giros;pon();const rr=q('#rr');rr.innerHTML=`<b>🎉 ${esc(pr.texto||'¡Premio!')}</b>`;rr.hidden=false;confeti();vib();
+    if(pr.tipo==='frame'||pr.tipo==='plus_day'){XEC=0;xEstCarga()}ptsCarga(false)},4300)};
+  q('#rg').onclick=go;q('#rgo').onclick=go})}
+const RKC=[['','Todo'],['gym','🏋️ Gimnasios'],['cafeteria','☕ Cafeterías'],['restaurante','🍽️ Restaurantes'],['barberia','💈 Barberías'],['consultorio','🦷 Consultorios']];
+function rkFila(x){const md=x.pos===1?'🥇':x.pos===2?'🥈':x.pos===3?'🥉':'#'+x.pos,cs=x.color&&x.plus&&XST&&XST.catalogo&&XST.catalogo.colors?XST.catalogo.colors[x.color]:'';
+ const av=`<div class="av rk">${/^https:/.test(x.foto||'')?`<img src="${esc(x.foto)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:esc((String(x.nombre||'?')[0]||'?').toUpperCase())}</div>`;
+ return`<div class="rkr${x.yo?' yo':''}"><span class="rkp">${md}</span>${avMarco(av,x.marco&&FRM[x.marco]?x.marco:'','sm')}<span class="sp" style="min-width:0"><b style="${cs?'color:'+cs:''}">${esc(x.nombre)}</b>${x.plus?' <span class="pill" style="background:#7c5cff33;color:#c4b5fd">XYRO+</span>':''}${x.yo?' <span class="mu xs">(tú)</span>':''}<br><span class="mu xs">${x.usuario?'@'+esc(x.usuario)+' · ':''}Nivel ${esc(String(x.nivel||'').toLowerCase())}</span></span><b>${nfmt(x.pts)}</b></div>`}
+async function rankAbrir(){vib();let per='mes',cat='';
+ hoja(`<h2>🏆 Ranking Xyro</h2><p class="mu sm">Quienes más puntos globales ganaron comprando con Xyro.</p>
+  <div class="row" style="gap:6px"><button class="chip on" data-rp="mes">Este mes</button><button class="chip" data-rp="siempre">Siempre</button></div>
+  <div class="hs" style="gap:6px">${RKC.map(([k,t])=>`<button class="chip${k?'':' on'}" data-rc="${k}" style="flex:0 0 auto;width:auto">${t}</button>`).join('')}</div>
+  <div id="rky"></div><div id="rkl" class="g" style="gap:6px"></div><button class="btn l" data-x>Cerrar</button>`,(o)=>{
+  const carga=async()=>{const l=o.querySelector('#rkl'),y=o.querySelector('#rky');l.innerHTML='<div class="exsk"></div><div class="exsk"></div>';
+   try{const r=await rpc('xy_ranking',{p_periodo:per,p_cat:cat||null,p_limit:50}),T=r.top||[];
+    y.innerHTML=r.yo?`<div class="card" style="padding:12px"><p class="sm">Tu puesto: <b>#${r.yo.pos}</b> con <b>${nfmt(r.yo.pts)}</b> puntos</p></div>`:'<p class="mu sm">Compra con Xyro en tus negocios favoritos para entrar al ranking.</p>';
+    l.innerHTML=T.length?T.map(rkFila).join(''):'<div class="card vacio"><span class="e">🏆</span><p class="mu sm">Aún nadie suma puntos aquí. ¡Sé el primero!</p></div>'}catch(e){l.innerHTML=`<p class="mu sm">${esc(errDe(e))}</p>`}};
+  o.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>{per=b.dataset.rp;o.querySelectorAll('[data-rp]').forEach(x=>x.classList.toggle('on',x===b));carga()});
+  o.querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>{cat=b.dataset.rc;o.querySelectorAll('[data-rc]').forEach(x=>x.classList.toggle('on',x===b));carga()});
+  carga()})}
+async function estiloAbrir(){vib();if(!D)return;try{XST=await rpc('xy_estilo')}catch(e){return toast(errDe(e))}
+ const per=(D&&D.persona)||{},C=XST.catalogo||{},F=C.frames||{},CO=C.colors||{},mios=new Set(XST.mios||[]),plus=XST.plus;
+ const okF=k=>mios.has('frame:'+k)||(plus&&(C.plus||[]).includes(k)),okC=k=>k==='blanco'||(plus&&(C.plus_colors||[]).includes(k));
+ let f=(XST.actual||{}).frame||'',c=(XST.actual||{}).color||'';
+ hoja(`<h2>🎨 Mi estilo</h2><p class="mu sm">Así te ven en el ranking y en tu perfil. Los marcos se ganan en la ruleta; Xyro+ trae marcos y colores propios.</p>
+  <div id="eprev" style="display:flex;gap:12px;align-items:center"></div>
+  <p class="mu xs" style="font-weight:700">MARCO</p><div class="estg">${[['','Sin marco']].concat(Object.entries(F)).map(([k,t])=>`<button class="estb${okF(k)||!k?'':' lk'}" data-ef="${k}"><span class="estm" style="background:${k?FRM[k]:'#ffffff14'}"></span><span class="xs">${esc(t)}${!k||okF(k)?'':' 🔒'}</span></button>`).join('')}</div>
+  <p class="mu xs" style="font-weight:700">COLOR DE TU NOMBRE ${plus?'':'· solo Xyro+'}</p><div class="estg">${Object.entries(CO).map(([k,h])=>`<button class="estb${okC(k)?'':' lk'}" data-ec="${k}"><span class="estm" style="background:${h}"></span><span class="xs">${esc(k)}${okC(k)?'':' 🔒'}</span></button>`).join('')}</div>
+  <div class="msg" id="em"></div><button class="btn p" id="es">Guardar</button>${plus?'':'<button class="btn" data-xy="plus">⭐ Desbloquear con Xyro+</button>'}<button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  const q=s=>o.querySelector(s),prev=()=>{const av=`<div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc((String(per.nombre||'?').trim()[0]||'?').toUpperCase())}</div>`;
+   q('#eprev').innerHTML=avMarco(av,f)+`<b style="font-size:18px;${c&&CO[c]?'color:'+CO[c]:''}">${esc(per.apodo||String(per.nombre||'').split(' ')[0])}</b>`;
+   o.querySelectorAll('[data-ef]').forEach(b=>b.classList.toggle('on',b.dataset.ef===f));o.querySelectorAll('[data-ec]').forEach(b=>b.classList.toggle('on',b.dataset.ec===c))};
+  prev();
+  o.querySelectorAll('[data-ef]').forEach(b=>b.onclick=()=>{const k=b.dataset.ef;if(k&&!okF(k))return toast(plus?'Ese marco se gana en la ruleta 🎡':'Gánalo en la ruleta o hazte Xyro+');f=k;prev()});
+  o.querySelectorAll('[data-ec]').forEach(b=>b.onclick=()=>{const k=b.dataset.ec;if(!okC(k))return toast('Los colores vienen con Xyro+');c=c===k?'':k;prev()});
+  q('#es').onclick=async()=>{try{await rpc('xy_estilo_set',{p_frame:f||null,p_color:c||null});XST.actual={frame:f||null,color:c||null};close();pinta();toast('🎨 Estilo guardado')}catch(e){const m=q('#em');m.textContent=errDe(e);m.className='msg on'}}})}
+function boostCardHTML(slug,nom){return`<div class="card" style="border-color:#f59e0b55"><div class="row"><div class="ibox" style="font-size:22px">⚡</div><div class="sp"><h3>Boost por hora</h3><p class="mu sm">Sal primero en Recomendados y en el mapa. Tus clientes ganan el doble de puntos mientras dure.</p></div></div><button class="btn" data-xy="boost" data-slug="${esc(slug)}" data-nom="${esc(nom||'')}">⚡ Activar Boost</button></div>`}
+async function boostAbrir(slug,nom){vib();let b;try{b=await rpc('xy_boost_info',{p_slug:slug})}catch(e){return toast(errDe(e))}let h=1;
+ hoja(`<h2>⚡ Boost</h2><p class="mu sm">Mientras dure, ${esc(nom||'tu negocio')} sale primero en Recomendados y en el mapa, y tus clientes ganan <b>el doble de puntos</b>.</p>
+  ${b.activo_hasta?`<div class="card" style="padding:12px"><p class="sm">⚡ Activo hasta las ${fH(b.activo_hasta)} del ${fF(b.activo_hasta,{day:'numeric',month:'short'})}. Si sumas horas, se agregan.</p></div>`:''}
+  ${b.pendiente?`<div class="card" style="padding:12px"><p class="sm">⏳ Tu pago de ${b.pendiente.horas} h está en revisión. Se activa apenas lo confirmemos.</p></div>`:''}
+  <p class="mu xs" style="font-weight:700">¿CUÁNTAS HORAS?</p><div class="row" style="gap:6px;flex-wrap:wrap">${[1,2,3,6,12,24].map(x=>`<button class="chip${x===1?' on':''}" data-bh="${x}" style="flex:0 0 auto;width:auto">${x} h</button>`).join('')}</div>
+  <div class="card" id="bres" style="gap:6px"></div><div class="msg" id="bm"></div>
+  <button class="btn p" id="bpu"></button>${b.pendiente?'':'<label>Nº de operación <span class="mu xs">(si ya pagaste)</span><input id="bref" maxlength="40" inputmode="numeric"></label><button class="btn" id="bpa"></button>'}<button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  const q=s=>o.querySelector(s),say=t=>{const m=q('#bm');m.textContent=t;m.className='msg on'};
+  const pon=()=>{const pts=h*b.puntos_hora,pre=h*b.precio_hora;
+   q('#bres').innerHTML=`<div class="row"><span class="sp">Con puntos de tu negocio</span><b>${nfmt(pts)} pts</b></div><p class="mu xs">Tienes ${nfmt(b.puntos)} disponibles${+b.por_liberar?` · ${nfmt(b.por_liberar)} se liberan a los 7 días de cada venta`:''}. Tu negocio gana puntos con cada venta confirmada.</p><div class="hr"></div><div class="row"><span class="sp">O pagando</span><b>${moneyX(pre,b.moneda)}</b></div>`;
+   q('#bpu').textContent=+b.puntos>=pts?`⚡ Activar ${h} h con ${nfmt(pts)} puntos`:`Te faltan ${nfmt(pts-b.puntos)} puntos`;q('#bpu').disabled=+b.puntos<pts;
+   q('#bpa')&&(q('#bpa').textContent=`Pagar ${moneyX(pre,b.moneda)} por WhatsApp`)};
+  o.querySelectorAll('[data-bh]').forEach(x=>x.onclick=()=>{h=+x.dataset.bh;o.querySelectorAll('[data-bh]').forEach(y=>y.classList.toggle('on',y===x));pon()});pon();
+  q('#bpu').onclick=async()=>{try{const r=await rpc('xy_boost_pedir',{p_slug:slug,p_horas:h,p_con:'puntos'});close();confeti();toast('⚡ Boost activo hasta las '+fH(r.hasta))}catch(e){say(errDe(e))}};
+  q('#bpa')&&(q('#bpa').onclick=async()=>{const ref=q('#bref').value.trim();try{await rpc('xy_boost_pedir',{p_slug:slug,p_horas:h,p_con:'pago',p_ref:ref||null})}catch(e){return say(errDe(e))}
+   window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent(`Hola XyroStudio, quiero Boost de ${h} h para ${nom||slug} (${moneyX(h*b.precio_hora,b.moneda)}).${ref?' Nº de operación: '+ref:''}`),'_blank','noopener');close();toast('Listo. Lo activamos al confirmar tu pago')})})}
+(()=>{const st=document.createElement('style');st.textContent=`.avf{position:relative;display:inline-grid;padding:3px;border-radius:25px;isolation:isolate;flex:none}.avf::before{content:'';position:absolute;inset:0;border-radius:inherit;background:var(--fr);z-index:-1}.avf.gira::before{animation:avhue 4s linear infinite}.hdr .avf{border-radius:17px}.avf.sm{border-radius:14px;padding:2px}
+@keyframes avhue{to{filter:hue-rotate(360deg)}}
+.av.rk{width:40px;height:40px;border-radius:12px;font-size:16px;box-shadow:none!important}.rkr{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:16px;background:#ffffff08;border:1px solid var(--ln)}.rkr.yo{border-color:var(--a);background:color-mix(in srgb,var(--a) 12%,transparent)}.rkp{width:30px;text-align:center;font-weight:900;font-size:15px;flex:none}
+.rul{position:relative;width:min(300px,78vw);aspect-ratio:1;margin:6px auto}.rulw{position:absolute;inset:0;border-radius:50%;border:6px solid #fff2;box-shadow:0 0 0 3px #7c5cff55,0 18px 50px #7c5cff44;transition:transform 4.2s cubic-bezier(.12,.7,.08,1)}
+.rulw span{position:absolute;left:50%;top:0;width:52px;margin-left:-26px;height:50%;transform-origin:50% 100%;text-align:center;padding-top:14px;color:#fff;font-size:14px;text-shadow:0 1px 3px #0009}
+.rulp{position:absolute;left:50%;top:-10px;width:0;height:0;margin-left:-13px;border-left:13px solid transparent;border-right:13px solid transparent;border-top:24px solid #facc15;filter:drop-shadow(0 3px 4px #0008);z-index:2}
+.rulc{position:absolute;left:50%;top:50%;width:76px;height:76px;margin:-38px 0 0 -38px;border-radius:50%;border:4px solid #fff;background:linear-gradient(135deg,#facc15,#f59e0b);color:#111;font-weight:900;font-size:13px;cursor:pointer;box-shadow:0 6px 20px #0008;z-index:2}
+.rulr{text-align:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,#7c5cff33,#c026d333);border:1px solid #7c5cff66;font-size:16px;animation:mup .3s ease}
+.estg{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}.estb{display:grid;justify-items:center;gap:6px;padding:10px 6px;border-radius:14px;border:1px solid var(--ln);background:#ffffff08;color:var(--tx);font:inherit;cursor:pointer}.estb.on{border-color:var(--a);background:color-mix(in srgb,var(--a) 18%,transparent)}.estb.lk{opacity:.5}.estm{width:34px;height:34px;border-radius:50%}
+.xplus.on{border-color:#7c5cff88}`;document.head.appendChild(st)})();
+{const d2=demoRpc;demoRpc=async function(f,a){const Z=window._XYD||(window._XYD={giros:2,est:{frame:null,color:null},mios:[]});
+ if(f==='xy_ruleta_estado')return{giros:Z.giros,costo:100,plus:false,premios:[['pts',5],['pts',10],['pts',25],['pts',50],['pts',100],['mult',1.25],['mult',1.5],['frame',null],['plus_day',1],['plus_disc',0.2]].map(([t,v])=>({tipo:t,valor:v}))};
+ if(f==='xy_ruleta_girar'){if(Z.giros>0)Z.giros--;const i=Math.floor(Math.random()*5);const v=[5,10,25,50,100][i];return{ok:true,giros:Z.giros,premio:{tipo:'pts',valor:v,idx:i,texto:'+'+v+' puntos globales'}}}
+ if(f==='xy_estilo')return{plus:false,mios:Z.mios,actual:Z.est,catalogo:{frames:{aura:'Aura violeta',neon:'Neón',oro:'Marco dorado',fuego:'Fuego',hielo:'Hielo',arcoiris:'Arcoíris'},plus:['aura','neon','oro'],colors:{blanco:'#f1f2f7',violeta:'#b9a6ff',cian:'#7fe3ff',oro:'#f3d68a',rosa:'#ff9ecb',verde:'#7ff0b8'},plus_colors:['violeta','cian','oro','rosa','verde']}};
+ if(f==='xy_estilo_set'){Z.est={frame:a.p_frame,color:a.p_color};return{ok:true}}
+ if(f==='xy_plus_info')return{activo:false,hasta:null,usd:10,descuento:0,moneda:'PEN',precio:38,pendiente:false};
+ if(f==='xy_plus_pedir')return{ok:true,precio:38,moneda:'PEN'};
+ if(f==='xy_ranking')return{yo:{pos:4,pts:684},top:[['Carla','carla',2410,'oro','oro',true],['Diego','diego',1980,'neon','cian',true],['Ana','ana',1220,null,null,false],['Tú','yo',684,null,null,false],['Luis','luis',540,'fuego',null,false]].map(([n,u,p,m,c,pl],i)=>({pos:i+1,pts:p,nombre:n,usuario:u,nivel:'BRONZE',plus:pl,marco:m,color:c,yo:u==='yo'}))};
+ if(f==='xy_boost_info')return{activo_hasta:null,puntos:312,por_liberar:120,puntos_hora:500,usd_hora:5,precio_hora:19,moneda:'PEN',pendiente:null};
+ if(f==='xy_boost_pedir')return a.p_con==='puntos'?(()=>{throw new Error('Te faltan puntos de negocio')})():{ok:true};
+ return d2(f,a)}}
 const demoRpc0=demoRpc;
 demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
   items:[{t:'n',slug:'demo',nombre:'Iron Gym Miraflores',cat:'gym',distrito:'Miraflores',prom:4.8,n:126,km:0.6,promos:2,dest:true,logo:''},
@@ -2034,7 +2210,7 @@ demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
   res:{n:3,prom:4.7,dist:{5:2,4:1},lista:[{id:'r1',estrellas:5,texto:'Excelente atención y muy buen ambiente. ¡Lo recomiendo!',v:true,creado:new Date(Date.now()-864e5*2).toISOString(),nombre:'Carla',fundador:true},{id:'r2',estrellas:5,texto:'Me ayudó a bajar 8 kg en 3 meses 💪',v:true,creado:new Date(Date.now()-864e5*9).toISOString(),nombre:'Jorge'},{id:'r3',estrellas:4,texto:'Muy bueno, a veces hay que esperar un poco.',v:false,creado:new Date(Date.now()-864e5*20).toISOString(),nombre:'Ana'}]},
   pro:{slug:'coach-diego',tipo:'entrenador',nombre:'Diego Ramírez',titulo:'Coach de fuerza e hipertrofia',bio:'8 años entrenando personas reales con objetivos reales. Certificado NSCA. Planes a tu medida, presencial en Miraflores o 100% online.',especialidades:['Fuerza','Hipertrofia','Bajar de peso','Funcional'],modalidad:'ambas',pais:'PE',ciudad:'Lima',zona:'Miraflores',foto:'',portada:'',fotos:[],videos:[],redes:{instagram:'@coachdiego'},estado:'activo',plus:true,alumnos:24,soyAlumno:false},
   chats:[],mio:null});
- if(f==='xa_mapa'){const p=a.p||{},C0=[-12.12,-77.03];return{items:W.items.filter(x=>x.t!=='p'&&(!p.cat||x.cat===p.cat)&&(!p.top||(+x.prom||0)>=4.5)).map((x,i)=>({slug:x.slug,nombre:x.nombre,logo:x.logo,cat:x.cat,lat:C0[0]+Math.sin(i*2.3)*0.03,lng:C0[1]+Math.cos(i*1.7)*0.035,dir:x.distrito,prom:x.prom,n:x.n,dest:x.dest,promos:x.promos}))}}
+ if(f==='xa_mapa'){const p=a.p||{},C0=[-12.12,-77.03];return{items:W.items.filter(x=>x.t!=='p'&&(!p.cat||x.cat===p.cat)&&(!p.q||(x.nombre+' '+x.distrito).toLowerCase().includes(String(p.q).toLowerCase()))&&(!p.top||(+x.prom||0)>=4.5)).map((x,i)=>({slug:x.slug,nombre:x.nombre,logo:x.logo,cat:x.cat,lat:C0[0]+Math.sin(i*2.3)*0.03,lng:C0[1]+Math.cos(i*1.7)*0.035,dir:x.distrito,prom:x.prom,n:x.n,dest:x.dest,boost:x.dest,promos:x.promos}))}}
  if(f==='xa_explorar'){const p=a.p||{},q=(p.q||'').toLowerCase(),l=(p.lugar||'').toLowerCase();let L=W.items.filter(x=>(!p.cat||x.cat===p.cat)&&(!q||x.nombre.toLowerCase().includes(q))&&(!l||(x.distrito+' '+(x.pais||'')).toLowerCase().includes(l)));
   L=L.slice().sort((x,y)=>(y.dest?1:0)-(x.dest?1:0)||(p.orden==='cerca'?(x.km??1e6)-(y.km??1e6):p.orden==='nuevos'?0:(y.prom||0)-(x.prom||0)));return{items:p.off?[]:L,off:0}}
  if(f==='xa_resenas_de')return a.p_pro&&W.mio&&a.p_pro===W.mio.slug?{n:0,lista:[]}:JSON.parse(JSON.stringify(W.res));

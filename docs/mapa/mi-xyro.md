@@ -65,3 +65,7 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Mapa (SQL 84, `xa_mapa(p)` con recuadro s/n/w/e, cat, top≥4.5; máx 300 pines): Explorar → «🗺️ Ver el mapa» (`mapaAbrir`, `mapaCarga` al mover, `mapaCard` con «Ver negocio» y «Cómo llegar» a Google Maps, `mapaYo`). Leaflet 1.9.4 de cdnjs + teselas oscuras de OpenStreetMap (tile.openstreetmap.org) con filtro CSS oscuro en .leaflet-tile-pane (CARTO pide API key desde 2026-11); si crece mucho el tráfico, pasar a plan de CARTO/MapTiler). Ubicación = sede del perfil (lat/lng) o punto GPS de pedidos de mesa. Entrenadores no salen.
 - 2026-11-18 SQL 85: `xa_yo_borrar_cuenta` solo bloquea a dueños/admins; quita accesos por ID; si hay historial con FK restrict, cierra y anonimiza (ban + correo borrado+id).
 - 2026-11-18: login de Mi Xyro ya NO tiene «Soy un negocio · entrar a mi panel» ni «Entrar con usuario y clave». Modo negocio solo desde la cuenta (`negElegir`); si no tiene negocios muestra su ID + «Registrar mi negocio gratis».
+
+## Xyro+, ruleta, ranking y mapa (2026-11-18, SQL 88)
+- Módulo «Xyro+, ruleta, ranking, estilo» antes de `demoRpc0`: `XST` (estilo), `XR` (ruleta), `PLI` (precio Xyro+), clicks por `data-xy` (ruleta|ranking|plus|estilo|boost). Botones en `ptsHTML` (`xJuegosHTML`), tarjeta `xPlusHTML`, Boost en «Mi negocio» (`boostCardHTML`).
+- Mapa estilo Google Maps: OSM claro SIN filtro (el filtro invert era lo lento), Leaflet precargado (`mapaPre`), caché por zona (`MP.caja`), búsqueda `#mpq` con `xa_mapa {q}`, lista abajo (`mapaHoja`).
