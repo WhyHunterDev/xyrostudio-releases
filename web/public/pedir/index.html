@@ -100,7 +100,8 @@ em{font-style:italic;color:var(--a);font-weight:900}
 .stp div::before{content:"";position:absolute;top:15px;left:-50%;width:100%;height:2px;background:var(--ln)}.stp div:first-child::before{display:none}
 .stp .on{color:var(--tx)}.stp .on i{background:var(--a);border-color:var(--a)}.stp .on::before{background:var(--a)}
 .stp .now i{animation:pu 1.4s infinite}
-.pg{background:#ffffff0a;border-radius:14px;padding:10px 12px;font-size:14px}
+.pg{background:#ffffff0a;border-radius:14px;padding:10px 12px;font-size:14px}.pg.ok{background:#22c55e1f;color:#bbf7d0}.pg.no{background:#ef44441f;color:#fecaca}
+.yp{display:grid;gap:10px;justify-items:center;text-align:center}.yp .qr{width:220px;max-width:70vw;border-radius:18px;background:#fff;padding:8px}.yp .nu{font-size:28px;font-weight:900;letter-spacing:1px}.yp ol{text-align:left;margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}.yp input{text-align:center;font-size:20px;font-weight:800;letter-spacing:2px}.btn.yb{background:#742284;border-color:#742284;color:#fff}
 .geo{font-size:12px;color:var(--mu);text-align:center}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#fff;color:#111;padding:11px 18px;border-radius:999px;font-weight:700;font-size:14px;z-index:20;box-shadow:0 10px 30px #0008;animation:up .3s;max-width:90vw;text-align:center}
 .vac{text-align:center;padding:50px 20px;display:grid;gap:10px;justify-items:center}.vac .e{font-size:52px}
@@ -160,11 +161,13 @@ async function api(f,b){if(!DEMO)return rpc(f,b);await new Promise(r=>setTimeout
  if(RES&&(f==='xa_mesa_menu'||f==='xa_carta')){const DP=CAF?DC:DR;return{negocio:Q.get('n')||(CAF?'Tu Cafetería':'Tu Restaurante'),rubro:'restaurante',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):CAF?'#c8873a':'#ff7a1a',tienda:'Carta',mesa:f==='xa_carta'?0:MESA||3,abierto:f!=='xa_carta',qr:true,desde:CAF?'08:00':'12:00',hasta:CAF?'22:00':'23:00',portada:CAF?U('1554118811-1e0d58224f24'):U('1517248135467-4c7edcad34c4'),titulo:CAF?'Tu café, a tu mesa':'Nuestra carta',texto:CAF?'Frappés, waffles, cafés y postres. Pide desde aquí y te lo llevamos a tu mesa. Pagas al final en caja.':'Elige tus platos y te los llevamos a la mesa. Pagas al final en caja.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||fotoB(p[2]),antes:p[6]||null,destacado:!!p[7],opciones:CAF?opcBase(p[2],p[0]):null,agotado:i===(CAF?5:13)}))}}
  if(f==='xa_mesa_menu')return{negocio:Q.get('n')||'Tu Gimnasio',color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):null,tienda:'Cafetín',mesa:MESA||3,abierto:true,desde:'07:00',hasta:'21:00',geo:Q.has('geo'),portada:IM+'hero.jpg',titulo:'Come como entrenas',texto:'Batidos, platos y snacks para antes o después de entrenar. Pide aquí y te lo llevamos a tu mesa.',productos:DP.map((p,i)=>({id:'d'+i,categoria:p[0],emoji:p[1],nombre:p[2],precio:p[3],detalle:p[4],foto:p[5]||null,antes:p[6]||null,destacado:!!p[7],modelo:p[8]||(i===2&&/^https:\/\/\S+\.glb(\?\S*)?$/i.test(Q.get('glb')||'')?Q.get('glb'):null),agotado:i===9}))};
  if(f==='xa_mesa_pedir'){if(Q.has('lejos'))throw new Error('lejos');const L=CAF?DC:RES?DR:DP,it=b.p_items.map(x=>{const p=L[+x.id.slice(1)],op=opc({opciones:CAF?opcBase(p[2],p[0]):null},x.o||[]);return{id:x.id,n:p[2]+(op.t?' · '+op.t:''),c:x.c,p:p[3]+op.x,e:p[1]}}),o={id:'o'+Date.now(),num:DEMO_ORD.length+7,mesa:b.p_mesa,items:it,total:it.reduce((a,i)=>a+i.p*i.c,0),estado:'nuevo',creado:new Date().toISOString(),t0:Date.now()};DEMO_ORD.unshift(o);return o}
- if(f==='xa_mesa_mios'){DEMO_ORD.forEach(o=>{if(o.estado==='cancelado')return;const s=(Date.now()-o.t0)/1e3;o.estado=s>30?'servido':s>12?'preparando':'nuevo'});return DEMO_ORD}
- if(f==='xa_mesa_cancelar_mio'){const o=DEMO_ORD.find(x=>x.id===b.p_id);if(o.estado!=='nuevo')throw new Error('Ya lo están preparando. Pide el cambio en el cafetín.');o.estado='cancelado';return o}}
+ if(f==='xa_mesa_mios'){DEMO_ORD.forEach(o=>{if(o.estado==='cancelado')return;const s=(Date.now()-o.t0)/1e3;if(o.yape_op&&!o.pagado_ok&&Date.now()-o.yt>7e3){o.pagado_ok=true;o.metodo='Yape'}o.estado=s>30?(o.pagado_ok?'pagado':'servido'):s>12?'preparando':'nuevo'});return DEMO_ORD}
+ if(f==='xa_mesa_yape')return{on:true,num:'987654321',titular:Q.get('n')||'Tu negocio'};
+ if(f==='xa_mesa_yapee'){if(!/^\d{4,14}$/.test(String(b.p_op).replace(/\D/g,'')))throw new Error('Escribe el N.º de operación que sale en tu Yape');DEMO_ORD.filter(o=>b.p_ids.includes(o.id)).forEach(o=>{o.yape_op=String(b.p_op).replace(/\D/g,'');o.yt=Date.now();o.yape_no=false});return{ok:true}}
+ if(f==='xa_mesa_cancelar_mio'){const o=DEMO_ORD.find(x=>x.id===b.p_id);if(o.estado!=='nuevo'||o.yape_op)throw new Error('Ya lo están preparando. Pide el cambio en el cafetín.');o.estado='cancelado';return o}}
 
-let M=null,CART=[],CAT='',MIOS=[],ENV=false;
-const RESTO=()=>M&&M.rubro==='restaurante',lug=()=>RESTO()?'caja':(M&&M.tienda||'cafetín').toLowerCase(); // dónde se paga
+let M=null,CART=[],CAT='',MIOS=[],ENV=false,YP=null; // YP = Yape del negocio (SQL 71)
+const RESTO=()=>M&&M.rubro==='restaurante',lug=()=>RESTO()?'caja':(M&&M.tienda||'cafetín').toLowerCase(),elL=()=>(RESTO()?'la ':'el ')+lug(),alL=()=>(RESTO()?'a la ':'al ')+lug(); // dónde se paga
 const OPS=p=>Array.isArray(p&&p.opciones)?p.opciones.filter(g=>g&&Array.isArray(g.o)&&g.o.length):[];
 const opc=(p,sel)=>{let x=0;const t=[];OPS(p).forEach(g=>{const m=g.m==1||g.m===true;let c=0;g.o.forEach((o,i)=>{if(sel.includes(o.n)&&(m||!c)){x+=Math.max(+o.p||0,0);c++;if(m||i>0)t.push(o.n)}});if(!m&&!c)x+=Math.max(+g.o[0].p||0,0)});return{x,t:t.join(', ').slice(0,120)}}; // igual que xa_opc (SQL 59)
 const tot=()=>CART.reduce((a,i)=>a+i.p*i.c,0),cnt=()=>CART.reduce((a,i)=>a+i.c,0);
@@ -185,23 +188,24 @@ async function init(){
  document.title=(M.tienda||'Cafetín')+' · '+M.negocio;
  try{CART=JSON.parse(sessionStorage.getItem('xp-cart-'+SLUG)||'[]')}catch(_){CART=[]}
  CART=CART.filter(i=>M.productos.some(p=>p.id===i.id&&!p.agotado)).map(i=>Object.assign(i,{k:i.k||i.id,o:i.o||[]}));
+ try{const y=await api('xa_mesa_yape',{p_slug:SLUG});YP=y&&y.on&&/^\d{9}$/.test(y.num||'')?y:null}catch(_){YP=null}
  await cargarMios();pinta();setInterval(async()=>{if(document.hidden)return;const j=JSON.stringify(MIOS);await cargarMios();if(JSON.stringify(MIOS)!==j){avisos(j);pinta()}},DEMO?4000:8000);
 }
 async function cargarMios(){try{MIOS=(await api('xa_mesa_mios',{p_token:TOK})||[]).filter(o=>o.estado!=='cancelado'||Date.now()-new Date(o.cambio||o.creado)<3e5)}catch(_){}}
-function avisos(j){let A=[];try{A=JSON.parse(j)||[]}catch(_){}MIOS.forEach(o=>{const a=A.find(x=>x.id===o.id);if(!a||a.estado===o.estado)return;vib();
- toast(o.estado==='preparando'?'👨‍🍳 Ya están preparando tu pedido':o.estado==='servido'?'🍽️ ¡Tu pedido va a tu mesa!':o.estado==='pagado'?'✅ Pago confirmado. ¡Gracias!':o.estado==='cancelado'?'Tu pedido se canceló':'')})}
+function avisos(j){let A=[];try{A=JSON.parse(j)||[]}catch(_){}MIOS.forEach(o=>{const a=A.find(x=>x.id===o.id);if(a&&o.pagado_ok&&!a.pagado_ok&&o.estado!=='pagado'){vib();return toast('✅ ¡Tu Yape llegó! Ya está pagado')}if(a&&o.yape_no&&!a.yape_no&&!o.yape_op){vib();return toast('😕 No encontramos tu Yape. Revisa o paga en '+elL())}if(!a||a.estado===o.estado)return;vib();
+ toast(o.estado==='preparando'?'👨‍🍳 Ya están preparando tu pedido':o.estado==='servido'?'🍽️ ¡Tu pedido va a tu mesa!':o.estado==='pagado'?(a.pagado_ok?'🍽️ ¡Tu pedido va a tu mesa!':'✅ Pago confirmado. ¡Gracias!'):o.estado==='cancelado'?'Tu pedido se canceló':'')})}
 const PASOS=[['nuevo','📨','Recibido'],['preparando','👨‍🍳','Preparando'],['servido','🍽️','Servido'],['pagado','✅','Pagado']];
 function ordHTML(o){const k=PASOS.findIndex(p=>p[0]===o.estado);
  return`<div class="ord ${o.estado}"><div class="rw"><div class="t"><b>Pedido #${o.num}</b> <span class="mu xs">· Mesa ${o.mesa}</span><p class="mu xs">${(o.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ')}</p></div><b>${sol(o.total)}</b></div>
  ${o.estado==='cancelado'?'<p class="sm" style="color:var(--bad)">Pedido cancelado</p>':`<div class="stp">${PASOS.map((p,i)=>`<div class="${i<=k?'on':''} ${i===k&&k<3?'now':''}"><i>${p[1]}</i>${p[2]}</div>`).join('')}</div>`}
- ${o.estado==='servido'?`<div class="pg">💰 Cuando termines, acércate al ${esc(lug())} y paga <b>${sol(o.total)}</b>. Di tu mesa: <b>${o.mesa}</b>.</div>`:''}
- ${o.estado==='nuevo'?`<button class="btn" data-cx="${esc(o.id)}" style="padding:10px">Cancelar pedido</button>`:''}</div>`}
+ ${o.estado==='pagado'||o.estado==='cancelado'?'':o.pagado_ok?`<div class="pg ok">✅ Pagado${o.metodo?' con '+esc(o.metodo):''}. No tienes que pasar por caja.</div>`:o.yape_op?`<div class="pg">📱 Yape enviado (op. ${esc(o.yape_op)}). ${esc(elL().replace(/^./,c=>c.toUpperCase()))} lo está confirmando…</div>`:o.yape_no?`<div class="pg no">😕 No encontramos tu Yape. Revisa tu constancia y vuelve a intentarlo, o paga en ${esc(elL())}.</div>`:o.estado==='servido'?`<div class="pg">💰 Cuando termines, ${YP?'págalo con Yape aquí o ':''}acércate ${esc(alL())} y paga <b>${sol(o.total)}</b>. Di tu mesa: <b>${o.mesa}</b>.</div>`:''}
+ ${o.estado==='nuevo'&&!o.yape_op&&!o.pagado_ok?`<button class="btn" data-cx="${esc(o.id)}" style="padding:10px">Cancelar pedido</button>`:''}</div>`}
 const ft=(p,c)=>p.foto&&/^https:\/\//.test(p.foto)?`<img src="${esc(p.foto)}" alt="" loading="lazy" data-e="${esc(p.emoji||'🍽️')}" onerror="this.outerHTML=this.dataset.e">`:'';
 function titulo(){const t=String(M.titulo||((M.tienda||'Cafetín')+' a tu mesa')).trim().split(' ');if(t.length<2)return esc(t[0]);const u=t.pop();return esc(t.join(' '))+' <em>'+esc(u)+'</em>'}
 function qty(p,c,ab){if(M.solo)return'';return c?`<div class="q"><button data-d="${esc(p.id)}" aria-label="Quitar">−</button><b>${c}</b><button data-a="${esc(p.id)}" aria-label="Agregar">＋</button></div>`:`<button class="add" data-a="${esc(p.id)}" ${p.agotado||!ab?'disabled':''} aria-label="Agregar">＋</button>`}
 const esCombo=p=>/combo|promo/i.test(p.categoria||'')||(+p.antes>+p.precio);
 function pinta(){
- const P=M.productos||[],ab=M.abierto,act=MIOS.filter(o=>!['pagado','cancelado'].includes(o.estado)),deuda=act.reduce((a,o)=>a+ +o.total,0);
+ const P=M.productos||[],ab=M.abierto,act=MIOS.filter(o=>!['pagado','cancelado'].includes(o.estado)),xpa=act.filter(o=>!o.pagado_ok&&!o.yape_op),deuda=xpa.reduce((a,o)=>a+ +o.total,0);
  const C=P.filter(esCombo),N=P.filter(p=>!esCombo(p)),cats=[...new Set(N.map(p=>p.categoria||'Otros'))];if(CAT&&!cats.includes(CAT))CAT='';
  const L=N.filter(p=>!CAT||(p.categoria||'Otros')===CAT).sort((a,b)=>(!!a.agotado-!!b.agotado)||(!!b.destacado-!!a.destacado));
  const cn=id=>CART.filter(i=>i.id===id).reduce((a,i)=>a+i.c,0);
@@ -213,8 +217,8 @@ function pinta(){
   <div class="top"><div class="lg">${lg}</div><span class="nm">${esc(M.negocio)}</span>${M.solo?'':`<div class="mesa"><span>MESA</span><b>${M.mesa}</b></div>`}</div>
   <span class="eb">${esc(M.tienda||'Cafetín')}${M.yo?' · Hola, '+esc(String(M.yo).split(' ')[0]):''}</span><h1>${titulo()}</h1>${M.texto?`<p class="ld">${esc(M.texto)}</p>`:''}
   <span class="st ${ab||M.solo?'':'ce'}"><i></i>${M.solo?(horario()?'Atendemos '+esc(horario()):'Nuestra carta'):ab?'Pedidos abiertos · te lo llevamos a la mesa '+M.mesa:M.pausa?'Pedidos en pausa por ahora':'Cerrado ahora'+(horario()?' · '+esc(horario()):'')}</span></header>
- ${M.solo?`<div class="bn"><b>📍 Para pedir, visítanos</b><p class="mu sm">${M.qr?'En tu local más cercano escanea el QR de tu mesa y pide desde tu celular. Te lo llevamos a la mesa.':'En tu local más cercano pide tu orden al mozo o en caja.'}</p>${SLUG?`<a class="btn" style="margin-top:8px;text-decoration:none;color:inherit" href="/mi/?n=${encodeURIComponent(SLUG)}">🧭 Ver nuestros locales</a>`:''}</div>`:ab?'':`<div class="bn cl"><b>🔒 ${M.pausa?'Pedidos en pausa por ahora':'Ahora no recibimos pedidos'}</b><p class="mu sm">${M.pausa?'Pide directo en el '+esc(lug())+'.':'Puedes ver el menú. Recibimos pedidos de '+esc(horario())+'.'}</p></div>`}
- ${act.length?`<h2 class="h2">Tus <em>pedidos</em>${deuda?` <span class="mu sm" style="text-transform:none;font-weight:700">· por pagar ${sol(deuda)}</span>`:''}</h2>${act.map(ordHTML).join('')}`:''}${MIOS.filter(o=>o.estado==='pagado').slice(0,1).map(ordHTML).join('')}
+ ${M.solo?`<div class="bn"><b>📍 Para pedir, visítanos</b><p class="mu sm">${M.qr?'En tu local más cercano escanea el QR de tu mesa y pide desde tu celular. Te lo llevamos a la mesa.':'En tu local más cercano pide tu orden al mozo o en caja.'}</p>${SLUG?`<a class="btn" style="margin-top:8px;text-decoration:none;color:inherit" href="/mi/?n=${encodeURIComponent(SLUG)}">🧭 Ver nuestros locales</a>`:''}</div>`:ab?'':`<div class="bn cl"><b>🔒 ${M.pausa?'Pedidos en pausa por ahora':'Ahora no recibimos pedidos'}</b><p class="mu sm">${M.pausa?'Pide directo en '+esc(elL())+'.':'Puedes ver el menú. Recibimos pedidos de '+esc(horario())+'.'}</p></div>`}
+ ${act.length?`<h2 class="h2">Tus <em>pedidos</em>${deuda?` <span class="mu sm" style="text-transform:none;font-weight:700">· por pagar ${sol(deuda)}</span>`:''}</h2>${YP&&xpa.length?`<button class="btn yb" id="yap" style="margin:0 0 12px">📱 Pagar ${sol(deuda)} con Yape</button>`:''}${act.map(ordHTML).join('')}`:''}${MIOS.filter(o=>o.estado==='pagado').slice(0,1).map(ordHTML).join('')}
  ${C.length?`<h2 class="h2">Combos <em>del momento</em></h2><div class="cmb">${C.map(ck).join('')}</div>`:''}
  ${N.length?`<h2 class="h2">Nuestro <em>menú</em></h2>${cats.length>1?`<div class="chips">${['',...cats].map(c=>`<button class="chip ${c===CAT?'on':''}" data-c="${esc(c)}">${c?esc(c):'Todo'}</button>`).join('')}</div>`:''}<div class="menu">${L.map(mc).join('')}</div>`:''}
  ${P.length?'':'<div class="vac"><span class="e">🥤</span><p class="mu">Aún no hay productos en el menú.</p></div>'}
@@ -224,6 +228,7 @@ function pinta(){
  app.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>mover(b.dataset.d,-1));
  app.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>ver(b.dataset.v));
  app.querySelectorAll('[data-cx]').forEach(b=>b.onclick=()=>cancelar(b.dataset.cx));
+ const yb=$('#yap');yb&&(yb.onclick=()=>yapear(xpa));
  const v=$('#ver');v&&(v.onclick=carrito);
 }
 function ver(id){const p=M.productos.find(x=>x.id===id);if(!p)return;const o=document.createElement('div');o.className='ov';let c=1;const G=OPS(p);let sel=G.filter(g=>!(g.m==1||g.m===true)).map(g=>g.o[0].n);const pu=()=>+p.precio+opc(p,sel).x;
@@ -249,7 +254,7 @@ function carrito(){const o=document.createElement('div');o.className='ov';
   ${CART.map(i=>{const p=M.productos.find(x=>x.id===i.id)||{};return`<div class="rw">${p.foto?`<img class="th" src="${esc(p.foto)}" alt="">`:`<span class="th">${esc(i.e||'🛒')}</span>`}<div class="t"><b>${esc(i.n)}</b><p class="mu xs">${sol(i.p)} c/u</p></div><div class="q"><button data-d="${esc(i.k)}">−</button><b>${i.c}</b><button data-a="${esc(i.k)}">＋</button></div></div>`}).join('')}
   <input id="nm" maxlength="60" placeholder="Tu nombre (para llevártelo a la mesa)" value="${esc(ls.g('xp-nom','')||M.yo||'')}">
   <textarea id="nt" rows="2" maxlength="200" placeholder="Nota (opcional): sin azúcar, con hielo…"></textarea>
-  <div class="tot"><span class="mu">Total</span><b>${sol(tot())}</b></div><p class="mu xs" style="text-align:center">Pagas al terminar, en el ${esc(lug())}.</p>
+  <div class="tot"><span class="mu">Total</span><b>${sol(tot())}</b></div><p class="mu xs" style="text-align:center">${YP?'Paga con Yape desde aquí o al terminar, en '+esc(elL())+'.':'Pagas al terminar, en '+esc(elL())+'.'}</p>
   <button class="btn p" id="go">Hacer pedido · ${sol(tot())}</button>${M.geo?'<p class="geo">📍 Te pediremos tu ubicación solo para confirmar que estás en el local.</p>':''}</div>`;
   o.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.k===b.dataset.a);i.c=Math.min(20,i.c+1);guarda();keep(draw)});
   o.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{const i=CART.find(x=>x.k===b.dataset.d);i.c--;if(i.c<=0)CART=CART.filter(x=>x!==i);guarda();keep(draw)});
@@ -286,8 +291,23 @@ function donde(){return new Promise((ok,ko)=>{if(!navigator.geolocation)return k
  navigator.geolocation.getCurrentPosition(p=>ok(p.coords),()=>ko(new Error('ubicacion')),{enableHighAccuracy:true,timeout:15000,maximumAge:30000})})}
 function geoAviso(k){const o=document.createElement('div');o.className='ov';const t=lug();
  o.innerHTML=`<div class="sh" style="text-align:center;justify-items:center"><span style="font-size:52px">${k==='lejos'?'🗺️':'📍'}</span><h2>${k==='lejos'?'Parece que no estás en el local':'Activa tu ubicación para pedir'}</h2>
- <p class="mu sm" style="max-width:380px">${k==='lejos'?'Solo se puede pedir desde las mesas de '+esc(M.negocio)+'. Si ya estás aquí, activa el GPS de tu celular e inténtalo otra vez, o pide directo en el '+esc(t)+'.':'Así evitamos pedidos falsos. Toca «Permitir» cuando tu celular te pregunte. Si dijiste que no, actívala en los ajustes del navegador (el candado 🔒 junto a la dirección).'}</p>
+ <p class="mu sm" style="max-width:380px">${k==='lejos'?'Solo se puede pedir desde las mesas de '+esc(M.negocio)+'. Si ya estás aquí, activa el GPS de tu celular e inténtalo otra vez, o pide directo en '+esc(elL())+'.':'Así evitamos pedidos falsos. Toca «Permitir» cuando tu celular te pregunte. Si dijiste que no, actívala en los ajustes del navegador (el candado 🔒 junto a la dirección).'}</p>
  <button class="btn p" data-x>Entendido</button></div>`;o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o)}
+// ---------- Pagar con Yape (SQL 71): directo al Yape del negocio, sin comisiones. El equipo confirma que llegó. ----------
+function yapear(L){if(!YP||!L.length)return;const t=Math.round(L.reduce((a,o)=>a+ +o.total,0)*100)/100,o=document.createElement('div');o.className='ov';
+ o.innerHTML=`<div class="sh yp" style="position:relative"><button class="xb" data-x aria-label="Cerrar">✕</button><span class="eb" style="color:#c084fc">Pagar con Yape</span><h2 style="margin:0">${sol(t)}</h2>
+  ${YP.qr?`<img class="qr" src="${esc(YP.qr)}" alt="QR de Yape de ${esc(M.negocio)}">`:''}
+  <div><p class="mu xs" style="margin:0">Yapea al número</p><div class="nu">${esc(YP.num.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</div>${YP.titular?`<p class="mu sm" style="margin:0">a nombre de <b style="color:var(--tx)">${esc(YP.titular)}</b></p>`:''}</div>
+  <button class="btn" id="ycp" style="padding:10px">📋 Copiar número</button>
+  <ol><li>Abre tu Yape y ${YP.qr?'escanea el QR o ':''}yapea al número.</li><li>Paga exacto <b>${sol(t)}</b>${L.length>1?' ('+L.length+' pedidos)':''}.</li><li>Escribe abajo el <b>N.º de operación</b> que sale en tu constancia.</li></ol>
+  <input id="yop" inputmode="numeric" maxlength="14" autocomplete="off" placeholder="N.º de operación">
+  <input id="ynm" maxlength="60" placeholder="Tu nombre como sale en Yape (opcional)" value="${esc(ls.g('xp-nom','')||M.yo||'')}" style="font-size:15px;letter-spacing:0;font-weight:600">
+  <button class="btn yb" id="yok">Ya pagué</button><p class="mu xs" style="margin:0">${esc(elL().replace(/^./,c=>c.toUpperCase()))} revisa su Yape y te confirma aquí mismo. El dinero va directo a ${esc(M.negocio)}.</p></div>`;
+ o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o);
+ o.querySelector('#ycp').onclick=async()=>{try{await navigator.clipboard.writeText(YP.num);toast('📋 Número copiado')}catch(_){toast(YP.num)}};
+ const ok=o.querySelector('#yok');ok.onclick=async()=>{const op=o.querySelector('#yop').value.replace(/\D/g,''),nm=o.querySelector('#ynm').value.trim();if(op.length<4)return toast('Escribe el N.º de operación de tu Yape');
+  ok.disabled=true;ok.textContent='Enviando…';try{await api('xa_mesa_yapee',{p_token:TOK,p_ids:L.map(x=>x.id),p_op:op,p_nombre:nm||null});o.remove();vib();toast('📱 ¡Listo! Te avisamos aquí cuando confirmen tu Yape');await cargarMios();pinta()}
+  catch(e){toast(e.message);ok.disabled=false;ok.textContent='Ya pagué'}}}
 async function cancelar(id){if(!confirm('¿Cancelar este pedido?'))return;try{await api('xa_mesa_cancelar_mio',{p_token:TOK,p_id:id});await cargarMios();pinta();toast('Pedido cancelado')}catch(e){toast(e.message)}}
 function confeti(){const C=['#fff',getComputedStyle(document.documentElement).getPropertyValue('--a').trim(),'#facc15','#3ad6ff'];for(let i=0;i<36;i++){const d=document.createElement('i');d.className='cf';d.style.left=Math.random()*100+'vw';d.style.background=C[i%C.length];d.style.animationDelay=Math.random()*.3+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}}
 // ---------- Botón «atrás» del celular: cierra la ventana abierta en vez de salir ----------

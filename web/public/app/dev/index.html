@@ -316,6 +316,7 @@ body:not(.dentro){background:#05060a}
 .mpB{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start;margin-bottom:14px}.mpB section{display:grid;gap:10px;align-content:start}.mpB h3{display:flex;gap:8px;align-items:center}
 .mpC{padding:14px;display:grid;gap:8px;animation:mpIn .35s cubic-bezier(.2,1.3,.3,1)}.mpC.nuevo{border-color:var(--wa);box-shadow:0 0 0 1px var(--wa),0 10px 40px -18px var(--wa)}.mpC.preparando{border-color:#3ad6ff66}.mpC.servido{border-color:var(--a)}
 .mpH{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.mpM{font-size:20px;font-weight:900;letter-spacing:-.02em}.mpI{display:grid;gap:3px;font-size:14px}.mpN{background:#ffffff0a;border-radius:10px;padding:6px 10px}
+.mpY{background:#7422841f;border:1px solid #74228466;border-radius:12px;padding:8px 10px;font-size:13px;display:grid;gap:6px}.mpY.ok{background:#22c55e14;border-color:#22c55e55}.mpY .b{display:flex;gap:6px}
 .mpF{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px dashed var(--ln);padding-top:8px}.mpE{padding:18px;border:1px dashed var(--ln);border-radius:16px;text-align:center}
 .mpHero{display:grid;gap:14px;padding:22px}.mpSt{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.mpSt div{display:grid;gap:6px;justify-items:center;text-align:center;padding:16px 10px;border:1px solid var(--ln);border-radius:16px;animation:mpIn .5s both}.mpSt span{font-size:30px}.mpSt b{font-size:13px}
 .mpQ{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;max-height:46vh;overflow:auto;margin:10px 0}.mpQ .btn{display:grid;gap:2px;padding:12px}.mpQ small{opacity:.6;font-size:11px}
@@ -2477,7 +2478,9 @@ const mpCfg=()=>Object.assign({on:!!DEMO,n:DEMO?8:0,desde:'07:00',hasta:'21:00',
 const mpLink=n=>DEMO?location.origin+'/pedir/?demo=1&m='+n+'&n='+encodeURIComponent(nombre()):'https://xyrostudio.net/pedir/?s='+encodeURIComponent(SLUG)+'&m='+n;
 const MPE={nuevo:['🟡 Nuevo','var(--wa)'],preparando:['👨‍🍳 Preparando','#3ad6ff'],servido:['🍽️ Listo · falta pagar','var(--a)'],pagado:['✅ Pagado','var(--ok)'],cancelado:['Cancelado','var(--mu)']};
 const mpAbiertos=()=>(MP&&MP.pedidos||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
-const mpNuevos=()=>(MP&&MP.pedidos||[]).filter(p=>p.estado==='nuevo').length;
+const mpNuevos=()=>(MP&&MP.pedidos||[]).filter(p=>p.estado==='nuevo'||mpYP(p)).length;
+const mpYP=p=>!!(p&&p.yape_op&&!p.pago_id&&!['pagado','cancelado'].includes(p.estado)); // dice que pagó con Yape, falta confirmar (SQL 71)
+const mpY71=()=>DEMO||!!(MP&&MP.v71);
 const mpHace=t=>{const m=Math.max(0,Math.round((Date.now()-new Date(t))/6e4));return m<1?'ahora':m<60?'hace '+m+' min':'hace '+Math.floor(m/60)+' h'};
 /* Carta base: carga los productos típicos del rubro (cafetería o restaurante) para no empezar de cero. */
 async function fotosBase(){const L=S.pro.filter(p=>p.activo!==false&&!p.foto&&fotoBase(p.nombre));if(!L.length)return;const b=$('#tFot');b&&(b.disabled=true,b.textContent='Poniendo fotos…');
@@ -2488,18 +2491,20 @@ async function cartaBase(){if(S.pro.length||!R.productos)return;const b=$('#tBas
 function mpDemo(){if(R.resto)return mpDemoResto();const P=S.pro.filter(p=>p.activo!==false).slice(0,6),it=(i,c)=>{const p=P[i%Math.max(1,P.length)]||{id:'x',nombre:'Batido',precio:10,emoji:'🥤'};return{id:p.id,n:p.nombre,c,p:+p.precio,e:p.emoji}},t=m=>new Date(Date.now()-m*6e4).toISOString(),c=S.cli[0];
  const L=[{id:'m1',num:1,mesa:2,items:[it(2,2),it(4,1)],nota:'Sin azúcar porfa',nombre:c?c.nombre:'Lucía',cliente_id:c&&c.id,cliente_nombre:c&&c.nombre,estado:'servido',creado:t(34),cambio:t(20)},
   {id:'m2',num:2,mesa:5,items:[it(0,1),it(3,1)],nombre:'Diego',estado:'preparando',creado:t(9),cambio:t(5)},
-  {id:'m3',num:3,mesa:1,items:[it(1,3)],nombre:'',estado:'nuevo',creado:t(1),cambio:t(1)}];
- L.forEach(p=>p.total=p.items.reduce((a,i)=>a+i.p*i.c,0));return{mesas:mpCfg(),abierto:true,pedidos:L}}
+  {id:'m3',num:3,mesa:1,items:[it(1,3)],nombre:'',estado:'nuevo',creado:t(1),cambio:t(1)},
+  {id:'m4',num:4,mesa:7,items:[it(5,1),it(2,1)],nombre:'Valeria',estado:'preparando',creado:t(6),cambio:t(3),yape_op:'04512873',yape_nom:'Valeria Soto',yape_at:t(2)}];
+ L.forEach(p=>p.total=p.items.reduce((a,i)=>a+i.p*i.c,0));return{v71:true,mesas:mpCfg(),abierto:true,pedidos:L}}
 async function mpRpc(f,a){
- if(DEMO){const p=(MP.pedidos||[]).find(x=>x.id===(a||{}).p_id);if(f==='xa_mesa_estado'&&p){p.estado=a.p_estado;p.cambio=new Date().toISOString();p.atendio=QUIEN()}
-  if(f==='xa_mesa_cobrar')(MP.pedidos||[]).filter(x=>a.p_ids.includes(x.id)).forEach(x=>{x.estado='pagado';x.pagado=new Date().toISOString();x.cobro=QUIEN();x.metodo=a.p_metodo;x.pago_id=a.p_pago});return p||{}}
+ if(DEMO){const p=(MP.pedidos||[]).find(x=>x.id===(a||{}).p_id);if(f==='xa_mesa_estado'&&p){p.estado=a.p_estado==='servido'&&p.pago_id?'pagado':a.p_estado;p.cambio=new Date().toISOString();p.atendio=QUIEN()}
+  if(f==='xa_mesa_cobrar')(MP.pedidos||[]).filter(x=>a.p_ids.includes(x.id)).forEach(x=>{x.estado=x.estado==='servido'?'pagado':x.estado;x.pagado=new Date().toISOString();x.cobro=QUIEN();x.metodo=a.p_metodo;x.pago_id=a.p_pago||'demo'});
+  if(f==='xa_mesa_yape_no')(MP.pedidos||[]).filter(x=>a.p_ids.includes(x.id)).forEach(x=>{x.yape_no='No llegó';x.yape_op=null});return p||{}}
  const{data,error}=await sb.rpc(f,a||{});if(error)throw error;return data}
 async function mpCargar(){if(!mpOn())return MP=null;if(DEMO){MP=MP||mpDemo();MP.mesas=mpCfg();return MP}
  try{MP=await mpRpc('xa_mesa_lista',{p_slug:SLUG||null});NEED50=false}catch(e){NEED50=/xa_mesa|function|schema/i.test(e.message||'');MP=MP||{pedidos:[]}}return MP}
 // Revisa pedidos nuevos cada 12 s en la vista y cada 30 s en el resto del panel (suena y avisa)
 let mpT=0;setInterval(async()=>{if(document.hidden||!mpOn()||!mpCfg().on||NEED50)return;const en=/^#\/(pedidos|cocina)/.test(location.hash)||R.resto&&/^(#\/inicio)?$/.test(location.hash);if(!en&&Date.now()-mpT<3e4)return;mpT=Date.now();
- const n0=mpNuevos(),ids=new Set((MP&&MP.pedidos||[]).map(p=>p.id)),j=JSON.stringify(MP&&MP.pedidos);await mpCargar();const nv=(MP.pedidos||[]).filter(p=>p.estado==='nuevo'&&!ids.has(p.id));
- if(nv.length&&MPn){beep(true);toast('🍽️ Nuevo pedido · Mesa '+nv.map(p=>p.mesa).join(', '))}MPn=1;
+ const n0=mpNuevos(),ids=new Set((MP&&MP.pedidos||[]).map(p=>p.id)),yids=new Set((MP&&MP.pedidos||[]).filter(mpYP).map(p=>p.id)),j=JSON.stringify(MP&&MP.pedidos);await mpCargar();const nv=(MP.pedidos||[]).filter(p=>p.estado==='nuevo'&&!ids.has(p.id)),ny=(MP.pedidos||[]).filter(p=>mpYP(p)&&!yids.has(p.id));
+ if(nv.length&&MPn){beep(true);toast('🍽️ Nuevo pedido · Mesa '+nv.map(p=>p.mesa).join(', '))}else if(ny.length&&MPn){beep(true);toast('📱 '+mesaN(ny[0].mesa)+' dice que pagó con Yape: revisa tu Yape y confírmalo')}MPn=1;
  if(mpNuevos()!==n0)shell();if(en&&JSON.stringify(MP.pedidos)!==j&&!document.querySelector('.ov'))go()},12000);
 function pedidosMesa(){
  if(!mpOn())return'<div class="empty"><b>🍽️</b>Los pedidos por QR vienen con Xyro Control.</div>';
@@ -2508,38 +2513,44 @@ function pedidosMesa(){
  setTimeout(()=>{const q=s=>$(s);q('#mpCfg')&&(q('#mpCfg').onclick=mpConfig);q('#mpAct')&&(q('#mpAct').onclick=mpConfig);q('#mpQR')&&(q('#mpQR').onclick=mpQRs);q('#mpSim')&&(q('#mpSim').onclick=mpSimular);
   q('#mpTom')&&(q('#mpTom').onclick=()=>mpTomar());q('#mpVer')&&(q('#mpVer').onclick=()=>window.open(mpLink(1),'_blank'));
   $$('[data-mpe]').forEach(b=>b.onclick=async()=>{const[id,e]=b.dataset.mpe.split('|');if(e==='cancelado'&&!confirm('¿Cancelar este pedido?'))return;b.disabled=true;try{await mpRpc('xa_mesa_estado',{p_id:id,p_estado:e});await mpCargar();toast(e==='servido'?'🍽️ Marcado como servido':e==='preparando'?'👨‍🍳 En preparación':'Pedido cancelado');shell();go()}catch(er){toast(er.message);b.disabled=false}});
-  $$('[data-mpc]').forEach(b=>b.onclick=()=>mpCobrar(+b.dataset.mpc.split('|')[0],b.dataset.mpc.split('|')[1]))});
+  $$('[data-mpc]').forEach(b=>b.onclick=()=>mpCobrar(+b.dataset.mpc.split('|')[0],b.dataset.mpc.split('|')[1]));
+  q('#mpYc')&&(q('#mpYc').onclick=mpYapeCfg);
+  $$('[data-mpy]').forEach(b=>b.onclick=()=>{const p=(MP.pedidos||[]).find(x=>x.id===b.dataset.mpy);if(!p)return;const L=mpAbiertos().filter(x=>mpYP(x)&&x.yape_op===p.yape_op);mpCobrar(p.mesa,'',L.map(x=>x.id))});
+  $$('[data-mpyn]').forEach(b=>b.onclick=async()=>{const p=(MP.pedidos||[]).find(x=>x.id===b.dataset.mpyn);if(!p||!confirm('¿No te llegó este Yape? Al cliente le saldrá que no lo encontraste.'))return;b.disabled=true;
+   try{await mpRpc('xa_mesa_yape_no',{p_ids:mpAbiertos().filter(x=>mpYP(x)&&x.yape_op===p.yape_op).map(x=>x.id)});await mpCargar();toast('Avisado al cliente');shell();go()}catch(er){toast(er.message);b.disabled=false}})});
  if(NEED50&&!DEMO)return`<div class="hi"><div><h2>🍽️ Pedidos de mesa</h2></div></div><div class="empty"><b>🧩</b>Para recibir pedidos por QR falta activar la función en tu base (<b>SQL 50</b>). Avísale a XyroStudio.</div>`;
  if(!C.on)return`<div class="hi"><div><h2>🍽️ Pedidos desde la mesa</h2><p class="mu">Tus ${R.clis.toLowerCase()} escanean el QR de su mesa, eligen del ${esc(tiendaN().toLowerCase())} y piden sin hacer cola.</p></div></div>
   <div class="card mpHero"><div class="mpSt">${[['📷','Escanea el QR de su mesa'],['🛒','Elige combos, promos y productos'],['🔔','Te llega el pedido al instante'],['💰','Paga al terminar y queda registrado']].map(([i,t],k)=>`<div style="animation-delay:${k*.08}s"><span>${i}</span><b>${t}</b></div>`).join('')}</div>
   <p class="mu sm">Solo muestra lo que tienes en stock y no recibe pedidos fuera de tu horario.</p>${adm?'<button class="btn p" id="mpAct">🚀 Activar pedidos por QR</button>':'<p class="sm">🔒 Solo el administrador del negocio puede activarlo (cuenta admin).</p>'}<button class="btn" id="mpVer" style="margin-left:6px">👀 Ver cómo lo ve el cliente</button></div>`;
- const A=mpAbiertos(),col=e=>A.filter(p=>p.estado===e),serv=col('servido'),mesas=[...new Set(serv.map(p=>p.mesa))].sort((a,b)=>a-b),mGr=mesas.filter(m=>+m).map(m=>[m,serv.filter(p=>p.mesa===m),'']).concat(serv.filter(p=>!+p.mesa).map(p=>[0,[p],p.id]));
+ const A=mpAbiertos(),col=e=>A.filter(p=>p.estado===e),servY=col('servido').filter(mpYP),serv=col('servido').filter(p=>!mpYP(p)),mesas=[...new Set(serv.map(p=>p.mesa))].sort((a,b)=>a-b),mGr=mesas.filter(m=>+m).map(m=>[m,serv.filter(p=>p.mesa===m),'']).concat(serv.filter(p=>!+p.mesa).map(p=>[0,[p],p.id]));
  const hoyP=(MP.pedidos||[]).filter(p=>p.estado==='pagado'),totH=hoyP.reduce((a,p)=>a+ +p.total,0);
  const card=p=>{const e=MPE[p.estado];return`<div class="card mpC ${p.estado}"><div class="mpH"><b class="mpM">${mesaN(p.mesa)}</b><span class="mu sm">#${p.num} · ${mpHace(p.creado)}</span></div>
   ${p.nombre||p.cliente_nombre?`<p class="sm">👤 ${esc(p.cliente_nombre||p.nombre)}${p.cliente_id?' <span class="pill act" style="font-size:10px">socio</span>':''}</p>`:''}
   <div class="mpI">${(p.items||[]).map(i=>`<div><b>${+i.c}×</b> ${esc(i.e||'')} ${esc(i.n)}</div>`).join('')}</div>${p.nota?`<p class="sm mpN">📝 ${esc(p.nota)}</p>`:''}
+  ${mpYP(p)?`<div class="mpY"><span>📱 <b>Dice que pagó con Yape</b> · op. <b>${esc(p.yape_op)}</b>${p.yape_nom?' · '+esc(p.yape_nom):''}${p.yape_at?' · '+mpHace(p.yape_at):''}<br><small class="mu">Revisa en tu Yape que llegó ${sol(mpAbiertos().filter(x=>mpYP(x)&&x.yape_op===p.yape_op).reduce((a,x)=>a+ +x.total,0))} con ese N.º de operación.</small></span><span class="b"><button class="btn sm" data-mpyn="${p.id}">✕ No llegó</button><button class="btn sm p" data-mpy="${p.id}" style="flex:1">✅ Llegó · confirmar</button></span></div>`:p.pago_id?`<div class="mpY ok">✅ Ya pagó${p.metodo?' con '+esc(p.metodo):''}. Al servirlo se cierra solo.</div>`:''}
   <div class="mpF"><b>${sol(p.total)}</b><span style="display:flex;gap:6px">${p.estado==='nuevo'?`<button class="btn sm" data-mpe="${p.id}|cancelado" title="Cancelar">✕</button><button class="btn sm p" data-mpe="${p.id}|preparando">👨‍🍳 Preparar</button>`:p.estado==='preparando'?`<button class="btn sm p" data-mpe="${p.id}|servido">${R.resto?'✅ Listo':'🍽️ Servido'}</button>`:''}</span></div></div>`};
  return`<div class="hi"><div><h2>${R.resto?'🧾 Pedidos':'🍽️ Pedidos de mesa'}</h2><p class="mu">${MP.abierto||DEMO?'<span style="color:var(--ok)">● Recibiendo pedidos</span>':'<span style="color:var(--bad)">● Cerrado ahora</span>'} · ${C.n} mesas · ${esc(h12(C.desde||''))}–${esc(h12(C.hasta||''))} · hoy ${hoyP.length} cobrados (${sol(totH)})</p></div>
- <div style="display:flex;gap:8px;flex-wrap:wrap">${R.resto?'<button class="btn p" id="mpTom">＋ Pedido</button>':''}${DEMO?'<button class="btn" id="mpSim">🧪 Simular pedido</button>':''}<button class="btn" id="mpQR">🖨️ QR de mesas</button>${adm?'<button class="btn" id="mpCfg">⚙️ Mesas y horario</button>':''}</div></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap">${R.resto?'<button class="btn p" id="mpTom">＋ Pedido</button>':''}${DEMO?'<button class="btn" id="mpSim">🧪 Simular pedido</button>':''}<button class="btn" id="mpQR">🖨️ QR de mesas</button>${adm&&mpY71()?`<button class="btn" id="mpYc">📱 Yape${C.yape&&C.yape.on?' ✓':''}</button>`:''}${adm?'<button class="btn" id="mpCfg">⚙️ Mesas y horario</button>':''}</div></div>
  <div class="mpB">
   <section><h3>🟡 Nuevos <span class="pill">${col('nuevo').length}</span></h3>${col('nuevo').map(card).join('')||'<p class="mu sm mpE">Sin pedidos nuevos. Suena cuando llega uno.</p>'}</section>
   <section><h3>👨‍🍳 Preparando <span class="pill">${col('preparando').length}</span></h3>${col('preparando').map(card).join('')||'<p class="mu sm mpE">Nada en preparación.</p>'}</section>
-  <section><h3>💰 Por cobrar <span class="pill">${mGr.length}</span></h3>${mGr.map(([m,L,id])=>{const t=L.reduce((a,p)=>a+ +p.total,0);return`<div class="card mpC servido"><div class="mpH"><b class="mpM">${mesaN(m)}</b><span class="mu sm">${L.length} pedido${L.length>1?'s':''}</span></div>
+  <section><h3>💰 Por cobrar <span class="pill">${mGr.length+servY.length}</span></h3>${servY.map(card).join('')}${mGr.map(([m,L,id])=>{const t=L.reduce((a,p)=>a+ +p.total,0);return`<div class="card mpC servido"><div class="mpH"><b class="mpM">${mesaN(m)}</b><span class="mu sm">${L.length} pedido${L.length>1?'s':''}</span></div>
    <div class="mpI">${L.flatMap(p=>p.items||[]).map(i=>`<div><b>${+i.c}×</b> ${esc(i.e||'')} ${esc(i.n)} <span class="mu">${sol(i.p*i.c)}</span></div>`).join('')}</div>
-   <button class="btn p" data-mpc="${m}|${id}" style="width:100%;margin-top:8px">Cobrar ${sol(t)}</button></div>`}).join('')||'<p class="mu sm mpE">Cuando sirvas un pedido, aquí sale cuánto paga cada mesa.</p>'}</section>
+   <button class="btn p" data-mpc="${m}|${id}" style="width:100%;margin-top:8px">Cobrar ${sol(t)}</button></div>`}).join('')||(servY.length?'':'<p class="mu sm mpE">Cuando sirvas un pedido, aquí sale cuánto paga cada mesa.</p>')}</section>
  </div>
  ${hoyP.length?`<div class="card"><h3>✅ Cobrados hoy</h3><div class="tl">${hoyP.slice().reverse().slice(0,30).map(p=>`<div class="row" style="padding:7px 6px"><span class="nm"><b>${mesaN(p.mesa)} · #${p.num}${p.cliente_nombre?' · '+esc(p.cliente_nombre):''}</b><small>${(p.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ')} · ${esc(p.metodo||'')} · ${p.pagado?fH(p.pagado):''}${p.cobro?' · '+esc(p.cobro):''}</small></span><b>${sol(p.total)}</b></div>`).join('')}</div></div>`:''}`;
 }
-function mpCobrar(m,id){
- const L=mpAbiertos().filter(p=>p.estado==='servido'&&p.mesa===m&&(!id||p.id===id));if(!L.length)return;
+function mpCobrar(m,id,yp){
+ const L=yp?mpAbiertos().filter(p=>yp.includes(p.id)):mpAbiertos().filter(p=>p.estado==='servido'&&p.mesa===m&&(!id||p.id===id)&&!mpYP(p));if(!L.length)return;const yop=yp&&(L[0]||{}).yape_op;
  const tot=Math.round(L.reduce((a,p)=>a+ +p.total,0)*100)/100,cl=(L.find(p=>p.cliente_id)||{}).cliente_id||'',items=[];
  L.flatMap(p=>p.items||[]).forEach(i=>{const o=items.find(x=>x.id===i.id&&x.p===+i.p);o?o.c+=+i.c:items.push({id:i.id,n:i.n,c:+i.c,p:+i.p})});
- form('💰 '+mesaN(m)+' · '+sol(tot),[...pagoFields(()=>tot),...(R.resto?[]:[{k:'cliente',l:R.cli+' (opcional, queda en su historial)',t:'sel',v:cl,o:[['','—']].concat(S.cli.map(c=>[c.id,(c.num?'#'+c.num+' ':'')+c.nombre]))}]),...compFields()],async v=>{
+ const pf=pagoFields(()=>tot);if(yop)pf[0].v='Yape';
+ form((yop?'📱 Confirmar Yape · ':'💰 ')+mesaN(m)+' · '+sol(tot),[...(yop?[{t:'h',k:'hy',l:'Op. '+esc(yop)+(L[0].yape_nom?' · '+esc(L[0].yape_nom):'')+' · confirma solo si ya lo viste en tu Yape'}]:[]),...pf,...(R.resto?[]:[{k:'cliente',l:R.cli+' (opcional, queda en su historial)',t:'sel',v:cl,o:[['','—']].concat(S.cli.map(c=>[c.id,(c.num?'#'+c.num+' ':'')+c.nombre]))}]),...compFields()],async v=>{
   valComp(v);valSplit(v,tot);
-  const pg=await pagar({concepto:tiendaN()+' · '+(+m?'Mesa '+m:'Para llevar')+': '+items.map(i=>i.c+'× '+i.n).join(', '),items,monto:tot,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:QUIEN()},v);
+  const pg=await pagar({concepto:tiendaN()+' · '+(+m?'Mesa '+m:'Para llevar')+': '+items.map(i=>i.c+'× '+i.n).join(', ')+(yop&&v.metodo==='Yape'?' · Yape op. '+yop:''),items,monto:tot,metodo:v.metodo,cliente_id:v.cliente||null,fecha:new Date().toISOString(),quien:QUIEN()},v);
   for(const i of items)if(S.pro.some(p=>p.id===i.id))await DB.stock(i.id,-i.c,'venta',+m?'Mesa '+m:'Para llevar');
   await mpRpc('xa_mesa_cobrar',{p_ids:L.map(p=>p.id),p_metodo:v.metodo,p_pago:pg&&pg.id||null,p_cliente:v.cliente||null});
-  await mpCargar();shell();go();await finCobro(pg,v,(+m?'Mesa '+m+' cobrada':'Pedido para llevar cobrado'));
+  await mpCargar();shell();go();await finCobro(pg,v,yop?'Yape confirmado ✓':(+m?'Mesa '+m+' cobrada':'Pedido para llevar cobrado'));
  });
 }
 function mpConfig(){if(!isAdmin())return;const C=mpCfg(),D=[['1','Lun'],['2','Mar'],['3','Mié'],['4','Jue'],['5','Vie'],['6','Sáb'],['0','Dom']];
@@ -2559,7 +2570,16 @@ function mpConfig(){if(!isAdmin())return;const C=mpCfg(),D=[['1','Lun'],['2','Ma
   const off=el.querySelector('#mpOff');off&&(off.onclick=async()=>{await DB.cfg({mesas:Object.assign(C,{on:false})});close();toast('Pedidos por QR apagados');go()});
   el.querySelector('#mpf').onsubmit=async e=>{e.preventDefault();const n=Math.min(200,Math.max(1,Math.round(+el.querySelector('#mpn').value)||0)),d=[...el.querySelectorAll('.mpD .on')].map(b=>+b.dataset.d);
    const er=el.querySelector('.err');if(!d.length){er.textContent='Elige al menos un día';er.hidden=false;return}
-   try{const nuevo=!C.on;await DB.cfg({mesas:{on:true,n,desde:el.querySelector('#mpd').value||'',hasta:el.querySelector('#mph').value||'',dias:d.length===7?[]:d,pausa:el.querySelector('#mpp').checked,geo:G,radio:+(el.querySelector('#mpR')||{}).value||150}});close();MP=null;toast(nuevo?'🎉 Listo. Descarga los QR de tus mesas':'Guardado ✓');go();if(nuevo)setTimeout(mpQRs,500)}catch(x){er.textContent=x.message;er.hidden=false}}})}
+   try{const nuevo=!C.on;await DB.cfg({mesas:{yape:C.yape,on:true,n,desde:el.querySelector('#mpd').value||'',hasta:el.querySelector('#mph').value||'',dias:d.length===7?[]:d,pausa:el.querySelector('#mpp').checked,geo:G,radio:+(el.querySelector('#mpR')||{}).value||150}});close();MP=null;toast(nuevo?'🎉 Listo. Descarga los QR de tus mesas':'Guardado ✓');go();if(nuevo)setTimeout(mpQRs,500)}catch(x){er.textContent=x.message;er.hidden=false}}})}
+/* ===== Cobrar con Yape en pedidos de mesa (SQL 71): el dinero va directo al Yape del negocio; el equipo confirma que llegó ===== */
+function mpYapeCfg(){if(!isAdmin())return;const C=mpCfg(),Y=C.yape||{};
+ form('📱 Cobrar con Yape',[{t:'h',k:'hy0',l:'Tus clientes pagan desde su mesa a tu Yape (sin comisiones). Te llega el aviso «Dice que pagó con Yape» y tú lo confirmas cuando lo veas en tu Yape.'},
+  {k:'on',l:'Recibir pagos con Yape en los pedidos de mesa',t:'chk',v:Y.on!==false},
+  {k:'num',l:'Número de Yape (9 dígitos)',req:1,v:Y.num||'',ph:'987654321',im:'tel',half:1},{k:'titular',l:'A nombre de (como sale en Yape)',v:Y.titular||'',ph:'Ej. Juan P. Pérez',half:1},
+  {k:'qr',l:'Foto de tu QR de Yape (opcional: en Yape → «Mi QR» → descargar)',t:'img',v:Y.qr||'',pref:'yape'}],async v=>{
+  const num=String(v.num||'').replace(/\D/g,'');if(!/^9\d{8}$/.test(num))throw new Error('Pon tu número de Yape de 9 dígitos (empieza con 9).');
+  await DB.cfg({mesas:Object.assign({},CFG.mesas||{},{yape:{on:!!v.on,num,titular:String(v.titular||'').trim().slice(0,60),qr:/^https:\/\//.test(v.qr||'')?v.qr:''}})});
+  toast(v.on?'📱 Listo: tus clientes ya pueden pagar con Yape desde su mesa':'Yape apagado');go()})}
 function mpQRs(){const n=mpCfg().n||0;if(!n)return mpConfig();
  sheet(`<h3>🖨️ QR de tus mesas</h3><p class="mu sm">Imprímelos en blanco (gastan poca tinta) y pega cada uno en su mesa. Cada QR dice su número.</p>
  <div class="mpQ">${Array.from({length:n},(_,i)=>`<button class="btn" data-mq="${i+1}">🪑 Mesa ${i+1}<small>⬇️ PNG</small></button>`).join('')}</div>
@@ -4114,7 +4134,7 @@ function demoResto(){
 }
 function mpDemoResto(){const P=S.pro.filter(p=>p.activo!==false),pick=(i,c)=>{const p=P[i%Math.max(1,P.length)];return{id:p.id,n:p.nombre,c,p:+p.precio,e:p.emoji}},t=m=>new Date(Date.now()-m*6e4).toISOString();
  const L=[[3,[[0,2],[5,1],[11,2]],'servido',41,'','Familia Ramos'],[7,[[1,1],[12,1]],'servido',26],[1,[[4,2],[13,2]],'preparando',14,R.cafe?'Uno sin azúcar':'Uno sin ají'],[9,[[2,1],[6,1],[10,2]],'preparando',8],[0,[[7,2],[11,1]],'nuevo',3,'','Para Jorge'],[5,[[3,1],[14,2]],'nuevo',1,R.cafe?'Leche deslactosada':'Término medio']];
- return{mesas:mpCfg(),abierto:true,pedidos:L.map(([mesa,its,estado,min,nota,nombre],i)=>{const items=its.map(([a,b])=>pick(a,b));return{id:'r'+i,num:31+i,mesa,items,total:items.reduce((a,x)=>a+x.p*x.c,0),nota:nota||'',nombre:nombre||'',estado,creado:t(min),cambio:t(Math.max(0,min-5))}})}}
+ return{v71:true,mesas:mpCfg(),abierto:true,pedidos:L.map(([mesa,its,estado,min,nota,nombre],i)=>{const items=its.map(([a,b])=>pick(a,b));return Object.assign({id:'r'+i,num:31+i,mesa,items,total:items.reduce((a,x)=>a+x.p*x.c,0),nota:nota||'',nombre:nombre||'',estado,creado:t(min),cambio:t(Math.max(0,min-5))},i===1?{yape_op:'04512873',yape_nom:'Valeria Soto',yape_at:t(2)}:{})})}}
 
 /* ===== Demo: datos de ejemplo realistas, todo en este navegador ===== */
 function semilla(rubro){
