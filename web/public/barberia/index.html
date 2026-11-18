@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>(nombre de la barbería) · Barbería</title>
+<meta name="description" content="Barbería: cortes, barba y estilo. Reserva tu hora en Mi Xyro.">
+<meta name="theme-color" content="#0b0b0c">
+<meta property="og:type" content="website"><meta property="og:locale" content="es_PE">
+<!-- Base Xyro Webs · Barbería. Todo sale del negocio (?s=codigo): app (nombre, logo, color, barberos, duración de servicios), planes, sedes y barber. Sin precios ni reservas en la web: se reserva en Mi Xyro. -->
+<link rel="icon" href="/img/marca/logo-webs-app.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://images.unsplash.com">
+<style>
+:root{--a:#d4a24c;--bg:#0b0b0c;--c1:#141416;--c2:#1b1b1f;--ln:#2a2a30;--tx:#f4f1ea;--mu:#a3a0a8;--r:20px}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font:16px/1.6 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom)}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}img{max-width:100%;display:block}
+.w{width:min(1180px,100% - 32px);margin:0 auto}
+h1,h2,.bb{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;letter-spacing:.02em;line-height:.95}
+.mk{opacity:.55;font-style:italic}
+.eyb{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--a)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:14px;font-weight:700;font-size:15px;border:1px solid var(--ln);background:var(--c2);transition:transform .15s,background .2s}
+.btn:active{transform:scale(.97)}.btn-p{background:var(--a);border-color:var(--a);color:#111}.btn-o{background:transparent}
+/* barra */
+.nav{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid #ffffff0d}
+.nav .w{display:flex;align-items:center;gap:18px;height:66px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;min-width:0}.brand span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg{width:38px;height:38px;border-radius:12px;background:var(--c2);display:grid;place-items:center;overflow:hidden;flex:none;font-size:20px}.lg img{width:100%;height:100%;object-fit:cover}
+.tabs{position:relative;display:flex;gap:4px;margin-left:auto}.tabs a{padding:8px 14px;border-radius:10px;font-weight:600;font-size:14px;color:var(--mu);position:relative;z-index:1;transition:color .2s}.tabs a.on{color:#111}
+#ind{position:absolute;left:0;top:0;height:100%;border-radius:10px;background:var(--a);transition:transform .35s cubic-bezier(.3,1.3,.5,1),width .35s}
+.nav .btn{padding:10px 16px;font-size:14px}
+@media(max-width:900px){.tabs,.nav .btn{display:none}}
+/* dock en celular */
+.dock{display:none}
+@media(max-width:900px){.dock{display:flex;position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:40;background:#17171bf2;backdrop-filter:blur(14px);border:1px solid var(--ln);border-radius:20px;padding:6px;justify-content:space-around}
+ .dock a{flex:1;display:grid;justify-items:center;gap:2px;padding:7px 0;border-radius:14px;font-size:11px;font-weight:600;color:var(--mu)}.dock a i{font-style:normal;font-size:19px}.dock a.on{background:var(--a);color:#111}
+ body{padding-bottom:96px}}
+/* portada */
+.hero{position:relative;min-height:min(88svh,760px);display:flex;align-items:flex-end;padding:0 0 56px;overflow:hidden}
+.hero .bg{position:absolute;inset:0;background:radial-gradient(120% 80% at 80% 0%,color-mix(in srgb,var(--a) 30%,transparent),transparent 60%),repeating-linear-gradient(135deg,#151518 0 22px,#111113 22px 44px)}
+.hero .bg img{width:100%;height:100%;object-fit:cover;opacity:.55;transform:scale(1.06);animation:zoom 18s ease-out forwards}
+@keyframes zoom{to{transform:scale(1)}}
+.hero .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--bg) 4%,#0b0b0cb0 45%,#0b0b0c40)}
+.hero .w{position:relative}
+.hero h1{font-size:clamp(64px,13vw,150px);margin:10px 0 6px}.hero h1 em{font-style:normal;color:var(--a);display:block}
+.hero p.sub{max-width:520px;color:#d9d5cd;font-size:clamp(16px,2vw,18px)}
+.hero .ac{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.live{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:99px;background:#ffffff10;border:1px solid #ffffff1a;font-size:13px;font-weight:600;margin-bottom:6px}
+.live i{width:8px;height:8px;border-radius:50%;background:#3ddc97;box-shadow:0 0 0 0 #3ddc97;animation:pl 1.8s infinite}.live.off i{background:#ff5c7a;animation:none}
+@keyframes pl{70%{box-shadow:0 0 0 9px #3ddc9700}}
+/* poste de barbería */
+.pole{position:absolute;right:max(16px,calc((100vw - 1180px)/2));top:90px;width:26px;height:190px;border-radius:14px;overflow:hidden;border:3px solid #e9e4da;box-shadow:0 0 40px #0008;background:repeating-linear-gradient(45deg,#e8e4dc 0 12px,#c8102e 12px 24px,#e8e4dc 24px 36px,#1d4ed8 36px 48px);background-size:100% 68px;animation:pole 1.6s linear infinite}
+@keyframes pole{to{background-position:0 68px}}
+@media(max-width:700px){.pole{top:80px;height:120px;width:18px}}
+/* cinta */
+.tape{border-block:1px solid var(--ln);background:var(--c1);overflow:hidden;white-space:nowrap}
+.tape div{display:inline-flex;gap:38px;padding:14px 0;animation:tape 32s linear infinite;font-family:"Bebas Neue";font-size:24px;letter-spacing:.06em;color:var(--mu)}.tape b{color:var(--a);font-weight:400}
+@keyframes tape{to{transform:translateX(-50%)}}
+section{padding:64px 0}
+.hd{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}.hd h2{font-size:clamp(42px,6vw,64px)}
+/* servicios */
+.sv{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.sc{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);padding:20px;display:grid;gap:8px;transition:transform .25s,border-color .25s;text-align:left}
+.sc:hover{transform:translateY(-3px);border-color:var(--a)}
+.sc .t{display:flex;align-items:center;gap:12px}.sc .e{width:46px;height:46px;border-radius:14px;background:var(--c2);display:grid;place-items:center;font-size:22px;flex:none}
+.sc h3{font-size:17px;line-height:1.25}.sc p{color:var(--mu);font-size:14px}.sc small{color:var(--a);font-weight:700;font-size:13px}
+/* barberos */
+.bs{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.bc{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);overflow:hidden}
+.bc .ph{aspect-ratio:4/3;background:linear-gradient(135deg,var(--c),#111);display:grid;place-items:center;font-family:"Bebas Neue";font-size:84px;color:#ffffffd0;position:relative}.bc .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bc .bd{padding:16px 18px 18px;display:grid;gap:6px}.bc h3{font-size:19px}.bc p{color:var(--mu);font-size:14px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:700;background:#ffffff10;justify-self:start}.pill.ok{background:#3ddc9722;color:#3ddc97}
+.dias{display:flex;gap:4px}.dias span{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--c2);color:#666}.dias span.on{background:color-mix(in srgb,var(--a) 22%,transparent);color:var(--a)}
+/* galería */
+.gal{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.gal div{aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:var(--c2)}.gal div:nth-child(1){grid-row:span 2;aspect-ratio:auto}
+.gal img{width:100%;height:100%;object-fit:cover;transition:transform .5s}.gal div:hover img{transform:scale(1.05)}
+@media(max-width:700px){.gal{grid-template-columns:1fr 1fr}.gal div:nth-child(1){grid-row:auto;aspect-ratio:3/4}}
+/* banner Mi Xyro */
+.app{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;background:linear-gradient(135deg,var(--c1),#101012);border:1px solid var(--ln);border-radius:28px;padding:clamp(22px,4vw,44px);position:relative;overflow:hidden}
+.app::before{content:"";position:absolute;width:340px;height:340px;right:-120px;top:-140px;border-radius:50%;background:radial-gradient(color-mix(in srgb,var(--a) 40%,transparent),transparent 70%)}
+.app h2{font-size:clamp(40px,5vw,58px)}.app ul{list-style:none;display:grid;gap:8px;margin:16px 0 20px}.app li{display:flex;gap:10px;color:#d9d5cd}
+.qr{background:#fff;border-radius:22px;padding:14px;justify-self:center;width:min(240px,100%);display:grid;gap:6px;text-align:center;color:#111;position:relative}.qr svg{width:100%;height:auto}.qr small{font-size:12px;font-weight:600}
+@media(max-width:800px){.app{grid-template-columns:1fr}}
+/* local */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:800px){.two{grid-template-columns:1fr}}
+.card{background:var(--c1);border:1px solid var(--ln);border-radius:var(--r);padding:22px}.card h3{font-size:18px;margin-bottom:8px}
+.card ul{list-style:none;display:grid;gap:6px;color:#d9d5cd}.map{border:0;width:100%;height:280px;border-radius:16px;margin-top:12px;filter:grayscale(.6) invert(.9) hue-rotate(180deg)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips span{padding:7px 12px;border-radius:99px;background:var(--c2);font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}.steps div{background:var(--c1);border:1px solid var(--ln);border-radius:18px;padding:18px}.steps b{font-family:"Bebas Neue";font-size:40px;color:var(--a);display:block;line-height:1}
+@media(max-width:700px){.steps{grid-template-columns:1fr}}
+footer{border-top:1px solid var(--ln);padding:34px 0 40px;color:var(--mu);font-size:14px}footer .w{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s,transform .6s}.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body data-r="inicio">
+<header class="nav"><div class="w"><a class="brand" href="#/"><span class="lg" id="lg">💈</span><span data-nom></span></a>
+ <nav class="tabs" id="tabs"><i id="ind"></i><a href="#/" data-r="inicio">Inicio</a><a href="#/servicios" data-r="servicios">Servicios</a><a href="#/barberos" data-r="barberos">Barberos</a><a href="#/local" data-r="local">Horario y local</a></nav>
+ <a class="btn btn-p" href="#/reservar">📱 Reservar en Mi Xyro</a></div></header>
+<main id="app"></main>
+<footer><div class="w"><span>© <span id="yr"></span> <span data-nom></span></span><span>Web hecha con <a href="https://xyrostudio.net" style="color:var(--a)">Xyro Webs</a></span></div></footer>
+<nav class="dock"><a href="#/" data-r="inicio"><i>💈</i>Inicio</a><a href="#/servicios" data-r="servicios"><i>✂️</i>Servicios</a><a href="#/reservar" data-r="reservar"><i>📱</i>Reservar</a><a href="#/barberos" data-r="barberos"><i>🧔</i>Barberos</a><a href="#/local" data-r="local"><i>📍</i>Local</a></nav>
+<script>
+/* Base Xyro Webs · Barbería. /barberia/?s=slug lee lo público del negocio (contenido): nombre, logo, color, barberos y duración de
+   servicios de Xyro Apps ('app'), servicios ('planes'), sedes ('sedes') y textos/fotos propios ('barber').
+   Lo que falte sale de la base con marcadores «(nombre de la barbería)». Vista de venta: ?n=Nombre&c=hex&l=logo. Solo lectura. */
+(function(){
+const SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
+const Q=new URLSearchParams(location.search),SLUG=(Q.get('s')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const hm=s=>{const[a,b]=String(s||'0:0').split(':');return(+a||0)*60+(+b||0)};
+const h12=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||'');if(!m)return h||'';const x=+m[1];return(x%12||12)+(m[2]==='00'?'':':'+m[2])+' '+(x<12?'am':'pm')};
+const DN=['Do','Lu','Ma','Mi','Ju','Vi','Sá'],DL=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const U=id=>'https://images.unsplash.com/photo-'+id+'?auto=format&fit=crop&w=1100&q=70';
+const IMG={hero:U('1503951914875-452162b0f3f1'),gal:['1621605815971-fbc98d665033','1599351431202-1e0f0137899a','1622286342621-4bd786c2447c','1585747860715-2ba37e788b70','1605497788044-5a32c7078486'].map(U)};
+const DUR={'Corte clásico':30,'Corte + barba':45,'Fade / degradado':40,'Perfilado de barba':20,'Afeitado clásico con toalla':30,'Corte niño':25,'Cejas':10,'Diseño / líneas':15,'Tinte / color':60,'Lavado y peinado':20};
+const EMO=n=>{n=String(n).toLowerCase();return/barba|afeit|navaja/.test(n)?'🧔':/fade|degrad/.test(n)?'💈':/niñ/.test(n)?'👦':/ceja/.test(n)?'👁️':/dise|l[ií]nea/.test(n)?'〰️':/tinte|color|decolor/.test(n)?'🎨':/lav|peina|masaj/.test(n)?'🫧':'✂️'};
+const DESC={'Corte clásico':'Tijera y máquina, terminado con navaja y peinado.','Corte + barba':'El combo de siempre: corte completo y barba perfilada.','Fade / degradado':'Degradado limpio, bajo, medio o alto, como lo pidas.','Perfilado de barba':'Líneas marcadas, rebaje y aceite para barba.','Afeitado clásico con toalla':'Toalla caliente, espuma y navaja. Ritual completo.','Corte niño':'Con paciencia, para que salgan felices.','Cejas':'Limpieza y perfilado con navaja.','Diseño / líneas':'Líneas y diseños a mano alzada.','Tinte / color':'Color, platinado o cubrir canas.','Lavado y peinado':'Lavado, masaje y peinado con producto.'};
+const BASE=n=>({nombre:n||'(nombre de la barbería)',wa:'51936449066',distrito:'(distrito)',
+ servicios:['Corte clásico','Fade / degradado','Corte + barba','Perfilado de barba','Afeitado clásico con toalla','Diseño / líneas','Corte niño','Cejas'].map(x=>({n:x,d:DESC[x]||''})),
+ profs:[{id:'a',n:'(barbero 1)',esp:'Fades y diseños',color:'#d4a24c',dias:[1,2,3,4,5,6],desde:'10:00',hasta:'21:00'},{id:'b',n:'(barbero 2)',esp:'Clásicos y barba con toalla',color:'#3ad6ff',dias:[2,3,4,5,6,0],desde:'10:00',hasta:'20:00'},{id:'c',n:'(barbero 3)',esp:'Cortes de niño y color',color:'#3ddc97',dias:[1,3,5,6,0],desde:'13:00',hasta:'21:00'}],
+ sedes:[{nombre:'Local (distrito)',direccion:'Av. (dirección) 123, (distrito)',maps:''}],svDur:{},
+ pagos:['💵 Efectivo','📱 Yape','📱 Plin','💳 Tarjeta']});
+async function rest(p){const r=await fetch(SB.url+'/rest/v1/'+p,{headers:{apikey:SB.key,Authorization:'Bearer '+SB.key}});if(!r.ok)throw new Error(r.status);return r.json()}
+async function cargar(){
+ const B=BASE(SLUG?'':(Q.get('n')||'').slice(0,40));let D={...B,color:/^[0-9a-f]{6}$/i.test(Q.get('c')||'')?'#'+Q.get('c'):'',logo:/^https:\/\//.test(Q.get('l')||'')?Q.get('l'):''};
+ if(!SLUG)return D;
+ try{const s=(await rest('sitios?select=id,negocio&slug=eq.'+encodeURIComponent(SLUG)))[0];if(!s)return D;
+  const C={};(await rest('contenido?select=clave,valor&sitio_id=eq.'+s.id)).forEach(r=>C[r.clave]=r.valor);
+  const app=C.app||{},bw=C.barber||{},pf=app.perfil||{};D.nombre=app.nombre||s.negocio||D.nombre;D.color=app.color||'';D.logo=app.logo||'';D.svDur=app.svDur||{};
+  const pr=(app.profesionales||[]).filter(p=>p.activo!==false);if(pr.length)D.profs=pr.map(p=>({id:p.id,n:p.n,esp:p.esp,color:p.color,dias:p.dias,desde:p.desde,hasta:p.hasta,foto:/^https:/.test(p.foto||'')?p.foto:''}));
+  const pl=Array.isArray(C.planes)?C.planes.filter(p=>p&&p.nombre&&p.activo!==false):[];if(pl.length)D.servicios=pl.map(p=>({n:p.nombre,d:p.desc||p.descripcion||DESC[p.nombre]||''}));
+  const se=Array.isArray(C.sedes)&&C.sedes.length?C.sedes:Array.isArray(pf.sedes)&&pf.sedes.length?pf.sedes:null;if(se)D.sedes=se;
+  const w=(D.sedes.find(x=>x.whatsapp)||{}).whatsapp||pf.whatsapp||(C.bot&&C.bot.whatsapp);if(w)D.wa=String(w).replace(/\D/g,'').replace(/^9(\d{8})$/,'519$1');
+  const fo=bw.fotos||{};if(/^https:/.test(fo.hero||''))IMG.hero=fo.hero;const g=(Array.isArray(fo.gal)?fo.gal:[]).filter(u=>/^https:/.test(u||''));if(g.length)IMG.gal=g;
+  ['hero','lema','sub','distrito','anios','pagos','sec','appT','appX'].forEach(k=>{if(bw[k]!=null&&bw[k]!=='')D[k]=bw[k]});
+  if(pf.distrito&&!bw.distrito)D.distrito=pf.distrito;
+ }catch(e){console.warn('Muestro la base',e)}
+ return D;
+}
+const mk=s=>esc(s).replace(/\((nombre[^)]*|distrito|dirección|barbero \d)\)/g,'<span class="mk">($1)</span>');
+const ini=n=>String(n).replace(/[()«»"]/g,'').trim().split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase()||'💈';
+
+cargar().then(D=>{
+ if(D.color)document.documentElement.style.setProperty('--a',D.color);
+ const N=D.nombre,NL=N.replace(/[()]/g,'');document.title=NL+' · Barbería';$$('[data-nom]').forEach(e=>e.innerHTML=mk(N));$('#yr').textContent=new Date().getFullYear();
+ if(D.logo)$('#lg').innerHTML=`<img src="${esc(D.logo)}" alt="">`;
+ const SEC=k=>(D.sec||{})[k]!==false,MSL=SLUG||(Q.get('m')||'').toLowerCase().replace(/[^a-z0-9-]/g,''),APP='https://xyrostudio.net/mi/'+(MSL?'?n='+encodeURIComponent(MSL):'');
+ const wa=t=>'https://wa.me/'+D.wa+'?text='+encodeURIComponent(t);
+ const S=D.servicios.map(s=>({...s,e:EMO(s.n),m:+(D.svDur||{})[s.n]||DUR[s.n]||0})),P=D.profs;
+ // Hora de Lima para saber si está abierto
+ const L=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Lima'})),dw=L.getDay(),nm=L.getHours()*60+L.getMinutes();
+ const hoyAt=p=>(p.dias||[1,2,3,4,5,6]).includes(dw),ahora=p=>hoyAt(p)&&nm>=hm(p.desde||'10:00')&&nm<hm(p.hasta||'20:00');
+ const nAhora=P.filter(ahora).length,abre=P.filter(hoyAt).map(p=>hm(p.desde||'10:00')).filter(m=>m>nm).sort((a,b)=>a-b)[0];
+ const live=nAhora?`<span class="live"><i></i>Abierto ahora · ${nAhora} barbero${nAhora>1?'s':''} atendiendo</span>`:`<span class="live off"><i></i>Cerrado ahora${abre!=null?' · abrimos '+h12(String(Math.floor(abre/60)).padStart(2,'0')+':'+String(abre%60).padStart(2,'0')):''}</span>`;
+ const rango=()=>{const a=Math.min(...P.map(p=>hm(p.desde||'10:00'))),b=Math.max(...P.map(p=>hm(p.hasta||'20:00'))),f=m=>h12(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));return f(a)+' a '+f(b)};
+ const diasTxt=()=>{const s=new Set();P.forEach(p=>(p.dias||[1,2,3,4,5,6]).forEach(d=>s.add(d)));const o=[1,2,3,4,5,6,0].filter(d=>s.has(d));return o.length===7?'Todos los días':o.length===6&&!s.has(0)?'Lunes a sábado':o.map(d=>DL[d]).join(', ')};
+ const svc=(s,i)=>`<div class="sc rv"><div class="t"><span class="e">${esc(s.e)}</span><div><h3>${esc(s.n)}</h3>${s.m?`<small>⏱️ ${s.m} min</small>`:''}</div></div>${s.d?`<p>${esc(s.d)}</p>`:''}</div>`;
+ const brb=p=>`<div class="bc rv"><div class="ph" style="--c:${esc(p.color||'#333')}">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy" onerror="this.remove()">`:''}${esc(ini(p.n))}</div><div class="bd"><h3>${mk(p.n)}</h3>${p.esp?`<p>${esc(p.esp)}</p>`:''}<div class="dias">${[1,2,3,4,5,6,0].map(d=>`<span class="${(p.dias||[1,2,3,4,5,6]).includes(d)?'on':''}">${DN[d]}</span>`).join('')}</div><p style="font-size:13px">${h12(p.desde||'10:00')} a ${h12(p.hasta||'20:00')}</p>${ahora(p)?'<span class="pill ok">● Atendiendo ahora</span>':hoyAt(p)?'<span class="pill">Hoy atiende</span>':'<span class="pill">Hoy descansa</span>'}</div></div>`;
+ const appB=()=>`<div class="app rv"><div style="position:relative"><span class="eyb">Mi Xyro</span><h2>${esc(D.appT||'Reserva tu corte en Mi Xyro')}</h2><p style="color:#d9d5cd;margin-top:8px">${esc(D.appX||'Elige servicio, barbero y una hora libre. Llegas y te sientas, sin esperar.')}</p>
+  <ul><li>✂️ Ves solo las horas libres de tu barbero</li><li>⭐ Juntas sellos y ganas cortes gratis</li><li>🎁 Promos solo para quienes nos guardan</li></ul>
+  <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-p" href="${esc(APP)}">📱 Abrir Mi Xyro</a><a class="btn btn-o" target="_blank" rel="noopener" href="${wa('Hola '+NL+', quiero información 🙂')}">💬 Pedir información</a></div></div>
+  <div class="qr" id="qrw"><small>Cargando QR…</small></div></div>`;
+ const V={
+  inicio:()=>`<section class="hero" style="padding-top:40px"><div class="bg"><img src="${esc(IMG.hero)}" alt="" onerror="this.remove()"></div><i class="pole" aria-hidden="true"></i><div class="w">${live}<span class="eyb" style="display:block">Barbería${D.distrito?' · '+mk(D.distrito):''}${D.anios?' · '+esc(D.anios)+' años cortando':''}</span>
+    <h1>${esc(D.hero||'Tu estilo,')}<em>${esc(D.lema||'bien hecho.')}</em></h1><p class="sub">${esc(D.sub||'Cortes clásicos y modernos, fades limpios y barba con toalla caliente. Reserva en Mi Xyro y te atendemos a tu hora.')}</p>
+    <div class="ac"><a class="btn btn-p" href="#/reservar">📱 Reservar mi hora</a><a class="btn" href="#/servicios">✂️ Ver servicios</a></div></div></section>
+   <div class="tape"><div>${[0,1].map(()=>S.map(s=>`<span>${esc(s.n)}</span><b>✦</b>`).join('')).join('')}</div></div>
+   ${SEC('serv')?`<section><div class="w"><div class="hd"><div><span class="eyb">Lo que hacemos</span><h2>Servicios</h2></div><a class="btn" href="#/servicios">Ver todos →</a></div><div class="sv">${S.slice(0,4).map(svc).join('')}</div></div></section>`:''}
+   ${SEC('gal')&&IMG.gal.length?`<section style="padding-top:0"><div class="w"><div class="hd"><div><span class="eyb">Nuestro trabajo</span><h2>Cortes de la casa</h2></div></div><div class="gal">${IMG.gal.slice(0,5).map(u=>`<div class="rv"><img src="${esc(u)}" alt="" loading="lazy" onerror="this.parentNode.remove()"></div>`).join('')}</div></div></section>`:''}
+   ${SEC('equipo')?`<section style="padding-top:0"><div class="w"><div class="hd"><div><span class="eyb">El equipo</span><h2>Barberos</h2></div><a class="btn" href="#/barberos">Ver horarios →</a></div><div class="bs">${P.slice(0,3).map(brb).join('')}</div></div></section>`:''}
+   ${SEC('app')?`<section style="padding-top:0"><div class="w">${appB()}</div></section>`:''}`,
+  servicios:()=>`<section><div class="w"><div class="hd"><div><span class="eyb">${S.length} servicios</span><h2>Servicios</h2></div></div><div class="sv">${S.map(svc).join('')}</div>
+   <div class="card rv" style="margin-top:18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between"><p>¿Te gustó alguno? Resérvalo en Mi Xyro con tu barbero favorito.</p><a class="btn btn-p" href="#/reservar">📱 Reservar</a></div></div></section>`,
+  barberos:()=>`<section><div class="w"><div class="hd"><div><span class="eyb">${diasTxt()} · ${rango()}</span><h2>Barberos</h2></div></div><div class="bs">${P.map(brb).join('')}</div></div></section>`,
+  reservar:()=>`<section><div class="w"><div class="hd"><div><span class="eyb">Sin esperar</span><h2>Reserva en Mi Xyro</h2></div></div>${appB()}
+   <div class="steps"><div class="rv"><b>1</b><h3>Escanea o toca</h3><p style="color:var(--mu)">Abre Mi Xyro con el QR y guárdanos.</p></div><div class="rv"><b>2</b><h3>Elige</h3><p style="color:var(--mu)">Servicio, barbero y una hora libre.</p></div><div class="rv"><b>3</b><h3>Llega y siéntate</h3><p style="color:var(--mu)">Te confirmamos ahí mismo. Juntas sellos con cada corte.</p></div></div></div></section>`,
+  local:()=>`<section><div class="w"><div class="hd"><div><span class="eyb">Te esperamos</span><h2>Horario y local</h2></div></div><div class="two">
+   <div class="card rv"><h3>🕒 Horario</h3><ul><li><b>${diasTxt()}</b></li><li>${rango()}</li></ul><p style="margin-top:10px">${live}</p>
+    <h3 style="margin-top:18px">💳 Medios de pago</h3><div class="chips">${(D.pagos||[]).map(p=>`<span>${esc(p)}</span>`).join('')}</div></div>
+   ${D.sedes.map(s=>{const real=s.direccion&&!/\(dirección\)/.test(s.direccion);return`<div class="card rv"><h3>📍 ${mk(s.nombre||'Local')}</h3><p style="color:#d9d5cd">${mk(s.direccion||'')}</p>${real?`<iframe class="map" loading="lazy" src="https://maps.google.com/maps?q=${encodeURIComponent(s.direccion+(s.distrito?', '+s.distrito:''))}&z=16&output=embed" title="Mapa"></iframe><a class="btn" style="margin-top:12px" target="_blank" rel="noopener" href="${esc(/^https:/.test(s.maps||'')?s.maps:'https://maps.google.com/?q='+encodeURIComponent(s.direccion))}">🧭 Cómo llegar</a>`:''}</div>`}).join('')}
+   </div></div></section>`
+ };
+ async function qrPinta(){const el=$('#qrw');if(!el)return;try{if(!window.qrcode)await new Promise((ok,ko)=>{const t=document.createElement('script');t.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';t.onload=ok;t.onerror=ko;document.head.appendChild(t)});
+  const q=qrcode(0,'M');q.addData(APP);q.make();el.innerHTML=q.createSvgTag({cellSize:5,margin:2,scalable:true})+'<small>Escanéalo y reserva en '+esc(NL)+'</small>'}catch(_){el.innerHTML='<a class="btn btn-p" href="'+esc(APP)+'">Abrir Mi Xyro</a>'}}
+ const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.08});
+ const ind=()=>{const a=$('#tabs a.on'),i=$('#ind');if(!a){i.style.width='0';return}i.style.width=a.offsetWidth+'px';i.style.transform='translateX('+a.offsetLeft+'px)'};
+ const render=()=>{const r=(location.hash.match(/^#\/(\w+)/)||[])[1]||'inicio',k=V[r]?r:'inicio';document.body.dataset.r=k;
+  $('#app').innerHTML=V[k]();scrollTo({top:0,behavior:'instant'});$$('[data-r]').forEach(a=>a.classList.toggle('on',a.dataset.r===k));ind();
+  $$('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*.07+'s';io.observe(el)});qrPinta()};
+ addEventListener('hashchange',render);addEventListener('resize',ind);render();
+});
+})();
+</script>
+</body>
+</html>

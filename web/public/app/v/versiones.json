@@ -1,5 +1,22 @@
 [
  {
+  "id": "20261117-1931",
+  "fecha": "2026-11-17 19:31",
+  "titulo": "Barberías: nuevo ecosistema",
+  "notas": "Barberías: nuevo ecosistema",
+  "cambios": [
+   "Agenda por barbero con duración por servicio",
+   "🚶 Llegó sin cita: cola con tiempo de espera y el primer barbero libre",
+   "💸 Comisiones por barbero (el barbero ve sus ganancias)",
+   "✂️ Terminar corte: anota cómo le gusta y cobra",
+   "Clientes por volver a los 30 días, sellos y reservas desde Mi Xyro"
+  ],
+  "requiere": "SQL 74",
+  "rubros": [
+   "barberia"
+  ]
+ },
+ {
   "id": "20261117-1718",
   "fecha": "2026-11-17 17:18",
   "titulo": "Todo en Mi Xyro web",
