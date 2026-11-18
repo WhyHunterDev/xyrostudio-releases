@@ -2146,14 +2146,15 @@ async function plusAbrir(){vib();if(!D)return toast('Entra a tu cuenta');let I2;
   o.querySelector('#xpg').onclick=()=>{close();pagoTicket({titulo:'⭐ Xyro+ · 1 mes',monto:I2.precio,moneda:I2.moneda,args:{p_tipo:'PLUS'},ok:()=>{PLI=null;XEC=0}})}})}
 const rulLab=p=>p.tipo==='pts'?'+'+p.valor:p.tipo==='mult'?'x'+p.valor:p.tipo==='frame'?'🖼️':p.tipo==='plus_day'?'⭐ 1d':p.tipo==='plus_disc'?'-'+Math.round(p.valor*100)+'%':'🎁';
 async function ruletaAbrir(){vib();if(!D)return toast('Entra a tu cuenta');try{XR=await rpc('xy_ruleta_estado')}catch(e){return toast(errDe(e))}
- const P=XR.premios||[],n=P.length||1,seg=360/n;let rot=0,gira=false;
- const bg=`conic-gradient(${P.map((_,i)=>`${['#7c5cff','#231f45','#c026d3','#1b2240'][i%4]} ${(i*seg).toFixed(2)}deg ${((i+1)*seg).toFixed(2)}deg`).join(',')})`;
- hoja(`<h2>🎡 Ruleta Xyro</h2><p class="mu sm">Ganas 1 giro con cada compra que te da puntos globales (vence en 30 días). Sin giros, cómpralo con tus puntos globales.</p>
-  <div class="rul"><div class="rulw" id="rw" style="background:${bg}">${P.map((p,i)=>`<span style="transform:rotate(${(i*seg+seg/2).toFixed(2)}deg)"><b>${esc(rulLab(p))}</b></span>`).join('')}</div><i class="rulp"></i><button class="rulc" id="rg" aria-label="Girar">GIRAR</button></div>
+ const tab=()=>+XR.giros>0?(XR.premios||[]):(XR.premios_compra||XR.premios||[]);let P=tab(),n=P.length||1,seg=360/n,rot=0,gira=false;
+ const bgDe=P=>`conic-gradient(${P.map((_,i)=>`${['#7c5cff','#231f45','#c026d3','#1b2240'][i%4]} ${(i*seg).toFixed(2)}deg ${((i+1)*seg).toFixed(2)}deg`).join(',')})`,labs=P=>P.map((p,i)=>`<span style="transform:rotate(${(i*seg+seg/2).toFixed(2)}deg)"><b>${esc(rulLab(p))}</b></span>`).join(''),bg=bgDe(P);
+ hoja(`<h2>🎡 Ruleta Xyro</h2><p class="mu sm">Ganas 1 giro gratis con cada compra que te da puntos globales (vence en 30 días). Sin giros, cómpralo con tus globales: el giro comprado tiene premios más grandes (mínimo la mitad de lo que pagaste).</p>
+  <div class="rul"><div class="rulw" id="rw" style="background:${bg}">${labs(P)}</div><i class="rulp"></i><button class="rulc" id="rg" aria-label="Girar">GIRAR</button></div>
   <div class="rulr" id="rr" hidden></div><p class="sm" id="ri" style="text-align:center"></p><div class="msg" id="rm"></div>
   <button class="btn p" id="rgo"></button><p class="mu xs" style="text-align:center">Premios: puntos globales, más % en tu próxima compra, marcos para tu perfil, días y descuentos de Xyro+.</p><button class="btn l" data-x>Cerrar</button>`,(o)=>{
   const q=s=>o.querySelector(s),pon=()=>{const g=+XR.giros||0;q('#ri').innerHTML=g?`Tienes <b>${g}</b> giro${g>1?'s':''}`:`No tienes giros · cuesta <b>${XR.costo}</b> puntos globales${XR.plus?' (precio Xyro+)':''}`;
-   q('#rgo').textContent=g?'🎡 Girar':'Comprar giro · '+XR.costo+' pts';q('#rgo').disabled=gira};
+   q('#rgo').textContent=g?'🎡 Girar gratis':'Comprar giro · '+XR.costo+' pts';q('#rgo').disabled=gira;
+   const T=tab();if(!gira&&T!==P){P=T;n=P.length||1;seg=360/n;const w=q('#rw');w.style.background=bgDe(P);w.innerHTML=labs(P)}};
   pon();
   const go=async()=>{if(gira)return;gira=true;pon();const m=q('#rm');m.className='msg';q('#rr').hidden=true;let r;
    try{r=await rpc('xy_ruleta_girar',{p_comprar:!(+XR.giros>0)})}catch(e){gira=false;pon();m.textContent=errDe(e);m.className='msg on';return}
@@ -2221,8 +2222,8 @@ async function boostAbrir(slug,nom){vib();let b;try{b=await rpc('xy_boost_info',
 .estg{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}.estb{display:grid;justify-items:center;gap:6px;padding:10px 6px;border-radius:14px;border:1px solid var(--ln);background:#ffffff08;color:var(--tx);font:inherit;cursor:pointer}.estb.on{border-color:var(--a);background:color-mix(in srgb,var(--a) 18%,transparent)}.estb.lk{opacity:.5}.estm{width:34px;height:34px;border-radius:50%}
 .xplus.on{border-color:#7c5cff88}`;document.head.appendChild(st)})();
 {const d2=demoRpc;demoRpc=async function(f,a){const Z=window._XYD||(window._XYD={giros:2,est:{frame:null,color:null},mios:[]});
- if(f==='xy_ruleta_estado')return{giros:Z.giros,costo:100,plus:false,premios:[['pts',5],['pts',10],['pts',25],['pts',50],['pts',100],['mult',1.25],['mult',1.5],['frame',null],['plus_day',1],['plus_disc',0.2]].map(([t,v])=>({tipo:t,valor:v}))};
- if(f==='xy_ruleta_girar'){if(Z.giros>0)Z.giros--;const i=Math.floor(Math.random()*5);const v=[5,10,25,50,100][i];return{ok:true,giros:Z.giros,premio:{tipo:'pts',valor:v,idx:i,texto:'+'+v+' puntos globales'}}}
+ if(f==='xy_ruleta_estado'){const m=L=>L.map(([t,v])=>({tipo:t,valor:v})),x=[['mult',1.25],['mult',1.5],['frame',null],['plus_day',1],['plus_disc',0.2]];return{giros:Z.giros,costo:50,plus:false,premios:m([['pts',10],['pts',15],['pts',25],['pts',50],['pts',100],...x]),premios_compra:m([['pts',25],['pts',40],['pts',60],['pts',100],['pts',250],...x])}}
+ if(f==='xy_ruleta_girar'){if(Z.giros>0)Z.giros--;const i=Math.floor(Math.random()*5);const v=(a.p_comprar?[25,40,60,100,250]:[10,15,25,50,100])[i];return{ok:true,giros:Z.giros,premio:{tipo:'pts',valor:v,idx:i,texto:'+'+v+' puntos globales'}}}
  if(f==='xy_estilo')return{plus:false,mios:Z.mios,actual:Z.est,catalogo:{frames:{aura:'Aura violeta',neon:'Neón',oro:'Marco dorado',fuego:'Fuego',hielo:'Hielo',arcoiris:'Arcoíris'},plus:['aura','neon','oro'],colors:{blanco:'#f1f2f7',violeta:'#b9a6ff',cian:'#7fe3ff',oro:'#f3d68a',rosa:'#ff9ecb',verde:'#7ff0b8'},plus_colors:['violeta','cian','oro','rosa','verde']}};
  if(f==='xy_estilo_set'){Z.est={frame:a.p_frame,color:a.p_color};return{ok:true}}
  if(f==='xy_plus_info')return{activo:false,hasta:null,usd:10,descuento:0,moneda:'PEN',precio:38,pendiente:false};
