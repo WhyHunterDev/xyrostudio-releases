@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261118-0408",
+  "fecha": "2026-11-18 04:08",
+  "titulo": "Equipo para XyroStudio",
+  "notas": "Equipo para XyroStudio",
+  "cambios": [
+   "XyroStudio (gestor) también puede agregar y quitar personas del equipo de cualquier negocio"
+  ],
+  "requiere": "SQL 87"
+ },
+ {
   "id": "20261118-0404",
   "fecha": "2026-11-18 04:04",
   "titulo": "Quitar del equipo",
