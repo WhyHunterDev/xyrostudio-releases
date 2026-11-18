@@ -89,13 +89,14 @@ async function planCard(box) {
   let f = null; try { f = await rpc('xy_entity_features', { p_entity: S.entidad.id }); } catch (_) {}
   if (!f) { box.innerHTML = '<b>Tu plan</b><p class="mu sm">No disponible por ahora.</p>'; return; }
   const lim = (n, m) => m == null ? `${num(n)} (ilimitado)` : `${num(n)} de ${num(m)}`;
-  box.innerHTML = `<div class="row"><b class="sp">Tu plan</b><span class="pill ${f.pro ? 'ok' : ''}">${f.pro ? '⭐ PRO' : 'Gratis'}</span></div>
-    ${f.type === 'PROFESSIONAL' ? `<div class="li"><span class="ico">👥</span><span class="sp sm">Alumnos activos: <b>${lim(f.students, f.max_students)}</b></span></div>` : ''}
+  const T = { FREE: 'Gratis', PLUS: 'Plus', PRO: 'Pro', ENTERPRISE: 'Empresa' }, t = f.tier || (f.pro ? 'PRO' : 'FREE'), sig = t === 'FREE' ? 'Plus' : t === 'PLUS' ? 'Pro' : null;
+  box.innerHTML = `<div class="row"><b class="sp">Tu plan</b><span class="pill ${f.pro ? 'ok' : ''}">${f.pro ? '⭐ ' : ''}${T[t] || t}</span></div>
+    <div class="li"><span class="ico">👥</span><span class="sp sm">${f.type === 'PROFESSIONAL' ? 'Alumnos' : 'Clientes'} activos: <b>${lim(f.clients ?? f.students, f.max_clients ?? f.max_students)}</b></span></div>
+    ${f.max_qrs !== undefined ? `<div class="li"><span class="ico">${I.qr}</span><span class="sp sm">Códigos QR: <b>${lim(f.qrs, f.max_qrs)}</b></span></div>` : ''}
     <div class="li"><span class="ico">🏷️</span><span class="sp sm">Planes o productos: <b>${lim(f.items, f.max_items)}</b></span></div>
     <div class="li"><span class="ico">${I.film}</span><span class="sp sm">Xyro Edits: <b>${f.pro ? num(f.edits_credits) + ' créditos este mes' : num(f.edits_free_left) + ' gratis este mes (con marca)'}</b></span></div>
-    <div class="li"><span class="ico">🌐</span><span class="sp sm">Perfil público ${f.watermark ? 'con marca Xyro' : '<b>sin marca de agua</b>'}</span></div>
-    <div class="li"><span class="ico">🤖</span><span class="sp sm">Xyro Bots: <b>${f.pro ? 'incluido al lanzarse' : 'solo PRO'}</b></span></div>
-    ${f.pro ? '' : `<a class="btn p w" target="_blank" rel="noopener" href="https://wa.me/${WA_XYRO}?text=${encodeURIComponent('Hola XyroStudio, quiero el plan PRO para ' + (S.entidad.name || 'mi negocio'))}">⭐ Pasar a PRO</a><span class="mu xs">PRO: alumnos y planes ilimitados, 15 créditos de Edits al mes, sin marca de agua y Bots al lanzarse.</span>`}`;
+    <div class="li"><span class="ico">🌐</span><span class="sp sm">${f.web ? '<b>Tu web en xyrostudio.net incluida</b>' : 'Web propia: solo en Pro'}</span></div>
+    ${sig ? `<a class="btn p w" target="_blank" rel="noopener" href="https://wa.me/${WA_XYRO}?text=${encodeURIComponent('Hola XyroStudio, quiero el plan ' + sig + ' para ' + (S.entidad.name || 'mi negocio'))}">⭐ Pasar a ${sig}</a><span class="mu xs">${sig === 'Plus' ? 'Plus: 2,000 clientes, 25 productos, 10 QR y mesas, 5 videos al mes sin marca.' : 'Pro: sin límites, tu web en xyrostudio.net, 15 videos al mes y Bots al lanzarse.'}</span>` : ''}`;
 }
 
 const filaPedido = (o) => `<div class="li"><span class="ico">${I.orders}</span><span class="sp"><b>#${esc(o.code)}</b> <span class="pill ${EST[o.status] ? EST[o.status][1] : ''}">${EST[o.status] ? EST[o.status][0] : esc(o.status)}</span><br>
