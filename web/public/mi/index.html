@@ -464,7 +464,7 @@ async function entrar(){
 }
 
 // ---------- Botón «atrás» del celular: cierra la ventana abierta en vez de salir ----------
-const HN={k:'',st:[],skip:0,ov:0,pop:false,ir:''},HSEL='.ov,.cam,.qrfull';
+const HN={k:'',st:[],skip:0,ov:0,pop:false,ir:''},HSEL='.ov,.cam,.qrfull,.emov';
 new MutationObserver(()=>{const c=document.querySelectorAll(HSEL).length;
  while(HN.ov<c){HN.ov++;try{history.pushState(Object.assign({},history.state||{},{_ov:HN.ov}),'')}catch(_){}}
  if(HN.ov>c&&HN.ir){HN.ov=c;const u=HN.ir;HN.ir='';location.assign(u);return}
@@ -1080,14 +1080,14 @@ function vMiGr(){const g=G0();
  const logo=/^(https:|blob:)/.test(g.logo||'')?`<img src="${esc(g.logo)}" alt="">`:esc(rg[1]);
  return`<div class="g"><div class="row"><div class="av">${logo}</div><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">MI NEGOCIO · ${g.estado==='pago'?'PANEL COMPLETO':'PLAN GRATIS'}</p><h2>${esc(g.nombre)}</h2><span class="pill ${ec}">${et}</span></div></div>
   <p class="mu sm">${esc(g.estado==='suspendido'&&g.motivo?g.motivo:ed)}</p>
-  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${boostCardHTML(g.slug,g.nombre)}${verifCardHTML(g)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
+  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${boostCardHTML(g.slug,g.nombre)}${verifCardHTML(g)}${empNegCardHTML(g)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
   <div class="card"><div class="row"><div class="ibox">${I.store}</div><div class="sp"><h3>Tu perfil</h3><p class="mu sm">${lis===5?'✅ Completo. ¡Se ve muy bien!':lis+' de 5 listos · '+['logo','portada','descripción','dirección','horario'].filter((_,i)=>!ok[i]).join(', ')}</p></div></div>
    <button class="btn" id="gped">✏️ Editar perfil</button><button class="btn l" id="gver">Ver cómo lo ven tus clientes ›</button></div>
   <div class="card"><div class="row"><div class="ibox">${I.gift}</div><div class="sp"><h3>Promos por Mi Xyro</h3><p class="mu sm">${P.length} de ${GRMAX} · solo para quienes te tienen en Mi Xyro</p></div></div>
    ${P.length?`<div>${P.map((p,i)=>`<button class="li" data-gpr="${i}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="dot">🎁</span><span class="sp"><b>${esc(p.titulo)}</b>${p.plus?' <span class="pill" style="background:#7c5cff33;color:#c4b5fd">Xyro+</span>':''}<br><span class="mu xs">${p.hasta?(p.hasta<hoyL()?'Venció el ':'Hasta el ')+fF(p.hasta,{day:'numeric',month:'long'}):'Sin fecha de fin'}</span></span><span class="mu">›</span></button>`).join('')}</div>`:''}
    ${P.length<GRMAX?'<button class="btn" id="gpn">＋ Nueva promo</button>':'<p class="mu xs">Llegaste a 3 promos. Con el panel completo publicas más.</p>'}</div>
   ${gcHTML(g)}
-  ${g.estado==='activo'?boostCardHTML(g.slug,g.nombre)+verifCardHTML(g):''}
+  ${g.estado==='activo'?boostCardHTML(g.slug,g.nombre)+verifCardHTML(g)+empNegCardHTML(g):''}
   <div class="card" style="justify-items:center;text-align:center"><h3>QR para que te guarden</h3><div id="gqr" style="background:#fff;padding:12px;border-radius:18px;width:210px;aspect-ratio:1"></div>
    <p class="mu xs" style="max-width:300px">Ponlo en tu caja o mostrador: al escanearlo, tus clientes te guardan en Mi Xyro y ven tus promos.</p>
    <p class="sm"><b>${g.seguidores||0}</b> ${(g.seguidores|0)===1?'persona te guardó':'personas te guardaron'}</p><button class="btn" id="gsh" style="width:100%">Compartir mi enlace</button></div>
@@ -1858,7 +1858,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
  const f0=post;post=()=>{f0&&f0();exBind();
   app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{vib();EX.cat=b.dataset.cat;ls.s('mi-excat',EX.cat);EX.items=null;pinta();const h=$('.exch .on');h&&h.scrollIntoView({inline:'center',block:'nearest'})});
   app.querySelectorAll('[data-ord]').forEach(b=>b.onclick=()=>{vib();const o=b.dataset.ord;if(o==='cerca'&&!EX.geo){EX.orden='cerca';return exGeo()}EX.orden=o;ls.s('mi-exord',o);EX.items=null;pinta()});
-  const mb=$('#exmap');mb&&(mb.onclick=mapaAbrir);mb&&mapaPre();
+  const mb=$('#exmap');mb&&(mb.onclick=mapaAbrir);mb&&mapaPre();const eb=$('#exemp');eb&&(eb.onclick=empAbrir);
   const q=$('#exq');let tq;q&&(q.oninput=()=>{clearTimeout(tq);tq=setTimeout(()=>{EX.q=q.value.trim();EX.items=null;exCarga();const l=$('#exl');l&&(l.innerHTML=exLista())},450)});
   const lu=$('#exlu');lu&&(lu.onclick=()=>hoja(`<h2>📍 ¿Dónde buscas?</h2><p class="mu sm">Escribe un distrito, ciudad o país.</p><input id="lgi" maxlength="40" value="${esc(EX.lugar)}" placeholder="Ej. Miraflores, Bogotá, México"><button class="btn p" id="lgb">Buscar ahí</button>${EX.lugar?'<button class="btn" id="lgx">Ver todo el mundo 🌎</button>':''}`,(o,close)=>{
    const i=o.querySelector('#lgi');i.focus();const ir=v=>{EX.lugar=v;EX.items=null;close();pinta()};o.querySelector('#lgb').onclick=()=>ir(i.value.trim());i.onkeydown=e=>{if(e.key==='Enter')ir(i.value.trim())};const x=o.querySelector('#lgx');x&&(x.onclick=()=>ir(''))}))};
@@ -1867,6 +1867,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
   ${M.length?`<p class="mu xs" style="font-weight:700">DONDE ERES ${M.some(n=>citR(n.rubro))?'CLIENTE':'SOCIO'}</p>${mis}`:''}
   <div class="exs"><span>${I.search}</span><input id="exq" type="search" maxlength="40" placeholder="Busca un gym, café, entrenador…" value="${esc(EX.q)}" autocomplete="off"><button class="exlu" id="exlu">📍 ${esc(EX.lugar||'Todo')}</button></div>
   <button class="mapbtn" id="exmap"><span class="mapbg"></span><span class="sp" style="position:relative"><b>🗺️ Ver el mapa</b><br><span class="xs" style="opacity:.85">Negocios Xyro cerca de ti</span></span><span style="position:relative;font-size:20px">›</span></button>
+  <button class="mapbtn" id="exemp" style="padding:12px 16px"><span class="sp" style="position:relative"><b>💼 Empleos</b><br><span class="xs" style="opacity:.85">Trabaja en negocios de Xyro</span></span><span style="position:relative;font-size:20px">›</span></button>
   <div class="hs exch">${CATS.map(([k,i,t])=>`<button class="chip${EX.cat===k?' on':''}" data-cat="${k}">${i} ${t}</button>`).join('')}</div>
   <div class="seg s3">${[['top','⭐ Mejor puntuados'],['cerca','📍 Cerca de mí'],['nuevos','🆕 Nuevos']].map(([k,t])=>`<button data-ord="${k}" id="exo-${k}" class="${EX.orden===k?'on':''}">${t}</button>`).join('')}</div>
   <div class="g" id="exl">${exLista()}</div>
@@ -2252,8 +2253,8 @@ async function pagoTicket(o){const C=await cobCarga(),pe=String(o.moneda||'PEN')
   q('#tkf').onchange=async()=>{const f=q('#tkf').files[0];if(!f)return;q('#tkb').disabled=true;q('#tkb').textContent='Subiendo…';
    try{foto=await subirCaptura(f);q('#tkp').innerHTML=`<p class="sm">✅ Captura lista</p>`;q('#tkb').textContent='📎 Cambiar captura'}catch(e){say(errDe(e));q('#tkb').textContent='📎 Subir captura del pago'}q('#tkb').disabled=false};
   q('#tks').onclick=async()=>{const ref=q('#tkr').value.trim();if(!ref&&!foto)return say('Pon el N.º de operación o sube la captura.');const b=q('#tks');b.disabled=true;
-   try{await rpc('xy_pago_enviar',Object.assign({p_ref:ref||null,p_foto:foto||null},o.args));MISP=null;close();confeti();toast('🧾 Ticket enviado. Te avisamos al activarlo');o.ok&&o.ok();if(TAB==='perfil')pinta()}catch(e){b.disabled=false;say(errDe(e))}}})}
-const TKT={PLUS:'⭐ Xyro+',BOOST:'⚡ Boost',PLAN:'Plan'},TKE={PENDIENTE:['⏳ En revisión','wa'],APROBADA:['✅ Activado','ok'],RECHAZADA:['❌ Rechazado','ko']};
+   try{await rpc(o.rpc||'xy_pago_enviar',Object.assign({p_ref:ref||null,p_foto:foto||null},o.args));MISP=null;close();confeti();toast('🧾 Ticket enviado. Te avisamos al activarlo');o.ok&&o.ok();if(TAB==='perfil')pinta()}catch(e){b.disabled=false;say(errDe(e))}}})}
+const TKT={PLUS:'⭐ Xyro+',BOOST:'⚡ Boost',PLAN:'Plan',EMPLEO:'💼 Empleo destacado'},TKE={PENDIENTE:['⏳ En revisión','wa'],APROBADA:['✅ Activado','ok'],RECHAZADA:['❌ Rechazado','ko']};
 function misPagosHTML(){if(!D)return'';if(MISP===null){MISP=undefined;rpc('xy_mis_pagos').then(r=>{MISP=r||[];if(MISP.length&&TAB==='perfil'&&!SUB&&!document.querySelector('.ov'))pinta()}).catch(()=>{MISP=[]})}
  const L=MISP||[];if(!L.length)return'';
  return`<div class="card"><b>🧾 Mis pagos</b>${L.slice(0,4).map(x=>{const[e,c]=TKE[x.estado]||['',''];return`<div class="li"><span class="sp"><b class="sm">${x.tipo==='PLAN'?'Plan '+(x.plan==='PRO'?'Pro':'Plus')+(x.meses>=12?' · 1 año':''):x.tipo==='BOOST'?'⚡ Boost '+x.horas+' h':TKT[x.tipo]}${x.negocio?' · '+esc(x.negocio):''}</b><br><span class="mu xs">${moneyX(x.monto,x.moneda)} · ${fF(x.creado,{day:'numeric',month:'short'})}${x.motivo?' · '+esc(x.motivo):''}</span></span><span class="pill ${c}">${e}</span></div>`}).join('')}</div>`}
@@ -2322,6 +2323,125 @@ async function retosAbrir(){vib();let L;try{L=await rpc('xy_retos')||[]}catch(e)
  if(f==='xy_retos'){const fin=new Date(Date.now()+864e5*9).toISOString();return[{id:'m1',tipo:'MULT',titulo:'Fin de semana doble',mult:2,fin},{id:'r1',tipo:'RETO',titulo:'Explorador Xyro',meta_tipo:'NEGOCIOS',meta:3,premio:500,progreso:2,fin},{id:'r2',tipo:'RETO',titulo:'Primera compra con Xyro',meta_tipo:'COMPRAS',meta:1,premio:200,progreso:1,fin}]}
  if(f==='xy_reto_reclamar')return{ok:true,puntos:200};
  return d2(f,a)}}
+/* ---------- EMPLEOS (SQL 93): bolsa de trabajo. Personas buscan y postulan; negocios publican, ven postulantes y destacan su anuncio ---------- */
+const EMT={COMPLETO:'Tiempo completo',MEDIO:'Medio tiempo',HORAS:'Por horas',PRACTICAS:'Prácticas',FREELANCE:'Freelance'},EMM={PRESENCIAL:'Presencial',REMOTO:'Remoto',HIBRIDO:'Híbrido'};
+const EMPE={NUEVA:['📨 Enviada','wa'],VISTA:['👀 Vista','wa'],ENTREVISTA:['🗓️ Entrevista','ok'],DESCARTADA:['No seleccionado','ko'],CONTRATADA:['🎉 Contratado','ok']};
+const EMP={q:'',pais:'',tipo:'',moda:'',items:null,fin:false,carg:false};
+const empSueldo=e=>{const a=+e.sueldo_min||0,b=+e.sueldo_max||0;return a&&b?moneyX(a,e.moneda)+' – '+moneyX(b,e.moneda):a?'Desde '+moneyX(a,e.moneda):b?'Hasta '+moneyX(b,e.moneda):'Sueldo a conversar'};
+async function subirPriv(fl,carpeta){const im=/^image\//.test(fl.type),pdf=fl.type==='application/pdf';if(!im&&!pdf)throw new Error('Sube un PDF o una foto');
+ if(fl.size>8e6)throw new Error('El archivo pesa mucho (máx. 8 MB)');let b=fl,ext=pdf?'pdf':'jpg';
+ if(im){const img=await new Promise((ok,ko)=>{const u=URL.createObjectURL(fl),i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=u});
+  const k=Math.min(1,1800/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);b=await new Promise(r=>c.toBlob(r,'image/jpeg',.85))}
+ const{data:{session}}=DEMO?{data:{session:{user:{id:'demo'}}}}:await sb.auth.getSession();if(!session)throw new Error('Inicia sesión');
+ const path=session.user.id+'/'+carpeta+'/'+Date.now()+'-'+Math.random().toString(36).slice(2,7)+'.'+ext;if(DEMO)return path;
+ const{error}=await sb.storage.from('privado').upload(path,b,{contentType:pdf?'application/pdf':'image/jpeg'});if(error)throw error;return path}
+async function abrirPriv(path){const w=window.open('','_blank');try{if(DEMO)throw new Error('En la demo no hay archivos reales');const{data,error}=await sb.storage.from('privado').createSignedUrl(path,600);if(error)throw error;if(w)w.location=data.signedUrl;else location.href=data.signedUrl}catch(e){w&&w.close();toast(errDe(e))}}
+function empCard(e){const lg=logoURL(e.logo);return`<button class="card emc${e.dest?' dest':''}" data-emp="${e.id}"><div class="row" style="align-items:flex-start"><span class="exi">${lg?`<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.remove()">`:'💼'}</span>
+ <span class="sp" style="min-width:0;text-align:left"><b style="font-size:16px">${esc(e.titulo)}</b>${e.dest?' <span class="pill dst">⚡ Destacado</span>':''}<br><span class="sm">${esc(e.negocio)}${e.ver?'<span class="vchk" title="Verificado">✓</span>':''}</span><br>
+ <span class="mu xs">${EMT[e.tipo]||''} · ${EMM[e.modalidad]||''}${e.ciudad?' · 📍 '+esc(e.ciudad):''}${e.pais&&e.pais!=='PE'?' '+flagDe(e.pais):''}${e.km!=null?' · '+e.km+' km':''}</span><br><b class="sm" style="color:#4ade80">${empSueldo(e)}</b></span></div></button>`}
+async function empCarga(mas){if(EMP.carg)return;EMP.carg=true;const g=MP.geo||EX.geo;
+ try{const r=await rpc('xy_empleos_lista',{p:{q:EMP.q,pais:EMP.pais,tipo:EMP.tipo,modalidad:EMP.moda,lat:g&&g.lat,lng:g&&g.lng,off:mas?(EMP.items||[]).length:0}});const L=(r&&r.items)||[];
+  EMP.items=mas?[...(EMP.items||[]),...L]:L;EMP.fin=L.length<30}catch(e){EMP.items=EMP.items||[];toast(errDe(e))}EMP.carg=false;empLista()}
+function empLista(){const l=$('#eml');if(!l)return;const L=EMP.items;
+ if(L==null){l.innerHTML='<div class="exsk"></div><div class="exsk"></div>';return}
+ l.innerHTML=L.length?L.map(empCard).join('')+(EMP.fin?'':'<button class="btn" id="emmas">Ver más</button>'):`<div class="card vacio"><span class="e">💼</span><h3>Aún no hay empleos${EMP.q||EMP.tipo||EMP.moda||EMP.pais?' con estos filtros':''}</h3><p class="mu sm">Los negocios de Xyro publican aquí sus vacantes. ¿Tienes un negocio? Publica gratis desde «Mi negocio».</p></div>`;
+ l.querySelectorAll('[data-emp]').forEach(b=>b.onclick=()=>empVer(b.dataset.emp));const m=$('#emmas');m&&(m.onclick=()=>{m.textContent='Cargando…';empCarga(true)})}
+function empAbrir(){vib();const ov=document.createElement('div');ov.className='emov';
+ const ch=(k,v,t)=>`<button class="chip${EMP[k]===v?' on':''}" data-ef="${k}" data-v="${v}">${t}</button>`;
+ ov.innerHTML=`<div class="g" style="max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px 40px">
+  <div class="row"><button class="back" id="emx">‹ Volver</button><span class="sp"></span>${D?'<button class="btn s2" id="emmis" style="width:auto">📨 Mis postulaciones</button>':''}</div>
+  <div><h1>💼 Empleos</h1><p class="mu sm">Trabajos en negocios de Xyro cerca de ti y en todo el mundo.</p></div>
+  <div class="exs"><span>${I.search}</span><input id="emq" type="search" maxlength="40" placeholder="Puesto, negocio o ciudad…" value="${esc(EMP.q)}" autocomplete="off"><button class="exlu" id="empa">${EMP.pais?flagDe(EMP.pais)+' '+esc(paisNom(EMP.pais)):'🌎 Todos'}</button></div>
+  <div class="hs exch">${ch('tipo','','Todos')}${Object.entries(EMT).map(([k,t])=>ch('tipo',k,t)).join('')}</div>
+  <div class="hs exch">${ch('moda','','Cualquier lugar')}${Object.entries(EMM).map(([k,t])=>ch('moda',k,t)).join('')}</div>
+  <div id="eml" class="g" style="gap:10px"></div></div>`;
+ document.body.appendChild(ov);
+ ov.querySelector('#emx').onclick=()=>history.back();const mi=ov.querySelector('#emmis');mi&&(mi.onclick=empMias);
+ ov.querySelectorAll('[data-ef]').forEach(b=>b.onclick=()=>{vib();EMP[b.dataset.ef]=b.dataset.v;ov.querySelectorAll(`[data-ef="${b.dataset.ef}"]`).forEach(x=>x.classList.toggle('on',x===b));EMP.items=null;empLista();empCarga()});
+ let tq;ov.querySelector('#emq').oninput=e=>{clearTimeout(tq);tq=setTimeout(()=>{EMP.q=e.target.value.trim();EMP.items=null;empLista();empCarga()},400)};
+ ov.querySelector('#empa').onclick=async()=>{let P=[];try{P=await rpc('xa_mapa_paises',{})||[]}catch(_){}
+  hoja(`<h2>🌎 ¿En qué país?</h2><button class="btn" data-pp="">🌎 Todos los países</button>${P.map(x=>`<button class="btn" data-pp="${esc(x.pais)}">${flagDe(x.pais)} ${esc(paisNom(x.pais))}</button>`).join('')}<button class="btn l" data-x>Cerrar</button>`,(o,c)=>o.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{EMP.pais=b.dataset.pp;c();ov.querySelector('#empa').textContent=EMP.pais?flagDe(EMP.pais)+' '+paisNom(EMP.pais):'🌎 Todos';EMP.items=null;empLista();empCarga()}))};
+ empLista();if(EMP.items==null)empCarga()}
+async function empVer(id){vib();let e;try{e=await rpc('xy_empleo_ver',{p_id:id})}catch(x){return toast(errDe(x))}const lg=logoURL(e.logo),[mt,mc]=e.mio?EMPE[e.mio.estado]||['','']:['',''];
+ hoja(`<div class="row"><span class="exi">${lg?`<img src="${esc(lg)}" alt="">`:'💼'}</span><div class="sp"><h2 style="margin:0">${esc(e.titulo)}</h2><p class="sm" style="margin:0">${esc(e.negocio)}${e.ver?'<span class="vchk">✓</span>':''}</p></div></div>
+  <div class="row" style="flex-wrap:wrap;gap:6px"><span class="pill">${EMT[e.tipo]||''}</span><span class="pill">${EMM[e.modalidad]||''}</span>${e.vacantes>1?`<span class="pill">${e.vacantes} vacantes</span>`:''}${e.ciudad?`<span class="pill">📍 ${esc(e.ciudad)}</span>`:''}</div>
+  <b style="color:#4ade80;font-size:18px">${empSueldo(e)}</b>
+  <div class="card"><p class="sm" style="white-space:pre-line;margin:0">${esc(e.descripcion)}</p></div>${e.requisitos?`<div class="card"><b class="sm">Requisitos</b><p class="sm" style="white-space:pre-line;margin:0">${esc(e.requisitos)}</p></div>`:''}
+  ${e.direccion&&e.modalidad!=='REMOTO'?`<p class="mu xs">📍 ${esc(e.direccion)}</p>`:''}<p class="mu xs">Publicado el ${fF(e.created_at,{day:'numeric',month:'long'})} · ${e.vistas} vistas</p>
+  ${e.admin?'<p class="mu sm">Es un empleo de tu negocio.</p>':e.mio?`<div class="card"><p class="sm">Ya postulaste · <span class="pill ${mc}">${mt}</span></p></div>`:e.estado==='ABIERTO'?'<button class="btn p" id="emgo">📨 Postular</button>':'<div class="card"><b>Ya no recibe postulaciones</b></div>'}
+  <div class="row"><button class="btn sp" id="emneg">Ver negocio</button><button class="btn sp" id="emsh">Compartir</button></div><button class="btn l sm" id="emrep" style="width:100%">🚩 Reportar anuncio</button><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  const q=s=>o.querySelector(s);q('#emgo')&&(q('#emgo').onclick=()=>{close();empPostular(e)});
+  q('#emneg').onclick=()=>{close();if(document.querySelector('.emov')){history.back();setTimeout(()=>abrirNeg(e.slug),80)}else abrirNeg(e.slug)};
+  q('#emsh').onclick=async()=>{const u=HOME+'?empleo='+e.id,t=`Empleo: ${e.titulo} en ${e.negocio}. Postula en Mi Xyro: ${u}`;try{if(navigator.share)return await navigator.share({title:e.titulo,text:t,url:u})}catch(_){return}try{await navigator.clipboard.writeText(u);toast('📋 Enlace copiado')}catch(_){toast(u)}};
+  q('#emrep').onclick=()=>{if(!D)return toast('Entra a tu cuenta para reportar');hoja(`<h2>¿Qué pasa con este anuncio?</h2>${['Parece una estafa','Pide pagar para postular','Discrimina (edad, sexo, etc.)','Es ilegal u ofensivo','Otro'].map(t=>`<button class="btn" data-r="${t}">${t}</button>`).join('')}<button class="btn l" data-x>Cancelar</button>`,(o2,c2)=>o2.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{try{await rpc('xy_empleo_reportar',{p_id:e.id,p_motivo:b.dataset.r});c2();toast('Gracias, lo revisaremos')}catch(x){toast(errDe(x))}}))}})}
+function empPostular(e){if(!D)return toast('Entra o crea tu cuenta en Mi Xyro para postular');let cv='';const per=(D&&D.persona)||{};
+ hoja(`<h2>📨 Postular a ${esc(e.titulo)}</h2><p class="mu sm">${esc(e.negocio)} verá tu nombre, tu mensaje, tu celular y tu CV.</p>
+  <label>Tu celular<input id="ptel" inputmode="tel" maxlength="20" value="${esc(per.celular||'')}" placeholder="Para que te contacten"></label>
+  <label>Mensaje<textarea id="pmsg" maxlength="1000" rows="4" placeholder="Cuéntales tu experiencia y tu disponibilidad"></textarea></label>
+  <input type="file" id="pcv" accept="application/pdf,image/*" hidden><button class="btn" id="pcvb">📎 Adjuntar CV (opcional, PDF o foto)</button>
+  <div class="msg" id="pm"></div><button class="btn p" id="pok">Enviar postulación</button><p class="mu xs" style="text-align:center">Nunca pagues por postular. Si te piden dinero, repórtalo.</p><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  const q=s=>o.querySelector(s),say=t=>{const m=q('#pm');m.textContent=t;m.className='msg on'};q('#pcvb').onclick=()=>q('#pcv').click();
+  q('#pcv').onchange=async()=>{const f=q('#pcv').files[0];if(!f)return;const b=q('#pcvb');b.disabled=true;b.textContent='Subiendo…';try{cv=await subirPriv(f,'cv');b.textContent='✅ CV listo'}catch(x){say(errDe(x));b.textContent='📎 Adjuntar CV (opcional, PDF o foto)'}b.disabled=false};
+  q('#pok').onclick=async()=>{const b=q('#pok');b.disabled=true;try{await rpc('xy_postular',{p_empleo:e.id,p_mensaje:q('#pmsg').value,p_telefono:q('#ptel').value,p_cv:cv||null});close();confeti();toast('📨 ¡Postulación enviada! Mírala en «Mis postulaciones»')}catch(x){b.disabled=false;say(errDe(x))}}})}
+async function empMias(){let L;try{L=await rpc('xy_mis_postulaciones')||[]}catch(e){return toast(errDe(e))}
+ hoja(`<h2>📨 Mis postulaciones</h2>${L.length?L.map(p=>{const[t,c]=EMPE[p.estado]||['',''];return`<button class="li" data-emp="${p.empleo}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="sp"><b>${esc(p.titulo)}</b><br><span class="mu xs">${esc(p.negocio)} · ${fF(p.fecha,{day:'numeric',month:'short'})}${p.abierto?'':' · cerrado'}</span></span><span class="pill ${c}">${t}</span></button>`}).join(''):'<p class="mu sm">Aún no postulas a ningún empleo.</p>'}<button class="btn l" data-x>Cerrar</button>`,(o,c)=>o.querySelectorAll('[data-emp]').forEach(b=>b.onclick=()=>{c();empVer(b.dataset.emp)}))}
+/* Negocio: publicar y gestionar */
+function empNegCardHTML(g){if(!g||g.estado==='suspendido'||g.estado==='pendiente')return'';return`<div class="card"><div class="row"><div class="ibox">💼</div><div class="sp"><h3>Empleos</h3><p class="mu sm">Publica tus vacantes y recibe postulantes de Mi Xyro.</p></div></div><button class="btn" data-empneg="${esc(g.slug)}" data-nom="${esc(g.nombre)}">💼 Mis empleos</button></div>`}
+async function empNeg(slug,nom){vib();let R;try{R=await rpc('xy_empleos_mios',{p_slug:slug})}catch(e){return toast(errDe(e))}const L=R.items||[],act=L.filter(x=>['ABIERTO','PAUSADO'].includes(x.estado)&&!x.vencido).length;
+ const ES={ABIERTO:['ok','Abierto'],PAUSADO:['wa','Pausado'],CERRADO:['','Cerrado'],QUITADO:['ko','Quitado por Xyro']};
+ hoja(`<h2>💼 Empleos de ${esc(nom)}</h2><p class="mu sm">Plan ${R.plan==='PRO'?'Pro':R.plan==='PLUS'?'Plus':'Gratis'}: ${act} de ${R.limite>=50?'∞':R.limite} empleos activos. Cada anuncio dura 30 días.</p>
+  ${act<R.limite?'<button class="btn p" id="enew">＋ Publicar empleo</button>':'<p class="mu xs">Llegaste al límite de tu plan. Cierra un anuncio o mejora tu plan.</p>'}
+  ${L.map(e=>{const[c,t]=e.vencido&&e.estado==='ABIERTO'?['','Vencido']:ES[e.estado]||['',e.estado];return`<div class="card" style="gap:8px"><div class="row"><b class="sp">${esc(e.titulo)}</b><span class="pill ${c}">${t}</span></div>
+   <p class="mu xs" style="margin:0">${e.postulantes} postulante${e.postulantes==1?'':'s'}${+e.nuevos?` · <b style="color:var(--a)">${e.nuevos} nuevo${e.nuevos>1?'s':''}</b>`:''} · ${e.vistas} vistas${e.dest?' · ⚡ destacado hasta '+fF(e.destacado_hasta,{day:'numeric',month:'short'}):''}</p>
+   ${e.estado==='QUITADO'?(e.motivo?`<p class="mu xs">${esc(e.motivo)}</p>`:''):`<div class="row" style="flex-wrap:wrap;gap:6px"><button class="btn s2 sp" data-ep="${e.id}">👥 Postulantes</button><button class="btn s2 sp" data-ed="${e.id}">⚡ Destacar</button></div>
+   <div class="row" style="flex-wrap:wrap;gap:6px"><button class="btn s2 sp" data-ee="${e.id}">✏️ Editar</button>${e.vencido||e.estado==='CERRADO'?`<button class="btn s2 sp" data-es="${e.id}" data-v="RENOVAR">🔄 Renovar</button>`:e.estado==='ABIERTO'?`<button class="btn s2 sp" data-es="${e.id}" data-v="PAUSADO">⏸ Pausar</button><button class="btn s2 sp" data-es="${e.id}" data-v="CERRADO">Cerrar</button>`:`<button class="btn s2 sp" data-es="${e.id}" data-v="ABIERTO">▶ Abrir</button>`}</div>`}</div>`}).join('')}
+  <button class="btn l" data-x>Cerrar</button>`,(o,close)=>{const q=s=>o.querySelector(s),F=id=>L.find(x=>x.id===id);
+  q('#enew')&&(q('#enew').onclick=()=>{close();empForm(slug,nom,null)});
+  o.querySelectorAll('[data-ee]').forEach(b=>b.onclick=()=>{close();empForm(slug,nom,F(b.dataset.ee))});
+  o.querySelectorAll('[data-ep]').forEach(b=>b.onclick=()=>{close();empPostulantes(F(b.dataset.ep),slug,nom)});
+  o.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{close();empDestacar(F(b.dataset.ed),R.precio)});
+  o.querySelectorAll('[data-es]').forEach(b=>b.onclick=async()=>{try{await rpc('xy_empleo_estado',{p_id:b.dataset.es,p_estado:b.dataset.v});close();toast('Listo ✓');empNeg(slug,nom)}catch(e){toast(errDe(e))}})})}
+function empForm(slug,nom,e){e=e||{};const op=(o,v)=>Object.entries(o).map(([k,t])=>`<option value="${k}"${v===k?' selected':''}>${t}</option>`).join('');
+ hoja(`<h2>${e.id?'✏️ Editar empleo':'＋ Publicar empleo'}</h2>
+  <label>Puesto<input id="ft" maxlength="80" value="${esc(e.titulo||'')}" placeholder="Ej. Mozo, Recepcionista, Barbero"></label>
+  <div class="row" style="gap:8px"><label class="sp">Jornada<select id="fy">${op(EMT,e.tipo||'COMPLETO')}</select></label><label class="sp">Lugar<select id="fm">${op(EMM,e.modalidad||'PRESENCIAL')}</select></label></div>
+  <label>Descripción<textarea id="fd" maxlength="3000" rows="5" placeholder="Funciones, horario, beneficios…">${esc(e.descripcion||'')}</textarea></label>
+  <label>Requisitos (opcional)<textarea id="fr" maxlength="1500" rows="3" placeholder="Experiencia, estudios, disponibilidad…">${esc(e.requisitos||'')}</textarea></label>
+  <div class="row" style="gap:8px"><label class="sp">Sueldo desde<input id="fs1" type="number" min="0" value="${esc(e.sueldo_min??'')}"></label><label class="sp">Hasta<input id="fs2" type="number" min="0" value="${esc(e.sueldo_max??'')}"></label><label style="flex:0 0 90px">Moneda<input id="fmo" maxlength="3" value="${esc(e.moneda||(D&&D.persona&&D.persona.moneda)||'PEN')}"></label></div>
+  <div class="row" style="gap:8px"><label class="sp">Vacantes<input id="fv" type="number" min="1" max="100" value="${esc(e.vacantes||1)}"></label><label class="sp">Ciudad o distrito<input id="fc" maxlength="80" value="${esc(e.ciudad||'')}" placeholder="Se toma de tu dirección"></label></div>
+  <p class="mu xs">No pidas sexo, edad, raza, religión ni estado civil: la ley lo prohíbe. Nunca cobres por postular.</p>
+  <div class="msg" id="fmg"></div><button class="btn p" id="fok">${e.id?'Guardar cambios':'Publicar'}</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{const q=s=>o.querySelector(s);
+  q('#fok').onclick=async()=>{const b=q('#fok');b.disabled=true;const p={id:e.id||null,titulo:q('#ft').value,tipo:q('#fy').value,modalidad:q('#fm').value,descripcion:q('#fd').value,requisitos:q('#fr').value,sueldo_min:q('#fs1').value,sueldo_max:q('#fs2').value,moneda:q('#fmo').value.toUpperCase(),vacantes:+q('#fv').value||1,ciudad:q('#fc').value};
+   try{await rpc('xy_empleo_guardar',{p_slug:slug,p});close();confeti();toast(e.id?'Guardado ✓':'💼 ¡Empleo publicado!');empNeg(slug,nom)}catch(x){b.disabled=false;const m=q('#fmg');m.textContent=errDe(x);m.className='msg on'}}})}
+async function empPostulantes(e,slug,nom){let L;try{L=await rpc('xy_empleo_postulantes',{p_id:e.id})||[]}catch(x){return toast(errDe(x))}
+ const wa=t=>'https://wa.me/'+String(t||'').replace(/\D/g,'').replace(/^9(\d{8})$/,'519$1');
+ hoja(`<h2>👥 Postulantes · ${esc(e.titulo)}</h2>${L.length?L.map(p=>{const[t,c]=EMPE[p.estado]||['',''];return`<div class="card" style="gap:6px"><div class="row"><b class="sp">${esc(p.nombre)}${p.usuario?` <span class="mu xs">@${esc(p.usuario)}</span>`:''}</b><span class="pill ${c}">${t}</span></div>
+  ${p.mensaje?`<p class="sm" style="white-space:pre-line;margin:0">${esc(p.mensaje)}</p>`:''}<p class="mu xs" style="margin:0">${fF(p.fecha,{day:'numeric',month:'short'})} · 📱 ${esc(p.telefono||'')}</p>
+  <div class="row" style="flex-wrap:wrap;gap:6px">${p.telefono?`<a class="btn s2 sp" target="_blank" rel="noopener" href="${wa(p.telefono)}">💬 WhatsApp</a><a class="btn s2 sp" href="tel:${esc(String(p.telefono).replace(/\s/g,''))}">📞 Llamar</a>`:''}${p.cv?`<button class="btn s2 sp" data-cv="${esc(p.cv)}">📄 Ver CV</button>`:''}</div>
+  <select data-pe="${p.id}">${['VISTA','ENTREVISTA','DESCARTADA','CONTRATADA'].map(k=>`<option value="${k}"${p.estado===k?' selected':''}>${EMPE[k][0]}</option>`).join('')}</select></div>`}).join(''):'<p class="mu sm">Aún no hay postulantes. Comparte tu anuncio o destácalo para que lo vean más personas.</p>'}
+  <button class="btn" id="pvb">‹ Volver a mis empleos</button>`,(o,close)=>{o.querySelectorAll('[data-cv]').forEach(b=>b.onclick=()=>abrirPriv(b.dataset.cv));
+  o.querySelectorAll('[data-pe]').forEach(s=>s.onchange=async()=>{try{await rpc('xy_postulacion_estado',{p_id:s.dataset.pe,p_estado:s.value});toast('Listo ✓')}catch(x){toast(errDe(x))}});
+  o.querySelector('#pvb').onclick=()=>{close();empNeg(slug,nom)}})}
+function empDestacar(e,pr){let d=7;const P=x=>moneyX(Math.round(x*(+pr.monto||0)*100)/100,pr.moneda);
+ hoja(`<h2>⚡ Destacar «${esc(e.titulo)}»</h2><p class="mu sm">Tu anuncio sale primero en Empleos y en Recomendados, con la marca ⚡ Destacado.</p>
+  <div class="row" style="flex-wrap:wrap;gap:6px">${[3,7,15,30].map(x=>`<button class="chip${x===d?' on':''}" data-dd="${x}" style="flex:1 1 40%;padding:10px">${x} días<br><b>${P(x)}</b></button>`).join('')}</div>
+  <button class="btn p" id="dgo">Continuar</button><button class="btn l" data-x>Ahora no</button>`,(o,close)=>{
+  o.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>{d=+b.dataset.dd;o.querySelectorAll('[data-dd]').forEach(x=>x.classList.toggle('on',x===b))});
+  o.querySelector('#dgo').onclick=()=>{close();pagoTicket({titulo:`⚡ Destacar empleo · ${d} días`,detalle:`<p class="mu sm">${esc(e.titulo)}</p>`,monto:Math.round(d*(+pr.monto||0)*100)/100,moneda:pr.moneda,rpc:'xy_empleo_destacar_pagar',args:{p_empleo:e.id,p_dias:d}})}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-empneg]');if(b)empNeg(b.dataset.empneg,b.dataset.nom)});
+(()=>{const st=document.createElement('style');st.textContent=`.emov{position:fixed;inset:0;z-index:8;background:var(--bg,#05060a);overflow:auto;animation:fd .2s}.emc{text-align:left;cursor:pointer;width:100%}.emc.dest{border-color:#facc1588;background:linear-gradient(135deg,#facc1514,transparent)}`;document.head.appendChild(st)})();
+{const d2=demoRpc;demoRpc=async function(f,a){
+ const E0=[{id:'e1',titulo:'Mozo / Moza',tipo:'MEDIO',modalidad:'PRESENCIAL',sueldo_min:1200,sueldo_max:1500,moneda:'PEN',vacantes:2,pais:'PE',ciudad:'Miraflores',slug:'la-mar',negocio:'Cevichería La Mar',logo:'',ver:true,dest:true,km:1.2,creado:new Date().toISOString(),descripcion:'Atención en mesas de 12 pm a 6 pm. Buen trato y ganas de aprender.\nPropinas + menú del día.',requisitos:'Experiencia mínima de 6 meses (deseable).',vistas:84,estado:'ABIERTO',created_at:new Date(Date.now()-864e5*2).toISOString()},
+  {id:'e2',titulo:'Recepcionista de gimnasio',tipo:'COMPLETO',modalidad:'PRESENCIAL',sueldo_min:1300,moneda:'PEN',vacantes:1,pais:'PE',ciudad:'Surco',slug:'iron-gym',negocio:'Iron Gym Miraflores',logo:'',ver:true,dest:false,km:3.8,creado:new Date().toISOString(),descripcion:'Atención a socios, ventas de membresías y caja.',vistas:41,estado:'ABIERTO',created_at:new Date(Date.now()-864e5*5).toISOString()},
+  {id:'e3',titulo:'Community manager',tipo:'FREELANCE',modalidad:'REMOTO',moneda:'USD',vacantes:1,pais:'MX',ciudad:'Ciudad de México',slug:'mini-market-sol',negocio:'Minimarket Sol',logo:'',ver:false,dest:false,km:null,creado:new Date().toISOString(),descripcion:'Manejo de Instagram y TikTok, 3 publicaciones por semana.',vistas:12,estado:'ABIERTO',created_at:new Date(Date.now()-864e5).toISOString()}];
+ if(f==='xy_empleos_lista'){const p=a.p||{},q=(p.q||'').toLowerCase();return{items:p.off?[]:E0.filter(e=>(!p.tipo||e.tipo===p.tipo)&&(!p.modalidad||e.modalidad===p.modalidad)&&(!p.pais||e.pais===p.pais)&&(!q||(e.titulo+' '+e.negocio+' '+e.ciudad).toLowerCase().includes(q)))}}
+ if(f==='xy_empleo_ver'){const e=E0.find(x=>x.id===a.p_id)||E0[0];return{...e,mio:e.id==='e2'?{estado:'ENTREVISTA'}:null,admin:false,direccion:'Av. Larco 345'}}
+ if(f==='xy_postular'||f==='xy_empleo_reportar'||f==='xy_empleo_estado'||f==='xy_postulacion_estado'||f==='xy_empleo_destacar_pagar')return{ok:true};
+ if(f==='xy_empleo_guardar')return{ok:true,id:'e9'};
+ if(f==='xy_mis_postulaciones')return[{id:'p1',empleo:'e2',titulo:'Recepcionista de gimnasio',negocio:'Iron Gym Miraflores',estado:'ENTREVISTA',abierto:true,fecha:new Date().toISOString()}];
+ if(f==='xy_empleos_mios')return{plan:'GRATIS',limite:1,precio:{dias:1,usd:2,monto:7.6,moneda:'PEN'},items:[{...E0[0],id:'e1',postulantes:3,nuevos:1,dest:false,vencido:false,vistas:84}]};
+ if(f==='xy_empleo_postulantes')return[{id:'p1',nombre:'Carla Ríos',usuario:'carla',mensaje:'Tengo 1 año de experiencia en restaurantes y disponibilidad inmediata.',telefono:'987654321',cv:'demo/cv/1.pdf',estado:'VISTA',fecha:new Date().toISOString()},{id:'p2',nombre:'Luis Vega',usuario:'luisv',mensaje:'',telefono:'912345678',cv:null,estado:'ENTREVISTA',fecha:new Date(Date.now()-864e5).toISOString()}];
+ return d2(f,a)}}
 const demoRpc0=demoRpc;
 demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
   items:[{t:'n',slug:'demo',nombre:'Iron Gym Miraflores',cat:'gym',distrito:'Miraflores',prom:4.8,n:126,km:0.6,promos:2,dest:true,logo:''},
@@ -2362,6 +2482,8 @@ demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
  return demoRpc0(f,a)};
 
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&D&&!DEMO&&!document.querySelector('.ov,.cam')){try{await cargar();pinta()}catch(_){}}});
+{const ei=(P.get('empleo')||'').replace(/[^a-z0-9-]/gi,''),es=P.get('empleos'),em=(P.get('misempleos')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
+ if(ei||es||em)setTimeout(()=>{if(em&&D)empNeg(em,'tu negocio');else if(ei)empVer(ei);else empAbrir()},1800)}
 (async()=>{
  setTimeout(bannerApp,2500);
  if(DEMO){D=demoData();CUR=0;if(/^negocio/.test(DEMO))return modoNegocio();return pinta()}

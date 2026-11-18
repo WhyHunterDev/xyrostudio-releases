@@ -77,3 +77,6 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Retos: botón 🎯 (`retosAbrir`, `xy_retos`, `xy_reto_reclamar`). Campañas MULT (máx x3).
 - Mapa: chips país (`mapaPaises`, `xa_mapa_paises`), orden cerca/top, ✓ Verificados, pestañas «En esta zona / Todos» (`mapaTodos`, xa_mapa `todo`), chips con rueda/arrastre y en 2 filas en PC.
 - Gestor: vistas `verif` (docs con `createSignedUrl` 10 min) y `retos` (campañas + `xy_g_dar_puntos`).
+
+## SQL 93 (2026-11-18) · Empleos
+Bolsa de trabajo: `empAbrir` (overlay `.emov`, en HSEL), `empVer`, `empPostular` (CV a `privado/<uid>/cv/`, `subirPriv`), `empMias`; negocio `empNegCardHTML`/`empNeg`/`empForm`/`empPostulantes` (CV con `abrirPriv` = signed URL)/`empDestacar` (pagoTicket con `o.rpc='xy_empleo_destacar_pagar'`). Enlaces `/mi/?empleos=1`, `?empleo=<id>`, `?misempleos=<slug>` (Xyro Apps → Mi app). Límites: Gratis 1, Plus 3, Pro 50 activos; 30 días. Gestor vista `empleos` (moderar, precio US$/día en `system_settings.empleo_boost`). Tickets tipo `EMPLEO` (resolver envuelve `xy_solicitud_resolver_89`).
