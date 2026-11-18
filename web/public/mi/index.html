@@ -1714,6 +1714,54 @@ function exLista(){const L=EX.items;
 function exBind(){const r=$('#exr');r&&(r.onclick=()=>{EX.items=null;exCarga();pinta()});const m=$('#exmas');m&&(m.onclick=()=>exCarga(true));
  const iv=$('#exinv');iv&&(iv.onclick=exInvitar);
  app.querySelectorAll('#exl [data-neg]').forEach(b=>b.onclick=()=>abrirNeg(b.dataset.neg));app.querySelectorAll('#exl [data-pro]').forEach(b=>b.onclick=()=>abrirPro(b.dataset.pro))}
+/* ---------- Mapa de negocios (SQL 84, xa_mapa): Leaflet + mapa oscuro de CARTO/OpenStreetMap, sin API de pago ---------- */
+const MAPC={gym:'🏋️',cafeteria:'☕',restaurante:'🍽️',barberia:'💈',consultorio:'🦷',otro:'🏪'};
+const MP={cat:'',top:false,geo:null,map:null,capa:null,t:0,sel:null,items:[]};
+async function mapaLib(){if(window.L)return;const c=document.createElement('link');c.rel='stylesheet';c.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';document.head.appendChild(c);await js('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js')}
+async function mapaAbrir(){vib();
+ const ov=document.createElement('div');ov.className='mapov';ov.innerHTML=`<div id="mapa"></div>
+  <div class="maptop"><button class="mapb" id="mpx" aria-label="Volver">‹</button><div class="hs mapch">${CATS.filter(c=>c[0]!=='entrenadores').map(([k,i,t])=>`<button class="chip${MP.cat===k?' on':''}" data-mc="${k}">${i} ${t}</button>`).join('')}<button class="chip${MP.top?' on':''}" id="mptop">⭐ 4.5+</button></div></div>
+  <button class="mapb mapyo" id="mpyo" aria-label="Mi ubicación">◎</button><div class="mapcard" id="mpc" hidden></div><div class="mapmsg" id="mpm" hidden></div>`;
+ document.body.appendChild(ov);history.pushState({mapa:1},'');
+ const cerrar=()=>{if(MP.map){MP.map.remove();MP.map=null}ov.remove();window.removeEventListener('popstate',pop)};const pop=()=>cerrar();window.addEventListener('popstate',pop);
+ ov.querySelector('#mpx').onclick=()=>history.back();
+ try{await mapaLib()}catch(_){toast('No se pudo cargar el mapa. Revisa tu internet.');return history.back()}
+ const g=MP.geo||EX.geo;
+ MP.map=L.map('mapa',{zoomControl:false,attributionControl:true}).setView(g?[g.lat,g.lng]:[-12.08,-77.03],g?14:12);
+ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'© OpenStreetMap · © CARTO'}).addTo(MP.map);
+ MP.capa=L.layerGroup().addTo(MP.map);
+ MP.map.on('moveend',()=>{clearTimeout(MP.t);MP.t=setTimeout(mapaCarga,350)});MP.map.on('click',()=>{const c=$('#mpc');c&&(c.hidden=true)});
+ ov.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{vib();MP.cat=b.dataset.mc;ov.querySelectorAll('[data-mc]').forEach(x=>x.classList.toggle('on',x===b));mapaCarga()});
+ ov.querySelector('#mptop').onclick=e=>{vib();MP.top=!MP.top;e.currentTarget.classList.toggle('on',MP.top);mapaCarga()};
+ ov.querySelector('#mpyo').onclick=()=>mapaYo(true);
+ mapaCarga();if(!g)mapaYo(false)}
+function mapaYo(avisar){if(!navigator.geolocation)return avisar&&toast('Tu equipo no comparte la ubicación.');
+ navigator.geolocation.getCurrentPosition(p=>{MP.geo={lat:p.coords.latitude,lng:p.coords.longitude};if(!MP.map)return;MP.map.setView([MP.geo.lat,MP.geo.lng],14);
+  MP.yo&&MP.yo.remove();MP.yo=L.circleMarker([MP.geo.lat,MP.geo.lng],{radius:8,color:'#fff',weight:3,fillColor:'#7c5cff',fillOpacity:1}).addTo(MP.map)},
+  ()=>avisar&&toast('Activa el permiso de ubicación para ver lo que está cerca.'),{timeout:12000,maximumAge:3e5})}
+async function mapaCarga(){if(!MP.map)return;const b=MP.map.getBounds(),m=$('#mpm');
+ try{const r=await rpc('xa_mapa',{p:{s:b.getSouth(),n:b.getNorth(),w:b.getWest(),e:b.getEast(),cat:MP.cat,top:MP.top}});MP.items=(r&&r.items)||[]}catch(e){MP.items=[];m&&(m.hidden=false,m.textContent=errDe(e));return}
+ if(!MP.map)return;MP.capa.clearLayers();
+ MP.items.forEach(x=>{const ic=L.divIcon({className:'',html:`<div class="pin${x.dest?' dst':''}"><span>${MAPC[x.cat]||'🏪'}</span></div>`,iconSize:[40,46],iconAnchor:[20,44]});
+  L.marker([x.lat,x.lng],{icon:ic,title:x.nombre}).addTo(MP.capa).on('click',()=>mapaCard(x))});
+ m&&(m.hidden=!!MP.items.length,m.textContent='Aún no hay negocios Xyro en esta zona. Aleja el mapa o invita a uno.')}
+function mapaCard(x){vib();const c=$('#mpc');if(!c)return;const img=logoURL(x.logo),g=MP.geo,km=g?xaKm(g.lat,g.lng,x.lat,x.lng):null;
+ c.innerHTML=`<div class="row"><span class="exi">${img?`<img src="${esc(img)}" alt="" onerror="this.remove()">`:MAPC[x.cat]||'🏪'}</span><span class="sp" style="min-width:0"><b>${esc(x.nombre)}</b>${x.dest?' <span class="pill dst">Destacado</span>':''}<br>${estr(x.prom,x.n)}<br>
+  <span class="mu xs">${x.dir?'📍 '+esc(x.dir):''}${km!=null?` · ${km<1?Math.round(km*1000)+' m':km.toFixed(1)+' km'}`:''}</span>${+x.promos?` <span class="pill gft">🎁 ${x.promos} promo${x.promos>1?'s':''}</span>`:''}</span></div>
+  <div class="row"><button class="btn p sp" id="mpv">Ver negocio</button><a class="btn sp" style="text-decoration:none;color:var(--tx)" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${x.lat},${x.lng}">🧭 Cómo llegar</a></div>`;
+ c.hidden=false;c.querySelector('#mpv').onclick=()=>{history.back();setTimeout(()=>abrirNeg(x.slug),60)}}
+function xaKm(a,b,c,d){const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2;return 12742*Math.asin(Math.sqrt(x))}
+(()=>{const st=document.createElement('style');st.textContent=`.mapbtn{position:relative;overflow:hidden;display:flex;align-items:center;gap:10px;width:100%;padding:14px 16px;border-radius:18px;border:1px solid var(--ln);color:var(--tx);text-align:left;cursor:pointer;background:#10131f}
+.mapbg{position:absolute;inset:0;background:radial-gradient(circle at 80% 30%,#7c5cff55,transparent 45%),repeating-linear-gradient(35deg,#ffffff08 0 2px,transparent 2px 26px),repeating-linear-gradient(-55deg,#ffffff06 0 2px,transparent 2px 34px)}
+.mapov{position:fixed;inset:0;z-index:60;background:#0b0d16}#mapa{position:absolute;inset:0}
+.maptop{position:absolute;left:0;right:0;top:0;z-index:500;display:flex;gap:8px;align-items:center;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;background:linear-gradient(#0b0d16ee,#0b0d1600)}
+.mapch{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.mapch .chip{flex:0 0 auto;width:auto}.mapb{width:44px;height:44px;flex:0 0 44px;border-radius:14px;border:1px solid var(--ln);background:#151826;color:var(--tx);font-size:24px;cursor:pointer}
+.mapyo{position:absolute;right:14px;bottom:calc(env(safe-area-inset-bottom) + 24px);z-index:500;font-size:20px}
+.mapcard{position:absolute;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 80px);z-index:500;display:grid;gap:12px;padding:14px;border-radius:20px;background:#151826;border:1px solid var(--ln);box-shadow:0 20px 50px #000a;max-width:520px;margin:0 auto}
+.mapmsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:500;background:#151826ee;border:1px solid var(--ln);padding:12px 16px;border-radius:14px;font-size:14px;max-width:80%;text-align:center}
+.pin{width:40px;height:40px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:linear-gradient(135deg,#7c5cff,#38bdf8);display:grid;place-items:center;box-shadow:0 6px 16px #0008;border:2px solid #fff}
+.pin span{transform:rotate(45deg);font-size:18px}.pin.dst{background:linear-gradient(135deg,#f5c542,#d4a017);width:46px;height:46px}
+.leaflet-container{background:#0b0d16;font:inherit}.leaflet-control-attribution{background:#0b0d16aa!important;color:#888!important;font-size:10px}.leaflet-control-attribution a{color:#aaa!important}`;document.head.appendChild(st)})();
 function exInvitar(){const u=location.origin+'/mi/?registro=1',t='Registra tu negocio gratis en Mi Xyro y aparece ante miles de personas: '+u;
  if(navigator.share)navigator.share({title:'Mi Xyro',text:t}).catch(()=>{});else{navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('📋 Enlace copiado'),()=>toast(u))}}
 function exGeo(){if(!navigator.geolocation){toast('Tu equipo no comparte la ubicación.');return}
@@ -1725,6 +1773,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
  const f0=post;post=()=>{f0&&f0();exBind();
   app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{vib();EX.cat=b.dataset.cat;ls.s('mi-excat',EX.cat);EX.items=null;pinta();const h=$('.exch .on');h&&h.scrollIntoView({inline:'center',block:'nearest'})});
   app.querySelectorAll('[data-ord]').forEach(b=>b.onclick=()=>{vib();const o=b.dataset.ord;if(o==='cerca'&&!EX.geo){EX.orden='cerca';return exGeo()}EX.orden=o;ls.s('mi-exord',o);EX.items=null;pinta()});
+  const mb=$('#exmap');mb&&(mb.onclick=mapaAbrir);
   const q=$('#exq');let tq;q&&(q.oninput=()=>{clearTimeout(tq);tq=setTimeout(()=>{EX.q=q.value.trim();EX.items=null;exCarga();const l=$('#exl');l&&(l.innerHTML=exLista())},450)});
   const lu=$('#exlu');lu&&(lu.onclick=()=>hoja(`<h2>📍 ¿Dónde buscas?</h2><p class="mu sm">Escribe un distrito, ciudad o país.</p><input id="lgi" maxlength="40" value="${esc(EX.lugar)}" placeholder="Ej. Miraflores, Bogotá, México"><button class="btn p" id="lgb">Buscar ahí</button>${EX.lugar?'<button class="btn" id="lgx">Ver todo el mundo 🌎</button>':''}`,(o,close)=>{
    const i=o.querySelector('#lgi');i.focus();const ir=v=>{EX.lugar=v;EX.items=null;close();pinta()};o.querySelector('#lgb').onclick=()=>ir(i.value.trim());i.onkeydown=e=>{if(e.key==='Enter')ir(i.value.trim())};const x=o.querySelector('#lgx');x&&(x.onclick=()=>ir(''))}))};
@@ -1732,6 +1781,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
  return`<div class="g"><div class="hdr"><div class="sp"><h1>Explorar</h1><p class="mu sm">Negocios y entrenadores con Mi Xyro, en todo el mundo.</p></div></div>
   ${M.length?`<p class="mu xs" style="font-weight:700">DONDE ERES ${M.some(n=>citR(n.rubro))?'CLIENTE':'SOCIO'}</p>${mis}`:''}
   <div class="exs"><span>${I.search}</span><input id="exq" type="search" maxlength="40" placeholder="Busca un gym, café, entrenador…" value="${esc(EX.q)}" autocomplete="off"><button class="exlu" id="exlu">📍 ${esc(EX.lugar||'Todo')}</button></div>
+  <button class="mapbtn" id="exmap"><span class="mapbg"></span><span class="sp" style="position:relative"><b>🗺️ Ver el mapa</b><br><span class="xs" style="opacity:.85">Negocios Xyro cerca de ti</span></span><span style="position:relative;font-size:20px">›</span></button>
   <div class="hs exch">${CATS.map(([k,i,t])=>`<button class="chip${EX.cat===k?' on':''}" data-cat="${k}">${i} ${t}</button>`).join('')}</div>
   <div class="seg s3">${[['top','⭐ Mejor puntuados'],['cerca','📍 Cerca de mí'],['nuevos','🆕 Nuevos']].map(([k,t])=>`<button data-ord="${k}" id="exo-${k}" class="${EX.orden===k?'on':''}">${t}</button>`).join('')}</div>
   <div class="g" id="exl">${exLista()}</div>
@@ -1984,6 +2034,7 @@ demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
   res:{n:3,prom:4.7,dist:{5:2,4:1},lista:[{id:'r1',estrellas:5,texto:'Excelente atención y muy buen ambiente. ¡Lo recomiendo!',v:true,creado:new Date(Date.now()-864e5*2).toISOString(),nombre:'Carla',fundador:true},{id:'r2',estrellas:5,texto:'Me ayudó a bajar 8 kg en 3 meses 💪',v:true,creado:new Date(Date.now()-864e5*9).toISOString(),nombre:'Jorge'},{id:'r3',estrellas:4,texto:'Muy bueno, a veces hay que esperar un poco.',v:false,creado:new Date(Date.now()-864e5*20).toISOString(),nombre:'Ana'}]},
   pro:{slug:'coach-diego',tipo:'entrenador',nombre:'Diego Ramírez',titulo:'Coach de fuerza e hipertrofia',bio:'8 años entrenando personas reales con objetivos reales. Certificado NSCA. Planes a tu medida, presencial en Miraflores o 100% online.',especialidades:['Fuerza','Hipertrofia','Bajar de peso','Funcional'],modalidad:'ambas',pais:'PE',ciudad:'Lima',zona:'Miraflores',foto:'',portada:'',fotos:[],videos:[],redes:{instagram:'@coachdiego'},estado:'activo',plus:true,alumnos:24,soyAlumno:false},
   chats:[],mio:null});
+ if(f==='xa_mapa'){const p=a.p||{},C0=[-12.12,-77.03];return{items:W.items.filter(x=>x.t!=='p'&&(!p.cat||x.cat===p.cat)&&(!p.top||(+x.prom||0)>=4.5)).map((x,i)=>({slug:x.slug,nombre:x.nombre,logo:x.logo,cat:x.cat,lat:C0[0]+Math.sin(i*2.3)*0.03,lng:C0[1]+Math.cos(i*1.7)*0.035,dir:x.distrito,prom:x.prom,n:x.n,dest:x.dest,promos:x.promos}))}}
  if(f==='xa_explorar'){const p=a.p||{},q=(p.q||'').toLowerCase(),l=(p.lugar||'').toLowerCase();let L=W.items.filter(x=>(!p.cat||x.cat===p.cat)&&(!q||x.nombre.toLowerCase().includes(q))&&(!l||(x.distrito+' '+(x.pais||'')).toLowerCase().includes(l)));
   L=L.slice().sort((x,y)=>(y.dest?1:0)-(x.dest?1:0)||(p.orden==='cerca'?(x.km??1e6)-(y.km??1e6):p.orden==='nuevos'?0:(y.prom||0)-(x.prom||0)));return{items:p.off?[]:L,off:0}}
  if(f==='xa_resenas_de')return a.p_pro&&W.mio&&a.p_pro===W.mio.slug?{n:0,lista:[]}:JSON.parse(JSON.stringify(W.res));
