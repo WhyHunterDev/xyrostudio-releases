@@ -40,3 +40,6 @@ Documento maestro: una cuenta multi-rol (Usuario / Xyro Control / XyroStudio Pan
 
 ## SQL 91 (2026-11-18) · Marketplace sin custodia
 Decisión del usuario: Xyro es PUENTE, nunca recibe dinero de terceros. Compra Protegida retirada: `xy_create_p2p_order` siempre trato directo (sin comisión); comprador «Ya pagué · subir captura» (`xy_order_report_payment` + `p_foto`); vendedor ve la captura y «Recibí el pago · confirmar venta» (`xy_p2p_close` SOLD → `xy_award_points`). `xy_p2p_mark_paid/payout/release` sin permisos. Panel /x/ sin «Pagos».
+
+## Centro de pruebas (SQL 94)
+Gestor → 🧪 Pruebas (arriba). `xy_g_demo_crear(p_idn,lat,lng)` crea `prueba-xyro-cafe` (Gratis, mesa+Yape ficticio, 3 productos), `prueba-xyro-gym` (PRO, Xyro Apps) y `prueba-xyro-barberia` (verificada ✓) + 2 empleos; dueño = cuenta con ese ID. Solo los ven gestor y `xy_probadores` (`xy_ve_pruebas()` en xa_mapa/xa_mapa_paises/xa_explorar/xy_empleos_lista). `xy_g_demo_borrar()` borra todo. `xy_g_probador`, `xy_g_pruebas`.
