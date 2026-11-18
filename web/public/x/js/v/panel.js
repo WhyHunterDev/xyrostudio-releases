@@ -1,5 +1,5 @@
 // Xyro · XyroStudio Panel (solo equipo con staff_role). Lo delicado sigue en /gestor/; aquí lo del núcleo Xyro (SQL 76 + 79):
-// negocios por revisar, Boost pagado, Compra Protegida (cobro/retenido/pago al vendedor), cola de videos, tickets y moderación.
+// negocios por revisar, Boost pagado, cola de videos, tickets y moderación. (Compra Protegida retirada: SQL 91, Xyro no recibe dinero de terceros)
 import { S, $, $$, esc, I, rpc, tabla, money, fecha, hora, toast, hoja, errDe } from '../core.js';
 import { verTicket } from './p2p.js';
 
@@ -11,7 +11,7 @@ export async function vista(r, el) {
   if (r === 'p-inicio') return inicio(el);
   if (r === 'p-negocios') return negocios(el);
   if (r === 'p-soporte') return soporte(el);
-  if (r === 'p-pagos') return pagos(el);
+  if (r === 'p-pagos') { location.hash = '#/p-inicio'; return; }
   if (r === 'p-videos') return videos(el);
 }
 const tiene = (...r) => S.me && (S.me.staff_role === 'SUPERADMIN' || r.includes(S.me.staff_role));
@@ -22,13 +22,12 @@ async function inicio(el) {
   el.innerHTML = `<div><h1>XyroStudio Panel</h1><p class="mu">Tu rol: <b>${esc(ROL[S.me.staff_role] || S.me.staff_role)}</b></p></div>
     <div class="kpis"><div class="kpi"><span class="mu xs">Negocios por revisar</span><b id="kp">…</b></div>
       <div class="kpi"><span class="mu xs">Tickets abiertos</span><b id="kt">…</b><span class="mu xs">Xyro</span></div>
-      <div class="kpi"><span class="mu xs">Pagos protegidos</span><b id="kg">…</b><span class="mu xs">por confirmar</span></div></div>
+</div>
     <div class="card"><b>Atajos</b>
       <a class="li" href="#/p-negocios" style="text-decoration:none"><span class="ico">${I.shield}</span><span class="sp">Aprobar negocios nuevos</span>›</a>
       <a class="li" href="/gestor/" style="text-decoration:none"><span class="ico">${I.chart}</span><span class="sp">Abrir el Panel XyroStudio completo<br><span class="mu xs">Cobros, Actualizaciones, Registros gratis</span></span>›</a></div>`;
   try { $('#kp', el).textContent = (await pendientes()).length; } catch (e) { $('#kp', el).textContent = '—'; }
   $('#kt', el).textContent = await cuenta('support_tickets', (q) => q.select('id').eq('status', 'OPEN').limit(200), 'tickets');
-  $('#kg', el).textContent = await cuenta('orders', (q) => q.select('id').eq('fulfillment_mode', 'P2P').eq('protected', true).eq('status', 'AWAITING_PAYMENT').limit(200), 'p2p_orders');
 }
 
 async function negocios(el) {
