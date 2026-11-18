@@ -1,5 +1,17 @@
 [
  {
+  "id": "20261118-1207",
+  "fecha": "2026-11-18 12:07",
+  "titulo": "Planes Plus y Pro",
+  "notas": "Planes Plus y Pro",
+  "cambios": [
+   "Integraciones muestra tu plan (Plus o Pro) y botón para mejorar a Pro",
+   "Pagos de plan y Boost por ticket con captura, sin WhatsApp",
+   "Plus tiene límite de 2,000 clientes y 25 productos"
+  ],
+  "requiere": "SQL 89"
+ },
+ {
   "id": "20261118-1132",
   "fecha": "2026-11-18 11:32",
   "titulo": "Boost por hora y promos Xyro+",

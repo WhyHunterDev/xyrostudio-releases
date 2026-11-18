@@ -32,3 +32,8 @@ Documento maestro: una cuenta multi-rol (Usuario / Xyro Control / XyroStudio Pan
 - Pagos de Xyro+/Boost: `xy_plus_pedir` / `xy_boost_pedir(...,'pago')` crean `xy_solicitudes`; el gestor las activa en Panel → 💳 Cobros (`xy_solicitudes_lista`, `xy_solicitud_resolver`). Boost con puntos es al instante.
 - Mi Xyro: `xy_ruleta_estado/girar`, `xy_ranking(mes|siempre, cat)`, `xy_estilo/_set` (marcos/colores), reseñas Xyro+ pesan x2 (`xa_peso_resena`), promos con `plus:true` (registro gratis y Xyro Apps).
 - `xa_mapa` acepta `q` (busca por nombre/distrito sin caja) y devuelve `boost`.
+
+## SQL 89 · Planes Plus/Pro y pagos por ticket (2026-11-18)
+- Decisión usuario: ya NO se venden Xyros por separado. Planes de negocio: GRATIS / PLUS (Xyro Apps con límites: 2,000 clientes, 25 productos —trigger `xa_plan_limite`—, 10 mesas, 1 sede, sin web ni Control) / PRO (todo + Control + web). Tabla `xa_plan_sitio`; `xa_plan_de(sid)` (sin fila: registro gratis = GRATIS, cliente antiguo = PRO). `xa_plan_aplicar` pone `config.xyros` y `entities.plan`.
+- Pagos (Xyro+, Boost, planes) = TICKET `xy_pago_enviar` (N.º de operación + captura en `medios`), NUNCA WhatsApp. Datos de pago = `xa_xyro_cobro` (Panel → Cobros → Tus datos). Gestor: Panel → «⭐ Planes y pagos» (tickets, plan de cada negocio, precios en US$ `xy_g_precios_set`).
+- Mi Xyro: `pagoTicket`, `planesAbrir`, «Mis pagos» (`xy_mis_pagos`). Xyro Apps: `planCard`/`planAbrir`/`pagoTicketApp` en Integraciones.
