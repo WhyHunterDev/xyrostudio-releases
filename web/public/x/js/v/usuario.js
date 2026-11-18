@@ -132,7 +132,7 @@ function perfil(el) {
       <a class="li" href="#/pedidos" style="text-decoration:none"><span class="ico">${I.orders}</span><span class="sp">Mis pedidos y ventas<br><span class="mu xs">Estado, código, cajas sorpresa y tratos del Marketplace</span></span>›</a>
       <a class="li" href="#/ayuda" style="text-decoration:none"><span class="ico">💬</span><span class="sp">Ayuda<br><span class="mu xs">Tus consultas y reclamos con Xyro</span></span>›</a>
       <a class="li" href="/mi/" style="text-decoration:none"><span class="ico">🪪</span><span class="sp">Mi Xyro<br><span class="mu xs">Tus negocios guardados, carnet y chat</span></span>›</a>
-      <a class="li" href="/#/entrar" style="text-decoration:none"><span class="ico">🏪</span><span class="sp">Registrar mi negocio o servicio<br><span class="mu xs">Gratis: perfil, QR y promos</span></span>›</a>
+      <a class="li" href="/mi/?registro=1" style="text-decoration:none"><span class="ico">🏪</span><span class="sp">Registrar mi negocio o servicio<br><span class="mu xs">Gratis: perfil, QR y promos</span></span>›</a>
       <div class="li"><span class="ico">🕑</span><span class="sp">Miembro desde<br><span class="mu xs">${me.created_at ? fecha(me.created_at, { month: 'long', year: 'numeric' }) : '—'}</span></span></div></div>
       ${S.demo ? '<a class="btn" href="/x/">Salir de la demo</a>' : '<button class="btn" id="out">Cerrar sesión</button>'}</div></div>`;
   $('#pC', el).onchange = (e) => { const p = P.find((x) => x[0] === e.target.value); p && ($('#pM', el).value = p[2]); };
