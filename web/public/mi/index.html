@@ -425,14 +425,12 @@ function pantallaEntrada(msg,modo){
    <button class="btn p" id="lb">${modo==='crear'?'Crear mi cuenta':'Entrar'}</button>
    ${modo==='entrar'?'<button type="button" class="btn l" id="olv">¿Olvidaste tu clave?</button>':''}
   </form>
-  <button type="button" class="btn l" id="lneg" style="color:var(--tx)">${I.brief}Soy un negocio · entrar a mi panel</button>
   <button type="button" class="btn l" id="lreg" style="color:var(--a)">${p&&p.reg?'✓ Después de entrar registras tu negocio gratis':'🏪 ¿Tienes un negocio? Regístralo gratis'}</button>
   <p class="mu xs" style="text-align:center">¿Quieres verla antes? <a href="?demo=1" style="color:var(--a)">Mira la demo</a> · Hecho por XyroStudio</p>
  </div></div>`;
  const m=$('#lm'),say=(t,ok)=>{m.textContent=t;m.className='msg on'+(ok?' ok':'')};if(msg)say(msg);
  const sv=ls.g('mi-email');if(sv)$('#le').value=sv;
  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>pantallaEntrada('',b.dataset.m));
- $('#lneg').onclick=()=>modoNegocio();
  $('#lreg').onclick=()=>{pend.set(Object.assign({},pend.get()||{},{reg:1}));pantallaEntrada('Primero crea tu cuenta de Mi Xyro (o entra). Después registras tu negocio gratis.','crear')};
  $('#gg').onclick=async()=>{try{await cliente();const{error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:HOME}});if(error)throw error}catch(e){say(errDe(e))}};
  const o=$('#olv');o&&(o.onclick=async()=>{const em=$('#le').value.trim();if(!/@/.test(em))return say('Escribe tu correo y vuelve a tocar «¿Olvidaste tu clave?».');
@@ -1043,12 +1041,14 @@ async function negElegir(){vib();let L=[];
  const op=L.map(x=>({k:'s',v:x.slug,t:x.negocio,d:x.tipo==='equipo'?'Te dieron acceso · '+(RLN[x.rol]||x.rol):'Eres el dueño',i:I.store}))
   .concat(p?[{k:'p',t:'Mi perfil de '+(PROT[p.tipo]||PROT.otro)[1].toLowerCase(),d:'Tus alumnos, cobros y mensajes',i:I.dumb}]:[])
   .concat(g&&g.estado!=='pago'?[{k:'g',t:g.nombre,d:'Tu negocio · Plan Gratis',i:I.store}]:[]);
- if(!op.length)return modoNegocio();
+ if(!op.length){const per=D&&D.persona;return hoja(`<h2>Aún no tienes un negocio</h2><p class="mu sm">Si trabajas en uno, dale al dueño tu ID para que te agregue a su equipo. Luego entras desde aquí.</p>
+  ${per&&per.idn?`<div class="idbox"><span class="mu xs" style="font-weight:700">TU ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b></div>`:''}
+  <button class="btn p" id="nnv">${I.store}Registrar mi negocio gratis</button><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{o.querySelector('#nnv').onclick=()=>{close();negNuevo()}})}
  if(op.length===1)return negIr(op[0]);
  hoja(`<h2>¿A dónde entras?</h2><p class="mu sm">Con tu misma cuenta: elige el negocio o perfil.</p>
   ${op.map((o,i)=>`<button class="card" data-no="${i}" style="text-align:left;display:flex;gap:12px;align-items:center;cursor:pointer"><div class="ibox">${o.i}</div><span class="sp"><b>${esc(o.t)}</b><br><span class="mu xs">${esc(o.d)}</span></span>›</button>`).join('')}
-  <button class="btn" id="nlg">Entrar con usuario y clave</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
-  o.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{close();negIr(op[+b.dataset.no])});o.querySelector('#nlg').onclick=()=>{close();modoNegocio()}})}
+  <button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  o.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{close();negIr(op[+b.dataset.no])});})}
 async function negIr(o){
  if(o.k==='p'||o.k==='g'){SUB=o.k==='p'?'mipro':'migr';pinta();$('#sc')&&($('#sc').scrollTop=0);return}
  if(DEMO)return modoNegocio();
