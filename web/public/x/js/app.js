@@ -52,7 +52,7 @@ function elegirModo() {
     <button class="btn l" data-x>Cerrar</button>`, (o, close) => {
     $$('[data-m]', o).forEach((b) => b.onclick = () => {
       close();
-      if (b.dataset.reg) { location.href = '/#/entrar'; return; }
+      if (b.dataset.reg) { location.href = '/mi/?registro=1'; return; }
       S.modo = b.dataset.m; ls.s('x-modo', S.modo); location.hash = '#/' + INICIO[S.modo];
     });
   });
@@ -72,7 +72,7 @@ function pantallaEntrar() {
     <form id="fE" class="g"><label>Correo<input type="email" id="eM" autocomplete="email" required></label>
       <label>Clave<input type="password" id="eP" autocomplete="current-password" minlength="6" required></label>
       <div class="msg" id="eE"></div><button class="btn p w">Entrar</button></form>
-    <p class="sm mu" style="text-align:center">¿No tienes cuenta? <a href="/#/entrar" class="b">Créala gratis</a> · <a href="?demo=1" class="b">Ver demo</a></p>
+    <p class="sm mu" style="text-align:center">¿No tienes cuenta? <a href="/mi/" class="b">Créala gratis</a> · <a href="?demo=1" class="b">Ver demo</a></p>
   </div></div>`;
   $('#gG').onclick = async () => {
     if (!S.sb) return toast('Sin conexión. Revisa tu internet.');

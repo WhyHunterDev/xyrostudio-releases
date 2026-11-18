@@ -20,7 +20,7 @@ function cabecera(el, titulo, sub) {
 }
 
 export async function vista(r, el) {
-  if (!entidad()) { el.innerHTML = '<div class="vacio"><div class="e">🏪</div><b>Aún no tienes un negocio</b><a class="btn p" href="/#/entrar">Registrarlo gratis</a></div>'; return; }
+  if (!entidad()) { el.innerHTML = '<div class="vacio"><div class="e">🏪</div><b>Aún no tienes un negocio</b><a class="btn p" href="/mi/?registro=1">Registrarlo gratis</a></div>'; return; }
   if (S.entidad.type === 'PROFESSIONAL') { document.querySelectorAll('#tabs a[href="#/c-qr"],#side a[href="#/c-qr"]').forEach((a) => a.remove()); if (r === 'c-qr') { location.hash = '#/c-inicio'; return; } }
   if (r === 'c-inicio') return inicio(el);
   if (r === 'c-pedidos') return pedidos(el);

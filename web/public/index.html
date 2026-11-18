@@ -1,724 +1,356 @@
 <!doctype html>
 <html lang="es-PE"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>XyroStudio · El ecosistema digital para tu negocio</title>
-<meta name="description" content="Webs, apps, control, bots de WhatsApp y edición con IA en un solo ecosistema. Pruébalo en vivo con tu propio negocio. Hecho en Lima para todo el Perú.">
+<title>Xyro · Los negocios de tu ciudad en un solo lugar</title>
+<meta name="description" content="Xyro conecta a las personas con los negocios de su ciudad: mapa, promos, puntos, pedidos y pagos con Yape. Crea tu cuenta gratis o registra tu negocio gratis.">
 <meta name="theme-color" content="#05060a">
 <link rel="canonical" href="https://xyrostudio.net/">
 <meta property="og:type" content="website"><meta property="og:locale" content="es_PE"><meta property="og:site_name" content="XyroStudio">
-<meta property="og:title" content="XyroStudio · El ecosistema digital para tu negocio">
-<meta property="og:description" content="Webs, apps, control, bots y edición con IA. Pruébalo en vivo con tu negocio.">
+<meta property="og:title" content="Xyro · Los negocios de tu ciudad en un solo lugar">
+<meta property="og:description" content="Encuentra negocios cerca, aprovecha sus promos y gana puntos. ¿Tienes un negocio? Regístralo gratis y aparece en el mapa.">
 <meta property="og:url" content="https://xyrostudio.net/">
 <meta property="og:image" content="https://xyrostudio.net/img/og-xyro.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="img/marca/logo-xyrostudio-app.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="img/logo.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"XyroStudio","url":"https://xyrostudio.net/","logo":"https://xyrostudio.net/img/marca/logo-xyrostudio-app.svg","email":"hola@xyrostudio.net","sameAs":["https://www.tiktok.com/@xyrostudio.net","https://www.instagram.com/xyrostudio_/","https://www.facebook.com/profile.php?id=61596799371612"],"address":{"@type":"PostalAddress","addressLocality":"Lima","addressCountry":"PE"}}</script>
-<style>*{scrollbar-width:thin;scrollbar-color:rgba(140,140,150,.35) transparent}::-webkit-scrollbar{width:8px;height:8px;background:transparent}::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}::-webkit-scrollbar-thumb{background:rgba(140,140,150,.35);border-radius:8px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-thumb:hover{background-color:rgba(160,160,170,.6)}::-webkit-scrollbar-button{display:none;height:0;width:0}
-
-:root{--bg:#05060a;--panel:#10131c;--panel2:#171b27;--line:#ffffff14;--line2:#ffffff24;--tx:#f1f2f7;--mut:#9aa1b5;--ac:#7c5cff;--ac2:#b06bff;--cy:#3ad6ff;--ok:#3ddc97;--wa:#25D366;--acc:#7c5cff;--rc:#f59e0b;--top:64px;--dock:92px}
-*{box-sizing:border-box}
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"XyroStudio","url":"https://xyrostudio.net/","logo":"https://xyrostudio.net/img/marca/logo-xyrostudio-app.svg","sameAs":["https://www.tiktok.com/@xyrostudio.net","https://www.instagram.com/xyrostudio_/","https://www.facebook.com/profile.php?id=61596799371612"]}</script>
+<script>/* rutas viejas: entrar → Mi Xyro (login único) */(function(){var h=location.hash;if(/^#\/entrar/.test(h))location.replace('/mi/')})()</script>
+<style>
+:root{--bg:#05060a;--pn:#10131c;--pn2:#171b27;--ln:#ffffff14;--ln2:#ffffff26;--tx:#f1f2f7;--mu:#9aa1b5;--ac:#7c5cff;--ac2:#b06bff;--cy:#3ad6ff;--ok:#3ddc97;--wa:#25D366;--gd:#f5c542;--top:66px;--nav:0px}
+*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:#8c8c9659 transparent}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
-h1,h2,h3{font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,sans-serif;font-weight:700;letter-spacing:-.03em;line-height:1.05;margin:0}
+h1,h2,h3{font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,sans-serif;font-weight:750;letter-spacing:-.03em;line-height:1.04;margin:0}
 p{margin:0}a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
 button,input{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0;padding:0}
 :focus-visible{outline:2px solid var(--cy);outline-offset:3px}
-.mut{color:var(--mut)}
+[hidden]{display:none!important}.mu{color:var(--mu)}.xs{font-size:12.5px}.sm{font-size:14px}
 .grad{background:linear-gradient(90deg,var(--cy),var(--ac2),var(--cy));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:sh 6s linear infinite}
 @keyframes sh{to{background-position:200% center}}
-.tile{display:block;border-radius:22%;box-shadow:0 0 0 1px #ffffff1a,0 14px 30px -12px #000}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-weight:600;padding:13px 20px;border-radius:12px;border:1px solid transparent;transition:transform .2s,box-shadow .2s,border-color .2s,background .2s;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-weight:650;padding:13px 20px;border-radius:14px;border:1px solid transparent;transition:transform .2s,box-shadow .2s,border-color .2s,background .2s;white-space:nowrap}
 .btn:hover{transform:translateY(-2px)}
-.btn-p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 10px 30px -10px #7c5cffcc}
-.btn-a{background:var(--acc);color:#05060a;box-shadow:0 10px 30px -10px var(--acc)}
-.btn-g{background:#ffffff0d;border-color:var(--line2);backdrop-filter:blur(8px)}.btn-g:hover{border-color:var(--acc)}
-.btn-wa{background:var(--wa);color:#04210f}
+.btn-p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 12px 34px -12px #7c5cffcc}
+.btn-g{background:#ffffff0d;border-color:var(--ln2);backdrop-filter:blur(8px)}.btn-g:hover{border-color:var(--ac)}
+.btn-w{background:#fff;color:#0b0d16}
 .ico{width:18px;height:18px;flex:none}
 /* fondo */
 #fx{position:fixed;inset:0;z-index:0;width:100%;height:100%}
-.glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(600px circle at var(--mx,50%) var(--my,40%),color-mix(in srgb,var(--acc) 18%,transparent),transparent 60%);transition:background .3s}
-.aura{position:fixed;width:70vmax;height:70vmax;left:50%;top:50%;transform:translate(-50%,-60%);border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--acc) 22%,transparent),transparent);filter:blur(20px);z-index:0;pointer-events:none;transition:background 1s}
-/* top */
-.top{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:30;display:flex;align-items:center;gap:20px;padding:0 max(20px,env(safe-area-inset-left));background:linear-gradient(#05060ae6,#05060a00)}
-.logo{display:flex;align-items:center;gap:10px;font-size:19px;margin-right:auto}.logo img{width:32px;height:32px}.logo b{font-weight:700}.logo span{font-weight:300;color:#d6d9e4}
-.tnav{display:flex;gap:6px}
-.tnav a{padding:8px 14px;border-radius:99px;font-size:14px;color:var(--mut);transition:all .2s}
-.tnav a:hover,.tnav a.on{color:#fff;background:#ffffff12}
-.top .btn{padding:9px 16px;font-size:14px}
-@media(max-width:820px){.tnav{display:none}.top .btn span{display:none}}
+.aura{position:fixed;inset:-20%;z-index:0;pointer-events:none;background:radial-gradient(40% 35% at 75% 30%,#7c5cff26,transparent 70%),radial-gradient(35% 30% at 15% 80%,#3ad6ff14,transparent 70%)}
+/* barra */
+.top{position:fixed;top:0;left:0;right:0;height:var(--top);z-index:20;display:flex;align-items:center;gap:18px;padding:0 max(18px,env(safe-area-inset-left));background:linear-gradient(#05060ae6,#05060a00)}
+.logo{display:flex;align-items:center;gap:10px;font-size:19px;letter-spacing:-.02em}.logo img{width:32px;height:32px;border-radius:9px}.logo span{font-weight:400}.logo b{font-weight:750}
+.tnav{display:flex;gap:4px;margin:0 auto;padding:4px;border-radius:14px;background:#ffffff08;border:1px solid var(--ln)}
+.tnav a{padding:8px 14px;border-radius:10px;font-size:14px;color:var(--mu);transition:.2s}.tnav a:hover{color:var(--tx)}.tnav a.on{background:#ffffff14;color:var(--tx)}
+.ubtn{display:flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:99px;border:1px solid var(--ln2);font-size:14px;font-weight:650;background:#ffffff08}
+.ubtn .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--ac),var(--cy));color:#fff;font-size:13px;font-weight:800}
+.top .reg{padding:10px 16px;font-size:14px}
 /* vistas */
-main{position:fixed;inset:var(--top) 0 var(--dock) 0;z-index:5}
-.view{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:10px clamp(16px,4vw,56px);opacity:0;visibility:hidden;transform:scale(.96);filter:blur(10px);transition:opacity .6s,transform .7s cubic-bezier(.2,.8,.2,1),filter .6s,visibility 0s .7s}
-.view.on{opacity:1;visibility:visible;transform:none;filter:none;transition:opacity .6s .1s,transform .8s .1s cubic-bezier(.2,.8,.2,1),filter .6s .1s}
-.view.out{transform:scale(1.04)}
-.in-1,.in-2,.in-3,.in-4{opacity:0;transform:translateY(22px);transition:opacity .7s,transform .8s cubic-bezier(.2,.8,.2,1)}
-.view.on .in-1{opacity:1;transform:none;transition-delay:.2s}.view.on .in-2{opacity:1;transform:none;transition-delay:.32s}.view.on .in-3{opacity:1;transform:none;transition-delay:.44s}.view.on .in-4{opacity:1;transform:none;transition-delay:.56s}
-.wrap{width:min(1200px,100%);max-height:100%;display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,64px);align-items:center}
-@media(max-width:900px){body{overflow:hidden}.view{align-items:flex-start;overflow-y:auto;overflow-x:hidden;padding-top:16px;padding-bottom:24px;-webkit-overflow-scrolling:touch}.wrap{grid-template-columns:1fr;max-height:none;gap:26px}}
-/* home */
-.eti{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#d9cfff;background:#7c5cff1f;border:1px solid #7c5cff59;padding:6px 12px;border-radius:99px}
+main{position:relative;z-index:1;height:100%}
+.view{position:absolute;inset:0;padding:calc(var(--top) + 8px) 0 calc(var(--nav) + 18px);overflow-y:auto;overflow-x:hidden;opacity:0;visibility:hidden;transition:opacity .45s,visibility .45s}
+.view.on{opacity:1;visibility:visible}
+.wrap{width:min(1180px,100% - 40px);margin:0 auto;min-height:100%;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.in{opacity:0;transform:translateY(16px);transition:opacity .6s,transform .6s}.view.on .in{opacity:1;transform:none}
+.view.on .d1{transition-delay:.06s}.view.on .d2{transition-delay:.14s}.view.on .d3{transition-delay:.22s}.view.on .d4{transition-delay:.3s}
+.eti{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;border:1px solid #7c5cff55;background:#7c5cff14;font-size:13px;font-weight:650}
 .eti i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
-.home h1{font-size:clamp(40px,5.6vw,76px);margin:18px 0}
-.home h1 .w{display:inline-block;opacity:0;transform:translateY(40%) rotate(4deg);transition:opacity .6s,transform .8s cubic-bezier(.2,.8,.2,1)}
-.view.on .home h1 .w{opacity:1;transform:none}
-.lead{font-size:clamp(16px,1.6vw,19px);max-width:540px;margin-bottom:22px}
-.pick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
-.chip{padding:8px 14px;border-radius:99px;border:1px solid var(--line2);background:#ffffff08;font-size:14px;font-weight:600;transition:all .2s}
-.chip:hover{border-color:var(--acc)}.chip[aria-pressed=true]{background:#fff;color:#05060a;border-color:#fff}
-.inrow{display:flex;gap:10px;flex-wrap:wrap;max-width:560px}
-.inrow input{flex:1;min-width:190px;padding:13px 16px;border-radius:12px;border:1px solid var(--line2);background:#ffffff08;outline:none;transition:border-color .2s}
-.inrow input:focus{border-color:var(--acc)}
-/* orbita 3D */
-.orb{position:relative;width:min(520px,100%);aspect-ratio:1;margin:auto;perspective:1100px}
-.ring{position:absolute;inset:0;transform:rotateX(64deg)}
-.ring::before,.ring::after{content:"";position:absolute;inset:6%;border-radius:50%;border:1px solid #ffffff1f;box-shadow:0 0 60px -10px var(--acc) inset}
-.ring::after{inset:22%;border-style:dashed;border-color:#ffffff14;box-shadow:none}
-.nd{position:absolute;left:0;top:0;width:86px;margin:-60px 0 0 -43px;will-change:transform}
-.nd button{width:100%;transition:filter .2s}
-.nd button img{width:86px;height:86px;transition:transform .3s,box-shadow .3s}
-.nd button:hover img{transform:translateY(-8px) scale(1.1);box-shadow:0 0 0 2px var(--c),0 20px 40px -10px var(--c)}
-.nd button span{display:block;text-align:center;font-size:13px;font-weight:600;margin-top:8px;color:#dfe2ee;text-shadow:0 2px 8px #000}
-.core{position:absolute;left:50%;top:50%;width:30%;transform:translate(-50%,-62%);z-index:50;animation:bob 5s ease-in-out infinite}
-.core img{width:100%;height:auto;box-shadow:0 0 0 1px #ffffff26,0 30px 80px -10px #7c5cffaa,0 0 120px -20px var(--cy)}
-.core::after{content:"";position:absolute;left:10%;right:10%;bottom:-38%;height:20%;border-radius:50%;background:radial-gradient(closest-side,#7c5cff66,transparent);filter:blur(6px)}
-@keyframes bob{50%{transform:translate(-50%,-68%)}}
-@media(max-width:900px){.orb{width:min(360px,92vw)}.nd{width:64px;margin:-46px 0 0 -32px}.nd button img{width:64px;height:64px}}
-/* mundos */
-.wd .k{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.wd .k img{width:58px;height:58px;box-shadow:0 0 0 1px #ffffff1a,0 0 40px -6px var(--acc)}
-.wd .k small{display:block;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
-.wd .k b{font-size:20px}
-.wd h2{font-size:clamp(32px,4.2vw,56px);margin-bottom:16px}
-.wd .pain{display:inline-flex;gap:8px;align-items:center;font-size:14px;color:#ffb4b4;background:#ff5b5b14;border:1px solid #ff5b5b33;padding:6px 12px;border-radius:99px;margin-bottom:14px}
-.wd .pain s{color:#ff9d9d}
-.bens{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 26px}
-.bens span{padding:8px 13px;border-radius:12px;background:#ffffff0a;border:1px solid var(--line);font-size:14px}
-.bens span::before{content:"✓ ";color:var(--acc);font-weight:700}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.try{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin-bottom:14px}
-.try::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);animation:ping 1.6s infinite}
-@keyframes ping{0%{box-shadow:0 0 0 0 var(--acc)}100%{box-shadow:0 0 0 10px transparent}}
-.vis{position:relative;display:flex;justify-content:center}
-.vis::before{content:"";position:absolute;inset:8% 10%;background:radial-gradient(closest-side,color-mix(in srgb,var(--acc) 35%,transparent),transparent);filter:blur(30px);z-index:-1}
-.tilt{transition:transform .2s ease-out;transform-style:preserve-3d}
-/* phone */
-.phone{width:min(290px,80vw);border-radius:40px;padding:10px;background:#000;box-shadow:0 0 0 1px #ffffff26,0 50px 100px -30px #000,0 0 0 6px #ffffff08}
-.scr{position:relative;height:min(530px,calc(100dvh - 250px));min-height:420px;border-radius:31px;overflow:hidden;background:#fff;color:#111}
-.brw{width:min(600px,100%);border-radius:14px;overflow:hidden;background:#fff;color:#111;box-shadow:0 0 0 1px #ffffff26,0 50px 100px -30px #000,0 0 80px -30px var(--rc)}
-.brw-bar{display:flex;align-items:center;gap:6px;padding:10px 12px;background:#1b1f2b}
-.brw-bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.brw-bar i:nth-child(2){background:#febc2e}.brw-bar i:nth-child(3){background:#28c840}
-.brw-url{flex:1;margin-left:10px;display:flex;align-items:center;gap:6px;justify-content:center;padding:5px 10px;border-radius:8px;background:#0f121a;color:#c9cede;font-size:12px}
-.brw-pg{height:min(420px,calc(100dvh - 300px));min-height:330px;overflow:hidden}
-.wm-top{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid #eee;font-size:14px}
-.wm-top b{color:var(--rc);transition:color .4s}.wm-top nav{display:flex;gap:14px;margin-left:auto;font-size:12px;color:#555}
-.wm-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:center;padding:22px 18px;background:linear-gradient(135deg,color-mix(in srgb,var(--rc) 20%,#fff),#fff);transition:background .4s}
-.wm-hero h4{margin:0 0 6px;font-size:24px;line-height:1.1}
-.wm-hero p{font-size:13px;color:#555;margin-bottom:12px}
-.wm-art{aspect-ratio:1;width:100%;max-width:140px;justify-self:end;border-radius:18px;display:grid;place-items:center;font-size:56px;background:color-mix(in srgb,var(--rc) 25%,#fff);box-shadow:0 20px 40px -20px var(--rc);transition:background .4s}
-.wm-btn{display:inline-flex;gap:6px;align-items:center;padding:9px 14px;border-radius:10px;background:var(--rc);color:#fff;font-size:13px;font-weight:700;transition:background .4s}
-.wm-btn.sm{padding:6px 10px;font-size:11px}
-.wm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 18px}
-.wm-it{border:1px solid #eee;border-radius:12px;padding:10px;font-size:12px}
-.wm-it i{font-style:normal;display:grid;place-items:center;height:48px;border-radius:8px;margin-bottom:6px;background:color-mix(in srgb,var(--rc) 14%,#fff);font-size:24px}
-.wm-it span{display:block;min-height:2.4em;line-height:1.2}.wm-it b{display:block;margin-top:4px;color:var(--rc)}
-@media(max-width:600px){.wm-top nav{display:none}.wm-hero{grid-template-columns:1fr}.wm-art{display:none}.wm-grid{grid-template-columns:repeat(2,1fr)}.wm-hero h4{font-size:20px}}
-.edit{display:grid;gap:10px;padding:14px;border-radius:16px;background:#ffffff08;border:1px solid var(--line2);max-width:460px;margin-bottom:20px}
-.edit label{font-size:12px;font-weight:600;color:var(--mut)}
-.edit input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line2);background:#00000040;outline:none;margin-top:4px}
-.sw{display:flex;gap:8px;margin-top:4px}.sw button{width:28px;height:28px;border-radius:50%;border:2px solid transparent;transition:transform .2s}
-.sw button:hover{transform:scale(1.15)}.sw button[aria-pressed=true]{border-color:#fff}
-/* panel oscuro */
-.dash{position:relative;width:min(460px,100%);border-radius:22px;background:#0b0e16f2;border:1px solid var(--line2);padding:16px;box-shadow:0 50px 100px -30px #000}
-.d-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:13px;color:var(--mut)}.d-h b{color:var(--tx)}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.kpi{padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}.kpi span{display:block;font-size:11px;color:var(--mut)}.kpi b{font-size:19px;display:inline-block}
-.kpi b.bump{animation:bump .5s}@keyframes bump{50%{color:var(--ok);transform:scale(1.15)}}
-.pos{display:grid;grid-template-columns:1.25fr 1fr;gap:10px}
-.prods{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.prod{padding:10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);text-align:left;font-size:12px;transition:transform .12s,border-color .2s}
-.prod:active{transform:scale(.94)}.prod:hover{border-color:var(--acc)}
-.prod i{font-style:normal;font-size:20px;display:block}.prod b{display:block;font-size:13px;margin:2px 0}.prod small{color:var(--mut)}
-.stock{height:4px;border-radius:2px;background:#ffffff14;margin-top:6px;overflow:hidden}.stock span{display:block;height:100%;background:var(--ok);transition:width .3s}
-.tk{display:flex;flex-direction:column;padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:12px}
-.tk-l{flex:1;min-height:90px;max-height:130px;overflow:auto}
-.tk-l div{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--line2);animation:pop .25s}
-.tk-t{display:flex;justify-content:space-between;font-weight:700;font-size:15px;margin:8px 0}
-.tk button{padding:10px;border-radius:10px;background:var(--ok);color:#04210f;font-weight:700}
-.bars{display:flex;align-items:flex-end;gap:5px;height:50px;margin-top:12px}
-.bars i{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--acc),color-mix(in srgb,var(--acc) 40%,transparent));transition:height .5s cubic-bezier(.2,.8,.2,1)}
-.toast{position:absolute;left:50%;top:12px;transform:translate(-50%,-20px);opacity:0;padding:8px 14px;border-radius:99px;background:var(--ok);color:#04210f;font-size:12px;font-weight:700;transition:all .3s;white-space:nowrap;z-index:5;pointer-events:none}
-.toast.on{transform:translate(-50%,0);opacity:1}
-.cl{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--panel);border:1px solid var(--line);margin-bottom:8px;font-size:13px}
-.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
-.cl .st{margin-left:auto;font-size:11px;font-weight:700;padding:4px 9px;border-radius:99px;white-space:nowrap}
-.ok{background:#3ddc9726;color:var(--ok)}.wn{background:#f59e0b26;color:#f5b544}.bd{background:#ef444426;color:#f87171}
-.cl button{font-size:11px;padding:5px 9px;border-radius:8px;border:1px solid var(--line2);background:var(--panel2);font-weight:600}
-.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.acts button{padding:11px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);font-weight:600;font-size:13px;transition:border-color .2s}
-.acts button:hover{border-color:var(--acc)}
-.bol{margin-top:10px;padding:12px;border-radius:12px;background:#fff;color:#111;font-size:12px;font-family:ui-monospace,Consolas,monospace;display:none}
-.bol.on{display:block;animation:pop .35s}
-@keyframes pop{from{transform:scale(.85);opacity:0}}
-/* chat */
-.wa-h{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#075e54;color:#fff;font-size:14px;font-weight:600}
-.wa-h i{width:34px;height:34px;border-radius:50%;background:var(--rc);display:grid;place-items:center;font-style:normal}
-.wa-h small{display:block;font-weight:400;font-size:11px;opacity:.8}
-.wa-b{position:absolute;top:58px;bottom:96px;left:0;right:0;overflow:auto;padding:12px;background:#ece5dd;display:flex;flex-direction:column;gap:6px}
-.msg{max-width:84%;padding:7px 10px;border-radius:10px;font-size:13px;line-height:1.4;box-shadow:0 1px 1px #0002;animation:pop .25s}
-.msg.b{background:#fff;align-self:flex-start;border-top-left-radius:2px}.msg.u{background:#dcf8c6;align-self:flex-end;border-top-right-radius:2px}
-.typing{display:flex;gap:3px}.typing i{width:6px;height:6px;border-radius:50%;background:#999;animation:tp 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
-@keyframes tp{50%{opacity:.3;transform:translateY(-3px)}}
-.qr{position:absolute;left:0;right:0;bottom:0;height:96px;display:flex;flex-wrap:wrap;align-content:center;gap:6px;padding:10px;background:#f7f7f7;border-top:1px solid #ddd}
-.qr button{padding:7px 11px;border-radius:99px;border:1px solid #075e54;background:#fff;color:#075e54;font-size:12px;font-weight:600}
-/* reel */
-.reel{position:relative;height:100%;overflow:hidden;background:linear-gradient(160deg,var(--rc),#1a1033);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:24px;transition:background .5s}
-.reel::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,#fff0,#ffffff26,#fff0 30%);animation:spin 7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.reel .em{position:relative;font-size:92px;line-height:1;animation:bob2 2s ease-in-out infinite;filter:drop-shadow(0 10px 20px #0006)}
-@keyframes bob2{50%{transform:translateY(-12px) rotate(-4deg)}}
-.reel .cap{position:relative;margin-top:26px;font-weight:800;font-size:26px;line-height:1.15;text-transform:uppercase;text-shadow:0 3px 0 #0006;min-height:92px}
-.reel .cap mark{background:#fff;color:#111;padding:0 6px;border-radius:6px}
-.reel .cap.in{animation:pop .35s}
-.reel .pb{position:absolute;left:14px;right:14px;top:14px;height:3px;border-radius:2px;background:#fff4;overflow:hidden}.reel .pb i{display:block;height:100%;width:0;background:#fff}
-.reel .eq{position:absolute;bottom:18px;left:18px;display:flex;gap:3px;align-items:flex-end;height:18px}.reel .eq i{width:3px;background:#fff;animation:eq .8s ease-in-out infinite}
-.reel .eq i:nth-child(2){animation-delay:.2s}.reel .eq i:nth-child(3){animation-delay:.4s}.reel .eq i:nth-child(4){animation-delay:.1s}
-@keyframes eq{0%,100%{height:4px}50%{height:18px}}
-.reel .tag{position:absolute;bottom:16px;right:16px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:99px;background:#0006}
-/* ecosistema */
-.eco{position:relative;width:min(520px,100%);aspect-ratio:1;margin:auto}
-.eco svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.eco line{stroke:#ffffff1a;stroke-width:2;transition:stroke .4s}
-.eco line.on{stroke:url(#lg);stroke-dasharray:6 8;animation:flow 1s linear infinite}
-@keyframes flow{to{stroke-dashoffset:-14}}
-.en{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;font-weight:600;transition:transform .3s,opacity .3s;opacity:.45}
-.en img{width:70px;height:70px;transition:box-shadow .3s}
-.en.on{opacity:1}.en.on img{box-shadow:0 0 0 2px var(--c),0 0 40px -6px var(--c)}
-.en:hover{transform:translate(-50%,-50%) scale(1.08)}
-.eco .me{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:150px;height:150px;border-radius:50%;display:grid;place-items:center;text-align:center;padding:16px;background:radial-gradient(circle,#7c5cff40,#0b0e16 70%);border:1px solid #7c5cff80;box-shadow:0 0 80px -10px #7c5cff;font-weight:700;font-size:15px;line-height:1.2}
-.eco .me small{display:block;font-weight:600;font-size:11px;color:var(--mut);margin-top:4px}
-.sum{padding:20px;border-radius:20px;background:#ffffff08;border:1px solid var(--line2);margin:18px 0 22px;max-width:520px}
-.sum b{display:block;margin-bottom:6px}
-.sum ul{margin:8px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:6px}
-.sum li{padding:5px 10px;border-radius:99px;background:#ffffff12;font-size:13px;animation:pop .3s}
-.plan-s{display:inline-block;margin-top:12px;font-size:14px;color:var(--cy);font-weight:600}
-/* resultados */
-.cards{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;width:min(1200px,100%)}
-.card{position:relative;border-radius:24px;overflow:hidden;background:var(--panel);border:1px solid var(--line2);transition:transform .3s,border-color .3s}
-.card:hover{transform:translateY(-4px);border-color:var(--acc)}
-.card .ph{position:relative;height:clamp(150px,26dvh,260px);background:#000}.card .ph>img{width:100%;height:100%;object-fit:cover;opacity:.85}
-.card .ph .lg{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:12px;background:#000b;backdrop-filter:blur(6px);font-weight:600;font-size:13px}
-.card .ph .lg img{width:30px;height:30px;border-radius:8px}
-.card .tx{padding:22px}.card h3{font-size:22px;margin-bottom:8px}.card p{font-size:14px;margin-bottom:16px}
-.reels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px;height:clamp(150px,26dvh,260px)}
-.reels img{width:100%;height:100%;object-fit:cover;border-radius:12px;transition:transform .3s}
-.reels img:nth-child(even){transform:translateY(14px)}
-.steps{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.legal{align-self:center;margin-left:6px;font-size:12px;color:var(--mut)}.legal a{color:inherit;text-decoration:underline;text-underline-offset:3px}.redes .legal a{width:auto;height:auto;display:inline;background:none;border:0;border-radius:0}
-.redes{display:flex;gap:10px;margin-top:18px}.redes a{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#ffffff0d;border:1px solid var(--line);color:var(--tx);transition:.2s}.redes a:hover{border-color:var(--cy);transform:translateY(-2px)}
-.step{padding:16px;border-radius:16px;background:#ffffff08;border:1px solid var(--line);font-size:14px}
-.step b{display:block;color:var(--cy);font-size:12px;letter-spacing:.1em}
-@media(max-width:900px){.cards{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}
-/* dock */
-.dock{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;display:flex;align-items:flex-end;gap:6px;padding:8px 10px;border-radius:22px;background:#10131ccc;border:1px solid var(--line2);backdrop-filter:blur(16px) saturate(1.5);-webkit-backdrop-filter:blur(16px) saturate(1.5);box-shadow:0 20px 50px -20px #000}
-.dock button{position:relative;display:flex;flex-direction:column;align-items:center;transition:transform .2s cubic-bezier(.2,.8,.2,1);transform-origin:50% 100%}
-.dock img{width:46px;height:46px;border-radius:12px;box-shadow:0 0 0 1px #ffffff1a}
-.dock .tx{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--ac),var(--ac2));font-size:20px}
-.dock button::after{content:"";position:absolute;bottom:-6px;width:4px;height:4px;border-radius:50%;background:transparent}
-.dock button.on::after{background:#fff}
-.dock .lb{position:absolute;bottom:calc(100% + 12px);padding:5px 10px;border-radius:8px;background:#000;font-size:12px;font-weight:600;white-space:nowrap;opacity:0;transform:translateY(4px);transition:all .2s;pointer-events:none}
-.dock button:hover .lb{opacity:1;transform:none}
-.dock .sep{width:1px;align-self:stretch;background:var(--line2);margin:4px 4px}
-@media(max-width:600px){:root{--dock:86px}.dock{gap:3px;padding:6px 8px;width:calc(100% - 20px);justify-content:space-between}.dock img,.dock .tx{width:40px;height:40px}.dock .sep{display:none}}
-.flash{position:fixed;inset:0;z-index:25;pointer-events:none;background:var(--acc);clip-path:circle(0 at var(--fx,50%) var(--fy,50%));opacity:.9}
-.flash.go{animation:fl .75s cubic-bezier(.7,0,.2,1) forwards}
-@keyframes fl{50%{clip-path:circle(150% at var(--fx) var(--fy));opacity:.85}100%{clip-path:circle(150% at var(--fx) var(--fy));opacity:0}}
-.hint{position:fixed;right:20px;bottom:calc(var(--dock) + 4px);z-index:20;font-size:12px;color:var(--mut)}
-.hint kbd{font:inherit;padding:2px 6px;border-radius:5px;border:1px solid var(--line2)}
-@media(max-width:900px){.hint{display:none}}
-/* listos por rubro */
-.lst{width:min(1200px,100%);display:grid;gap:14px}
-.lst-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.lst-h h2{font-size:clamp(28px,3.6vw,48px)}
-.lst-g{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.rx{position:relative;border-radius:24px;padding:20px;background:var(--panel);border:1px solid var(--line2);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s}
-.rx::before{content:"";position:absolute;inset:-40% -20% auto auto;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--rc) 30%,transparent),transparent);pointer-events:none;animation:rxp 6s ease-in-out infinite alternate}
-@keyframes rxp{to{transform:translate(-18%,14%) scale(1.15)}}
-.rx:hover{transform:translateY(-4px);border-color:var(--rc);box-shadow:0 24px 60px -30px var(--rc)}
-.rx-t{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.rx-t i{font-style:normal;font-size:28px;width:52px;height:52px;display:grid;place-items:center;border-radius:16px;background:color-mix(in srgb,var(--rc) 22%,#000);box-shadow:0 0 0 1px #ffffff1a,0 0 30px -8px var(--rc)}
-.rx-t b{display:block;font-size:22px;line-height:1.1}.rx-t small{color:var(--mut);font-size:13px}
-.rx-tag{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;background:#3ddc9722;color:#3ddc97;white-space:nowrap}
-.rx ul{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:7px}
-.rx li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.35}
-.rx li img{width:24px;height:24px;border-radius:7px;flex:none;margin-top:1px}
-.rx li b{font-weight:600}.rx li em{font-style:normal;font-size:11px;padding:2px 7px;border-radius:99px;background:#f5b54422;color:#f5b544;margin-left:4px;white-space:nowrap}
-.rx .row{display:flex;gap:8px;flex-wrap:wrap}.rx .btn{padding:10px 14px;font-size:14px}
-.lst-p{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-radius:16px;background:#ffffff08;border:1px dashed var(--line2);font-size:14px}
-.lst-p span{padding:5px 11px;border-radius:99px;background:#ffffff0d}
-@media(max-width:900px){.lst-g{grid-template-columns:1fr}}
-@media(max-width:600px){.rx-t{flex-wrap:wrap}.rx-t>div{flex:1}.rx-tag{margin-left:64px}}
-.fab{position:fixed;right:18px;bottom:calc(var(--dock,96px) + 14px);z-index:40;display:flex;align-items:center;gap:10px;padding:12px 18px 12px 14px;border-radius:99px;background:var(--wa);color:#04210f;font-weight:700;font-size:15px;box-shadow:0 14px 40px -12px #25d366;animation:fb 2.6s ease-in-out infinite}
-.fab .ico{width:22px;height:22px}
-@keyframes fb{0%,100%{box-shadow:0 0 0 0 #25d36666,0 14px 40px -12px #25d366}50%{box-shadow:0 0 0 12px #25d36600,0 14px 40px -12px #25d366}}
-@media(max-width:600px){.fab span{display:none}.fab{padding:14px;right:14px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition-duration:.01s!important}}
-
-/* ===== Entrar (cuenta Xyro) ===== */
-body.v-entrar .fab{opacity:0;pointer-events:none}
-.ubtn{display:inline-flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:99px;font-size:14px;font-weight:600;border:1px solid var(--line2);background:#ffffff0a;backdrop-filter:blur(8px);transition:all .2s;margin-left:auto}
-.ubtn:hover,.ubtn.on{border-color:var(--ac);background:#7c5cff22}
-.ubtn .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--ac),var(--cy));font-size:12px;font-weight:800;color:#fff}
-.top .wa{margin-left:0}
-@media(max-width:820px){.ubtn .t{display:none}.ubtn{padding:5px}}
-.echip{display:inline-flex;align-items:center;gap:10px;margin-top:14px;padding:8px 14px 8px 8px;border-radius:99px;border:1px solid var(--line2);background:#ffffff08;font-size:14px;transition:all .25s}
-.echip:hover{border-color:var(--cy);transform:translateY(-2px)}
-.echip b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--cy));font-size:14px}
-.echip span{color:var(--mut)}.echip span i{font-style:normal;color:var(--tx);font-weight:600}
-.ent{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(24px,5vw,72px);align-items:center;width:100%;max-width:1120px}
-.ent h2{font-size:clamp(30px,4.2vw,52px);margin:14px 0}
-.ent .lead2{max-width:46ch;margin-bottom:26px}
-.pase{position:relative;width:min(400px,100%);aspect-ratio:1.58;border-radius:24px;padding:22px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr auto;gap:10px;color:#fff;
- background:radial-gradient(120% 140% at 0% 0%,#7c5cff 0%,#2a1d6e 38%,#0b0d18 70%),#0b0d18;box-shadow:0 0 0 1px #ffffff26 inset,0 40px 80px -30px #7c5cffaa,0 20px 40px -20px #000;transform-style:preserve-3d;transition:transform .15s ease-out;will-change:transform;overflow:hidden}
-.pase::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,#ffffff40 45%,#3ad6ff33 50%,transparent 62%);background-size:250% 100%;background-position:var(--sx,100%) 0;mix-blend-mode:screen;pointer-events:none}
-.pase::after{content:"";position:absolute;width:260px;height:260px;right:-90px;bottom:-120px;border-radius:50%;background:radial-gradient(closest-side,#3ad6ff55,transparent);pointer-events:none}
-.pase .pt{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.14em;font-size:12px}.pase .pt img{width:34px;height:34px;border-radius:9px}
-.pase .pq{grid-row:1/3;grid-column:2;width:96px;height:96px;background:#fff;border-radius:12px;padding:7px;transform:translateZ(30px)}
-.pase .pq svg{width:100%;height:100%;display:block}
-.pase .pn{align-self:end;transform:translateZ(20px)}.pase .pn small{display:block;font-size:11px;letter-spacing:.12em;opacity:.65;text-transform:uppercase}
-.pase .pn b{font-size:22px;letter-spacing:-.02em;display:block;max-width:15ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pase .pr{grid-column:1/3;display:flex;gap:6px;flex-wrap:wrap;transform:translateZ(14px)}
-.pase .pr span{font-size:12px;padding:4px 9px;border-radius:99px;background:#ffffff1f;border:1px solid #ffffff2a;transition:all .3s}
-.pase .pr span.on{background:#fff;color:#111}
-.pase .ok{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:6px;background:#0b0d18e6;opacity:0;transition:opacity .4s;text-align:center;font-weight:700}
-.pase .ok i{font-style:normal;font-size:46px;transform:scale(.3);transition:transform .5s cubic-bezier(.2,1.6,.4,1)}
-.pase.done .ok{opacity:1}.pase.done .ok i{transform:none}
-.pfeat{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:14px;color:var(--mut)}.pfeat b{color:var(--tx)}
-.ecard{background:#0d1019d9;border:1px solid var(--line2);border-radius:24px;padding:26px;display:grid;gap:14px;backdrop-filter:blur(18px);box-shadow:0 30px 80px -30px #000,0 0 0 1px #7c5cff22;position:relative}
-.ecard h3{font-size:24px}
-.eseg{display:grid;grid-template-columns:1fr 1fr 1fr;padding:4px;border-radius:14px;background:#ffffff0a;border:1px solid var(--line);position:relative}
-.eseg button{position:relative;z-index:1;padding:10px;border-radius:10px;font-weight:600;font-size:14px;color:var(--mut);transition:color .3s}
-.eseg button.on{color:#fff}
-.eseg .pill{position:absolute;top:4px;bottom:4px;left:4px;width:calc(33.333% - 2.67px);border-radius:10px;background:linear-gradient(135deg,var(--ac),var(--ac2));transition:transform .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 8px 20px -8px #7c5cff}
-.eseg.r .pill{transform:translateX(100%)}.eseg.r2 .pill{transform:translateX(200%)}.eseg button{padding:10px 4px;font-size:13px}
-.epro{display:grid;gap:10px}.epro .it{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--mut)}.epro .it b{color:var(--tx)}.epro .it i{font-style:normal;font-size:18px;line-height:1.2}
-.efl{display:grid;gap:12px}
-.efl label{display:grid;gap:6px;font-size:13px;color:var(--mut);font-weight:600}
-.efl input{width:100%;padding:13px 14px;border-radius:12px;background:#ffffff08;border:1px solid var(--line2);font-size:16px;transition:border-color .2s,box-shadow .2s}
-.efl input:focus{outline:0;border-color:var(--ac);box-shadow:0 0 0 4px #7c5cff2e}
-.efl .btn{width:100%}
-.egg{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:12px;background:#fff;color:#1f1f1f;font-weight:600;transition:transform .2s}.egg:hover{transform:translateY(-2px)}
-.eor{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--mut)}.eor::before,.eor::after{content:"";flex:1;height:1px;background:var(--line2)}
-.emsg{display:none;font-size:14px;padding:10px 12px;border-radius:10px;background:#ef444422;border:1px solid #ef444455}.emsg.on{display:block}.emsg.ok{background:#3ddc9722;border-color:#3ddc9755}
-.elk{font-size:13px;color:var(--mut);text-align:center}.elk a,.elk button{color:var(--tx);font-weight:600;text-decoration:underline;text-decoration-color:var(--cy);text-underline-offset:3px}
-.esub{display:flex;gap:16px;font-size:14px}.esub button{color:var(--mut);font-weight:600;padding-bottom:4px;border-bottom:2px solid transparent}.esub button.on{color:var(--tx);border-color:var(--cy)}
-.ehp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
-.ewho{display:grid;gap:12px;text-align:center;justify-items:center}.ewho .av{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--ac),var(--cy))}
-@media(max-width:900px){.ent{grid-template-columns:1fr;gap:22px}.ent-l{order:2}.ent h2{font-size:30px}.pase{width:min(360px,100%)}.ecard{padding:20px}}
-</style></head>
+h1{font-size:clamp(40px,5.6vw,76px);margin:18px 0}h2{font-size:clamp(32px,4.2vw,56px);margin:16px 0}
+.lead{font-size:clamp(16px,1.5vw,19px);max-width:560px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+.hola{display:inline-flex;align-items:center;gap:10px;margin-top:16px;padding:8px 16px 8px 8px;border-radius:99px;border:1px solid var(--ln2);background:#ffffff08;font-size:14px}
+.hola .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--ac),var(--cy));font-weight:800;font-size:13px}
+.puntos{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:14px;color:var(--mu)}.puntos b{color:var(--tx)}
+/* teléfono */
+.ph{position:relative;width:min(330px,82vw);aspect-ratio:9/18.5;margin:0 auto;border-radius:44px;padding:10px;background:linear-gradient(160deg,#2a2f42,#0c0e16);box-shadow:0 0 0 1px #ffffff1f,0 40px 100px -30px #7c5cff88,0 30px 60px -30px #000}
+.ph:before{content:"";position:absolute;top:18px;left:50%;width:90px;height:22px;transform:translateX(-50%);border-radius:99px;background:#000;z-index:5}
+.scr{position:relative;width:100%;height:100%;border-radius:35px;overflow:hidden;background:#0b0d16}
+/* mapa dibujado */
+.mapa{position:absolute;inset:0;background:#10131f}
+.mapa svg{position:absolute;inset:0;width:100%;height:100%}
+.pin{position:absolute;width:38px;height:38px;margin:-38px 0 0 -19px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg) scale(0);background:linear-gradient(135deg,var(--ac),var(--cy));border:2px solid #fff;box-shadow:0 8px 18px #0009;display:grid;place-items:center;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.pin span{transform:rotate(45deg);font-size:17px}.pin.on{transform:rotate(-45deg) scale(1)}.pin.dst{background:linear-gradient(135deg,#f5c542,#d4a017)}
+.pin.sel{transform:rotate(-45deg) scale(1.22);box-shadow:0 0 0 6px #7c5cff55,0 8px 18px #0009}
+.yo{position:absolute;width:16px;height:16px;margin:-8px;border-radius:50%;background:var(--ac);border:3px solid #fff;box-shadow:0 0 0 0 #7c5cff99;animation:pu 2s infinite}
+@keyframes pu{70%{box-shadow:0 0 0 18px #7c5cff00}}
+.sbar{position:absolute;left:12px;right:12px;top:46px;z-index:3;display:flex;gap:6px;overflow:hidden}
+.sbar span{flex:none;padding:6px 10px;border-radius:99px;background:#151826ee;border:1px solid var(--ln2);font-size:11.5px;font-weight:650}.sbar span.on{background:linear-gradient(135deg,var(--ac),var(--ac2));border-color:transparent}
+.ncard{position:absolute;left:10px;right:10px;bottom:12px;z-index:3;padding:12px;border-radius:20px;background:#151826f2;border:1px solid var(--ln2);box-shadow:0 20px 40px #000a;transform:translateY(130%);transition:transform .5s cubic-bezier(.3,1.3,.5,1)}
+.ncard.on{transform:none}
+.nrow{display:flex;gap:10px;align-items:center}.nic{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;font-size:22px;background:#ffffff10}
+.nb{font-weight:750;font-size:14.5px;line-height:1.2}.nst{color:var(--gd);font-size:12px}.pill{display:inline-block;padding:3px 8px;border-radius:99px;font-size:11px;font-weight:700;background:#3ddc9722;color:var(--ok)}
+.nbt{display:flex;gap:6px;margin-top:10px}.nbt span{flex:1;text-align:center;padding:8px;border-radius:11px;font-size:12px;font-weight:700;background:#ffffff10}.nbt span:first-child{background:linear-gradient(135deg,var(--ac),var(--ac2))}
+/* pantallas de personas */
+.pv{position:absolute;inset:0;padding:52px 14px 14px;display:flex;flex-direction:column;gap:10px;opacity:0;transform:translateX(18px);transition:.4s;pointer-events:none}
+.pv.on{opacity:1;transform:none}
+.pv h4{margin:0 0 2px;font-size:17px}
+.it{display:flex;gap:10px;align-items:center;padding:10px;border-radius:16px;background:#151826;border:1px solid var(--ln)}
+.it b{font-size:13.5px;display:block;line-height:1.25}.it small{color:var(--mu);font-size:11.5px}
+.big{padding:16px;border-radius:20px;background:linear-gradient(135deg,#7c5cff,#3ad6ff);color:#fff}
+.big b{font-size:30px;display:block;letter-spacing:-.02em}
+.bar{height:7px;border-radius:9px;background:#ffffff33;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;width:72%;background:#fff;border-radius:9px}
+.qr{width:150px;height:150px;margin:6px auto;padding:10px;border-radius:16px;background:#fff;display:grid;grid-template-columns:repeat(21,1fr)}
+.qr i{background:#0b0d16}.qr u{background:#fff}
+/* lista de funciones */
+.fl{display:grid;gap:8px;margin-top:22px}
+.fi{display:flex;gap:14px;align-items:flex-start;text-align:left;padding:14px 16px;border-radius:18px;border:1px solid var(--ln);background:#ffffff06;transition:.25s}
+.fi .e{width:42px;height:42px;flex:none;border-radius:13px;display:grid;place-items:center;font-size:20px;background:#ffffff0d}
+.fi b{display:block;font-size:15.5px}.fi span{font-size:13.5px;color:var(--mu)}
+.fi.on,.fi:hover{border-color:#7c5cff88;background:#7c5cff14}.fi.on .e{background:linear-gradient(135deg,var(--ac),var(--cy))}
+/* negocios */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.chip{padding:9px 14px;border-radius:99px;border:1px solid var(--ln2);background:#ffffff08;font-size:14px;font-weight:600;transition:.2s}.chip[aria-pressed=true]{background:#fff;color:#0b0d16;border-color:#fff}
+.inp{margin-top:12px;width:100%;max-width:420px;padding:14px 16px;border-radius:14px;border:1px solid var(--ln2);background:#0b0d16cc;outline:0}.inp:focus{border-color:var(--ac)}
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+.paso{padding:14px;border-radius:18px;border:1px solid var(--ln);background:#ffffff06;font-size:14px}.paso b{display:block;color:var(--cy);font-size:13px;margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.mini{padding:14px;border-radius:18px;border:1px solid var(--ln);background:#ffffff06}.mini b{display:block;font-size:14.5px;margin:6px 0 2px}.mini span{font-size:13px;color:var(--mu)}
+.prev{display:grid;gap:12px}
+.vcard{padding:18px;border-radius:24px;background:#151826;border:1px solid var(--ln2);box-shadow:0 30px 80px -30px #7c5cff77}
+.vcard .nic{width:56px;height:56px;font-size:28px;border-radius:18px;background:linear-gradient(135deg,#7c5cff33,#3ad6ff22)}
+.vcard h3{font-size:22px}.promo{margin-top:12px;padding:12px;border-radius:16px;background:linear-gradient(135deg,#7c5cff22,#3ad6ff14);border:1px dashed #7c5cff88;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.stats div{padding:10px;border-radius:14px;background:#ffffff08;text-align:center}.stats b{display:block;font-size:19px}.stats small{color:var(--mu);font-size:11.5px}
+/* planes */
+.planes{width:min(1180px,100% - 40px);margin:0 auto;min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:10px 0}
+.pls{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}
+.pl{position:relative;padding:24px;border-radius:26px;border:1px solid var(--ln2);background:#10131ccc;display:flex;flex-direction:column;gap:12px}
+.pl h3{font-size:26px}.pl ul{list-style:none;margin:0;padding:0;display:grid;gap:9px;font-size:14.5px}.pl li{display:flex;gap:9px}.pl li:before{content:"✓";color:var(--ok);font-weight:800}
+.pl.dst{border-color:#7c5cff;box-shadow:0 30px 80px -30px #7c5cffaa;background:linear-gradient(180deg,#7c5cff1f,#10131ccc 40%)}
+.pl .tag{position:absolute;top:-12px;left:24px;padding:4px 12px;border-radius:99px;background:linear-gradient(135deg,var(--ac),var(--ac2));font-size:12px;font-weight:750}
+.pl .btn{margin-top:auto}
+/* mapa real */
+.mwrap{position:relative;width:100%;height:min(560px,62vh);border-radius:28px;overflow:hidden;border:1px solid var(--ln2);box-shadow:0 40px 100px -40px #7c5cff88;background:#10131f}
+#lmap{position:absolute;inset:0}
+.mtag{position:absolute;top:12px;left:12px;z-index:500;padding:6px 12px;border-radius:99px;background:#151826ee;border:1px solid var(--ln2);font-size:12.5px;font-weight:650}
+.leaflet-container{background:#10131f!important;font:inherit}.leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) brightness(.85) contrast(.85) saturate(.6)}
+.leaflet-control-attribution{background:#0b0d16aa!important;color:#888!important;font-size:10px}.leaflet-control-attribution a{color:#aaa!important}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#151826;color:var(--tx);border:1px solid var(--ln2)}.leaflet-popup-content{margin:12px 14px;font-size:13.5px}
+.lpin{width:38px;height:38px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:linear-gradient(135deg,var(--ac),var(--cy));border:2px solid #fff;display:grid;place-items:center;box-shadow:0 6px 16px #0008}.lpin span{transform:rotate(45deg);font-size:17px}.lpin.dst{background:linear-gradient(135deg,#f5c542,#d4a017)}
+/* pie y flotantes */
+.redes{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:22px;font-size:13px}.redes a.r{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--ln2);background:#ffffff08}
+.redes .lg a{text-decoration:underline;text-underline-offset:3px;color:var(--mu)}
+.fab{position:fixed;right:18px;bottom:calc(var(--nav) + 16px);z-index:30;display:flex;align-items:center;gap:9px;padding:12px 16px 12px 13px;border-radius:99px;background:var(--wa);color:#04210f;font-weight:750;font-size:14.5px;box-shadow:0 14px 40px -14px #25d366}
+.fab .ico{width:21px;height:21px}
+.bnav{display:none}
+@media (max-width:980px){
+ :root{--nav:72px;--top:60px}
+ body{overflow:hidden}
+ .tnav,.top .reg{display:none}.top{justify-content:space-between}
+ .wrap{grid-template-columns:1fr;gap:28px;align-content:start;padding:8px 0 20px}
+ h1{font-size:clamp(36px,10vw,52px);margin:14px 0}
+ .pls{grid-template-columns:1fr}.paso{padding:10px;font-size:12.5px}.paso b{font-size:12px}.grid2{grid-template-columns:1fr 1fr}
+ .ph{width:min(300px,78vw)}
+ .fab span{display:none}.fab{padding:13px;bottom:calc(var(--nav) + 14px)}
+ .bnav{display:flex;position:fixed;left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));height:62px;z-index:25;border-radius:22px;background:#10131cf2;border:1px solid var(--ln2);backdrop-filter:blur(14px);justify-content:space-around;align-items:center}
+ .bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:650;color:var(--mu);padding:6px 8px}.bnav a .e{font-size:19px;line-height:1}.bnav a.on{color:var(--tx)}
+ .mwrap{height:58vh}
+}
+@media (max-width:420px){.grid2{grid-template-columns:1fr}.cta .btn{flex:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="tt" viewBox="0 0 24 24"><path fill="currentColor" d="M16.6 2h-3.3v13.3a2.9 2.9 0 1 1-2.1-2.8V9.1a6.3 6.3 0 1 0 5.4 6.2V8.6a7.7 7.7 0 0 0 4.4 1.4V6.7a4.4 4.4 0 0 1-4.4-4.4Z"/></symbol><symbol id="ig" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></symbol><symbol id="fb" viewBox="0 0 24 24"><path fill="currentColor" d="M14 8.5V6.8c0-.8.2-1.3 1.4-1.3H17V2.2A21 21 0 0 0 14.6 2C12.2 2 10.6 3.5 10.6 6.1v2.4H8v3.7h2.6V22H14v-9.8h2.7l.4-3.7H14Z"/></symbol><symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3Z"/></symbol></svg>
-<canvas id="fx" aria-hidden="true"></canvas><div class="aura"></div><div class="glow"></div><div class="flash" id="flash"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="tt" viewBox="0 0 24 24"><path fill="currentColor" d="M16.6 2h-3.3v13.3a2.9 2.9 0 1 1-2.1-2.8V9.1a6.3 6.3 0 1 0 5.4 6.2V8.6a7.7 7.7 0 0 0 4.4 1.4V6.7a4.4 4.4 0 0 1-4.4-4.4Z"/></symbol><symbol id="ig" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm5 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></symbol><symbol id="fb" viewBox="0 0 24 24"><path fill="currentColor" d="M14 8.5V6.8c0-.8.2-1.3 1.4-1.3H17V2.2A21 21 0 0 0 14.6 2C12.2 2 10.6 3.5 10.6 6.1v2.4H8v3.7h2.6V22H14v-9.8h2.7l.4-3.7H14Z"/></symbol><symbol id="wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></symbol></svg>
+<canvas id="fx" aria-hidden="true"></canvas><div class="aura" aria-hidden="true"></div>
 
 <header class="top">
-<a class="logo" href="#/" aria-label="XyroStudio, inicio"><img class="tile" src="img/marca/logo-xyrostudio-app.svg" alt="" width="32" height="32"><span><b>Xyro</b>Studio</span></a>
-<nav class="tnav" aria-label="Secciones"><a href="#/" data-v="home">Inicio</a><a href="#/negocios" data-v="negocios">Gimnasios y clínicas</a><a href="#/webs" data-v="webs">Ecosistema</a><a href="#/arma" data-v="arma">Arma el tuyo</a><a href="#/resultados" data-v="resultados">Resultados</a></nav>
-<a class="ubtn" id="ubtn" href="#/entrar" data-v="entrar"><span class="av"><svg class="ico" style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span class="t">Entrar</span></a>
-<a class="btn btn-p wa" data-msg="quiero mejorar mi negocio" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg><span>Hablemos</span></a>
+<a class="logo" href="#/" aria-label="Xyro, inicio"><img src="img/marca/logo-xyrostudio-app.svg" alt="" width="32" height="32"><span><b>Xyro</b>Studio</span></a>
+<nav class="tnav" aria-label="Secciones"><a href="#/" data-v="home">Inicio</a><a href="#/personas" data-v="personas">Para ti</a><a href="#/negocios" data-v="negocios">Para negocios</a><a href="#/mapa" data-v="mapa">Mapa</a><a href="#/planes" data-v="planes">Planes</a></nav>
+<a class="btn btn-g reg" href="/mi/?registro=1">Registrar mi negocio</a>
+<a class="ubtn" id="ubtn" href="/mi/"><span class="av" id="uav"><svg class="ico" style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><span id="ut">Entrar</span></a>
 </header>
 
 <main>
-<!-- HOME -->
-<section class="view" data-v="home" aria-label="Inicio">
-<div class="wrap home">
+<!-- INICIO -->
+<section class="view" data-v="home" aria-label="Inicio"><div class="wrap">
 <div>
-<span class="eti in-1"><i></i>Ecosistema digital para tu negocio</span>
-<h1 id="h1"></h1>
-<p class="lead mut in-2">Webs, apps, control, bots y contenido con IA conectados entre sí. <a href="#/negocios" style="color:var(--tx);font-weight:700;text-decoration:underline;text-decoration-color:var(--cy);text-underline-offset:4px">Ya listos para gimnasios y consultorios dentales →</a></p>
-<div class="in-3"><div class="pick" id="rubros" role="group" aria-label="Tu rubro"></div>
-<div class="inrow"><input id="nom" maxlength="28" placeholder="Nombre de tu negocio" autocomplete="off" aria-label="Nombre de tu negocio"><a class="btn btn-p" href="#/webs">Entrar al ecosistema →</a></div><a class="echip" href="#/entrar" id="echip"><b>✦</b><span><i>Únete gratis</i> · personas, negocios y entrenadores</span></a><div class="redes" aria-label="Síguenos"><a href="https://www.tiktok.com/@xyrostudio.net" target="_blank" rel="noopener" aria-label="TikTok"><svg class="ico"><use href="#tt"/></svg></a><a href="https://www.instagram.com/xyrostudio_/" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ico"><use href="#ig"/></svg></a><a href="https://www.facebook.com/profile.php?id=61596799371612" target="_blank" rel="noopener" aria-label="Facebook"><svg class="ico"><use href="#fb"/></svg></a><span class="legal"><a href="/privacidad.html">Privacidad</a> · <a href="/terminos.html">Términos</a></span></div></div>
+ <span class="eti in d1"><i></i>Una cuenta · todos los negocios de tu ciudad</span>
+ <h1 class="in d2">Lo mejor de tu ciudad,<br><span class="grad">a un toque.</span></h1>
+ <p class="lead mu in d3">Xyro conecta a las personas con los negocios de su zona. Encuentra gimnasios, cafeterías, restaurantes, barberías y consultorios en el mapa, aprovecha sus promos, pide desde la mesa, paga con Yape y gana puntos en cada compra.</p>
+ <div class="cta in d4"><a class="btn btn-p" href="/mi/">Crear mi cuenta gratis →</a><a class="btn btn-g" href="#/negocios">Tengo un negocio</a></div>
+ <a class="hola in d4" id="hola" href="/mi/" hidden><span class="av" id="hav">X</span><span><b id="hn">Hola</b> · abre Mi Xyro →</span></a>
+ <div class="puntos in d4"><span>📍 <b>Mapa</b> de negocios cerca</span><span>🎁 <b>Promos</b> solo en Xyro</span><span>⭐ <b>Puntos</b> que se canjean</span></div>
 </div>
-<div class="in-4"><div class="orb" id="orb">
-<div class="ring" id="ring"></div>
-<div class="core"><img class="tile" src="img/marca/logo-xyrostudio-app.svg" alt="XyroStudio" width="160" height="160"></div>
-</div></div>
-</div>
-</section>
-
-<!-- LISTOS POR RUBRO -->
-<section class="view" data-v="negocios" aria-label="Sistemas listos por rubro"><div class="lst">
-<div class="lst-h in-1"><div><span class="eti"><i></i>Listos para usar · demo en vivo</span><h2 style="margin-top:12px">Tu sistema ya está hecho.<br><span class="grad">Pruébalo hoy, gratis.</span></h2></div>
-<p class="mut" style="max-width:380px">Elige tu rubro, entra a la demo con datos de ejemplo y escríbenos por WhatsApp: te lo dejamos funcionando con tu nombre, tu logo y tus precios.</p></div>
-<div class="lst-g">
-<div class="rx in-2" style="--rc:#ef4444"><div class="rx-t"><i>🏋️</i><div><b>Gimnasios</b><small>Socios, cobros, asistencia y web que vende</small></div><span class="rx-tag">● Disponible</span></div>
-<ul><li><img src="img/marca/logo-apps-app.svg" alt=""><span><b>Xyro Apps:</b> socios y membresías, asistencia con QR, cuotas, caja y boletas, rutinas y dietas, metas de recepción por sede.</span></li>
-<li><img src="img/marca/logo-control-app.svg" alt=""><span><b>Xyro Control:</b> cafetín y tienda con stock que avisa y cuánto ganas de verdad.</span></li>
-<li><img src="img/marca/logo-webs-app.svg" alt=""><span><b>Xyro Webs:</b> web con 3 diseños, planes y horarios siempre al día desde tu panel.</span></li>
-<li><img src="img/marca/logo-bots-app.svg" alt=""><span><b>Xyro Bots:</b> asistente que vende y agenda clases de prueba por WhatsApp. <em>Pronto</em></span></li></ul>
-<div class="row"><a class="btn btn-a" style="--acc:#ef4444" href="app/?demo=gym" target="_blank" rel="noopener">▶ Probar demo</a><a class="btn btn-g" href="sitio/?n=Tu%20Gym&amp;c=ef4444" target="_blank" rel="noopener">Ver web de ejemplo</a><a class="btn btn-wa wa" data-msg="quiero el sistema para mi gimnasio (Xyro Gym)" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg>Consultar</a></div></div>
-<div class="rx in-3" style="--rc:#14b8a6"><div class="rx-t"><i>🦷</i><div><b>Consultorios dentales</b><small>Agenda, odontograma y pacientes que vuelven</small></div><span class="rx-tag">● Nuevo</span></div>
-<ul><li><img src="img/marca/logo-apps-app.svg" alt=""><span><b>Xyro Apps:</b> agenda por odontólogo, odontograma, historia clínica privada, presupuestos con abonos, cobro al paso y pacientes por volver.</span></li>
-<li><img src="img/marca/logo-control-app.svg" alt=""><span><b>Xyro Control:</b> venta de productos e insumos (resinas, anestesia) con stock y márgenes.</span></li>
-<li><img src="img/marca/logo-webs-app.svg" alt=""><span><b>Xyro Webs:</b> web de tu clínica con especialistas y reserva de cita que llega a tu WhatsApp.</span></li>
-<li><img src="img/marca/logo-bots-app.svg" alt=""><span><b>Xyro Bots:</b> agenda citas 24 h y recuerda la cita un día antes. <em>Pronto</em></span></li></ul>
-<div class="row"><a class="btn btn-a" style="--acc:#14b8a6" href="app/?demo=consultorio" target="_blank" rel="noopener">▶ Probar demo</a><a class="btn btn-g" href="consultorio/?n=Tu%20Cl%C3%ADnica&amp;c=14b8a6" target="_blank" rel="noopener">Ver web de ejemplo</a><a class="btn btn-wa wa" data-msg="quiero el sistema para mi consultorio dental (Xyro Dental)" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg>Consultar</a></div></div>
-</div>
-<div class="lst-p in-4"><b>🔜 Próximos rubros:</b><span>🎓 Academias</span><span>🍽️ Restaurantes</span><span>🛒 Bodegas</span><span>💇 Salones</span><a class="btn btn-g wa" style="padding:8px 14px;font-size:13px;margin-left:auto" data-msg="quiero un sistema para mi rubro, ¿cuándo estará listo?" href="https://wa.me/51936449066" target="_blank" rel="noopener">¿Tu rubro no está? Escríbenos</a></div>
-</div></section>
-
-<!-- WEBS -->
-<section class="view" data-v="webs" aria-label="Xyro Webs"><div class="wrap wd">
-<div>
-<div class="k in-1"><img class="tile" src="img/marca/logo-webs-app.svg" alt="" width="58" height="58"><div><small>Ecosistema · 1/5</small><b>Xyro Webs</b></div></div>
-<span class="pain in-1">¿Nadie te encuentra en Google?</span>
-<h2 class="in-2">Tu web, tuya.<br><span class="grad">Abierta 24/7 para vender.</span></h2>
-<div class="edit in-3"><span class="try" style="margin:0">Pruébalo: escribe y mira tu web cambiar</span><label>Título de tu web<input id="eTit" maxlength="40"></label><div><label>Color de tu marca</label><div class="sw" id="sw"></div></div></div>
-<div class="row in-4"><a class="btn btn-a wa" data-msg="quiero una web para mi negocio" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero mi web</a><a class="btn btn-g" href="#/apps">Siguiente: Apps →</a></div>
-</div>
-<div class="vis in-3"><div class="tilt"><div class="brw">
-<div class="brw-bar"><i></i><i></i><i></i><span class="brw-url"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span id="wUrl">tunegocio.pe</span></span></div>
-<div class="brw-pg">
-<div class="wm-top"><b data-n>Tu negocio</b><nav><span>Inicio</span><span>Productos</span><span>Contacto</span></nav><span class="wm-btn sm"><svg class="ico" style="width:12px;height:12px"><use href="#wa"/></svg>Escríbenos</span></div>
-<div class="wm-hero"><div><h4 id="wTit"></h4><p id="wSub"></p><span class="wm-btn"><svg class="ico" style="width:14px;height:14px"><use href="#wa"/></svg><span id="wCta"></span></span></div><div class="wm-art" id="wArt"></div></div>
-<div class="wm-grid" id="wList"></div>
-</div></div></div></div>
-</div></section>
-
-<!-- APPS -->
-<section class="view" data-v="apps" aria-label="Xyro Apps"><div class="wrap wd">
-<div>
-<div class="k in-1"><img class="tile" src="img/marca/logo-apps-app.svg" alt="" width="58" height="58"><div><small>Ecosistema · 2/5</small><b>Xyro Apps</b></div></div>
-<span class="pain in-1">¿Clientes que olvidan pagar?</span>
-<h2 class="in-2">Tus clientes y cobros,<br><span class="grad">en orden y en automático.</span></h2>
-<p class="mut in-2" style="max-width:520px">Sistemas listos por una mensualidad: membresías, recordatorios, asistencia con QR y boletas SUNAT. Ya listos: <b style="color:var(--tx)">Xyro Gym</b> y <b style="color:var(--tx)">Xyro Dental</b>.</p>
-<div class="bens in-3"><span>Recordatorios por WhatsApp</span><span>Asistencia con QR</span><span>Boletas y facturas</span></div>
-<div class="row in-4"><a class="btn btn-a" href="app/?demo=gym">Probar Xyro Gym</a><a class="btn btn-g" href="app/?demo=consultorio">Probar Xyro Dental</a><a class="btn btn-g wa" data-msg="quiero un sistema de clientes y cobros" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero mi app</a><a class="btn btn-g" href="#/control">Siguiente: Control →</a></div>
-</div>
-<div class="vis in-3"><div class="tilt"><div class="dash"><div class="toast" id="aToast"></div>
-<span class="try">Toca los botones</span>
-<div class="d-h"><b>Clientes</b><span id="aCnt"></span></div>
-<div id="aList"></div>
-<div class="acts"><button id="aQr">📷 Registrar asistencia</button><button id="aBol">🧾 Emitir boleta</button></div>
-<div class="bol" id="bol"></div>
+<div class="in d3"><div class="ph"><div class="scr">
+ <div class="mapa" id="hm"><svg viewBox="0 0 310 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g stroke="#ffffff10" stroke-width="14" fill="none" stroke-linecap="round"><path d="M-20 140 C80 120 200 180 340 150"/><path d="M-20 330 C90 350 210 300 340 340"/><path d="M-20 520 C120 500 200 560 340 530"/><path d="M90 -20 C70 200 130 420 100 680"/><path d="M230 -20 C250 220 200 430 240 680"/></g><g stroke="#ffffff08" stroke-width="5" fill="none"><path d="M-20 240 L340 250"/><path d="M-20 430 L340 420"/><path d="M160 -20 L170 680"/><path d="M30 -20 L10 680"/><path d="M300 -20 L290 680"/></g><path d="M-20 600 C60 580 140 640 340 610 L340 680 L-20 680Z" fill="#3ad6ff12"/><rect x="180" y="380" width="70" height="40" rx="10" fill="#3ddc9712"/></svg></div>
+ <div class="sbar"><span class="on">✨ Todo</span><span>🏋️ Gym</span><span>☕ Café</span><span>🍽️ Resto</span><span>💈 Barbería</span></div>
+ <div class="yo" style="left:52%;top:46%"></div>
+ <div id="hpins"></div>
+ <div class="ncard" id="hcard"></div>
 </div></div></div>
 </div></section>
 
-<!-- CONTROL -->
-<section class="view" data-v="control" aria-label="Xyro Control"><div class="wrap wd">
+<!-- PERSONAS -->
+<section class="view" data-v="personas" aria-label="Para ti"><div class="wrap">
 <div>
-<div class="k in-1"><img class="tile" src="img/marca/logo-control-app.svg" alt="" width="58" height="58"><div><small>Ecosistema · 3/5</small><b>Xyro Control</b></div></div>
-<span class="pain in-1">¿Todavía anotas en un <s>cuaderno</s>?</span>
-<h2 class="in-2">Cada venta cuenta.<br><span class="grad">Literalmente.</span></h2>
-<p class="mut in-2" style="max-width:520px">Caja, inventario y reportes en tiempo real. Cada venta descuenta stock y te avisa antes de que algo falte.</p>
-<div class="bens in-3"><span>Caja al día</span><span>Alertas de stock</span><span>Reportes por hora</span></div>
-<div class="row in-4"><a class="btn btn-a wa" data-msg="quiero controlar mis ventas e inventario" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero control</a><a class="btn btn-g" href="#/bots">Siguiente: Bots →</a></div>
+ <span class="eti in d1"><i></i>Para ti · gratis</span>
+ <h2 class="in d2">Tu cuenta Xyro <span class="grad">te abre la ciudad.</span></h2>
+ <p class="lead mu in d3">Una sola cuenta para todos los negocios que usan Xyro. Funciona desde el navegador del celular: sin descargar nada.</p>
+ <div class="fl in d4" id="pfl">
+  <button class="fi on" data-p="0"><span class="e">📍</span><span><b>Negocios cerca de ti</b><span>Mapa con filtros: los más cercanos y los mejor puntuados.</span></span></button>
+  <button class="fi" data-p="1"><span class="e">🎁</span><span><b>Promos que solo ves en Xyro</b><span>Guarda tus negocios favoritos y entérate primero.</span></span></button>
+  <button class="fi" data-p="2"><span class="e">⭐</span><span><b>Puntos en cada compra</b><span>Canjéalos por premios en el negocio: un café, una clase, un corte.</span></span></button>
+  <button class="fi" data-p="3"><span class="e">🎟️</span><span><b>Tu pase y tus pedidos</b><span>QR de entrada, tu membresía, pide desde la mesa y paga con Yape.</span></span></button>
+ </div>
+ <div class="cta in d4"><a class="btn btn-p" href="/mi/">Crear mi cuenta gratis →</a></div>
 </div>
-<div class="vis in-3"><div class="tilt"><div class="dash"><div class="toast" id="cToast"></div>
-<span class="try">Toca productos y cobra</span>
-<div class="d-h"><b data-n>Tu negocio</b><span>Caja abierta</span></div>
-<div class="kpis"><div class="kpi"><span>Ventas hoy</span><b id="kV">S/ 0</b></div><div class="kpi"><span>Tickets</span><b id="kT">0</b></div><div class="kpi"><span>Stock bajo</span><b id="kS">0</b></div></div>
-<div class="pos"><div class="prods" id="prods"></div>
-<div class="tk"><div class="tk-l" id="tk"></div><div class="tk-t"><span>Total</span><span id="tkT">S/ 0.00</span></div><button id="cobrar">Cobrar</button></div></div>
-<div class="bars" id="bars"></div>
+<div class="in d3"><div class="ph"><div class="scr" id="pscr">
+ <div class="pv on"><h4>Cerca de ti</h4>
+  <div class="it"><span class="nic">🏋️</span><span style="flex:1"><b>Fuerza Gym</b><small>⭐ 4.8 · 350 m · abierto</small></span><span class="pill">-20%</span></div>
+  <div class="it"><span class="nic">☕</span><span style="flex:1"><b>Café Aurora</b><small>⭐ 4.9 · 600 m · 2x1 hoy</small></span><span class="pill">2x1</span></div>
+  <div class="it"><span class="nic">💈</span><span style="flex:1"><b>Barbería Don Lucho</b><small>⭐ 4.7 · 800 m</small></span></div>
+  <div class="it"><span class="nic">🦷</span><span style="flex:1"><b>Sonrisa Dental</b><small>⭐ 5.0 · 1.2 km · cita online</small></span></div>
+  <div class="it"><span class="nic">🍽️</span><span style="flex:1"><b>La Mesa de Rosa</b><small>⭐ 4.6 · 1.5 km · pide desde la mesa</small></span></div>
+ </div>
+ <div class="pv"><h4>Promos para ti</h4>
+  <div class="big"><small>☕ Café Aurora</small><b>2x1 en frappés</b><small>Solo mostrando tu Xyro · hasta el domingo</small></div>
+  <div class="it"><span class="nic">🏋️</span><span style="flex:1"><b>Primer mes -20%</b><small>Fuerza Gym · nuevos socios</small></span></div>
+  <div class="it"><span class="nic">💈</span><span style="flex:1"><b>Corte + barba</b><small>Barbería Don Lucho · martes</small></span></div>
+  <div class="it"><span class="nic">🦷</span><span style="flex:1"><b>Evaluación gratis</b><small>Sonrisa Dental</small></span></div>
+ </div>
+ <div class="pv"><h4>Tus puntos</h4>
+  <div class="big"><small>Tienes</small><b>1,240 pts</b><div class="bar"><i></i></div><small>Te faltan 260 para tu premio en Café Aurora</small></div>
+  <div class="it"><span class="nic">🎁</span><span style="flex:1"><b>1 frappé gratis</b><small>1,500 pts · Café Aurora</small></span></div>
+  <div class="it"><span class="nic">🎁</span><span style="flex:1"><b>1 clase gratis</b><small>2,000 pts · Fuerza Gym</small></span></div>
+  <div class="it"><span class="nic">➕</span><span style="flex:1"><b>+38 pts</b><small>Tu compra de ayer · Yape</small></span></div>
+ </div>
+ <div class="pv" style="align-items:center;text-align:center"><h4>Tu pase Xyro</h4><small class="mu xs">Muéstralo al entrar o al pagar</small><div class="qr" id="pqr"></div>
+  <div class="it" style="width:100%;text-align:left"><span class="nic">🏋️</span><span style="flex:1"><b>Membresía activa</b><small>Fuerza Gym · vence en 18 días</small></span></div>
+  <div class="it" style="width:100%;text-align:left"><span class="nic">🧾</span><span style="flex:1"><b>Pedido listo</b><small>Mesa 4 · pagado con Yape</small></span></div>
+ </div>
 </div></div></div>
 </div></section>
 
-<!-- BOTS -->
-<section class="view" data-v="bots" aria-label="Xyro Bots"><div class="wrap wd">
+<!-- NEGOCIOS -->
+<section class="view" data-v="negocios" aria-label="Para negocios"><div class="wrap">
 <div>
-<div class="k in-1"><img class="tile" src="img/marca/logo-bots-app.svg" alt="" width="58" height="58"><div><small>Ecosistema · 4/5</small><b>Xyro Bots</b></div></div>
-<span class="pain in-1">¿Respondes WhatsApp todo el día?</span>
-<h2 class="in-2">Tu WhatsApp vende<br><span class="grad">mientras duermes.</span></h2>
-<p class="mut in-2" style="max-width:520px">Responde horarios y precios, toma pedidos y agenda citas las 24 horas. Tú solo recibes lo que ya está listo.</p>
-<div class="bens in-3"><span>Responde al instante</span><span>Pedidos y reservas</span><span>Te avisa si te necesitan</span></div>
-<div class="row in-4"><a class="btn btn-a wa" data-msg="quiero un bot de WhatsApp" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero mi bot</a><a class="btn btn-g" href="#/edits">Siguiente: Edits →</a></div>
+ <span class="eti in d1"><i></i>Para negocios · regístrate gratis</span>
+ <h2 class="in d2">Que te encuentren <span class="grad">los clientes de tu zona.</span></h2>
+ <p class="lead mu in d3">Aparece en el mapa de Xyro, publica tus promos y cobra con Yape. Los clientes vuelven por sus puntos y tú ves todo desde un solo panel.</p>
+ <div class="in d4">
+  <div class="chips" id="rub" role="group" aria-label="Tu rubro"></div>
+  <input class="inp" id="nom" maxlength="30" placeholder="Nombre de tu negocio" autocomplete="off" aria-label="Nombre de tu negocio">
+  <div class="pasos"><div class="paso"><b>1 · Gratis</b>Crea tu cuenta y registra tu negocio</div><div class="paso"><b>2 · Lo revisamos</b>Verificamos que sea real</div><div class="paso"><b>3 · Apareces</b>En el mapa y en Explorar</div></div>
+  <div class="cta"><a class="btn btn-p" href="/mi/?registro=1">Registrar mi negocio gratis →</a><a class="btn btn-g" href="#/planes">Ver planes</a></div>
+ </div>
 </div>
-<div class="vis in-3"><div class="tilt"><div class="phone"><div class="scr" style="background:#ece5dd">
-<div class="wa-h"><i id="bAv">🥐</i><div><span data-n>Tu negocio</span><small>en línea · responde al instante</small></div></div>
-<div class="wa-b" id="chat"></div><div class="qr" id="qr"></div>
-</div></div></div></div>
+<div class="prev in d3">
+ <div class="vcard"><div class="nrow"><span class="nic" id="vic">🏋️</span><span style="flex:1;min-width:0"><span class="mu xs">Así te verán en Xyro</span><h3 id="vnom">Tu negocio</h3><span class="nst">★★★★★ <span class="mu">4.9 · opiniones verificadas</span></span></span></div>
+  <div class="promo" id="vpro">🎁 Primer mes -20% para nuevos clientes</div>
+  <div class="stats"><div><b id="vs1">128</b><small>te guardaron</small></div><div><b id="vs2">46</b><small>pedidos</small></div><div><b id="vs3">S/ 3,480</b><small>cobrado con Yape</small></div></div></div>
+ <div class="grid2">
+  <div class="mini"><span>📍</span><b>Sales en el mapa</b><span>Los de tu zona te encuentran por cercanía y puntuación.</span></div>
+  <div class="mini"><span>💸</span><b>Cobra con Yape</b><span>Confirmas el pago con un toque. Sin comisiones de pasarela.</span></div>
+  <div class="mini" id="mqr"><span>🔳</span><b>QR de mesa</b><span>Te piden y pagan desde la mesa, sin colas.</span></div>
+  <div class="mini"><span>⭐</span><b>Clientes que vuelven</b><span>Puntos y canjes que tú decides.</span></div>
+  <div class="mini"><span>👥</span><b>Tu equipo</b><span>Agrégalos con su ID de Xyro y elige qué puede ver cada uno.</span></div>
+  <div class="mini"><span>📊</span><b>Un solo panel</b><span>Clientes, cobros, caja y reportes.</span></div>
+ </div>
+</div>
 </div></section>
 
-<!-- EDITS -->
-<section class="view" data-v="edits" aria-label="Xyro Edits"><div class="wrap wd">
-<div>
-<div class="k in-1"><img class="tile" src="img/marca/logo-edits-app.svg" alt="" width="58" height="58"><div><small>Ecosistema · 5/5</small><b>Xyro Edits</b></div></div>
-<span class="pain in-1">¿No tienes tiempo para redes?</span>
-<h2 class="in-2">Videos que detienen<br><span class="grad">el scroll.</span></h2>
-<p class="mut in-2" style="max-width:520px">Reels, anuncios y videos con IA para tu marca: voz, música, subtítulos y escenas 3D. Lo hacemos por ti o lo haces tú con nuestra app gratis.</p>
-<div class="bens in-3"><span>Videos con IA</span><span>Edición profesional</span><span>Listo para TikTok y Reels</span></div>
-<div class="row in-4"><button class="btn btn-a" id="rGen">✨ Generar otro video</button><a class="btn btn-g" href="videos/">App XyroStudio Videos</a></div>
-</div>
-<div class="vis in-3"><div class="tilt"><div class="phone"><div class="scr"><div class="reel"><div class="pb"><i id="rPb"></i></div><div class="em" id="rEm">🥐</div><div class="cap" id="rCap"></div><div class="eq"><i></i><i></i><i></i><i></i></div><span class="tag">♪ Hecho con IA</span></div></div></div></div></div>
+<!-- MAPA -->
+<section class="view" data-v="mapa" aria-label="Mapa de negocios"><div class="planes">
+ <div class="in d1" style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+  <div><span class="eti"><i></i>En vivo</span><h2 style="margin:12px 0 6px">El mapa de <span class="grad">Xyro.</span></h2><p class="mu">Negocios que ya están en Xyro. Toca un pin para ver sus promos.</p></div>
+  <div class="chips" id="mch" style="margin:0"></div>
+ </div>
+ <div class="mwrap in d2" style="margin-top:18px"><div id="lmap"></div><span class="mtag" id="mtag" hidden>Vista de ejemplo</span></div>
+ <div class="cta in d3" style="justify-content:center"><a class="btn btn-p" href="/mi/">Ver todo en Mi Xyro →</a><a class="btn btn-g" href="/mi/?registro=1">Poner mi negocio en el mapa</a></div>
 </div></section>
 
-<!-- ARMA -->
-<section class="view" data-v="arma" aria-label="Arma tu ecosistema"><div class="wrap">
-<div>
-<span class="eti in-1"><i></i>Arma tu ecosistema</span>
-<h2 class="in-2" style="font-size:clamp(32px,4.4vw,58px);margin:16px 0">Conecta lo que <span class="grad">tu negocio necesita.</span></h2>
-<p class="mut in-2">Toca cada pieza para sumarla. Te armamos una solución a tu medida y a tu bolsillo, con pagos en partes.</p>
-<div class="sum in-3"><b id="sNom">Tu negocio</b><span class="mut" id="sTx">Elige al menos una pieza.</span><ul id="sList"></ul><span class="plan-s" id="sPlan"></span></div>
-<div class="row in-4"><a class="btn btn-wa wa" id="sWa" data-msg="" href="https://wa.me/51936449066" target="_blank" rel="noopener"><svg class="ico"><use href="#wa"/></svg>Enviar mi ecosistema</a><span class="mut" style="font-size:13px">Asesoría gratis · sin compromiso</span></div>
-</div>
-<div class="in-3"><div class="eco" id="eco">
-<svg aria-hidden="true"><defs><linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#3ad6ff"/></linearGradient></defs><g id="lines"></g></svg>
-<div class="me"><div><span data-n>Tu negocio</span><small>conectado</small></div></div>
-</div></div>
-</div></section>
-
-<!-- RESULTADOS -->
-<!-- ENTRAR -->
-<section class="view" data-v="entrar" aria-label="Entrar a tu cuenta"><div class="wrap ent">
-<div class="ent-l in-1">
-<span class="eti"><i></i>Una cuenta, todos tus lugares</span>
-<h2>Tu gimnasio, tu dentista y tu café <span class="grad">en un solo pase.</span></h2>
-<p class="lead mut lead2">Con tu cuenta Xyro tienes tu QR de entrada, tus citas, tus pedidos y tus sellos de cada negocio que usa XyroStudio. Funciona desde la web, sin descargar nada.</p>
-<div class="pase" id="pase" aria-hidden="true">
- <div class="pt"><img src="img/marca/logo-xyrostudio-app.svg" alt="" width="34" height="34">PASE XYRO</div>
- <div class="pq" id="pq"></div>
- <div class="pn"><small id="pk">Bienvenido</small><b id="pn">Tu nombre aquí</b></div>
- <div class="pr" id="pr"><span>🏋️ Gym</span><span>🦷 Dental</span><span>☕ Café</span><span>🍽️ Resto</span></div>
- <div class="ok"><i>✓</i><span id="pok">¡Listo! Entrando…</span></div>
-</div>
-<div class="pfeat"><span>🎟️ <b>QR de entrada</b></span><span>📅 <b>Citas y reservas</b></span><span>🎁 <b>Promos y sellos</b></span></div>
-</div>
-<div class="ent-c in-2"><div class="ecard" id="ecard"></div></div>
-</div></section>
-
-<section class="view" data-v="resultados" aria-label="Resultados"><div class="cards">
-<a class="card in-1" href="https://whyhunterdev.github.io/santos-strength/" target="_blank" rel="noopener" style="--acc:#f5b544">
-<div class="ph"><img src="img/santos.webp" srcset="img/santos-480.webp 480w,img/santos.webp 800w" sizes="(max-width:900px) 100vw,640px" alt="Gimnasio Santos Strength" loading="lazy" width="800" height="450"><div class="lg"><img src="img/santos-logo.webp" alt="" width="30" height="30" loading="lazy">Santos Strength</div></div>
-<div class="tx"><h3>Un gimnasio, dos sedes, cero papeles</h3><p class="mut">Web y panel propio en Manchay y Villa María del Triunfo: planes, horarios, promos y cafetín editables desde el celular, con reservas por WhatsApp.</p><span class="btn btn-g">Ver su web en vivo →</span></div></a>
-<a class="card in-2" href="videos/" style="--acc:#b06bff">
-<div class="reels"><img src="img/ejemplos/e1.jpg" alt="" loading="lazy"><img src="img/ejemplos/e3.jpg" alt="" loading="lazy"><img src="img/ejemplos/e5.jpg" alt="" loading="lazy"><img src="img/ejemplos/e8.jpg" alt="" loading="lazy"></div>
-<div class="tx"><h3>XyroStudio Videos</h3><p class="mut">Nuestra app para Windows: escribe un tema y crea videos con guion, voz, escenas 3D y subtítulos. 15 videos gratis al mes.</p><span class="btn btn-g">Conocer la app →</span></div></a>
-<div class="steps in-3"><div class="step"><b>01</b>Conversamos por WhatsApp, gratis</div><div class="step"><b>02</b>Te proponemos un plan a tu medida</div><div class="step"><b>03</b>Lo construimos y lo dejamos funcionando</div><div class="step"><b>04</b>Te acompañamos cada mes</div></div><div class="redes" style="grid-column:1/-1;justify-content:center" aria-label="Síguenos"><a href="https://www.tiktok.com/@xyrostudio.net" target="_blank" rel="noopener" aria-label="TikTok"><svg class="ico"><use href="#tt"/></svg></a><a href="https://www.instagram.com/xyrostudio_/" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ico"><use href="#ig"/></svg></a><a href="https://www.facebook.com/profile.php?id=61596799371612" target="_blank" rel="noopener" aria-label="Facebook"><svg class="ico"><use href="#fb"/></svg></a></div>
+<!-- PLANES -->
+<section class="view" data-v="planes" aria-label="Planes para negocios"><div class="planes">
+ <div class="in d1" style="text-align:center"><span class="eti"><i></i>Empieza gratis · crece cuando quieras</span><h2>Un solo Xyro, <span class="grad">tres niveles.</span></h2><p class="mu">Pasas de un plan a otro sin perder nada: tus clientes, promos y puntos siguen ahí.</p></div>
+ <div class="pls">
+  <div class="pl in d2"><h3>Gratis</h3><p class="mu sm">Para empezar a que te encuentren.</p><ul><li>Perfil en el mapa y en Explorar</li><li>Promos para tus clientes</li><li>Hasta 50 clientes o 5 productos</li><li>1 código QR y 1 mesa</li><li>Cobros con Yape</li></ul><a class="btn btn-g" href="/mi/?registro=1">Registrarme gratis</a></div>
+  <div class="pl dst in d3"><span class="tag">Más elegido</span><h3>Plus</h3><p class="mu sm">Para el negocio que ya tiene movimiento.</p><ul><li>Hasta 2,000 clientes</li><li>Hasta 25 productos o planes</li><li>Más QR y mesas</li><li>Puntos y canjes propios</li><li>Pasamos tus datos de tu sistema anterior</li></ul><a class="btn btn-p wa" data-msg="quiero el plan Plus de Xyro" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero Plus</a></div>
+  <div class="pl in d4"><h3>Pro</h3><p class="mu sm">Todo sin límites, con tu propia web.</p><ul><li>Clientes, productos y QR sin límite</li><li>Tu web en xyrostudio.net/tunegocio</li><li>Panel completo: caja, stock, equipo y reportes</li><li>Destacado en el mapa</li><li>Pasamos tus datos de tu sistema anterior</li></ul><a class="btn btn-g wa" data-msg="quiero el plan Pro de Xyro" href="https://wa.me/51936449066" target="_blank" rel="noopener">Quiero Pro</a></div>
+ </div>
+ <div class="redes in d4" style="justify-content:center"><a class="r" href="https://www.tiktok.com/@xyrostudio.net" target="_blank" rel="noopener" aria-label="TikTok"><svg class="ico"><use href="#tt"/></svg></a><a class="r" href="https://www.instagram.com/xyrostudio_/" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ico"><use href="#ig"/></svg></a><a class="r" href="https://www.facebook.com/profile.php?id=61596799371612" target="_blank" rel="noopener" aria-label="Facebook"><svg class="ico"><use href="#fb"/></svg></a><span class="lg mu"><a href="/privacidad.html">Privacidad</a> · <a href="/terminos.html">Términos</a> · Hecho por XyroStudio en Lima</span></div>
 </div></section>
 </main>
 
-<a class="fab wa" data-msg="quiero consultar por sus sistemas" href="https://wa.me/51936449066" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg class="ico"><use href="#wa"/></svg><span>¿Consultas? Escríbenos</span></a>
-<nav class="dock" id="dock" aria-label="Navegación"></nav>
-<div class="hint" style="display:none">Usa <kbd>←</kbd> <kbd>→</kbd> para recorrer</div>
+<a class="fab wa" data-msg="quiero saber más de Xyro" href="https://wa.me/51936449066" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg class="ico"><use href="#wa"/></svg><span>¿Consultas? Escríbenos</span></a>
+<nav class="bnav" aria-label="Secciones"><a href="#/" data-v="home"><span class="e">✨</span>Inicio</a><a href="#/personas" data-v="personas"><span class="e">🙋</span>Para ti</a><a href="#/mapa" data-v="mapa"><span class="e">📍</span>Mapa</a><a href="#/negocios" data-v="negocios"><span class="e">🏪</span>Negocios</a><a href="#/planes" data-v="planes"><span class="e">💎</span>Planes</a></nav>
 
 <script>
 (function(){
-var WA='51936449066',$=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
-var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
-var R={
-panaderia:{n:'Panadería',def:'Panadería Doña Rosa',em:'🥐',c:'#f59e0b',tit:'Pan calientito todos los días',sub:'Recién horneado desde las 6 a. m. Pide por WhatsApp y recógelo listo.',cta:'Pedir por WhatsApp',hor:'de 6:00 a. m. a 9:00 p. m.',ped:'tu pedido',o:'Hacer pedido',p:[['🥖','Pan francés',0.3],['🎂','Torta de chocolate',45],['🥟','Empanada',4.5],['☕','Café pasado',5]],promo:['2x1 en empanadas','Torta del día']},
-bodega:{n:'Bodega',def:'Bodega Don Lucho',em:'🛒',c:'#16a34a',tit:'Todo lo de tu casa, a una cuadra',sub:'Haz tu pedido por WhatsApp y te lo llevamos.',cta:'Hacer pedido',hor:'de 7:00 a. m. a 11:00 p. m.',ped:'tu pedido',o:'Hacer pedido',p:[['🍚','Arroz 1 kg',4.8],['🫒','Aceite 1 L',9.9],['🥤','Gaseosa 1.5 L',6.5],['🥛','Leche',4.2]],promo:['Delivery gratis hoy','Combo desayuno']},
-gimnasio:{n:'Gimnasio',def:'Gym Fuerza Total',em:'💪',c:'#ef4444',tit:'Entrena con los mejores',sub:'Planes desde el primer día, clases grupales y entrenadores.',cta:'Reservar clase gratis',hor:'de 5:00 a. m. a 11:00 p. m.',ped:'tu clase',o:'Reservar',p:[['🏋️','Mensualidad',120],['🥤','Batido proteico',8],['💧','Agua',2.5],['🎟️','Pase diario',15]],promo:['Matrícula gratis','Trae a un amigo']},
-clinica:{n:'Clínica',def:'Clínica Sonrisas',em:'🦷',c:'#0ea5e9',tit:'Tu sonrisa en buenas manos',sub:'Especialistas, citas el mismo día y atención amable.',cta:'Agendar cita',hor:'de 8:00 a. m. a 8:00 p. m.',ped:'tu cita',o:'Agendar cita',p:[['🩺','Consulta',60],['🪥','Limpieza',120],['📷','Radiografía',50],['✨','Blanqueamiento',350]],promo:['Evaluación gratis','Limpieza a mitad de precio']},
-restaurante:{n:'Restaurante',def:'Sabor Norteño',em:'🍽️',c:'#dc2626',tit:'El sabor del norte en Lima',sub:'Menú del día, carta completa y delivery a tu casa.',cta:'Ver carta y pedir',hor:'de 12:00 m. a 10:00 p. m.',ped:'tu pedido',o:'Hacer pedido',p:[['🐟','Ceviche',28],['🥩','Lomo saltado',30],['🍹','Chicha morada',6],['🍛','Menú del día',15]],promo:['Ceviche + chicha','Menú a S/ 15']}
-};
-var D=[['webs','Webs','#7c5cff'],['apps','Apps','#3ad6ff'],['control','Control','#f5b544'],['bots','Bots','#3ddc97'],['edits','Edits','#b06bff']];
-var ORDER=['home','negocios','webs','apps','control','bots','edits','arma','resultados'];
-var ACC={entrar:'#7c5cff',home:'#7c5cff',negocios:'#14b8a6',arma:'#7c5cff',resultados:'#3ad6ff'};D.forEach(function(d){ACC[d[0]]=d[2]});
-var st={r:'panaderia',nom:'',v:'home',color:null,tit:null,sel:{webs:1,bots:1}};
-function rb(){return R[st.r]}function name(){return st.nom||rb().def}
-function money(v){return 'S/ '+v.toFixed(2)}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+var $=function(s,r){return(r||document).querySelector(s)},$$=function(s,r){return[].slice.call((r||document).querySelectorAll(s))};
+var RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
-/* titular animado */
-$('#h1').innerHTML='El ecosistema digital que tu negocio <span class="grad">merece.</span>'.split(/(<span[^>]*>|<\/span>)/).map(function(p){if(p.charAt(0)==='<')return p;return p.split(' ').filter(Boolean).map(function(w){return '<span class="w">'+w+'</span>'}).join(' ')}).join(' ');
-$$('#h1 .w').forEach(function(w,i){w.style.transitionDelay=(0.15+i*0.06)+'s'});
-
-/* órbita */
-var orb=$('#orb'),NDS=[];D.forEach(function(d,i){var n=document.createElement('div');n.className='nd';n.innerHTML='<button type="button" style="--c:'+d[2]+'" data-go="'+d[0]+'"><img class="tile" src="img/marca/logo-'+d[0]+'-app.svg" alt="" width="86" height="86"><span>Xyro '+d[1]+'</span></button>';orb.appendChild(n);NDS.push(n)});
-var oa=0,oHov=false,oLast=0;orb.addEventListener('mouseenter',function(){oHov=true});orb.addEventListener('mouseleave',function(){oHov=false});
-function orbit(t){var w=orb.clientWidth,cx=w/2,cy=w/2,rx=w*.44,ry=w*.44*Math.cos(64*Math.PI/180);if(oLast&&!oHov&&!RM)oa+=(t-oLast)*.00016;oLast=t;NDS.forEach(function(n,i){var a=oa+i*Math.PI*2/5-Math.PI/2,x=cx+Math.cos(a)*rx,y=cy+Math.sin(a)*ry,f=(Math.sin(a)+1)/2,sc=.72+f*.36;n.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) scale('+sc.toFixed(3)+')';n.style.zIndex=Math.round(f*100);n.style.opacity=(.55+f*.45).toFixed(2)})}
-(function oloop(t){if(st.v==='home'&&!document.hidden)orbit(t||0);else oLast=0;requestAnimationFrame(oloop)})();
-
-/* dock */
-var dock=$('#dock');var DK=[['home','Inicio','<img src="img/marca/logo-xyrostudio-app.svg" alt="" width="46" height="46">'],['negocios','Listos para tu rubro','<span class="tx" style="background:linear-gradient(135deg,#ef4444,#14b8a6)">⭐</span>']].concat(D.map(function(d){return [d[0],'Xyro '+d[1],'<img src="img/marca/logo-'+d[0]+'-app.svg" alt="" width="46" height="46">']})).concat([['sep'],['arma','Arma tu ecosistema','<span class="tx">🧩</span>'],['resultados','Resultados','<span class="tx" style="background:linear-gradient(135deg,#f5b544,#ef4444)">🏆</span>']]);
-DK.forEach(function(k){if(k[0]==='sep'){var s=document.createElement('span');s.className='sep';dock.appendChild(s);return}var b=document.createElement('button');b.type='button';b.dataset.go=k[0];b.setAttribute('aria-label',k[1]);b.innerHTML=k[2]+'<span class="lb">'+k[1]+'</span>';dock.appendChild(b)});
-var dbs=$$('.dock button');
-if(matchMedia('(hover:hover)').matches&&!RM){dock.addEventListener('mousemove',function(e){dbs.forEach(function(b){var r=b.getBoundingClientRect(),d=Math.abs(e.clientX-(r.left+r.width/2));var s=Math.max(1,1.55-d/110);b.style.transform='scale('+s+') translateY('+(-(s-1)*14)+'px)'})});dock.addEventListener('mouseleave',function(){dbs.forEach(function(b){b.style.transform=''})})}
-
-/* navegación */
-var lastPt=null;
-document.addEventListener('click',function(e){var g=e.target.closest('[data-go]');if(g){e.preventDefault();lastPt=[e.clientX,e.clientY];location.hash='#/'+(g.dataset.go==='home'?'':g.dataset.go);return}
- var a=e.target.closest('a[href^="#/"]');if(a){lastPt=[e.clientX,e.clientY]}},true);
-function route(){var v=(location.hash.match(/^#\/(\w+)/)||[])[1]||'home';if(ORDER.indexOf(v)<0&&v!=='entrar')v='home';show(v)}
-function show(v){var prev=st.v;st.v=v;var acc=ACC[v];document.documentElement.style.setProperty('--acc',acc);
- if(prev!==v&&lastPt&&!RM){var f=$('#flash');f.style.setProperty('--fx',lastPt[0]+'px');f.style.setProperty('--fy',lastPt[1]+'px');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
- lastPt=null;
- $$('.view').forEach(function(s){var on=s.dataset.v===v;s.classList.toggle('on',on);if(on)s.scrollTop=0});
- dbs.forEach(function(b){b.classList.toggle('on',b.dataset.go===v)});
- $$('.tnav a').forEach(function(a){a.classList.toggle('on',a.dataset.v===v||(a.dataset.v==='webs'&&D.some(function(d){return d[0]===v})))});
- var ub=$('#ubtn');if(ub)ub.classList.toggle('on',v==='entrar');document.body.classList.toggle('v-entrar',v==='entrar');if(v==='entrar'&&window.entShow)entShow();if(v==='bots')botReset();if(v==='edits')reelStart();else reelStop();
- document.title=(v==='home'?'XyroStudio · El ecosistema digital para tu negocio':($('.view[data-v="'+v+'"]').getAttribute('aria-label')+' · XyroStudio'))}
+/* ---------- rutas ---------- */
+var VIEWS=['home','personas','negocios','mapa','planes'],cur='';
+function route(){var v=(location.hash.match(/^#\/(\w+)/)||[])[1]||'home';if(VIEWS.indexOf(v)<0)v='home';if(v===cur)return;cur=v;
+ $$('.view').forEach(function(s){s.classList.toggle('on',s.dataset.v===v)});
+ $$('.tnav a,.bnav a').forEach(function(a){a.classList.toggle('on',a.dataset.v===v)});
+ document.title=v==='home'?'Xyro · Los negocios de tu ciudad en un solo lugar':$('.view[data-v="'+v+'"]').getAttribute('aria-label')+' · Xyro';
+ if(v==='home')heroStart();else heroStop();if(v==='personas')pStart();else pStop();if(v==='mapa')mapa()}
 addEventListener('hashchange',route);
-addEventListener('keydown',function(e){if(/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;var i=ORDER.indexOf(st.v);if(e.key==='ArrowRight'&&i<ORDER.length-1)location.hash='#/'+ORDER[i+1];if(e.key==='ArrowLeft'&&i>0)location.hash='#/'+(ORDER[i-1]==='home'?'':ORDER[i-1])});
-var tx0=null;$('main').addEventListener('touchstart',function(e){tx0=[e.touches[0].clientX,e.touches[0].clientY]},{passive:true});
-$('main').addEventListener('touchend',function(e){if(!tx0)return;var dx=e.changedTouches[0].clientX-tx0[0],dy=e.changedTouches[0].clientY-tx0[1];if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.6&&!e.target.closest('.scr,.dash,.eco')){var i=ORDER.indexOf(st.v)+(dx<0?1:-1);if(i>=0&&i<ORDER.length)location.hash='#/'+(ORDER[i]==='home'?'':ORDER[i])}tx0=null},{passive:true});
 
-/* rubro y nombre */
-var ch=$('#rubros');Object.keys(R).forEach(function(k){var b=document.createElement('button');b.className='chip';b.type='button';b.dataset.r=k;b.textContent=R[k].em+' '+R[k].n;b.onclick=function(){st.r=k;st.color=null;st.tit=null;all()};ch.appendChild(b)});
-$('#nom').addEventListener('input',function(e){st.nom=e.target.value.trim();names();web();wa();eco()});
-function names(){$$('[data-n]').forEach(function(e){e.textContent=name()})}
-function wa(){$$('.wa').forEach(function(a){var m='Hola XyroStudio, '+(a.dataset.msg||'quiero información');if(a.id==='sWa')m='Hola XyroStudio, quiero armar mi ecosistema con: '+selNames().join(', ');if(!a.closest('.lst')&&!a.classList.contains('fab'))m+='. Mi negocio: '+name()+' ('+rb().n.toLowerCase()+')';else m+='.';a.href='https://wa.me/'+WA+'?text='+encodeURIComponent(m)})}
+/* ---------- sesión (login único: Mi Xyro) ---------- */
+(function(){try{var j=JSON.parse(localStorage.getItem('xyro-mi-auth')||'null'),u=j&&j.user;if(!u)return;var m=u.user_metadata||{},n=String(m.nombre||m.full_name||m.name||(u.email||'').split('@')[0]||'').trim().split(' ')[0];if(!n)return;
+ var i=n.charAt(0).toUpperCase();$('#uav').textContent=i;$('#ut').textContent=n;$('#hola').hidden=false;$('#hav').textContent=i;$('#hn').textContent='Hola, '+n}catch(_){}})();
 
-/* web */
-var COLS=['#f59e0b','#ef4444','#16a34a','#0ea5e9','#7c5cff','#111827'];
-COLS.forEach(function(c){var b=document.createElement('button');b.type='button';b.style.background=c;b.dataset.c=c;b.setAttribute('aria-label','Color');b.onclick=function(){st.color=c;web()};$('#sw').appendChild(b)});
-$('#eTit').addEventListener('input',function(e){st.tit=e.target.value;web()});
-function web(){var r=rb(),c=st.color||r.c;document.documentElement.style.setProperty('--rc',c);
- $$('#sw button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.c===c)});
- $('#wTit').textContent=st.tit!==null?st.tit:r.tit;if(st.tit===null)$('#eTit').value=r.tit;
- $('#wSub').textContent=r.sub;$('#wArt').textContent=r.p[0][0];var sl=(st.nom||r.def).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'');$('#wUrl').textContent=(sl||'tunegocio')+'.pe';$('#wCta').textContent=r.cta;
- $('#wList').innerHTML=r.p.map(function(p){return '<div class="wm-it"><i>'+p[0]+'</i><span>'+esc(p[1])+'</span><b>'+money(p[2])+'</b></div>'}).join('')}
+/* ---------- WhatsApp ---------- */
+$$('.wa').forEach(function(a){a.href='https://wa.me/51936449066?text='+encodeURIComponent('Hola XyroStudio, '+(a.dataset.msg||'quiero información'))});
 
-/* control */
-var C={};
-function ctlReset(){C.stock=rb().p.map(function(){return 12});C.ticket=[];C.v=0;C.t=0;C.bars=[3,5,4,7,6,8,5,9,2];ctl()}
-function ctl(){var r=rb();$('#prods').innerHTML=r.p.map(function(p,i){return '<button class="prod" type="button" data-i="'+i+'"><i>'+p[0]+'</i><b>'+esc(p[1])+'</b><small>'+money(p[2])+' · '+C.stock[i]+' und.</small><div class="stock"><span style="width:'+(C.stock[i]/12*100)+'%;'+(C.stock[i]<=3?'background:#f87171':'')+'"></span></div></button>'}).join('');
- $$('.prod').forEach(function(b){b.onclick=function(){var i=+b.dataset.i;if(C.stock[i]<=0){toast('#cToast','Sin stock: repón '+r.p[i][1]);return}C.ticket.push(i);C.stock[i]--;ctl();if(C.stock[i]===3)toast('#cToast','⚠️ Queda poco: '+r.p[i][1])}});
- var tot=0,g={};C.ticket.forEach(function(i){g[i]=(g[i]||0)+1;tot+=r.p[i][2]});
- $('#tk').innerHTML=C.ticket.length?Object.keys(g).map(function(i){return '<div><span>'+g[i]+'× '+esc(r.p[i][1])+'</span><span>'+money(g[i]*r.p[i][2])+'</span></div>'}).join(''):'<span class="mut">Toca un producto…</span>';
- $('#tkT').textContent=money(tot);$('#kV').textContent='S/ '+C.v.toFixed(0);$('#kT').textContent=C.t;$('#kS').textContent=C.stock.filter(function(s){return s<=3}).length;
- var mx=Math.max.apply(null,C.bars.concat([10]));$('#bars').innerHTML=C.bars.map(function(v){return '<i style="height:'+Math.max(6,v/mx*100)+'%"></i>'}).join('')}
-$('#cobrar').onclick=function(){var r=rb(),tot=0;if(!C.ticket.length){toast('#cToast','Agrega productos primero');return}C.ticket.forEach(function(i){tot+=r.p[i][2]});C.v+=tot;C.t++;C.bars[C.bars.length-1]+=Math.max(1,Math.round(tot/5));C.ticket=[];ctl();
- ['#kV','#kT'].forEach(function(s){var e=$(s);e.classList.remove('bump');void e.offsetWidth;e.classList.add('bump')});toast('#cToast','✓ Venta registrada: '+money(tot))};
-function toast(s,t){var e=$(s);e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(function(){e.classList.remove('on')},1900)}
+/* ---------- inicio: mapa animado ---------- */
+var NEG=[['🏋️','Fuerza Gym','4.8','350 m','Primer mes -20%',[30,30]],['☕','Café Aurora','4.9','600 m','2x1 en frappés',[72,24],1],['💈','Barbería Don Lucho','4.7','800 m','Corte + barba',[24,62]],['🦷','Sonrisa Dental','5.0','1.2 km','Evaluación gratis',[78,58]],['🍽️','La Mesa de Rosa','4.6','1.5 km','Pide desde la mesa',[46,72]],['🛍️','Tienda Nova','4.8','900 m','-15% en accesorios',[62,38]]];
+var hp=$('#hpins'),hc=$('#hcard'),hi=0,ht=null;
+hp.innerHTML=NEG.map(function(n,i){return '<div class="pin'+(n[6]?' dst':'')+'" style="left:'+n[5][0]+'%;top:'+n[5][1]+'%"><span>'+n[0]+'</span></div>'}).join('');
+var PINS=$$('.pin',hp);
+function heroCard(){var n=NEG[hi%NEG.length];PINS.forEach(function(p,i){p.classList.toggle('sel',i===hi%NEG.length)});hc.classList.remove('on');
+ setTimeout(function(){hc.innerHTML='<div class="nrow"><span class="nic">'+n[0]+'</span><span style="flex:1;min-width:0"><span class="nb">'+n[1]+'</span><br><span class="nst">★ '+n[2]+'</span> <span class="mu xs">· '+n[3]+'</span></span><span class="pill">🎁 Promo</span></div><div class="mu xs" style="margin-top:6px">🎁 '+n[4]+'</div><div class="nbt"><span>Ver negocio</span><span>🧭 Cómo llegar</span></div>';hc.classList.add('on')},RM?0:260);hi++}
+function heroStart(){if(ht)return;PINS.forEach(function(p,i){setTimeout(function(){p.classList.add('on')},RM?0:200+i*140)});setTimeout(heroCard,RM?0:1100);ht=setInterval(heroCard,3200)}
+function heroStop(){clearInterval(ht);ht=null}
 
-/* apps */
-var A=[],NOMS=[['María López','#7c5cff'],['Jorge Ramos','#0ea5e9'],['Lucía Torres','#16a34a'],['Carlos Díaz','#f59e0b']];
-function appsReset(){A=[{s:'ok'},{s:'wn'},{s:'bd'},{s:'ok'}];C.bol=1023;C.as=17;apps();$('#bol').classList.remove('on')}
-function apps(){var L={ok:'Al día',wn:'Vence en 3 días',bd:'Vencido'};
- $('#aList').innerHTML=A.map(function(a,i){var n=NOMS[i];return '<div class="cl"><span class="av" style="background:'+n[1]+'33;color:'+n[1]+'">'+n[0].split(' ').map(function(x){return x[0]}).join('')+'</span><span>'+n[0]+'</span><span class="st '+(a.sent?'ok':a.s)+'">'+(a.sent?'Recordatorio enviado':L[a.s])+'</span>'+(a.s!=='ok'&&!a.sent?'<button type="button" data-i="'+i+'">Avisar</button>':'')+'</div>'}).join('');
- $('#aCnt').textContent='Asistencias hoy: '+C.as;
- $$('#aList button').forEach(function(b){b.onclick=function(){A[+b.dataset.i].sent=1;apps();toast('#aToast','✓ Recordatorio enviado por WhatsApp')}})}
-$('#aQr').onclick=function(){C.as++;apps();toast('#aToast','✓ '+NOMS[C.as%4][0]+' registró su asistencia')};
-$('#aBol').onclick=function(){C.bol++;var p=rb().p[0],e=$('#bol');e.innerHTML='<b>BOLETA ELECTRÓNICA</b><br>B001-'+String(C.bol).padStart(6,'0')+'<br>'+esc(name())+'<br>1 × '+esc(p[1])+' ...... '+money(p[2])+'<br><b>TOTAL '+money(p[2])+'</b><br>✓ Enviada a SUNAT';e.classList.remove('on');void e.offsetWidth;e.classList.add('on');toast('#aToast','✓ Boleta emitida')};
+/* ---------- personas ---------- */
+var pi=0,pt=null,PV=$$('#pscr .pv'),FI=$$('#pfl .fi');
+function pShow(i){pi=i%PV.length;PV.forEach(function(v,k){v.classList.toggle('on',k===pi)});FI.forEach(function(b,k){b.classList.toggle('on',k===pi)})}
+FI.forEach(function(b){b.onclick=function(){pShow(+b.dataset.p);pStop();pStart()}});
+function pStart(){if(!pt&&!RM)pt=setInterval(function(){pShow(pi+1)},4200)}function pStop(){clearInterval(pt);pt=null}
+(function(){var h=2166136261,s='xyro-pase',n=21,o='';for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
+ var fz=function(x,y){return(x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13)},ring=function(x,y,ox,oy){var a=x-ox,b=y-oy;return a==0||a==6||b==0||b==6||(a>1&&a<5&&b>1&&b<5)};
+ for(var y=0;y<n;y++)for(var x=0;x<n;x++){var on;if(fz(x,y)){var ox=x<7?0:14,oy=y<7?0:14;on=ring(x,y,ox,oy)}else{h^=h<<13;h^=h>>>17;h^=h<<5;on=(h>>>0)%2}o+=on?'<i></i>':'<u></u>'}$('#pqr').innerHTML=o})();
 
-/* bots */
-var chat=$('#chat'),busy=0,bt=[];
-function say(t,u){var d=document.createElement('div');d.className='msg '+(u?'u':'b');d.innerHTML=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
-function bot(t){busy=1;var ty=document.createElement('div');ty.className='msg b';ty.innerHTML='<span class="typing"><i></i><i></i><i></i></span>';chat.appendChild(ty);chat.scrollTop=chat.scrollHeight;bt.push(setTimeout(function(){chat.removeChild(ty);say(t);busy=0},850))}
-function botReset(){bt.forEach(clearTimeout);bt=[];busy=0;chat.innerHTML='';var r=rb();$('#bAv').textContent=r.em;$('#qr').innerHTML='';
- [['🕒 Horario','h'],['💰 Precios','p'],['🛍️ '+r.o,'o'],['📍 Ubicación','u']].forEach(function(q){var b=document.createElement('button');b.type='button';b.textContent=q[0];b.onclick=function(){ask(q)};$('#qr').appendChild(b)});
- bot('¡Hola! 👋 Soy el asistente de <b>'+esc(name())+'</b>. ¿En qué te ayudo?')}
-function ask(q){if(busy)return;var r=rb();say(q[0],1);
- bot({h:'Atendemos '+r.hor+'. ¡Te esperamos! 😊',p:r.p.map(function(p){return p[0]+' '+esc(p[1])+': <b>'+money(p[2])+'</b>'}).join('<br>'),o:'¡Listo! ✅ Registré '+r.ped+' a tu nombre. Te confirmamos en unos minutos. Promo de hoy: <b>'+r.promo[0]+'</b> 🎉',u:'Estamos en Lima 📍 Te envío la ubicación en el mapa. ¿Algo más?'}[q[1]])}
+/* ---------- negocios: vista previa ---------- */
+var RUB=[['gym','🏋️','Gimnasio','Fuerza Gym','Primer mes -20% para nuevos socios',1],['cafe','☕','Cafetería','Café Aurora','2x1 en frappés de lunes a jueves',1],['resto','🍽️','Restaurante','La Mesa de Rosa','Postre gratis pidiendo desde la mesa',1],['barb','💈','Barbería','Barbería Don Lucho','Corte + barba a precio especial los martes',0],['dent','🦷','Consultorio','Sonrisa Dental','Evaluación gratis en tu primera cita',0],['tienda','🛍️','Tienda','Tienda Nova','-15% en tu primera compra',1]],ri=0;
+$('#rub').innerHTML=RUB.map(function(r,i){return '<button class="chip" type="button" data-i="'+i+'" aria-pressed="'+(i===0)+'">'+r[1]+' '+r[2]+'</button>'}).join('');
+function prev(){var r=RUB[ri],n=$('#nom').value.trim();$('#vic').textContent=r[1];$('#vnom').textContent=n||r[3];$('#vpro').textContent='🎁 '+r[4];$('#nom').placeholder='Ej. '+r[3];$('#mqr').style.display=r[5]?'':'none'}
+$$('#rub .chip').forEach(function(b){b.onclick=function(){ri=+b.dataset.i;$$('#rub .chip').forEach(function(x){x.setAttribute('aria-pressed',x===b)});prev()}});
+$('#nom').oninput=prev;prev();
 
-/* edits */
-var rt=null,ri=0,rp=0;
-function caps(){var r=rb(),n=esc(name());return ['¿Ya conoces <mark>'+n+'</mark>?',r.promo[0]+' 🔥','Solo esta semana','Escríbenos al <mark>WhatsApp</mark>',r.promo[1]+' ✨','<mark>'+n+'</mark> te espera']}
-function reelStart(){reelStop();ri=0;rp=0;$('#rEm').textContent=rb().em;step();rt=setInterval(function(){rp+=2;$('#rPb').style.width=Math.min(100,rp/1.2)+'%';if(rp%20===0)step();if(rp>=120){rp=0;ri=0}},100)}
-function step(){var c=caps(),e=$('#rCap');e.innerHTML=c[ri%c.length];e.classList.remove('in');void e.offsetWidth;e.classList.add('in');ri++}
-function reelStop(){clearInterval(rt);rt=null}
-$('#rGen').onclick=function(){var r=rb(),ems=[r.em].concat(r.p.map(function(p){return p[0]}));r.promo.reverse();reelStart();$('#rEm').textContent=ems[Math.floor(Math.random()*ems.length)]};
+/* ---------- mapa real (Leaflet + OpenStreetMap, negocios de xa_mapa) ---------- */
+var SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
+var MC={gym:'🏋️',cafeteria:'☕',restaurante:'🍽️',barberia:'💈',consultorio:'🦷',otro:'🛍️'},MCT=[['','✨ Todo'],['gym','🏋️ Gym'],['cafeteria','☕ Café'],['restaurante','🍽️ Resto'],['barberia','💈 Barbería'],['consultorio','🦷 Salud']];
+var M={map:null,capa:null,cat:'',demo:false,t:0};
+$('#mch').innerHTML=MCT.map(function(c){return '<button class="chip" type="button" data-c="'+c[0]+'" aria-pressed="'+(c[0]==='')+'">'+c[1]+'</button>'}).join('');
+$$('#mch .chip').forEach(function(b){b.onclick=function(){M.cat=b.dataset.c;$$('#mch .chip').forEach(function(x){x.setAttribute('aria-pressed',x===b)});carga()}});
+function js(u){return new Promise(function(ok,ko){var s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=ko;document.head.appendChild(s)})}
+function mapa(){if(M.map||M.ini)return;M.ini=1;var l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';document.head.appendChild(l);
+ js('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js').then(function(){
+  M.map=L.map('lmap',{zoomControl:false,scrollWheelZoom:false}).setView([-12.1,-77.02],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(M.map);
+  L.control.zoom({position:'bottomright'}).addTo(M.map);M.capa=L.layerGroup().addTo(M.map);
+  M.map.on('moveend',function(){clearTimeout(M.t);M.t=setTimeout(carga,400)});carga()}).catch(function(){M.ini=0;$('#lmap').innerHTML='<p class="mu" style="padding:24px;text-align:center">No se pudo cargar el mapa. Revisa tu internet.</p>'})}
+var DEMO=[['Fuerza Gym','gym',-12.121,-77.03,4.8,'Primer mes -20%',0],['Café Aurora','cafeteria',-12.148,-77.022,4.9,'2x1 en frappés',1],['La Mesa de Rosa','restaurante',-12.09,-77.05,4.6,'Postre gratis',0],['Barbería Don Lucho','barberia',-12.07,-77.0,4.7,'',0],['Sonrisa Dental','consultorio',-12.1,-76.98,5,'Evaluación gratis',0],['Tienda Nova','otro',-12.13,-76.99,4.8,'-15%',0]];
+function carga(){if(!M.map)return;var b=M.map.getBounds();
+ fetch(SB.url+'/rest/v1/rpc/xa_mapa',{method:'POST',headers:{apikey:SB.key,Authorization:'Bearer '+SB.key,'Content-Type':'application/json'},body:JSON.stringify({p:{s:b.getSouth(),n:b.getNorth(),w:b.getWest(),e:b.getEast(),cat:M.cat}})})
+ .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){var it=(d&&d.items)||[];if(!it.length&&!M.real)return pinta(demoIt(),true);M.real=M.real||it.length>0;pinta(it,false)})
+ .catch(function(){pinta(demoIt(),true)})}
+function demoIt(){return DEMO.filter(function(x){return!M.cat||x[1]===M.cat}).map(function(x){return{nombre:x[0],cat:x[1],lat:x[2],lng:x[3],prom:x[4],promo:x[5],dest:x[6]}})}
+function pinta(it,demo){M.capa.clearLayers();$('#mtag').hidden=!demo;
+ it.forEach(function(x){var ic=L.divIcon({className:'',html:'<div class="lpin'+(x.dest?' dst':'')+'"><span>'+(MC[x.cat]||'🛍️')+'</span></div>',iconSize:[38,44],iconAnchor:[19,42],popupAnchor:[0,-40]});
+  L.marker([x.lat,x.lng],{icon:ic,title:x.nombre}).addTo(M.capa).bindPopup('<b>'+esc(x.nombre)+'</b><br>'+(x.prom?'<span style="color:#f5c542">★ '+esc(x.prom)+'</span>':'<span class="mu">Nuevo en Xyro</span>')+(x.promo?'<br>🎁 '+esc(x.promo):(+x.promos?'<br>🎁 '+x.promos+' promo'+(x.promos>1?'s':''):''))+(x.slug?'<br><a href="/mi/?n='+encodeURIComponent(x.slug)+'" style="color:#3ad6ff">Ver en Mi Xyro →</a>':''))})}
 
-/* ecosistema */
-var ecoEl=$('#eco');var POS=[[50,8],[90,38],[76,88],[24,88],[10,38]];
-D.forEach(function(d,i){var b=document.createElement('button');b.type='button';b.className='en';b.dataset.k=d[0];b.style.cssText='left:'+POS[i][0]+'%;top:'+POS[i][1]+'%;--c:'+d[2];b.innerHTML='<img class="tile" src="img/marca/logo-'+d[0]+'-app.svg" alt="" width="70" height="70">Xyro '+d[1];b.onclick=function(){st.sel[d[0]]=st.sel[d[0]]?0:1;eco()};ecoEl.appendChild(b)});
-$('#lines').innerHTML=POS.map(function(p,i){return '<line data-k="'+D[i][0]+'" x1="50%" y1="50%" x2="'+p[0]+'%" y2="'+p[1]+'%"/>'}).join('');
-var DESC={webs:'Web propia editable',apps:'Clientes y cobros',control:'Caja e inventario',bots:'WhatsApp automático',edits:'Videos con IA'};
-function selNames(){return D.filter(function(d){return st.sel[d[0]]}).map(function(d){return 'Xyro '+d[1]})}
-function eco(){var n=0;D.forEach(function(d){var on=!!st.sel[d[0]];if(on)n++;$('.en[data-k="'+d[0]+'"]').classList.toggle('on',on);$('#lines line[data-k="'+d[0]+'"]').setAttribute('class',on?'on':'')});
- $('#sNom').textContent=name();$('#sTx').textContent=n?'Tu ecosistema incluye:':'Elige al menos una pieza.';
- $('#sList').innerHTML=D.filter(function(d){return st.sel[d[0]]}).map(function(d){return '<li style="border:1px solid '+d[2]+'66">Xyro '+d[1]+' · '+DESC[d[0]]+'</li>'}).join('');
- $('#sPlan').textContent=n===0?'':n===1?'🌱 Ideal para empezar':n<=3?'🚀 Ideal para crecer':'🏢 Ecosistema completo para escalar';wa()}
+/* ---------- fondo de partículas ---------- */
+var cv=$('#fx'),cx=cv.getContext('2d'),W,H,P=[],DPR=Math.min(2,devicePixelRatio||1),run=true;
+function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);var n=Math.round(Math.min(70,W*H/20000));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3})}
+function frame(){if(!run)return;cx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){var p=P[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;cx.fillStyle='#7c5cff99';cx.fillRect(p.x,p.y,1.6,1.6);
+ for(var j=i+1;j<P.length;j++){var q=P[j],dx=p.x-q.x,dy=p.y-q.y,d=dx*dx+dy*dy;if(d<12000){cx.strokeStyle='rgba(124,92,255,'+(.14*(1-d/12000))+')';cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}}requestAnimationFrame(frame)}
+size();addEventListener('resize',size);if(!RM)frame();document.addEventListener('visibilitychange',function(){run=!document.hidden;if(run&&!RM)frame()});
 
-function all(){$$('.chip').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.r===st.r)});$('#nom').placeholder='Ej. '+rb().def;names();web();ctlReset();appsReset();eco();wa();if(st.v==='bots')botReset();if(st.v==='edits')reelStart()}
-all();route();
-
-/* tilt 3D en demos */
-if(matchMedia('(hover:hover)').matches&&!RM){$$('.tilt').forEach(function(t){var p=t.parentNode;p.addEventListener('mousemove',function(e){var r=p.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;t.style.transform='perspective(1000px) rotateY('+(x*10)+'deg) rotateX('+(-y*10)+'deg)'});p.addEventListener('mouseleave',function(){t.style.transform=''})})}
-addEventListener('pointermove',function(e){document.documentElement.style.setProperty('--mx',e.clientX+'px');document.documentElement.style.setProperty('--my',e.clientY+'px');mouse.x=e.clientX;mouse.y=e.clientY},{passive:true});
-
-/* fondo: red de partículas */
-var cv=$('#fx'),cx=cv.getContext('2d'),P=[],W,H,DPR=Math.min(1.5,devicePixelRatio||1),mouse={x:-999,y:-999},run=true;
-function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);var n=Math.round(Math.min(90,W*H/16000));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35})}
-function hex(c){var n=parseInt(c.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255]}
-function frame(){if(!run)return;cx.clearRect(0,0,W,H);var a=hex(ACC[st.v]||'#7c5cff');
- for(var i=0;i<P.length;i++){var p=P[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-  var dm=Math.hypot(p.x-mouse.x,p.y-mouse.y);if(dm<160){p.x+=(mouse.x-p.x)*.004;p.y+=(mouse.y-p.y)*.004}
-  cx.fillStyle='rgba('+a+',.7)';cx.beginPath();cx.arc(p.x,p.y,1.4,0,6.3);cx.fill();
-  for(var j=i+1;j<P.length;j++){var q=P[j],d=Math.hypot(p.x-q.x,p.y-q.y);if(d<130){cx.strokeStyle='rgba('+a+','+(0.18*(1-d/130))+')';cx.lineWidth=1;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke()}}
-  if(dm<180){cx.strokeStyle='rgba('+a+','+(0.35*(1-dm/180))+')';cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(mouse.x,mouse.y);cx.stroke()}}
- requestAnimationFrame(frame)}
-size();addEventListener('resize',size);
-if(!RM)requestAnimationFrame(frame);else{run=false}
-document.addEventListener('visibilitychange',function(){var r=!document.hidden&&!RM;if(r&&!run){run=true;requestAnimationFrame(frame)}else run=r});
-})();
-</script>
-<script>(function(){
-var SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'},MI=location.origin+'/mi/',APP=location.origin+'/app/';
-var q=function(x,r){return (r||document).querySelector(x)},card=q('#ecard'),pase=q('#pase'),RMx=matchMedia('(prefers-reduced-motion:reduce)').matches;
-var T={tab:'cli',sub:'entrar'},sbM=null,sbA=null,lib=null;
-function esc(x){return String(x==null?'':x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function ses(k){try{var j=JSON.parse(localStorage.getItem(k)||'null');if(j&&j.user&&j.expires_at&&(j.refresh_token||j.expires_at*1000>Date.now()))return j.user}catch(_){}return null}
-function nomDe(u){var m=(u&&u.user_metadata)||{};return String(m.nombre||m.full_name||m.name||(u&&u.email||'').split('@')[0]||'').trim()}
-function libSB(){if(lib)return lib;lib=new Promise(function(ok,ko){if(window.supabase)return ok();var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';s.onload=ok;s.onerror=function(){lib=null;ko(new Error('Sin conexión. Revisa tu internet.'))};document.head.appendChild(s)});return lib}
-function cMi(){return libSB().then(function(){return sbM||(sbM=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-mi-auth',persistSession:true,autoRefreshToken:false,detectSessionInUrl:false}}))})}
-function cApp(){return libSB().then(function(){return sbA||(sbA=supabase.createClient(SB.url,SB.key,{auth:{storageKey:'xyro-apps-auth',persistSession:true,autoRefreshToken:false,detectSessionInUrl:false}}))})}
-function err(e){var t=String(e&&(e.message||e.error)||e||'');
- if(/Invalid login/i.test(t))return 'Correo o clave incorrectos.';if(/already registered|already been registered/i.test(t))return 'Ese correo ya tiene cuenta. Toca «Entrar».';
- if(/Password should/i.test(t))return 'Tu clave debe tener al menos 6 caracteres.';if(/not confirmed/i.test(t))return 'Confirma tu correo: te enviamos un enlace.';
- if(/rate limit|security purposes|too many/i.test(t))return 'Espera un minuto y vuelve a intentar.';if(/provider is not enabled|Unsupported provider/i.test(t))return 'El ingreso con Google se activa muy pronto. Usa tu correo por ahora.';
- if(/fetch|network/i.test(t))return 'Sin conexión. Revisa tu internet.';return t||'Algo salió mal. Intenta de nuevo.'}
-/* QR decorativo que cambia con tu nombre */
-function hash(x){var h=2166136261;for(var i=0;i<x.length;i++){h^=x.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-function qr(seed){var n=21,h=hash(seed||'xyro'),r='',fz=function(x,y){return (x<8&&y<8)||(x>n-9&&y<8)||(x<8&&y>n-9)};
- for(var y=0;y<n;y++)for(var x=0;x<n;x++){if(fz(x,y))continue;h^=h<<13;h^=h>>>17;h^=h<<5;h>>>=0;if(h%100<48)r+='M'+x+' '+y+'h1v1h-1z'}
- var f=function(x,y){return 'M'+x+' '+y+'h7v7h-7zM'+(x+1)+' '+(y+1)+'v5h5v-5zM'+(x+2)+' '+(y+2)+'h3v3h-3z'};
- q('#pq').innerHTML='<svg viewBox="0 0 21 21" shape-rendering="crispEdges"><path fill="#0b0d18" fill-rule="evenodd" d="'+f(0,0)+f(14,0)+f(0,14)+r+'"/></svg>'}
-function paseNom(v,k){q('#pn').textContent=v||'Tu nombre aquí';if(k)q('#pk').textContent=k;qr(v)}
-var pi=0;setInterval(function(){if(document.hidden||!pase.offsetParent)return;var c=pase.querySelectorAll('.pr span');c.forEach(function(e,i){e.classList.toggle('on',i===pi%c.length)});pi++},1600);
-if(!RMx&&matchMedia('(hover:hover)').matches){var ar=q('.ent');ar.addEventListener('mousemove',function(e){var b=pase.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;x=Math.max(-.8,Math.min(.8,x));y=Math.max(-.8,Math.min(.8,y));pase.style.transform='perspective(900px) rotateY('+(x*18).toFixed(2)+'deg) rotateX('+(-y*14).toFixed(2)+'deg)';pase.style.setProperty('--sx',(50+x*-90)+'%')});ar.addEventListener('mouseleave',function(){pase.style.transform='';pase.style.setProperty('--sx','100%')})}
-function listo(txt,url){q('#pok').textContent=txt;pase.classList.add('done');setTimeout(function(){location.href=url},RMx?200:1100)}
-function say(t,ok){var m=q('#em',card);m.textContent=t;m.className='emsg on'+(ok?' ok':'')}
-var GG='<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>';
-function pinta(){var um=ses('xyro-mi-auth'),ua=ses('xyro-apps-auth'),h='';
- h+='<div class="eseg'+(T.tab==='neg'?' r':T.tab==='pro'?' r2':'')+'" role="tablist"><span class="pill"></span><button type="button" data-t="cli" class="'+(T.tab==='cli'?'on':'')+'">👤 Persona</button><button type="button" data-t="neg" class="'+(T.tab==='neg'?'on':'')+'">🏪 Negocio</button><button type="button" data-t="pro" class="'+(T.tab==='pro'?'on':'')+'">🏋️ Entrenador</button></div>';
- if(T.tab==='pro'){h+='<div class="epro"><div><h3>Tu perfil de entrenador o profesor, gratis</h3><p class="mut" style="font-size:14px;margin-top:4px">Solo necesitas tu celular. Te encuentran en Mi Xyro, te califican y te escriben.</p></div>'
-  +'<div class="it"><i>📲</i><span><b>Tu QR y tu enlace</b> para compartir con tus alumnos.</span></div><div class="it"><i>🎬</i><span><b>Videos, fotos y especialidades</b> en un perfil que se ve pro.</span></div><div class="it"><i>⭐</i><span><b>Opiniones de tus alumnos</b>: más prestigio, más clientes.</span></div><div class="it"><i>💬</i><span><b>Solicitudes y chat</b> sin dar tu número a cualquiera.</span></div>'
-  +'<a class="btn btn-p" style="width:100%" href="/mi/?pro=1">Crear mi perfil gratis →</a><p class="elk">Usa tu misma cuenta de Mi Xyro. ¿Tienes un local? Elige «Negocio».</p></div>';paseNom('','Perfil profesional')}
- else 
- if(T.tab==='cli'&&um){var n=nomDe(um);h+='<div class="ewho"><div class="av">'+esc((n[0]||'X').toUpperCase())+'</div><h3>Hola, '+esc(n.split(' ')[0])+' 👋</h3><p class="mut">Ya tienes tu sesión abierta en este equipo.</p><a class="btn btn-p" style="width:100%" href="/mi/">Abrir Mi Xyro →</a><button type="button" class="elk" id="eout" style="background:none">No soy yo · cerrar sesión</button></div>';paseNom(n,'Pase activo')}
- else if(T.tab==='neg'&&ua){h+='<div class="ewho"><div class="av">🏪</div><h3>Tu panel está abierto</h3><p class="mut">'+esc(String(ua.email||'').replace(/\.xyrostudio\.net$/,''))+'</p><a class="btn btn-p" style="width:100%" href="/app/">Ir a mi panel →</a><button type="button" class="elk" id="eout" style="background:none">Entrar con otra cuenta</button></div>'}
- else if(T.tab==='cli'){var cr=T.sub==='crear';
-  h+='<div><h3>'+(cr?'Crea tu cuenta gratis':'Entra a tu cuenta')+'</h3><p class="mut" style="font-size:14px;margin-top:4px">'+(cr?'En 20 segundos. Descubre gyms, cafés, barberías y entrenadores, con promos solo por usar Mi Xyro.':'Tu QR, tus citas y tus promos te esperan.')+'</p></div>';
-  h+='<button type="button" class="egg" id="egg">'+GG+'Continuar con Google</button><div class="eor">o con tu correo</div>';
-  h+='<div class="esub"><button type="button" data-s="entrar" class="'+(!cr?'on':'')+'">Entrar</button><button type="button" data-s="crear" class="'+(cr?'on':'')+'">Crear cuenta</button></div>';
-  h+='<form class="efl" id="ef" novalidate>'+(cr?'<label>Tu nombre<input id="en" autocomplete="name" maxlength="80" required placeholder="Ej. Ana Torres"></label>':'')+'<label>Correo<input id="ee" type="email" inputmode="email" autocomplete="email" required maxlength="120" placeholder="tucorreo@gmail.com"></label><label>Clave<input id="ep" type="password" autocomplete="'+(cr?'new-password':'current-password')+'" required minlength="6" maxlength="128" placeholder="'+(cr?'Mínimo 6 caracteres':'••••••')+'"></label><div class="emsg" id="em"></div><button class="btn btn-p" id="eb">'+(cr?'Crear mi cuenta ✦':'Entrar →')+'</button></form>';
-  h+='<p class="elk">'+(cr?'Al crearla aceptas los <a href="/terminos.html">términos</a> y la <a href="/privacidad.html">privacidad</a>.':'<button type="button" id="eolv" style="background:none">¿Olvidaste tu clave?</button>')+'</p>'}
- else{h+='<div><h3>Entra a tu panel</h3><p class="mut" style="font-size:14px;margin-top:4px">Para dueños y equipo de negocios con Xyro Apps.</p></div>';
-  h+='<form class="efl" id="ef" novalidate><label>Usuario o correo<input id="ee" autocomplete="username" required maxlength="120" placeholder="ana@tu-negocio"></label><label>Clave<input id="ep" type="password" autocomplete="current-password" required maxlength="128"></label><input class="ehp" id="ehp" tabindex="-1" autocomplete="off" aria-hidden="true"><div class="emsg" id="em"></div><button class="btn btn-p" id="eb">Entrar al panel →</button></form>';
-  h+='<a class="btn btn-g" href="/mi/?registro=1" style="width:100%">🏪 Registra tu negocio gratis</a><p class="elk" style="margin-top:-4px">Sale en Mi Xyro con tu perfil, tus promos y tu QR.</p>';
-  h+='<p class="elk">¿Quieres el sistema completo? <a href="/app/?demo=gym">Pruébalo en vivo</a> · <a href="#/arma">Arma el tuyo</a></p>'}
- card.innerHTML=h;
- card.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){T.tab=b.dataset.t;pinta()}});
- card.querySelectorAll('[data-s]').forEach(function(b){b.onclick=function(){T.sub=b.dataset.s;pinta()}});
- var o=q('#eout',card);if(o)o.onclick=function(){var k=T.tab==='cli'?'xyro-mi-auth':'xyro-apps-auth';(T.tab==='cli'?cMi():cApp()).then(function(c){return c.auth.signOut()}).catch(function(){}).then(function(){try{localStorage.removeItem(k)}catch(_){}paseNom('','Bienvenido');pinta();cabeza()})};
- var f=q('#ef',card);if(!f)return;
- var ee=q('#ee',card),en=q('#en',card);try{var sv=localStorage.getItem(T.tab==='cli'?'mi-email':'xs-neg');if(sv)ee.value=sv}catch(_){}
- var vivo=function(){paseNom((en&&en.value.trim())||(ee.value.split('@')[0]||'').replace(/[._-]+/g,' ').trim(),T.tab==='cli'?(T.sub==='crear'?'Nuevo pase':'Bienvenido'):'Panel del negocio')};
- ee.oninput=vivo;if(en)en.oninput=vivo;vivo();
- cMi().catch(function(){});
- var g=q('#egg',card);if(g)g.onclick=function(){cMi().then(function(c){return c.auth.signInWithOAuth({provider:'google',options:{redirectTo:MI}})}).then(function(r){if(r&&r.error)throw r.error}).catch(function(e){say(err(e))})};
- var ol=q('#eolv',card);if(ol)ol.onclick=function(){var em=ee.value.trim();if(!/@.+\./.test(em))return say('Escribe tu correo y vuelve a tocar «¿Olvidaste tu clave?».');cMi().then(function(c){return c.auth.resetPasswordForEmail(em,{redirectTo:MI})}).then(function(r){if(r&&r.error)throw r.error;say('📩 Te enviamos un correo para crear una clave nueva.',1)}).catch(function(e){say(err(e))})};
- f.onsubmit=function(e){e.preventDefault();var b=q('#eb',card),t0=b.textContent,pw=q('#ep',card).value,em=ee.value.trim().toLowerCase();q('#em',card).className='emsg';
-  var fin=function(m){say(m);b.disabled=false;b.textContent=t0};
-  if(T.tab==='cli'){if(!/@.+\./.test(em))return say('Escribe un correo válido.');if(pw.length<6)return say('Tu clave debe tener al menos 6 caracteres.');if(en&&!en.value.trim())return say('Escribe tu nombre.');
-   b.disabled=true;b.textContent='Un momento…';try{localStorage.setItem('mi-email',em)}catch(_){}
-   cMi().then(function(c){return T.sub==='crear'?c.auth.signUp({email:em,password:pw,options:{data:{nombre:en.value.trim()},emailRedirectTo:MI}}):c.auth.signInWithPassword({email:em,password:pw})}).then(function(r){if(r.error)throw r.error;
-    if(T.sub==='crear'&&!r.data.session)return fin('📩 Te enviamos un correo a '+em+'. Ábrelo y toca el enlace para activar tu cuenta.'),q('#em',card).classList.add('ok');
-    listo('¡Bienvenido! Abriendo Mi Xyro…',MI)}).catch(function(e){fin(err(e))})}
-  else{if(q('#ehp',card).value)return setTimeout(function(){say('Usuario o contraseña incorrectos.')},1500);
-   var x=em;if(x.indexOf('@')<0)return say('Escribe tu usuario completo, ej. ana@tu-negocio.');var pp=x.split('@');if(pp[1]&&pp[1].indexOf('.')<0)x=pp[0]+'@'+pp[1]+'.xyrostudio.net';
-   if(!pw)return say('Escribe tu clave.');b.disabled=true;b.textContent='Un momento…';try{localStorage.setItem('xs-neg',em)}catch(_){}
-   var c;cApp().then(function(cc){c=cc;return c.rpc('xa_login_espera',{p_email:x}).then(function(r){return r.error?0:(r.data|0)},function(){return 0})}).then(function(w){if(w>0)throw new Error('🔒 Por seguridad, espera '+(w>=90?Math.ceil(w/60)+' min':w+' s')+' antes de volver a intentar.');
-    return c.auth.signInWithPassword({email:x,password:pw}).then(function(r){if(r.error){q('#ep',card).value='';return c.rpc('xa_login_fallo',{p_email:x,p_ua:navigator.userAgent.slice(0,200)}).then(function(){},function(){}).then(function(){throw new Error(/confirm/i.test(r.error.message)?'Tu correo aún no está confirmado.':/rate|too many/i.test(r.error.message)?'Espera un minuto y vuelve a intentar.':'Usuario o contraseña incorrectos.')})}
-     listo('¡Listo! Abriendo tu panel…',APP)})}).catch(function(e){fin(e.message||err(e))})}
- }}
-function cabeza(){var um=ses('xyro-mi-auth'),ua=ses('xyro-apps-auth'),b=q('#ubtn'),c=q('#echip');if(!b)return;
- if(um||ua){var n=um?nomDe(um):'Mi panel';b.querySelector('.av').textContent=(n[0]||'X').toUpperCase();b.querySelector('.t').textContent=um?n.split(' ')[0]:'Mi panel';if(c)c.querySelector('span').innerHTML='<i>Hola'+(um?', '+esc(n.split(' ')[0]):'')+'</i> · abre tu cuenta Xyro →'}}
-window.entShow=function(){T.tab=ses('xyro-apps-auth')&&!ses('xyro-mi-auth')?'neg':T.tab;pinta()};
-cabeza();qr('xyro');if(/^#\/entrar/.test(location.hash))entShow();
+route();
 })();
 </script>
 </body></html>
