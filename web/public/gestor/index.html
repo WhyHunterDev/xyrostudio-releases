@@ -526,7 +526,13 @@ V.cobros=async ()=>{
    <td><input type="date" value="${esc(p.vence||'')}" data-xgv="${x.id}"></td>
    <td>${d==null?'<span class="tag pausado">Sin fecha</span>':d<0?`<span class="tag baja">🔴 Venció hace ${-d} d</span>`:d<=5?`<span class="tag pend">🟠 En ${d} d</span>`:'<span class="tag activo">Al día</span>'}</td>
    <td style="text-align:right"><button class="btn btn-p btn-sm" data-xgsave="${x.id}">Guardar</button></td></tr>`};
-  return `<div class="grid4"><div class="kpi w"><b>${rev.length}</b><small>Pagos por revisar</small></div><div class="kpi"><b>${pron}</b><small>Vencen en 5 días</small></div><div class="kpi"><b>${venc}</b><small>Vencidos</small></div><div class="kpi g"><b>${soles(act.reduce((a,p)=>a+(+p.monto/(+p.meses||1)),0))}</b><small>Mensualidades al mes</small></div></div>
+  let SOL=null;try{const r=await sb.rpc('xy_solicitudes_lista');SOL=r.error?(/function|schema/i.test(r.error.message||'')?'falta':null):(r.data||[])}catch(_){}
+  const solF=x=>{const pend=x.estado==='PENDIENTE',f=new Date(x.creado).toLocaleString('es-PE',{timeZone:'America/Lima',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+   return`<div class="cl"><div class="in"><h4>${x.tipo==='PLUS'?'⭐ Xyro+ · 1 mes':'⚡ Boost · '+x.horas+' h'} · ${esc(x.moneda||'')} ${(+x.monto).toFixed(2)} <span class="tag ${pend?'pend':x.estado==='APROBADA'?'activo':'baja'}">${pend?'🕓 Por confirmar':x.estado==='APROBADA'?'✅ Activado':'⛔ Rechazado'}</span></h4>
+    <div class="meta"><span>${x.tipo==='BOOST'?'🏪 '+esc(x.negocio||'—')+' · ':''}👤 ${esc(x.persona||'—')} @${esc(x.usuario||'')}${x.idn?' · ID '+esc(String(x.idn).replace(/(\d{4})(\d{4})/,'$1 $2')):''}</span><span>US$ ${(+x.usd).toFixed(2)}</span><span>${x.ref?'Nº op. '+esc(x.ref):'Sin Nº de operación'}</span><span>${f}</span></div></div>
+    ${pend?`<div class="acts"><button class="btn btn-p btn-sm" data-solok="${x.id}">✅ Ya pagó · activar</button><button class="btn btn-g btn-sm" data-solno="${x.id}">Rechazar</button></div>`:''}</div>`};
+  const solP=SOL==='falta'?'<div class="note">⚡ Para cobrar Xyro+ y Boost corre <b>88-xyro-plus-boost-ruleta.sql</b> en Supabase.</div>':Array.isArray(SOL)&&SOL.length?`<div class="panel"><h3>⭐ Xyro+ y ⚡ Boost (${SOL.filter(x=>x.estado==='PENDIENTE').length} por confirmar)</h3><p class="d" style="margin:0 0 8px">Revisa en tu Yape que llegó el pago y actívalo con 1 toque.</p><div class="clients">${SOL.map(solF).join('')}</div></div>`:'';
+  return solP+`<div class="grid4"><div class="kpi w"><b>${rev.length}</b><small>Pagos por revisar</small></div><div class="kpi"><b>${pron}</b><small>Vencen en 5 días</small></div><div class="kpi"><b>${venc}</b><small>Vencidos</small></div><div class="kpi g"><b>${soles(act.reduce((a,p)=>a+(+p.monto/(+p.meses||1)),0))}</b><small>Mensualidades al mes</small></div></div>
    ${rev.length?`<div class="panel"><h3>⏳ Por revisar (${rev.length})</h3><div class="clients">${rev.map(pago).join('')}</div></div>`:''}
    <div class="panel tbl"><h3>Plan de cada negocio</h3><table><tr><th>Negocio</th><th>Monto (S/)</th><th>Cada</th><th>Vence</th><th>Estado</th><th></th></tr>${L.map(fila).join('')||'<tr><td colspan="6">Aún no hay negocios con Xyro Apps.</td></tr>'}</table>
    <p class="d" style="margin-top:10px">Cada negocio ve «💳 Mi plan XyroStudio» y, 5 días antes de vencer, un aviso en su panel. Si paga y la captura cuadra (monto, N.º de operación nuevo y tu Yape o cuenta), se renueva solo desde su fecha de vencimiento.</p></div>
@@ -537,6 +543,8 @@ V.cobros=async ()=>{
     <div class="full"><button class="btn btn-p" data-xgcfg>Guardar mis datos</button></div></form></div>
    ${PG.filter(x=>x.estado!=='revisar').length?`<div class="panel"><h3>Últimos pagos</h3><div class="clients">${PG.filter(x=>x.estado!=='revisar').slice(0,30).map(pago).join('')}</div></div>`:''}`;
 };
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-solok],[data-solno]');if(!t||!me)return;e.preventDefault();const ok=!!t.dataset.solok;
+ if(!ok&&!confirm('¿Rechazar este pedido?'))return;t.disabled=true;try{const{error}=await sb.rpc('xy_solicitud_resolver',{p_id:t.dataset.solok||t.dataset.solno,p_ok:ok});if(error)throw error;touch((ok?'Activó':'Rechazó')+' un pedido de Xyro+/Boost');toast(ok?'✅ Activado':'Rechazado');go('cobros')}catch(er){toast(er.message||er);t.disabled=false}});
 document.addEventListener('click',async e=>{const t=e.target.closest('[data-xgsave],[data-xgok],[data-xgno],[data-xgcfg]');if(!t||!me)return;
  try{
   if(t.dataset.xgsave){const id=t.dataset.xgsave,q=k=>document.querySelector(`[data-${k}="${id}"]`);const v={sitio_id:id,monto:+q('xgm').value||0,meses:+q('xgc').value||1,vence:q('xgv').value||null,actualizado:new Date().toISOString()};
