@@ -5,7 +5,7 @@ import { S, $, $$, esc, I, MODOS, puedeModo, cargarCuenta, cliente, toast, hoja,
 const NAV = {
   user: [['explorar', 'Explorar', I.explore], ['market', 'Marketplace', I.market], ['escanear', 'Escanear', I.scan, 1], ['billetera', 'Billetera', I.wallet], ['perfil', 'Perfil', I.user]],
   control: [['c-inicio', 'Resumen', I.chart], ['c-pedidos', 'Pedidos', I.orders], ['c-qr', 'QR', I.qr, 1], ['c-boost', 'Boost', I.bolt], ['c-catalogo', 'Catálogo', I.catalog]],
-  panel: [['p-inicio', 'Resumen', I.chart], ['p-negocios', 'Negocios', I.shield], ['p-pagos', 'Pagos', I.wallet], ['p-videos', 'Videos', I.film], ['p-soporte', 'Soporte', I.ticket]],
+  panel: [['p-inicio', 'Resumen', I.chart], ['p-negocios', 'Negocios', I.shield], ['p-pagos', 'Pagos', I.wallet], ['p-soporte', 'Soporte', I.ticket]],
 };
 // Ruta → módulo de vista
 const VISTA = {
@@ -21,8 +21,10 @@ const rutaAct = () => (location.hash.replace(/^#\/?/, '').split('?')[0]) || INIC
 function logo() { return `<div class="logo"><img src="/img/marca/logo-xyrostudio-app.svg" alt="">Xyro</div>`; }
 const inicial = () => esc(((S.me && (S.me.display_name || S.me.username)) || '?').trim().charAt(0).toUpperCase());
 
+// Xyro Edits oculto hasta lanzarlo (decisión 2026-11-18). Entrenadores/profesionales no usan QR de mesa.
+const esPro = () => !!(S.entidad && S.entidad.type === 'PROFESSIONAL');
 function pintarMarco(r) {
-  const m = modoDe(r), md = MODOS[m], nav = NAV[m];
+  const m = modoDe(r), md = MODOS[m], nav = NAV[m].filter(([k]) => !(k === 'c-qr' && esPro()));
   $('#top').innerHTML = `${logo()}<button class="modo ${md.c}" id="bModo" aria-label="Cambiar de modo"><i></i><span class="ell">${esc(md.t)}</span>▾</button><span class="sp"></span>
     ${S.demo ? '<span class="pill warn">Demo</span>' : ''}<button class="av" id="bAv" aria-label="Perfil">${inicial()}</button>`;
   $('#tabs').innerHTML = nav.map(([k, t, ic, fab]) => `<a class="tab${fab ? ' fab' : ''}${k === r ? ' on' : ''}" href="#/${k}" aria-label="${t}">${fab ? `<span>${ic}</span>` : ic}${fab ? '' : `<span>${t}</span>`}</a>`).join('');
