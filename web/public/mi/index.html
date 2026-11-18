@@ -2226,7 +2226,7 @@ async function boostAbrir(slug,nom){vib();let b;try{b=await rpc('xy_boost_info',
 /* ---------- Pagos por TICKET (SQL 89): Xyro+, Boost y planes Plus/Pro. Se paga a XyroStudio por Yape/Plin/transferencia y se manda
    el N.º de operación + captura. El gestor lo confirma en su Panel. Nada por WhatsApp. ---------- */
 let XCOB=null,MISP=null;
-async function cobCarga(){if(XCOB)return XCOB;if(DEMO)return XCOB={titular:'XyroStudio',yape:'999 888 777',plin:'',banco:'BCP',cuenta:'191-0000000-0-00',cci:'',nota:''};
+async function cobCarga(){if(XCOB)return XCOB;if(DEMO)return XCOB={titular:'XyroStudio',yape:'999 888 777',plin:'',banco:'BCP',cuenta:'191-0000000-0-00',cci:'',nota:'',binance:'123456789'};
  try{const{data}=await sb.from('xa_xyro_cobro').select('*').eq('id',1).maybeSingle();XCOB=data||{}}catch(_){XCOB={}}return XCOB}
 async function subirCaptura(fl){if(!/^image\//.test(fl.type))throw new Error('Sube una imagen (captura de pantalla)');
  const img=await new Promise((ok,ko)=>{const u=URL.createObjectURL(fl),im=new Image();im.onload=()=>ok(im);im.onerror=ko;im.src=u});
@@ -2240,8 +2240,8 @@ async function pagoTicket(o){const C=await cobCarga(),pe=String(o.moneda||'PEN')
  hoja(`<h2>${esc(o.titulo)}</h2>${o.detalle||''}
   <div class="card" style="text-align:center;padding:14px"><span class="mu xs">TOTAL A PAGAR</span><b style="font-size:32px">${moneyX(o.monto,o.moneda)}</b></div>
   <div class="card" style="gap:2px"><p class="mu xs" style="font-weight:700">1 · PAGA A XYROSTUDIO</p>${C.titular?`<p class="sm">Titular: <b>${esc(C.titular)}</b></p>`:''}
-   ${pe?cp('Yape',C.yape)+cp('Plin',C.plin):''}${cp(C.banco?'Cuenta '+C.banco:'Cuenta',C.cuenta)}${cp('CCI (desde otro banco)',C.cci)}
-   ${!pe?'<p class="mu xs">¿Estás fuera de Perú? Paga por transferencia y manda tu ticket. Si necesitas otro medio de tu país, escríbelo en el N.º de operación y te respondemos.</p>':''}${C.nota?`<p class="mu xs">${esc(C.nota)}</p>`:''}</div>
+   ${pe?cp('Yape',C.yape)+cp('Plin',C.plin):''}${pe||!C.binance?cp(C.banco?'Cuenta '+C.banco:'Cuenta',C.cuenta)+cp('CCI (desde otro banco)',C.cci):''}${cp('Binance Pay ID'+(pe?' (desde otro país)':''),C.binance)}
+   ${!pe?(C.binance?'<p class="mu xs">Desde fuera de Perú paga con <b>Binance Pay</b> (USDT) el equivalente en dólares. En el N.º de operación pon el ID de la orden de Binance.</p>':'<p class="mu xs">¿Estás fuera de Perú? Escribe en el N.º de operación cómo puedes pagar y te respondemos.</p>'):''}${C.nota?`<p class="mu xs">${esc(C.nota)}</p>`:''}</div>
   <div class="card" style="gap:8px"><p class="mu xs" style="font-weight:700">2 · MANDA TU TICKET DE PAGO</p>
    <label>N.º de operación<input id="tkr" maxlength="40" placeholder="Sale en tu Yape o banco"></label>
    <input id="tkf" type="file" accept="image/*" hidden><button type="button" class="btn" id="tkb">📎 Subir captura del pago</button><div id="tkp"></div></div>
