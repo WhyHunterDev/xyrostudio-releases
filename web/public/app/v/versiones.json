@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261118-0338",
+  "fecha": "2026-11-18 03:38",
+  "titulo": "Equipo con ID de Xyro",
+  "notas": "Equipo con ID de Xyro",
+  "cambios": [
+   "Agrega a tu entrenador, recepción o cafetín con el ID de 8 dígitos de su Mi Xyro: entra con su propia cuenta, sin usuario ni clave nuevos",
+   "Quitar acceso o cambiar su rol cuando quieras"
+  ],
+  "requiere": "SQL 83"
+ },
+ {
   "id": "20261118-0007",
   "fecha": "2026-11-18 00:07",
   "titulo": "Yape en mesa y barberías juntos",

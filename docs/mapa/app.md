@@ -69,3 +69,5 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Gestor: ficha → pestaña Xyros → tarjeta «🏅 Negocio fundador» (`nfCargar`, `data-nfund`).
 - Xyro Apps: `NFUND` (se pide al arrancar), «🏅 Fundador» en la marca del menú y banner `nfBan()` en Inicio (se cierra por negocio).
 - Mi Xyro: `xa_yo_negocio` devuelve `fundador` → pastilla dorada `.nfb` en la página del negocio. Web /restaurante/: pastilla en el hero.
+
+**Equipo por ID de Xyro (SQL 83, tabla `xa_accesos`):** el admin agrega en `#/equipo` («🆔 Agregar con su ID de Xyro», `IDROL`, `eqIdLoad`, RPC `xa_equipo_id_agregar/lista/quitar`) a una persona de Mi Xyro por su ID de 8 dígitos (`xa_personas.idn`) con rol y sede; no se crea cuenta ni clave. `xa_mis_negocios` ahora une `xa_duenos` (propio) + `xa_accesos` (equipo, con `rol`); `xa_cambiar_negocio` entra con su rol/sede y crea el perfil si solo tenía Mi Xyro. Quitar acceso pone `activo=false` si estaba dentro. Mi Xyro: «Entrar al modo negocio» → `negElegir` (negocios + perfil de entrenador + registro gratis; «Entrar con usuario y clave» para cuentas viejas). Las cuentas usuario@negocio siguen funcionando.

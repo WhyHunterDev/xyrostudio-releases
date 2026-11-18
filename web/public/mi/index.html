@@ -948,7 +948,7 @@ async function escanear(onCode,txt){
 function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim()[0]||'?';
  if(GR===null)grCarga().then(()=>{if(TAB==='perfil'&&!SUB&&MODO!=='negocio'&&!document.querySelector('.ov'))pinta()});
  if(PROM===undefined&&D)proMioCarga().then(()=>{if(TAB==='perfil'&&!SUB&&MODO!=='negocio'&&!document.querySelector('.ov'))pinta()});
- const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=e=>{e.preventDefault();modoNegocio()};const s=$('#salir');s&&(s.onclick=salir);const bc=$('#bcta');bc&&(bc.onclick=e=>{e.preventDefault();borrarCuenta()});const gr=$('#greg');gr&&(gr.onclick=()=>grRegistro());const mp=$('#mpro');mp&&(mp.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});
+ const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=e=>{e.preventDefault();negElegir()};const s=$('#salir');s&&(s.onclick=salir);const bc=$('#bcta');bc&&(bc.onclick=e=>{e.preventDefault();borrarCuenta()});const gr=$('#greg');gr&&(gr.onclick=()=>grRegistro());const mp=$('#mpro');mp&&(mp.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});
   const nN=$('#ngN');nN&&(nN.onclick=negNuevo);const nG=$('#ngG');nG&&(nG.onclick=()=>{vib();SUB='migr';pinta();$('#sc')&&($('#sc').scrollTop=0)});const nP=$('#ngP');nP&&(nP.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
  return`<div class="g"><div class="row"><div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
    <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p>${per.fundador?`<p style="margin-top:6px">${fBad(per)}</p>`:''}</div></div>
@@ -1033,7 +1033,26 @@ function negCard(){const g=GRN?null:G0(),p=PROM;
   ${g?fila('ngG',I.store,esc(g.nombre),(GREST[g.estado]||GREST.pendiente)[1]+' · Plan '+(g.estado==='pago'?'completo':'Gratis')):''}
   ${p?fila('ngP',I.dumb,'Mi perfil de '+esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase()),(p.estado==='activo'?'✅ Visible en Explorar':p.estado==='suspendido'?'⛔ Suspendido':'⏳ En revisión')+(p.nuevos?` · <b style="color:var(--a)">${p.nuevos} nuevo${p.nuevos>1?'s':''}</b>`:'')):''}
   ${g||p?'':`<p class="mu sm">¿Vendes productos o das un servicio? Regístralo gratis y cobra dentro de Xyro.</p><button class="btn p" id="ngN">Registrar mi negocio gratis</button>`}
-  <a href="#" id="mneg" class="mu xs" style="text-align:center;color:var(--mu)">¿Trabajas en un negocio con Xyro Apps? Entra aquí</a></div>`}
+  <button class="btn${g||p?' p':''}" id="mneg">${I.brief}Entrar al modo negocio</button></div>`}
+/* Modo negocio (SQL 83): todo lo que la persona puede manejar con SU cuenta: sus negocios, los que le dieron acceso con su ID y su perfil de entrenador */
+const RLN={admin:'Administrador',supervisor:'Supervisor',recepcion:'Recepción',cafetin:'Cafetín',entrenador:'Entrenador',nutricionista:'Nutricionista',profesional:'Profesional'};let NACC=0;
+async function negElegir(){vib();let L=[];
+ if(DEMO)L=[{slug:'demo',negocio:'Fuerza Gym · Miraflores',rol:'entrenador',tipo:'equipo'}];
+ else if(D){try{const{data}=await sb.rpc('xa_mis_negocios');L=Array.isArray(data)?data:[]}catch(_){}}
+ NACC=L.length;const g=GRN?null:G0(),p=PROM;
+ const op=L.map(x=>({k:'s',v:x.slug,t:x.negocio,d:x.tipo==='equipo'?'Te dieron acceso · '+(RLN[x.rol]||x.rol):'Eres el dueño',i:I.store}))
+  .concat(p?[{k:'p',t:'Mi perfil de '+(PROT[p.tipo]||PROT.otro)[1].toLowerCase(),d:'Tus alumnos, cobros y mensajes',i:I.dumb}]:[])
+  .concat(g&&g.estado!=='pago'?[{k:'g',t:g.nombre,d:'Tu negocio · Plan Gratis',i:I.store}]:[]);
+ if(!op.length)return modoNegocio();
+ if(op.length===1)return negIr(op[0]);
+ hoja(`<h2>¿A dónde entras?</h2><p class="mu sm">Con tu misma cuenta: elige el negocio o perfil.</p>
+  ${op.map((o,i)=>`<button class="card" data-no="${i}" style="text-align:left;display:flex;gap:12px;align-items:center;cursor:pointer"><div class="ibox">${o.i}</div><span class="sp"><b>${esc(o.t)}</b><br><span class="mu xs">${esc(o.d)}</span></span>›</button>`).join('')}
+  <button class="btn" id="nlg">Entrar con usuario y clave</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  o.querySelectorAll('[data-no]').forEach(b=>b.onclick=()=>{close();negIr(op[+b.dataset.no])});o.querySelector('#nlg').onclick=()=>{close();modoNegocio()}})}
+async function negIr(o){
+ if(o.k==='p'||o.k==='g'){SUB=o.k==='p'?'mipro':'migr';pinta();$('#sc')&&($('#sc').scrollTop=0);return}
+ if(DEMO)return modoNegocio();
+ try{const{error}=await sb.rpc('xa_cambiar_negocio',{p_slug:o.v});if(error)throw error;NSB=sb;NSLUG=null;ls.s('mi-nslug',null);await nCargar();entrarNeg();toast('🏢 '+o.t)}catch(e){toast(errDe(e))}}
 function negNuevo(){vib();hoja(`<h2>¿Qué ofreces?</h2>
  <button class="card" data-nt="producto" style="text-align:left"><b>🛍️ Productos</b><span class="mu sm">Comida, bebidas, ropa, accesorios, cosas digitales…</span></button>
  <button class="card" data-nt="servicio" style="text-align:left"><b>🏋️ Servicio con muchos clientes</b><span class="mu sm">Gimnasio, consultorio, barbería: socios, citas y control.</span></button>
@@ -1353,7 +1372,7 @@ function nMas(){
   <p class="mu xs" style="text-align:center;margin-top:-4px">Cobrar, crear socios, caja, reportes y todo lo demás. Entra sin volver a escribir tu clave.</p>
   ${nMpOn()?`<button class="btn" data-ntgo="mesas">🍽️ Pedidos de mesa${nMpNuevos()?' · '+nMpNuevos()+' nuevos':''}</button>`:''}
   <button class="btn" id="nrf">${I.refresh}Actualizar datos</button>
-  ${(NB.mios||0)>1||NB.rol==='gestor'?`<button class="btn" id="ncb">${I.store}Cambiar de negocio</button>`:''}
+  ${(NB.mios||0)>1||NACC>1||NB.rol==='gestor'?`<button class="btn" id="ncb">${I.store}Cambiar de negocio</button>`:''}
   <div class="card"><div class="row"><div class="ibox">${I.user}</div><div class="sp"><b>Mi cuenta personal</b><p class="mu sm">Tus membresías, QR, promos y negocios guardados.</p></div></div><button class="btn" id="nmc">Volver a mi cuenta personal</button></div>
   <button class="btn l" id="nso">Cerrar sesión del negocio</button>
   <p class="mu xs" style="text-align:center">Mi Xyro · Modo negocio · XyroStudio</p></div>`}
