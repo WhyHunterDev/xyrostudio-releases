@@ -14,6 +14,8 @@ Documento maestro: una cuenta multi-rol (Usuario / Xyro Control / XyroStudio Pan
 - `js/demo.js`: datos de ejemplo (`?demo=1`).
 - `js/app.js`: rutas hash, selector de modo (`MODOS`/`puedeModo`), acceso (correo o Google), `?q=token` → `#/escanear`.
 - Vistas `js/v/`: `usuario.js` (explorar, market, billetera con «Mis membresías activas» estilo Wallet: días restantes, Check-in → `#/escanear?c=<id>`, Renovar plan → WhatsApp del negocio o su perfil en Mi Xyro; perfil), `escanear.js` (BarcodeDetector o jsQR → GPS → verify), `control.js` (c-inicio, c-pedidos con Realtime, c-qr, c-boost, c-catalogo), `panel.js` (p-inicio, p-negocios, p-soporte).
-- «Muy pronto» (no inventar funciones): publicar en Marketplace, pedido desde la carta tras escanear, catálogo, Boost con dinero, tickets Xyro.
+- «Muy pronto» (no inventar funciones): publicar en Marketplace, tickets Xyro.
 - No enlazado para clientes; `robots.txt` → `Disallow: /x/`; meta noindex.
-- Pendiente Sprint 3: carta y pedido tras QR, ruleta, Boost pagado. Sprint 4: P2P completo, bóveda digital, cola de Edits, webhooks de Bots.
+- Sprint 3 (SQL 78: `xy_mystery_open`, `xy_location_set`, `orders.mystery_prize`, `xy_qr_create` usa la ubicación del local): `compras.js` = `#/carta?e=&s=&m=` (carrito, en el local / recoger / envío, `xy_create_order`, PIN en sessionStorage `x-pin-<id>`), `#/pedido?id=` (pasos + Realtime, «Ya lo recibí», ruleta → `xy_mystery_open`), `#/pedidos`. Control: entregar envío con PIN (`xy_confirm_handoff`), ubicación del local en c-qr, catálogo real. Panel: «Activar Boost pagado» (`xy_boost`) tras pago por Yape.
+- Legales: `/terminos.html` y `/privacidad.html` = todo el ecosistema (generador en el hilo de Sprint 3); `/mi/privacidad.html` redirige; la app de videos tiene los suyos en `/videos/*.html`.
+- Pendiente Sprint 4: P2P completo, bóveda digital, cola de Edits, webhooks de Bots.

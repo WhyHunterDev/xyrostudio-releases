@@ -1,6 +1,6 @@
 // Xyro · Xyro Control (negocios y servicios): resumen, pedidos, QR, Boost y catálogo.
 // Todo pasa por funciones de la base (SQL 76): el navegador nunca reparte puntos ni cambia montos.
-import { S, $, $$, esc, I, rpc, tabla, money, num, hora, fecha, toast, hoja, errDe, cargaJS, ls } from '../core.js';
+import { S, $, $$, esc, I, rpc, tabla, money, num, hora, fecha, toast, hoja, errDe, cargaJS, ls, ubicar } from '../core.js';
 
 const EST = { CREATED: ['Nuevo', ''], AWAITING_PAYMENT: ['Por cobrar', 'warn'], PAID: ['Pagado', 'ok'], READY: ['Listo', 'ok'], IN_TRANSIT: ['En camino', ''], COMPLETED: ['Completado', 'ok'], CANCELLED: ['Cancelado', 'bad'], DISPUTED: ['En disputa', 'bad'], REFUNDED: ['Devuelto', 'bad'] };
 const MOD = { IN_STORE: 'En el local', PICKUP: 'Para recoger', DELIVERY: 'Delivery', DIGITAL: 'Digital', P2P: 'P2P' };
@@ -29,7 +29,7 @@ export async function vista(r, el) {
 }
 
 const deHoy = (o) => new Date(o.created_at).toDateString() === new Date().toDateString();
-const cargarPedidos = () => tabla('orders', (q) => q.select('id,code,fulfillment_mode,status,total,currency,created_at,payment_method').eq('entity_id', S.entidad.id).order('created_at', { ascending: false }).limit(60))
+const cargarPedidos = () => tabla('orders', (q) => q.select('id,code,fulfillment_mode,status,total,currency,created_at,payment_method,notes,delivery_address,order_items(title,qty)').eq('entity_id', S.entidad.id).order('created_at', { ascending: false }).limit(60))
   .then((L) => L.filter((o) => !o.entity_id || o.entity_id === S.entidad.id));
 const ptsNegocio = async () => {
   const B = await tabla('points_balances', (q) => q.select('available,pending').eq('entity_id', S.entidad.id).eq('bucket', 'ENTITY_GLOBAL'), 'entity_points');
@@ -57,7 +57,9 @@ async function inicio(el) {
 }
 
 const filaPedido = (o) => `<div class="li"><span class="ico">${I.orders}</span><span class="sp"><b>#${esc(o.code)}</b> <span class="pill ${EST[o.status] ? EST[o.status][1] : ''}">${EST[o.status] ? EST[o.status][0] : esc(o.status)}</span><br>
-  <span class="mu xs">${MOD[o.fulfillment_mode] || ''} · ${hora(o.created_at)}</span></span><b>${money(o.total, o.currency)}</b></div>`;
+  <span class="mu xs">${MOD[o.fulfillment_mode] || ''} · ${hora(o.created_at)}</span>
+  ${o.order_items && o.order_items.length ? `<br><span class="xs">${o.order_items.map((x) => `${x.qty}× ${esc(x.title)}`).join(', ')}</span>` : ''}
+  ${o.notes ? `<br><span class="xs mu">📝 ${esc(o.notes)}</span>` : ''}${o.delivery_address && o.delivery_address.direccion ? `<br><span class="xs mu">📍 ${esc(o.delivery_address.direccion)}</span>` : ''}</span><b>${money(o.total, o.currency)}</b></div>`;
 
 async function pedidos(el) {
   cabecera(el, 'Pedidos', 'Confirma el pago y el cliente recibe sus puntos al instante.');
@@ -66,9 +68,18 @@ async function pedidos(el) {
   const pinta = () => {
     const L = O.filter((o) => f === 'all' || (f === 'cob' ? ['CREATED', 'AWAITING_PAYMENT'].includes(o.status) : ['PAID', 'READY', 'IN_TRANSIT'].includes(o.status)));
     $('#lp', el).innerHTML = L.length ? L.map((o) => `${filaPedido(o)}${['CREATED', 'AWAITING_PAYMENT'].includes(o.status) ? `<button class="btn p w sm" data-c="${o.id}" style="margin-bottom:8px">Confirmar pago</button>`
-      : o.status === 'PAID' && o.fulfillment_mode === 'PICKUP' ? `<button class="btn w sm" data-h="${o.id}" style="margin-bottom:8px">Marcar entregado</button>` : ''}`).join('')
+      : o.status === 'PAID' && o.fulfillment_mode === 'PICKUP' ? `<button class="btn w sm" data-h="${o.id}" style="margin-bottom:8px">Marcar entregado</button>`
+      : ['PAID', 'READY', 'IN_TRANSIT'].includes(o.status) && o.fulfillment_mode === 'DELIVERY' ? `<button class="btn w sm" data-pin="${o.id}" style="margin-bottom:8px">🔐 Entregar con PIN</button>` : ''}`).join('')
       : `<div class="vacio"><div class="e">🧾</div><span class="mu">Nada por aquí.</span></div>`;
     $$('[data-c]', el).forEach((b) => b.onclick = () => cobrar(O.find((o) => o.id === b.dataset.c)));
+    $$('[data-pin]', el).forEach((b) => b.onclick = () => hoja(`<h2>Entregar con PIN</h2><p class="mu sm">Pídele al cliente su PIN de 4 dígitos cuando reciba el pedido.</p>
+      <input id="pn" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="0000" style="font-size:28px;letter-spacing:.4em;text-align:center"><button class="btn p" id="ok">Confirmar entrega</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
+      $('#ok', h).onclick = async (ev) => {
+        const pin = $('#pn', h).value.trim(); if (!/^\d{4}$/.test(pin)) return toast('El PIN tiene 4 dígitos');
+        ev.target.disabled = true;
+        try { await rpc('xy_confirm_handoff', { p_order: b.dataset.pin, p_pin: pin }); close(); toast('Entregado ✓ Puntos liberados'); recargar(); } catch (e) { toast(errDe(e)); ev.target.disabled = false; }
+      };
+    }));
     $$('[data-h]', el).forEach((b) => b.onclick = async () => {
       b.disabled = true;
       try { await rpc('xy_confirm_handoff', { p_order: b.dataset.h, p_pin: null }); toast('Entregado ✓ Puntos liberados'); recargar(); } catch (e) { toast(errDe(e)); b.disabled = false; }
@@ -109,7 +120,24 @@ async function qrs(el) {
       <label>Tipo<select id="qK">${Object.entries(KQ).map(([k, t]) => `<option value="${k}" ${S.entidad.type === 'PROFESSIONAL' && k === 'PRO_PHONE' ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <button class="btn p">${I.qr} Crear QR</button>
       <p class="mu xs">Por seguridad el código se muestra una sola vez: descárgalo o imprímelo al crearlo. Si lo pierdes, crea otro.</p></form>
-    <div class="card"><b>Tus QR</b><div id="lq"><div class="sk" style="height:60px"></div></div></div></div>`);
+    <div class="g"><div class="card" id="ubi"><div class="sk" style="height:60px"></div></div>
+    <div class="card"><b>Tus QR</b><div id="lq"><div class="sk" style="height:60px"></div></div></div></div></div>`);
+  const ubi = async () => {
+    const box = $('#ubi', el);
+    let L = []; try { L = await tabla('locations', (q) => q.select('id,name,address').eq('entity_id', S.entidad.id).limit(1)); } catch (_) {}
+    const l = L[0];
+    box.innerHTML = `<div class="row"><span class="ico">${I.pin}</span><span class="sp"><b>Ubicación del local</b><br><span class="mu xs">${l ? esc(l.address || l.name || 'Guardada') + ' · tus QR validan que el cliente esté a 50 m o menos' : 'Sin ubicación: tus QR no pueden validar que el cliente esté en el local'}</span></span>${l ? '<span class="pill ok">Lista</span>' : '<span class="pill warn">Falta</span>'}</div>
+      <input id="uDir" maxlength="200" placeholder="Dirección (opcional)" value="${esc((l && l.address) || '')}">
+      <button class="btn ${l ? '' : 'p'}" id="uSet">${I.pin} ${l ? 'Actualizar con mi ubicación actual' : 'Guardar mi ubicación actual'}</button><span class="mu xs">Hazlo parado dentro de tu local. Es la ubicación del negocio, no la de tus clientes.</span>`;
+    $('#uSet', box).onclick = async (ev) => {
+      ev.target.disabled = true;
+      const g = await ubicar(12000);
+      if (!g) { toast('Activa la ubicación del navegador'); ev.target.disabled = false; return; }
+      try { const d = await rpc('xy_location_set', { p_entity: S.entidad.id, p_name: S.entidad.name, p_lat: g.lat, p_lng: g.lng, p_address: $('#uDir', box).value.trim() || null });
+        toast('Ubicación guardada ✓' + (d.qr_updated ? ` · ${d.qr_updated} QR ahora validan GPS` : '')); ubi(); lista(); }
+      catch (e) { toast(errDe(e)); ev.target.disabled = false; }
+    };
+  };
   const lista = async () => {
     try {
       const L = await tabla('qr_checkpoints', (q) => q.select('id,label,kind,active,created_at').eq('entity_id', S.entidad.id).order('created_at'));
@@ -132,11 +160,12 @@ async function qrs(el) {
         $('#dl', h).onclick = () => { const a = document.createElement('a'); a.href = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); a.download = 'qr-' + nom.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.svg'; a.click(); };
         $('#pr', h).onclick = () => { const w = open('', '_blank'); if (!w) return; w.document.write(`<title>QR ${esc(nom)}</title><body style="font-family:system-ui;text-align:center;padding:40px"><h1>${esc(S.entidad.name)}</h1><div style="width:320px;margin:0 auto">${svg}</div><h2>${esc(nom)}</h2><p>Escanea para pedir y sumar Xyro Points</p><script>onload=()=>print()<\/script>`); w.document.close(); };
       });
+      if (d.gps === false) toast('Ojo: este QR no valida GPS hasta que guardes la ubicación del local');
       ev.target.reset(); lista();
     } catch (e) { toast(errDe(e)); }
     b.disabled = false;
   };
-  lista();
+  ubi(); lista();
 }
 
 const PLAN_B = [[2, 100, 'Prueba rápida'], [6, 250, 'Hora punta'], [24, 800, 'Todo el día']];
@@ -147,7 +176,8 @@ async function boost(el) {
       <span class="mu sm">${activo ? `Hasta las ${hora(e.boost_until)} del ${fecha(e.boost_until)}` : 'Actívalo con los puntos que gana tu negocio en cada venta.'}</span></span>${activo ? '<span class="pill boost">⚡ x2</span>' : ''}</div>
       <span class="mu sm">Puntos de tu negocio: <b id="pn">…</b></span></div>
     <div class="card"><b>Elige cuánto tiempo</b>${PLAN_B.map(([h, p, t]) => `<button class="mopt" data-h="${h}" data-p="${p}"><span class="ico">⚡</span><span class="sp"><b>${h} horas</b><br><span class="mu xs">${t}</span></span><b>${num(p)} pts</b></button>`).join('')}
-      <p class="mu xs">Pagar Boost con dinero: muy pronto.</p></div></div>`);
+      <a class="btn w" target="_blank" rel="noopener" href="https://wa.me/51936449066?text=${encodeURIComponent('Hola, quiero activar Boost con pago para ' + e.name + ' (' + e.slug + ')')}">💳 Boost con pago por Yape</a>
+      <p class="mu xs">Con pago: nos escribes, pagas por Yape y lo activamos al momento.</p></div></div>`);
   let P = 0; try { P = await ptsNegocio(); } catch (_) {}
   $('#pn', el).textContent = num(P);
   $$('[data-h]', el).forEach((b) => { if (+b.dataset.p > P) b.disabled = true; b.onclick = async () => {
@@ -157,8 +187,57 @@ async function boost(el) {
   }; });
 }
 
-function catalogo(el) {
-  cabecera(el, 'Catálogo', 'Tus productos, servicios, clases y membresías.');
-  el.insertAdjacentHTML('beforeend', `<div class="card pronto"><b>Muy pronto aquí</b><span class="mu sm">Podrás subir productos con foto, paquetes de clases, membresías y productos digitales. Por ahora tu carta se maneja desde tu panel.</span>
-    <a class="btn" href="/app/">Abrir mi panel</a></div>`);
+const KIND = { PRODUCT: 'Producto', SERVICE: 'Servicio', SESSION: 'Sesión', CLASS_PACK: 'Paquete de clases', MEMBERSHIP: 'Membresía', DIGITAL: 'Digital' };
+const MODOS_V = [['IN_STORE', '🍽️ En el local'], ['PICKUP', '🛍️ Para recoger'], ['DELIVERY', '🛵 Delivery']];
+let DEMO_CAT = null;
+async function catalogo(el) {
+  cabecera(el, 'Catálogo', 'Tus productos y servicios: aparecen en tu carta al escanear el QR y en Explorar.');
+  el.insertAdjacentHTML('beforeend', `<div class="row"><span class="sp"></span><button class="btn p" id="nuevo">＋ Agregar</button></div><div class="card" id="lc"><div class="sk" style="height:120px"></div></div>`);
+  let L = [];
+  const pinta = () => {
+    $('#lc', el).innerHTML = L.length ? L.map((x) => `<div class="li"><span class="ico">${esc(x.emoji || '🏷️')}</span><span class="sp"><b class="ell">${esc(x.title)}</b><br>
+      <span class="mu xs">${esc(x.category || 'Sin categoría')} · ${KIND[x.kind] || ''} · ${(x.fulfillment_modes || []).map((m) => (MODOS_V.find((v) => v[0] === m) || ['', m])[1].split(' ')[0]).join(' ')}${x.stock != null ? ' · stock ' + num(x.stock) : ''}</span></span>
+      <span style="text-align:right"><b>${money(x.price, x.currency)}</b><br><span class="pill ${x.active ? 'ok' : ''}">${x.active ? 'Visible' : 'Oculto'}</span></span><button class="btn sm" data-ed="${x.id}">Editar</button></div>`).join('')
+      : '<div class="vacio"><div class="e">🏷️</div><b>Aún no tienes productos</b><span class="mu sm">Agrega lo que vendes para que tus clientes pidan desde la mesa o para recoger.</span></div>';
+    $$('[data-ed]', el).forEach((b) => b.onclick = () => form(L.find((x) => x.id === b.dataset.ed)));
+  };
+  const cargar = async () => {
+    try {
+      if (S.demo || S.sinCore) { DEMO_CAT = DEMO_CAT || await tabla('catalog_items', (q) => q); L = DEMO_CAT; }
+      else L = await tabla('catalog_items', (q) => q.select('id,title,description,category,price,currency,kind,fulfillment_modes,stock,active').eq('entity_id', S.entidad.id).order('category').order('title'));
+      pinta();
+    } catch (e) { toast(errDe(e)); }
+  };
+  const form = (x) => hoja(`<h2>${x ? 'Editar' : 'Nuevo'} producto o servicio</h2>
+    <label>Nombre<input id="fT" maxlength="120" value="${esc(x ? x.title : '')}" required></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Precio (${esc(S.entidad.currency || 'PEN')})<input id="fP" type="number" min="0" step="0.1" inputmode="decimal" value="${x ? esc(x.price) : ''}"></label>
+      <label>Categoría<input id="fC" maxlength="40" placeholder="Bebidas, Postres…" value="${esc((x && x.category) || '')}"></label></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Tipo<select id="fK">${Object.entries(KIND).filter(([k]) => k !== 'DIGITAL').map(([k, t]) => `<option value="${k}" ${x && x.kind === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label>Stock<input id="fS" type="number" min="0" placeholder="Sin control" value="${x && x.stock != null ? esc(x.stock) : ''}"></label></div>
+    <label>Descripción<input id="fD" maxlength="300" value="${esc((x && x.description) || '')}"></label>
+    <b class="sm">¿Cómo se puede pedir?</b><div class="chips" style="margin:0;padding:0;flex-wrap:wrap">${MODOS_V.map(([k, t]) => `<button type="button" class="chip${!x || (x.fulfillment_modes || []).includes(k) ? ' on' : ''}" data-mo="${k}">${t}</button>`).join('')}</div>
+    <label class="row" style="color:var(--tx)"><input type="checkbox" id="fA" style="width:auto" ${!x || x.active ? 'checked' : ''}> Visible para clientes</label>
+    <p class="mu xs">Fotos y productos digitales: muy pronto.</p>
+    <button class="btn p" id="gd">Guardar</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
+    $$('[data-mo]', h).forEach((b) => b.onclick = () => b.classList.toggle('on'));
+    $('#gd', h).onclick = async (ev) => {
+      const d = { title: $('#fT', h).value.trim(), price: +$('#fP', h).value, category: $('#fC', h).value.trim() || null, kind: $('#fK', h).value,
+        stock: $('#fS', h).value === '' ? null : Math.max(0, parseInt($('#fS', h).value, 10) || 0), description: $('#fD', h).value.trim() || null,
+        fulfillment_modes: $$('[data-mo].on', h).map((b) => b.dataset.mo), active: $('#fA', h).checked };
+      if (d.title.length < 2) return toast('Escribe el nombre');
+      if (!(d.price >= 0) || $('#fP', h).value === '') return toast('Escribe el precio');
+      if (!d.fulfillment_modes.length) return toast('Elige al menos una forma de pedir');
+      ev.target.disabled = true;
+      try {
+        if (S.demo || S.sinCore) { if (x) Object.assign(x, d); else DEMO_CAT.unshift({ id: 'n' + Date.now(), currency: 'PEN', ...d }); }
+        else {
+          const q = x ? S.sb.from('catalog_items').update(d).eq('id', x.id) : S.sb.from('catalog_items').insert({ ...d, entity_id: S.entidad.id, currency: S.entidad.currency || 'PEN' });
+          const { error } = await q; if (error) throw error;
+        }
+        close(); toast('Guardado ✓'); cargar();
+      } catch (e) { toast(errDe(e)); ev.target.disabled = false; }
+    };
+  });
+  $('#nuevo', el).onclick = () => form(null);
+  await cargar();
 }

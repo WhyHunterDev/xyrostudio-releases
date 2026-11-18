@@ -50,10 +50,11 @@ function detalle(p) {
     <div><span class="mu sm">${esc(p.entity_name)}</span><h2>${esc(p.title)}</h2></div>
     <div class="row"><b style="font-size:22px">${money(p.price, p.currency)}</b><span class="sp"></span>${estrellas(p.rating_avg, p.rating_count)}</div>
     <div class="card" style="background:var(--c2)"><b class="sm">¿Cómo se compra?</b>
-      <span class="mu sm">${p.entity_type === 'PHYSICAL' ? 'En el local: escanea el QR de la mesa o del mostrador y paga ahí. Sumas puntos al confirmar el pago.' : p.kind === 'DIGITAL' ? 'Producto digital: lo recibes en tu Bóveda al pagar.' : 'Escríbele por chat o escanea su QR para coordinar.'}</span></div>
+      <span class="mu sm">${p.entity_type === 'PHYSICAL' ? 'En el local: escanea el QR de la mesa o del mostrador y paga ahí. Sumas puntos al confirmar el pago.' : p.kind === 'DIGITAL' ? 'Producto digital: la entrega en tu Bóveda llega muy pronto. Mientras, coordina con el vendedor.' : 'Escríbele por chat o escanea su QR para coordinar.'}</span></div>
     <div class="dos" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <a class="btn" href="/mi/?n=${encodeURIComponent(p.entity_slug)}">Ver perfil</a>
+      <a class="btn" href="#/carta?e=${encodeURIComponent(p.entity_id || '')}" data-x>🍽️ Ver carta</a>
       <a class="btn p" href="#/escanear" data-x>${I.scan} Escanear QR</a></div>
+    <a class="btn l" href="/mi/?n=${encodeURIComponent(p.entity_slug)}">Ver su perfil en Mi Xyro</a>
     <button class="btn l" data-x>Cerrar</button>`);
 }
 
@@ -143,6 +144,7 @@ function perfil(el) {
       <label>Moneda<select id="pM">${[...new Set(P.map((x) => x[2]))].map((c) => `<option ${c === me.currency ? 'selected' : ''}>${c}</option>`).join('')}</select></label></div>
       <div class="msg" id="pE"></div><button class="btn p">Guardar</button></form>
     <div class="g"><div class="card"><b>Tu cuenta</b>
+      <a class="li" href="#/pedidos" style="text-decoration:none"><span class="ico">${I.orders}</span><span class="sp">Mis pedidos<br><span class="mu xs">Estado, código y cajas sorpresa</span></span>›</a>
       <a class="li" href="/mi/" style="text-decoration:none"><span class="ico">🪪</span><span class="sp">Mi Xyro<br><span class="mu xs">Tus negocios guardados, carnet y chat</span></span>›</a>
       <a class="li" href="/#/entrar" style="text-decoration:none"><span class="ico">🏪</span><span class="sp">Registrar mi negocio o servicio<br><span class="mu xs">Gratis: perfil, QR y promos</span></span>›</a>
       <div class="li"><span class="ico">🕑</span><span class="sp">Miembro desde<br><span class="mu xs">${me.created_at ? fecha(me.created_at, { month: 'long', year: 'numeric' }) : '—'}</span></span></div></div>

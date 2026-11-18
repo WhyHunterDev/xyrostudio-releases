@@ -10,6 +10,7 @@ const NAV = {
 // Ruta → módulo de vista
 const VISTA = {
   explorar: 'usuario', market: 'usuario', billetera: 'usuario', perfil: 'usuario', escanear: 'escanear',
+  carta: 'compras', pedido: 'compras', pedidos: 'compras',
   'c-inicio': 'control', 'c-pedidos': 'control', 'c-qr': 'control', 'c-boost': 'control', 'c-catalogo': 'control',
   'p-inicio': 'panel', 'p-negocios': 'panel', 'p-soporte': 'panel',
 };

@@ -28,7 +28,7 @@ export async function vista(r, el) {
         z.innerHTML = `<div class="card" style="border-color:#22c55e66;text-align:center;justify-items:center;padding:24px">
           <div style="font-size:48px">✅</div><h2>¡Estás en el local!</h2><span class="mu">${esc(d.checkpoint || '')} · tu sesión dura ${esc(d.expires_in_min || 120)} min</span>
           <span class="pill ok">Compra en el local activa</span>
-          <div class="card pronto" style="width:100%;text-align:left"><b class="sm">Carta y pedido</b><span class="mu sm">El pedido desde aquí llega muy pronto. Mientras, pide en caja: al confirmar tu pago sumas puntos.</span></div>
+          <a class="btn p w" href="#/carta?e=${encodeURIComponent(d.entity_id)}&s=${encodeURIComponent(d.qr_session_id)}&m=${encodeURIComponent(d.checkpoint || '')}">🍽️ Ver carta y pedir</a>
           <button class="btn w" id="otra">Escanear otro</button></div>`;
       } else {
         z.innerHTML = `<div class="card" style="border-color:#f59e0b66;text-align:center;justify-items:center;padding:24px">
