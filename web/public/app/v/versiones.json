@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261118-0007",
+  "fecha": "2026-11-18 00:07",
+  "titulo": "Yape en mesa y barberías juntos",
+  "notas": "Yape en mesa y barberías juntos",
+  "cambios": [
+   "Incluye cobrar con Yape en pedidos de mesa",
+   "Incluye el ecosistema de barberías y el plan gratis"
+  ],
+  "requiere": "SQL 71–74"
+ },
+ {
   "id": "20261117-1931",
   "fecha": "2026-11-17 19:31",
   "titulo": "Barberías: nuevo ecosistema",
