@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261118-0404",
+  "fecha": "2026-11-18 04:04",
+  "titulo": "Quitar del equipo",
+  "notas": "Quitar del equipo",
+  "cambios": [
+   "El botón ✕ del Equipo ahora saca a la persona de tu negocio (su cuenta de Mi Xyro sigue siendo suya)"
+  ],
+  "requiere": "SQL 86"
+ },
+ {
   "id": "20261118-0358",
   "fecha": "2026-11-18 03:58",
   "titulo": "Equipo solo por ID",
