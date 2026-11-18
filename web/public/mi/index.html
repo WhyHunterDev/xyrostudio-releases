@@ -1962,7 +1962,7 @@ async function ptsCarga(fx){if(!D)return;try{if(!DEMO&&!PTSR){PTSR=1;try{await r
  if(!PTSCH&&sb&&!DEMO&&D){try{const{data:{session}}=await sb.auth.getSession();const uid=session&&session.user.id;if(uid){PTSCH=sb.channel('mi-pts').on('postgres_changes',{event:'*',schema:'public',table:'points_ledger',filter:'user_id=eq.'+uid},()=>ptsCarga(true)).subscribe()}}catch(_){}}}
 setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB==='mipro'))ptsCarga(true)},30000);
 function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;ptsCarga().then(()=>{if(!document.querySelector('.ov'))pinta()})}
- const P=PTS||{},biz=+P.business_points>0||(PROM&&PROM.entity_id);
+ const P=PTS||{},biz=true; // siempre las 3 columnas (pedido del usuario 2026-11-18: que no aparezcan y desaparezcan)
  return`<div class="card"><div class="row"><b class="sp">⭐ Mis puntos Xyro</b><span class="pill" style="background:#7c5cff22;color:var(--a)">en vivo</span></div>
   <div class="kps ${biz?'k3':''}" style="${biz?'':'grid-template-columns:1fr 1fr'}"><div class="kp"><b data-pts="global_points">${nfmt(P.global_points)}</b><span class="mu xs">Globales</span></div><div class="kp"><b data-pts="local_points">${nfmt(P.local_points)}</b><span class="mu xs">Locales</span></div>${biz?`<div class="kp"><b data-pts="business_points">${nfmt(P.business_points)}</b><span class="mu xs">De tu negocio</span></div>`:''}</div>
   ${+P.pending>0?`<p class="sm">⏳ <b>${nfmt(P.pending)}</b> en espera: se liberan a los 7 días de tu compra.</p>`:''}
