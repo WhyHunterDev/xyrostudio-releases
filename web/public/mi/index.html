@@ -1714,7 +1714,7 @@ function exLista(){const L=EX.items;
 function exBind(){const r=$('#exr');r&&(r.onclick=()=>{EX.items=null;exCarga();pinta()});const m=$('#exmas');m&&(m.onclick=()=>exCarga(true));
  const iv=$('#exinv');iv&&(iv.onclick=exInvitar);
  app.querySelectorAll('#exl [data-neg]').forEach(b=>b.onclick=()=>abrirNeg(b.dataset.neg));app.querySelectorAll('#exl [data-pro]').forEach(b=>b.onclick=()=>abrirPro(b.dataset.pro))}
-/* ---------- Mapa de negocios (SQL 84, xa_mapa): Leaflet + mapa oscuro de CARTO/OpenStreetMap, sin API de pago ---------- */
+/* ---------- Mapa de negocios (SQL 84, xa_mapa): Leaflet + OpenStreetMap con filtro oscuro, sin API de pago ---------- */
 const MAPC={gym:'🏋️',cafeteria:'☕',restaurante:'🍽️',barberia:'💈',consultorio:'🦷',otro:'🏪'};
 const MP={cat:'',top:false,geo:null,map:null,capa:null,t:0,sel:null,items:[]};
 async function mapaLib(){if(window.L)return;const c=document.createElement('link');c.rel='stylesheet';c.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';document.head.appendChild(c);await js('https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js')}
@@ -1728,7 +1728,7 @@ async function mapaAbrir(){vib();
  try{await mapaLib()}catch(_){toast('No se pudo cargar el mapa. Revisa tu internet.');return history.back()}
  const g=MP.geo||EX.geo;
  MP.map=L.map('mapa',{zoomControl:false,attributionControl:true}).setView(g?[g.lat,g.lng]:[-12.08,-77.03],g?14:12);
- L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'© OpenStreetMap · © CARTO'}).addTo(MP.map);
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(MP.map);
  MP.capa=L.layerGroup().addTo(MP.map);
  MP.map.on('moveend',()=>{clearTimeout(MP.t);MP.t=setTimeout(mapaCarga,350)});MP.map.on('click',()=>{const c=$('#mpc');c&&(c.hidden=true)});
  ov.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{vib();MP.cat=b.dataset.mc;ov.querySelectorAll('[data-mc]').forEach(x=>x.classList.toggle('on',x===b));mapaCarga()});
@@ -1761,7 +1761,7 @@ function xaKm(a,b,c,d){const r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r
 .mapmsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:500;background:#151826ee;border:1px solid var(--ln);padding:12px 16px;border-radius:14px;font-size:14px;max-width:80%;text-align:center}
 .pin{width:40px;height:40px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:linear-gradient(135deg,#7c5cff,#38bdf8);display:grid;place-items:center;box-shadow:0 6px 16px #0008;border:2px solid #fff}
 .pin span{transform:rotate(45deg);font-size:18px}.pin.dst{background:linear-gradient(135deg,#f5c542,#d4a017);width:46px;height:46px}
-.leaflet-container{background:#0b0d16;font:inherit}.leaflet-control-attribution{background:#0b0d16aa!important;color:#888!important;font-size:10px}.leaflet-control-attribution a{color:#aaa!important}`;document.head.appendChild(st)})();
+.leaflet-container{background:#0b0d16;font:inherit}.leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) brightness(.85) contrast(.85) saturate(.6)}.leaflet-control-attribution{background:#0b0d16aa!important;color:#888!important;font-size:10px}.leaflet-control-attribution a{color:#aaa!important}`;document.head.appendChild(st)})();
 function exInvitar(){const u=location.origin+'/mi/?registro=1',t='Registra tu negocio gratis en Mi Xyro y aparece ante miles de personas: '+u;
  if(navigator.share)navigator.share({title:'Mi Xyro',text:t}).catch(()=>{});else{navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('📋 Enlace copiado'),()=>toast(u))}}
 function exGeo(){if(!navigator.geolocation){toast('Tu equipo no comparte la ubicación.');return}
