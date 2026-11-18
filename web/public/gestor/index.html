@@ -284,6 +284,7 @@ async function sembrarWeb(slug){
   const {data:rows}=await sb.from('contenido').select('clave,valor').eq('sitio_id',s.id); const ya={}; (rows||[]).forEach(r=>ya[r.clave]=r.valor);
   const app=ya.app||{};
   if(app.rubro==='restaurante'){ const web=app.web||'https://xyrostudio.net/restaurante/?s='+encodeURIComponent(slug); if(!app.web){ const {error}=await sb.from('contenido').upsert({sitio_id:s.id,clave:'app',valor:{...app,web}}); if(error)throw error; } return web; } // base de restaurante: /restaurante/ lee carta y datos de Xyro Apps
+  if(app.rubro==='barberia'){ const web=app.web||'https://xyrostudio.net/barberia/?s='+encodeURIComponent(slug); if(!app.web){ const {error}=await sb.from('contenido').upsert({sitio_id:s.id,clave:'app',valor:{...app,web}}); if(error)throw error; } return web; } // base de barbería: /barberia/
   if(app.rubro==='consultorio'){ const web=app.web||'https://xyrostudio.net/consultorio/?s='+encodeURIComponent(slug); if(!app.web){ const {error}=await sb.from('contenido').upsert({sitio_id:s.id,clave:'app',valor:{...app,web}}); if(error)throw error; } return web; } // base de consultorio: /consultorio/ lee sus datos de Xyro Apps
   if(app.rubro&&app.rubro!=='gym')return ''; // academia: aún sin base
   const B=(await baseGym())(app.nombre||s.negocio||slug), up=[];
@@ -710,7 +711,7 @@ V.negocios=async ()=>{
 // ---- Alta de un negocio nuevo en 1 minuto: cliente + sitio + Xyros + ajustes de la app + cuenta del dueño ----
 const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
 // Plantillas de Xyro Apps por rubro (on = lista para usar).
-const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🦷',n:'Consultorio dental',d:'Pacientes, agenda por odontólogo, odontograma, presupuestos con abonos e historia clínica',on:1,color:'#14b8a6'},{k:'restaurante',ico:'🍽️',n:'Restaurante',d:'Carta con fotos, pedidos por QR de mesa, mozo, cocina, caja y para llevar',on:1,color:'#ff7a1a'},{k:'cafeteria',rub:'restaurante',tipo:'cafe',ico:'☕',n:'Cafetería',d:'Cafés, frappés, waffles y postres: carta con fotos, pedidos por QR, barra, caja y para llevar',on:1,color:'#c8873a'},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
+const PLANTILLAS=[{k:'gym',ico:'🏋️',n:'Gimnasio',d:'Socios, membresías, asistencia QR, caja, rutinas y dietas',on:1,color:'#f5c400'},{k:'consultorio',ico:'🦷',n:'Consultorio dental',d:'Pacientes, agenda por odontólogo, odontograma, presupuestos con abonos e historia clínica',on:1,color:'#14b8a6'},{k:'barberia',ico:'💈',n:'Barbería',d:'Agenda por barbero, cola sin cita, comisiones de cada barbero, su corte de siempre y reservas en Mi Xyro',on:1,color:'#d4a24c'},{k:'restaurante',ico:'🍽️',n:'Restaurante',d:'Carta con fotos, pedidos por QR de mesa, mozo, cocina, caja y para llevar',on:1,color:'#ff7a1a'},{k:'cafeteria',rub:'restaurante',tipo:'cafe',ico:'☕',n:'Cafetería',d:'Cafés, frappés, waffles y postres: carta con fotos, pedidos por QR, barra, caja y para llevar',on:1,color:'#c8873a'},{k:'academia',ico:'🎓',n:'Academia',d:'Alumnos, matrículas y pensiones',on:0}];
 let altaRes=null,altaPlt='gym';
 /* Accesos de prueba (SQL 31): enlace /app/?prueba=CODIGO con el nombre del posible cliente y vencimiento. Es la demo completa con tiempo. */
 const PR_DUR=[[60,'1 hora'],[180,'3 horas'],[1440,'1 día'],[4320,'3 días'],[10080,'7 días'],[21600,'15 días'],[43200,'30 días']];
@@ -891,7 +892,7 @@ const vEf=r=>{if(!r)return null;const ya=r.prog&&new Date(r.prog_para)<=new Date
 const progOn=r=>r&&r.prog&&new Date(r.prog_para)>new Date();
 let VERS=[];
 // Ecosistemas: cada versión dice para qué rubros es (versiones.json → rubros; sin rubros = para todos).
-const ECOS={gym:['🏋️','Gimnasios','gimnasios'],consultorio:['🦷','Consultorios dentales','consultorios'],restaurante:['🍽️','Restaurantes y cafeterías','restaurantes'],academia:['🎓','Academias','academias']};
+const ECOS={gym:['🏋️','Gimnasios','gimnasios'],consultorio:['🦷','Consultorios dentales','consultorios'],barberia:['💈','Barberías','barberías'],restaurante:['🍽️','Restaurantes y cafeterías','restaurantes'],academia:['🎓','Academias','academias']};
 const vPara=(v,r)=>!v.rubros||!v.rubros.length||v.rubros.includes(r);
 const ultDe=r=>(VERS.find(v=>vPara(v,r))||{}).id||'';
 // Un negocio sin versión propia (o con una de antes de que existiera su rubro) recibe la más nueva de su ecosistema.
@@ -959,7 +960,7 @@ document.addEventListener('change',async e=>{const t=e.target;try{
 let gEco=(()=>{try{return localStorage.getItem('xg-geco')||'todos'}catch(_){return'todos'}})(),RUBS=null;
 const ECO_OTROS=['🌐','Otros / solo web','negocios de otros rubros'];
 const ecoInfo=k=>ECOS[k]||ECO_OTROS;
-const ecoTxt=t=>{t=String(t||'').toLowerCase();return/dental|consult|cl[ií]nic|odont/.test(t)?'consultorio':/restaur|cafeter|caf[eé]\b|comida|cevich|poller|juguer|cocina/.test(t)?'restaurante':/academ/.test(t)?'academia':/gym|gimn|fit|strength|crossfit/.test(t)?'gym':'otros'};
+const ecoTxt=t=>{t=String(t||'').toLowerCase();return/barber/.test(t)?'barberia':/dental|consult|cl[ií]nic|odont/.test(t)?'consultorio':/restaur|cafeter|caf[eé]\b|comida|cevich|poller|juguer|cocina/.test(t)?'restaurante':/academ/.test(t)?'academia':/gym|gimn|fit|strength|crossfit/.test(t)?'gym':'otros'};
 async function cargarRubs(){if(RUBS)return RUBS;const [{data:si},{data:ap}]=await Promise.all([sb.from('sitios').select('id,slug'),sb.from('contenido').select('sitio_id,valor').eq('clave','app')]);
   const r={};(ap||[]).forEach(x=>r[x.sitio_id]=(x.valor&&x.valor.rubro)||'gym');RUBS={};(si||[]).forEach(x=>{if(r[x.id])RUBS[x.slug]=r[x.id]});return RUBS}
 const ecoCli=cl=>{const sl=cl.url?slugDe(cl.url):'';return(RUBS&&sl&&RUBS[sl])||ecoTxt(cl.rubro)};
