@@ -3436,7 +3436,7 @@ const sede1=()=>SEDE||(sedesL()[0]||{}).id||'todas';
 /* Equipo por ID de Xyro (SQL 83): la persona usa su propia cuenta de Mi Xyro, sin usuario ni clave nuevos */
 const IDROL=['supervisor','recepcion','cafetin','entrenador','nutricionista','profesional'];
 async function eqIdLoad(){if(DEMO){EQID=EQID&&EQID.length?EQID:[{user_id:'i1',nombre:'Diego Ramírez',usuario:'coachdiego',idn:48203716,rol:'entrenador',sede:'todas',dentro:true}];return}
- const{data,error}=await sb.rpc('xa_equipo_id_lista');EQID=error?[]:(data||[]);if(error&&!/xa_equipo_id_lista/.test(error.message||''))EQerr=fixErr(error).message}
+ const{data,error}=await sb.rpc('xa_equipo_id_lista',{p_slug:SLUG});EQID=error?[]:(data||[]);if(error&&!/xa_equipo_id_lista/.test(error.message||''))EQerr=fixErr(error).message}
 function idFmt(n){return String(n||'').replace(/(\d{4})(\d{4})/,'$1 $2')}
 async function eqLoad(){
  if(DEMO){if(!EQ){const s1=(sedesL()[0]||{}).id||'todas',ay=new Date(Date.now()-864e5).toISOString();EQ=[{id:'yo',nombre:ME.nombre,email:'admin@'+(SLUG||'negocio')+'.pe',rol:'admin',sede:'todas',activo:true,ultimo_ingreso:new Date().toISOString()},{id:'d1',nombre:'Ana Torres',email:'ana@negocio.pe',rol:'recepcion',sede:s1,activo:true,ultimo_ingreso:ay},{id:'d2',nombre:'Carlos Díaz',email:'cafe@negocio.pe',rol:'cafetin',sede:s1,activo:true,debe_cambiar:true},{id:'d3',nombre:'Rosa Quispe',email:'rosa@negocio.pe',rol:'supervisor',sede:s1,activo:true,ultimo_ingreso:ay}]}return}
@@ -3462,17 +3462,17 @@ function equipo(){
   v.querySelectorAll('[data-ea]').forEach(b=>b.onclick=async()=>{const x=u(b.dataset.ea),on=!x.activo;if(!on&&!confirm(`¿Bloquear a ${x.nombre}? Ya no podrá entrar hasta que lo actives.`))return;
    try{await eqRpc('gestor_set_activo',{p_user:x.id,p_activo:on});x.activo=on;toast(on?'Cuenta activada ✓':'Cuenta bloqueada 🔒');go()}catch(er){toast(er.message)}});
   v.querySelectorAll('[data-ed]').forEach(b=>b.onclick=async()=>{const x=u(b.dataset.ed);if(!confirm(`¿Quitar a ${x.nombre} de tu equipo? Ya no podrá entrar a tu negocio. Si tiene cuenta de Mi Xyro, sigue siendo suya.`))return;
-   try{if(!DEMO){const{error}=await sb.rpc('xa_equipo_sacar',{p_user:x.id});if(error){if(/xa_equipo_sacar/.test(error.message||''))await eqRpc('gestor_borrar_usuario',{p_user:x.id});else throw fixErr(error)}}EQ=EQ.filter(y=>y!==x);toast('Quitado del equipo ✓');go()}catch(er){toast(er.message)}});
+   try{if(!DEMO){const{error}=await sb.rpc('xa_equipo_sacar',{p_user:x.id,p_slug:SLUG});if(error){if(/xa_equipo_sacar/.test(error.message||''))await eqRpc('gestor_borrar_usuario',{p_user:x.id});else throw fixErr(error)}}EQ=EQ.filter(y=>y!==x);toast('Quitado del equipo ✓');go()}catch(er){toast(er.message)}});
   v.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.cp);toast('Copiado ✓')}catch(_){toast('Cópialo manualmente')}});
   const ok=$('#eqOk');ok&&(ok.onclick=()=>{EQnew=null;go()});
   const nw=$('#eqNew');nw&&(nw.onclick=eqIdFoco);
   const io=$('#eqIdOk');io&&(io.onclick=async()=>{const idn=($('#eqIdn').value||'').replace(/\D/g,''),rol=$('#eqIdRol').value,sede=($('#eqIdSede')||{}).value||'todas';
    if(idn.length<8)return toast('Escribe el ID de 8 dígitos');io.disabled=true;
-   try{if(DEMO){EQID.push({user_id:'i'+Date.now(),nombre:'Persona '+idFmt(idn),idn,rol,sede,dentro:false})}else{const{data,error}=await sb.rpc('xa_equipo_id_agregar',{p_idn:idn,p_rol:rol,p_sede:sede});if(error)throw fixErr(error);toast('✓ '+(data&&data.nombre||'Agregado')+' ya puede entrar desde «Modo negocio»');await eqIdLoad()}go()}catch(er){toast(er.message);io.disabled=false}});
+   try{if(DEMO){EQID.push({user_id:'i'+Date.now(),nombre:'Persona '+idFmt(idn),idn,rol,sede,dentro:false})}else{const{data,error}=await sb.rpc('xa_equipo_id_agregar',{p_idn:idn,p_rol:rol,p_sede:sede,p_slug:SLUG});if(error)throw fixErr(error);toast('✓ '+(data&&data.nombre||'Agregado')+' ya puede entrar desde «Modo negocio»');await eqIdLoad()}go()}catch(er){toast(er.message);io.disabled=false}});
   v.querySelectorAll('[data-iq]').forEach(b=>b.onclick=async()=>{const x=EQID.find(y=>String(y.user_id)===b.dataset.iq);if(!confirm(`¿Quitarle el acceso a ${x.nombre}? Su cuenta de Mi Xyro sigue siendo suya.`))return;
-   try{if(!DEMO){const{error}=await sb.rpc('xa_equipo_id_quitar',{p_user:x.user_id});if(error)throw fixErr(error)}EQID=EQID.filter(y=>y!==x);toast('Acceso quitado');go()}catch(er){toast(er.message)}});
+   try{if(!DEMO){const{error}=await sb.rpc('xa_equipo_id_quitar',{p_user:x.user_id,p_slug:SLUG});if(error)throw fixErr(error)}EQID=EQID.filter(y=>y!==x);toast('Acceso quitado');go()}catch(er){toast(er.message)}});
   v.querySelectorAll('[data-ir]').forEach(s=>s.onchange=async()=>{const x=EQID.find(y=>String(y.user_id)===s.dataset.ir);
-   try{if(!DEMO){const{error}=await sb.rpc('xa_equipo_id_agregar',{p_idn:String(x.idn),p_rol:s.value,p_sede:x.sede||'todas'});if(error)throw fixErr(error)}x.rol=s.value;toast('Permisos guardados ✓')}catch(er){toast(er.message)}go()});
+   try{if(!DEMO){const{error}=await sb.rpc('xa_equipo_id_agregar',{p_idn:String(x.idn),p_rol:s.value,p_sede:x.sede||'todas',p_slug:SLUG});if(error)throw fixErr(error)}x.rol=s.value;toast('Permisos guardados ✓')}catch(er){toast(er.message)}go()});
  });
  if(EQID===null){EQID=[];eqIdLoad().then(()=>{ruta==='equipo'&&go()})}
  const IDS=new Set((EQID||[]).map(x=>String(x.user_id))),ROI=RO.filter(([k])=>IDROL.includes(k));
