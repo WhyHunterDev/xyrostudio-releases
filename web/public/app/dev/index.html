@@ -385,6 +385,11 @@ const RUBROS={
   productos:[['Agua 625 ml','Bebidas',2.5,1.2,'💧'],['Bebida isotónica','Bebidas',5,2.8,'🥤'],['Batido de proteína','Batidos',12,5,'🥛'],['Café americano','Bebidas',6,1.5,'☕'],['Barra proteica','Snacks',7,3.5,'🍫'],['Sándwich de pollo','Snacks',9,4,'🥪'],['Creatina (scoop)','Suplementos',4,1.5,'💊'],['Toalla (alquiler)','Accesorios',3,0,'🧴']]},
  consultorio:{n:'Consultorio dental',ico:'🦷',cli:'Paciente',clis:'Pacientes',plan:'Tratamiento',demo:'Clínica Sonríe',lema:'Te esperamos en tu próxima cita 😊',tienda:'Productos',citas:1,productos:[['Cepillo dental','Higiene',8,3,'🪥'],['Pasta dental','Higiene',12,6,'🧴'],['Hilo dental','Higiene',9,4,'🧵'],['Enjuague bucal','Higiene',18,9,'🫧']],
   planes:[['Consulta y diagnóstico',50,1,'#3ad6ff'],['Limpieza dental',90,1,'#3ddc97'],['Curación con resina',120,1,'#f5b544'],['Extracción simple',100,1,'#ff8a3d'],['Endodoncia',380,1,'#ff5c7a'],['Blanqueamiento',450,1,'#7c5cff'],['Corona de porcelana',650,1,'#f5b544'],['Control de ortodoncia',150,1,'#8d8fa8'],['Brackets (instalación)',1800,1,'#7c5cff'],['Implante dental',2800,1,'#3ddc97']]},
+ barberia:{n:'Barbería',ico:'💈',cli:'Cliente',clis:'Clientes',plan:'Servicio',demo:'Barbería El Clásico',lema:'¡Te esperamos para tu próximo corte! 💈',tienda:'Productos',citas:1,barb:1,
+  roles:{profesional:'Barbero(a)',recepcion:'Caja / Recepción',supervisor:'Encargado(a)'},
+  dur:{'Corte clásico':30,'Corte + barba':45,'Fade / degradado':40,'Perfilado de barba':20,'Afeitado clásico con toalla':30,'Corte niño':25,'Cejas':10,'Diseño / líneas':15,'Tinte / color':60,'Lavado y peinado':20},
+  productos:[['Cera mate','Estilo',35,14,'🫙'],['Pomada con brillo','Estilo',35,14,'🫙'],['Polvo texturizador','Estilo',38,15,'🧂'],['Gel fijador','Estilo',15,6,'💧'],['Aceite para barba','Barba',40,15,'🧴'],['Shampoo para barba','Barba',30,12,'🧴'],['Bebida (agua / gaseosa)','Bebidas',3,1.2,'🥤']],
+  planes:[['Cejas',8,1,'#8d8fa8'],['Diseño / líneas',10,1,'#e879f9'],['Perfilado de barba',15,1,'#f5b544'],['Lavado y peinado',15,1,'#3ad6ff'],['Corte niño',20,1,'#8d8fa8'],['Corte clásico',25,1,'#3ad6ff'],['Afeitado clásico con toalla',25,1,'#ff8a3d'],['Fade / degradado',30,1,'#3ddc97'],['Corte + barba',40,1,'#7c5cff'],['Tinte / color',60,1,'#ff5c7a']]},
  restaurante:{n:'Restaurante / Cafetería',ico:'🍽️',cli:'Cliente',clis:'Clientes',plan:'Combo',demo:'La Sazón de Rosa',lema:'¡Gracias por tu visita! 🍽️',tienda:'Carta',resto:1,planes:[],
   roles:{supervisor:'Encargado(a)',recepcion:'Caja',cafetin:'Mozo y cocina',mozo:'Mozo',cocina:'Cocina'},
   productos:[['Ceviche clásico','Entradas',32,12,'🐟'],['Causa limeña','Entradas',18,6,'🥔'],['Papa a la huancaína','Entradas',14,4,'🥔'],['Lomo saltado','Fondos',38,15,'🥩'],['Ají de gallina','Fondos',28,9,'🍛'],['Arroz con mariscos','Fondos',36,14,'🦐'],['Pollo a la brasa (1/4)','Fondos',24,9,'🍗'],['Tallarines verdes con bistec','Fondos',32,12,'🍝'],['Menú del día','Menú',16,6,'🍲'],['Chicha morada (jarra)','Bebidas',15,4,'🍇'],['Limonada frozen','Bebidas',12,3,'🍋'],['Inca Kola 500 ml','Bebidas',5,2.5,'🥤'],['Café pasado','Cafés',7,1.5,'☕'],['Capuchino','Cafés',10,2.5,'☕'],['Suspiro limeño','Postres',12,4,'🍮'],['Torta de chocolate','Postres',14,5,'🍰']]},
@@ -421,8 +426,9 @@ const TEMAS_X=[['navidad','🎄','Navidad'],['halloween','🎃','Halloween'],['a
 const temasDe=c=>c.temasPermitidos&&c.temasPermitidos.length?c.temasPermitidos:c.temaExtra?TEMAS_X.map(t=>t[0]):[];
 const DISENOS_X=[['fuerza','Fuerza','Foto a pantalla completa y letras gigantes. El clásico de gimnasio.'],['impacto','Impacto','Portada dividida, sello «desde S/ al mes», planes y clases de hoy en la portada.'],['comunidad','Comunidad','Collage de fotos, historias tipo Instagram y «¿cuál es tu objetivo?».']];
 const DIS_R=[['resto','Restaurante','Portada con foto, carta en vivo sin precios, cómo llegar y tu QR para abrir Mi Xyro (ahí se registran, reservan y piden, sin descargar nada).']];
+const DIS_B=[['barber','Barbería','Oscura y con estilo: servicios, barberos, galería de cortes, horario y QR para reservar en Mi Xyro.']];
 const DIS_C=[['clinica','Clínica','Portada con agenda animada, servicios, especialistas con sus días y reserva de cita en 4 pasos por WhatsApp.']];
-const demoURL=(e,t)=>(R.citas?'/consultorio/':R.resto?'/restaurante/':'/sitio/')+'?n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||WEB.color||'#f5c400').replace('#','')+(CFG.logo&&/^https:/.test(CFG.logo)?'&l='+encodeURIComponent(CFG.logo):'')+'&e='+e+(t?'&tema='+t:'')+(SLUG?'&m='+encodeURIComponent(SLUG):'');
+const demoURL=(e,t)=>(R.barb?'/barberia/':R.citas?'/consultorio/':R.resto?'/restaurante/':'/sitio/')+'?n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||WEB.color||'#f5c400').replace('#','')+(CFG.logo&&/^https:/.test(CFG.logo)?'&l='+encodeURIComponent(CFG.logo):'')+'&e='+e+(t?'&tema='+t:'')+(SLUG?'&m='+encodeURIComponent(SLUG):'');
 const conTema=(u,t)=>u?u.replace(/#.*$/,'')+(u.includes('?')?'&':'?')+'tema='+t:'';
 // Consultorio dental: qué hace cada Xyro en una clínica (disponibles y pensados, «muy pronto»).
 const XYROS_R=[['apps','Xyro Apps','Mapa de mesas en vivo, pedidos por QR desde la mesa, mozo que toma pedidos en el celular, pantalla de cocina, para llevar, carta con fotos y stock, caja por turnos y reportes de lo más vendido y las horas fuertes.',0,['🪑 Mesas en vivo','📱 Pedidos por QR','👨‍🍳 Cocina','🥡 Para llevar','📖 Carta y stock','💰 Caja']],
@@ -435,7 +441,12 @@ const XYROS_D=[['apps','Xyro Apps','Agenda por odontólogo, pacientes, odontogra
  ['control','Xyro Control','Vende productos en el consultorio (cepillos, hilo dental, kits de blanqueamiento) y controla tus insumos (resinas, anestesia, guantes): stock que avisa antes de acabarse y cuánto ganas de verdad.',0,['🪥 Venta de productos','📦 Insumos y stock','💰 Márgenes']],
  ['bots','Xyro Bots','Asistente por WhatsApp que agenda citas solo las 24 horas en los horarios libres, recuerda la cita un día antes, confirma o reprograma, invita a su control a los pacientes por volver y avisa los saldos.',1,['🤖 Agenda 24 h','⏰ Recordatorios','🔁 Reactiva pacientes','💸 Avisa saldos']],
  ['edits','Xyro Edits','Videos y reels para tus redes: antes y después de tratamientos, consejos de salud dental y presentación de tus especialistas.',1,['🎬 Antes y después','💡 Consejos','📣 Reels']]];
-const XYR=()=>R.citas?XYROS_D:R.resto?XYROS_R:XYROS;
+const XYROS_B=[['apps','Xyro Apps','Agenda por barbero, clientes sin cita en cola con tiempo de espera, servicios con su duración, cobros y caja, comisión de cada barbero calculada sola, cómo le gusta el corte a cada cliente y clientes por volver.',0,['💈 Agenda por barbero','🚶 Cola sin cita','💸 Comisiones','✂️ Su corte de siempre','🔁 Por volver']],
+ ['webs','Xyro Webs','La web de tu barbería con tus servicios, tus barberos, galería de cortes, horario y cómo llegar, y tu QR para que reserven en Mi Xyro. Tus servicios pasan solos desde este panel.',0,['🌐 Web con tu dominio','✂️ Galería de cortes','💈 Tus barberos','📱 QR de Mi Xyro']],
+ ['control','Xyro Control','Vende ceras, pomadas y aceites con stock que avisa antes de acabarse, y controla tus insumos (navajas, talco, toallas): cuánto ganas de verdad.',0,['🫙 Venta de productos','📦 Stock','💰 Márgenes']],
+ ['bots','Xyro Bots','Asistente por WhatsApp que reserva turnos solo en los horarios libres de cada barbero, recuerda la cita y avisa cuando ya toca corte.',1,['🤖 Reserva 24 h','⏰ Recordatorios','🔁 «Ya toca corte»']],
+ ['edits','Xyro Edits','Reels de tus mejores cortes y transformaciones para TikTok e Instagram.',1,['🎬 Antes y después','📣 Reels']]];
+const XYR=()=>R.barb?XYROS_B:R.citas?XYROS_D:R.resto?XYROS_R:XYROS;
 const PRONTO=k=>{const x=XYR().find(y=>y[0]===k);return!!(x&&x[3])};
 const soporteWA=()=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;
 const soporteURL=()=>DEMO?soporteWA():'#/soporte';const soporteTgt=()=>DEMO?' target="_blank" rel="noopener"':'';
@@ -950,8 +961,8 @@ const sdVence=x=>x.tipo==='consulta'&&(x.estado==='cerrado'||(x.estado==='abiert
 const sdVis=x=>x.tipo==='consulta'?!sdVence(x)&&(['abierta','invitado'].includes(x.estado)||x.visto_negocio===false):x.tipo==='registro'?x.estado==='pendiente':x.estado!=='cancelado'&&(x.estado==='pendiente'||x.visto_negocio===false)&&(!miProf()||!x.cita||x.cita.prof===miProf().id);
 const sdN=()=>sdOn()?(SOLD||[]).filter(sdVis).length:0;
 function sdDemo(){const c=S.cli,P=profsL(),T=S.pla.filter(p=>p.activo!==false),d=sigLab(hoy()),mk=(i,h,m,n)=>{const p=P[i%P.length]||{},t=T[i%Math.max(1,T.length)]||{nombre:'Consulta',precio:50};return{id:'sd'+i,tipo:'cita',estado:'pendiente',cliente_id:(c[i]||{}).id,cliente_nombre:(c[i]||{}).nombre||'Paciente',cliente_tel:(c[i]||{}).telefono,persona_nombre:((c[i]||{}).nombre||'').split(' ')[0],objetivo:t.nombre,nota:n,creado:new Date(Date.now()-(i+1)*42e5).toISOString(),cita:{inicio:new Date(d+'T'+h+':00').toISOString(),prof:p.id,prof_nombre:p.n,dur:p.dur||30,servicio:t.nombre,precio:t.precio},msgs:[]}};
- const now=new Date().toISOString();return[mk(3,'10:30','0','Me sangran las encías al cepillarme.'),mk(8,'16:00','0',''),
-  {id:'sdc',tipo:'consulta',estado:'abierta',cliente_id:null,persona_nombre:'Valeria',creado:now,actualizado:now,visto_negocio:false,msgs:[{de:'persona',texto:'Hola, ¿cuánto cuesta el blanqueamiento? ¿Atienden sábados?',creado:now}]},
+ const now=new Date().toISOString();return[mk(3,'10:30','0',R.barb?'El mismo fade de la otra vez, porfa.':'Me sangran las encías al cepillarme.'),mk(8,'16:00','0',''),
+  {id:'sdc',tipo:'consulta',estado:'abierta',cliente_id:null,persona_nombre:'Valeria',creado:now,actualizado:now,visto_negocio:false,msgs:[{de:'persona',texto:R.barb?'Hola, ¿hacen diseños con navaja? ¿Atienden domingos?':'Hola, ¿cuánto cuesta el blanqueamiento? ¿Atienden sábados?',creado:now}]},
   {id:'sdr',tipo:'registro',estado:'pendiente',cliente_id:null,persona_nombre:'Marco',datos:{nombre:'Marco Salazar Ríos',dni:'47851236',tel:'987 654 321',nac:'1994-03-12'},creado:now,actualizado:now,visto_negocio:false,msgs:[]}]}
 async function sdCargar(){if(!sdOn())return SOLD=[];if(DEMO){SOLD=SOLD||sdDemo();return SOLD}
  try{const{data,error}=await sb.rpc('xa_neg_pedidos',{p_slug:SLUG||null,p_todos:false});if(error)throw error;SOLD=(data||[]).filter(x=>['cita','consulta','registro'].includes(x.tipo)||x.tipo==='cita');NEED64=false}catch(_){SOLD=SOLD||[];NEED64=true}return SOLD}
@@ -1024,7 +1035,7 @@ function libres(pid,d,dur,sin){const p=profDe(pid),h=profHoras(p,d);if(!h)return
 function agenda(){
  if(!citOn())return`<div class="empty"><b>🗓️</b>${R.citas?'Falta activar la agenda (SQL 44). Avísale a XyroStudio.':'La agenda es para consultorios y clínicas.'}</div>`;
  const H=hoy();agD=agD||H;const d=agD,mp=miProf(),PS=profsL();
- if(!PS.length){setTimeout(()=>{const b=$('#agPro');b&&(b.onclick=editProfs)});return`<div class="empty"><b>👩‍⚕️</b>Primero agrega a los profesionales que atienden y sus horarios.<br><br>${isAdmin()?'<button class="btn p" id="agPro">＋ Agregar profesionales</button>':'Pídeselo al administrador.'}</div>`}
+ if(!PS.length){setTimeout(()=>{const b=$('#agPro');b&&(b.onclick=editProfs)});return`<div class="empty"><b>${R.barb?'💈':'👩‍⚕️'}</b>Primero agrega a ${R.barb?'los barberos':'los profesionales'} que atienden y sus horarios.<br><br>${isAdmin()?`<button class="btn p" id="agPro">＋ Agregar ${R.barb?'barberos':'profesionales'}</button>`:'Pídeselo al administrador.'}</div>`}
  const P=mp?[mp]:agP&&PS.some(p=>p.id===agP)?PS.filter(p=>p.id===agP):PS.slice();
  const Ld=citDia(d),L=Ld.filter(x=>P.some(p=>p.id===x.prof)||(!mp&&!agP&&!PS.some(p=>p.id===x.prof)));
  if(!mp&&!agP&&L.some(x=>!PS.some(p=>p.id===x.prof)))P.push({id:'_',n:'Sin asignar',esp:'',color:'#8d8fa8'});
@@ -1043,11 +1054,11 @@ function agenda(){
   $$('.agc').forEach(c=>c.onclick=e=>{if(e.target.closest('[data-ct]'))return;const r=c.getBoundingClientRect(),m=a0+Math.floor((e.clientY-r.top)/PX/15)*15;nuevaCita({prof:c.dataset.p||undefined,fecha:d,hora:mh(Math.max(a0,m))})});
   const w=$('.agw');if(w){const fst=L.filter(x=>x.estado!=='cancelada').map(citMin).sort((a,b)=>a-b)[0],tg=d===H&&nm>=a0&&nm<=a1?nm-60:fst!=null?fst-30:0;w.scrollTop=Math.max(0,(tg-a0)*PX)}
  });
- return`<div class="hi st"><div><p class="mu">${mp?'Tu agenda, '+esc(mp.n):'Agenda de '+esc(nombre())}</p><h2>${d===H?'Hoy, ':''}<span class="grad">${['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][new Date(d+'T12:00:00').getDay()]} ${fF(d)}</span></h2></div><div style="display:flex;gap:8px;flex-wrap:wrap">${isAdmin()?'<button class="btn" id="agPro">👩‍⚕️ Profesionales</button>':''}</div></div>
- ${sdCard()}
+ return`<div class="hi st"><div><p class="mu">${mp?'Tu agenda, '+esc(mp.n):'Agenda de '+esc(nombre())}</p><h2>${d===H?'Hoy, ':''}<span class="grad">${['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][new Date(d+'T12:00:00').getDay()]} ${fF(d)}</span></h2></div><div style="display:flex;gap:8px;flex-wrap:wrap">${R.barb?'<button class="btn p" data-sincita>🚶 Llegó sin cita</button>':''}${isAdmin()?`<button class="btn" id="agPro">${R.barb?'💈 Barberos':'👩‍⚕️ Profesionales'}</button>`:''}</div></div>
+ ${sdCard()}${R.barb&&d===H?colaCard():''}
  <div class="agsem st"><button class="btn sm" data-agd="${addD(d,-7)}" title="Semana anterior">◀</button>${sem.map((x,i)=>{const n=citVivas(x).filter(y=>!mp||y.prof===mp.id).length;return`<button data-agd="${x}" class="${x===d?'on':''} ${x===H?'hoy':''}"><small>${DN[i]}</small><b>${+x.slice(8)}</b><em>${n?n+' citas':'—'}</em></button>`}).join('')}<button class="btn sm" data-agd="${addD(d,7)}" title="Semana siguiente">▶</button><label class="btn sm" title="Elegir fecha">📅<input type="date" id="agF" value="${d}" style="position:absolute;opacity:0;width:1px;height:1px"></label>${d!==H?`<button class="btn sm" data-agd="${H}">Hoy</button>`:''}</div>
  ${!mp&&PS.length>1?`<div class="opts st" style="margin:10px 0">${[['','👥 Todos']].concat(PS.map(p=>[p.id,p.n])).map(([k,t])=>`<button type="button" data-agp="${k}" class="${(agP||'')===k?'on':''}">${k?`<i class="agdot" style="background:${profC(k)}"></i>`:''}${esc(t)}</button>`).join('')}</div>`:''}
- <div class="g k4 st" style="margin:12px 0"><div class="card kpi"><i style="background:var(--a)"></i><small>Citas del día</small><b data-n="${viv.length}">0</b><span class="tr">${cnt('confirmada')} confirmadas</span></div><div class="card kpi"><i style="background:var(--wa)"></i><small>En sala de espera</small><b data-n="${cnt('llego')}">0</b><span class="tr">${cnt('agendada')} sin confirmar</span></div><div class="card kpi"><i style="background:var(--ok)"></i><small>Atendidas</small><b data-n="${cnt('atendida')}">0</b><span class="tr">${cnt('no_vino')} no vinieron</span></div><div class="card kpi"><i style="background:var(--b)"></i><small>Cobrado en citas</small><b data-n="${Math.round(cob)}" data-f="s">0</b><span class="tr">${viv.filter(x=>x.estado==='atendida'&&!x.pago_id).length} atendidas sin cobrar</span></div></div>
+ <div class="g k4 st" style="margin:12px 0"><div class="card kpi"><i style="background:var(--a)"></i><small>Citas del día</small><b data-n="${viv.length}">0</b><span class="tr">${cnt('confirmada')} confirmadas</span></div><div class="card kpi"><i style="background:var(--wa)"></i><small>${R.barb?'Esperando':'En sala de espera'}</small><b data-n="${cnt('llego')}">0</b><span class="tr">${cnt('agendada')} sin confirmar</span></div><div class="card kpi"><i style="background:var(--ok)"></i><small>Atendidas</small><b data-n="${cnt('atendida')}">0</b><span class="tr">${cnt('no_vino')} no vinieron</span></div><div class="card kpi"><i style="background:var(--b)"></i><small>Cobrado en citas</small><b data-n="${Math.round(cob)}" data-f="s">0</b><span class="tr">${viv.filter(x=>x.estado==='atendida'&&!x.pago_id).length} atendidas sin cobrar</span></div></div>
  <div class="card agcard st"><div class="agw"><div class="agg" style="grid-template-columns:52px repeat(${P.length},minmax(${P.length>2?150:200}px,1fr))"><div class="agt"><div class="agh"></div><div style="position:relative;height:${alt}px">${[...Array((a1-a0)/60+1)].map((_,i)=>`<span style="top:${i*60*PX}px">${h12(pad(a0/60+i)+':00').replace(':00 ','')}</span>`).join('')}</div></div>${P.map(col).join('')}</div></div><p class="mu sm" style="margin-top:8px">Toca un espacio libre para agendar. Toca una cita para confirmarla, recordarla, atenderla o cobrarla.</p></div>
  ${man.length?`<div class="card st" style="margin-top:14px;border-color:var(--wa)"><h3>📲 Confirma las citas de ${diaTxt(ms)} <span class="pill">${man.length}</span></h3><p class="mu sm">Envía el recordatorio por WhatsApp. Al tocarlo queda marcado como enviado.</p><div class="tl">${man.map(x=>{const c=cli(x.cliente_id)||{nombre:'—'};return`<div class="row"><a class="nm" href="#" data-ct="${x.id}"><b>${fH(x.inicio)} · ${esc(c.nombre)}</b><small>${esc(profN(x.prof))}${x.servicio?' · '+esc(x.servicio):''}${x.recordado?' · 📲 recordado '+fH(x.recordado):''}</small></a>${tel(c.telefono)?`<a class="btn sm ${x.recordado?'':'p'}" target="_blank" rel="noopener" href="${waLink(c,citMsg(x))}" data-rc="${x.id}">📲 ${x.recordado?'Otra vez':'Recordar'}</a>`:'<span class="mu sm">sin celular</span>'}</div>`}).join('')}</div></div>`:''}`;
 }
@@ -1060,16 +1071,17 @@ document.addEventListener('click',e=>{
 
 function nuevaCita(pre,x){
  pre=pre||{};const PS=profsL();if(!citOn())return toast('Falta activar la agenda (SQL 44)');
- if(!PS.length)return isAdmin()?editProfs():toast('Pídele al administrador que agregue a los profesionales');
+ if(!PS.length)return isAdmin()?editProfs():toast(R.barb?'Pídele al administrador que agregue a los barberos':'Pídele al administrador que agregue a los profesionales');
  const c0=x?cli(x.cliente_id):pre.c,lab=c=>c.nombre+(c.dni?' · DNI '+c.dni:c.num?' · N.º '+c.num:''),SV=S.pla.filter(p=>p.activo!==false),mp=miProf();
  const p0=x?x.prof:pre.prof&&PS.some(p=>p.id===pre.prof)?pre.prof:(mp&&mp.id)||(PS.some(p=>p.id===agP)?agP:PS[0].id);
  const f=[{k:'pac',l:R.cli+' · escribe para buscarlo o pon el nombre de uno nuevo',v:c0?lab(c0):'',req:1,dl:S.cli.slice(0,4000).map(lab),ph:'Ej. María Quispe'},
   {k:'tel',l:'Celular del '+R.cli.toLowerCase()+' nuevo (para recordarle la cita)',t:'tel',v:'',ph:'9xx xxx xxx',im:'tel'},
-  {k:'prof',l:'Profesional',t:'opts',v:p0,o:PS.map(p=>[p.id,p.n])},
-  {k:'servicio',l:'Servicio',t:'sel',v:x?x.servicio||'':'',o:[['','—']].concat(SV.map(p=>[p.nombre,p.nombre+' · '+sol(p.precio)]))},
+  {k:'prof',l:R.barb?'Barbero':'Profesional',t:'opts',v:p0,o:PS.map(p=>[p.id,p.n])},
+  {k:'servicio',l:'Servicio',t:'sel',v:x?x.servicio||'':'',o:[['','—']].concat(SV.map(p=>[p.nombre,p.nombre+' · '+sol(p.precio)+(R.barb?' · '+svDur(p.nombre)+' min':'')]))},
   {k:'fecha',l:'Día',t:'date',v:x?ymd(new Date(x.inicio)):pre.fecha||agD||hoy(),half:1,req:1},
   {k:'hora',l:'Hora',t:'time',v:x?fH24(x.inicio):pre.hora||'',half:1,req:1},
-  {k:'dur',l:'Duración',t:'opts',v:String(x?x.dur||30:(profDe(p0)||{}).dur||30),o:[15,20,30,45,60,90].map(m=>[String(m),m+' min']),on:(fm,val)=>{
+  {k:'dur',l:'Duración',t:'opts',v:String(x?x.dur||30:(profDe(p0)||{}).dur||30),o:(R.barb?[10,15,20,25,30,40,45,60,90]:[15,20,30,45,60,90]).map(m=>[String(m),m+' min']),on:(fm,val)=>{
+   if(R.barb){const sv=fm.querySelector('#f_servicio');sv&&sv.addEventListener('change',()=>{const b=fm.querySelector('[data-k=dur] button[data-v="'+svDur(sv.value)+'"]');b&&b.click()})}
    const tl=fm.querySelector('#f_tel').closest('label'),pc=fm.querySelector('#f_pac'),hr=fm.querySelector('#f_hora');
    const exi=()=>{const v=pc.value.trim().toLowerCase();return!v||S.cli.some(c=>lab(c).toLowerCase()===v||c.nombre.toLowerCase()===v)};
    const upT=()=>tl.style.display=exi()?'none':'';pc.addEventListener('input',upT);upT();
@@ -1077,7 +1089,7 @@ function nuevaCita(pre,x){
    const upL=()=>{const v=val(),L=libres(v.prof,v.fecha,v.dur,x&&x.id);lb.innerHTML=`<span>Horarios libres de ${esc(profN(v.prof))}</span>`+(L.length?`<div class="opts">${L.map(h=>`<button type="button" data-h="${h}" class="${h===hr.value?'on':''}">${h12(h)}</button>`).join('')}</div>`:`<small class="mu">${profHoras(profDe(v.prof),v.fecha)?'No quedan horarios libres ese día.':'No atiende ese día.'}</small>`)};
    lb.onclick=e=>{const b=e.target.closest('[data-h]');if(!b)return;hr.value=b.dataset.h;lb.querySelectorAll('button').forEach(y=>y.classList.toggle('on',y===b))};
    fm.addEventListener('change',e=>{if(!lb.contains(e.target))upL()});upL()}},
-  {k:'nota',l:'Motivo o nota (lo ve recepción)',t:'area',v:x?x.nota||'':'',rows:2},
+  {k:'nota',l:R.barb?'Nota (ej. «el mismo corte de la otra vez»)':'Motivo o nota (lo ve recepción)',t:'area',v:x?x.nota||'':'',rows:2},
   {k:'sobre',l:'Permitir sobreturno (aunque el horario esté ocupado o fuera de su horario)',t:'chk'}];
  form(x?'🔁 Reprogramar cita':'🗓️ Nueva cita',f,async v=>{
   const ini=new Date(v.fecha+'T'+v.hora+':00'),dur=+v.dur||30;if(isNaN(ini))throw new Error('Revisa el día y la hora.');
@@ -1101,8 +1113,8 @@ function verCita(id){
  if(abierta&&d>=H&&tel(c.telefono))B.push(`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,citMsg(x))}" data-ca="rec">📲 Recordar</a>`);
  if(k==='agendada')B.push('<button class="btn" data-ca="conf">✅ Confirmó</button>');
  if(abierta&&k!=='llego'&&d===H)B.push('<button class="btn" data-ca="lle">🚪 Llegó</button>');
- if(abierta&&d<=H)B.push(`<button class="btn p" data-ca="ate">🩺 ${hcVer()?'Atender':'Marcar atendida'}</button>`);
- if(!x.pago_id&&k!=='cancelada'&&k!=='no_vino'&&!isProf())B.push('<button class="btn p" data-ca="cob">💳 Cobrar</button>');
+ if(abierta&&d<=H)B.push(`<button class="btn p" data-ca="ate">${R.barb?'✂️ Terminar corte':'🩺 '+(hcVer()?'Atender':'Marcar atendida')}</button>`);
+ if(!x.pago_id&&k!=='cancelada'&&k!=='no_vino'&&(!isProf()||R.barb))B.push('<button class="btn p" data-ca="cob">💳 Cobrar</button>');
  if(abierta)B.push('<button class="btn" data-ca="rep">🔁 Reprogramar</button>');
  if(abierta&&d<=H)B.push('<button class="btn" data-ca="nov">⛔ No vino</button>');
  if(abierta)B.push('<button class="btn" data-ca="can">✖️ Cancelar</button>');
@@ -1117,7 +1129,7 @@ function verCita(id){
    if(a==='rec')return up({recordado:new Date().toISOString()});
    if(a==='conf')return up({estado:'confirmada'},'Cita confirmada ✅');
    if(a==='lle'){try{await DB.ins('asi',{cliente_id:x.cliente_id,t:new Date().toISOString(),quien:ME.nombre||ROLES[ME.rol]})}catch(_){}return up({estado:'llego'},'🚪 '+c.nombre.split(' ')[0]+' está en sala')}
-   if(a==='ate'){if(hcVer()){close();return hcNota(c,x)}return up({estado:'atendida'},'Atendida ✓')}
+   if(a==='ate'){if(R.barb){close();return terminarCorte(x)}if(hcVer()){close();return hcNota(c,x)}return up({estado:'atendida'},'Atendida ✓')}
    if(a==='cob'){close();return cobrarCita(x)}
    if(a==='rep'){close();return nuevaCita(null,x)}
    if(a==='nov')return up({estado:'no_vino'},'Marcada como no vino');
@@ -1138,22 +1150,23 @@ function cobrarCita(x){
 function editProfs(){
  if(!isAdmin())return toast('Solo el administrador');
  const T0=profsT().filter(p=>p.activo!==false);
- sheet(`<div class="g" style="gap:12px"><h3>👩‍⚕️ Profesionales y horarios</h3><p class="mu sm">Quién atiende, qué días y en qué horario. La agenda solo deja citas dentro de su horario.</p><div class="tl">${T0.map(p=>`<div class="row"><i class="agdot" style="background:${esc(p.color||'#8d8fa8')};width:12px;height:12px"></i><span class="nm"><b>${esc(p.n)}</b><small>${esc(p.esp||'')} · ${esc((DPRE.find(d=>d[0]===(p.dias||[1,2,3,4,5,6]).join(','))||['','Días a medida'])[1])} · ${esc(h12(p.desde||'09:00'))}–${esc(h12(p.hasta||'19:00'))} · citas de ${p.dur||30} min${p.cuenta?' · 🔐 '+esc(p.cuenta):''}</small></span><button class="btn sm" data-pe="${p.id}">✏️</button></div>`).join('')||'<p class="mu">Aún no hay profesionales.</p>'}</div><div class="bt"><button class="btn" data-x>Cerrar</button><button class="btn p" data-pe="">＋ Profesional</button></div></div>`,(el,close)=>{
+ sheet(`<div class="g" style="gap:12px"><h3>${R.barb?'💈 Barberos y horarios':'👩‍⚕️ Profesionales y horarios'}</h3><p class="mu sm">Quién atiende, qué días y en qué horario. La agenda solo deja citas dentro de su horario.</p><div class="tl">${T0.map(p=>`<div class="row"><i class="agdot" style="background:${esc(p.color||'#8d8fa8')};width:12px;height:12px"></i><span class="nm"><b>${esc(p.n)}</b><small>${esc(p.esp||'')} · ${esc((DPRE.find(d=>d[0]===(p.dias||[1,2,3,4,5,6]).join(','))||['','Días a medida'])[1])} · ${esc(h12(p.desde||'09:00'))}–${esc(h12(p.hasta||'19:00'))} · citas de ${p.dur||30} min${R.barb?' · comisión '+profCom(p)+'%':''}${p.cuenta?' · 🔐 '+esc(p.cuenta):''}</small></span><button class="btn sm" data-pe="${p.id}">✏️</button></div>`).join('')||'<p class="mu">Aún no hay '+(R.barb?'barberos':'profesionales')+'.</p>'}</div><div class="bt"><button class="btn" data-x>Cerrar</button><button class="btn p" data-pe="">＋ ${R.barb?'Barbero':'Profesional'}</button></div></div>`,(el,close)=>{
   el.onclick=e=>{const b=e.target.closest('[data-pe]');if(!b)return;close();editProf(profDe(b.dataset.pe))};
  });
 }
 function editProf(p){
  const CL=['#3ad6ff','#7c5cff','#3ddc97','#f5b544','#ff5c7a','#ff8a3d','#e879f9'],n=profsT().length;
- const f=[{k:'n',l:'Nombre',v:p&&p.n,req:1,ph:'Ej. Dra. Paola Ríos'},{k:'esp',l:'Especialidad',v:p&&p.esp,ph:'Ej. Odontología general'},
+ const f=[{k:'n',l:'Nombre',v:p&&p.n,req:1,ph:R.barb?'Ej. Kevin Ramos':'Ej. Dra. Paola Ríos'},{k:'esp',l:R.barb?'Lo suyo (lo ven los clientes al reservar)':'Especialidad',v:p&&p.esp,ph:R.barb?'Ej. Fades y diseños':'Ej. Odontología general'},
   {k:'dias',l:'Días que atiende',t:'opts',v:p?(p.dias||[1,2,3,4,5,6]).join(','):'1,2,3,4,5,6',o:DPRE},
   {k:'desde',l:'Desde',t:'time',v:p?p.desde:'09:00',half:1},{k:'hasta',l:'Hasta',t:'time',v:p?p.hasta:'19:00',half:1},
   {k:'dur',l:'Duración normal de cada cita',t:'opts',v:String(p&&p.dur||30),o:[15,20,30,45,60].map(m=>[String(m),m+' min'])},
+  ...(R.barb?[{k:'com',l:'Su comisión por cada servicio (%) · el resto queda para la barbería',t:'number',v:p?profCom(p):50,im:'numeric',half:1}]:[]),
   {k:'color',l:'Color en la agenda',t:'opts',v:p&&p.color||CL[n%CL.length],o:CL.map(c=>[c,'●'])},
   {k:'cuenta',l:'Usuario de su cuenta (opcional · así ve solo su agenda)',v:p&&p.cuenta,ph:'Ej. paola'}];
  if(sedesL().length>1)f.push({k:'sede',l:'Sede',t:'sel',v:p?p.sede||'':SEDE,o:[['','Todas las sedes']].concat(sedesL().map(s=>[s.id,s.nombre]))});
- form(p?'✏️ '+esc(p.n):'＋ Profesional',f,async v=>{
+ form(p?'✏️ '+esc(p.n):R.barb?'＋ Barbero':'＋ Profesional',f,async v=>{
   if(hm(v.hasta)<=hm(v.desde))throw new Error('La hora de salida debe ser después de la de entrada.');
-  const row={n:v.n,esp:v.esp||'',dias:v.dias.split(',').map(Number),desde:v.desde||'09:00',hasta:v.hasta||'19:00',dur:+v.dur||30,color:v.color,cuenta:(v.cuenta||'').trim().toLowerCase().split('@')[0]};if('sede' in v)row.sede=v.sede||'';
+  const row={n:v.n,esp:v.esp||'',dias:v.dias.split(',').map(Number),desde:v.desde||'09:00',hasta:v.hasta||'19:00',dur:+v.dur||30,color:v.color,cuenta:(v.cuenta||'').trim().toLowerCase().split('@')[0]};if(R.barb){const k=Math.round(+v.com);if(!(k>=0&&k<=100))throw new Error('La comisión va de 0 a 100 %.');row.com=k}if('sede' in v)row.sede=v.sede||'';
   const L=profsT().slice();if(p){const i=L.findIndex(x=>x.id===p.id);L[i]=Object.assign({},L[i],row)}else L.push(Object.assign({id:uid().slice(0,8)},row));
   await DB.cfg({profesionales:L});toast('Guardado ✓');go();setTimeout(editProfs,200);
  },p?'<button type="button" class="btn" id="pDel">🗑️ Quitar</button>':'');
@@ -1183,7 +1196,7 @@ async function hcCargar(id){
 const HCF=[['alergias','⚠️ Alergias'],['antecedentes','Antecedentes'],['medicacion','Medicación actual'],['sangre','Grupo sanguíneo'],['emergencia','Contacto de emergencia']];
 const HCN=[['motivo','Motivo de consulta'],['examen','Examen / hallazgos'],['diagnostico','Diagnóstico'],['tratamiento','Tratamiento realizado'],['indicaciones','Indicaciones']];
 function hcCard(c){
- if(!citOn()||!c)return'';
+ if(!citOn()||!c||R.barb)return'';
  if(!hcVer())return`<div class="card"><h3>🔒 Historia clínica</h3><p class="mu sm">Es privada: solo la ven los profesionales y el administrador.</p></div>`;
  if(!DEMO&&!HCL.has(c.id)){HCL.add(c.id);setTimeout(()=>hcCargar(c.id))}
  const H=S.his.filter(h=>h.cliente_id===c.id),F=(H.find(h=>h.tipo==='ficha')||{}).datos||{},N=H.filter(h=>h.tipo==='nota').sort((a,b)=>b.creado>a.creado?1:-1);
@@ -1226,6 +1239,7 @@ function hcImprimir(c){
 const demoProfs=()=>[{id:'p1',n:'Dra. Paola Ríos',esp:'Odontología general',color:'#3ad6ff',dias:[1,2,3,4,5,6],desde:'09:00',hasta:'18:00',dur:30,cuenta:'paola',u:'d-profesional'},{id:'p2',n:'Dr. Marco Salas',esp:'Ortodoncia',color:'#7c5cff',dias:[1,3,5],desde:'14:00',hasta:'20:00',dur:30},{id:'p3',n:'Dra. Carla Méndez',esp:'Endodoncia',color:'#3ddc97',dias:[2,4,6],desde:'09:00',hasta:'17:00',dur:60}];
 const NOTAS_D={'Consulta y diagnóstico':['Dolor al masticar en molar inferior derecho','Caries profunda en pieza 4.6, sin movilidad','Caries dentinaria 4.6','Evaluación y radiografía periapical','Evitar alimentos muy fríos. Volver para curación.'],'Limpieza dental':['Limpieza semestral','Sarro moderado en sector anterior inferior, encías inflamadas','Gingivitis leve','Profilaxis y destartraje con ultrasonido','Cepillado 3 veces al día e hilo dental. Control en 6 meses.'],'Curación con resina':['Curación programada','Caries oclusal en pieza 3.6','Caries de esmalte y dentina 3.6','Restauración con resina A2','No comer en 2 horas. Si hay sensibilidad, avisar.'],'Endodoncia':['Dolor espontáneo intenso','Pulpitis irreversible en pieza 1.6','Pulpitis irreversible 1.6','Endodoncia en 1 sesión, obturación temporal','Ibuprofeno 400 mg c/8 h por 3 días. Volver para corona.'],'Blanqueamiento':['Quiere dientes más blancos','Tono A3, sin caries activas','Pigmentación extrínseca','Blanqueamiento en consultorio, 3 aplicaciones','Evitar café, té y vino por 48 horas.']};
 function demoClinica(){
+ if(R.barb)return demoBarber();
  CFG.profesionales=demoProfs();S.cit=[];S.his=[];const rnd=a=>a[Math.floor(Math.random()*a.length)],H=hoy(),now=new Date(),nm=now.getHours()*60+now.getMinutes(),PA=S.cli.slice(),SV=S.pla.filter(p=>+p.dias<=1);
  for(let o=-21;o<=10;o++){const d=addD(H,o);
   CFG.profesionales.forEach(p=>{const h=profHoras(p,d);if(!h)return;const pr=o<0?.62:o===0?.75:Math.max(.12,.6-o*.05);
@@ -1255,7 +1269,7 @@ function demoDental(PA,rnd){
 /* ===== Consultorio dental: vistas propias (lo de gimnasio no se muestra) ===== */
 const DENT_OFF=['kiosco','pruebas','whatsapp','ventasbot','rutinas','solicitudes','metas'];
 let NEEDPRE=false;
-const preOn=()=>citOn()&&(DEMO||!NEEDPRE);
+const preOn=()=>citOn()&&!R.barb&&(DEMO||!NEEDPRE);
 const ODS={sano:['Sano','#ffffff14',''],caries:['Caries','#ff5c7a','Curación con resina'],endop:['Necesita endodoncia','#e879f9','Endodoncia'],pext:['Por extraer','#ff8a3d','Extracción simple'],obt:['Obturado','#3ad6ff'],endo:['Endodoncia hecha','#7c5cff'],corona:['Corona','#f5b544'],impl:['Implante','#3ddc97'],ext:['Ausente','#00000000']};
 const ODU=[18,17,16,15,14,13,12,11,21,22,23,24,25,26,27,28],ODL=[48,47,46,45,44,43,42,41,31,32,33,34,35,36,37,38];
 const PEST={pendiente:['📝','Por aceptar','#8d8fa8'],aceptado:['🦷','En tratamiento','#3ad6ff'],terminado:['✅','Terminado','#3ddc97'],rechazado:['✖️','No aceptó','#777']};
@@ -1270,6 +1284,7 @@ function citIx(){const m=new Map,t=Date.now()-36e5;S.cit.forEach(x=>{if(x.estado
 const pacPill=(c,M)=>{const o=M.get(c.id)||{};return o.p?`<span class="pill" style="background:#3ad6ff22;color:#3ad6ff">🗓️ ${fF(o.p.inicio)} ${fH(o.p.inicio)}</span>`:o.u?`<span class="pill" style="background:#ffffff10;color:var(--mu)">Última: ${fF(o.u.inicio)}</span>`:'<span class="pill" style="background:#3ddc9722;color:var(--ok)">Nuevo</span>'};
 
 function inicioDent(){
+ if(R.barb)return inicioBarb();
  const H=hoy(),mes=H.slice(0,7),ing=S.pag.filter(p=>mk(p.fecha)===mes).reduce((a,p)=>a+ +p.monto,0),d30=[...Array(30)].map((_,i)=>addD(H,i-29)),porD={};S.pag.forEach(p=>{const k=ymd(new Date(p.fecha));porD[k]=(porD[k]||0)+ +p.monto});
  const SAL=S.pre.filter(p=>preSal(p)>0&&p.estado!=='pendiente'),porCob=SAL.reduce((a,p)=>a+preSal(p),0),nuevos=S.cli.filter(c=>(c.creado||'').slice(0,7)===mes).length,cv=citVivas(H).filter(x=>!miProf()||x.prof===miProf().id);
  const M=citIx(),vol=S.cli.filter(c=>{const o=M.get(c.id)||{};return o.u&&!o.p&&diff(ymd(new Date(o.u.inicio)),H)>=180}),nh=new Date().getHours(),hr=nh<12?'Buenos días':nh<19?'Buenas tardes':'Buenas noches';
@@ -1299,6 +1314,7 @@ function sociosDent(){
 }
 
 function socioDent(){
+ if(R.barb)return socioBarb();
  const c=cli(arg);if(!c)return`<div class="empty"><b>🤔</b>No encontramos a este paciente.<br><br><a class="btn" href="#/socios">Volver</a></div>`;
  if(hcVer()&&!DEMO&&!HCL.has(c.id)){HCL.add(c.id);setTimeout(()=>hcCargar(c.id))}
  const F=(S.his.find(h=>h.cliente_id===c.id&&h.tipo==='ficha')||{}).datos||{},pags=S.pag.filter(p=>p.cliente_id===c.id),sal=preDe(c.id).reduce((a,p)=>a+preSal(p),0);
@@ -1324,7 +1340,7 @@ function cobrarPac(c){
 
 /* Odontograma (privado, en xa_historias tipo 'odonto') */
 function odoCard(c){
- if(!citOn()||!hcVer())return'';
+ if(!citOn()||!hcVer()||R.barb)return'';
  const o=odoDe(c.id),d=(o&&o.datos&&o.datos.d)||{},pen=Object.entries(d).filter(([,k])=>ODS[k]&&ODS[k][2]);
  const t=n=>{const k=ODS[d[n]]?d[n]:'sano';return`<button type="button" class="tt ${k}" data-od="${c.id}|${n}" style="--tc:${ODS[k][1]}" title="Pieza ${n} · ${ODS[k][0]}"><i></i><small>${n}</small></button>`},arc=L=>L.slice(0,8).map(t).join('')+'<b class="odm"></b>'+L.slice(8).map(t).join('');
  return`<div class="card" id="odC"><h3>🦷 Odontograma ${pen.length&&preOn()?`<button class="btn sm p" data-od="${c.id}|pres">📋 Presupuesto de lo pendiente (${pen.length})</button>`:''}</h3>
@@ -1399,6 +1415,7 @@ document.addEventListener('change',e=>{const x=e.target.closest('[data-pri]');if
 /* Seguimiento dental: a quién llamar hoy */
 let sgD='volver';
 function segDent(){
+ if(R.barb)return segBarb();
  const H=hoy(),M=citIx(),t30=addD(H,-30);
  const T={
   volver:['🔁','Por volver',S.cli.filter(c=>{const o=M.get(c.id)||{};return o.u&&!o.p&&diff(ymd(new Date(o.u.inicio)),H)>=180}),c=>`Hola ${c.nombre.split(' ')[0]} 😊, en ${nombre()} notamos que ya pasaron más de 6 meses desde tu última visita. ¿Te agendamos tu limpieza y control? 🦷`,c=>'Última visita: '+fF((M.get(c.id)||{}).u.inicio)],
@@ -1419,19 +1436,20 @@ function segDent(){
 function planesDent(){
  setTimeout(()=>{$$('.plan[data-id]').forEach(el=>el.onclick=()=>isAdmin()?editTrat(plan(el.dataset.id)):toast('Solo el administrador cambia precios'));const a=$('#addP');a&&(a.onclick=()=>editTrat());const s=$('#sug');s&&(s.onclick=sugeridos)});
  const vec=n=>S.pag.filter(p=>p.concepto===n).length;
- return`<div class="hi"><div><h2>Tratamientos y precios</h2><p class="mu">Lista de precios de ${esc(nombre())}. Aparece al agendar, cobrar y armar presupuestos${tiene('webs')?', y en tu web':''}.</p></div>${!S.pla.length&&isAdmin()?'<button class="btn p" id="sug">✨ Cargar lista sugerida</button>':''}</div>
- <div class="pl st">${S.pla.filter(p=>p.activo!==false).map(p=>`<div class="plan" data-id="${p.id}" style="--pc:${esc(p.color||'#3ad6ff')}"><b>${esc(p.nombre)}</b><div class="pr">${sol(p.precio)}</div><span class="mu sm">${vec(p.nombre)} cobros recientes</span></div>`).join('')}
- ${isAdmin()?`<div class="plan" style="--pc:#ffffff;display:grid;place-items:center;border-style:dashed;min-height:110px" id="addP"><b class="mu">＋ Tratamiento</b></div>`:''}</div>`;
+ return`<div class="hi"><div><h2>${R.barb?'Servicios y precios':'Tratamientos y precios'}</h2><p class="mu">Lista de precios de ${esc(nombre())}. Aparece al agendar, cobrar${R.barb?' y cuando tus clientes reservan en Mi Xyro (con su duración)':' y armar presupuestos'}${tiene('webs')?', y en tu web':''}.</p></div>${!S.pla.length&&isAdmin()?'<button class="btn p" id="sug">✨ Cargar lista sugerida</button>':''}</div>
+ <div class="pl st">${S.pla.filter(p=>p.activo!==false).map(p=>`<div class="plan" data-id="${p.id}" style="--pc:${esc(p.color||'#3ad6ff')}"><b>${esc(p.nombre)}</b><div class="pr">${sol(p.precio)}</div><span class="mu sm">${R.barb?'⏱️ '+svDur(p.nombre)+' min · ':''}${vec(p.nombre)} cobros recientes</span></div>`).join('')}
+ ${isAdmin()?`<div class="plan" style="--pc:#ffffff;display:grid;place-items:center;border-style:dashed;min-height:110px" id="addP"><b class="mu">＋ ${R.barb?'Servicio':'Tratamiento'}</b></div>`:''}</div>`;
 }
 function editTrat(p){
- form(p?'Editar tratamiento':'Nuevo tratamiento',[{k:'nombre',l:'Nombre',v:p&&p.nombre,req:1,ph:'Ej. Limpieza dental'},{k:'precio',l:'Precio (S/)',t:'number',v:p&&p.precio,req:1},{k:'color',l:'Color',t:'opts',v:(p&&p.color)||'#3ad6ff',o:[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo'],['#8d8fa8','Gris']]}],async v=>{
-  const row={nombre:v.nombre,precio:+v.precio,dias:1,color:v.color,activo:true};if(p)await DB.upd('pla',p.id,row);else await DB.ins('pla',row);S.pla.sort((a,b)=>a.precio-b.precio);toast('Guardado ✓');if(tiene('webs')&&!DEMO)aWeb(false);go();
+ form(p?(R.barb?'Editar servicio':'Editar tratamiento'):(R.barb?'Nuevo servicio':'Nuevo tratamiento'),[{k:'nombre',l:'Nombre',v:p&&p.nombre,req:1,ph:R.barb?'Ej. Corte + barba':'Ej. Limpieza dental'},{k:'precio',l:'Precio (S/)',t:'number',v:p&&p.precio,req:1}].concat(R.barb?[{k:'dur',l:'Cuánto dura (así la agenda y Mi Xyro reservan el tiempo justo)',t:'opts',v:String(p?svDur(p.nombre):30),o:[10,15,20,25,30,40,45,60,90].map(m=>[String(m),m+' min'])}]:[],[{k:'color',l:'Color',t:'opts',v:(p&&p.color)||'#3ad6ff',o:[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo'],['#8d8fa8','Gris']]}]),async v=>{
+  const row={nombre:v.nombre,precio:+v.precio,dias:1,color:v.color,activo:true};if(p)await DB.upd('pla',p.id,row);else await DB.ins('pla',row);if(R.barb){const m=svDurMap();if(p&&p.nombre!==v.nombre)delete m[p.nombre];m[v.nombre]=+v.dur||30;await DB.cfg({svDur:m})}S.pla.sort((a,b)=>a.precio-b.precio);toast('Guardado ✓');if(tiene('webs')&&!DEMO)aWeb(false);go();
  },p?'<button type="button" class="btn bad" id="pDel" style="margin-right:auto">Quitar</button>':'');
  const d=$('#pDel');d&&(d.onclick=async()=>{await DB.upd('pla',p.id,{activo:false});$('.ov').remove();toast('Quitado');if(tiene('webs')&&!DEMO)aWeb(false);go()});
 }
 
 /* Mi web (base de consultorio): se arma sola con lo que tienes en Xyro Apps */
 function webDent(){
+ if(R.barb)return webBarb();
  const u=CFG.web||('/consultorio/?s='+encodeURIComponent(SLUG||'')+(DEMO?'&n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||'#3ad6ff').replace('#',''):''));
  const uu=DEMO?'/consultorio/?n='+encodeURIComponent(nombre())+'&c='+String(CFG.color||'#3ad6ff').replace('#',''):u;
  setTimeout(()=>{const b=$('#wCam');b&&(b.onclick=()=>DEMO?toast('En tu versión llega a XyroStudio'):nuevoTicket('cambio','Cambio en mi web'));const e=$('#wEd');e&&(e.onclick=editWebDent)});
@@ -1439,15 +1457,183 @@ function webDent(){
  <div class="card" style="padding:0;overflow:hidden;height:70vh"><iframe src="${esc(uu)}" title="Mi web" style="width:100%;height:100%;border:0;background:#000" loading="lazy"></iframe></div>`;
 }
 
+/* ===== Barbería (rubro barberia): agenda por barbero, cola sin cita, comisiones, su corte de siempre. Usa xa_citas (SQL 44) y Mi Xyro (SQL 64 + 74). ===== */
+const svDurMap=()=>Object.assign({},R.dur||{},CFG.svDur||{});
+const svDur=n=>+svDurMap()[n]||30;
+const profCom=p=>p&&p.com!=null&&p.com!==''?+p.com:50;
+const corteDe=x=>{const t=String(x&&x.nota||'').split(' · ').find(y=>y.startsWith('✂️ '));return t?t.slice(3).trim():''};
+const nowMin=()=>{const n=new Date();return n.getHours()*60+n.getMinutes()};
+// Primer hueco libre de un barbero hoy desde ahora (la cola sin cita no respeta horario: llegó y espera)
+function libreDesde(pid,dur){const H=hoy(),ocu=citVivas(H).filter(x=>x.prof===pid&&['agendada','confirmada','llego'].includes(x.estado)),d=+dur||30;let m=Math.ceil(nowMin()/5)*5;
+ for(let i=0;i<200;i++){const ch=ocu.find(x=>citMin(x)<m+d&&citFin(x)>m);if(!ch)return m;m=Math.ceil(citFin(ch)/5)*5}return m}
+function sinCita(pre){
+ const PS=profsL();if(!citOn())return toast('Falta activar la agenda (SQL 44)');if(!PS.length)return isAdmin()?editProfs():toast('Pídele al administrador que agregue a los barberos');
+ const SV=S.pla.filter(p=>p.activo!==false),mp=miProf(),lab=c=>c.nombre+(c.telefono?' · '+c.telefono:'');
+ form('🚶 Llegó sin cita',[{k:'pac',l:'Nombre del cliente (escribe para buscarlo)',v:pre&&pre.c?lab(pre.c):'',req:1,dl:S.cli.slice(0,4000).map(lab),ph:'Ej. Jorge'},
+  {k:'servicio',l:'Servicio',t:'sel',v:(SV.find(p=>/^corte/i.test(p.nombre)&&!/niñ/i.test(p.nombre))||SV[0]||{}).nombre||'',o:SV.map(p=>[p.nombre,p.nombre+' · '+sol(p.precio)+' · '+svDur(p.nombre)+' min'])},
+  {k:'prof',l:'Con quién',t:'opts',v:mp?mp.id:'auto',o:(mp?[]:[['auto','⚡ El primero libre']]).concat(PS.map(p=>[p.id,p.n])),on:(fm,val)=>{
+   fm.querySelector('[data-k=prof]').insertAdjacentHTML('afterend','<p class="mu sm" id="scW" style="margin:-4px 0 6px"></p>');const w=fm.querySelector('#scW');
+   const up=()=>{const v=val(),d=svDur(v.servicio),L=(v.prof==='auto'?PS:PS.filter(p=>p.id===v.prof)).map(p=>[p,libreDesde(p.id,d)]).sort((a,b)=>a[1]-b[1]),b=L[0];if(!b)return;const e=b[1]-nowMin();w.innerHTML=e<=2?`✅ <b>${esc(b[0].n)}</b> lo atiende ahora.`:`⏱️ <b>${esc(b[0].n)}</b> se libera a las <b>${h12(mh(b[1]))}</b> (unos ${e} min de espera).`};
+   fm.addEventListener('change',up);fm.addEventListener('click',()=>setTimeout(up,30));up()}}],async v=>{
+  const d=svDur(v.servicio),c0=v.pac.trim(),q=c0.toLowerCase(),L=(v.prof==='auto'?PS:PS.filter(p=>p.id===v.prof)).map(p=>[p,libreDesde(p.id,d)]).sort((a,b)=>a[1]-b[1]),[p,m]=L[0];
+  let c=S.cli.find(c=>lab(c).toLowerCase()===q)||S.cli.find(c=>c.nombre.toLowerCase()===q);
+  if(!c){c=await DB.ins('cli',{nombre:c0.replace(/\s+/g,' '),num:nextNum(),codigo:codigo(),creado:new Date().toISOString()});S.cli.sort((a,b)=>a.nombre.localeCompare(b.nombre));ixOff()}
+  const sv=SV.find(s=>s.nombre===v.servicio),ini=new Date(hoy()+'T'+mh(m)+':00'),row={cliente_id:c.id,prof:p.id,servicio:v.servicio||null,inicio:ini.toISOString(),dur:d,estado:'llego',nota:'🚶 Sin cita',precio:sv?+sv.precio:null,quien:ME.nombre||ROLES[ME.rol],creado:new Date().toISOString()};
+  if(SEDE)row.sede=SEDE;await DB.ins('cit',row);toast(`💺 ${c.nombre.split(' ')[0]} en cola con ${p.n}${m-nowMin()>2?' · le toca a las '+h12(mh(m)):' · ahora'}`);go()});
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-sincita]'))sinCita()});
+function colaCard(){
+ if(!citOn())return'';const H=hoy(),n=nowMin(),mp=miProf(),L=citVivas(H).filter(x=>x.estado==='llego'&&(!mp||x.prof===mp.id)).sort((a,b)=>a.inicio>b.inicio?1:-1);
+ return`<div class="card st" style="margin-bottom:14px"><h3>💺 Esperando ahora <span class="pill">${L.length}</span> <button class="btn sm p" data-sincita>🚶 Llegó sin cita</button></h3>${L.length?`<div class="tl">${L.map(x=>{const c=cli(x.cliente_id)||{nombre:'—'},e=citMin(x)-n;return`<a class="row" href="#" data-ct="${x.id}">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small><i class="agdot" style="background:${profC(x.prof)}"></i>${esc(profN(x.prof))}${x.servicio?' · '+esc(x.servicio):''}${corteDeCli(x.cliente_id)?' · ✂️ '+esc(corteDeCli(x.cliente_id)).slice(0,40):''}</small></span><span class="pill" style="background:${e<=2?'#3ddc9722':'#f5b54422'};color:${e<=2?'var(--ok)':'var(--wa)'}">${e<=2?'Le toca':'~'+e+' min'}</span></a>`}).join('')}</div>`:'<p class="mu sm">Nadie esperando. Si llega alguien sin cita, tócalo arriba y te digo quién se libera primero.</p>'}</div>`;
+}
+const corteDeCli=cid=>{const x=S.cit.filter(y=>y.cliente_id===cid&&y.estado==='atendida'&&corteDe(y)).sort((a,b)=>b.inicio>a.inicio?1:-1)[0];return x?corteDe(x):''};
+function terminarCorte(x){
+ const c=cli(x.cliente_id)||{nombre:'Cliente'},ult=corteDeCli(x.cliente_id),cob=!x.pago_id;
+ form('✂️ Terminar corte de '+esc(c.nombre.split(' ')[0]),[{k:'corte',l:'¿Qué le hiciste? Así la próxima vez sale igual (opcional)',t:'area',rows:2,v:ult,ph:'Ej. Fade medio 0.5 a los lados, 2 cm arriba con tijera, barba perfilada'}].concat(cob?[{k:'cob',t:'chk',l:'Cobrar ahora',v:true}]:[]),async v=>{
+  const base=String(x.nota||'').split(' · ').filter(t=>t&&!t.startsWith('✂️ ')),t=(v.corte||'').trim().slice(0,300);if(t)base.push('✂️ '+t);
+  await DB.upd('cit',x.id,{estado:'atendida',nota:base.join(' · ')||null});toast('✂️ Listo · '+c.nombre.split(' ')[0]);if(cob&&v.cob)setTimeout(()=>cobrarCita(x),150);else go()});
+}
+function libreTxt(p){const H=hoy(),h=profHoras(p,H),n=nowMin();if(!h)return['Descansa hoy','var(--mu)'];if(n>=h[1])return['Ya terminó su turno','var(--mu)'];const m=Math.max(libreDesde(p.id,15),h[0]);return m-n<=2?['✅ Libre ahora','var(--ok)']:['✂️ Ocupado · libre '+h12(mh(m)),'var(--wa)']}
+function inicioBarb(){
+ const H=hoy(),mes=H.slice(0,7),mp=miProf(),PS=mp?[mp]:profsL(),nh=new Date().getHours(),hr=nh<12?'Buenos días':nh<19?'Buenas tardes':'Buenas noches';
+ if(!S.cli.length&&!profsL().length)return`<div class="empty"><b>💈</b>Bienvenido a ${esc(nombre())}.<br>Empieza agregando a tus barberos y tus servicios.<br><br>${isAdmin()?'<button class="btn p" data-eprofs>💈 Agregar barberos</button> <a class="btn" href="#/planes">✂️ Servicios</a>':''}</div>`;
+ const pHoy=S.pag.filter(p=>ymd(new Date(p.fecha))===H),cob=pHoy.reduce((a,p)=>a+ +p.monto,0),cv=citVivas(H),at=cv.filter(x=>x.estado==='atendida'),pm=S.pag.filter(p=>mk(p.fecha)===mes),tk=pm.length?pm.reduce((a,p)=>a+ +p.monto,0)/pm.length:0;
+ const M=citIx(),vol=S.cli.filter(c=>{const o=M.get(c.id)||{};return o.u&&!o.p&&diff(ymd(new Date(o.u.inicio)),H)>=30}).length;
+ const d30=[...Array(30)].map((_,i)=>addD(H,i-29)),porD={};S.pag.forEach(p=>{const k=ymd(new Date(p.fecha));porD[k]=(porD[k]||0)+ +p.monto});
+ const top={};S.cit.filter(x=>x.estado==='atendida'&&mk(x.inicio)===mes&&x.servicio).forEach(x=>top[x.servicio]=(top[x.servicio]||0)+1);const TOP=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5),tmax=TOP.length?TOP[0][1]:1;
+ return`<div class="hi st"><div><p class="mu">${hr}${ME.nombre?', '+esc(ME.nombre.split(' ')[0]):''} 👋</p><h2>Así va <span class="grad">${esc(nombre())}</span> hoy</h2></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn p" data-sincita>🚶 Llegó sin cita</button><button class="btn" data-paso>💳 Cobro al paso</button></div></div>${sdCard()}
+ ${colaCard()}
+ <div class="g k4 st">
+  <a class="card kpi" href="#/agenda" onclick="agD=''"><i style="background:var(--a)"></i><small>Atendidos hoy</small><b data-n="${at.length}">0</b><span class="tr">${cv.filter(x=>['agendada','confirmada'].includes(x.estado)).length} citas por venir</span></a>
+  <a class="card kpi" href="#/caja"><i style="background:var(--b)"></i><small>Cobrado hoy</small><b data-n="${Math.round(cob)}" data-f="s">0</b><span class="tr">${pHoy.length} cobros</span></a>
+  <a class="card kpi" href="#/reportes"><i style="background:var(--ok)"></i><small>Ticket promedio del mes</small><b data-n="${Math.round(tk)}" data-f="s">0</b><span class="tr">${pm.length} cobros en ${MES[+mes.slice(5)-1]}</span></a>
+  <a class="card kpi" href="#/seguimiento" onclick="sgD='volver'"><i style="background:var(--wa)"></i><small>Ya les toca corte</small><b data-n="${vol}">0</b><span class="tr">más de 30 días sin venir</span></a>
+ </div>
+ <div class="card st" style="margin-top:14px"><h3>💈 Barberos hoy ${isSup()?'<a class="mu sm" href="#/comisiones">ver comisiones</a>':''}</h3><div class="tl">${PS.map(p=>{const L=at.filter(x=>x.prof===p.id),m=L.reduce((a,x)=>{const g=x.pago_id&&S.pag.find(y=>y.id===x.pago_id);return a+(g?+g.monto:0)},0),[t,col]=libreTxt(p);return`<div class="row"><i class="agdot" style="background:${esc(p.color||'#8d8fa8')};width:12px;height:12px"></i><span class="nm"><b>${esc(p.n)}</b><small style="color:${col}">${esc(t)}</small></span><span class="mu sm">${L.length} cortes</span><b>${sol(m)}</b></div>`}).join('')}</div></div>
+ <div class="g g2 st" style="margin-top:14px">
+  <div class="card"><h3>Ingresos · últimos 30 días <span class="grad" style="font-size:20px">${sol(d30.reduce((a,d)=>a+(porD[d]||0),0))}</span></h3>${area(d30.map(d=>porD[d]||0))}<div class="hrs"><span>${fF(d30[0])}</span><span>${fF(d30[15])}</span><span>Hoy</span></div></div>
+  <div class="card"><h3>✂️ Lo más pedido de ${MES[+mes.slice(5)-1]}</h3>${TOP.length?TOP.map(([n,k])=>`<div style="margin:8px 0"><div class="row" style="justify-content:space-between;padding:0"><span class="sm">${esc(n)}</span><b class="sm">${k}</b></div><div style="height:6px;border-radius:9px;background:var(--line)"><i style="display:block;height:100%;width:${Math.round(k/tmax*100)}%;border-radius:9px;background:var(--a)"></i></div></div>`).join(''):'<p class="mu sm">Aún no hay cortes este mes.</p>'}</div>
+ </div>
+ <div style="margin-top:14px">${citHoyCard()}</div>`;
+}
+function socioBarb(){
+ const c=cli(arg);if(!c)return`<div class="empty"><b>🤔</b>No encontramos a este cliente.<br><br><a class="btn" href="#/socios">Volver</a></div>`;
+ const L=S.cit.filter(x=>x.cliente_id===c.id),at=L.filter(x=>x.estado==='atendida').sort((a,b)=>b.inicio>a.inicio?1:-1),pags=S.pag.filter(p=>p.cliente_id===c.id),tot=pags.reduce((a,p)=>a+ +p.monto,0);
+ const cada=at.length>1?Math.round(diff(ymd(new Date(at[at.length-1].inicio)),ymd(new Date(at[0].inicio)))/(at.length-1)):0,ult=at[0],cortes=at.filter((x,i,A)=>corteDe(x)&&A.findIndex(y=>corteDe(y)===corteDe(x))===i).slice(0,5),fav={};at.forEach(x=>fav[x.prof]=(fav[x.prof]||0)+1);const fp=Object.entries(fav).sort((a,b)=>b[1]-a[1])[0];
+ setTimeout(()=>{const e=$('#bEd');e&&(e.onclick=()=>nuevoCli(c));const k=$('#bCo');k&&(k.onclick=()=>cobrarPac(c));const s=$('#bSc');s&&(s.onclick=()=>sinCita({c}));const d=$('#bDel');d&&(d.onclick=async()=>{if(!confirm('¿Eliminar a '+c.nombre+'?'))return;try{await DB.del('cli',c.id);toast('Eliminado');location.hash='#/socios'}catch(er){toast(er.message)}})});
+ return`<div class="fx st">
+ <div class="card pf">
+  ${av(c,'width:96px;height:96px;border-radius:30px;font-size:30px')}
+  <div><h2 style="font-size:22px;letter-spacing:-.02em">${esc(c.nombre)}</h2><p class="mu sm">${esc([c.num&&'Cliente N.º '+c.num,c.telefono,edad(c.nacimiento)].filter(Boolean).join(' · '))}</p></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center"><span class="pill" style="background:#ffffff10">✂️ ${at.length} visitas</span>${cada?`<span class="pill" style="background:#ffffff10">🔁 Viene cada ~${cada} días</span>`:''}${ult?`<span class="pill" style="background:#ffffff10">Última: ${fF(ult.inicio)}</span>`:''}${fp?`<span class="pill" style="background:#ffffff10">💈 Su barbero: ${esc(profN(fp[0]))}</span>`:''}${isProf()?'':`<span class="pill" style="background:#ffffff10">💵 ${sol(tot)} en total</span>`}</div>
+  <div class="acts"><button class="btn p" data-ag="${c.id}">🗓️ Agendar cita</button><button class="btn" id="bSc">🚶 En cola ahora</button>${isProf()?'':'<button class="btn" id="bCo">💳 Cobrar</button>'}${c.telefono?`<a class="btn" target="_blank" rel="noopener" href="${waLink(c,'Hola '+c.nombre.split(' ')[0]+' 💈, te escribimos de '+nombre()+'.')}">📲 WhatsApp</a>`:''}<button class="btn" data-app="${c.id}">📱 Conectar a su Mi Xyro</button><button class="btn" id="bEd">✏️ Editar</button>${isAdmin()?'<button class="btn bad" id="bDel">🗑️ Eliminar</button>':''}</div>
+  ${c.notas?`<p class="mu sm" style="text-align:left;width:100%">📝 ${esc(c.notas)}</p>`:''}
+ </div>
+ <div class="g">
+  <div class="card"><h3>✂️ Cómo le gusta su corte</h3>${cortes.length?`<div class="tl">${cortes.map(x=>`<a class="row" href="#" data-ct="${x.id}"><span class="nm"><b>${esc(corteDe(x))}</b><small>${fF(x.inicio)} · ${esc(profN(x.prof))}${x.servicio?' · '+esc(x.servicio):''}</small></span></a>`).join('')}</div>`:'<p class="mu sm">Cuando el barbero toca «✂️ Terminar corte» puede anotar qué le hizo (ej. fade 0.5, 2 cm arriba). Aquí sale para que la próxima vez quede igual.</p>'}</div>
+  ${citCard(c)}
+  ${isProf()?'':`<div class="card"><h3>Pagos</h3><div class="tl">${pags.slice(0,12).map(p=>`<a class="row" href="#" data-p="${p.id}"><span class="nm"><b>${esc(p.concepto||'Pago')}</b><small>${fF(p.fecha)} · ${esc(p.metodo||'')}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}</small></span><b>${sol(p.monto)}</b> 🖨️</a>`).join('')||'<p class="mu">Sin pagos</p>'}</div></div>`}
+ </div></div>`;
+}
+function segBarb(){
+ const H=hoy(),M=citIx(),t30=addD(H,-30),n1=c=>c.nombre.split(' ')[0],at=cid=>S.cit.filter(x=>x.cliente_id===cid&&x.estado==='atendida');
+ const T={
+  volver:['🔁','Ya les toca corte',S.cli.filter(c=>{const o=M.get(c.id)||{};return o.u&&!o.p&&diff(ymd(new Date(o.u.inicio)),H)>=30}).sort((a,b)=>(M.get(b.id).u.inicio>M.get(a.id).u.inicio?1:-1)),c=>`Hola ${n1(c)} 💈, ¿ya toca corte? En ${nombre()} te guardamos tu espacio. Reserva tu hora en Mi Xyro o respóndenos por aquí.`,c=>'Último corte: '+fF((M.get(c.id)||{}).u.inicio)+' · hace '+diff(ymd(new Date(M.get(c.id).u.inicio)),H)+' días'],
+  nuevos:['🆕','Vinieron una vez',S.cli.filter(c=>{const o=M.get(c.id)||{},a=at(c.id);if(a.length!==1||o.p)return false;const d=diff(ymd(new Date(a[0].inicio)),H);return d>=10&&d<=60}),c=>`Hola ${n1(c)} 👋, gracias por venir a ${nombre()}. ¿Qué tal te quedó el corte? Cuando quieras el siguiente, reserva en Mi Xyro y te atendemos sin esperar.`,c=>'Vino el '+fF(at(c.id)[0].inicio)],
+  novino:['⛔','No vinieron',S.cli.filter(c=>!(M.get(c.id)||{}).p&&S.cit.some(x=>x.cliente_id===c.id&&x.estado==='no_vino'&&ymd(new Date(x.inicio))>=t30)),c=>`Hola ${n1(c)} 💈, te esperábamos en ${nombre()}. ¿Te reprogramamos? Dinos qué día y hora te queda mejor.`,c=>{const x=S.cit.filter(x=>x.cliente_id===c.id&&x.estado==='no_vino').sort((a,b)=>b.inicio>a.inicio?1:-1)[0];return'Faltó el '+fF(x.inicio)}],
+  cumple:['🎂','Cumpleaños',S.cli.filter(c=>c.nacimiento&&c.nacimiento.slice(5)===H.slice(5)),c=>`¡Feliz cumpleaños ${n1(c)}! 🎉 Todo el equipo de ${nombre()} te saluda. Ven por tu corte de cumpleaños 💈`,c=>edad(c.nacimiento)]
+ };
+ if(!T[sgD])sgD='volver';const[ic,ti,L,msg,sub]=T[sgD];
+ setTimeout(()=>$$('[data-sg]').forEach(b=>b.onclick=()=>{sgD=b.dataset.sg;go()}));
+ return`<div class="hi"><div><h2>Seguimiento</h2><p class="mu">A quién escribirle hoy para que vuelva a cortarse contigo.</p></div></div>
+ <div class="chips">${Object.entries(T).map(([k,v])=>`<button class="chip ${k===sgD?'on':''}" data-sg="${k}">${v[0]} ${v[1]}<span>${v[2].length}</span></button>`).join('')}</div>
+ <div class="card" style="padding:8px"><div class="tl">${L.slice(0,200).map(c=>`<div class="row">${av(c)}<a class="nm" href="#/socio/${c.id}"><b>${esc(c.nombre)}</b><small>${esc(sub(c))}</small></a>${tel(c.telefono)?`<a class="btn sm" target="_blank" rel="noopener" href="${waLink(c,msg(c))}">📲</a>`:''}<button class="btn sm" data-ag="${c.id}">🗓️</button></div>`).join('')||`<div class="empty">${ic} Nadie en «${ti}» ahora mismo 👌</div>`}</div></div>`;
+}
+/* Comisiones: lo cobrado en cortes por cada barbero × su %. El barbero solo ve lo suyo. */
+let cmR='hoy';
+function comisiones(){
+ const H=hoy(),mp=miProf(),PS=mp?[mp]:profsT().filter(p=>p.activo!==false||S.cit.some(x=>x.prof===p.id)),R0={hoy:[H,H],'7':[addD(H,-6),H],mes:[H.slice(0,8)+'01',H],mesp:(()=>{const d=new Date(H.slice(0,8)+'01T12:00:00');d.setDate(0);const f=ymd(d);return[f.slice(0,8)+'01',f]})()},[a,b]=R0[cmR]||R0.hoy;
+ if(isProf()&&!mp)return`<div class="empty"><b>💸</b>Tu cuenta aún no está unida a un barbero de la agenda. Pídele al administrador que ponga tu usuario en «💈 Barberos».</div>`;
+ const C=S.cit.filter(x=>x.pago_id&&x.estado!=='cancelada'&&(()=>{const d=ymd(new Date(x.inicio));return d>=a&&d<=b})()),pg=x=>{const p=S.pag.find(y=>y.id===x.pago_id);return p?+p.monto:0};
+ const F=PS.map(p=>{const L=C.filter(x=>x.prof===p.id),t=L.reduce((s,x)=>s+pg(x),0),k=profCom(p);return{p,L,t,k,g:Math.round(t*k)/100}}).filter(r=>mp||r.L.length||r.p.activo!==false);
+ const sinCob=S.cit.filter(x=>x.estado==='atendida'&&!x.pago_id&&(!mp||x.prof===mp.id)&&(()=>{const d=ymd(new Date(x.inicio));return d>=a&&d<=b})()).length;
+ const T=F.reduce((s,r)=>s+r.t,0),G=F.reduce((s,r)=>s+r.g,0),per={hoy:'hoy','7':'los últimos 7 días',mes:'este mes',mesp:'el mes pasado'}[cmR];
+ const txt=()=>`💈 ${nombre()} · comisiones de ${per} (${fF(a)}${a!==b?' al '+fF(b):''})\n`+F.map(r=>`• ${r.p.n}: ${r.L.length} servicios · ${sol(r.t)} × ${r.k}% = ${sol(r.g)}`).join('\n')+`\nTotal a pagar: ${sol(G)}`;
+ setTimeout(()=>{$$('[data-cmr]').forEach(x=>x.onclick=()=>{cmR=x.dataset.cmr;go()});const cp=$('#cmCp');cp&&(cp.onclick=async()=>{try{await navigator.clipboard.writeText(txt());toast('📋 Copiado. Pégalo en WhatsApp')}catch(_){toast('No pude copiar')}});const pr=$('#cmPr');pr&&(pr.onclick=editProfs)});
+ return`<div class="hi"><div><h2>${mp?'💸 Mis ganancias':'💸 Comisiones'}</h2><p class="mu">${mp?'Lo que llevas ganado por tus servicios cobrados.':'Cuánto le toca a cada barbero por los servicios que cobró. Se calcula solo con su % de comisión.'}</p></div>${mp?'':`<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="cmCp">📋 Copiar resumen</button>${isAdmin()?'<button class="btn" id="cmPr">✏️ Cambiar %</button>':''}</div>`}</div>
+ <div class="chips">${[['hoy','Hoy'],['7','7 días'],['mes','Este mes'],['mesp','Mes pasado']].map(([k,t])=>`<button class="chip ${cmR===k?'on':''}" data-cmr="${k}">${t}</button>`).join('')}</div>
+ <div class="g k4 st" style="margin:12px 0">
+  <div class="card kpi"><i style="background:var(--a)"></i><small>Servicios cobrados</small><b data-n="${F.reduce((s,r)=>s+r.L.length,0)}">0</b><span class="tr">${sinCob?sinCob+' atendidos sin cobrar':'todo cobrado ✅'}</span></div>
+  <div class="card kpi"><i style="background:var(--b)"></i><small>${mp?'Cobrado por ti':'Cobrado en servicios'}</small><b data-n="${Math.round(T)}" data-f="s">0</b><span class="tr">${per}</span></div>
+  <div class="card kpi"><i style="background:var(--ok)"></i><small>${mp?'Tu ganancia ('+profCom(mp)+'%)':'Comisiones a pagar'}</small><b data-n="${Math.round(G)}" data-f="s">0</b><span class="tr">${mp?'sin propinas':'para tus barberos'}</span></div>
+  ${mp?'':`<div class="card kpi"><i style="background:var(--wa)"></i><small>Queda para la barbería</small><b data-n="${Math.round(T-G)}" data-f="s">0</b><span class="tr">antes de gastos</span></div>`}
+ </div>
+ <div class="card st" style="padding:8px"><div class="tl">${F.map(r=>`<details class="row" style="display:block"><summary style="display:flex;gap:10px;align-items:center;cursor:pointer;list-style:none"><i class="agdot" style="background:${esc(r.p.color||'#8d8fa8')};width:12px;height:12px"></i><span class="nm"><b>${esc(r.p.n)}</b><small>${r.L.length} servicios · ${sol(r.t)} × ${r.k}%</small></span><b style="color:var(--ok)">${sol(r.g)}</b></summary><div class="tl" style="margin-top:6px">${r.L.sort((x,y)=>y.inicio>x.inicio?1:-1).slice(0,60).map(x=>{const c=cli(x.cliente_id)||{nombre:'—'};return`<a class="row" href="#" data-ct="${x.id}"><span class="nm"><b>${esc(x.servicio||'Servicio')}</b><small>${fF(x.inicio)} ${fH(x.inicio)} · ${esc(c.nombre)}</small></span><span class="sm">${sol(pg(x))}</span></a>`}).join('')||'<p class="mu sm" style="padding:6px">Sin servicios cobrados.</p>'}</div></details>`).join('')||'<div class="empty">Aún no hay barberos.</div>'}</div></div>
+ <p class="mu sm" style="margin-top:8px">Cuenta solo los servicios cobrados desde la cita (💳 Cobrar o ✂️ Terminar corte → Cobrar). Las ventas de productos no suman comisión.</p>`;
+}
+/* Mi web de la barbería (contenido 'barber'): textos, fotos y secciones. Servicios, barberos, horario y sedes salen solos. */
+function webBarb(){
+ const cc=String(CFG.color||'#d4a24c').replace('#',''),u=CFG.web||('/barberia/?s='+encodeURIComponent(SLUG||'')),uu=DEMO?'/barberia/?n='+encodeURIComponent(nombre())+'&c='+cc:u;
+ setTimeout(()=>{const b=$('#wCam');b&&(b.onclick=()=>DEMO?toast('En tu versión llega a XyroStudio'):nuevoTicket('cambio','Cambio en mi web'));const e=$('#wEd');e&&(e.onclick=editWebBarb)});
+ return`<div class="hi"><div><h2>🌐 Mi web</h2><p class="mu">Se actualiza sola: tus servicios, barberos, días de atención y sedes salen de aquí. Tú eliges textos, fotos y qué secciones se ven. Las citas se reservan en Mi Xyro (la web muestra su QR).</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" target="_blank" rel="noopener" href="${esc(uu)}">Ver mi web ↗</a>${ME&&['admin','supervisor','gestor'].includes(ME.rol)?'<button class="btn p" id="wEd">✏️ Editar mi web</button>':''}<button class="btn" id="wCam">✏️ Pedir cambio de textos o fotos</button></div></div>
+ <div class="card" style="padding:0;overflow:hidden;height:70vh"><iframe src="${esc(uu)}" title="Mi web" style="width:100%;height:100%;border:0;background:#000" loading="lazy"></iframe></div>`;
+}
+async function editWebBarb(){let v={};
+ try{if(DEMO)v=CFG._barber||{};else{const{data}=await sb.from('contenido').select('valor').eq('sitio_id',SID).eq('clave','barber').maybeSingle();v=(data&&data.valor)||{}}}catch(_){}
+ const fo=v.fotos||{},sec=v.sec||{},gal=fo.gal||[],ON=k=>sec[k]!==false;
+ const SECS=[['serv','✂️ Servicios'],['equipo','💈 Barberos'],['gal','📸 Galería de cortes'],['visita','📍 Horario y cómo llegar'],['app','📱 Aviso para reservar en Mi Xyro']];
+ const F=[{t:'h',k:'h1',l:'🏠 Portada'},{k:'hero',l:'Título grande',v:v.hero||'',ph:'Tu estilo,',half:1},{k:'lema',l:'Segunda línea',v:v.lema||'',ph:'bien hecho.',half:1},
+  {k:'sub',l:'Frase debajo del título',t:'area',rows:2,v:v.sub||'',ph:'Ej. Cortes clásicos y modernos, barba con toalla caliente y cero espera si reservas.'},
+  {k:'distrito',l:'Distrito',v:v.distrito||'',ph:'Ej. Villa María del Triunfo',half:1},{k:'anios',l:'Años cortando',v:v.anios||'',ph:'8',half:1},
+  {k:'f_hero',t:'img',l:'Foto de portada',v:fo.hero,pref:'web',ayuda:'Usa una foto real de tu barbería o de un corte tuyo.'},
+  {t:'h',k:'h2',l:'🧩 Secciones que se ven'},{k:'sec',t:'multi',l:'Toca para mostrar u ocultar',v:SECS.filter(([k])=>ON(k)).map(([k])=>k),o:SECS},
+  {t:'h',k:'h3',l:'📸 Galería (hasta 6 fotos de tus cortes)'}];
+ for(let i=0;i<6;i++)F.push({k:'g'+i,t:'img',l:'Foto '+(i+1),v:gal[i],pref:'web'});
+ F.push({t:'h',k:'h4',l:'📱 Aviso de Mi Xyro'},{k:'appT',l:'Título',v:v.appT||'',ph:'Reserva tu corte en Mi Xyro'},{k:'appX',l:'Mensaje',t:'area',rows:2,v:v.appX||'',ph:'Elige servicio, barbero y una hora libre. Llegas y te sientas.'},
+  {k:'pagos',l:'Medios de pago (separados por coma)',v:(v.pagos||[]).join(', '),ph:'💵 Efectivo, 📱 Yape, 📱 Plin, 💳 Tarjeta'});
+ form('🌐 Editar mi web',F,async x=>{const t=(k,n)=>(x[k]||'').trim().slice(0,n)||null;
+  const val=Object.assign({},v,{hero:t('hero',40),lema:t('lema',40),sub:t('sub',220),distrito:t('distrito',40),anios:t('anios',3),appT:t('appT',60),appX:t('appX',200),
+   sec:Object.fromEntries(SECS.map(([k])=>[k,x.sec.includes(k)])),pagos:(x.pagos||'').split(',').map(q=>q.trim()).filter(Boolean).slice(0,8),
+   fotos:Object.assign({},fo,{hero:x.f_hero||null,gal:[0,1,2,3,4,5].map(i=>x['g'+i]).filter(Boolean)})});
+  if(!val.pagos.length)delete val.pagos;
+  if(DEMO){CFG._barber=val;saveDemo()}else{const{error}=await sb.from('contenido').upsert({sitio_id:SID,clave:'barber',valor:val});if(error)throw new Error('No pude guardar ('+error.message+'). Pídelo con «Pedir cambio».')}
+  toast('🌐 Tu web se actualizó');go()});
+}
+// Barbería: lo compartido con el consultorio (solicitudes de Mi Xyro, chats) dice «cliente» y «servicio», no «paciente» ni «tratamiento».
+const BTX=[[/\bpacientes\b/g,'clientes'],[/\bPacientes\b/g,'Clientes'],[/\bpaciente\b/g,'cliente'],[/\bPaciente\b/g,'Cliente'],[/\btratamientos\b/g,'servicios'],[/\bTratamientos\b/g,'Servicios'],[/\btratamiento\b/g,'servicio'],[/\bTratamiento\b/g,'Servicio'],[/\bProfesionales\b/g,'Barberos'],[/\bProfesional\b/g,'Barbero'],[/\bconsultorio\b/g,'barbería'],[/en sala\b/g,'esperando']];
+function barbFix(n){const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);let t;while(t=w.nextNode()){const v=t.nodeValue;if(!/aciente|ratamiento|rofesional|consultorio|en sala/.test(v))continue;let x=v;BTX.forEach(([r,q])=>x=x.replace(r,q));if(x!==v)t.nodeValue=x}
+ n.querySelectorAll&&n.querySelectorAll('[placeholder]').forEach(i=>{const v=i.placeholder;if(/aciente|ratamiento/.test(v)){let x=v;BTX.forEach(([r,q])=>x=x.replace(r,q));i.placeholder=x}})}
+let BTO=null;function barbTxt(){if(BTO)return;BTO=new MutationObserver(M=>M.forEach(m=>m.addedNodes.forEach(n=>(n.nodeType===1||n.nodeType===3)&&barbFix(n.nodeType===3?n.parentNode||document.body:n))));BTO.observe(document.body,{childList:true,subtree:true});barbFix(document.body)}
+/* Demo de barbería: 3 barberos, 5 semanas de cortes, cola de hoy y notas de cómo le gusta a cada uno */
+const CORTES_B=['Fade bajo 0.5, arriba 3 cm con tijera','Mid fade 1, raya al costado','Taper en la nuca, arriba texturizado','Corte clásico con tijera, patillas cortas','High fade 0, arriba peinado hacia atrás','Barba perfilada en línea, bigote recortado','Buzz cut 2 parejo','Fade 0.5 con diseño de línea al costado'];
+function demoBarber(){
+ CFG.profesionales=[{id:'p1',n:'Kevin Ramos',esp:'Fades y diseños',color:'#d4a24c',dias:[1,2,3,4,5,6],desde:'10:00',hasta:'21:00',dur:30,com:50,cuenta:'kevin',u:'d-profesional'},{id:'p2',n:'Luis «El Profe» Vega',esp:'Clásicos y barba con toalla',color:'#3ad6ff',dias:[2,3,4,5,6,0],desde:'10:00',hasta:'20:00',dur:30,com:50},{id:'p3',n:'Brayan Soto',esp:'Cortes de niño y tintes',color:'#3ddc97',dias:[1,3,5,6,0],desde:'13:00',hasta:'21:00',dur:30,com:40}];
+ CFG.sellos={on:true,meta:8,premio:'Un corte gratis'};
+ S.cit=[];S.his=[];S.pre=[];const rnd=a=>a[Math.floor(Math.random()*a.length)],H=hoy(),n=nowMin(),PA=S.cli.slice(),W=['Corte clásico','Corte + barba','Corte + barba','Fade / degradado','Fade / degradado','Fade / degradado','Perfilado de barba','Corte niño','Cejas','Afeitado clásico con toalla','Diseño / líneas','Tinte / color'],fav=new Map;
+ PA.forEach((c,i)=>{fav.set(c.id,[CFG.profesionales[i%3].id,rnd(CORTES_B)])});
+ for(let o=-35;o<=6;o++){const d=addD(H,o),sab=new Date(d+'T12:00:00').getDay()>=5;
+  CFG.profesionales.forEach(p=>{const h=profHoras(p,d);if(!h)return;const pr=(o<0?.55:o===0?.6:Math.max(.08,.4-o*.05))+(sab?.15:0);
+   for(let m=h[0];m<h[1]-20;){if(Math.random()>pr){m+=30;continue}const sv=rnd(W),du=svDur(sv),pl=S.pla.find(x=>x.nombre===sv),c=Math.random()<.65?rnd(PA.filter(c=>fav.get(c.id)[0]===p.id)):rnd(PA),fin=o<0||(o===0&&m+du<=n),r=Math.random();
+    const es=fin?(r<.9?'atendida':r<.96?'no_vino':'cancelada'):o===0&&m<=n?'llego':o===0?(r<.6?'confirmada':'agendada'):(r<.25?'confirmada':'agendada');
+    const ini=new Date(d+'T'+mh(m)+':00'),paso=Math.random()<.45,x={id:uid(),cliente_id:c.id,prof:p.id,servicio:sv,inicio:ini.toISOString(),dur:du,estado:es,precio:pl?+pl.precio:null,quien:rnd(['Caja','Kevin Ramos','Lucía Ramos']),creado:new Date(+ini-(paso?6e5:864e5*(1+Math.floor(Math.random()*4)))).toISOString(),nota:paso?'🚶 Sin cita':null};
+    if(es==='atendida'){if(Math.random()<.7)x.nota=[x.nota,'✂️ '+fav.get(c.id)[1]].filter(Boolean).join(' · ');if(pl){const pg={id:uid(),cliente_id:c.id,concepto:sv,monto:pl.precio,metodo:rnd(['Efectivo','Efectivo','Yape','Yape','Plin','Tarjeta']),fecha:new Date(+ini+du*6e4).toISOString(),quien:p.n};S.pag.push(pg);x.pago_id=pg.id}}
+    S.cit.push(x);m+=du+(Math.random()<.3?10:0)}})}
+ // Cola de ahora: 3 esperando
+ [0,1,2].forEach(i=>{const p=CFG.profesionales[i%3],c=PA[10+i],sv=['Fade / degradado','Corte + barba','Corte clásico'][i];S.cit.push({id:uid(),cliente_id:c.id,prof:p.id,servicio:sv,inicio:new Date(Date.now()+(i*14+4)*6e4).toISOString(),dur:svDur(sv),estado:'llego',precio:(S.pla.find(x=>x.nombre===sv)||{}).precio||25,quien:'Caja',creado:new Date().toISOString(),nota:'🚶 Sin cita'})});
+ PA.forEach((c,i)=>{c.creado=new Date(Date.now()-(i%9===0?Math.random()*12:30+Math.random()*500)*864e5).toISOString()});
+ PA.slice(60,72).forEach(c=>{S.cit=S.cit.filter(x=>x.cliente_id!==c.id);const ini=new Date(addD(H,-(32+Math.floor(Math.random()*40)))+'T17:00:00');S.cit.push({id:uid(),cliente_id:c.id,prof:'p1',servicio:'Fade / degradado',inicio:ini.toISOString(),dur:40,estado:'atendida',precio:30,quien:'Caja',creado:ini.toISOString(),nota:'✂️ '+fav.get(c.id)[1]})});
+ S.cit.sort((a,b)=>a.inicio>b.inicio?1:-1);
+}
+
 /* ===== Navegación ===== */
 const solPend=()=>(S.sol||[]).filter(x=>x.estado!=='resuelta'&&(!SEDE||!x.sede||String(x.sede)===SEDE)).length;
-const NAV=()=>{if(R.resto&&!isProf()&&!isCoach())return(ME&&ME.rol==='cafetin'?(miPuesto()==='cocina'?navMozo().filter(x=>['cocina','tienda','cuenta'].includes(x[0])):miPuesto()==='mozo'?navMozo().filter(x=>x[0]!=='cocina'):navMozo()):navResto()).filter(x=>!rutaOff(x[0]));let n=NAV0().filter(x=>!rutaOff(x[0]));if(R.citas&&!isProf()){n=n.filter(x=>!DENT_OFF.includes(x[0])).map(x=>x[0]==='planes'?['planes','🦷','Tratamientos']:x[0]==='miapp'?['miapp','📱','Pacientes en Mi Xyro']:x[0]==='tienda'?['tienda','🪥',tiendaN()]:x);if(citOn())n.splice(1,0,['agenda','🗓️','Agenda'+(sdN()?' ('+sdN()+')':'')]);if(isAdmin()){const i=n.findIndex(x=>xsDe(x[0])==='cfg');const vt=[].concat(CTL()?[]:[['xctl','🪥','Productos 🔒']],tiene('webs')?[]:[['xweb','🌐','Mi web 🔒']]);n.splice(i<0?n.length:i,0,...vt)}}return n};
-const NAV0=()=>{if(isProf())return[['agenda','🗓️','Mi agenda'+(sdN()?' ('+sdN()+')':'')],['socios','👥',R.clis],['cuenta','🔐','Mi cuenta']];if(isCoach())return[['rutinas','📋',(ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento')+(pdaN()?' ('+pdaN()+')':'')],['cuenta','🔐','Mi cuenta']];
+const NAV=()=>{if(R.resto&&!isProf()&&!isCoach())return(ME&&ME.rol==='cafetin'?(miPuesto()==='cocina'?navMozo().filter(x=>['cocina','tienda','cuenta'].includes(x[0])):miPuesto()==='mozo'?navMozo().filter(x=>x[0]!=='cocina'):navMozo()):navResto()).filter(x=>!rutaOff(x[0]));let n=NAV0().filter(x=>!rutaOff(x[0]));if(R.citas&&!isProf()){n=n.filter(x=>!DENT_OFF.includes(x[0])).map(x=>x[0]==='planes'?(R.barb?['planes','💈','Servicios']:['planes','🦷','Tratamientos']):x[0]==='miapp'?['miapp','📱',R.barb?'Clientes en Mi Xyro':'Pacientes en Mi Xyro']:x[0]==='tienda'?['tienda',R.barb?'🫙':'🪥',tiendaN()]:x);if(citOn())n.splice(1,0,['agenda','🗓️','Agenda'+(sdN()?' ('+sdN()+')':'')]);if(R.barb&&isSup()){const i=n.findIndex(x=>x[0]==='caja');n.splice(i<0?n.length:i+1,0,['comisiones','💸','Comisiones'])}if(isAdmin()){const i=n.findIndex(x=>xsDe(x[0])==='cfg');const vt=[].concat(CTL()?[]:[['xctl','🪥','Productos 🔒']],tiene('webs')?[]:[['xweb','🌐','Mi web 🔒']]);n.splice(i<0?n.length:i,0,...vt)}}return n};
+const NAV0=()=>{if(isProf())return[['agenda','🗓️','Mi agenda'+(sdN()?' ('+sdN()+')':'')],['socios','👥',R.clis]].concat(R.barb?[['comisiones','💸','Mis ganancias']]:[],[['cuenta','🔐','Mi cuenta']]);if(isCoach())return[['rutinas','📋',(ME.rol==='nutricionista'?'Planes de alimentación':'Planes de entrenamiento')+(pdaN()?' ('+pdaN()+')':'')],['cuenta','🔐','Mi cuenta']];
  if(ME&&ME.rol==='cafetin')return[['tienda','🥤',tiendaN()]].concat(mpVis()?[['pedidos','🍽️','Pedidos'+(mpNuevos()?' ('+mpNuevos()+')':'')]]:[],[['caja','💰','Caja']]).concat(tiene('webs')?[['web','🌐','Mi web']]:[],[['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL());
  const np=isSup()?solPend():0;
  return[['inicio','✨','Inicio'],['socios','👥',R.clis],['seguimiento','📌','Seguimiento'],['miapp','📱','Clientes en Mi Xyro'],['pruebas','🎟️','Días de prueba']].concat(waOn()?[['whatsapp','💬','WhatsApp'+(waPend()?' ('+waPend()+')':'')],['ventasbot','💳','Ventas del bot'+(vbPend()?' ('+vbPend()+')':'')]]:[],rutOn()?[['rutinas','📋','Rutinas y dietas'+(pdaN()?' ('+pdaN()+')':'')]]:[],[['kiosco','📷','Asistencia'],['tienda','🥤',tiendaN()]].concat(mpVis()?[['pedidos','🍽️','Pedidos de mesa'+(mpNuevos()?' ('+mpNuevos()+')':'')]]:[],[['caja','💰','Caja'],['solicitudes','📨','Solicitudes'+(np?' ('+np+')':'')],['reportes','📊','Reportes'],['metas','🎯','Metas'],['planes','🏷️','Planes']])).concat(tiene('webs')?[['web','🌐','Mi web']]:[]).concat(isAdmin()?[['equipo','👤','Equipo']].concat([['xyros','🧩','Integraciones'],['ajustes','⚙️','Ajustes']],!DEMO&&!NEED42?[['miplan','💳','Mi plan XyroStudio'+(xpDias()!=null&&xpDias()<=5?' (1)':'')]]:[]):[]).concat([['cuenta','🔐','Mi cuenta']]).filter(x=>x[0]!=='tienda'||CTL())};
 /* Servicios del gym: el admin apaga lo que su negocio no tiene y desaparece del menú (CFG.apagados). */
-const SVC=()=>[['tienda','🥤',tiendaN(),'Venta de productos con stock y caja propia',CTL()&&!R.resto],['pedidos','🍽️',R.resto?'Pedidos y cocina':'Pedidos de mesa',R.resto?'Mesas con QR, mozo, cocina y para llevar':'Los socios piden desde la mesa con un QR',CTL()&&!R.citas],['entreno','🏋️','Planes de entrenamiento','Rutinas y el rol Entrenador',rutOn()],['nutri','🥗','Nutrición','Dietas, citas con nutrición y el rol Nutricionista',rutOn()],['miapp','📱',R.citas?'Pacientes en Mi Xyro':'Clientes en Mi Xyro',R.resto?'Mi Xyro: carta, promos y pedidos en el celular de tus clientes':R.citas?'Mi Xyro: citas, tratamiento y promos en el celular de tus pacientes':'Mi Xyro: QR, promos y planes en el celular de tus socios',true],['citasapp','📅','Citas desde Mi Xyro','Tus pacientes piden su cita en Mi Xyro (tratamiento con precio y solo horarios libres) y tú la agendas con un toque',!!R.citas],['reservas','📅','Reservas de mesa','Tus clientes reservan desde Mi Xyro y te llega por WhatsApp. Apágalo si no tomas reservas.',!!R.resto],['pruebas','🎟️','Días de prueba','Agenda de clases de prueba para interesados',!R.citas&&!R.resto],['metas','🎯','Metas y bonos','Metas por sede y ranking de recepción',!R.citas&&!R.resto],['solicitudes','📨','Solicitudes','Recepción pasa casos al supervisor',!R.citas&&!R.resto]].filter(x=>x[4]);
+const SVC=()=>[['tienda','🥤',tiendaN(),'Venta de productos con stock y caja propia',CTL()&&!R.resto],['pedidos','🍽️',R.resto?'Pedidos y cocina':'Pedidos de mesa',R.resto?'Mesas con QR, mozo, cocina y para llevar':'Los socios piden desde la mesa con un QR',CTL()&&!R.citas],['entreno','🏋️','Planes de entrenamiento','Rutinas y el rol Entrenador',rutOn()],['nutri','🥗','Nutrición','Dietas, citas con nutrición y el rol Nutricionista',rutOn()],['miapp','📱',R.citas&&!R.barb?'Pacientes en Mi Xyro':'Clientes en Mi Xyro',R.resto?'Mi Xyro: carta, promos y pedidos en el celular de tus clientes':R.citas?'Mi Xyro: citas, tratamiento y promos en el celular de tus pacientes':'Mi Xyro: QR, promos y planes en el celular de tus socios',true],['citasapp','📅','Citas desde Mi Xyro',R.barb?'Tus clientes reservan en Mi Xyro (servicio, barbero y solo horarios libres) y tú la confirmas con un toque':'Tus pacientes piden su cita en Mi Xyro (tratamiento con precio y solo horarios libres) y tú la agendas con un toque',!!R.citas],['reservas','📅','Reservas de mesa','Tus clientes reservan desde Mi Xyro y te llega por WhatsApp. Apágalo si no tomas reservas.',!!R.resto],['pruebas','🎟️','Días de prueba','Agenda de clases de prueba para interesados',!R.citas&&!R.resto],['metas','🎯','Metas y bonos','Metas por sede y ranking de recepción',!R.citas&&!R.resto],['solicitudes','📨','Solicitudes','Recepción pasa casos al supervisor',!R.citas&&!R.resto]].filter(x=>x[4]);
 const svOff=k=>(CFG.apagados||[]).includes(k);
 const rutaOff=k=>k==='rutinas'?svOff('entreno')&&svOff('nutri'):k==='pedidos'?svOff('pedidos')||svOff('tienda'):['tienda','miapp','pruebas','metas','solicitudes'].includes(k)&&svOff(k);
 async function editPuestos(){const L=Object.entries(PERMS_()).filter(([k])=>k!=='admin');
@@ -1466,7 +1652,7 @@ async function editServicios(){const off=new Set(CFG.apagados||[]);
 // Menú por Xyro: cada sección dice de qué Xyro viene la función (Xyro Apps, Bots, Control, Webs) y al final Configuración.
 const NAVG=[['ventas','🧲','Ventas',['seguimiento','miapp','pruebas']],['gym','🏋️','Gimnasio',['rutinas','planes','solicitudes']],['res','📊','Resultados',['reportes','metas']],['cfg','⚙️','Configuración',['equipo','xyros','ajustes','miplan','cuenta']]];
 const XSEC=[['app','Xyro Apps'],['bot','Xyro Bots'],['ctl','Xyro Control'],['web','Xyro Webs'],['cfg','']];
-const xsDe=k=>['whatsapp','ventasbot','bots'].includes(k)?'bot':k==='xctl'?'ctl':k==='xweb'?'web':(k==='tienda'&&!R.resto)||k==='insumos'||k==='ganancias'||(k==='pedidos'&&!R.resto)?'ctl':k==='web'?'web':['equipo','xyros','ajustes','miplan','cuenta'].includes(k)?'cfg':'app';
+const xsDe=k=>k==='comisiones'?'app':['whatsapp','ventasbot','bots'].includes(k)?'bot':k==='xctl'?'ctl':k==='xweb'?'web':(k==='tienda'&&!R.resto)||k==='insumos'||k==='ganancias'||(k==='pedidos'&&!R.resto)?'ctl':k==='web'?'web':['equipo','xyros','ajustes','miplan','cuenta'].includes(k)?'cfg':'app';
 function navGrupos(n){const chico=n.length<=(R.resto?7:8);
  return XSEC.map(([x,h])=>{const L=n.filter(it=>xsDe(it[0])===x),top=[],G=NAVG.map(g=>({k:g[0],i:g[0]==='gym'?R.ico:g[1],t:g[0]==='gym'?R.n:g[2],L:[]}));
   L.forEach(it=>{const g=R.resto&&x==='app'?-1:NAVG.findIndex(g=>g[3].includes(it[0]));(g<0||chico&&x!=='cfg'?top:G[g].L).push(it)});
@@ -1491,7 +1677,8 @@ function go(){
  if(R.citas&&DENT_OFF.includes(ruta)){ruta='inicio';history.replaceState(null,'','#/inicio')}
  if(R.resto&&RES_OFF.includes(ruta)){ruta='inicio';history.replaceState(null,'','#/inicio')}
  if(!R.resto&&ruta==='cocina'){ruta='pedidos'}
- if(isProf()&&!['agenda','socios','socio','cuenta','mas','soporte'].includes(ruta)){ruta='agenda';history.replaceState(null,'','#/agenda')}
+ if(ruta==='comisiones'&&!(R.barb&&(isSup()||isProf()))){ruta='inicio';history.replaceState(null,'','#/inicio')}
+ if(isProf()&&!['agenda','socios','socio','cuenta','mas','soporte'].concat(R.barb?['comisiones']:[]).includes(ruta)){ruta='agenda';history.replaceState(null,'','#/agenda')}
  if(isCoach()&&!['rutinas','cuenta','mas','soporte'].includes(ruta)){ruta='rutinas';history.replaceState(null,'','#/rutinas')}
  if(rutaOff(ruta)){ruta=isCoach()?'cuenta':'inicio';history.replaceState(null,'','#/'+ruta)}
  if(ruta==='kiosco'){kiosco();ruta='inicio'}
@@ -1502,22 +1689,22 @@ function go(){
  if(ruta==='web'&&!tiene('webs'))ruta='xyros';
  if(ruta==='bots'&&(!tiene('bots')||!isAdmin()))ruta='xyros';
  if((ruta==='whatsapp'||ruta==='ventasbot')&&!waVer())ruta='inicio';
- const V={xweb:()=>{setTimeout(()=>location.replace('#/xyros/demoswebs'));return''},xctl:()=>{setTimeout(()=>location.replace('#/xyros/demoscontrol'));return''},ganancias,insumos:insumosV,cocina:cocinaV,pedidos:pedidosMesa,miapp:miApp,inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda}[ruta]||inicio;
+ const V={xweb:()=>{setTimeout(()=>location.replace('#/xyros/demoswebs'));return''},xctl:()=>{setTimeout(()=>location.replace('#/xyros/demoscontrol'));return''},ganancias,insumos:insumosV,cocina:cocinaV,pedidos:pedidosMesa,miapp:miApp,inicio,socios,socio,planes,caja,ajustes,tienda,reportes,mas,metas,equipo,cuenta:miCuenta,xyros,web:miWeb,seguimiento,solicitudes,rutinas,soporte,bots:misBots,whatsapp:waVista,ventasbot:vbVista,pruebas:pruebasV,miplan:miPlan,agenda,comisiones}[ruta]||inicio;
  const html=V();$('#v').innerHTML=`<div class="v">${ruta!=='miplan'?planAviso():''}${dmAviso()}${html}</div>`;$('#v').dataset.r=ruta;$('#main').scrollTop=0;countUp($('#v'));
- const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:citOn()?'🗓️ Cita':(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:R.citas?'＋ Tratamiento':'＋ Plan',caja:R.citas?'🚶 Cobro al paso':'＋ Cobro',ajustes:R.citas?'🗓️ Cita':'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket',agenda:'＋ Cita'};
+ const nt={inicio:'＋ '+R.cli,socios:'＋ '+R.cli,socio:citOn()?'🗓️ Cita':(()=>{const c=cli(arg);return c&&memDe(c.id)?'💳 Renovar':'💳 Asignar'})(),planes:R.barb?'＋ Servicio':R.citas?'＋ Tratamiento':'＋ Plan',caja:R.citas?'🚶 Cobro al paso':'＋ Cobro',ajustes:R.citas?'🗓️ Cita':'📷 Asistencia',tienda:'＋ Producto',reportes:'＋ '+R.cli,mas:'＋ '+R.cli,metas:isAdmin()?'＋ Meta':'＋ '+R.cli,equipo:'＋ Cuenta',rutinas:'＋ Plantilla',seguimiento:'＋ '+R.cli,solicitudes:'＋ Solicitud',soporte:'＋ Ticket',agenda:'＋ Cita',comisiones:'＋ Cita'};if(R.barb)Object.assign(nt,{inicio:'🚶 Sin cita',agenda:'🚶 Sin cita'});
  if(R.resto)Object.assign(nt,{insumos:'＋ Insumo',inicio:'＋ Pedido',pedidos:'＋ Pedido',cocina:'＋ Pedido',tienda:'＋ Plato',reportes:'＋ Pedido',mas:'＋ Pedido',miapp:'＋ Pedido',xyros:'＋ Pedido',web:'＋ Pedido'});
  $('#nuevoT').textContent=(nt[ruta]||'＋ Nuevo').slice(2);
- $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:R.citas?'Tratamientos y precios':'Planes',caja:'Caja',ajustes:'Ajustes',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',miapp:'Clientes en Mi Xyro',pruebas:'Días de prueba',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio',agenda:'Agenda',pedidos:R.resto?'Pedidos':'Pedidos de mesa',cocina:'Cocina',insumos:'Insumos y recetas'}[ruta]||'';
+ $('#tt').textContent={inicio:'Inicio',socios:R.clis,socio:'Ficha de '+R.cli.toLowerCase(),planes:R.barb?'Servicios y precios':R.citas?'Tratamientos y precios':'Planes',caja:'Caja',ajustes:'Ajustes',comisiones:isProf()?'Mis ganancias':'Comisiones',tienda:tiendaN(),reportes:'Reportes',mas:'Más',metas:'Metas',equipo:'Equipo',cuenta:'Mi cuenta',xyros:'Integraciones',web:'Mi web',bots:'Xyro Bots',whatsapp:'WhatsApp',ventasbot:'Ventas del asistente',seguimiento:'Seguimiento',miapp:'Clientes en Mi Xyro',pruebas:'Días de prueba',solicitudes:'Solicitudes de revisión',rutinas:'Rutinas y dietas',soporte:'Soporte XyroStudio',agenda:'Agenda',pedidos:R.resto?'Pedidos':'Pedidos de mesa',cocina:'Cocina',insumos:'Insumos y recetas'}[ruta]||'';
  const o2=$('#out2');o2&&(o2.onclick=e=>{e.preventDefault();salir()});
 }
-$('#nuevo').onclick=()=>{if(ruta==='insumos')return editIns();if(R.resto&&!['tienda','equipo','cuenta','soporte','caja'].includes(ruta))return mpTomar();(({socio:()=>{const c=cli(arg);c&&(citOn()?nuevaCita({c}):cobrar(c))},planes:()=>isAdmin()?(R.citas?editTrat():editPlan()):toast('Solo el administrador edita planes'),caja:()=>R.citas?cobroPaso():cobroSuelto(),ajustes:()=>R.citas?nuevaCita():kiosco(),tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket(),agenda:()=>nuevaCita()})[ruta]||nuevoCli)()};
+$('#nuevo').onclick=()=>{if(ruta==='insumos')return editIns();if(R.barb&&['inicio','agenda'].includes(ruta))return sinCita();if(R.resto&&!['tienda','equipo','cuenta','soporte','caja'].includes(ruta))return mpTomar();(({socio:()=>{const c=cli(arg);c&&(citOn()?nuevaCita({c}):cobrar(c))},planes:()=>isAdmin()?(R.citas?editTrat():editPlan()):toast('Solo el administrador edita planes'),caja:()=>R.citas?cobroPaso():cobroSuelto(),ajustes:()=>R.citas?nuevaCita():kiosco(),tienda:()=>puedeProd()?editProd():toast('Pídele al supervisor que cree el producto'),solicitudes:()=>nuevaSol(),rutinas:()=>editarPlan(null,rtT==='nutri'||ME.rol==='nutricionista'?'nutri':'entreno'),metas:()=>isAdmin()?editMeta():nuevoCli(),equipo:()=>isAdmin()&&nuevaCuenta(),cuenta:()=>cambiarClave(),soporte:()=>nuevoTicket(),agenda:()=>nuevaCita()})[ruta]||nuevoCli)()};
 $('#q').addEventListener('input',e=>{qtxt=e.target.value;if(ruta!=='socios'){location.hash='#/socios'}else{const l=$('#lst');l&&(l.innerHTML=lista())}});
 addEventListener('hashchange',go);
 addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();if(ruta!=='socios')location.hash='#/socios';setTimeout(()=>{const s=$('#q2');s&&s.focus()},80)}});
 
 /* ===== Vistas ===== */
 let NFUND=null;
-const NFR={gym:'gimnasios',consultorio:'consultorios',restaurante:'restaurantes',cafeteria:'cafeterías',academia:'academias'};
+const NFR={gym:'gimnasios',consultorio:'consultorios',barberia:'barberías',restaurante:'restaurantes',cafeteria:'cafeterías',academia:'academias'};
 function nfBan(){if(!NFUND||LS.g('xa-nf-'+SLUG,'')==='1')return'';setTimeout(()=>{const x=$('#nfX');x&&(x.onclick=()=>{LS.s('xa-nf-'+SLUG,'1');$('#nfB').remove()})},0);
  return`<div class="card" id="nfB" style="border:1px solid #e6b84d66;background:linear-gradient(135deg,#e6b84d1f,#14141400);display:flex;gap:14px;align-items:center;margin-bottom:14px"><span style="font-size:34px">🏅</span><div style="flex:1"><b style="color:#e6b84d">Negocio fundador de XyroStudio</b><p class="mu" style="margin:4px 0 0">Fueron los primeros ${esc(NFR[NFUND.rubro]||'negocios')} en creer en este proyecto. Gracias por confiar en nosotros: este reconocimiento es solo suyo y se ve en su Mi Xyro y en su carta.</p></div><button class="btn" id="nfX" style="padding:6px 10px">✕</button></div>`}
 function inicio(){return nfBan()+inicio0()}
@@ -1630,7 +1817,7 @@ async function carnetPNG(c){
 }
 // Invitación a la app Mi Xyro (reemplaza el carnet en imagen): un enlace que conecta su carnet y le ofrece instalar la app.
 const appLinkC=c=>'https://xyrostudio.net/mi/?c='+encodeURIComponent(c.codigo);
-const invitaMsg=c=>`¡Hola ${c.nombre.trim().split(' ')[0]}! 👋 Bienvenido(a) a ${nombre()}.\n\nTu QR de entrada, ${R.citas?'tus citas y tu tratamiento':'tu plan, tus rutinas y tu dieta'} ahora están en Mi Xyro *Mi Xyro* 📲\n\nEntra aquí, crea tu cuenta y quedas conectado:\n${appLinkC(c)}\n\n${MOTIV[Math.floor(Math.random()*MOTIV.length)]}`;
+const invitaMsg=c=>`¡Hola ${c.nombre.trim().split(' ')[0]}! 👋 Bienvenido(a) a ${nombre()}.\n\nTu QR de entrada, ${R.barb?'tus citas y tus sellos':R.citas?'tus citas y tu tratamiento':'tu plan, tus rutinas y tu dieta'} ahora están en Mi Xyro *Mi Xyro* 📲\n\nEntra aquí, crea tu cuenta y quedas conectado:\n${appLinkC(c)}\n\n${MOTIV[Math.floor(Math.random()*MOTIV.length)]}`;
 async function enviarCarnet(c){
  if(!c.codigo){const cd=codigo();await DB.upd('cli',c.id,{codigo:cd});c.codigo=cd}
  const msg=invitaMsg(c),mov=/Android|iPhone|iPad/i.test(navigator.userAgent);
@@ -1690,7 +1877,7 @@ function planes(){
  <div class="pl st">${S.pla.filter(p=>p.activo!==false).map(p=>`<div class="plan" data-id="${p.id}" style="--pc:${esc(p.color||'#3ad6ff')}"><b>${esc(p.nombre)}</b><div class="pr">${sol(p.precio)} <small>/ ${p.dias} ${+p.dias===1?'día':'días'}</small></div><span class="mu sm">${+p.sesiones?'🎟️ '+p.sesiones+' sesiones · ':''}${p.dom===false?'🚫 dom. · ':''}👥 ${cnt(p.id)} activos</span></div>`).join('')}
  ${isAdmin()?`<div class="plan" style="--pc:#ffffff;display:grid;place-items:center;border-style:dashed;min-height:140px" id="addP"><b class="mu">＋ Nuevo plan</b></div>`:''}</div>`;
 }
-async function sugeridos(){try{for(const[n,pr,d,co,se]of R.planes){const r={nombre:n,precio:pr,dias:d,color:co,activo:true};if(se)r.sesiones=se;await DB.ins('pla',r)}S.pla.sort((a,b)=>a.precio-b.precio);toast('Planes listos ✓');go()}catch(er){toast(er.message)}}
+async function sugeridos(){try{for(const[n,pr,d,co,se]of R.planes){const r={nombre:n,precio:pr,dias:d,color:co,activo:true};if(se)r.sesiones=se;await DB.ins('pla',r)}if(R.barb)await DB.cfg({svDur:svDurMap()});S.pla.sort((a,b)=>a.precio-b.precio);toast('Planes listos ✓');go()}catch(er){toast(er.message)}}
 function editPlan(p){
  form(p?'Editar plan':'Nuevo plan',[{k:'nombre',l:'Nombre',v:p&&p.nombre,req:1,ph:'Ej. Mensual'},{k:'precio',l:'Precio (S/)',t:'number',v:p&&p.precio,req:1,half:1},{k:'dias',l:'Duración (días)',t:'number',v:p?p.dias:30,req:1,half:1},{k:'sesiones',l:'Sesiones (vacío = libre)',t:'number',v:p&&p.sesiones,half:1,ph:'Libre'},{k:'dom',l:'Incluye domingos y feriados',t:'chk',v:!p||p.dom!==false,half:1},{k:'color',l:'Color',t:'opts',v:(p&&p.color)||'#3ad6ff',o:[['#3ad6ff','Cian'],['#7c5cff','Morado'],['#3ddc97','Verde'],['#f5b544','Oro'],['#ff5c7a','Rojo'],['#8d8fa8','Gris']]}],async v=>{
   const row={nombre:v.nombre,precio:+v.precio,dias:Math.max(1,parseInt(v.dias)||1),color:v.color,activo:true};if(v.sesiones!==''||(p&&p.sesiones))row.sesiones=parseInt(v.sesiones)||null;if(!v.dom||(p&&p.dom===false))row.dom=!!v.dom;
@@ -1700,7 +1887,7 @@ function editPlan(p){
 }
 function nuevoCli(c,pre){const X=c||pre||null;
  const P0=S.pla.filter(p=>p.activo!==false);
- const f=[{k:'nombre',l:'Nombre completo',v:X&&X.nombre,req:1,ph:'Ej. María Quispe'},{k:'num',l:R.citas?'N.º de historia':'Código de '+R.cli.toLowerCase(),v:c?c.num:nextNum(),half:1},{k:'dni',l:'DNI',v:X&&X.dni,half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:X&&X.telefono,half:1,t:'tel',ph:'9xx xxx xxx'},{k:'nacimiento',l:'Cumpleaños',t:'date',v:X&&X.nacimiento,half:1},{k:'email',l:'Correo',t:'email',v:X&&X.email}];
+ const f=[{k:'nombre',l:'Nombre completo',v:X&&X.nombre,req:1,ph:'Ej. María Quispe'},{k:'num',l:R.barb?'Código de cliente':R.citas?'N.º de historia':'Código de '+R.cli.toLowerCase(),v:c?c.num:nextNum(),half:1},{k:'dni',l:'DNI',v:X&&X.dni,half:1,im:'numeric'},{k:'telefono',l:'WhatsApp',v:X&&X.telefono,half:1,t:'tel',ph:'9xx xxx xxx'},{k:'nacimiento',l:'Cumpleaños',t:'date',v:X&&X.nacimiento,half:1},{k:'email',l:'Correo',t:'email',v:X&&X.email}];
  if(!R.citas)f.unshift({k:'foto',l:'Foto (para reconocerlo en la entrada)',t:'foto',v:X&&X.foto});
  f.push({k:'notas',l:'Notas',t:'area',v:X&&X.notas});
  if(sedesL().length>1&&(DEMO||!NEED20))f.push({k:'sede',l:'Sede del '+R.cli.toLowerCase(),t:'sel',v:c?c.sede||'':SEDE,o:[['','Todas las sedes']].concat(sedesL().map(s=>[s.id,s.nombre]))});
@@ -2852,8 +3039,8 @@ function xyrosDent(on,wa,wa2){
   if(!isAdmin())return'<small class="mu">Pídele al administrador que lo active.</small>';
   return`${k==='webs'||k==='control'?`<a class="btn sm" href="#/xyros/${arg==='demos'+k?'':'demos'+k}">${arg==='demos'+k?'Ocultar demo':'👀 Ver demo'}</a>`:''}<a class="btn sm p" target="_blank" rel="noopener" href="${wa(n)}">Activar por WhatsApp</a>`};
  const card=([k,n,d,p,L])=>`<div class="card eqc" style="align-items:flex-start;flex-wrap:wrap"><img src="/img/marca/logo-${k}-app.svg" alt="" style="width:44px;height:44px;flex:none"><div class="nm" style="flex:1 1 260px"><b>${esc(n)}${k==='apps'?' <small class="mu">· base</small>':''}</b><small style="white-space:normal">${esc(d)}</small>${ch(L)}</div><div class="eqa">${k==='apps'||on(k)?'<span class="pill act">Activo</span>':p?'<span class="pill pronto">Muy pronto</span>':'<span class="pill sin">No activo</span>'}${k==='apps'?'':p?`<a class="btn sm" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Me interesa '+n+' para '+nombre()+'. Avísenme cuando esté listo.')}">🔔 Avísame</a>`:acc(k,n)}</div></div>`;
- const XX=R.resto?XYROS_R:XYROS_D,D=XX.filter(x=>!x[3]),P=XX.filter(x=>x[3]);
- return`<div class="hi"><div><h2>Integraciones para tu ${R.cafe?'cafetería':R.resto?'restaurante':'consultorio'}</h2><p class="mu">Xyro Apps es la base de tu ${R.cafe?'cafetería':R.resto?'restaurante':'clínica'} y le sumas lo que necesites, todo en este mismo panel.</p></div></div>
+ const XX=R.resto?XYROS_R:R.barb?XYROS_B:XYROS_D,D=XX.filter(x=>!x[3]),P=XX.filter(x=>x[3]);
+ return`<div class="hi"><div><h2>Integraciones para tu ${R.cafe?'cafetería':R.resto?'restaurante':R.barb?'barbería':'consultorio'}</h2><p class="mu">Xyro Apps es la base de tu ${R.cafe?'cafetería':R.resto?'restaurante':R.barb?'barbería':'clínica'} y le sumas lo que necesites, todo en este mismo panel.</p></div></div>
  <p class="mu sm" style="margin:6px 0 8px">✅ Disponibles</p><div class="eq st">${D.map(card).join('')}</div>
  ${!on('webs')&&(arg==='demos'||arg==='demoswebs')?xyDemos(wa2):''}
  ${!on('control')&&arg==='demoscontrol'?xyDemoCtl(wa2):''}
@@ -2864,7 +3051,7 @@ function xyrosDent(on,wa,wa2){
 const dmRO=window.ResizeObserver?new ResizeObserver(E=>E.forEach(e=>e.target.style.setProperty('--dz',e.contentRect.width/1280))):null;
 function xyDemos(wa2){setTimeout(()=>$$('.dmf').forEach(f=>{f.style.setProperty('--dz',f.clientWidth/1280);dmRO&&dmRO.observe(f)}));
  return`<div class="card" id="xyDemos" style="margin-top:12px"><h3 style="margin:0 0 4px">🌐 Así se vería tu web</h3><p class="mu sm" style="margin:0 0 14px">${R.citas||R.resto?'Lista':'3 diseños listos'} con el nombre y color de ${esc(nombre())}. Tócalo para verlo en grande. Si te gusta uno, pídelo y lo dejamos con tus fotos, precios y tu propio dominio.</p>
- <div class="dmx">${(R.citas?DIS_C:R.resto?DIS_R:DISENOS_X).map(([k,n,d])=>`<div class="dmc"><a class="dmf" href="${demoURL(k)}" target="_blank" rel="noopener" aria-label="Ver ${n} en grande"><iframe src="${demoURL(k)}" loading="lazy" tabindex="-1" title="${n}" scrolling="no"></iframe><span>Ver en grande ↗</span></a>
+ <div class="dmx">${(R.barb?DIS_B:R.citas?DIS_C:R.resto?DIS_R:DISENOS_X).map(([k,n,d])=>`<div class="dmc"><a class="dmf" href="${demoURL(k)}" target="_blank" rel="noopener" aria-label="Ver ${n} en grande"><iframe src="${demoURL(k)}" loading="lazy" tabindex="-1" title="${n}" scrolling="no"></iframe><span>Ver en grande ↗</span></a>
   <b>${n}</b><small class="mu">${d}</small><a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Vi las demos y quiero la web de '+nombre()+' con el diseño «'+n+'».')}">💬 Quiero este diseño</a></div>`).join('')}</div>
  ${R.citas||R.resto?'':`<p class="mu sm" style="margin:14px 0 6px">Y en cada temporada tu web se viste sola:</p>`}
  <div class="tmx" ${R.citas||R.resto?'hidden':''}>${TEMAS_X.map(([k,e,n])=>`<a class="btn sm" target="_blank" rel="noopener" href="${demoURL('fuerza',k)}">${e} ${n}</a>`).join('')}</div></div>`;
@@ -2877,7 +3064,7 @@ function xyDemoCtl(wa2){
   <div class="dmc"><b>📦 Stock que se cuida solo</b><div class="card" style="padding:10px;display:grid;gap:8px">${P.map(([e,n,pr,st])=>`<div><div style="display:flex;justify-content:space-between"><small>${e} ${n}</small><small class="${st<5?'':'mu'}" style="${st<5?'color:var(--bad);font-weight:700':''}">${st<5?'⚠️ quedan '+st:st+' u.'}</small></div><div style="height:6px;border-radius:9px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${Math.min(100,st*1.6)}%;background:${st<5?'var(--bad)':'var(--a)'}"></i></div></div>`).join('')}</div><small class="mu">Te avisa antes de que se acabe y registra cada entrada de mercadería.</small></div>
   <div class="dmc"><b>💰 Cuánto ganas de verdad</b><div class="card" style="padding:10px;display:grid;gap:6px">${P.map(([e,n,pr,st,co])=>`<div style="display:flex;justify-content:space-between"><small>${e} ${n}</small><small>gana <b style="color:var(--ok)">${Math.round((pr-co)/pr*100)}%</b></small></div>`).join('')}<div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px"><b>Ganancia del mes</b><b style="color:var(--ok)">${sol(1840)}</b></div></div><small class="mu">Márgenes por producto, cierre de caja por turno y reportes por fecha.</small></div>
  </div>
- <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><a class="btn sm" target="_blank" rel="noopener" href="/app/?demo=${R.citas?'consultorio':'gym'}#/tienda">🧪 Probarlo en la demo ↗</a><a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Vi la demo de Xyro Control y quiero el punto de venta para '+nombre()+'.')}">💬 Lo quiero</a></div></div>`;
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px"><a class="btn sm" target="_blank" rel="noopener" href="/app/?demo=${R.barb?'barberia':R.citas?'consultorio':'gym'}#/tienda">🧪 Probarlo en la demo ↗</a><a class="btn sm p" target="_blank" rel="noopener" href="${wa2('Hola XyroStudio 👋 Vi la demo de Xyro Control y quiero el punto de venta para '+nombre()+'.')}">💬 Lo quiero</a></div></div>`;
 }
 /* ===== Xyro Bots: asistente del negocio (chat en su web; WhatsApp después). Worker /api/bot, SQL 34 ===== */
 let BOT=null,BOTH=[],BOT_ON=false;
@@ -3206,7 +3393,7 @@ const rolDe=x=>x&&x.rol==='cafetin'&&R.resto&&VIRT.includes(PZ()[x.id])?PZ()[x.i
 const miPuesto=()=>ME&&ME.rol==='cafetin'&&R.resto?(VIRT.includes(PZ()[ME.id])?PZ()[ME.id]:'cafetin'):null;
 async function setPz(id,r){const z=Object.assign({},PZ());if(VIRT.includes(r))z[id]=r;else delete z[id];if(JSON.stringify(z)!==JSON.stringify(PZ()))await DB.cfg({pz:z})}
 const PERMS=()=>Object.fromEntries(Object.entries(PERMS_()).filter(([k])=>rolOn(k)));
-const PERMS_=()=>R.resto?Object.fromEntries(Object.entries(PERMR).filter(([k])=>k!=='supervisor'||DEMO||!NEED24)):Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)&&((k!=='entrenador'&&k!=='nutricionista')||rutOn()&&!svOff(k==='entrenador'?'entreno':'nutri'))&&(k!=='profesional'||citOn())&&(!R.citas||['admin','recepcion','profesional'].includes(k))).map(([k,v])=>[k,R.citas&&k==='recepcion'?['🛎️','Agenda, pacientes, cobros, presupuestos y seguimiento. No ve la historia clínica ni el odontograma']:v]).filter(Boolean).map(([k,v])=>[k,CTL()&&PERMC[k]&&!R.citas?[v[0],PERMC[k]]:v]));
+const PERMS_=()=>R.resto?Object.fromEntries(Object.entries(PERMR).filter(([k])=>k!=='supervisor'||DEMO||!NEED24)):Object.fromEntries(Object.entries(PERM).filter(([k])=>(k!=='cafetin'||CTL())&&(k!=='supervisor'||DEMO||!NEED24)&&((k!=='entrenador'&&k!=='nutricionista')||rutOn()&&!svOff(k==='entrenador'?'entreno':'nutri'))&&(k!=='profesional'||citOn())&&(!R.citas||['admin','recepcion','profesional'].includes(k))).map(([k,v])=>[k,R.barb&&k==='recepcion'?['🛎️','Agenda, cola sin cita, clientes, cobros, productos y seguimiento']:R.barb&&k==='profesional'?['💈','Su agenda, sus clientes, termina y cobra sus cortes y ve sus ganancias del día']:R.citas&&k==='recepcion'?['🛎️','Agenda, pacientes, cobros, presupuestos y seguimiento. No ve la historia clínica ni el odontograma']:v]).filter(Boolean).map(([k,v])=>[k,CTL()&&PERMC[k]&&!R.citas?[v[0],PERMC[k]]:v]));
 const PERM={admin:['👑','Todo y todas las sedes: planes, precios, reportes, ajustes, metas y el equipo'],supervisor:['📈','Toda la venta de su sede, reportes, solicitudes de revisión y el registro completo de cada socio'],recepcion:['🛎️','Socios, asistencia, cobros, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'],cafetin:['🥤','Vende, agrega productos, ve el stock y cierra su turno'],entrenador:['🏋️','Arma y envía los planes de entrenamiento de los socios'],nutricionista:['🥗','Arma y envía los planes de alimentación de los socios'],profesional:['🦷','Su agenda, sus pacientes, el odontograma y la historia clínica (privada: recepción no la ve)']};
 const PERMC={supervisor:'Toda la venta de su sede (recepción y cafetín), reportes, solicitudes de revisión y el registro completo de cada socio',recepcion:'Socios, asistencia, cobros, venta en cafetín, seguimiento, reportes y cierre de su turno. Lo delicado lo pasa al supervisor'};
 const genClave=()=>{const a='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789',r=crypto.getRandomValues(new Uint32Array(10));return'Xa-'+[...r].map(n=>a[n%a.length]).join('')};
@@ -3397,7 +3584,7 @@ async function carnet(c){
    La persona se registra con Google o correo y tiene un ID de cuenta fijo. El negocio la conecta a su ficha con ese ID
    (`conectarApp` → xa_yo_pedir) y ella acepta en su Mi Xyro. Quien escanea el QR del negocio lo guarda y aparece en «Clientes en Mi Xyro». */
 const miLink=()=>'https://xyrostudio.net/mi/?n='+encodeURIComponent(SLUG||'demo');
-const appDesc=()=>R.resto?'la carta, el estado de su pedido en la mesa y tus promos':R.citas?'sus citas y su tratamiento':'su membresía, su QR de entrada, sus rutinas y su dieta';
+const appDesc=()=>R.resto?'la carta, el estado de su pedido en la mesa y tus promos':R.barb?'su próxima cita, reservar con su barbero en horas libres, sus sellos y tus promos':R.citas?'sus citas y su tratamiento':'su membresía, su QR de entrada, sus rutinas y su dieta';
 async function yoRpc(f,a){const{data,error}=await sb.rpc(f,a);
  if(error){if(/function|schema cache|does not exist/i.test(error.message||''))throw new Error('Falta activar Mi Xyro (SQL 46). Avísale a XyroStudio.');throw new Error('No se pudo. Revisa tu internet.')}
  if(data&&data.error)throw new Error({id:'No existe una cuenta con ese ID. Pídele que lo revise en su Mi Xyro: Perfil → ID de cuenta.'}[data.error]||'No se pudo.');return data}
@@ -3500,7 +3687,7 @@ function miApp(){
   if(SEG===null){try{SEG=DEMO?segDemo():await yoRpc('xa_yo_seguidores',{p_slug:SLUG})}catch(e){SEG=[];$('#maS').innerHTML=`<p class="mu sm">${esc(e.message)}</p>`;return}}
   pintaSeg();(R.resto||R.citas)&&selPinta();
  });
- return`<div class="hi"><div><h2>📱 App de ${R.citas?'pacientes':'clientes'}</h2><p class="mu">Tus clientes abren <b>Mi Xyro</b> desde la web (sin descargar nada), escanean tu QR y guardan tu negocio: ${R.resto?'ven tu carta con fotos, tus promos y el estado de su pedido cuando piden desde la mesa':'ven tus promos y, si los conectas a su ficha, '+appDesc()}.</p></div></div>
+ return`<div class="hi"><div><h2>📱 App de ${R.citas&&!R.barb?'pacientes':'clientes'}</h2><p class="mu">Tus clientes abren <b>Mi Xyro</b> desde la web (sin descargar nada), escanean tu QR y guardan tu negocio: ${R.resto?'ven tu carta con fotos, tus promos y el estado de su pedido cuando piden desde la mesa':'ven tus promos y, si los conectas a su ficha, '+appDesc()}.</p></div></div>
  <div class="g2" style="display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
   <div class="card" style="display:grid;gap:12px;justify-items:center;text-align:center"><h3>Tu QR para Mi Xyro</h3><div id="maQ" style="background:#fff;padding:14px;border-radius:18px;width:220px"></div><p class="mu sm">Pégalo en recepción, en el espejo o en tus redes. Al escanearlo, te guardan en su Mi Xyro.</p>
    <div class="bt" style="justify-content:center;margin:0"><button class="btn p" id="maP">🖨️ Cartel para imprimir</button><button class="btn" id="maO">📱 Versión para pantallas y redes</button><button class="btn" id="maC">📋 Copiar enlace</button></div></div>
@@ -3512,21 +3699,21 @@ function miApp(){
  <div class="card" style="margin-top:14px"><h3>👥 Te guardaron en su Mi Xyro</h3><div id="maS"><p class="mu sm">Cargando…</p></div></div>`}
 /* ===== Tarjeta de sellos (SQL 63): 1 sello por día que el cliente pide desde Mi Xyro y paga; caja entrega el premio ===== */
 let SELL=null,NEED63=false;
-const selCfg=()=>Object.assign({on:false,meta:R.citas?5:8,premio:R.citas?'Una limpieza dental gratis':R.cafe?'Un café o frappé gratis':'Un postre gratis'},CFG.sellos||{});
-const selQue=()=>R.citas?'cada cita que el paciente paga':'cada día que un cliente pide desde su Mi Xyro (QR de la mesa) y paga';
+const selCfg=()=>Object.assign({on:false,meta:R.barb?8:R.citas?5:8,premio:R.barb?'Un corte gratis':R.citas?'Una limpieza dental gratis':R.cafe?'Un café o frappé gratis':'Un postre gratis'},CFG.sellos||{});
+const selQue=()=>R.barb?'cada corte o servicio que el cliente paga':R.citas?'cada cita que el paciente paga':'cada día que un cliente pide desde su Mi Xyro (QR de la mesa) y paga';
 async function selCargar(){if(DEMO){SELL=SELL||[['Lucía Ramos','lu.ramos',8],['Diego Paredes','diegop',6],['Valeria Soto','vale.s',3],['Marco Ríos','mrios',1]].map(([n,u,k],i)=>({persona:'d'+i,nombre:n,usuario:u,sellos:Math.min(k,selCfg().meta),listo:k>=selCfg().meta,meta:selCfg().meta,premio:selCfg().premio,canjes:i?0:1}));return}
  const{data,error}=await sb.rpc('xa_sellos_negocio',{p_sitio:String(SID)});if(error){if(/xa_sellos|function|schema/i.test(error.message||'')){NEED63=true;SELL=[];return}throw error}SELL=data||[]}
 async function selPinta(){const el=$('#selC');if(!el)return;const c=selCfg(),ad=isAdmin();
  if(c.on&&SELL==null)try{await selCargar()}catch(e){SELL=[];toast(e.message)}
  const L=SELL||[],listos=L.filter(x=>x.listo).length,dots=(n,m)=>Array.from({length:m},(_,i)=>`<i style="display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:3px;background:${i<n?'#c8873a':'var(--ln)'}"></i>`).join('');
- el.innerHTML=`<div class="row" style="justify-content:space-between"><h3>${R.citas?'🦷':'☕'} Tarjeta de sellos</h3>${ad?'<button class="btn sm" id="selE">✏️ Configurar</button>':''}</div>
-  <p class="mu sm">${c.on?`Activa: por ${selQue()} gana 1 sello en su Mi Xyro. Con <b>${+c.meta}</b> sellos se lleva <b>${esc(c.premio)}</b>. Así vuelven más seguido.`:(R.citas?'Haz que tus pacientes vuelvan: 1 sello por cada cita pagada (las que no pagan no cuentan). Lo ven en su Mi Xyro y, al llenar la tarjeta, ganan el premio que tú eliges.':'Haz que tus clientes vuelvan: 1 sello por cada día que piden desde su Mi Xyro y pagan. Al llenar la tarjeta, ganan un premio que tú eliges.')}</p>
-  ${!c.on?'':NEED63?`<p class="mu sm">⚙️ Falta activar el SQL ${R.citas?64:63}. Avísale a XyroStudio.</p>`:L.length?`${listos?`<p class="sm" style="color:#f2c27b"><b>🎁 ${listos} cliente${listos>1?'s':''} con premio listo</b></p>`:''}<div class="tl">${L.map((x,i)=>`<div class="row" style="gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--ln);flex-wrap:wrap"><span style="flex:1;min-width:150px"><b>${esc(x.nombre)}</b> <span class="mu sm">@${esc(x.usuario||'')}</span><small class="mu" style="display:block">${dots(+x.sellos,+x.meta)} ${+x.sellos}/${+x.meta}${+x.canjes?' · '+x.canjes+' premio'+(x.canjes>1?'s':'')+' canjeado'+(x.canjes>1?'s':''):''}</small></span>${x.listo?`<button class="btn sm p" data-sel="${i}">🎁 Entregar premio</button>`:''}</div>`).join('')}</div>`:(R.citas?'<p class="mu sm">Aún nadie junta sellos. Llegan cuando un paciente conectado a Mi Xyro paga su cita.</p>':'<p class="mu sm">Aún nadie junta sellos. Llegan cuando tus clientes piden desde la mesa con Mi Xyro.</p>')}`;
+ el.innerHTML=`<div class="row" style="justify-content:space-between"><h3>${R.barb?'💈':R.citas?'🦷':'☕'} Tarjeta de sellos</h3>${ad?'<button class="btn sm" id="selE">✏️ Configurar</button>':''}</div>
+  <p class="mu sm">${c.on?`Activa: por ${selQue()} gana 1 sello en su Mi Xyro. Con <b>${+c.meta}</b> sellos se lleva <b>${esc(c.premio)}</b>. Así vuelven más seguido.`:(R.barb?'Haz que tus clientes vuelvan contigo: 1 sello por cada corte pagado. Lo ven en su Mi Xyro y tú entregas el premio aquí.':R.citas?'Haz que tus pacientes vuelvan: 1 sello por cada cita pagada (las que no pagan no cuentan). Lo ven en su Mi Xyro y, al llenar la tarjeta, ganan el premio que tú eliges.':'Haz que tus clientes vuelvan: 1 sello por cada día que piden desde su Mi Xyro y pagan. Al llenar la tarjeta, ganan un premio que tú eliges.')}</p>
+  ${!c.on?'':NEED63?`<p class="mu sm">⚙️ Falta activar el SQL ${R.barb?74:R.citas?64:63}. Avísale a XyroStudio.</p>`:L.length?`${listos?`<p class="sm" style="color:#f2c27b"><b>🎁 ${listos} cliente${listos>1?'s':''} con premio listo</b></p>`:''}<div class="tl">${L.map((x,i)=>`<div class="row" style="gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--ln);flex-wrap:wrap"><span style="flex:1;min-width:150px"><b>${esc(x.nombre)}</b> <span class="mu sm">@${esc(x.usuario||'')}</span><small class="mu" style="display:block">${dots(+x.sellos,+x.meta)} ${+x.sellos}/${+x.meta}${+x.canjes?' · '+x.canjes+' premio'+(x.canjes>1?'s':'')+' canjeado'+(x.canjes>1?'s':''):''}</small></span>${x.listo?`<button class="btn sm p" data-sel="${i}">🎁 Entregar premio</button>`:''}</div>`).join('')}</div>`:(R.citas?`<p class="mu sm">Aún nadie junta sellos. Llegan cuando un ${R.barb?'cliente':'paciente'} conectado a Mi Xyro paga su ${R.barb?'corte':'cita'}.</p>`:'<p class="mu sm">Aún nadie junta sellos. Llegan cuando tus clientes piden desde la mesa con Mi Xyro.</p>')}`;
  const e=$('#selE');e&&(e.onclick=selEditar);
  $$('[data-sel]').forEach(b=>b.onclick=async()=>{const x=L[+b.dataset.sel];if(!confirm(`¿Entregar «${x.premio}» a ${x.nombre}? Su tarjeta vuelve a empezar.`))return;b.disabled=true;
   try{if(DEMO){x.canjes=(+x.canjes||0)+1;x.sellos=0;x.listo=false}else{const{error}=await sb.rpc('xa_sellos_canjear',{p_sitio:String(SID),p_persona:x.persona});if(error)throw error;SELL=null}
   toast('🎁 Premio entregado a '+x.nombre);selPinta()}catch(er){toast(er.message);b.disabled=false}})}
-function selEditar(){const c=selCfg();form((R.citas?'🦷':'☕')+' Tarjeta de sellos',[{k:'on',t:'chk',l:'Activar la tarjeta de sellos en Mi Xyro',v:c.on},{k:'meta',l:'Sellos para ganar el premio',t:'sel',v:String(c.meta),o:[5,6,8,10,12].map(n=>[String(n),n+' sellos'])},{k:'premio',l:'Premio (tú decides qué dar)',v:c.premio,req:1,ph:R.citas?'Ej. Una limpieza gratis':'Ej. Un café gratis'}],async v=>{
+function selEditar(){const c=selCfg();form((R.barb?'💈':R.citas?'🦷':'☕')+' Tarjeta de sellos',[{k:'on',t:'chk',l:'Activar la tarjeta de sellos en Mi Xyro',v:c.on},{k:'meta',l:'Sellos para ganar el premio',t:'sel',v:String(c.meta),o:[5,6,8,10,12].map(n=>[String(n),n+' sellos'])},{k:'premio',l:'Premio (tú decides qué dar)',v:c.premio,req:1,ph:R.barb?'Ej. Un corte gratis':R.citas?'Ej. Una limpieza gratis':'Ej. Un café gratis'}],async v=>{
  await DB.cfg({sellos:{on:!!v.on,meta:+v.meta||8,premio:(v.premio||'').trim().slice(0,60)}});SELL=null;toast(v.on?'✅ Tarjeta de sellos activa':'Tarjeta de sellos apagada');go()})}
 function pintaSeg(){const el=$('#maS');if(!el)return;const L=SEG||[];
  el.innerHTML=L.length?`<div class="tl">${L.map((x,i)=>`<div class="row" style="gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ln)">${avatar(x,40)}<div style="flex:1;min-width:0"><b>${esc(x.nombre||'')}</b> <span class="mu sm">@${esc(x.usuario||'')}</span><p class="mu sm">${[x.celular,x.email].filter(Boolean).map(esc).join(' · ')} · ${fF(String(x.creado).slice(0,10))}</p></div>
@@ -3542,7 +3729,7 @@ function segConectar(x){
   q.value=String(x.nombre||'').trim().split(' ')[0];q.oninput=dr;dr();
   el.querySelector('#sN').onclick=()=>{close();nuevoCli(null,{nombre:x.nombre,telefono:x.celular,email:x.email,idn:x.idn})}})}
 function editPromo(i){const p=i!=null?(CFG.promosApp||[])[i]:null;
- form(p?'Editar promo':'Nueva promo para Mi Xyro',[{k:'titulo',l:'Título',v:p&&p.titulo,req:1,ph:R.citas?'Ej. Evaluación gratis por Mi Xyro':R.resto?'Ej. 2x1 en frappés por Mi Xyro':'Ej. Inscripción gratis por Mi Xyro'},{k:'descripcion',l:'Detalle',t:'area',v:p&&p.descripcion,ph:'Ej. Muestra Mi Xyro en recepción al matricularte.'},{k:'hasta',l:'Válida hasta (opcional)',t:'date',v:p&&p.hasta}],async v=>{
+ form(p?'Editar promo':'Nueva promo para Mi Xyro',[{k:'titulo',l:'Título',v:p&&p.titulo,req:1,ph:R.barb?'Ej. Cejas gratis con tu corte por Mi Xyro':R.citas?'Ej. Evaluación gratis por Mi Xyro':R.resto?'Ej. 2x1 en frappés por Mi Xyro':'Ej. Inscripción gratis por Mi Xyro'},{k:'descripcion',l:'Detalle',t:'area',v:p&&p.descripcion,ph:'Ej. Muestra Mi Xyro en recepción al matricularte.'},{k:'hasta',l:'Válida hasta (opcional)',t:'date',v:p&&p.hasta}],async v=>{
   const L=(CFG.promosApp||[]).slice(),o={titulo:String(v.titulo).slice(0,80),descripcion:String(v.descripcion||'').slice(0,300),hasta:v.hasta||''};
   if(p)L[i]=o;else L.unshift(o);await DB.cfg({promosApp:L.slice(0,10)});toast('🎁 Promo publicada en Mi Xyro');go()},
   p?'<button type="button" class="btn bad" id="pDel">🗑️ Quitar</button>':'');
@@ -3939,7 +4126,7 @@ function semilla(rubro){
  R.planes.forEach(([n,p,d,c,se])=>S.pla.push({id:uid(),nombre:n,precio:p,dias:d,color:c,activo:true,sesiones:se||null}));
  (R.productos||[]).forEach(([n,cat,pr,co,em])=>S.pro.push({id:uid(),nombre:n,categoria:cat,precio:pr,costo:co,stock:12+Math.floor(Math.random()*30),minimo:5,emoji:em,activo:true,opciones:R.cafe?opcBase(n,cat):null,foto:R.resto?fotoBase(n):null}));if(S.pro[3])S.pro[3].stock=3;if(R.resto)S.pro.forEach(p=>p.stock+=60);
  const pp=S.pla.filter(p=>p.dias>1);
- for(let i=0;i<(R.citas?80:R.resto?0:46);i++){
+ for(let i=0;i<(R.barb?220:R.citas?80:R.resto?0:46);i++){
   const c={id:uid(),nombre:rnd(N)+' '+rnd(A)+' '+rnd(A),dni:String(40000000+Math.floor(Math.random()*39999999)),telefono:'9'+String(Math.floor(Math.random()*1e8)).padStart(8,'0'),num:String(1001+i),codigo:codigo(),creado:new Date().toISOString(),nacimiento:i===3?'1995'+H.slice(4):null};
   S.cli.push(c);const r=Math.random();if(r<.06||R.citas)continue;
   const p=Math.random()<.65?pp[0]:rnd(pp),fin=addD(H,r<.2?-Math.floor(Math.random()*25)-1:r<.32?Math.floor(Math.random()*5):Math.floor(Math.random()*p.dias)),ini0=addD(fin,-p.dias+1);
@@ -3955,7 +4142,7 @@ function demoBoot(){
  if(PRB&&!PRUEBA)return pruebaBoot();
  const pd=PRUEBA?PRUEBA.rubro:P.get('demo'),rub=RUBROS[pd]?pd:'gym';CFG={rubro:rub};R=RUBROS[rub];XY=['apps'];
  let g=LS.g(DKEY(),null);if(g&&(!g.t||!PRUEBA&&Date.now()-g.t>DEMO_TTL)){LS.r(DKEY());g=null}DT=g?g.t:0;const n=P.get('n')||(PRUEBA&&!g?PRUEBA.nombre:null);
- const rl=P.get('rol');ME=['supervisor','recepcion','cafetin','entrenador','nutricionista','profesional'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz',entrenador:'Diego Salas',nutricionista:'Valeria Ríos',profesional:'Dra. Paola Ríos'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
+ const rl=P.get('rol');ME=['supervisor','recepcion','cafetin','entrenador','nutricionista','profesional'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz',entrenador:'Diego Salas',nutricionista:'Valeria Ríos',profesional:pd==='barberia'?'Kevin Ramos':'Dra. Paola Ríos'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
  const arrancar=()=>{
   R=RUBROS[CFG.rubro]||rubDe(CFG)||R;demoMetas();asegS();if(R.citas&&(!(CFG.profesionales||[]).length||!S.pre)){S.pre=[];demoClinica();S.pag.sort((a,b)=>b.fecha>a.fecha?1:-1);saveDemo()}if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
   const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo de prueba · se borra en 24 h</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
@@ -3979,7 +4166,7 @@ async function verVersion(){try{localStorage.setItem('xa-slug',SLUG)}catch(_){}i
   if(data!==VER){location.replace('/app/'+location.search+location.hash);return true}}catch(_){}return false}
 if(/\/app\/dev\//.test(location.pathname))addEventListener('DOMContentLoaded',()=>document.body.insertAdjacentHTML('beforeend','<div style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:99999;background:#f59e0b;color:#000;font:700 12px system-ui;padding:4px 12px;border-radius:99px;pointer-events:none">🧪 PANEL DE PRUEBAS · los negocios no ven esto</div>'));
 /* ===== Arranque real (Supabase) ===== */
-function start(){initSede();if(R.resto){insCargar().then(()=>{INS&&INS.length&&(ruta==='tienda'||ruta==='pedidos')&&go()}).catch(()=>{});if(CFG.stockNeg&&!CFG.stockV2&&(isAdmin()||ME.gestor))DB.cfg({stockNeg:false,stockV2:1}).catch(()=>{})}setTimeout(misNegocios,500);setTimeout(waIni,800);setTimeout(()=>xpCargar().then(()=>{if(planAviso()||ruta==='miplan')go();shell()}),900);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>{dmVistos=dmNuevos().length;if(dmVistos&&isSup()){toast('📨 XyroStudio te escribió un mensaje.');(ruta==='inicio'||!ruta)&&go()}else if(TKN)toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')}),2500);setInterval(dmRevisar,180000)}
+function start(){initSede();if(R.barb){CE.llego=['💺','Esperando','#f5b544'];CE.atendida=['✂️','Atendido','#3ddc97'];barbTxt()}if(R.resto){insCargar().then(()=>{INS&&INS.length&&(ruta==='tienda'||ruta==='pedidos')&&go()}).catch(()=>{});if(CFG.stockNeg&&!CFG.stockV2&&(isAdmin()||ME.gestor))DB.cfg({stockNeg:false,stockV2:1}).catch(()=>{})}setTimeout(misNegocios,500);setTimeout(waIni,800);setTimeout(()=>xpCargar().then(()=>{if(planAviso()||ruta==='miplan')go();shell()}),900);$('#boot').hidden=true;$('#login').hidden=true;$('#app').hidden=false;shell();go();if(!DEMO&&(REC||(ME.debe_cambiar&&!ME.gestor)))setTimeout(()=>cambiarClave(true,REC?'🔑 Crea tu nueva contraseña':''),300);setTimeout(()=>autoCierres().catch(()=>{}),1200);if(!DEMO)setTimeout(()=>tkCargar().then(()=>{dmVistos=dmNuevos().length;if(dmVistos&&isSup()){toast('📨 XyroStudio te escribió un mensaje.');(ruta==='inicio'||!ruta)&&go()}else if(TKN)toast('🛟 Soporte te respondió. Míralo en Soporte XyroStudio.')}),2500);setInterval(dmRevisar,180000)}
 async function salir(){try{await sb.auth.signOut()}catch(_){}LS.r('xa-s');location.href='/app/'}
 async function boot(){
  if(DEMO)return demoBoot();
