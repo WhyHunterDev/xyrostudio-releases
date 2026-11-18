@@ -24,7 +24,23 @@ async function inicio(el) {
 }
 
 async function negocios(el) {
-  el.innerHTML = `<div><h1>Negocios por revisar</h1><p class="mu">Al aprobar, el negocio aparece en Explorar. Verificado = revisaste sus documentos.</p></div><div class="card" id="ln"><div class="sk" style="height:120px"></div></div>`;
+  el.innerHTML = `<div><h1>Negocios por revisar</h1><p class="mu">Al aprobar, el negocio aparece en Explorar. Verificado = revisaste sus documentos.</p></div><div class="card" id="ln"><div class="sk" style="height:120px"></div></div>
+    <div class="card"><b>⚡ Activar Boost pagado</b><span class="mu sm">Cuando un negocio te pague el Boost por Yape, búscalo y actívalo aquí (rol Finanzas o Superadmin).</span>
+      <div class="row"><input id="bq" placeholder="Nombre del negocio" autocomplete="off"><button class="btn" id="bb">Buscar</button></div><div id="br"></div></div>`;
+  $('#bb', el).onclick = async () => {
+    const t = $('#bq', el).value.trim(); if (t.length < 2) return toast('Escribe al menos 2 letras');
+    try {
+      const L = S.demo || S.sinCore ? (await tabla('entities', (q) => q)).filter((e) => e.name.toLowerCase().includes(t.toLowerCase()))
+        : await tabla('entities', (q) => q.select('id,name,slug,boost_until').eq('status', 'ACTIVE').ilike('name', '*' + t.replace(/[^\p{L}\p{N} .-]/gu, '') + '*').limit(8));
+      $('#br', el).innerHTML = L.length ? L.map((e) => `<div class="li wrap"><span class="sp"><b>${esc(e.name)}</b><br><span class="mu xs">${e.boost_until && new Date(e.boost_until) > new Date() ? 'Boost hasta ' + fecha(e.boost_until) + ' ' + hora(e.boost_until) : 'Sin Boost'}</span></span>
+        <span class="row">${[[24, '1 día'], [168, '7 días'], [720, '30 días']].map(([h, t2]) => `<button class="btn sm" data-bo="${e.id}" data-h="${h}">${t2}</button>`).join('')}</span></div>`).join('') : '<p class="mu sm">Sin resultados.</p>';
+      $$('[data-bo]', el).forEach((b) => b.onclick = async () => {
+        b.disabled = true;
+        try { await rpc('xy_boost', { p_entity: b.dataset.bo, p_hours: +b.dataset.h, p_points: 0, p_mult: 2 }); toast('Boost activado ⚡'); $('#bb', el).click(); }
+        catch (e) { toast(errDe(e)); b.disabled = false; }
+      });
+    } catch (e) { toast(errDe(e)); }
+  };
   const pinta = async () => {
     try {
       const L = await pendientes();
