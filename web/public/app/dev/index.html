@@ -447,6 +447,7 @@ const XYROS_B=[['apps','Xyro Apps','Agenda por barbero, clientes sin cita en col
  ['control','Xyro Control','Vende ceras, pomadas y aceites con stock que avisa antes de acabarse, y controla tus insumos (navajas, talco, toallas): cuánto ganas de verdad.',0,['🫙 Venta de productos','📦 Stock','💰 Márgenes']],
  ['bots','Xyro Bots','Asistente por WhatsApp que reserva turnos solo en los horarios libres de cada barbero, recuerda la cita y avisa cuando ya toca corte.',1,['🤖 Reserva 24 h','⏰ Recordatorios','🔁 «Ya toca corte»']],
  ['edits','Xyro Edits','Reels de tus mejores cortes y transformaciones para TikTok e Instagram.',1,['🎬 Antes y después','📣 Reels']]];
+[XYROS,XYROS_R,XYROS_D,XYROS_B].forEach(a=>{const i=a.findIndex(x=>x[0]==='edits');i>=0&&a.splice(i,1)}); // Xyro Edits oculto hasta lanzarlo (2026-11-18)
 const XYR=()=>R.barb?XYROS_B:R.citas?XYROS_D:R.resto?XYROS_R:XYROS;
 const PRONTO=k=>{const x=XYR().find(y=>y[0]===k);return!!(x&&x[3])};
 const soporteWA=()=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;

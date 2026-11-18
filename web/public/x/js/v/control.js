@@ -21,12 +21,13 @@ function cabecera(el, titulo, sub) {
 
 export async function vista(r, el) {
   if (!entidad()) { el.innerHTML = '<div class="vacio"><div class="e">🏪</div><b>Aún no tienes un negocio</b><a class="btn p" href="/#/entrar">Registrarlo gratis</a></div>'; return; }
+  if (S.entidad.type === 'PROFESSIONAL') { document.querySelectorAll('#tabs a[href="#/c-qr"],#side a[href="#/c-qr"]').forEach((a) => a.remove()); if (r === 'c-qr') { location.hash = '#/c-inicio'; return; } }
   if (r === 'c-inicio') return inicio(el);
   if (r === 'c-pedidos') return pedidos(el);
   if (r === 'c-qr') return qrs(el);
   if (r === 'c-boost') return boost(el);
   if (r === 'c-catalogo') return catalogo(el);
-  if (r === 'c-videos') return videos(el);
+  if (r === 'c-videos') { location.hash = '#/c-inicio'; return; } // Xyro Edits oculto hasta lanzarlo
 }
 
 const deHoy = (o) => new Date(o.created_at).toDateString() === new Date().toDateString();
@@ -42,9 +43,8 @@ async function inicio(el) {
   el.insertAdjacentHTML('beforeend', `<div class="kpis" id="k">${Array(4).fill('<div class="sk" style="height:86px"></div>').join('')}</div>
     <div class="dos"><div class="card"><div class="row"><b class="sp">Últimos pedidos</b><a class="btn sm" href="#/c-pedidos">Ver todos</a></div><div id="ul"></div></div>
     <div class="card"><b>Accesos rápidos</b>
-      <a class="li" href="#/c-qr" style="text-decoration:none"><span class="ico">${I.qr}</span><span class="sp">Crear QR de mesa o mostrador</span>›</a>
+      ${S.entidad.type === 'PROFESSIONAL' ? '' : `<a class="li" href="#/c-qr" style="text-decoration:none"><span class="ico">${I.qr}</span><span class="sp">Crear QR de mesa o mostrador</span>›</a>`}
       <a class="li" href="#/c-boost" style="text-decoration:none"><span class="ico">${I.bolt}</span><span class="sp">Destacar mi negocio (Boost)</span>›</a>
-      <a class="li" href="#/c-videos" style="text-decoration:none"><span class="ico">${I.film}</span><span class="sp">Pedir un video para redes<br><span class="mu xs">Xyro Edits · 2 gratis al mes</span></span>›</a>
       <a class="li" href="/app/" style="text-decoration:none"><span class="ico">${I.catalog}</span><span class="sp">Abrir mi panel completo</span>›</a></div></div>
     <div class="dos"><div class="card" id="pm"><div class="sk" style="height:60px"></div></div><div class="card" id="pl"><div class="sk" style="height:60px"></div></div></div>`);
   pagosCard($('#pm', el)); planCard($('#pl', el));
@@ -94,7 +94,6 @@ async function planCard(box) {
     <div class="li"><span class="ico">👥</span><span class="sp sm">${f.type === 'PROFESSIONAL' ? 'Alumnos' : 'Clientes'} activos: <b>${lim(f.clients ?? f.students, f.max_clients ?? f.max_students)}</b></span></div>
     ${f.max_qrs !== undefined ? `<div class="li"><span class="ico">${I.qr}</span><span class="sp sm">Códigos QR: <b>${lim(f.qrs, f.max_qrs)}</b></span></div>` : ''}
     <div class="li"><span class="ico">🏷️</span><span class="sp sm">Planes o productos: <b>${lim(f.items, f.max_items)}</b></span></div>
-    <div class="li"><span class="ico">${I.film}</span><span class="sp sm">Xyro Edits: <b>${f.pro ? num(f.edits_credits) + ' créditos este mes' : num(f.edits_free_left) + ' gratis este mes (con marca)'}</b></span></div>
     <div class="li"><span class="ico">🌐</span><span class="sp sm">${f.web ? '<b>Tu web en xyrostudio.net incluida</b>' : 'Web propia: solo en Pro'}</span></div>
     ${sig ? `<a class="btn p w" target="_blank" rel="noopener" href="https://wa.me/${WA_XYRO}?text=${encodeURIComponent('Hola XyroStudio, quiero el plan ' + sig + ' para ' + (S.entidad.name || 'mi negocio'))}">⭐ Pasar a ${sig}</a><span class="mu xs">${sig === 'Plus' ? 'Plus: 2,000 clientes, 25 productos, 10 QR y mesas, 5 videos al mes sin marca.' : 'Pro: sin límites, tu web en xyrostudio.net, 15 videos al mes y Bots al lanzarse.'}</span>` : ''}`;
 }

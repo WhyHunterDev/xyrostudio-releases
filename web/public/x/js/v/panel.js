@@ -22,14 +22,12 @@ async function inicio(el) {
   el.innerHTML = `<div><h1>XyroStudio Panel</h1><p class="mu">Tu rol: <b>${esc(ROL[S.me.staff_role] || S.me.staff_role)}</b></p></div>
     <div class="kpis"><div class="kpi"><span class="mu xs">Negocios por revisar</span><b id="kp">…</b></div>
       <div class="kpi"><span class="mu xs">Tickets abiertos</span><b id="kt">…</b><span class="mu xs">Xyro</span></div>
-      <div class="kpi"><span class="mu xs">Videos en cola</span><b id="kv">…</b><span class="mu xs">Xyro Edits</span></div>
       <div class="kpi"><span class="mu xs">Pagos protegidos</span><b id="kg">…</b><span class="mu xs">por confirmar</span></div></div>
     <div class="card"><b>Atajos</b>
       <a class="li" href="#/p-negocios" style="text-decoration:none"><span class="ico">${I.shield}</span><span class="sp">Aprobar negocios nuevos</span>›</a>
       <a class="li" href="/gestor/" style="text-decoration:none"><span class="ico">${I.chart}</span><span class="sp">Abrir el Panel XyroStudio completo<br><span class="mu xs">Cobros, Actualizaciones, Registros gratis</span></span>›</a></div>`;
   try { $('#kp', el).textContent = (await pendientes()).length; } catch (e) { $('#kp', el).textContent = '—'; }
   $('#kt', el).textContent = await cuenta('support_tickets', (q) => q.select('id').eq('status', 'OPEN').limit(200), 'tickets');
-  $('#kv', el).textContent = await cuenta('video_jobs', (q) => q.select('id').in('status', ['QUEUED', 'PROCESSING']).limit(200), 'video_jobs');
   $('#kg', el).textContent = await cuenta('orders', (q) => q.select('id').eq('fulfillment_mode', 'P2P').eq('protected', true).eq('status', 'AWAITING_PAYMENT').limit(200), 'p2p_orders');
 }
 
