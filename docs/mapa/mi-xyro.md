@@ -69,3 +69,11 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 ## Xyro+, ruleta, ranking y mapa (2026-11-18, SQL 88)
 - Módulo «Xyro+, ruleta, ranking, estilo» antes de `demoRpc0`: `XST` (estilo), `XR` (ruleta), `PLI` (precio Xyro+), clicks por `data-xy` (ruleta|ranking|plus|estilo|boost). Botones en `ptsHTML` (`xJuegosHTML`), tarjeta `xPlusHTML`, Boost en «Mi negocio» (`boostCardHTML`).
 - Mapa estilo Google Maps: OSM claro SIN filtro (el filtro invert era lo lento), Leaflet precargado (`mapaPre`), caché por zona (`MP.caja`), búsqueda `#mpq` con `xa_mapa {q}`, lista abajo (`mapaHoja`).
+
+## SQL 90 (2026-11-18) · verificados, captura obligatoria, retos, mapa pro
+- Registro de negocio sin aprobación (trigger `xa_gratis_abierto`): ilegal = bloqueado, marca conocida = `pendiente`. `xa_nombre_guard` en renombres.
+- Verificación: `verifCardHTML`/`verifAbrir` (Mi negocio) → docs a bucket PRIVADO `privado/<uid>/verif/*` (`subirDocPriv`) → `xa_verif_enviar`. Requisitos `xa_verif_info` (5 reseñas ≥4.0, 14 días, dirección). Sello ✓ (`.vchk`, `verTag`) en mapa, Explorar y ficha (`xa_verificado`).
+- Puntos solo con captura (`orders.buyer_pay_foto`; mesa `yape_foto` vía `xa_mesa_yapee` 5 args en /pedir/; entrenador `xy_order_report_payment` con `p_foto`). Verificado ×1.2; no verificado ½ globales y ½ puntos de negocio.
+- Retos: botón 🎯 (`retosAbrir`, `xy_retos`, `xy_reto_reclamar`). Campañas MULT (máx x3).
+- Mapa: chips país (`mapaPaises`, `xa_mapa_paises`), orden cerca/top, ✓ Verificados, pestañas «En esta zona / Todos» (`mapaTodos`, xa_mapa `todo`), chips con rueda/arrastre y en 2 filas en PC.
+- Gestor: vistas `verif` (docs con `createSignedUrl` 10 min) y `retos` (campañas + `xy_g_dar_puntos`).
