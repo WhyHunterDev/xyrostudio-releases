@@ -1363,12 +1363,15 @@ function nHoy(){const dn=nDent();
    ${PG.length?PG.map(p=>`<div class="li"><span class="dot">${I.cash}</span><span class="sp"><b>${esc(p.nombre||p.concepto||'Venta')}</b><br><span class="mu xs">${fH(p.f)} · ${esc(p.concepto||'')}${p.metodo?' · '+esc(p.metodo):''}</span></span><b>${money(p.monto)}</b></div>`).join(''):'<p class="mu sm">Aún no hay cobros hoy.</p>'}</div>`:''}
   <div class="card"><div class="row"><b class="sp">Ingresos al local</b><span class="pill">${NB.asis_hoy||0}</span></div>
    ${U.length?U.map(a=>`<div class="li"><span class="dot">${esc((a.nombre||'?')[0])}</span><span class="sp"><b>${esc(a.nombre)}</b><br><span class="mu xs">${fH(a.t)}${a.quien?' · '+esc(a.quien):''}</span></span></div>`).join(''):'<p class="mu sm">Nadie ha marcado ingreso hoy todavía.</p>'}</div></div>`}
+/* Abre Xyro Apps ya dentro del negocio: pase de un solo uso (2 min) que el panel canjea por su propia sesión (xa_pase/xa_canje) */
+document.addEventListener('click',async e=>{const a=e.target.closest&&e.target.closest('[data-pan]');if(!a||DEMO||!NSB)return;e.preventDefault();a.style.opacity=.6;
+ try{const c=await nrpc('xa_pase');location.href='/app/'+(NB&&NB.slug?'?s='+encodeURIComponent(NB.slug):'')+'#xa='+c}catch(_){location.href=panelURL()}});
 const panelURL=()=>'/app/'+(NB&&NB.rol==='gestor'&&NB.slug?'?s='+encodeURIComponent(NB.slug):'');
 function nMas(){
  post=()=>{const q=s=>$(s);q('#nmc')&&(q('#nmc').onclick=modoCliente);q('#nso')&&(q('#nso').onclick=async()=>{if(DEMO)return location.href='/mi/';try{await NSB.auth.signOut()}catch(_){}NB=null;NSB=null;modoCliente()});
   q('#ncb')&&(q('#ncb').onclick=cambiarNeg);q('#nrf')&&(q('#nrf').onclick=async()=>{try{await nCargar();pinta();toast('✅ Actualizado')}catch(e){toast(errDe(e))}})};
  return`${nHead('MÁS')}<div class="g">
-  <a class="btn p" href="${DEMO?'/app/?demo='+(nDent()?(NB.rubro==='barberia'?'barberia':'consultorio'):'gym'):panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel completo</a>
+  <a class="btn p" data-pan href="${DEMO?'/app/?demo='+(nDent()?(NB.rubro==='barberia'?'barberia':'consultorio'):'gym'):panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel completo</a>
   <p class="mu xs" style="text-align:center;margin-top:-4px">Cobrar, crear socios, caja, reportes y todo lo demás. Entra sin volver a escribir tu clave.</p>
   ${nMpOn()?`<button class="btn" data-ntgo="mesas">🍽️ Pedidos de mesa${nMpNuevos()?' · '+nMpNuevos()+' nuevos':''}</button>`:''}
   <button class="btn" id="nrf">${I.refresh}Actualizar datos</button>
@@ -1392,7 +1395,7 @@ const nMpOn=()=>NB&&!nDent()&&['gestor','admin','supervisor','recepcion'].includ
 // Cafetín trabaja solo desde el panel web (ahí le llegan los pedidos de mesa)
 function nCafPanel(){post=()=>{const q=s=>$(s);q('#nmc')&&(q('#nmc').onclick=modoCliente);q('#nso')&&(q('#nso').onclick=async()=>{if(DEMO)return location.href='/mi/';try{await NSB.auth.signOut()}catch(_){}NB=null;NSB=null;modoCliente()})};
  return`${nHead('CAFETÍN')}<div class="g"><div class="card vacio"><span class="e">🥤</span><h2>Tu cuenta trabaja en el panel</h2><p class="mu sm" style="max-width:300px">Las ventas del cafetín y los pedidos de mesa se atienden desde el panel web de Xyro Apps.</p></div>
-  <a class="btn p" href="${DEMO?'/app/?demo=gym&rol=cafetin':panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel</a>
+  <a class="btn p" data-pan href="${DEMO?'/app/?demo=gym&rol=cafetin':panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel</a>
   <button class="btn" id="nmc">Volver a mi cuenta personal</button><button class="btn l" id="nso">Cerrar sesión del negocio</button></div>`}
 const nMpAb=()=>((NMP&&NMP.pedidos)||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
 const nMpNuevos=()=>nMpAb().filter(p=>p.estado==='nuevo').length;
