@@ -683,7 +683,8 @@ function pinta(){var um=ses('xyro-mi-auth'),ua=ses('xyro-apps-auth'),h='';
   h+='<p class="elk">'+(cr?'Al crearla aceptas los <a href="/terminos.html">términos</a> y la <a href="/mi/privacidad.html">privacidad</a>.':'<button type="button" id="eolv" style="background:none">¿Olvidaste tu clave?</button>')+'</p>'}
  else{h+='<div><h3>Entra a tu panel</h3><p class="mut" style="font-size:14px;margin-top:4px">Para dueños y equipo de negocios con Xyro Apps.</p></div>';
   h+='<form class="efl" id="ef" novalidate><label>Usuario o correo<input id="ee" autocomplete="username" required maxlength="120" placeholder="ana@tu-negocio"></label><label>Clave<input id="ep" type="password" autocomplete="current-password" required maxlength="128"></label><input class="ehp" id="ehp" tabindex="-1" autocomplete="off" aria-hidden="true"><div class="emsg" id="em"></div><button class="btn btn-p" id="eb">Entrar al panel →</button></form>';
-  h+='<p class="elk">¿Aún no tienes tu sistema? <a href="/app/?demo=gym">Pruébalo en vivo</a> · <a href="#/arma">Arma el tuyo</a></p>'}
+  h+='<a class="btn btn-g" href="/mi/?registro=1" style="width:100%">🏪 Registra tu negocio gratis</a><p class="elk" style="margin-top:-4px">Sale en Mi Xyro con tu perfil, tus promos y tu QR.</p>';
+  h+='<p class="elk">¿Quieres el sistema completo? <a href="/app/?demo=gym">Pruébalo en vivo</a> · <a href="#/arma">Arma el tuyo</a></p>'}
  card.innerHTML=h;
  card.querySelectorAll('[data-t]').forEach(function(b){b.onclick=function(){T.tab=b.dataset.t;pinta()}});
  card.querySelectorAll('[data-s]').forEach(function(b){b.onclick=function(){T.sub=b.dataset.s;pinta()}});
