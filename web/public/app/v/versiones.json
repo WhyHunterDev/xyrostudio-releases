@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261118-1357",
+  "fecha": "2026-11-18 13:57",
+  "titulo": "Empleos",
+  "notas": "Empleos",
+  "cambios": [
+   "Nuevo: publica tus vacantes en Mi Xyro desde Mi app → Empleos"
+  ],
+  "requiere": "SQL 93"
+ },
+ {
   "id": "20261118-1245",
   "fecha": "2026-11-18 12:45",
   "titulo": "Pago con Binance",

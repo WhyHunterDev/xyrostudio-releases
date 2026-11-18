@@ -384,7 +384,7 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ sb
 addEventListener('focus',mantenerSesion); addEventListener('online',mantenerSesion);
 
 // ---- Navegación ----
-const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['mixyro','📲','Mi Xyro'],['gratis','🆓','Registros gratis'],['pagos','⭐','Planes y pagos'],['verif','✅','Verificaciones'],['retos','🎯','Puntos y retos'],['cobros','💳','Cobros'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['tickets','🎫','Tickets'],['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['pendientes','📋','Pendientes'],['cuenta','🔑','Mi cuenta']]]];
+const NAV=[['Gestión',[['resumen','📊','Resumen'],['clientes','🗂️','Clientes'],['negocios','📱','Xyro Apps'],['mixyro','📲','Mi Xyro'],['gratis','🆓','Registros gratis'],['pagos','⭐','Planes y pagos'],['verif','✅','Verificaciones'],['retos','🎯','Puntos y retos'],['empleos','💼','Empleos'],['cobros','💳','Cobros'],['pruebas','🧪','Accesos de prueba'],['versiones','🚀','Actualizaciones']]],['Operación',[['tickets','🎫','Tickets'],['soporte','🛟','Modo soporte'],['seguridad','🛡️','Seguridad'],['backups','💾','Copias de seguridad'],['registro','🕑','Mi registro']]],['Cuenta',[['pendientes','📋','Pendientes'],['cuenta','🔑','Mi cuenta']]]];
 function side(){
   $('#side').innerHTML=`<div class="brand"><img class="logo xlogo" src="../img/marca/logo-xyrostudio-app.svg" alt="" width="36" height="36"><span>Xyro<b>Studio</b> <small style="color:var(--mu);font-weight:600">Panel</small></span></div><div class="status"><span class="d"></span>sistema operativo</div>`+
     NAV.map(([g,it])=>[g,it.filter(([id])=>puede(id))]).filter(([,it])=>it.length).map(([g,it])=>`<div class="grp">${g}</div>`+it.map(([id,ic,n])=>`<button class="nv ${id===view?'on':''}" data-v="${id}">${ic} ${n}${id==='tickets'&&TKG?` <b class="tkb">${TKG}</b>`:''}${id==='pendientes'&&PDN?` <b class="tkb">${PDN}</b>`:''}${id==='cobros'&&XGN?` <b class="tkb">${XGN}</b>`:''}${id==='mixyro'&&MXN?` <b class="tkb">${MXN}</b>`:''}${id==='gratis'&&GRP?` <b class="tkb">${GRP}</b>`:''}${id==='pagos'&&PGN?` <b class="tkb">${PGN}</b>`:''}${id==='verif'&&VFN?` <b class="tkb">${VFN}</b>`:''}</button>`).join('')).join('')+
@@ -609,7 +609,7 @@ V.mixyro=async ()=>{
 /* ===== Planes y pagos (SQL 88–89): tickets de pago de Xyro+, Boost y planes Plus/Pro; plan de cada negocio; precios ===== */
 let PGN=0,PGF='tickets';
 async function pgCuenta(){try{const{data,error}=await sb.rpc('xy_solicitudes_lista');if(error)return;PGN=(data||[]).filter(x=>x.estado==='PENDIENTE').length;side()}catch(_){}}
-const PGT=x=>x.tipo==='PLUS'?'⭐ Xyro+ · 1 mes':x.tipo==='BOOST'?'⚡ Boost · '+x.horas+' h':'🏪 Plan '+(x.plan==='PRO'?'Pro':'Plus')+' · '+(x.meses>=12?'1 año':x.meses+' mes'+(x.meses>1?'es':''));
+const PGT=x=>x.tipo==='EMPLEO'?'💼 Empleo destacado · '+Math.round((x.horas||24)/24)+' días':x.tipo==='PLUS'?'⭐ Xyro+ · 1 mes':x.tipo==='BOOST'?'⚡ Boost · '+x.horas+' h':'🏪 Plan '+(x.plan==='PRO'?'Pro':'Plus')+' · '+(x.meses>=12?'1 año':x.meses+' mes'+(x.meses>1?'es':''));
 V.pagos=async ()=>{
  H('Planes y pagos','Tickets de pago de Xyro+, Boost y planes de negocio. Revisa en tu Yape o banco que llegó el pago y actívalo con 1 toque.');
  $('#acts').innerHTML='<button class="btn btn-p" data-v="pagos">↻ Actualizar</button>';
@@ -713,6 +713,22 @@ document.addEventListener('click',async e=>{const t=e.target.closest('[data-rtsa
    if(!confirm(`¿${pt>0?'Dar':'Quitar'} ${Math.abs(pt).toLocaleString('es-PE')} puntos globales al ID ${idn}?`))return;
    const{error}=await sb.rpc('xy_g_dar_puntos',{p_idn:idn,p_puntos:pt,p_motivo:mo});if(error)throw error;touch(`${pt>0?'Dio':'Quitó'} ${pt} puntos a ${idn}`);toast('✅ Listo');return go('retos')}
  }catch(ex){toast(ex.message||String(ex))}});
+/* ===== Empleos (SQL 93): moderar anuncios de trabajo y precio del destacado ===== */
+V.empleos=async ()=>{
+ H('Empleos','Anuncios de trabajo que publican los negocios en Mi Xyro. Los más reportados salen primero. Quita los que sean estafa, ilegales o discriminen.');
+ $('#acts').innerHTML='<a class="btn btn-g" href="/mi/?empleos=1" target="_blank" rel="noopener">Ver en Mi Xyro ↗</a> <button class="btn btn-p" data-v="empleos">↻ Actualizar</button>';
+ const{data,error}=await sb.rpc('xy_g_empleos');if(error)return '<div class="note">💼 Falta correr <b>93-xyro-empleos.sql</b> en Supabase (después del 92).</div>';
+ const L=data.items||[],pr=data.precio||{},f=t=>new Date(t).toLocaleString('es-PE',{timeZone:'America/Lima',day:'numeric',month:'short',hour:'numeric',minute:'2-digit',hour12:true});
+ const EST={ABIERTO:'activo',PAUSADO:'pend',CERRADO:'pausado',QUITADO:'baja'},k=(v,l,c)=>`<div class="kpi${c?' '+c:''}"><b>${v}</b><small>${l}</small></div>`;
+ return`<div class="grid4">${k(L.filter(x=>x.estado==='ABIERTO').length,'Abiertos','g')}${k(L.filter(x=>x.reportes>0&&x.estado!=='QUITADO').length,'Con reportes',L.some(x=>x.reportes>0&&x.estado!=='QUITADO')?'w':'')}${k(L.filter(x=>x.dest).length,'Destacados')}${k(L.reduce((a,x)=>a+(+x.postulantes||0),0),'Postulaciones')}</div>
+  <div class="panel"><h3>Precio del destacado</h3><form class="form" onsubmit="return false"><label>US$ por día<input id="emP" type="number" step="0.5" min="0.5" value="${esc(pr.price_usd||2)}"></label><div><button class="btn btn-p" data-empp>Guardar</button></div></form><p class="d">El negocio elige 3, 7, 15 o 30 días y paga por ticket. Lo confirmas en «⭐ Planes y pagos».</p></div>
+  <div class="panel tbl"><table><tr><th>Empleo</th><th>Negocio</th><th>Estado</th><th>Postulantes</th><th></th></tr>${L.map(x=>`<tr><td><b>${esc(x.titulo)}</b>${x.dest?' ⚡':''}<br><small style="color:var(--mu)">${f(x.created_at)}${x.reportes?` · <b style="color:var(--warn)">🚩 ${x.reportes} reporte${x.reportes>1?'s':''}</b>`:''}</small>${x.motivo?`<br><small style="color:var(--warn)">${esc(x.motivo)}</small>`:''}</td>
+   <td>${esc(x.negocio)}<br><small style="color:var(--mu)">${esc(x.slug)}</small></td><td><span class="tag ${EST[x.estado]||''}">${esc(x.estado)}</span></td><td>${x.postulantes}</td>
+   <td style="text-align:right;white-space:nowrap"><a class="btn btn-g btn-sm" href="/mi/?empleo=${x.id}" target="_blank" rel="noopener">Ver</a> ${x.estado==='QUITADO'||x.estado==='PAUSADO'?`<button class="btn btn-g btn-sm" data-emga="${x.id}" data-a="ABRIR">Reabrir</button>`:`<button class="btn btn-g btn-sm" data-emga="${x.id}" data-a="QUITAR">Quitar</button>`} <button class="btn btn-g btn-sm" data-emga="${x.id}" data-a="DESTACAR">⚡ 7 días</button></td></tr>`).join('')||'<tr><td colspan="5">Aún no hay empleos.</td></tr>'}</table></div>`};
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-emga],[data-empp]');if(!t||!me)return;e.preventDefault();const d=t.dataset;
+ try{if(d.empp!==undefined){const{error}=await sb.rpc('xy_g_empleo_precio',{p_usd:+$('#emP').value});if(error)throw error;touch('Cambió precio de empleo destacado');toast('✅ Precio guardado');return go('empleos')}
+  let m=null;if(d.a==='QUITAR'){m=prompt('¿Por qué se quita? (lo verá el negocio)','Anuncio no permitido en Xyro');if(m==null)return}
+  const{error}=await sb.rpc('xy_g_empleo',{p_id:d.emga,p_accion:d.a,p_motivo:m});if(error)throw error;touch(d.a+' empleo');toast('Listo ✓');go('empleos')}catch(ex){toast(ex.message||String(ex))}});
 /* ===== Registros gratis (SQL 72): negocios que se registran solos desde Mi Xyro. Tú apruebas, suspendes o los pasas a pago ===== */
 let GRP=0,GRL=null,GRF='todos';
 const GRE={pendiente:['pend','🕓 Por revisar'],activo:['activo','✅ Publicado'],suspendido:['baja','⛔ Suspendido'],pago:['pg','⭐ Pasó a pago']};
