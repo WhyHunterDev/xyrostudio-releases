@@ -27,6 +27,7 @@ Push a `main` = se publica solo (Cloudflare Workers Builds, raíz `web/`). Verif
 ## Reglas
 - Nunca la service_role key en el frontend. No publicar `.sql`. RLS en toda tabla nueva.
 - Datos personales del dueño: privados.
+- Idiomas: portada, /mi/ y /pedir/ se traducen con `web/public/i18n/i18n.js`; todo texto nuevo en español ahí lleva su inglés en `i18n/en.js` (`#` = parte variable).
 - Rendimiento: sin librerías pesadas, imágenes webp/jpg chicas, nada de frameworks.
 - Diseño: nada de landing estática; demos interactivas. Sin precios altos visibles. NUNCA el WhatsApp del dueño (retirado 2026-11-18): consultas y comunidad = Discord https://discord.gg/R39CwRC2bP; pagos por ticket.
 

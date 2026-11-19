@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><script src="/i18n/i18n.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Pedir desde mi mesa</title>
 <meta name="robots" content="noindex,nofollow">
@@ -370,7 +370,7 @@ function elegirMesa(){const o=document.createElement('div');o.className='ov';
  const rl=o.querySelector('[data-rl]');rl&&(rl.onclick=()=>{o.remove();modoRecojo();pinta()})}
 async function cargarRec(){if(!DEMO&&!token())return REC=[];try{REC=await api('xa_recojo_mios',{p_slug:SLUG})||[]}catch(_){}return REC}
 const RPAS=[['por_pagar','💳','Pago'],['preparando','👨‍🍳','Preparando'],['listo','🛍️','Listo'],['entregado','✅','Entregado']];
-const hm=d=>{const x=new Date(d);return x.toLocaleTimeString('es-PE',{hour:'numeric',minute:'2-digit',hour12:true}).replace(/\s?a\.?\s?m\.?/i,' am').replace(/\s?p\.?\s?m\.?/i,' pm')};
+const hm=d=>{const x=new Date(d);return x.toLocaleTimeString(window.XY_LOC||'es-PE',{hour:'numeric',minute:'2-digit',hour12:true}).replace(/\s?a\.?\s?m\.?/i,' am').replace(/\s?p\.?\s?m\.?/i,' pm')};
 function recHTML(o){const e=o.estado,k=e==='por_revisar'?0:RPAS.findIndex(p=>p[0]===e),fin=['cancelado','no_vino'].includes(e);
  return`<div class="ord ${e==='listo'?'listo':''}"><div class="rw"><div class="t"><b>Pedido #${o.num}</b> <span class="mu xs">· Para recoger</span><p class="mu xs">${(o.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ')}</p></div><b>${sol(o.total)}</b></div>
  ${fin?`<p class="sm" style="color:var(--bad)">${e==='no_vino'?'No lo recogiste: no sumó puntos.':esc(o.motivo||'Pedido cancelado')}</p>`:`<div class="stp">${RPAS.map((p,i)=>`<div class="${i<=k?'on':''} ${i===k&&k<3?'now':''}"><i>${p[1]}</i>${p[2]}</div>`).join('')}</div>`}
@@ -416,5 +416,6 @@ init();
  var a=document.createElement('a');a.href='/mi/';a.textContent='‹ Mi Xyro';a.setAttribute('aria-label','Volver a Mi Xyro');
  a.style.cssText='position:absolute;left:16px;top:calc(74px + env(safe-area-inset-top));z-index:60;padding:6px 12px;border-radius:999px;background:#7c5cffee;color:#fff;font:700 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 8px 20px -8px #7c5cff';
  document.body.appendChild(a)})();</script>
+<script>document.addEventListener('click',function(e){var b=e.target.closest('[data-lang]');if(!b)return;e.preventDefault();xyLang(window.XY_LANG==='en'?'es':'en')});</script>
 </body>
 </html>
