@@ -103,3 +103,4 @@ Monetización (SQL 98): 📣 avisos a seguidores (`xy_avisos_neg`, `xy_aviso_inf
 - WhatsApp del dueño RETIRADO de todo (2026-11-18). Contacto/comunidad = Discord https://discord.gg/R39CwRC2bP (Perfil de Mi Xyro, portada, enlaces de Xyro Apps).
 - 2026-11-18: «✏️ Editar mi perfil» (grEditar) con vista previa en vivo (#epv). Cartel imprimible A5 para caja `cartelXyro(nom,url)` («¿Tienes Xyro? Escanea y gana puntos»).
 - 2026-11-18 (SQL 103): puntos SOLO con pago virtual + captura; efectivo = 0 puntos (antes daba en verificados). Textos en Mi Xyro avisan.
+- Eliminar negocio (SQL 106, `xy_negocio_eliminar`): dueño en «✏️ Editar mi perfil» → «🗑️ Eliminar mi negocio» (escribe el nombre); gestor en «🆓 Registros gratis». No aplica a negocios con panel completo (estado pago). Si tuvo compras, la entidad queda SUSPENDED «(eliminado)» para no perder pedidos/puntos.
