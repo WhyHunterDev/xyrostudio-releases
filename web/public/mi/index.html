@@ -1070,6 +1070,7 @@ function negCard(){const g=GRN?null:G0(),p=PROM;
   ${g?fila('ngG',I.store,esc(g.nombre),(GREST[g.estado]||GREST.pendiente)[1]+' · Plan '+(g.estado==='pago'?'completo':'Gratis')):''}
   ${p?fila('ngP',I.dumb,'Mi perfil de '+esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase()),(p.estado==='activo'?'✅ Visible en Explorar':p.estado==='suspendido'?'⛔ Suspendido':'⏳ En revisión')+(p.nuevos?` · <b style="color:var(--a)">${p.nuevos} nuevo${p.nuevos>1?'s':''}</b>`:'')):''}
   ${g||p?'':`<p class="mu sm">¿Vendes productos o das un servicio? Regístralo gratis y cobra dentro de Xyro.</p><button class="btn p" id="ngN">Registrar mi negocio gratis</button>`}
+  ${p&&!g?'<button class="btn l" id="ngN" style="padding:6px 0">＋ Registrar también un negocio (local, tienda, barbería…)</button>':''}${g&&!p?'<button class="btn l" id="ngN" style="padding:6px 0">＋ Crear también mi perfil de entrenador o profesor</button>':''}
   <button class="btn${g||p?' p':''}" id="mneg">${I.brief}Entrar al modo negocio</button></div>`}
 /* Modo negocio (SQL 83): todo lo que la persona puede manejar con SU cuenta: sus negocios, los que le dieron acceso con su ID y su perfil de entrenador */
 const RLN={admin:'Administrador',supervisor:'Supervisor',recepcion:'Recepción',cafetin:'Cafetín',entrenador:'Entrenador',nutricionista:'Nutricionista',profesional:'Profesional'};let NACC=0;
@@ -1092,10 +1093,10 @@ async function negIr(o){
  if(o.k==='p'||o.k==='g'){SUB=o.k==='p'?'mipro':'migr';pinta();$('#sc')&&($('#sc').scrollTop=0);return}
  if(DEMO)return modoNegocio();
  try{const{error}=await sb.rpc('xa_cambiar_negocio',{p_slug:o.v});if(error)throw error;NSB=sb;NSLUG=null;ls.s('mi-nslug',null);await nCargar();entrarNeg();toast('🏢 '+o.t)}catch(e){toast(errDe(e))}}
-function negNuevo(){vib();hoja(`<h2>¿Qué ofreces?</h2>
- <button class="card" data-nt="producto" style="text-align:left"><b>🛍️ Productos</b><span class="mu sm">Comida, bebidas, ropa, accesorios, cosas digitales…</span></button>
- <button class="card" data-nt="servicio" style="text-align:left"><b>🏋️ Servicio con muchos clientes</b><span class="mu sm">Gimnasio, consultorio, barbería: socios, citas y control.</span></button>
- <button class="card" data-nt="indep" style="text-align:left"><b>💪 Servicio independiente</b><span class="mu sm">Entrenador, profesor o freelancer: cobras a tus alumnos por Xyro.</span></button>
+function negNuevo(){vib();const tg=!GRN&&G0(),tp=PROM;hoja(`<h2>¿Qué ofreces?</h2>
+ ${tg?`<div class="card"><p class="sm">Ya tienes un negocio gratis: <b>${esc(tg.nombre)}</b>. Para un 2.º negocio con la misma cuenta, pasa ese a Plus o Pro, o pídelo por «Necesito ayuda».</p></div>`:`<button class="card" data-nt="producto" style="text-align:left"><b>🛍️ Productos</b><span class="mu sm">Comida, bebidas, ropa, accesorios, cosas digitales…</span></button>
+ <button class="card" data-nt="servicio" style="text-align:left"><b>🏋️ Servicio con muchos clientes</b><span class="mu sm">Gimnasio, consultorio, barbería: socios, citas y control.</span></button>`}
+ ${tp?'':`<button class="card" data-nt="indep" style="text-align:left"><b>💪 Servicio independiente</b><span class="mu sm">Entrenador, profesor o freelancer: cobras a tus alumnos por Xyro.</span></button>`}
  <button class="btn l" data-x>Ahora no</button>`,(o,close)=>{o.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{close();const t=b.dataset.nt;
   if(t==='indep'){SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)}else grRegistro(t)})})}
 function grCard(){if(GRN)return'';const g=G0();
@@ -2064,6 +2065,11 @@ function vMiPro(){const p=PROM;
   ${proCobrosHTML(p)}${proPlanesCardHTML()}
   <h2>📥 Solicitudes y mensajes</h2>${B.length?B.map(c=>`<button class="card" data-chat="${esc(c.id)}" style="text-align:left;width:100%;cursor:pointer"><div class="row"><span class="dot rav">${/^https:/.test(c.foto||'')?`<img src="${esc(c.foto)}" alt="" referrerpolicy="no-referrer">`:esc(String(c.nombre||'?')[0].toUpperCase())}</span><div class="sp" style="min-width:0"><b>${esc(c.nombre)}${c.alumno?' <span class="pill ver">Alumno</span>':''}</b><p class="mu xs">${TT[c.tipo]||''}${c.objetivo?' · '+esc(c.objetivo):''} · ${haceCuanto(c.act)}</p><p class="sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.ult||'')}</p></div>${c.nuevo?'<span class="nvd"></span>':''}</div></button>`).join(''):'<p class="mu sm">Aún no tienes mensajes. Comparte tu QR con tus alumnos para que te sigan y te escriban.</p>'}
   ${proPlanHTML(p)}</div>`}
+/* Eliminar perfil de entrenador (SQL 117): confirma escribiendo el nombre; su negocio gratis y su cuenta no se tocan */
+function proEliminar(p){vib();hoja(`<h2>🗑️ Eliminar mi perfil</h2><p class="sm">Se borra tu perfil de ${esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase())}, tus planes y solicitudes. Tu cuenta de Mi Xyro${G0()?' y tu negocio':''} siguen igual. No se puede deshacer.</p>
+ <label class="sm">Escribe <b>${esc(p.nombre||'')}</b> para confirmar<input id="pdc" autocomplete="off"></label><div class="msg" id="pdm"></div>
+ <button class="btn" id="pdok" style="background:#ef4444;color:#fff">Eliminar para siempre</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+ o.querySelector('#pdok').onclick=async()=>{const b=o.querySelector('#pdok');b.disabled=true;try{if(!DEMO)await rpc('xa_pro_eliminar',{p_confirma:o.querySelector('#pdc').value});close();PROM=null;SUB=null;TAB='perfil';pinta();toast('Perfil eliminado')}catch(e){const m=o.querySelector('#pdm');m.textContent=errDe(e);m.className='msg on';b.disabled=false}}})}
 function proEditar(){const p=PROM||{},per=(D&&D.persona)||{},E=p.especialidades||[],mx=p.plus?20:6,mv=p.plus?12:3;let foto=p.foto||per.foto||'',portada=p.portada||'',fotos=(p.fotos||[]).slice();
  hoja(`<h2>${PROM?'✏️ Editar mi perfil':'🧑‍🏫 Crear mi perfil'}</h2>
  <form class="g" id="pf"><div class="row"><button type="button" class="av" id="pff" style="cursor:pointer">${foto?`<img src="${esc(foto)}" alt="">`:'📷'}</button><div class="sp"><p class="sm"><b>Tu foto</b></p><p class="mu xs">Una foto clara de tu cara da confianza.</p></div></div>
@@ -2081,7 +2087,8 @@ function proEditar(){const p=PROM||{},per=(D&&D.persona)||{},E=p.especialidades|
   <button type="button" class="btn" id="pfpo">🖼️ ${portada?'Cambiar':'Poner'} foto de portada</button>
   <div class="row"><label class="sp">Instagram<input id="pfri" maxlength="60" value="${esc((p.redes||{}).instagram||'')}" placeholder="@usuario"></label><label class="sp">TikTok<input id="pfrt" maxlength="60" value="${esc((p.redes||{}).tiktok||'')}" placeholder="@usuario"></label></div>
   <input type="file" id="pfi" accept="image/*" hidden><div class="msg" id="pfmg"></div><button class="btn p" id="pfok">Guardar</button>
-  <p class="mu xs" style="text-align:center">Al publicar aceptas los <a href="/terminos.html" target="_blank" rel="noopener" style="color:var(--a)">términos</a>. XyroStudio revisa cada perfil antes de mostrarlo en Explorar.</p></form>`,(o,close)=>{
+  <p class="mu xs" style="text-align:center">Al publicar aceptas los <a href="/terminos.html" target="_blank" rel="noopener" style="color:var(--a)">términos</a>. XyroStudio revisa cada perfil antes de mostrarlo en Explorar.</p>${p.id||p.slug?'<button type="button" class="btn l" id="pfdel" style="color:#ef4444">🗑️ Eliminar mi perfil de entrenador</button>':''}</form>`,(o,close)=>{
+  const dl=o.querySelector('#pfdel');dl&&(dl.onclick=()=>{close();proEliminar(p)});
   const q=s=>o.querySelector(s),m=q('#pfmg'),say=t=>{m.textContent=t;m.className='msg on'};let para='';
   const gal=()=>{q('#pfg').innerHTML=fotos.map((u,i)=>`<span><img src="${esc(u)}" alt=""><button type="button" data-fx="${i}" aria-label="Quitar">✕</button></span>`).join('')+(fotos.length<mx?'<button type="button" id="pfadd">＋</button>':'');
    o.querySelectorAll('[data-fx]').forEach(b=>b.onclick=()=>{fotos.splice(+b.dataset.fx,1);gal()});const a=q('#pfadd');a&&(a.onclick=()=>{para='g';q('#pfi').click()})};gal();
