@@ -371,7 +371,7 @@ async function cliente(){
 async function rpc(f,a){if(DEMO){const r=await demoRpc(f,a);if(f==='xa_yo_editar'&&r&&r.error)throw r.error;return r}const{data,error}=await sb.rpc(f,a||{});if(error)throw error;if(data&&data.error)throw data.error;return data}
 async function cargar(){
  if(DEMO){D=D||demoData();return D}
- D=await rpc('xa_yo');await cargaPed();ls.s('mi-data',JSON.stringify(D));invRef();return D;
+ D=await rpc('xa_yo');await cargaPed();ls.s('mi-data',JSON.stringify(D));invRef();recMios();irPend();return D;
 }
 const negs=()=>(D&&D.negocios)||[];
 const N=()=>negs()[Math.min(CUR,negs().length-1)]||null;
@@ -677,7 +677,7 @@ function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||
  const f0=post;post=()=>{f0&&f0();xCardFx();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
  const it=feed(),pr=promosFeed();
  return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1${estC()?` style="color:${estC()}"`:''}>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
-  ${per.idn?xCard(per):''}
+  ${per.idn?xCard(per):''}${recCard()}
   ${ptsHTML()}
   ${M.length?`<div class="qk"${M.length===1?' style="grid-template-columns:1fr"':''}>${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}</div>`:''}
   ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}${av}<div class="g">${misPlanesProHTML()}${it.join('')}${pr}
@@ -1183,6 +1183,7 @@ function gcHTML(g){if(!grResto(g)||GCN)return'';if(!GC)return`<div class="card">
  return`<div class="card"><div class="row"><div class="ibox">📖</div><div class="sp"><h3>Tu carta y tu mesa</h3><p class="mu sm">${P.length} de ${GPMAX} productos · 1 mesa con QR · ${on?(ps?'⏸️ Pedidos en pausa':'🟢 Recibiendo pedidos'):'Pedidos apagados'}</p></div></div>
   ${P.length?`<div>${P.map(p=>`<button class="li" data-gcp="${esc(p.id)}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="dot" style="overflow:hidden;padding:0">${/^(https:|blob:)/.test(p.foto||'')?`<img src="${esc(p.foto)}" alt="" style="width:100%;height:100%;object-fit:cover">`:'🍽️'}</span><span class="sp"><b>${esc(p.nombre)}</b><br><span class="mu xs">${esc(p.detalle||'')}</span></span><b>${money(p.precio)}</b></button>`).join('')}</div>`:'<p class="mu sm">Agrega tus 3 productos estrella: es lo que verán al escanear tu mesa.</p>'}
   ${P.length<GPMAX?'<button class="btn" id="gcn">＋ Agregar producto</button>':'<p class="mu xs">Llegaste a 3 productos. Con el panel completo tienes tu carta entera y todas tus mesas.</p>'}
+  <button class="btn" data-recneg="${esc(g.slug)}">🛍️ Pedidos para recoger</button>
   <button class="btn s2" id="gcy">📱 ${y.on?'Cobro con Yape: '+esc(String(y.num||'').replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3')):'Poner mi Yape (cobra sin que vayan a caja)'}</button>
   <div class="row" style="gap:8px">${on?`<button class="btn sp" id="gcpa">${ps?'▶️ Reanudar pedidos':'⏸️ Pausar pedidos'}</button><button class="btn sp" id="gcof">Apagar</button>`:`<button class="btn p sp" id="gcon" ${P.length?'':'disabled'}>🟢 Recibir pedidos en mi mesa</button>`}</div>
   ${on?`<div style="display:grid;justify-items:center;gap:6px;text-align:center"><div id="gcqr" style="background:#fff;padding:10px;border-radius:16px;width:170px;aspect-ratio:1"></div><p class="mu xs" style="max-width:290px">QR de tu mesa: pégalo en la mesa o el mostrador. Tus clientes ven tu carta, piden y pagan con Yape desde su celular.</p><a class="btn l" href="${esc(grMesaURL(g))}" target="_blank" rel="noopener" style="text-decoration:none;color:var(--a)">Probar mi mesa ›</a></div>`:''}</div>
@@ -1402,6 +1403,7 @@ function nMas(){
   <p class="mu xs" style="text-align:center;margin-top:-4px">Cobrar, crear ${citR(NB.rubro)?(NB.rubro==='barberia'?'clientes':'pacientes'):NB.rubro==='restaurante'?'pedidos':'socios'}, caja, reportes y todo lo demás. Entra sin volver a escribir tu clave.</p>
   ${nMpOn()?`<button class="btn" data-ntgo="mesas">🍽️ Pedidos de mesa${nMpNuevos()?' · '+nMpNuevos()+' nuevos':''}</button>`:''}
   <button class="btn" id="ncj">🎟️ Cobrar canje de puntos</button>
+  ${nDent()?'':'<button class="btn" data-recnegn>🛍️ Pedidos para recoger</button>'}
   <button class="btn" id="nrf">${I.refresh}Actualizar datos</button>
   ${(NB.mios||0)>1||NACC>1||NB.rol==='gestor'?`<button class="btn" id="ncb">${I.store}Cambiar de negocio</button>`:''}
   <div class="card"><div class="row"><div class="ibox">${I.user}</div><div class="sp"><b>Mi cuenta personal</b><p class="mu sm">Tus membresías, QR, promos y negocios guardados.</p></div></div><button class="btn" id="nmc">Volver a mi cuenta personal</button></div>
@@ -1425,6 +1427,7 @@ function nCafPanel(){post=()=>{const q=s=>$(s);q('#ncj')&&(q('#ncj').onclick=()=
  return`${nHead('CAFETÍN')}<div class="g"><div class="card vacio"><span class="e">🥤</span><h2>Tu cuenta trabaja en el panel</h2><p class="mu sm" style="max-width:300px">Las ventas del cafetín y los pedidos de mesa se atienden desde el panel web de Xyro Apps.</p></div>
   <a class="btn p" data-pan href="${DEMO?'/app/?demo=gym&rol=cafetin':panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel</a>
   <button class="btn" id="ncj">🎟️ Cobrar canje de puntos</button>
+  <button class="btn" data-recnegn>🛍️ Pedidos para recoger</button>
   <button class="btn" id="nmc">Volver a mi cuenta personal</button><button class="btn l" id="nso">Cerrar sesión del negocio</button></div>`}
 const nMpAb=()=>((NMP&&NMP.pedidos)||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
 const nMpNuevos=()=>nMpAb().filter(p=>p.estado==='nuevo').length;
@@ -2841,6 +2844,9 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
    Invitar: enlace /mi/?ref=<ID>. Al hacer el amigo su 1.ª compra (y pasar la espera antifraude) los dos ganan globales.
    Premios: el negocio elige qué da por puntos locales y/o globales. La persona pide un código (15 min), lo muestra al pagar
    y el equipo lo escribe: los puntos se descuentan al toque. */
+{const ir=P.get('ir')||'';if(/^\/pedir\/\?s=[a-z0-9_-]+/.test(ir))try{sessionStorage.setItem('mi-ir',ir)}catch(_){}
+ if(/^[A-Za-z0-9]{40}$/.test(P.get('rc')||''))setTimeout(()=>toast('🛍️ Este QR es de un pedido para recoger: lo escanea el negocio desde «Pedidos para recoger»'),1500)}
+function irPend(){let ir='';try{ir=sessionStorage.getItem('mi-ir')||'';sessionStorage.removeItem('mi-ir')}catch(_){}if(/^\/pedir\/\?s=[a-z0-9_-]+/.test(ir)&&D)location.assign(ir+(ir.includes('de=mi')?'':'&de=mi'))}
 {const r=(P.get('ref')||'').replace(/\D/g,'');if(r.length>=6&&r.length<=10){ls.s('mi-ref',r);setTimeout(()=>{if(!D)toast('🎁 Te invitaron a Mi Xyro: regístrate y gana puntos con tu primera compra')},1200)}}
 let INVT=0;
 async function invRef(){const r=ls.g('mi-ref');if(!r||INVT||DEMO||!D)return;INVT=1;try{const x=await rpc('xy_invitar_usar',{p_idn:+r});ls.s('mi-ref',null);if(x&&x.ok)setTimeout(()=>{confeti();toast(`🎉 Te invitó ${x.invitador}: con tu primera compra ganas ${nfmt(x.puntos)} puntos`)},800)}catch(_){}}
@@ -2912,6 +2918,54 @@ function canjeCobrar(slug,cli){vib();
     r.innerHTML=`<div class="card" style="border-color:#22c55e;text-align:center"><b style="font-size:22px">✅ Entrega: ${esc(x.premio)}</b><span class="sm">a ${esc(x.persona)} · −${nfmt(x.puntos)} ${x.tipo==='LOCAL'?'puntos de aquí':'puntos Xyro'}</span></div>`;k.value=''}
    catch(e){r.innerHTML=`<p class="sm" style="color:#ef4444;text-align:center">${esc(errDe(e))}</p>`}g.disabled=false};
   g.onclick=go;k.onkeydown=e=>{if(e.key==='Enter')go()}})}
+/* ===== Pagar y recoger (SQL 104) =====
+   Persona: tarjeta en Inicio con sus pedidos activos (abre /pedir/ con su QR).
+   Negocio: «🛍️ Pedidos para recoger»: revisa capturas, prepara, avisa «listo» y entrega escaneando el QR del cliente. */
+var RECM=[];
+async function recMios(){if(DEMO){RECM=[{id:'r1',num:12,estado:'listo',slug:'cafe-aurora',negocio:'Café Aurora',total:23}];return}try{RECM=(await rpc('xa_recojo_mios'))||[]}catch(_){RECM=[]}if(RECM.some(o=>['por_pagar','por_revisar','preparando','listo'].includes(o.estado))&&TAB==='inicio'&&!SUB)pinta()}
+function recCard(){const L=(RECM||[]).filter(o=>['por_pagar','por_revisar','preparando','listo'].includes(o.estado));if(!L.length)return'';
+ const T={por_pagar:'💳 Falta subir tu pago',por_revisar:'🔎 Revisando tu pago',preparando:'👨‍🍳 Lo están preparando',listo:'🛍️ ¡Te está esperando!'};
+ return L.slice(0,3).map(o=>`<a class="card" href="/pedir/?s=${encodeURIComponent(o.slug)}&rec=1&de=mi" style="text-decoration:none;color:inherit;${o.estado==='listo'?'border-color:#22c55e;box-shadow:0 10px 40px -20px #22c55e':''}"><div class="row"><div class="ibox">🛍️</div><div class="sp"><b>${esc(T[o.estado])}</b><p class="mu sm">Pedido #${o.num} · ${esc(o.negocio)}${o.estado==='listo'?' · toca para ver tu QR':''}</p></div><span class="mu" style="align-self:center">›</span></div></a>`).join('')}
+var RECD={L:null};
+function recDemo(f,a){const t=m=>new Date(Date.now()-m*6e4).toISOString(),F='https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400';
+ if(!RECD.L)RECD.L=[{id:'q1',num:7,cliente:'Valeria',items:[{n:'Frappé de moka',c:2,p:14},{n:'Waffle con fresas',c:1,p:16}],total:44,estado:'por_revisar',yape_op:'04512873',yape_foto:F,yape_at:t(1),creado:t(3)},{id:'q2',num:6,cliente:'Diego',items:[{n:'Café americano',c:1,p:7}],total:7,estado:'preparando',creado:t(9)},{id:'q3',num:5,cliente:'Lucía',items:[{n:'Cheesecake',c:2,p:12}],total:24,estado:'listo',creado:t(20)},{id:'q4',num:4,cliente:'Marco',items:[{n:'Latte',c:1,p:9}],total:9,estado:'entregado',creado:t(60)}];
+ const L=RECD.L,x=L.find(o=>o.id===a.p_id);
+ if(f==='xa_recojo_lista')return{on:RECD.on!==false,listo_para_usar:RECD.on!==false,yape:true,abierto:true,pedidos:L};
+ if(f==='xa_recojo_config'){RECD.on=a.p_on;return{ok:true,on:a.p_on}}
+ if(f==='xa_recojo_accion'){x.estado={pago_ok:'preparando',pago_no:'por_pagar',listo:'listo',no_vino:'no_vino',cancelar:'cancelado'}[a.p_accion];return{ok:true}}
+ const c=String(a.p_cod||'').replace(/\D/g,''),y=L.find(o=>['preparando','listo'].includes(o.estado)&&(c==='482913'||/rc=/.test(a.p_cod||'')));
+ if(f==='xa_recojo_ver')return y?{ok:true,pedido:y}:{ok:false,error:'Este QR no es de un pedido de tu negocio'};
+ if(f==='xa_recojo_entregar'){if(!y)return{ok:false,error:'Este QR no es de un pedido de tu negocio'};y.estado='entregado';return{ok:true,num:y.num,cliente:y.cliente,items:y.items,total:y.total,puntos:true}}
+ return{}}
+function recojoNeg(slug,cli){vib();const C=DEMO?async(f,a)=>recDemo(f,a):cli;let R=null,tm=0;
+ const its=o=>(o.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ');
+ const hora=d=>new Date(d).toLocaleTimeString('es-PE',{hour:'numeric',minute:'2-digit',hour12:true}).replace(/\s?a\.?\s?m\.?/i,' am').replace(/\s?p\.?\s?m\.?/i,' pm');
+ const card=(o,bt)=>`<div class="card" style="gap:6px"><div class="row"><b class="sp">#${o.num} · ${esc(o.cliente||'Cliente')}</b><b>S/ ${(+o.total).toFixed(2)}</b></div><span class="mu sm">${its(o)}</span>${o.nota?`<span class="sm">📝 ${esc(o.nota)}</span>`:''}${bt}</div>`;
+ const draw=o=>{const L=(R&&R.pedidos)||[],by=e=>L.filter(x=>x.estado===e),rv=by('por_revisar'),pr=by('preparando'),li=by('listo'),pp=by('por_pagar'),en=by('entregado');
+  o.querySelector('#rcl').innerHTML=`${R&&!R.yape?'<div class="card" style="border-color:#f59e0b"><p class="sm">📱 Para recibir pedidos para recoger, primero pon tu <b>Yape</b> en tu carta (Pedidos de mesa → Cobrar con Yape).</p></div>':''}
+   ${rv.length?`<h3>💰 Pago por revisar · ${rv.length}</h3>${rv.map(x=>card(x,`<p class="sm" style="color:#f59e0b">Dice que pagó · op. <b>${esc(x.yape_op||'')}</b>${x.yape_at?' · '+hora(x.yape_at):''}</p>${/^https:\/\//.test(x.yape_foto||'')?`<a class="btn" href="${esc(x.yape_foto)}" target="_blank" rel="noopener" style="text-decoration:none;padding:10px">🧾 Ver su captura</a>`:''}<p class="mu xs">Revisa que llegó a tu Yape antes de confirmar.</p><div class="row" style="gap:6px"><button class="btn p sp" data-ra="${x.id}|pago_ok">✅ Pago recibido</button><button class="btn sp" data-ra="${x.id}|pago_no">❌ No llegó</button></div>`)).join('')}`:''}
+   ${pr.length?`<h3>👨‍🍳 Preparando · ${pr.length}</h3>${pr.map(x=>card(x,`<button class="btn p" data-ra="${x.id}|listo">🛍️ Listo para recoger</button><button class="btn l" data-ra="${x.id}|cancelar" style="color:#ef4444">Cancelar compra (sin puntos)</button>`)).join('')}`:''}
+   ${li.length?`<h3>🛍️ Esperando que lo recojan · ${li.length}</h3>${li.map(x=>card(x,`<p class="mu xs">Cuando llegue, escanea su QR o escribe su código.</p><div class="row" style="gap:6px"><button class="btn sp" data-ra="${x.id}|no_vino">🚫 No vino</button><button class="btn l sp" data-ra="${x.id}|cancelar" style="color:#ef4444">Cancelar compra</button></div>`)).join('')}`:''}
+   ${!rv.length&&!pr.length&&!li.length?'<p class="mu sm" style="text-align:center">No hay pedidos para recoger ahora. Te avisamos aquí cuando llegue uno.</p>':''}
+   ${pp.length||en.length?`<p class="mu xs" style="text-align:center">${pp.length?pp.length+' esperando que el cliente pague · ':''}${en.length} entregados hoy</p>`:''}`;
+  const sw=o.querySelector('#rcon');sw&&(sw.textContent=R&&R.on?'🟢 Recibiendo pedidos para recoger · tocar para apagar':'⚪ Apagado · tocar para encender');
+  o.querySelectorAll('[data-ra]').forEach(b=>b.onclick=async()=>{const[id,ac]=b.dataset.ra.split('|');
+   if(['cancelar','no_vino','pago_no'].includes(ac)&&!confirm(ac==='pago_no'?'¿No llegó el pago? El cliente podrá volver a subirlo.':ac==='no_vino'?'¿No vino a recoger? No gana puntos.':'¿Cancelar la compra? No hay puntos. Si ya te pagó, la devolución la ves tú con el cliente.'))return;
+   b.disabled=true;try{await C('xa_recojo_accion',{p_slug:slug,p_id:id,p_accion:ac});vib();toast({pago_ok:'✅ Pago confirmado: a preparar',pago_no:'Le avisamos que no llegó',listo:'🛍️ Le avisamos que ya está listo',no_vino:'Marcado como no vino',cancelar:'Compra cancelada'}[ac]);await carga(o)}catch(e){toast(errDe(e));b.disabled=false}})};
+ const carga=async o=>{try{const j=JSON.stringify(R&&R.pedidos);R=await C('xa_recojo_lista',{p_slug:slug});if(j&&j!=='null'&&(R.pedidos||[]).some(x=>x.estado==='por_revisar'&&!j.includes(x.id))){vib();toast('🔔 ¡Pedido nuevo para recoger!')}}catch(e){R=R||{pedidos:[]};toast(errDe(e))}if(o.isConnected)draw(o)};
+ const entregar=async cod=>{let v;try{v=await C('xa_recojo_ver',{p_slug:slug,p_cod:cod})}catch(e){toast(errDe(e));return false}if(!v||v.ok===false){toast((v&&v.error)||'No se encontró');return false}const x=v.pedido;
+  hoja(`<h2>🛍️ Pedido #${x.num}</h2><p class="sm"><b>${esc(x.cliente||'Cliente')}</b> · S/ ${(+x.total).toFixed(2)} · pagado</p><div class="card" style="gap:4px">${(x.items||[]).map(i=>`<span>${i.c}× ${esc(i.n)}</span>`).join('')}</div>${x.nota?`<p class="sm">📝 ${esc(x.nota)}</p>`:''}
+   <button class="btn p" id="rde">✅ Entregado</button><button class="btn l" data-x>Todavía no</button>`,(h,close)=>{h.querySelector('#rde').onclick=async()=>{try{const r=await C('xa_recojo_entregar',{p_slug:slug,p_cod:cod});if(!r||r.ok===false)throw new Error((r&&r.error)||'No se pudo');close();vib();confeti();toast(r.puntos?'🎉 Entregado: los dos ganaron puntos':'✅ Entregado');const o=document.querySelector('#rcl');o&&carga(o.closest('.ov'))}catch(e){toast(errDe(e))}}});return true};
+ hoja(`<h2>🛍️ Pedidos para recoger</h2><p class="mu sm">Tus clientes piden desde tu carta, te pagan por Yape directo y suben su captura. Tú confirmas, preparas y entregas con su QR. Al entregar, los dos ganan puntos.</p>
+  <button class="btn p" id="rsc">📷 Escanear QR para entregar</button>
+  <div class="row" style="gap:6px"><input id="rck" class="sp" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="o escribe su código" style="text-align:center;letter-spacing:.15em"><button class="btn" id="rcb" style="width:auto">Buscar</button></div>
+  <div id="rcl" class="g"><p class="mu sm">⏳ Cargando…</p></div>
+  <button class="btn l" id="rcon"></button><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  carga(o);tm=setInterval(()=>{if(!o.isConnected)return clearInterval(tm);if(!document.hidden&&!document.querySelector('.cam'))carga(o)},8000);
+  o.querySelector('#rsc').onclick=()=>escanear(t=>entregar(t),'Escanea el QR del pedido del cliente');
+  const k=o.querySelector('#rck'),go=()=>{const c=k.value.replace(/\D/g,'');if(c.length!==6)return toast('Son 6 dígitos');entregar(c)};o.querySelector('#rcb').onclick=go;k.onkeydown=e=>{if(e.key==='Enter')go()};
+  o.querySelector('#rcon').onclick=async()=>{try{const r=await C('xa_recojo_config',{p_slug:slug,p_on:!(R&&R.on)});toast(r.on?'🟢 Ya reciben pedidos para recoger':'Apagado');await carga(o)}catch(e){toast(errDe(e))}}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-recneg],[data-recnegn]');if(!b)return;e.preventDefault();if(b.hasAttribute('data-recnegn'))recojoNeg(NB.slug||NSLUG,nrpc);else recojoNeg(b.dataset.recneg,rpc)});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-prmneg]');if(!b)return;e.preventDefault();premiosNeg(b.dataset.prmneg,b.dataset.nom)});
 
 /* --- Demo --- */
