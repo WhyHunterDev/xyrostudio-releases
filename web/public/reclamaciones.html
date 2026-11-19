@@ -1,0 +1,73 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Libro de Reclamaciones · Xyro</title><meta name="description" content="Libro de Reclamaciones virtual de XyroStudio, conforme al Código de Protección y Defensa del Consumidor (Ley N.º 29571).">
+<meta property="og:type" content="website"><meta property="og:site_name" content="XyroStudio"><meta property="og:url" content="https://xyrostudio.net/reclamaciones.html">
+<meta property="og:image" content="https://xyrostudio.net/img/og.jpg"><link rel="icon" href="/img/marca/logo-xyrostudio-app.svg"><link rel="stylesheet" href="/estilo.css">
+<style>
+.lr{display:grid;gap:18px;margin:10px 0 40px}.lr fieldset{border:1px solid var(--borde);border-radius:16px;background:var(--panel);padding:18px;margin:0;display:grid;gap:12px;min-width:0}
+.lr legend{font-weight:700;padding:0 6px}.lr label{display:grid;gap:5px;font-size:14px;color:var(--tenue);min-width:0}
+.lr input,.lr select,.lr textarea{font:inherit;color:var(--texto);background:var(--fondo2);border:1px solid var(--borde2);border-radius:10px;padding:10px 12px;width:100%;box-sizing:border-box}
+.lr textarea{min-height:110px;resize:vertical}.lr .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.lr .opc{display:flex;gap:10px;flex-wrap:wrap}.lr .opc label{display:flex;align-items:center;gap:8px;background:var(--fondo2);border:1px solid var(--borde2);border-radius:10px;padding:10px 14px;color:var(--texto);cursor:pointer}
+.lr [hidden]{display:none}.lr .opc input{width:auto}.lr .chk{display:flex;gap:10px;align-items:flex-start;color:var(--texto)}.lr .chk input{width:auto;margin-top:4px}
+.lr .ayuda{font-size:13px;color:var(--tenue);margin:0}.lr .err{color:#ff7a7a;font-weight:600;min-height:1em;margin:0}
+.prov{border:1px solid var(--borde);border-radius:16px;padding:14px 18px;background:var(--fondo2);font-size:14px}.prov b{color:var(--texto)}
+.hoja{border:1px solid var(--ok);border-radius:16px;padding:20px;background:var(--panel);display:grid;gap:8px}.hoja h2{margin:0}
+@media print{header,footer,.np{display:none!important}body{background:#fff;color:#000}.hoja{border-color:#000;background:#fff}}
+</style></head><body>
+<header class="cabecera"><div class="contenedor"><a href="/" class="marca"><img class="logo-img" src="/img/marca/logo-xyrostudio-app.svg" alt="" width="32" height="32"><span>Xyro<b>Studio</b></span></a><a href="/mi/" class="btn btn-primario" style="width:auto;flex:none">Abrir Mi Xyro</a></div></header>
+<main class="contenedor legal">
+<nav class="tabs-legal np"><a href="/terminos.html">Términos</a><a href="/privacidad.html">Privacidad</a><a href="/reclamaciones.html" class="sel">Libro de Reclamaciones</a></nav>
+<h1>📕 Libro de Reclamaciones</h1>
+<div class="prov"><b>XyroStudio</b> · persona natural con negocio · Lima, Perú · <span id="pruc">RUC en trámite</span> · <a href="mailto:hola@xyrostudio.net">hola@xyrostudio.net</a></div>
+<p class="tenue np">Conforme al Código de Protección y Defensa del Consumidor (Ley N.º 29571). Esto es para reclamos sobre los servicios de <b>XyroStudio</b> (Mi Xyro, planes, Xyro+, Boost). Si tu reclamo es sobre un negocio que encontraste en Xyro, usa el Libro de Reclamaciones de ese negocio.</p>
+<div id="caja">
+<form class="lr" id="f" novalidate>
+ <fieldset><legend>1. Tus datos</legend>
+  <label>Nombre completo<input id="nombre" maxlength="120" autocomplete="name" required></label>
+  <div class="dos"><label>Documento<select id="doc_tipo"><option>DNI</option><option>CE</option><option>Pasaporte</option><option>RUC</option></select></label>
+   <label>Número<input id="doc_num" maxlength="15" inputmode="numeric" required></label></div>
+  <label>Domicilio<input id="domicilio" maxlength="200" autocomplete="street-address"></label>
+  <div class="dos"><label>Correo (aquí te respondemos)<input id="email" type="email" maxlength="120" autocomplete="email" required></label>
+   <label>Celular<input id="telefono" maxlength="20" inputmode="tel" autocomplete="tel"></label></div>
+  <label class="chk"><input type="checkbox" id="menor"> <span>Soy menor de edad</span></label>
+  <label id="apo" hidden>Nombre del padre, madre o apoderado<input id="apoderado" maxlength="120"></label>
+ </fieldset>
+ <fieldset><legend>2. Qué contrataste</legend>
+  <div class="opc"><label><input type="radio" name="bien" value="servicio" checked> Servicio</label><label><input type="radio" name="bien" value="producto"> Producto</label></div>
+  <div class="dos"><label>Monto reclamado (S/, opcional)<input id="monto" inputmode="decimal" maxlength="12" placeholder="0.00"></label>
+   <label>Qué fue<input id="descripcion" maxlength="300" placeholder="Ej: plan Pro de mi negocio"></label></div>
+ </fieldset>
+ <fieldset><legend>3. Tu reclamo</legend>
+  <div class="opc"><label><input type="radio" name="tipo" value="reclamo" checked> Reclamo</label><label><input type="radio" name="tipo" value="queja"> Queja</label></div>
+  <p class="ayuda"><b>Reclamo:</b> no estás de acuerdo con el producto o servicio. <b>Queja:</b> no estás de acuerdo con la atención que recibiste.</p>
+  <label>Qué pasó<textarea id="detalle" maxlength="3000" required></textarea></label>
+  <label>Qué pides<textarea id="pedido" maxlength="1500" style="min-height:70px" required></textarea></label>
+ </fieldset>
+ <p class="ayuda">La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI. Te responderemos en un plazo no mayor a quince (15) días hábiles.</p>
+ <p class="err" id="err"></p>
+ <button class="btn btn-primario" id="env" type="submit">Enviar</button>
+</form></div>
+</main>
+<footer><div class="contenedor"><span>© 2026 XyroStudio</span><nav><a href="/terminos.html">Términos</a><a href="/privacidad.html">Privacidad</a><a href="/reclamaciones.html">Libro de Reclamaciones</a><a href="mailto:hola@xyrostudio.net">Contacto</a></nav></div></footer>
+<script>
+const SB='https://szvdzcaoxjstdyblhxrd.supabase.co',KEY='sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe';
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+$('#menor').onchange=e=>{$('#apo').hidden=!e.target.checked};
+$('#f').onsubmit=async e=>{e.preventDefault();const b=$('#env'),er=$('#err');er.textContent='';
+ const v=id=>$('#'+id).value.trim(),r=n=>(document.querySelector(`input[name=${n}]:checked`)||{}).value;
+ const p={tipo:r('tipo'),bien:r('bien'),nombre:v('nombre'),doc_tipo:v('doc_tipo'),doc_num:v('doc_num').replace(/\s/g,''),domicilio:v('domicilio'),email:v('email'),telefono:v('telefono'),
+  menor:$('#menor').checked,apoderado:v('apoderado'),monto:v('monto').replace(',','.'),descripcion:v('descripcion'),detalle:v('detalle'),pedido:v('pedido')};
+ b.disabled=true;b.textContent='Enviando…';
+ try{const res=await fetch(SB+'/rest/v1/rpc/xy_reclamo_crear',{method:'POST',headers:{'Content-Type':'application/json',apikey:KEY},body:JSON.stringify({p})});
+  const j=await res.json().catch(()=>({}));if(!res.ok)throw new Error(j.message||'No se pudo enviar. Revisa tu internet e inténtalo otra vez.');
+  const f=new Date(j.fecha).toLocaleString('es-PE',{dateStyle:'long',timeStyle:'short',hour12:true,timeZone:'America/Lima'});
+  $('#caja').innerHTML=`<div class="hoja"><h2>✅ Hoja de reclamación N.º ${String(j.num).padStart(6,'0')}</h2>
+   <p class="tenue">Código de seguimiento: <b>${esc(j.codigo)}</b> · ${esc(f)}</p>
+   <p><b>${p.tipo==='queja'?'Queja':'Reclamo'}</b> de ${esc(p.nombre)} (${esc(p.doc_tipo)} ${esc(p.doc_num)}) · ${esc(p.email)}</p>
+   <p><b>Qué fue:</b> ${esc(p.bien)}${p.descripcion?' · '+esc(p.descripcion):''}${p.monto?' · S/ '+esc(p.monto):''}</p>
+   <p><b>Qué pasó:</b> ${esc(p.detalle)}</p><p><b>Qué pides:</b> ${esc(p.pedido)}</p>
+   <p class="tenue">Guarda esta hoja. Te responderemos a <b>${esc(p.email)}</b> en un plazo no mayor a 15 días hábiles.</p>
+   <button class="btn btn-sec np" onclick="print()">🖨️ Guardar o imprimir copia</button></div>`;scrollTo(0,0)}
+ catch(x){er.textContent=/fetch|network|load/i.test(x.message)?'No se pudo enviar. Revisa tu internet e inténtalo otra vez.':x.message;b.disabled=false;b.textContent='Enviar'}};
+</script>
+</body></html>

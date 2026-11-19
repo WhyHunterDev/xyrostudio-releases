@@ -722,6 +722,39 @@ async function xyroPago(req, env) {
   return json(o, o.ok ? 200 : 403);
 }
 
+
+/* Hook «Before User Created» de Supabase Auth: frena cuentas creadas por robots.
+   Dormido mientras no existan los secretos TURNSTILE_SECRET y AUTH_HOOK_SECRET (deja pasar todo).
+   Solo revisa registros con correo; Google y otros proveedores pasan. */
+async function authAntes(req, env) {
+  if (req.method !== "POST") return json({ error: "No existe" }, 404);
+  const raw = await req.text();
+  if (raw.length > 20000) return json({ error: { http_code: 400, message: "Solicitud no válida" } }, 400);
+  if (!env.TURNSTILE_SECRET || !env.AUTH_HOOK_SECRET) return json({});
+  // firma Standard Webhooks: v1,base64(hmac_sha256(secreto, id.timestamp.body))
+  const id = req.headers.get("webhook-id") || "", ts = req.headers.get("webhook-timestamp") || "", sigs = (req.headers.get("webhook-signature") || "").split(" ");
+  if (!id || !ts || Math.abs(Date.now() / 1000 - Number(ts)) > 300) return json({ error: { http_code: 401, message: "Firma no válida" } }, 401);
+  const sec = String(env.AUTH_HOOK_SECRET).replace(/^v1,/, "").replace(/^whsec_/, "");
+  const kb = Uint8Array.from(atob(sec), c => c.charCodeAt(0));
+  const k = await crypto.subtle.importKey("raw", kb, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(`${id}.${ts}.${raw}`)))));
+  const igual = (a, b) => { if (a.length !== b.length) return false; let r = 0; for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i); return r === 0; };
+  if (!sigs.some(s => igual(s.replace(/^v1,/, ""), mac))) return json({ error: { http_code: 401, message: "Firma no válida" } }, 401);
+  let ev; try { ev = JSON.parse(raw); } catch { return json({ error: { http_code: 400, message: "Solicitud no válida" } }, 400); }
+  const user = ev.user || {}, prov = (user.app_metadata || {}).provider || "email";
+  if (prov !== "email") return json({});
+  const tok = String((user.user_metadata || {}).ts || "");
+  const no = () => json({ error: { http_code: 400, message: "Confirma que no eres un robot y vuelve a intentarlo." } }, 400);
+  if (!tok || tok.length > 4000) return no();
+  const f = new FormData(); f.append("secret", env.TURNSTILE_SECRET); f.append("response", tok);
+  const ip = (ev.metadata || {}).ip_address; if (ip) f.append("remoteip", ip);
+  try {
+    const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: f });
+    const j = await r.json();
+    return j.success ? json({}) : no();
+  } catch { return json({}); } // si Cloudflare no responde, no bloqueamos registros reales
+}
+
 export default {
   async fetch(req, env, ctx) {
     const u = new URL(req.url);
@@ -733,6 +766,7 @@ export default {
     if (u.pathname === "/api/bot/doc") return botDoc(req, env);
     if (u.pathname === "/api/bot/reglas") return botReglas(req, env);
     if (u.pathname === "/api/xyro/pago") return xyroPago(req, env);
+    if (u.pathname === "/api/auth/antes") return authAntes(req, env);
     if (u.pathname === "/api/wa/perfil") return waPerfil(req, env);
     if (u.pathname.startsWith("/api/")) return json({ error: "No existe" }, 404);
     return env.ASSETS.fetch(req);

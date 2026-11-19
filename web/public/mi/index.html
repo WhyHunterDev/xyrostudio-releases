@@ -397,6 +397,10 @@ const ERR={usuario:'Tu @usuario debe tener de 3 a 20 letras, números, punto o g
  celular:'Revisa tu celular (9 dígitos) o ya lo usa otra cuenta.',codigo:'Ese código no es válido. Pide ayuda en recepción.',dato:'Para confirmar que eres tú escribe tu DNI o el celular que diste en el negocio.',
  no_socio:'Primero conecta tu membresía de este negocio.',muchos:'Ya enviaste varias solicitudes hoy. Espera la respuesta.',vacio:'Escribe un mensaje.','sin acceso':'No tienes acceso a esto.',
  otro:'Ese carnet ya está unido a otra cuenta. Pide ayuda en recepción.',espera:'Demasiados intentos. Espera un rato y vuelve a probar.',no:'Este aviso ya no está disponible.'};
+/* CAPTCHA del registro (Cloudflare Turnstile). Vacío = apagado. Lo revisa el Worker en /api/auth/antes (hook de Supabase). */
+const TS_KEY='';let TST='';
+function tsPintar(){const go=()=>{try{const el=document.getElementById('tsw');if(!el||el.dataset.on)return;el.dataset.on=1;turnstile.render(el,{sitekey:TS_KEY,theme:'dark',language:'es',callback:t=>{TST=t},'expired-callback':()=>{TST=''},'error-callback':()=>{TST=''}})}catch(_){}};
+ if(window.turnstile)return go();window.tsListo=go;if(!document.getElementById('tsjs')){const sc=document.createElement('script');sc.id='tsjs';sc.async=true;sc.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=tsListo';document.head.appendChild(sc)}}
 const errDe=e=>{const t=String(e&&(e.message||e.error)||e||'');for(const k in ERR)if(t===k)return ERR[k];
  if(/Invalid login/i.test(t))return 'Correo o clave incorrectos.';if(/already registered|already been registered/i.test(t))return 'Ese correo ya tiene cuenta. Toca «Entrar».';
  if(/Password should/i.test(t))return 'Tu clave debe tener al menos 6 caracteres.';if(/not confirmed/i.test(t))return 'Confirma tu correo: te enviamos un enlace.';
@@ -424,6 +428,7 @@ function pantallaEntrada(msg,modo){
    ${modo==='crear'?'<label>Tu nombre<input id="ln" autocomplete="name" required maxlength="80"></label>':''}
    <label>Correo<input id="le" type="email" autocomplete="email" inputmode="email" required></label>
    <label>Clave<input id="lp" type="password" autocomplete="${modo==='crear'?'new-password':'current-password'}" required minlength="6" placeholder="${modo==='crear'?'Mínimo 6 caracteres':''}"></label>
+   ${modo==='crear'&&TS_KEY?'<div id="tsw" style="min-height:65px;display:grid;justify-items:center"></div>':''}
    <div class="msg" id="lm"></div>
    <button class="btn p" id="lb">${modo==='crear'?'Crear mi cuenta':'Entrar'}</button>
    ${modo==='entrar'?'<button type="button" class="btn l" id="olv">¿Olvidaste tu clave?</button>':''}
@@ -432,6 +437,7 @@ function pantallaEntrada(msg,modo){
   <p class="mu xs" style="text-align:center">¿Quieres verla antes? <a href="?demo=1" style="color:var(--a)">Mira la demo</a> · Hecho por XyroStudio</p>
  </div></div>`;
  const m=$('#lm'),say=(t,ok)=>{m.textContent=t;m.className='msg on'+(ok?' ok':'')};if(msg)say(msg);
+ if(modo==='crear'&&TS_KEY)tsPintar();
  const sv=ls.g('mi-email');if(sv)$('#le').value=sv;
  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>pantallaEntrada('',b.dataset.m));
  $('#lreg').onclick=()=>{pend.set(Object.assign({},pend.get()||{},{reg:1}));pantallaEntrada('Primero crea tu cuenta de Mi Xyro (o entra). Después registras tu negocio gratis.','crear')};
@@ -441,7 +447,8 @@ function pantallaEntrada(msg,modo){
  $('#fl').onsubmit=async e=>{e.preventDefault();const em=$('#le').value.trim().toLowerCase(),pw=$('#lp').value,b=$('#lb');m.className='msg';
   b.disabled=true;const t0=b.textContent;b.textContent='Un momento…';
   try{await cliente();ls.s('mi-email',em);
-   if(modo==='crear'){const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{nombre:$('#ln').value.trim()},emailRedirectTo:HOME}});if(error)throw error;
+   if(modo==='crear'){if(TS_KEY&&!TST)throw new Error('Confirma que no eres un robot (el cuadro de arriba del botón).');const tk=TST;TST='';try{window.turnstile&&turnstile.reset('#tsw')}catch(_){}
+    const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:Object.assign({nombre:$('#ln').value.trim()},tk?{ts:tk}:{}),emailRedirectTo:HOME}});if(error)throw error;
     if(!data.session){say(`📩 Te enviamos un correo a ${em}. Ábrelo y toca el enlace para activar tu cuenta.`,1);b.disabled=false;b.textContent=t0;return}}
    else{const{error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error)throw error}
    await entrar();
@@ -963,7 +970,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${negCard()}
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
-  <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
+  <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
 /* nombre no adivinable: el bucket medios es público y las capturas de pago tienen datos personales */
 const rnd=()=>{try{return crypto.randomUUID().replace(/-/g,'').slice(0,16)}catch(_){return Math.random().toString(36).slice(2,12)}};
@@ -1980,7 +1987,7 @@ function vMiPro(){const p=PROM;
  if(PROM===undefined){proMioCarga().then(()=>SUB==='mipro'&&pinta());return'<button class="back" id="mpb">‹ Volver</button><div class="exsk"></div>'}
  if(PCH===null)pchCarga().then(()=>SUB==='mipro'&&pinta());
  const f0=post;post=()=>{f0&&f0();const q=s=>$(s);q('#mpb').onclick=()=>{SUB=null;TAB='perfil';pinta()};q('#mpe')&&(q('#mpe').onclick=()=>proEditar());q('#mpq')&&(q('#mpq').onclick=()=>proQR(p));q('#mpv')&&(q('#mpv').onclick=()=>{PRO[p.slug]=null;abrirPro(p.slug)});
-  q('#mpp')&&(q('#mpp').onclick=()=>planesAbrir(null,p.nombre));
+  q('#mpp')&&(q('#mpp').onclick=()=>planesAbrir(null,p.nombre,'entrenador'));
   app.querySelectorAll('[data-ctl]').forEach(b=>b.onclick=()=>{try{p.entity_id&&localStorage.setItem('x-ent',p.entity_id);localStorage.setItem('x-modo','control')}catch(_){}location.href='/x/'+(DEMO?'?demo=1':'')+'#/'+b.dataset.ctl});
   app.querySelectorAll('[data-chat]').forEach(b=>b.onclick=()=>abrirChat(b.dataset.chat))};
  if(!p)return`<button class="back" id="mpb">‹ Volver</button><div class="g"><div class="card prohero"><span style="font-size:44px">🧑‍🏫</span><h2>Tu perfil profesional, gratis</h2><p class="mu sm">Para entrenadores personales, profesores, nutricionistas y todo el que da su servicio con su celular.</p>
@@ -2296,15 +2303,17 @@ const PLFR={
   PRO:['Mesas y carta sin límite','Punto de venta: stock, caja y para llevar','Tu web propia con tu carta','Varios locales','20 avisos al mes y estadísticas por país']},
  otro:{PLUS:['Panel para tus clientes y ventas','Hasta 2,000 clientes y 25 productos','1 sede','Promos, puntos y QR en Mi Xyro','4 avisos al mes a tus seguidores y estadísticas día a día'],
   PRO:['Clientes y productos sin límite','Punto de venta: stock y caja','Tu web propia','Varias sedes','Pasamos tus datos de otro sistema','20 avisos al mes y estadísticas por país']},
+ entrenador:{PLUS:['Hasta 2,000 alumnos activos','Hasta 25 planes para vender','Tus alumnos te pagan por Xyro y reciben su Pase QR','Perfil más completo: 20 fotos y 12 videos','Sales más arriba en Explorar'],
+  PRO:['Alumnos y planes sin límite','Tu web propia: xyrostudio.net/tu-nombre','Perfil más completo: 20 fotos y 12 videos','Sales más arriba en Explorar']},
  digital:{PLUS:['Botones de Descargar, Discord y video en tu perfil','Hasta 10 promos','4 avisos al mes y clics día a día','3 empleos activos'],
   PRO:['Sales arriba en Explorar → Digital','20 avisos al mes y de qué países llegan','Hasta 30 promos','50 empleos activos']}};
 const PLF=r=>PLFR[r==='cafeteria'?'restaurante':r]||PLFR.otro;
-async function planesAbrir(slug,nom){vib();let P,mon;const rub=slug?rubDe(slug):'';
+async function planesAbrir(slug,nom,rb){vib();let P,mon;const rub=rb||(slug?rubDe(slug):'');
  try{if(slug){const r=await rpc('xa_plan_info',{p_slug:slug});P=r.precios;mon=r.moneda;if(r.pendiente)return toast('⏳ Ya enviaste un pago de plan. Lo estamos revisando.')}
   else{mon=(D&&D.persona&&D.persona.moneda)||'PEN';const g=(pl,m)=>rpc('xa_plan_precio',{p_plan:pl,p_meses:m,p_moneda:mon});const[a,b,c,d]=await Promise.all([g('PLUS',1),g('PLUS',12),g('PRO',1),g('PRO',12)]);P={PLUS:a,PLUS12:b,PRO:c,PRO12:d};mon=a.moneda}}
  catch(e){return toast(errDe(e))}
  let pl='PRO',an=false;
- hoja(`<h2>⭐ Mejora tu plan</h2><p class="mu sm">${rub==='digital'?'Más gente llega a tu web desde Xyro. Tú sigues vendiendo en tu web, como siempre.':'Lo que ya armaste se queda. Todo en un solo panel, sin pagar cosas por separado.'}</p>
+ hoja(`<h2>⭐ Mejora tu plan</h2><p class="mu sm">${rub==='digital'?'Más gente llega a tu web desde Xyro. Tú sigues vendiendo en tu web, como siempre.':rub==='entrenador'?'Más alumnos y un perfil que destaca. Lo que ya armaste se queda.':'Lo que ya armaste se queda. Todo en un solo panel, sin pagar cosas por separado.'}</p>
   <div class="row" style="gap:6px"><button class="chip on" data-an="0" style="flex:1">Mensual</button><button class="chip" data-an="1" style="flex:1">Anual · 20% menos</button></div>
   <div id="plc" class="g" style="gap:10px"></div><button class="btn p" id="plg"></button><button class="btn l" data-x>Ahora no</button>`,(el,close)=>{
   const pinta2=()=>{el.querySelector('#plc').innerHTML=['PLUS','PRO'].map(k=>{const x=P[an?k+'12':k];return`<button type="button" class="card" data-pl="${k}" style="text-align:left;gap:6px;cursor:pointer;${pl===k?'border-color:var(--a);background:color-mix(in srgb,var(--a) 12%,transparent)':''}">
