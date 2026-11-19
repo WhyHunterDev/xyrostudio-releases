@@ -679,12 +679,12 @@ function vInicioGen(){const per=(D&&D.persona)||{},M=negs(),G=(D&&D.guardados)||
  return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1${estC()?` style="color:${estC()}"`:''}>${esc(per.apodo||String(per.nombre||'').split(' ')[0]||'')} 👋</h1></div>${avatarHTML(per,'hav')}</div>
   ${per.idn?xCard(per):''}
   ${ptsHTML()}
-  ${M.length?`<div class="qk">${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}<button class="qkb" data-scan>${I.scan}<span><b>Escanear</b><small>QR de un negocio</small></span></button></div>`:''}
-  ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}${av}<div class="g">${it.join('')}${pr}
+  ${M.length?`<div class="qk"${M.length===1?' style="grid-template-columns:1fr"':''}>${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}</div>`:''}
+  ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}${av}<div class="g">${misPlanesProHTML()}${it.join('')}${pr}
   ${M.length?'':`<div class="card" style="text-align:center;justify-items:center;padding:26px 18px 18px;gap:12px"><div class="ibox big">${I.qr.replace('width="22" height="22"','width="40" height="40"')}</div><h2>Escanea el QR de tu negocio</h2>
    <p class="mu sm" style="max-width:300px">Tu gym, consultorio o tienda favorita tiene su QR de Xyro. Escanéalo y mira sus promos solo por Mi Xyro.</p><button class="btn p" data-scan style="width:100%">${I.scan}Escanear QR</button></div>
   <div class="card"><div class="row"><div class="ibox">${I.id}</div><div class="sp"><h3>¿Ya eres socio o paciente?</h3><p class="mu sm">Conecta tu membresía, tu QR y tus rutinas o citas.</p></div></div><button class="btn" data-yo>Ya estoy registrado en un negocio</button></div>`}
-  </div>${per.idn?perksHTML(per)+xPlusHTML(per):''}`}
+  </div>${per.idn?xPlusHTML(per):''}`}
 
 // ---------- Mis planes: pedir plan de entrenamiento o cita con nutrición (SQL 48) ----------
 let PEDID=null;
@@ -962,8 +962,8 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   const nN=$('#ngN');nN&&(nN.onclick=negNuevo);const nG=$('#ngG');nG&&(nG.onclick=()=>{vib();SUB='migr';pinta();$('#sc')&&($('#sc').scrollTop=0)});const nP=$('#ngP');nP&&(nP.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
  return`<div class="g"><div class="row"><div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
    <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p>${per.fundador?`<p style="margin-top:6px">${fBad(per)}</p>`:''}</div></div>
-  ${per.fundador?`<div class="card fcard"><div class="row"><span style="font-size:28px">🏅</span><div class="sp"><h3>Fundador ${fNum(per.fundador)} de Mi Xyro</h3><p class="mu sm">Eres de las primeras 50 personas en Mi Xyro. Tu insignia, tu carnet dorado y tu @ corto son para siempre.</p></div></div></div>`:''}
-  ${ptsHTML()}${D?`<div class="row"><button class="btn sp" data-pases>🎟️ Mis pases</button><button class="btn sp" data-boveda>🔐 Bóveda</button></div>`:''}${misPagosHTML()}
+  ${per.idn&&['o','s','f'].includes(nivel(per))?perksHTML(per):''}
+  ${D?`<div class="row"><button class="btn sp" data-pases>🎟️ Mis pases</button><button class="btn sp" data-boveda>🔐 Bóveda</button></div>`:''}${misPagosHTML()}
   <button class="btn" id="ed">✏️ Editar mi perfil</button>
   <div class="idbox"><span class="mu xs" style="font-weight:700;display:inline-flex;gap:6px;align-items:center;justify-content:center;color:var(--a)">${I.id}ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><p class="mu xs">Es tuyo y nunca cambia. Dáselo a recepción para que conecten tu membresía a Mi Xyro.</p><button class="btn" id="cpi">📋 Copiar mi ID</button></div>
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
@@ -1101,7 +1101,7 @@ function vMiGr(){const g=G0();
  const logo=/^(https:|blob:)/.test(g.logo||'')?`<img src="${esc(g.logo)}" alt="">`:esc(rg[1]);
  return`<div class="g"><div class="row"><div class="av">${logo}</div><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">MI NEGOCIO · ${g.estado==='pago'?'PANEL COMPLETO':'PLAN GRATIS'}</p><h2>${esc(g.nombre)}</h2><span class="pill ${ec}">${et}</span></div></div>
   <p class="mu sm">${esc(g.estado==='suspendido'&&g.motivo?g.motivo:ed)}</p>
-  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${dg?digCardHTML(g):''}${negExtrasHTML(g)}${boostCardHTML(g.slug,g.nombre)}${verifCardHTML(g)}${empNegCardHTML(g)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
+  ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${dg?digCardHTML(g):''}${crecerHTML(g)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
   <div class="card"><div class="row"><div class="ibox">${I.store}</div><div class="sp"><h3>Tu perfil</h3><p class="mu sm">${lis===5?'✅ Completo. ¡Se ve muy bien!':lis+' de 5 listos · '+(dg?['logo','portada','descripción','tu web','tus planes']:['logo','portada','descripción','dirección','horario']).filter((_,i)=>!ok[i]).join(', ')}</p></div></div>
    <button class="btn" id="gped">✏️ Editar perfil</button><button class="btn l" id="gver">Ver cómo lo ven tus clientes ›</button></div>
   ${dg?digCardHTML(g):''}
@@ -1109,7 +1109,7 @@ function vMiGr(){const g=G0();
    ${P.length?`<div>${P.map((p,i)=>`<button class="li" data-gpr="${i}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="dot">🎁</span><span class="sp"><b>${esc(p.titulo)}</b>${p.plus?' <span class="pill" style="background:#7c5cff33;color:#c4b5fd">Xyro+</span>':''}<br><span class="mu xs">${p.hasta?(p.hasta<hoyL()?'Venció el ':'Hasta el ')+fF(p.hasta,{day:'numeric',month:'long'}):'Sin fecha de fin'}</span></span><span class="mu">›</span></button>`).join('')}</div>`:''}
    ${P.length<PMX?'<button class="btn" id="gpn">＋ Nueva promo</button>':`<p class="mu xs">Llegaste al límite de promos de tu plan. ${dg?'Mejora tu plan para publicar más.':'Con el panel completo publicas más.'}</p>`}</div>
   ${dg?'':gcHTML(g)}
-  ${g.estado==='activo'?negExtrasHTML(g)+boostCardHTML(g.slug,g.nombre)+verifCardHTML(g)+empNegCardHTML(g):''}
+  ${g.estado==='activo'?crecerHTML(g):''}
   <div class="card" style="justify-items:center;text-align:center"><h3>QR para que te guarden</h3><div id="gqr" style="background:#fff;padding:12px;border-radius:18px;width:210px;aspect-ratio:1"></div>
    <p class="mu xs" style="max-width:300px">${dg?'Ponlo en tus lives, videos y bio: al escanearlo te guardan en Mi Xyro y ven tus promos y tu cupón.':'Ponlo en tu caja o mostrador: al escanearlo, tus clientes te guardan en Mi Xyro y ven tus promos.'}</p>
    <p class="sm"><b>${g.seguidores||0}</b> ${(g.seguidores|0)===1?'persona te guardó':'personas te guardaron'}</p><button class="btn" id="gsh" style="width:100%">Compartir mi enlace</button></div>
@@ -1715,7 +1715,7 @@ const PAISES=[['PE','Perú'],['MX','México'],['CO','Colombia'],['CL','Chile'],[
 const paisN=k=>(PAISES.find(p=>p[0]===k)||[k,k||''])[1];
 const PROT={entrenador:['🏋️','Entrenador personal'],profesor:['📚','Profesor'],nutricionista:['🥗','Nutricionista'],otro:['⭐','Profesional']};
 const MODT={presencial:'Presencial',online:'Online',ambas:'Presencial y online'};
-const EX={cat:ls.g('mi-excat')||'',orden:ls.g('mi-exord')||'top',q:'',lugar:'',geo:null,items:null,cargando:false,err:''};
+const EX={cat:ls.g('mi-excat')||'',orden:ls.g('mi-exord')==='cerca'?'cerca':'top',q:'',lugar:'',geo:null,items:null,cargando:false,err:''};
 const RES={},PRO={};let PROM,PCH=null,CH=null,CHID=null;
 const estr=(p,n,big)=>n?`<span class="est${big?' big':''}"><b>★ ${(+p).toFixed(1)}</b> <span class="mu">(${n})</span></span>`:`<span class="est${big?' big':''} mu">✨ Nuevo</span>`;
 const fila5=v=>'★★★★★'.slice(0,v)+'☆☆☆☆☆'.slice(0,5-v);
@@ -1895,11 +1895,9 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
  return`<div class="g"><div class="hdr"><div class="sp"><h1>Explorar</h1><p class="mu sm">Negocios y entrenadores con Mi Xyro, en todo el mundo.</p></div></div>
   ${M.length?`<p class="mu xs" style="font-weight:700">DONDE ERES ${M.some(n=>citR(n.rubro))?'CLIENTE':'SOCIO'}</p>${mis}`:''}
   <div class="exs"><span>${I.search}</span><input id="exq" type="search" maxlength="40" placeholder="Busca un gym, café, entrenador…" value="${esc(EX.q)}" autocomplete="off"><button class="exlu" id="exlu">📍 ${esc(EX.lugar||'Todo')}</button></div>
-  <button class="mapbtn" id="exmap"><span class="mapbg"></span><span class="sp" style="position:relative"><b>🗺️ Ver el mapa</b><br><span class="xs" style="opacity:.85">Negocios Xyro cerca de ti</span></span><span style="position:relative;font-size:20px">›</span></button>
-  <button class="mapbtn" id="exmk" style="padding:12px 16px"><span class="sp" style="position:relative"><b>🛍️ Marketplace</b><br><span class="xs" style="opacity:.85">Compra y vende entre personas</span></span><span style="position:relative;font-size:20px">›</span></button>
-  <button class="mapbtn" id="exemp" style="padding:12px 16px"><span class="sp" style="position:relative"><b>💼 Empleos</b><br><span class="xs" style="opacity:.85">Trabaja en negocios de Xyro</span></span><span style="position:relative;font-size:20px">›</span></button>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><button class="btn" id="exmap" style="flex-direction:column;gap:2px;padding:12px 6px">🗺️<span class="xs">Mapa</span></button><button class="btn" id="exmk" style="flex-direction:column;gap:2px;padding:12px 6px">🛍️<span class="xs">Marketplace</span></button><button class="btn" id="exemp" style="flex-direction:column;gap:2px;padding:12px 6px">💼<span class="xs">Empleos</span></button></div>
   <div class="hs exch">${CATS.map(([k,i,t])=>`<button class="chip${EX.cat===k?' on':''}" data-cat="${k}">${i} ${t}</button>`).join('')}</div>
-  <div class="seg s3">${[['top','⭐ Mejor puntuados'],['cerca','📍 Cerca de mí'],['nuevos','🆕 Nuevos']].map(([k,t])=>`<button data-ord="${k}" id="exo-${k}" class="${EX.orden===k?'on':''}">${t}</button>`).join('')}</div>
+  <div class="seg">${[['top','⭐ Mejores'],['cerca','📍 Cerca de mí']].map(([k,t])=>`<button data-ord="${k}" id="exo-${k}" class="${EX.orden===k?'on':''}">${t}</button>`).join('')}</div>
   <div class="g" id="exl">${exLista()}</div>
   ${G.length?`<p class="mu xs" style="font-weight:700;margin-top:6px">GUARDADOS</p>${G.map(tarjNeg).join('')}`:''}
   <div class="row"><button class="btn p sp" data-scan>${I.scan}Escanear QR</button><button class="btn sp" data-yo>${I.id}Ya soy socio</button></div></div>`}
@@ -2001,7 +1999,7 @@ function vMiPro(){const p=PROM;
   ${p.estado==='pendiente'?'<div class="card" style="border-color:#f5a524"><p class="sm">⏳ <b>Tu perfil está en revisión.</b> Ya puedes compartir tu QR con tus alumnos. Cuando lo aprobemos sales en Explorar para todo el mundo.</p></div>':p.estado==='suspendido'?`<div class="card" style="border-color:#e5484d"><p class="sm">⛔ Tu perfil está suspendido.${p.motivo?' Motivo: '+esc(p.motivo):''} Escríbenos desde «Necesito ayuda».</p></div>`:''}
   <div class="kps k3"><div class="kp"><b>${p.alumnos||0}</b><span class="mu xs">Alumnos</span></div><div class="kp"><b>${R.n?'★ '+(+R.prom).toFixed(1):'—'}</b><span class="mu xs">${R.n||0} opiniones</span></div><div class="kp"><b>${p.nuevos||0}</b><span class="mu xs">Nuevos</span></div></div>
   <div class="row"><button class="btn p sp" id="mpq">${I.qr}Mi QR</button><button class="btn sp" id="mpv">👁️ Ver</button><button class="btn sp" id="mpe">✏️ Editar</button></div>
-  ${proCobrosHTML(p)}
+  ${proCobrosHTML(p)}${proPlanesCardHTML()}
   <h2>📥 Solicitudes y mensajes</h2>${B.length?B.map(c=>`<button class="card" data-chat="${esc(c.id)}" style="text-align:left;width:100%;cursor:pointer"><div class="row"><span class="dot rav">${/^https:/.test(c.foto||'')?`<img src="${esc(c.foto)}" alt="" referrerpolicy="no-referrer">`:esc(String(c.nombre||'?')[0].toUpperCase())}</span><div class="sp" style="min-width:0"><b>${esc(c.nombre)}${c.alumno?' <span class="pill ver">Alumno</span>':''}</b><p class="mu xs">${TT[c.tipo]||''}${c.objetivo?' · '+esc(c.objetivo):''} · ${haceCuanto(c.act)}</p><p class="sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.ult||'')}</p></div>${c.nuevo?'<span class="nvd"></span>':''}</div></button>`).join(''):'<p class="mu sm">Aún no tienes mensajes. Comparte tu QR con tus alumnos para que te sigan y te escriban.</p>'}
   ${proPlanHTML(p)}</div>`}
 function proEditar(){const p=PROM||{},per=(D&&D.persona)||{},E=p.especialidades||[],mx=p.plus?20:6,mv=p.plus?12:3;let foto=p.foto||per.foto||'',portada=p.portada||'',fotos=(p.fotos||[]).slice();
@@ -2078,11 +2076,12 @@ async function ptsCarga(fx){if(!D)return;try{if(!DEMO&&!PTSR){PTSR=1;try{await r
  if(!PTSCH&&sb&&!DEMO&&D){try{const{data:{session}}=await sb.auth.getSession();const uid=session&&session.user.id;if(uid){PTSCH=sb.channel('mi-pts').on('postgres_changes',{event:'*',schema:'public',table:'points_ledger',filter:'user_id=eq.'+uid},()=>ptsCarga(true)).subscribe()}}catch(_){}}}
 setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB==='mipro'))ptsCarga(true)},30000);
 function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga()]).then(()=>{if(!document.querySelector('.ov'))pinta()})}
- const P=PTS||{},biz=true; // siempre las 3 columnas (pedido del usuario 2026-11-18: que no aparezcan y desaparezcan)
- return`<div class="card"><div class="row"><b class="sp">⭐ Mis puntos Xyro</b><span class="pill" style="background:#7c5cff22;color:var(--a)">en vivo</span></div>
-  <div class="kps ${biz?'k3':''}" style="${biz?'':'grid-template-columns:1fr 1fr'}"><div class="kp"><b data-pts="global_points">${nfmt(P.global_points)}</b><span class="mu xs">Globales</span></div><div class="kp"><b data-pts="local_points">${nfmt(P.local_points)}</b><span class="mu xs">Locales</span></div>${biz?`<div class="kp"><b data-pts="business_points">${nfmt(P.business_points)}</b><span class="mu xs">De tu negocio</span></div>`:''}</div>
-  ${+P.pending>0?`<p class="sm">⏳ <b>${nfmt(P.pending)}</b> en espera: se liberan a los 7 días de tu compra.</p>`:''}
-  <p class="mu xs">Globales: úsalos en cualquier negocio Xyro. Locales: solo donde los ganaste. Sumas puntos cuando el negocio confirma tu pago.</p>${xJuegosHTML()}</div>`}
+ const P=PTS||{},g=XR?+XR.giros||0:0; // simple (pedido del usuario 2026-11-19): un número, un botón
+ return`<div class="card"><div class="row"><span style="font-size:30px">⭐</span><div class="sp"><p style="margin:0"><b style="font-size:28px" data-pts="global_points">${nfmt(P.global_points)}</b> <span class="mu sm">puntos para descuentos</span></p>
+  <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas puntos cada vez que compras con Xyro'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div>
+  <button class="btn p" data-xy="ganar" style="width:auto;position:relative">🎁 Gana más${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button></div></div>`}
+function ganarAbrir(){const g=XR?+XR.giros||0:0;hoja(`<h2>🎁 Gana más puntos</h2><p class="mu sm">Tus puntos se usan como descuento. <b>Globales</b>: en cualquier negocio Xyro. <b>Locales</b>: solo donde los ganaste. Se suman cuando el negocio confirma tu pago.</p>
+ <button class="btn p" data-xy="ruleta">🎡 Girar la ruleta${g?` · tienes ${g} giro${g>1?'s':''}`:''}</button><button class="btn" data-xy="retos">🎯 Retos: gana puntos extra</button><button class="btn" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo">🎨 Mi estilo</button><button class="btn l" data-x>Cerrar</button>`,o=>o.querySelectorAll('[data-xy]').forEach(b=>b.addEventListener('click',()=>o.remove())))}
 let PTSR=0;
 function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'Xyro Points')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 (function(){const st=document.createElement('style');st.textContent='.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff;box-shadow:0 20px 60px #7c5cff66;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}.plan{display:grid;gap:4px;text-align:left;width:100%;cursor:pointer}.plan .row b{font-size:18px}.mpag{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14}.mpag .sp{min-width:0}';document.head.appendChild(st)})();
@@ -2124,6 +2123,35 @@ async function ordenHoja(slug,oid,pi){try{pi=pi||await rpc('xy_order_payinfo',{p
   const ver=async()=>{if(!document.body.contains(o)){clearInterval(ORDT);canal&&sb.removeChannel(canal);return}try{const n=await rpc('xy_order_payinfo',{p_order:pi.order_id});const ya=pi.status==='COMPLETED';pi=n;if(!ya&&n.status==='COMPLETED'){pinta2();const pt=(+((n.points||{}).USER_GLOBAL)||0)+(+((n.points||{}).USER_LOCAL)||0);ptsFx(pt,'Xyro Points');ptsCarga()}}catch(_){}};
   clearInterval(ORDT);ORDT=setInterval(ver,5000);
   if(sb&&!DEMO){canal=sb.channel('mi-ord-'+pi.order_id).on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders',filter:'id=eq.'+pi.order_id},ver).subscribe()}})}
+/* 📋 Rutinas y dietas del entrenador independiente para SUS alumnos (SQL 101). Mismo formato que las rutinas de los gyms. */
+let PPM=null;const PPD={};
+function proPlanesCardHTML(){return`<div class="card"><div class="row"><div class="ibox">📋</div><div class="sp"><h3>Rutinas y dietas</h3><p class="mu sm">Arma el plan de cada alumno. Le llega al toque a su Mi Xyro.</p></div></div><button class="btn p" id="ppal">👥 Mis alumnos</button></div>`}
+async function ppAlumnos(){vib();let L;try{L=DEMO?[{id:'a1',nombre:'Carla Ríos',activo:true,entreno:true,nutri:false},{id:'a2',nombre:'Jorge Paz',activo:true,entreno:!!PPD.a2entreno,nutri:!!PPD.a2nutri}]:await rpc('xy_pro_alumnos')}catch(e){return toast(errDe(e))}
+ hoja(`<h2>👥 Mis alumnos</h2><p class="mu sm">Toca Rutina o Dieta para armar o cambiar su plan.</p>${(L||[]).length?L.map((a,i)=>`<div class="li"><span class="dot">${a.activo?'🟢':'⚪'}</span><span class="sp sm"><b>${esc(a.nombre)}</b><br><span class="mu xs">${a.activo?'Plan activo':'Plan vencido'}</span></span>
+  <button class="btn${a.entreno?'':' p'}" style="width:auto;padding:8px 10px" data-ppa="${i}" data-pt="entreno">🏋️ ${a.entreno?'✓':'Rutina'}</button><button class="btn${a.nutri?'':' p'}" style="width:auto;padding:8px 10px" data-ppa="${i}" data-pt="nutri">🥗 ${a.nutri?'✓':'Dieta'}</button></div>`).join('')
+  :'<div class="vacio"><span class="e">👥</span><p class="mu sm">Aún no tienes alumnos. Cuando alguien compre uno de tus planes y lo confirmes, aparece aquí.</p></div>'}<button class="btn l" data-x>Cerrar</button>`,(o,close)=>
+  o.querySelectorAll('[data-ppa]').forEach(b=>b.onclick=()=>{close();ppEditar(L[+b.dataset.ppa],b.dataset.pt)}))}
+async function ppEditar(a,t){const ent=t==='entreno',F=ent?DIAS.map(([k,,n])=>[k,'🗓️',n]):COMIDAS;let P=null;
+ try{P=DEMO?(PPD[a.id+t]||null):await rpc('xy_pro_plan_ver',{p_alumno:a.id,p_tipo:t})}catch(_){}const d=(P&&P.datos)||{},nom=String(a.nombre||'').split(' ')[0];
+ hoja(`<h2>${ent?'🏋️ Rutina':'🥗 Dieta'} de ${esc(nom)}</h2><p class="mu xs">Una línea por ejercicio o comida. Deja vacío lo que no aplica.</p>
+  <label>Nombre del plan<input id="pp-t" maxlength="80" value="${esc((P&&P.titulo)||'')}" placeholder="${ent?'Ej: Fuerza · semana 1':'Ej: Bajar 3 kg'}"></label>
+  <label>Objetivo<input id="pp-o" maxlength="120" value="${esc(d.objetivo||'')}" placeholder="${ent?'Ej: ganar fuerza':'Ej: comer más proteína'}"></label>
+  ${F.map(([k,i,n])=>`<label>${i} ${n}<textarea id="pp-${k}" rows="2" maxlength="1500" placeholder="${ent?'Sentadilla 4x10\nPress banca 4x8':'Avena con plátano\nCafé sin azúcar'}">${esc(d[k]||'')}</textarea></label>`).join('')}
+  ${ent?'':`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>🔥 Calorías<input id="pp-kcal" maxlength="20" value="${esc(d.kcal||'')}" placeholder="2000 kcal"></label><label>💧 Agua<input id="pp-agua" maxlength="20" value="${esc(d.agua||'')}" placeholder="2 litros"></label></div>`}
+  <label>Indicaciones<textarea id="pp-nota" rows="2" maxlength="1000">${esc(d.nota||'')}</textarea></label>
+  <button class="btn p" id="pp-ok">📤 Enviar a ${esc(nom)}</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{const v=id=>{const x=o.querySelector('#pp-'+id);return x?x.value.trim():''};
+  o.querySelector('#pp-ok').onclick=async ev=>{const D2={};if(v('o'))D2.objetivo=v('o');F.forEach(([k])=>{if(v(k))D2[k]=v(k)});['kcal','agua','nota'].forEach(k=>{if(v(k))D2[k]=v(k)});
+   if(!F.some(([k])=>D2[k]))return toast(ent?'Escribe al menos un día.':'Escribe al menos una comida.');ev.target.disabled=true;
+   try{if(DEMO)PPD[a.id+t]={titulo:v('t'),datos:D2};else await rpc('xy_pro_plan_guardar',{p_alumno:a.id,p_tipo:t,p_titulo:v('t'),p_datos:D2});close();confeti();toast('📤 Enviado a '+nom)}catch(e){toast(errDe(e));ev.target.disabled=false}}})}
+/* Lo que ve el alumno: tarjetas en Inicio */
+function misPlanesProHTML(){if(!D)return'';if(PPM===null){PPM=undefined;(DEMO?Promise.resolve([{tipo:'entreno',titulo:'Fuerza · semana 1',pro:'Coach Ana',datos:{objetivo:'Ganar fuerza',d1:'Sentadilla 4x10\nPress banca 4x8',d3:'Peso muerto 4x6\nDominadas 3x8',d5:'Zancadas 3x12\nPlancha 3x40 s'}}]):rpc('xy_mis_planes_pro')).then(r=>{PPM=r||[];if(PPM.length&&TAB==='inicio'&&!SUB&&!document.querySelector('.ov'))pinta()}).catch(()=>{PPM=[]})}
+ return(PPM||[]).map((x,i)=>`<button class="card" data-ppm="${i}" style="text-align:left;cursor:pointer"><div class="row"><span style="font-size:26px">${x.tipo==='entreno'?'🏋️':'🥗'}</span><span class="sp"><b>${x.tipo==='entreno'?'Tu rutina':'Tu dieta'}: ${esc(x.titulo||'Plan')}</b><br><span class="mu xs">De ${esc(x.pro)}</span></span>›</div></button>`).join('')}
+function ppVer(x){const ent=x.tipo==='entreno',d=x.datos||{},F=ent?DIAS.map(([k,,n])=>[k,'🗓️',n]):COMIDAS;
+ hoja(`<p class="mu xs" style="font-weight:700">${ent?'TU RUTINA':'TU ALIMENTACIÓN'} · ${esc(x.pro)}</p><h2>${esc(x.titulo||(ent?'Plan de entrenamiento':'Plan de alimentación'))}</h2>${d.objetivo?`<p class="sm" style="color:var(--a)">🎯 ${esc(d.objetivo)}</p>`:''}
+  ${d.kcal||d.agua?`<p class="sm">${d.kcal?'🔥 '+esc(d.kcal):''} ${d.agua?' · 💧 '+esc(d.agua):''}</p>`:''}
+  ${F.map(([k,i,n])=>{const l=String(d[k]||'').split('\n').map(s=>s.trim()).filter(Boolean);return l.length?`<div class="card"><b>${i} ${n}</b>${l.map(s=>`<p class="sm" style="margin:0">• ${esc(s)}</p>`).join('')}</div>`:''}).join('')}
+  ${d.nota?`<div class="card"><p class="mu xs" style="font-weight:700">INDICACIONES</p><p class="sm">${esc(d.nota)}</p></div>`:''}<button class="btn l" data-x>Cerrar</button>`)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-ppm],#ppal');if(!b)return;if(b.id==='ppal')return ppAlumnos();const x=(PPM||[])[+b.dataset.ppm];x&&ppVer(x)});
 function proCobrosHTML(p){const X=p.xyro;if(!X)return'';const pro=X.pro;
  return`<div class="card"><div class="row"><b class="sp">💳 Cobros en Xyro</b><span class="pill${pro?' dst':''}">${({FREE:'Gratis',PLUS:'Plus',PRO:'Pro',ENTERPRISE:'Empresa'})[X.tier||(pro?'PRO':'FREE')]}</span></div>
   <div class="kps k3"><div class="kp"><b>${X.students}${X.max_students?'/'+X.max_students:''}</b><span class="mu xs">Alumnos activos</span></div><div class="kp"><b>${X.items}${X.max_items?'/'+X.max_items:''}</b><span class="mu xs">Planes</span></div><div class="kp"><b data-pts="business_points">${nfmt(X.business_points)}</b><span class="mu xs">Puntos negocio</span></div></div>
@@ -2147,7 +2175,7 @@ const estF=()=>{const a=XST&&XST.actual;if(!a||!a.frame||!FRM[a.frame])return'';
 const estC=()=>{const a=XST&&XST.actual;if(!a||!a.color||!XST.plus)return'';return((XST.catalogo||{}).colors||{})[a.color]||''};
 const avMarco=(h,f,cl)=>f&&FRM[f]?`<span class="avf${f==='neon'||f==='arcoiris'?' gira':''}${cl?' '+cl:''}" style="--fr:${FRM[f]}">${h}</span>`:h;
 document.addEventListener('click',e=>{const b=e.target.closest('[data-xy]');if(!b)return;const k=b.dataset.xy;
- if(k==='ruleta')ruletaAbrir();else if(k==='ranking')rankAbrir();else if(k==='plus')plusAbrir();else if(k==='estilo')estiloAbrir();else if(k==='retos')retosAbrir();else if(k==='boost')boostAbrir(b.dataset.slug,b.dataset.nom)});
+ if(k==='ganar')ganarAbrir();else if(k==='ruleta')ruletaAbrir();else if(k==='ranking')rankAbrir();else if(k==='plus')plusAbrir();else if(k==='estilo')estiloAbrir();else if(k==='retos')retosAbrir();else if(k==='boost')boostAbrir(b.dataset.slug,b.dataset.nom)});
 function xJuegosHTML(){const g=XR?+XR.giros||0:0;
  return`<div style="display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr)) 52px"><button class="btn sp" data-xy="ruleta">🎡 Ruleta${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button><button class="btn sp" data-xy="ranking">🏆 Ranking</button><button class="btn sp" data-xy="retos">🎯 Retos</button><button class="btn" data-xy="estilo" aria-label="Mi estilo" style="flex:0 0 52px">🎨</button></div>`}
 const PLB=[['⚡','+50% de puntos','En cada compra con Xyro'],['🎡','Ruleta a mitad','Giros más baratos'],['🎨','Tu perfil único','Marcos y colores'],['🎁','Promos exclusivas','Solo para Xyro+'],['⭐','Reseñas x2','Tu opinión pesa el doble'],['🏆','Destaca','Insignia en el ranking']];
@@ -2485,6 +2513,15 @@ async function digStats(slug,nom){let r;try{r=await rpc('xy_clics_resumen',{p_sl
 document.addEventListener('click',e=>{const t=e.target.closest('[data-digedit],[data-digstat]');if(!t)return;e.preventDefault();
  if(t.dataset.digedit)return DIG[t.dataset.digedit]===null?toast('⏳ Un momento…'):digEditar(t.dataset.digedit);digStats(t.dataset.digstat,t.dataset.nom)});
 /* ---------- Monetización (SQL 98): avisos a seguidores, estadísticas para todos y Xyro+ gratis 7 días ---------- */
+/* Todo lo que trae clientes en UNA tarjeta con filas (pedido del usuario 2026-11-19: simple, pocos botones) */
+function crecerHTML(g){if(!g||g.estado==='suspendido'||g.estado==='pendiente')return'';const dg=g.rubro==='digital',s=esc(g.slug),n=esc(g.nombre);
+ const row=(at,ic,t,d)=>`<button class="li" ${at} style="width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;cursor:pointer;font:inherit"><span class="dot">${ic}</span><span class="sp sm"><b>${t}</b><br><span class="mu xs">${d}</span></span><span class="mu" style="align-self:center">›</span></button>`;
+ return`<div class="card" style="gap:0;border-color:color-mix(in srgb,var(--a) 40%,var(--ln))"><h3 style="margin-bottom:4px">🚀 Consigue más clientes</h3>
+  ${row(`data-avn="${s}" data-nom="${n}"`,'📣','Avisar a mis seguidores','Les llega tu promo o novedad al toque')}
+  ${row(`data-xy="boost" data-slug="${s}" data-nom="${n}"`,'⚡','Salir primero',dg?'En Explorar → Digital, por horas':'En Explorar y en el mapa, por horas')}
+  ${dg?'':row(`data-digstat="${s}" data-nom="${n}"`,'📈','Cómo me encuentran','Visitas y clics a tu perfil')}
+  ${row(`data-verif="${s}" data-nom="${n}"`,'✓','Verificar mi negocio','Sello ✓ y más confianza')}
+  ${row(`data-empneg="${s}" data-nom="${n}"`,'💼','Buscar personal','Publica un empleo')}</div>`}
 function negExtrasHTML(g){if(!g||g.estado==='suspendido'||g.estado==='pendiente')return'';const dg=g.rubro==='digital';
  return`<div class="card" style="border-color:color-mix(in srgb,var(--a) 40%,var(--ln))"><div class="row"><div class="ibox">📣</div><div class="sp"><h3>Avisa a tus seguidores</h3><p class="mu sm">Manda una promo o novedad a todos los que te guardaron. Les llega a su Mi Xyro.</p></div></div>
   <button class="btn p" data-avn="${esc(g.slug)}" data-nom="${esc(g.nombre)}">📣 Enviar un aviso</button>${dg?'':`<button class="btn" data-digstat="${esc(g.slug)}" data-nom="${esc(g.nombre)}">📈 Cómo te encuentran en Xyro</button>`}</div>`}
