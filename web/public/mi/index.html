@@ -1228,7 +1228,7 @@ function gcProd(g,id){const p=id?(GC.productos||[]).find(x=>x.id===id):null,st={
    fin({nombre:q('#gcnm').value.trim(),precio:pr,detalle:q('#gcde').value.trim(),foto},'✅ Guardado en tu carta')}})}
 /* Billeteras por país (SQL 113): el negocio cobra con la de su país; Xyro no toca el dinero */
 var BILS={PE:['Yape','Plin','Transferencia'],BR:['PIX'],CO:['Nequi','Daviplata','Bre-B','Transferencia'],MX:['Mercado Pago','Transferencia SPEI','CoDi'],AR:['Mercado Pago','Transferencia (alias o CVU)'],CL:['MACH','Transferencia'],EC:['DeUna','Transferencia'],BO:['QR Simple','Tigo Money'],PY:['Transferencia','Tigo Money'],UY:['Transferencia','Mercado Pago'],VE:['Pago Móvil','Zelle'],US:['Zelle','Venmo','Cash App'],ES:['Bizum','Transferencia'],CR:['SINPE Móvil'],GT:['Transferencia'],DO:['Transferencia'],PA:['Yappy'],SV:['Transferencia'],HN:['Tigo Money'],NI:['Transferencia']};
-function bilPais(){return String((D&&D.persona&&D.persona.pais)||(typeof digPais==='function'&&digPais())||'PE').toUpperCase()}
+function bilPais(){return String((D&&D.persona&&D.persona.pais)||geoPais()||(typeof digPais==='function'&&digPais())||'PE').toUpperCase()}
 function bilOpc(){const p=bilPais();return[...new Set([...(BILS[p]||[]),'Transferencia','Otro'])]}
 const bilPE=m=>/^(yape|plin)$/i.test(String(m||'').trim());
 function gcYape(g){const y=(GC.mesas||{}).yape||{};let qr=y.qr||'';const O=bilOpc(),m0=y.metodo||(y.num?'Yape':O[0]);
@@ -1839,7 +1839,7 @@ async function mapaAbrir(){vib();
 /* Sin ubicación: el mapa abre en el país de la persona (perfil → zona horaria → idioma del equipo), nunca fijo en Perú */
 const PCEN={PE:[-9.2,-75,5],MX:[23.6,-102.5,4.5],CO:[4.6,-74.1,5],CL:[-33.4,-70.7,5],AR:[-36.5,-63.6,4],EC:[-1.6,-78.4,6],BO:[-16.6,-64.7,5],VE:[7.1,-66.2,5],UY:[-32.7,-56,6.5],PY:[-23.4,-58.4,5.5],CR:[9.9,-84.1,7],PA:[8.6,-80.1,6.5],DO:[18.8,-70.3,7],GT:[15.6,-90.3,6.5],ES:[40.2,-3.7,5],US:[39.5,-98.4,3.5],BR:[-14.2,-51.9,3.5],SV:[13.7,-88.9,8],HN:[14.8,-86.6,6.5],NI:[12.9,-85.2,6.5],CU:[21.7,-79.5,6],PR:[18.2,-66.5,8.5]};
 const TZP={La_Paz:'BO',Lima:'PE',Bogota:'CO',Santiago:'CL',Guayaquil:'EC',Caracas:'VE',Montevideo:'UY',Asuncion:'PY',Costa_Rica:'CR',Panama:'PA',Santo_Domingo:'DO',Guatemala:'GT',Madrid:'ES',Canary:'ES',Sao_Paulo:'BR',El_Salvador:'SV',Tegucigalpa:'HN',Managua:'NI',Havana:'CU',Puerto_Rico:'PR',Mexico_City:'MX',Monterrey:'MX',Cancun:'MX',Tijuana:'MX',Merida:'MX',Chihuahua:'MX',Hermosillo:'MX',Mazatlan:'MX',New_York:'US',Chicago:'US',Denver:'US',Los_Angeles:'US',Phoenix:'US'};
-function paisAprox(){const p=String((D&&D.persona&&D.persona.pais)||'').toUpperCase();if(PCEN[p])return p;
+function paisAprox(){const p=String((D&&D.persona&&D.persona.pais)||geoPais()||'').toUpperCase();if(PCEN[p])return p;
  try{const z=Intl.DateTimeFormat().resolvedOptions().timeZone||'';if(/^America\/Argentina\//.test(z))return'AR';const k=TZP[z.split('/').pop()];if(k)return k}catch(_){}
  const l=String(navigator.language||'').split('-')[1];return l&&PCEN[l.toUpperCase()]?l.toUpperCase():'PE'}
 function mapaHoja(on){MP.abierta=on;const s=$('#mps');if(!s)return;s.classList.toggle('on',on);$('#mpa').textContent=on?'▾':'▴';if(on){$('#mpc').hidden=true;mapaLista()}}
@@ -2125,7 +2125,7 @@ async function ptsCarga(fx){if(!D)return;try{if(!DEMO&&!PTSR){PTSR=1;try{await r
   app.querySelectorAll('[data-pts]').forEach(e=>{const k=e.dataset.pts;e.textContent=nfmt(PTS[k])})}catch(_){PTS=PTS||{global_points:0,local_points:0,business_points:0}}
  if(!PTSCH&&sb&&!DEMO&&D){try{const{data:{session}}=await sb.auth.getSession();const uid=session&&session.user.id;if(uid){PTSCH=sb.channel('mi-pts').on('postgres_changes',{event:'*',schema:'public',table:'points_ledger',filter:'user_id=eq.'+uid},()=>ptsCarga(true)).subscribe()}}catch(_){}}}
 setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB==='mipro'))ptsCarga(true)},30000);
-function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga(),nvCarga()]).then(()=>{if(!document.querySelector('.ov'))pinta()})}
+function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga(),nvCarga(),paisSync()]).then(()=>{if(!document.querySelector('.ov'))pinta()})}
  const P=PTS||{},g=XR?+XR.giros||0:0; // simple (pedido del usuario 2026-11-19): un número, un botón
  return`${nvCardHTML()}<div class="card"><div class="row"><span style="font-size:30px">⭐</span><div class="sp"><p style="margin:0"><b style="font-size:28px" data-pts="global_points">${nfmt(P.global_points)}</b> <span class="mu sm">puntos para descuentos</span></p>
   <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas XyroPoints al pagar por tu billetera o transferencia'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div>
@@ -2357,6 +2357,11 @@ function rgBadge(nv,sz){const r=rgDe(nv),s=sz||44,id='rg'+Math.random().toString
  return`<span class="rgb r-${r[0]}" style="width:${s}px;height:${s}px"><svg viewBox="0 0 48 52" width="${s}" height="${s}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${r[3]}"/><stop offset="1" stop-color="${r[4]}"/></linearGradient></defs>
   <path d="M24 2 44 13v24L24 50 4 37V13Z" fill="url(#${id})" stroke="#fff6" stroke-width="1.5"/>${i>=3?'<path d="M24 7 39 15.5v19L24 44 9 34.5v-19Z" fill="none" stroke="#fff8" stroke-width="1"/>':''}${i>=5?'<path d="M15 4l4 5 5-6 5 6 4-5-2 8H17Z" fill="#facc15" stroke="#7c2d12" stroke-width=".8" transform="translate(0 -6) scale(1)"/>':''}
   <text x="24" y="31" text-anchor="middle" font-size="${(+nv||1)>=100?13:16}" font-weight="900" fill="#111" font-family="Inter,system-ui,sans-serif">${+nv||1}</text></svg></span>`}
+/* País de la cuenta = país real (por internet, Cloudflare). Antes todas quedaban en Perú por defecto (SQL 116) */
+function geoPais(){try{const g=JSON.parse(ls.g('xy-geo')||'null');return g&&/^[A-Z]{2}$/.test(g.pais||'')?g.pais:null}catch(_){return null}}
+async function paisSync(){if(DEMO||!D||!D.persona)return;try{let g=JSON.parse(ls.g('xy-geo')||'null');
+ if(!g||!g.t||Date.now()-g.t>6*864e5){g=await(await fetch('/api/geo')).json();g.t=Date.now();ls.s('xy-geo',JSON.stringify(g))}
+ if(!/^[A-Z]{2}$/.test(g.pais||'')||ls.g('xy-pais-env')===g.pais)return;await rpc('xy_mi_pais',{p_pais:g.pais});ls.s('xy-pais-env',g.pais);D.persona.pais=g.pais}catch(_){}}
 let NV=null,NVC=0;
 async function nvCarga(){if(!D||!D.persona||NVC)return;NVC=1;
  const hoy=new Date().toLocaleDateString('en-CA',{timeZone:'America/Lima'}),k='xy-nv-'+(D.persona.idn||'');
