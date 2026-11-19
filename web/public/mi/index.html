@@ -2190,7 +2190,7 @@ async function plusAbrir(){vib();if(!D)return toast('Entra a tu cuenta');let I2;
   ${I2.activo?`<p class="sm">✅ Lo tienes hasta el ${fF(I2.hasta,{day:'numeric',month:'long'})}. Si renuevas, se suma un mes.</p>`:''}
   ${I2.pendiente?'<div class="card"><p class="sm">⏳ Ya enviaste tu pago. Lo activamos apenas lo confirmemos.</p></div>':''}
   <button class="btn p" id="xpg" ${I2.pendiente?'disabled':''}>⭐ ${I2.activo?'Renovar':'Quiero'} Xyro+ · ${moneyX(I2.precio,I2.moneda)}</button>${I2.activo||I2.pendiente?'':plusPruebaBtn()}<button class="btn l" data-x>Ahora no</button>`,(o,close)=>{
-  o.querySelector('#xpg').onclick=()=>{close();pagoTicket({titulo:'⭐ Xyro+ · 1 mes',monto:I2.precio,moneda:I2.moneda,args:{p_tipo:'PLUS'},ok:()=>{PLI=null;XEC=0}})}})}
+  o.querySelector('#xpg').onclick=()=>{close();pagoTicket({titulo:'⭐ Xyro+ · 1 mes',monto:I2.precio,moneda:I2.moneda,usd:(+I2.usd||0)*(1-(+I2.descuento||0)),args:{p_tipo:'PLUS'},ok:()=>{PLI=null;XEC=0}})}})}
 const rulLab=p=>p.tipo==='pts'?'+'+p.valor:p.tipo==='mult'?'x'+p.valor:p.tipo==='frame'?'🖼️':p.tipo==='plus_day'?'⭐ 1d':p.tipo==='plus_disc'?'-'+Math.round(p.valor*100)+'%':'🎁';
 async function ruletaAbrir(){vib();if(!D)return toast('Entra a tu cuenta');try{XR=await rpc('xy_ruleta_estado')}catch(e){return toast(errDe(e))}
  const tab=()=>+XR.giros>0?(XR.premios||[]):(XR.premios_compra||XR.premios||[]);let P=tab(),n=P.length||1,seg=360/n,rot=0,gira=false;
@@ -2260,7 +2260,7 @@ async function boostAbrir(slug,nom){vib();let b;try{b=await rpc('xy_boost_info',
    q('#bpa')&&(q('#bpa').textContent=`Pagar ${moneyX(pre,b.moneda)} por Yape o transferencia`)};
   o.querySelectorAll('[data-bh]').forEach(x=>x.onclick=()=>{h=+x.dataset.bh;o.querySelectorAll('[data-bh]').forEach(y=>y.classList.toggle('on',y===x));pon()});pon();
   q('#bpu').onclick=async()=>{try{const r=await rpc('xy_boost_pedir',{p_slug:slug,p_horas:h,p_con:'puntos'});close();confeti();toast('⚡ Boost activo hasta las '+fH(r.hasta))}catch(e){say(errDe(e))}};
-  q('#bpa')&&(q('#bpa').onclick=()=>{close();pagoTicket({titulo:`⚡ Boost · ${h} h`,detalle:`<p class="mu sm">Para ${esc(nom||slug)}</p>`,monto:h*b.precio_hora,moneda:b.moneda,args:{p_tipo:'BOOST',p_slug:slug,p_horas:h}})})})}
+  q('#bpa')&&(q('#bpa').onclick=()=>{close();pagoTicket({titulo:`⚡ Boost · ${h} h`,detalle:`<p class="mu sm">Para ${esc(nom||slug)}</p>`,monto:h*b.precio_hora,moneda:b.moneda,usd:h*(+b.usd_hora||0),args:{p_tipo:'BOOST',p_slug:slug,p_horas:h}})})})}
 (()=>{const st=document.createElement('style');st.textContent=`.avf{position:relative;display:inline-grid;padding:3px;border-radius:25px;isolation:isolate;flex:none}.avf::before{content:'';position:absolute;inset:0;border-radius:inherit;background:var(--fr);z-index:-1}.avf.gira::before{animation:avhue 4s linear infinite}.hdr .avf{border-radius:17px}.avf.sm{border-radius:14px;padding:2px}
 @keyframes avhue{to{filter:hue-rotate(360deg)}}
 .av.rk{width:40px;height:40px;border-radius:12px;font-size:16px;box-shadow:none!important}.rkr{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:16px;background:#ffffff08;border:1px solid var(--ln)}.rkr.yo{border-color:var(--a);background:color-mix(in srgb,var(--a) 12%,transparent)}.rkp{width:30px;text-align:center;font-weight:900;font-size:15px;flex:none}
@@ -2298,13 +2298,13 @@ async function subirCaptura(fl){if(!/^image\//.test(fl.type))throw new Error('Su
  const{data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Inicia sesión');
  const path='mi/'+session.user.id+'/pago-'+Date.now()+'-'+rnd()+'.jpg';const{error}=await sb.storage.from('medios').upload(path,b,{contentType:'image/jpeg'});if(error)throw error;
  return sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
-async function pagoTicket(o){const C=await cobCarga(),pe=String(o.moneda||'PEN').toUpperCase()==='PEN';let foto='';
+async function pagoTicket(o){const C=await cobCarga(),pe=String(o.moneda||'PEN').toUpperCase()==='PEN',us=+o.usd>0?(Math.ceil(+o.usd*100)/100).toFixed(2):'';let foto='';
  const cp=(l,v)=>v?`<div class="row" style="padding:6px 0"><span class="sp"><span class="mu xs">${l}</span><br><b>${esc(v)}</b></span><button type="button" class="btn s2" data-cp="${esc(v)}" style="flex:0 0 auto;width:auto">📋</button></div>`:'';
  hoja(`<h2>${esc(o.titulo)}</h2>${o.detalle||''}
-  <div class="card" style="text-align:center;padding:14px"><span class="mu xs">TOTAL A PAGAR</span><b style="font-size:32px">${moneyX(o.monto,o.moneda)}</b></div>
+  <div class="card" style="text-align:center;padding:14px"><span class="mu xs">TOTAL A PAGAR</span>${!pe&&us?`<b style="font-size:32px">US$ ${us}</b><span class="mu xs">≈ ${moneyX(o.monto,o.moneda)} · paga exacto en dólares (USDT)</span>`:`<b style="font-size:32px">${moneyX(o.monto,o.moneda)}</b>${us&&C.binance?`<span class="mu xs">Desde otro país: <b>US$ ${us}</b> por Binance</span>`:''}`}</div>
   <div class="card" style="gap:2px"><p class="mu xs" style="font-weight:700">1 · PAGA A XYROSTUDIO</p>${C.titular?`<p class="sm">Titular: <b>${esc(C.titular)}</b></p>`:''}
    ${pe?cp('Yape',C.yape)+cp('Plin',C.plin):''}${pe||!C.binance?cp(C.banco?'Cuenta '+C.banco:'Cuenta',C.cuenta)+cp('CCI (desde otro banco)',C.cci):''}${cp('Binance Pay ID'+(pe?' (desde otro país)':''),C.binance)}
-   ${!pe?(C.binance?'<p class="mu xs">Desde fuera de Perú paga con <b>Binance Pay</b> (USDT) el equivalente en dólares. En el N.º de operación pon el ID de la orden de Binance.</p>':'<p class="mu xs">¿Estás fuera de Perú? Escribe en el N.º de operación cómo puedes pagar y te respondemos.</p>'):''}${C.nota?`<p class="mu xs">${esc(C.nota)}</p>`:''}</div>
+   ${!pe?(C.binance?'<p class="mu xs">Desde fuera de Perú paga con <b>Binance Pay</b> exactamente '+(us?'<b>US$ '+us+'</b> en USDT':'el equivalente en dólares (USDT)')+'. En el N.º de operación pon el ID de la orden de Binance.</p>':'<p class="mu xs">¿Estás fuera de Perú? Escribe en el N.º de operación cómo puedes pagar y te respondemos.</p>'):''}${C.nota?`<p class="mu xs">${esc(C.nota)}</p>`:''}</div>
   <div class="card" style="gap:8px"><p class="mu xs" style="font-weight:700">2 · MANDA TU TICKET DE PAGO</p>
    <label>N.º de operación<input id="tkr" maxlength="40" placeholder="Sale en tu Yape o banco"></label>
    <input id="tkf" type="file" accept="image/*" hidden><button type="button" class="btn" id="tkb">📎 Subir captura del pago</button><div id="tkp"></div></div>
@@ -2352,7 +2352,7 @@ async function planesAbrir(slug,nom,rb){vib();let P,mon;const rub=rb||(slug?rubD
    el.querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>{pl=b.dataset.pl;pinta2()});el.querySelector('#plg').textContent=`Continuar con ${pl==='PRO'?'Pro':'Plus'}`};
   el.querySelectorAll('[data-an]').forEach(b=>b.onclick=()=>{an=b.dataset.an==='1';el.querySelectorAll('[data-an]').forEach(x=>x.classList.toggle('on',x===b));pinta2()});pinta2();
   el.querySelector('#plg').onclick=()=>{const x=P[an?pl+'12':pl];close();
-   pagoTicket({titulo:`Plan ${pl==='PRO'?'Pro':'Plus'}${an?' · 1 año':' · 1 mes'}`,detalle:nom?`<p class="mu sm">Para ${esc(nom)}</p>`:'',monto:x.monto,moneda:x.moneda,args:{p_tipo:'PLAN',p_slug:slug||null,p_plan:pl,p_meses:an?12:1},ok:()=>{try{grCarga().then(()=>pinta())}catch(_){}}})}})}
+   pagoTicket({titulo:`Plan ${pl==='PRO'?'Pro':'Plus'}${an?' · 1 año':' · 1 mes'}`,detalle:nom?`<p class="mu sm">Para ${esc(nom)}</p>`:'',monto:x.monto,moneda:x.moneda,usd:+x.usd||0,args:{p_tipo:'PLAN',p_slug:slug||null,p_plan:pl,p_meses:an?12:1},ok:()=>{try{grCarga().then(()=>pinta())}catch(_){}}})}})}
 /* ---------- Negocio VERIFICADO (SQL 90): requisitos, datos legales y documentos al bucket privado. XyroStudio aprueba ---------- */
 function verifCardHTML(g){if(!g||g.estado==='suspendido')return'';
  return`<div class="card" style="border-color:#1d9bf066"><div class="row"><div class="ibox" style="color:#1d9bf0;font-weight:900">✓</div><div class="sp"><h3>Negocio verificado</h3><p class="mu sm">${g.rubro==='digital'?'Sello ✓ en tu perfil y en Explorar: la gente sabe que tu software es real y no una copia.':'Sello ✓ en el mapa y en tu ficha, +20% de puntos para ti y tus clientes, y más confianza al comprar.'}</p></div></div><button class="btn" data-verif="${esc(g.slug)}" data-nom="${esc(g.nombre)}">✓ Verificar mi negocio</button></div>`}
@@ -2592,7 +2592,7 @@ function empDestacar(e,pr){let d=7;const P=x=>moneyX(Math.round(x*(+pr.monto||0)
   <div class="row" style="flex-wrap:wrap;gap:6px">${[3,7,15,30].map(x=>`<button class="chip${x===d?' on':''}" data-dd="${x}" style="flex:1 1 40%;padding:10px">${x} días<br><b>${P(x)}</b></button>`).join('')}</div>
   <button class="btn p" id="dgo">Continuar</button><button class="btn l" data-x>Ahora no</button>`,(o,close)=>{
   o.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>{d=+b.dataset.dd;o.querySelectorAll('[data-dd]').forEach(x=>x.classList.toggle('on',x===b))});
-  o.querySelector('#dgo').onclick=()=>{close();pagoTicket({titulo:`⚡ Destacar empleo · ${d} días`,detalle:`<p class="mu sm">${esc(e.titulo)}</p>`,monto:Math.round(d*(+pr.monto||0)*100)/100,moneda:pr.moneda,rpc:'xy_empleo_destacar_pagar',args:{p_empleo:e.id,p_dias:d}})}})}
+  o.querySelector('#dgo').onclick=()=>{close();pagoTicket({titulo:`⚡ Destacar empleo · ${d} días`,detalle:`<p class="mu sm">${esc(e.titulo)}</p>`,monto:Math.round(d*(+pr.monto||0)*100)/100,moneda:pr.moneda,usd:d*(+pr.usd_dia||0),rpc:'xy_empleo_destacar_pagar',args:{p_empleo:e.id,p_dias:d}})}})}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-empneg]');if(b)empNeg(b.dataset.empneg,b.dataset.nom)});
 /* 🛍️ Marketplace entre personas, 🔐 Bóveda y 🎟️ Mis pases: antes vivían en /x/ (decisión 2026-11-19: una sola app = Mi Xyro).
    Xyro NO recibe dinero: comprador y vendedor coordinan por chat y el pago va directo (SQL 79/91). */
