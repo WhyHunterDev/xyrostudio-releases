@@ -909,7 +909,7 @@ function mxPersona(d){const p=d.persona||{},U=d.uso||[];
   <h4>Negocios guardados</h4><p class="sub">${(d.guardados||[]).map(x=>esc(x.negocio)).join(' · ')||'Ninguno.'}</p>
   ${(d.solicitudes||[]).length?`<h4>Solicitudes de conexión</h4><p class="sub">${d.solicitudes.map(x=>`${esc(x.estado)} · ${mxF(x.creado)}`).join('<br>')}</p>`:''}
   ${(d.reportes||[]).length?`<h4>Lo que reportó</h4>${d.reportes.map(t=>`<p class="sub"><b>${t.tipo==='error'?'Error':'Ayuda'}</b> · ${mxF(t.creado)} · ${esc(t.texto)}${t.respuesta?`<br>↳ <i>${esc(t.respuesta)}</i>`:''}</p>`).join('')}`:''}</div>`}
-document.addEventListener('click',async e=>{const t=e.target.closest('[data-mxr],[data-mxbus],[data-mxver],[data-mxcl],[data-mxresp],[data-mxcer],[data-mxdes],[data-mxrg],[data-mxplus],[data-mxfund]');if(!t||!me)return;if(t.tagName==='A')e.preventDefault();
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-mxcs],[data-mxcc],[data-mxr],[data-mxbus],[data-mxver],[data-mxcl],[data-mxresp],[data-mxcer],[data-mxdes],[data-mxrg],[data-mxplus],[data-mxfund]');if(!t||!me)return;if(t.tagName==='A')e.preventDefault();
  try{
   if(t.dataset.mxcs)return mxChatEnviar(t.dataset.mxcs);
   if(t.dataset.mxcc){if(!confirm('¿Terminar esta atención? A la persona le sale «Atención terminada» y el chat desaparece de su Mi Xyro.'))return;const{error}=await sb.rpc('xa_yo_g_chat_cerrar',{p_id:t.dataset.mxcc});if(error)return toast(error.message);toast('✅ Atención terminada');await mxChats();return mxChatsPon()}
