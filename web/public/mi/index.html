@@ -371,7 +371,7 @@ async function cliente(){
 async function rpc(f,a){if(DEMO){const r=await demoRpc(f,a);if(f==='xa_yo_editar'&&r&&r.error)throw r.error;return r}const{data,error}=await sb.rpc(f,a||{});if(error)throw error;if(data&&data.error)throw data.error;return data}
 async function cargar(){
  if(DEMO){D=D||demoData();return D}
- D=await rpc('xa_yo');await cargaPed();ls.s('mi-data',JSON.stringify(D));return D;
+ D=await rpc('xa_yo');await cargaPed();ls.s('mi-data',JSON.stringify(D));invRef();return D;
 }
 const negs=()=>(D&&D.negocios)||[];
 const N=()=>negs()[Math.min(CUR,negs().length-1)]||null;
@@ -858,6 +858,7 @@ function vNegocio(slug){const n=NEG[slug];
   ${rub==='restaurante'?`<div class="row"><a class="btn p sp" data-dclic="carta" data-ds="${esc(slug)}" style="text-decoration:none" href="/pedir/?s=${encodeURIComponent(slug)}&de=mi">📖 Ver la carta</a>${!n.gratis&&String(n.whatsapp||'').replace(/\D/g,'').length>=9&&!(n.apagados||[]).includes('reservas')?`<button class="btn sp" data-resv="${esc(slug)}">📅 Reservar mesa</button>`:''}</div><p class="mu xs" style="text-align:center;margin-top:-4px">¿Ya estás en el local? Toca 📷 y escanea el QR de tu mesa para pedir.</p><div id="sel"></div>`:''}
   ${citR(rub)?'<div id="sel"></div>':''}
   ${rub==='digital'?digSec(slug):''}
+  ${premiosSec(slug)}
   ${PR.length?`<h2>🎁 Promos por usar Mi Xyro</h2>${PR.map(p=>{const lk=p.plus&&!esPlus();return`<div class="promo"><span class="pill" style="background:${p.plus?'linear-gradient(135deg,#7c5cff,#c026d3)':'var(--a)'};color:#fff;justify-self:start">${p.plus?'⭐ Solo Xyro+':'Solo en Mi Xyro'}</span><h2>${esc(p.titulo)}</h2>${p.descripcion?`<p class="sm"${lk?' style="filter:blur(5px);user-select:none"':''}>${esc(p.descripcion)}</p>`:''}${lk?'<button class="btn p" data-xy="plus">⭐ Desbloquear con Xyro+</button>':''}${p.hasta?`<p class="mu xs">Válido hasta el ${fF(p.hasta)}</p>`:''}<p class="mu xs">Muestra esta pantalla en ${citR(rub)?lugW(rub):rub==='restaurante'||(n.gratis&&n.rubro!=='gym')?'caja':'recepción'}${p.plus?' con tu tarjeta Xyro+':''}.</p></div>`}).join('')}`:''}
   ${PB.length?`<h2>📢 Novedades</h2><div class="hs">${PB.map(p=>`<div class="card" style="padding:0;overflow:hidden">${p.media&&p.mediaTipo!=='video'?`<img src="${esc(media(p.media,rub))}" alt="" loading="lazy" onerror="this.remove()" style="width:100%;height:150px;object-fit:cover;display:block">`:''}<div style="padding:14px;display:grid;gap:4px">${p.tipo?`<span class="mu xs" style="font-weight:700;color:var(--a)">${esc(p.tipo).toUpperCase()}</span>`:''}<h3>${esc(p.titulo)}</h3>${p.descripcion?`<p class="mu sm">${esc(p.descripcion)}</p>`:''}${p.fin?`<p class="mu xs">Hasta el ${fF(p.fin)}</p>`:''}</div></div>`).join('')}</div>`:''}
   ${PL.length?`<h2>${rub==='barberia'?'✂️ Servicios':rub==='consultorio'?'🦷 Tratamientos':'💪 Planes'}</h2><div class="hs">${PL.map(p=>`<div class="plan${p.destacado?' dest':''}">${p.destacado?'<span class="pill" style="background:var(--a);color:#fff;justify-self:start">⭐ Recomendado</span>':''}<h3>${esc(p.nombre)}</h3>
@@ -970,6 +971,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
+  <a class="btn" href="https://discord.gg/R39CwRC2bP" target="_blank" rel="noopener" style="text-decoration:none">💬 Comunidad Xyro en Discord · ideas, promos y eventos</a>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
@@ -997,14 +999,14 @@ function editarPerfil(){const per=(D&&D.persona)||{};
    try{const r=await rpc('xa_yo_editar',{p_nombre:o.querySelector('#pn').value,p_apodo:o.querySelector('#pa').value,p_usuario:u.value,p_celular:o.querySelector('#pc').value.replace(/\D/g,''),...(foto!==undefined?{p_foto:foto}:{})});D.persona=r;close();pinta();toast('✅ Perfil guardado')}
    catch(e){m.textContent=errDe(e);m.className='msg on'}}})}
 // ---------- Mi negocio gratis (SQL 72): cualquiera registra su negocio y maneja perfil, promos y QR; el panel completo se paga ----------
-let GR=null,GRN=false;const WAV='51936449066',GRMAX=3;
+let GR=null,GRN=false;const WAV='',GRMAX=3;
 const RUBG=[['gym','🏋️','Gimnasio'],['consultorio','🦷','Consultorio dental'],['barberia','💈','Barbería'],['restaurante','🍽️','Restaurante'],['cafeteria','☕','Cafetería'],['digital','💻','Software o producto digital'],['otro','🏪','Otro tipo de negocio']];
 const G0=()=>(GR||[])[0]||null;
 async function grCarga(){try{GR=await rpc('xa_gr_mio')||[];GRN=false}catch(e){GR=GR||[];GRN=/PGRST202|Could not find|does not exist|schema cache/i.test(String(e&&(e.message||e)))}return GR}
 const GREST={pendiente:['wa','🕓 En revisión','Tu nombre se parece a una marca conocida, así que XyroStudio lo revisa antes de publicarlo. Si la marca es tuya, pide la verificación con tus documentos.'],
  activo:['ok','✅ Publicado en Mi Xyro','Tus clientes ya te encuentran y te guardan con tu QR.'],suspendido:['ko','⛔ Suspendido','Escríbenos por «Necesito ayuda» para revisarlo.'],
  pago:['ok','⭐ Panel completo','Tu negocio ya tiene Xyro Apps. Manéjalo desde tu panel.']};
-const grWA=t=>window.open('https://wa.me/'+WAV+'?text='+encodeURIComponent(t),'_blank','noopener');
+const grWA=t=>window.open('https://discord.gg/R39CwRC2bP'+'?text='+encodeURIComponent(t),'_blank','noopener');
 // Foto del negocio (logo cuadrado 400 px o portada 1600 px), webp liviano, a medios/<sitio>/gr/
 async function grFoto(fl,g,tipo){const img=await new Promise((ok,ko)=>{const u=URL.createObjectURL(fl),im=new Image();im.onload=()=>ok(im);im.onerror=ko;im.src=u});
  const c=document.createElement('canvas'),cx=c.getContext('2d');cx.imageSmoothingQuality='high';
@@ -1386,11 +1388,12 @@ document.addEventListener('click',async e=>{const a=e.target.closest&&e.target.c
 const panelURL=()=>'/app/'+(NB&&NB.rol==='gestor'&&NB.slug?'?s='+encodeURIComponent(NB.slug):'');
 function nMas(){
  post=()=>{const q=s=>$(s);q('#nmc')&&(q('#nmc').onclick=modoCliente);q('#nso')&&(q('#nso').onclick=async()=>{if(DEMO)return location.href='/mi/';try{await NSB.auth.signOut()}catch(_){}NB=null;NSB=null;modoCliente()});
-  q('#ncb')&&(q('#ncb').onclick=cambiarNeg);q('#nrf')&&(q('#nrf').onclick=async()=>{try{await nCargar();pinta();toast('✅ Actualizado')}catch(e){toast(errDe(e))}})};
+  q('#ncb')&&(q('#ncb').onclick=cambiarNeg);q('#ncj')&&(q('#ncj').onclick=()=>canjeCobrar(NB.slug||NSLUG,nrpc));q('#nrf')&&(q('#nrf').onclick=async()=>{try{await nCargar();pinta();toast('✅ Actualizado')}catch(e){toast(errDe(e))}})};
  return`${nHead('MÁS')}<div class="g">
   <a class="btn p" data-pan href="${DEMO?'/app/?demo='+(nDent()?(NB.rubro==='barberia'?'barberia':'consultorio'):'gym'):panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel completo</a>
   <p class="mu xs" style="text-align:center;margin-top:-4px">Cobrar, crear ${citR(NB.rubro)?(NB.rubro==='barberia'?'clientes':'pacientes'):NB.rubro==='restaurante'?'pedidos':'socios'}, caja, reportes y todo lo demás. Entra sin volver a escribir tu clave.</p>
   ${nMpOn()?`<button class="btn" data-ntgo="mesas">🍽️ Pedidos de mesa${nMpNuevos()?' · '+nMpNuevos()+' nuevos':''}</button>`:''}
+  <button class="btn" id="ncj">🎟️ Cobrar canje de puntos</button>
   <button class="btn" id="nrf">${I.refresh}Actualizar datos</button>
   ${(NB.mios||0)>1||NACC>1||NB.rol==='gestor'?`<button class="btn" id="ncb">${I.store}Cambiar de negocio</button>`:''}
   <div class="card"><div class="row"><div class="ibox">${I.user}</div><div class="sp"><b>Mi cuenta personal</b><p class="mu sm">Tus membresías, QR, promos y negocios guardados.</p></div></div><button class="btn" id="nmc">Volver a mi cuenta personal</button></div>
@@ -1410,9 +1413,10 @@ function nGestor(){const L=NB.negocios||[];
 let NMP=null,NMPX=false;
 const nMpOn=()=>NB&&!nDent()&&['gestor','admin','supervisor','recepcion'].includes(nRol());
 // Cafetín trabaja solo desde el panel web (ahí le llegan los pedidos de mesa)
-function nCafPanel(){post=()=>{const q=s=>$(s);q('#nmc')&&(q('#nmc').onclick=modoCliente);q('#nso')&&(q('#nso').onclick=async()=>{if(DEMO)return location.href='/mi/';try{await NSB.auth.signOut()}catch(_){}NB=null;NSB=null;modoCliente()})};
+function nCafPanel(){post=()=>{const q=s=>$(s);q('#ncj')&&(q('#ncj').onclick=()=>canjeCobrar(NB.slug||NSLUG,nrpc));q('#nmc')&&(q('#nmc').onclick=modoCliente);q('#nso')&&(q('#nso').onclick=async()=>{if(DEMO)return location.href='/mi/';try{await NSB.auth.signOut()}catch(_){}NB=null;NSB=null;modoCliente()})};
  return`${nHead('CAFETÍN')}<div class="g"><div class="card vacio"><span class="e">🥤</span><h2>Tu cuenta trabaja en el panel</h2><p class="mu sm" style="max-width:300px">Las ventas del cafetín y los pedidos de mesa se atienden desde el panel web de Xyro Apps.</p></div>
   <a class="btn p" data-pan href="${DEMO?'/app/?demo=gym&rol=cafetin':panelURL()}" style="text-decoration:none">${I.grid}Abrir el panel</a>
+  <button class="btn" id="ncj">🎟️ Cobrar canje de puntos</button>
   <button class="btn" id="nmc">Volver a mi cuenta personal</button><button class="btn l" id="nso">Cerrar sesión del negocio</button></div>`}
 const nMpAb=()=>((NMP&&NMP.pedidos)||[]).filter(p=>['nuevo','preparando','servido'].includes(p.estado));
 const nMpNuevos=()=>nMpAb().filter(p=>p.estado==='nuevo').length;
@@ -1557,14 +1561,14 @@ function nPlan(){const p=(NPED||[]).find(x=>x.id===NPID);if(!p){NTAB='pedidos';r
   <button class="btn p" id="pse">📲 Enviar a su Mi Xyro</button><p class="mu xs" style="text-align:center">Le llega al instante como ficha en Mi Xyro. Ya no hace falta mandar imágenes por WhatsApp.</p></div>`}
 function demoPeds(){const t=m=>new Date(Date.now()-m*6e4).toISOString(),man=new Date(Date.now()+864e5);man.setUTCHours(22,0,0,0);const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
  if(DEMO==='negocio-dental'){const m2=new Date(man.getTime()+864e5);return[
-  {id:'q1',tipo:'cita',estado:'pendiente',cliente_nombre:'Lucía Fernández',cliente_tel:'936449066',cita:{inicio:man.toISOString(),servicio:'Limpieza dental',precio:80,prof_nombre:'Dra. Paula Rojas'},nota:'Me sangran un poco las encías',creado:t(25),visto_negocio:false,msgs:[]},
+  {id:'q1',tipo:'cita',estado:'pendiente',cliente_nombre:'Lucía Fernández',cliente_tel:'999888777',cita:{inicio:man.toISOString(),servicio:'Limpieza dental',precio:80,prof_nombre:'Dra. Paula Rojas'},nota:'Me sangran un poco las encías',creado:t(25),visto_negocio:false,msgs:[]},
   {id:'q2',tipo:'consulta',estado:'abierta',cliente_nombre:'Jorge Ramírez',creado:t(4),actualizado:t(4),visto_negocio:false,msgs:[{de:'persona',texto:'Hola, ¿cuánto cuesta un blanqueamiento?',creado:t(4)}]},
   {id:'q3',tipo:'registro',estado:'pendiente',cliente_nombre:'Ana Quispe',datos:{nombre:'Ana Quispe',celular:'987654321',dni:'45678912'},creado:t(180),visto_negocio:true,msgs:[]},
   {id:'q4',tipo:'cita',estado:'agendado',cliente_nombre:'Marco Díaz',cita:{inicio:m2.toISOString(),servicio:'Evaluación de ortodoncia',precio:0,prof_nombre:'Dr. Luis Paredes'},creado:t(2880),visto_negocio:true,msgs:[]}]}
- return[{id:'q1',tipo:'entreno',estado:'pendiente',cliente_nombre:'Lucía Fernández',cliente_num:112,cliente_tel:'936449066',persona_nombre:'Lucía',objetivo:'Bajar de peso',nota:'Días por semana: 4\nNivel: Principiante\nMe molesta un poco la rodilla derecha',creado:t(25),visto_negocio:false,msgs:[],planes:[],membresia:{plan:'Mensual',fin:ad(20)}},
-  {id:'q2',tipo:'nutri',estado:'pendiente',cliente_nombre:'Jorge Ramírez',cliente_num:87,cliente_tel:'936449066',persona_nombre:'Jorge',objetivo:'Ganar masa muscular',nota:'Horario preferido: Tarde\nNo como pescado',creado:t(70),visto_negocio:false,msgs:[{de:'persona',texto:'Hola, ¿puede ser esta semana?',creado:t(65)}],
+ return[{id:'q1',tipo:'entreno',estado:'pendiente',cliente_nombre:'Lucía Fernández',cliente_num:112,cliente_tel:'999888777',persona_nombre:'Lucía',objetivo:'Bajar de peso',nota:'Días por semana: 4\nNivel: Principiante\nMe molesta un poco la rodilla derecha',creado:t(25),visto_negocio:false,msgs:[],planes:[],membresia:{plan:'Mensual',fin:ad(20)}},
+  {id:'q2',tipo:'nutri',estado:'pendiente',cliente_nombre:'Jorge Ramírez',cliente_num:87,cliente_tel:'999888777',persona_nombre:'Jorge',objetivo:'Ganar masa muscular',nota:'Horario preferido: Tarde\nNo como pescado',creado:t(70),visto_negocio:false,msgs:[{de:'persona',texto:'Hola, ¿puede ser esta semana?',creado:t(65)}],
    planes:[{titulo:'Volumen 2,600 kcal',quien:'Lic. Andrea Ruiz',creado:ad(-120),datos:{kcal:'2600',desayuno:'Avena con plátano\n3 huevos',almuerzo:'Arroz + pollo 200 g\nEnsalada',cena:'Camote + carne'}}],membresia:{plan:'Trimestral',fin:ad(45)}},
-  {id:'q3',tipo:'nutri',estado:'agendado',asignado:'n1',cliente_nombre:'Ana Quispe',cliente_num:301,cliente_tel:'936449066',persona_nombre:'Ana',objetivo:'Bajar de peso',nota:'Horario preferido: Tarde',creado:t(60*26),visto_negocio:true,
+  {id:'q3',tipo:'nutri',estado:'agendado',asignado:'n1',cliente_nombre:'Ana Quispe',cliente_num:301,cliente_tel:'999888777',persona_nombre:'Ana',objetivo:'Bajar de peso',nota:'Horario preferido: Tarde',creado:t(60*26),visto_negocio:true,
    cita:{inicio:man.toISOString(),nutri:'n1',nutri_nombre:'Lic. Andrea Ruiz',nota:'Traer sus análisis de sangre',por:'Rosa (recepción)'},msgs:[{de:'negocio',autor:'Rosa',texto:'Hola Ana 👋 tenemos mañana 5 pm o el viernes 7 pm. ¿Cuál te acomoda?',creado:t(60*25)},{de:'persona',texto:'Mañana 5 pm 🙌',creado:t(60*24)},{de:'negocio',autor:'Rosa',texto:'📅 Tu cita quedó agendada para mañana a las 5:00 pm con Lic. Andrea Ruiz.',creado:t(60*24-2)}],planes:[],membresia:{plan:'Mensual',fin:ad(4)}},
   {id:'q4',tipo:'entreno',estado:'listo',cliente_nombre:'Marco Díaz',cliente_num:19,persona_nombre:'Marco',objetivo:'Ganar fuerza',nota:'Días por semana: 5',creado:t(60*50),visto_negocio:true,msgs:[{de:'negocio',autor:'Coach Diego',texto:'💪 Tu plan de entrenamiento ya está en tu Mi Xyro.',creado:t(60*30)}],planes:[{titulo:'Fuerza 5 días',quien:'Coach Diego',creado:t(60*30),datos:{d1:'Pierna\nSentadilla 5x5'}}],membresia:{plan:'Semestral',fin:ad(63)}}]}
 function demoPedNeg(f,a){const r=nRol();NPED=NPED||null;
@@ -1581,13 +1585,13 @@ function demoNB(){const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDat
  const dr=['recepcion','entrenador','nutricionista','supervisor','cafetin'].includes(P.get('rol'))?P.get('rol'):'admin';
  const base={slug:'demo',negocio:dn?'Sonrisa Dental':'Fuerza Gym',logo:null,rubro:dn?'consultorio':'gym',rol:dr,nombre:{recepcion:'Rosa',entrenador:'Coach Diego',nutricionista:'Lic. Andrea Ruiz',supervisor:'Paola'}[dr]||'Carlos',plata:['admin','supervisor'].includes(dr),mios:2,asis_hoy:86,activos:412,clientes:538,nuevos_mes:23,seguidores:57,en_app:31,
   ing_hoy:1840,cobros_hoy:11,ing_mes:38250,metodos:{yape:980,efectivo:560,plin:300},semana:[1520,2210,1380,2640,1960,980,1840].map((v,i)=>({d:ad(i-6),v})),
-  por_vencer:[['Lucía Fernández',1,'Mensual'],['Jorge Ramírez',2,'Trimestral'],['Ana Quispe',4,'Mensual'],['Diego Salazar',6,'Semestral']].map(([nombre,d,plan])=>({nombre,fin:ad(d),plan,tel:'936449066'})),
+  por_vencer:[['Lucía Fernández',1,'Mensual'],['Jorge Ramírez',2,'Trimestral'],['Ana Quispe',4,'Mensual'],['Diego Salazar',6,'Semestral']].map(([nombre,d,plan])=>({nombre,fin:ad(d),plan,tel:'999888777'})),
   ultimos:[['Valeria Torres',3],['Marco Díaz',9],['Sofía Rojas',14],['Luis Paredes',22],['Camila Vega',31]].map(([nombre,m])=>({nombre,t:t(m),quien:'Recepción'})),
   pagos:[['Lucía Fernández',99,'yape','Mensual'],['Marco Díaz',260,'efectivo','Trimestral'],['Sofía Rojas',12,'plin','Cafetín']].map(([nombre,monto,metodo,concepto],i)=>({nombre,monto,metodo,concepto,f:t(20+i*35)}))};
  if(dn)base.citas=[[9,'Valeria Torres','Curación con resina','atendida'],[10,'Pedro Gómez','Control y limpieza','llego'],[11.5,'Rosa Medina','Evaluación','confirmada'],[16,'Javier Soto','Blanqueamiento','agendada']].map(([hh,nombre,servicio,estado])=>{const x=new Date();x.setUTCHours(Math.floor(hh)+5,(hh%1)*60,0,0);return{inicio:x.toISOString(),dur:45,nombre,servicio,estado,prof:'Dra. Lucía Ramos'}});
  return base}
 async function demoNegRpc(f,a){if(/pedido|xa_neg_nutris/.test(f))return demoPedNeg(f,a);const h=hoyL(),ad=n=>{const x=new Date(h+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
- const L=[['Valeria Torres',28,248],['Lucía Fernández',1,112],['Jorge Ramírez',-3,87],['Ana Quispe',4,301],['Marco Díaz',63,19]].map(([nombre,d,num],i)=>({id:'c'+i,nombre,num,plan:d>40?'Semestral':'Mensual',inicio:ad(d-30),fin:ad(d),codigo:'DEMO'+num,tel:'936449066',ultima:new Date(Date.now()-(i+1)*864e5).toISOString(),app:i%2===0}));
+ const L=[['Valeria Torres',28,248],['Lucía Fernández',1,112],['Jorge Ramírez',-3,87],['Ana Quispe',4,301],['Marco Díaz',63,19]].map(([nombre,d,num],i)=>({id:'c'+i,nombre,num,plan:d>40?'Semestral':'Mensual',inicio:ad(d-30),fin:ad(d),codigo:'DEMO'+num,tel:'999888777',ultima:new Date(Date.now()-(i+1)*864e5).toISOString(),app:i%2===0}));
  if(f==='xa_neg')return NB||demoNB();
  if(f==='xa_neg_buscar'){const q=a.p_q.toLowerCase();return L.filter(x=>x.nombre.toLowerCase().includes(q)||String(x.num)===q||x.codigo.toLowerCase()===q)}
  if(f==='xa_neg_checkin'){const x=L.find(y=>y.codigo===String(a.p_codigo).toUpperCase())||L[0];if(x.fin<h)return{ok:false,nombre:x.nombre,t:'Hola '+x.nombre.split(' ')[0],s:'Su membresía venció el '+fF(x.fin,{day:'numeric',month:'short'})+'. Debe renovar.'};
@@ -1651,11 +1655,11 @@ addEventListener('unhandledrejection',e=>{const r=e.reason;if(r&&r.message)repEr
 
 // ---------- Demo ----------
 function demoBoth(){const h=hoyL(),ad=(d,n)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)},at=(n,hh)=>{const x=new Date(Date.now()+n*864e5);x.setUTCHours(hh+5,0,0,0);return x.toISOString()};
- const gym={cliente:'d1',slug:'demo-gym',negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym',nombre:'Valeria Torres',num:248,codigo:'DEMO248XYRO',whatsapp:'936449066',
+ const gym={cliente:'d1',slug:'demo-gym',negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym',nombre:'Valeria Torres',num:248,codigo:'DEMO248XYRO',whatsapp:'999888777',
   membresias:[{plan_nombre:'Trimestral',inicio:ad(h,-62),fin:ad(h,28),pausas:[]}],ingresos:{mes:17,ultimo:new Date(Date.now()-864e5).toISOString()},
   rutinas:[{tipo:'entreno',titulo:'Hipertrofia · 5 días',quien:'Coach Diego',creado:ad(h,-9),datos:{objetivo:'Ganar masa muscular',d1:'Pecho y tríceps\nPress banca 4x10\nPress inclinado mancuernas 4x10\nAperturas 3x12\nFondos 3x10',d2:'Espalda y bíceps\nJalón al pecho 4x10\nRemo con barra 4x10\nCurl con barra 3x12\nCurl martillo 3x12',d3:'Piernas\nSentadilla 4x10\nPrensa 4x12\nPeso muerto rumano 3x10\nPantorrillas 4x15',d4:'Hombros y abdomen\nPress militar 4x10\nElevaciones laterales 3x15\nPlancha 3x45 seg',d5:'Cuerpo completo\nPeso muerto 4x8\nDominadas 3x8\nZancadas 3x12\nCardio 20 min',nota:'Descansa 60–90 seg entre series. Toma 3 L de agua.'}},
    {tipo:'nutri',titulo:'Ganar masa muscular',quien:'Lic. Andrea',creado:ad(h,-9),datos:{objetivo:'Subir de peso en músculo',kcal:'2800',agua:'3 L',desayuno:'Avena con leche y plátano\n3 huevos',media:'Pan con palta\nBatido de proteína',almuerzo:'Arroz (1 taza) + menestra\nPollo o carne (200 g)\nEnsalada',merienda:'Sándwich de pollo\nFruta',cena:'Camote + pescado (150 g)\nVerduras',nota:'Come cada 3–4 horas.'}}]};
- const den={cliente:'d2',slug:'demo-dental',negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio',nombre:'Valeria Torres',num:91,codigo:'DEMO091XYRO',whatsapp:'936449066',membresias:[],rutinas:[],
+ const den={cliente:'d2',slug:'demo-dental',negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio',nombre:'Valeria Torres',num:91,codigo:'DEMO091XYRO',whatsapp:'999888777',membresias:[],rutinas:[],
   citas:[{inicio:at(3,10),dur:45,prof:'Dra. Lucía Ramos',servicio:'Curación con resina',estado:'confirmada'},{inicio:at(24,16),dur:30,prof:'Dra. Lucía Ramos',servicio:'Control y limpieza',estado:'agendada'},{inicio:at(-12,11),dur:60,prof:'Dra. Lucía Ramos',servicio:'Evaluación y radiografía',estado:'atendida'}],
   presupuestos:[{estado:'aceptado',prof:'Dra. Lucía Ramos',creado:ad(h,-12),descuento:30,items:[{t:'Profilaxis y destartraje',m:120,h:1},{t:'Curación con resina',p:'16',m:150,h:1},{t:'Curación con resina',p:'26',m:150},{t:'Blanqueamiento',m:450}],pagos:[{monto:300}]}]};
  return{gym,den}}
@@ -1670,7 +1674,7 @@ function demoData(){const{gym,den}=demoBoth(),dent=DEMO==='consultorio';
   avisos:[{id:'av1',negocio:dent?'Fuerza Gym':'Sonrisa Dental',color:dent?'#e11d48':'#0ea5e9',rubro:dent?'gym':'consultorio',nombre:'Valeria Torres',quien:'Recepción'}]}}
 function demoNeg(slug){const g=slug==='demo-gym'?{negocio:'Fuerza Gym',color:'#e11d48',rubro:'gym',fundador:true}:slug==='demo-dental'?{negocio:'Sonrisa Dental',color:'#0ea5e9',rubro:'consultorio'}:{negocio:'Nativa Café',color:'#16a34a',rubro:'restaurante'};
  const rs=g.rubro==='restaurante';
- return{slug,...g,whatsapp:'936449066',descripcion:rs?'Café de especialidad, brunch y almuerzos caseros. Pide desde tu mesa con el QR.':g.rubro==='consultorio'?'Odontología para toda la familia, sin dolor y con citas puntuales.':'Entrena con nosotros: máquinas nuevas, clases todos los días y buen ambiente.',guardado:true,socio:negs().some(n=>n.slug===slug),
+ return{slug,...g,whatsapp:'999888777',descripcion:rs?'Café de especialidad, brunch y almuerzos caseros. Pide desde tu mesa con el QR.':g.rubro==='consultorio'?'Odontología para toda la familia, sin dolor y con citas puntuales.':'Entrena con nosotros: máquinas nuevas, clases todos los días y buen ambiente.',guardado:true,socio:negs().some(n=>n.slug===slug),
   promos:[{titulo:rs?'Postre gratis con tu almuerzo por Mi Xyro':g.rubro==='consultorio'?'Limpieza a S/ 59 por Mi Xyro':'Inscripción gratis + 1 semana extra',descripcion:'Solo para quienes nos guardaron en Mi Xyro.',hasta:''}],
   publicaciones:rs?[]:[{tipo:'Promo',titulo:'Reto 30 días',descripcion:'Únete al reto y gana un mes gratis.',media:'img/clase.webp',fin:''}],
   planes:rs?[]:g.rubro==='consultorio'?[{nombre:'Limpieza dental',precio:80},{nombre:'Blanqueamiento',precio:450,destacado:true},{nombre:'Ortodoncia',precio:3500}]:[{nombre:'1 mes',precio:100,meses:1},{nombre:'3 meses',precio:270,meses:3},{nombre:'1 año',precio:900,meses:12,destacado:true,precioEvento:750,eventoTexto:'Solo este mes'}],
@@ -2079,9 +2083,10 @@ function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsC
  const P=PTS||{},g=XR?+XR.giros||0:0; // simple (pedido del usuario 2026-11-19): un número, un botón
  return`<div class="card"><div class="row"><span style="font-size:30px">⭐</span><div class="sp"><p style="margin:0"><b style="font-size:28px" data-pts="global_points">${nfmt(P.global_points)}</b> <span class="mu sm">puntos para descuentos</span></p>
   <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas puntos cada vez que compras con Xyro'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div>
-  <button class="btn p" data-xy="ganar" style="width:auto;position:relative">🎁 Gana más${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button></div></div>`}
+  <button class="btn p" data-xy="ganar" style="width:auto;position:relative">🎁 Gana más${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button></div>
+  <button class="btn" data-xy="invitar" style="margin-top:4px">👥 Invita amigos y gana puntos</button></div>`}
 function ganarAbrir(){const g=XR?+XR.giros||0:0;hoja(`<h2>🎁 Gana más puntos</h2><p class="mu sm">Tus puntos se usan como descuento. <b>Globales</b>: en cualquier negocio Xyro. <b>Locales</b>: solo donde los ganaste. Se suman cuando el negocio confirma tu pago.</p>
- <button class="btn p" data-xy="ruleta">🎡 Girar la ruleta${g?` · tienes ${g} giro${g>1?'s':''}`:''}</button><button class="btn" data-xy="retos">🎯 Retos: gana puntos extra</button><button class="btn" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo">🎨 Mi estilo</button><button class="btn l" data-x>Cerrar</button>`,o=>o.querySelectorAll('[data-xy]').forEach(b=>b.addEventListener('click',()=>o.remove())))}
+ <button class="btn p" data-xy="invitar">👥 Invitar amigos</button><button class="btn" data-xy="ruleta">🎡 Girar la ruleta${g?` · tienes ${g} giro${g>1?'s':''}`:''}</button><button class="btn" data-xy="retos">🎯 Retos: gana puntos extra</button><button class="btn" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo">🎨 Mi estilo</button><button class="btn l" data-x>Cerrar</button>`,o=>o.querySelectorAll('[data-xy]').forEach(b=>b.addEventListener('click',()=>o.remove())))}
 let PTSR=0;
 function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'Xyro Points')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 (function(){const st=document.createElement('style');st.textContent='.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff;box-shadow:0 20px 60px #7c5cff66;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}.plan{display:grid;gap:4px;text-align:left;width:100%;cursor:pointer}.plan .row b{font-size:18px}.mpag{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14}.mpag .sp{min-width:0}';document.head.appendChild(st)})();
@@ -2518,6 +2523,7 @@ function crecerHTML(g){if(!g||g.estado==='suspendido'||g.estado==='pendiente')re
  const row=(at,ic,t,d)=>`<button class="li" ${at} style="width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;cursor:pointer;font:inherit"><span class="dot">${ic}</span><span class="sp sm"><b>${t}</b><br><span class="mu xs">${d}</span></span><span class="mu" style="align-self:center">›</span></button>`;
  return`<div class="card" style="gap:0;border-color:color-mix(in srgb,var(--a) 40%,var(--ln))"><h3 style="margin-bottom:4px">🚀 Consigue más clientes</h3>
   ${row(`data-avn="${s}" data-nom="${n}"`,'📣','Avisar a mis seguidores','Les llega tu promo o novedad al toque')}
+  ${dg?'':row(`data-prmneg="${s}" data-nom="${n}"`,'🎁','Premios por puntos','Tú eliges qué das · cobra canjes con código')}
   ${row(`data-xy="boost" data-slug="${s}" data-nom="${n}"`,'⚡','Salir primero',dg?'En Explorar → Digital, por horas':'En Explorar y en el mapa, por horas')}
   ${dg?'':row(`data-digstat="${s}" data-nom="${n}"`,'📈','Cómo me encuentran','Visitas y clics a tu perfil')}
   ${row(`data-verif="${s}" data-nom="${n}"`,'✓','Verificar mi negocio','Sello ✓ y más confianza')}
@@ -2786,7 +2792,7 @@ demoRpc=async function(f,a){const W=window._EXD||(window._EXD={
   const c=W.chats.find(x=>x.slug===p.slug&&x.estado!=='cerrada');return{...p,chat:c?{id:c.id,tipo:c.tipo,estado:c.estado}:null}}
  if(f==='xy_pro_planes'){const w=W.px||(W.px={pendiente:null,mio:null});return{entity_id:'e-diego',plan:'PRO',currency:'PEN',vende:true,mio:w.mio,pendiente:w.pendiente,planes:[{id:'pl1',title:'Plan mensual presencial',description:'3 sesiones por semana en Miraflores + rutina en la app.',price:280,currency:'PEN',kind:'MEMBERSHIP',days:30},{id:'pl2',title:'Paquete 8 sesiones',price:360,currency:'PEN',kind:'CLASS_PACK',sessions:8,days:60},{id:'pl3',title:'Plan online',description:'Rutina y seguimiento semanal por chat.',price:120,currency:'PEN',kind:'MEMBERSHIP',days:30}]}}
  if(f==='xy_pro_comprar'){const w=W.px||(W.px={});const pl={pl1:['Plan mensual presencial',280],pl2:['Paquete 8 sesiones',360],pl3:['Plan online',120]}[a.p_item]||['Plan',100];w.ord={order_id:'do1',code:'K7Q2M9X4',status:'AWAITING_PAYMENT',total:pl[1],currency:'PEN',entity:{name:'Diego Ramírez'},items:[{title:pl[0],qty:1,line_total:pl[1]}],methods:[{tipo:'YAPE',dato:'999 888 777',titular:'Diego R.'},{tipo:'TRANSFER',dato:'BCP 191-12345678-0-12',titular:'Diego Ramírez'}],points:{}};w.pendiente='do1';return JSON.parse(JSON.stringify(w.ord))}
- if(f==='xy_order_payinfo'){const w=W.px||{};if(!w.ord)throw new Error('sin acceso');if(w.ord.buyer_paid_at&&w.ord.status!=='COMPLETED'&&Date.now()-new Date(w.ord.buyer_paid_at)>5000){w.ord.status='COMPLETED';w.ord.methods=[];w.ord.points={USER_LOCAL:Math.round(w.ord.total*0.27*8),USER_GLOBAL:Math.round(w.ord.total*0.27*2)};w.ord.membership={kind:'PASS',valid_until:new Date(Date.now()+864e5*30).toISOString()};w.pendiente=null;w.mio={kind:'PASS',valid_until:w.ord.membership.valid_until};W.pro.socio=true;W.pro.whatsapp='51936449066';if(W.pts){W.pts.global_points+=w.ord.points.USER_GLOBAL;W.pts.local_points+=w.ord.points.USER_LOCAL}}return JSON.parse(JSON.stringify(w.ord))}
+ if(f==='xy_order_payinfo'){const w=W.px||{};if(!w.ord)throw new Error('sin acceso');if(w.ord.buyer_paid_at&&w.ord.status!=='COMPLETED'&&Date.now()-new Date(w.ord.buyer_paid_at)>5000){w.ord.status='COMPLETED';w.ord.methods=[];w.ord.points={USER_LOCAL:Math.round(w.ord.total*0.27*8),USER_GLOBAL:Math.round(w.ord.total*0.27*2)};w.ord.membership={kind:'PASS',valid_until:new Date(Date.now()+864e5*30).toISOString()};w.pendiente=null;w.mio={kind:'PASS',valid_until:w.ord.membership.valid_until};W.pro.socio=true;W.pro.whatsapp='51999888777';if(W.pts){W.pts.global_points+=w.ord.points.USER_GLOBAL;W.pts.local_points+=w.ord.points.USER_LOCAL}}return JSON.parse(JSON.stringify(w.ord))}
  if(f==='xy_order_report_payment'){const w=W.px;w.ord.buyer_paid_at=new Date().toISOString();w.ord.buyer_pay_method=a.p_method;return{ok:true}}
  if(f==='xy_my_points'){W.pts=W.pts||{global_points:684,local_points:1240,business_points:W.mio?312:0,pending:0};return{...W.pts}}
  if(f==='xa_pro_mio')return W.mio?{...W.mio,res:{n:0},nuevos:W.chats.filter(c=>c.pro&&c.nuevo).length,entity_id:'e1',por_confirmar:1,xyro:{plan:'FREE',pro:false,students:3,max_students:5,items:2,max_items:5,business_points:312,edits_credits:0}}:null;
@@ -2823,6 +2829,97 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
  await entrar();
  if(P.get('borrar')){TAB='perfil';SUB=null;pinta();borrarCuenta()}
 })();
+/* ===== Invitar amigos + Premios por puntos (SQL 102, pedido del usuario 2026-11-18) =====
+   Invitar: enlace /mi/?ref=<ID>. Al hacer el amigo su 1.ª compra (y pasar la espera antifraude) los dos ganan globales.
+   Premios: el negocio elige qué da por puntos locales y/o globales. La persona pide un código (15 min), lo muestra al pagar
+   y el equipo lo escribe: los puntos se descuentan al toque. */
+{const r=(P.get('ref')||'').replace(/\D/g,'');if(r.length>=6&&r.length<=10){ls.s('mi-ref',r);setTimeout(()=>{if(!D)toast('🎁 Te invitaron a Mi Xyro: regístrate y gana puntos con tu primera compra')},1200)}}
+let INVT=0;
+async function invRef(){const r=ls.g('mi-ref');if(!r||INVT||DEMO||!D)return;INVT=1;try{const x=await rpc('xy_invitar_usar',{p_idn:+r});ls.s('mi-ref',null);if(x&&x.ok)setTimeout(()=>{confeti();toast(`🎉 Te invitó ${x.invitador}: con tu primera compra ganas ${nfmt(x.puntos)} puntos`)},800)}catch(_){}}
+async function invitarAbrir(){vib();if(!D)return toast('Inicia sesión para invitar');let I;try{I=await rpc('xy_invitar_info')}catch(e){return toast(errDe(e))}
+ const url=HOME+'?ref='+I.idn,t=`Te invito a Mi Xyro: promos y puntos en negocios cerca de ti. Con tu primera compra ganas ${I.invitado} puntos 🎁 `+url,L=I.lista||[];
+ hoja(`<h2>👥 Invita a tus amigos</h2><p class="mu sm">Cuando tu amigo haga su <b>primera compra</b> con Mi Xyro, tú ganas <b>${nfmt(I.invitador)} puntos</b> y él <b>${nfmt(I.invitado)}</b>. Sirven en cualquier negocio Xyro.</p>
+  ${I.me_invito&&!I.me_invito.premiado?`<p class="pill" style="background:#7c5cff22;color:var(--a)">🎉 Te invitó ${esc(I.me_invito.nombre)}: con tu 1.ª compra ganas ${nfmt(I.invitado)}</p>`:''}
+  <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:4px"><div><b style="font-size:24px">${nfmt(I.invitados)}</b><p class="mu xs" style="margin:0">invitados</p></div><div><b style="font-size:24px">${nfmt(I.compraron)}</b><p class="mu xs" style="margin:0">ya compraron</p></div><div><b style="font-size:24px;color:var(--a)">+${nfmt(I.ganados)}</b><p class="mu xs" style="margin:0">puntos</p></div></div>
+  <a class="btn p" href="https://wa.me/?text=${encodeURIComponent(t)}" target="_blank" rel="noopener" style="text-decoration:none">📲 Invitar por WhatsApp</a>
+  <button class="btn" id="ivc">📋 Copiar mi enlace</button>
+  ${L.length?`<div>${L.slice(0,10).map(x=>`<div class="li"><span class="dot">${x.compro?'✓':'⏳'}</span><span class="sp sm"><b>${esc(x.nombre)}</b><br><span class="mu xs">${x.compro?'Ya compró · ganaste tus puntos':'Falta su primera compra'}</span></span></div>`).join('')}</div>`:''}
+  <p class="mu xs">Los puntos llegan cuando la compra de tu amigo pasa la revisión (unos 7 días). Cuentas falsas no suman.</p><button class="btn l" data-x>Cerrar</button>`,o=>{
+  o.querySelector('#ivc').onclick=async()=>{try{if(navigator.share)return await navigator.share({title:'Mi Xyro',text:t})}catch(_){return}try{await navigator.clipboard.writeText(url);toast('📋 Enlace copiado')}catch(_){toast(url)}}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-xy="invitar"]');if(!b)return;e.preventDefault();document.querySelectorAll('.ov').forEach(o=>o.contains(b)&&o.remove());invitarAbrir()});
+
+/* --- Premios del negocio (persona) --- */
+const PRM={};
+function premiosSec(slug){if(!(slug in PRM)){PRM[slug]=null;rpc('xy_premios',{p_slug:slug}).then(r=>{PRM[slug]=r||{premios:[]};if(SUB&&SUB.neg===slug&&!document.querySelector('.ov'))pinta()}).catch(()=>{PRM[slug]={premios:[]}})}
+ const R=PRM[slug];if(!R||!(R.premios||[]).length)return'';const pe=R.pendiente;
+ const c=(p,k)=>p['pts_'+k]?`<span class="pill" style="${k==='global'?'background:#7c5cff22;color:var(--a)':''}">${nfmt(p['pts_'+k])} pts ${k==='local'?'de aquí':'Xyro'}</span>`:'';
+ return`<h2>🎁 Canjea tus puntos aquí</h2>${pe?`<button class="card" data-cjver="${esc(slug)}" style="width:100%;text-align:left;cursor:pointer;border-color:var(--a)"><b>🎟️ Tu código: ${esc(pe.codigo)}</b><span class="mu xs">${esc(pe.premio)} · muéstralo al pagar</span></button>`:''}
+  <div class="card" style="gap:0">${R.premios.map(p=>`<div class="li"><span class="sp"><b>${esc(p.nombre)}</b>${p.detalle?`<br><span class="mu xs">${esc(p.detalle)}</span>`:''}<br><span style="display:inline-flex;gap:6px;flex-wrap:wrap;margin-top:6px">${c(p,'local')}${c(p,'global')}</span></span><button class="btn p" data-cjp="${esc(p.id)}" data-slug="${esc(slug)}" style="width:auto;align-self:center">Canjear</button></div>`).join('')}
+  ${D?`<p class="mu xs" style="margin:10px 0 0">Tienes <b>${nfmt(R.local)}</b> puntos de aquí y <b>${nfmt(R.global)}</b> puntos Xyro.</p>`:''}</div>`}
+async function canjeAbrir(slug,id){vib();if(!D)return toast('Inicia sesión para canjear');const R=PRM[slug]||{},p=(R.premios||[]).find(x=>x.id===id);if(!p)return;
+ const op=[['LOCAL',p.pts_local,R.local,'puntos de aquí'],['GLOBAL',p.pts_global,R.global,'puntos Xyro']].filter(x=>x[1]);
+ hoja(`<h2>🎁 ${esc(p.nombre)}</h2>${p.detalle?`<p class="mu sm">${esc(p.detalle)}</p>`:''}<p class="sm">¿Con qué puntos?</p>
+  ${op.map(([k,c,b,t])=>`<button class="btn ${+b>=c?'p':''}" data-cjt="${k}" ${+b>=c?'':'disabled'}>${nfmt(c)} ${t}${+b>=c?'':` · te faltan ${nfmt(c-(+b||0))}`}</button>`).join('')}
+  <p class="mu xs">Te damos un código. Muéstralo al pagar y el negocio lo escribe: ahí recién se descuentan tus puntos.</p><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  o.querySelectorAll('[data-cjt]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{const c=await rpc('xy_canje_pedir',{p_premio:id,p_tipo:b.dataset.cjt});close();R.pendiente=c;canjeCodigo(slug,c)}catch(e){toast(errDe(e));b.disabled=false}})})}
+function canjeCodigo(slug,c){vib();let tm=0;
+ hoja(`<div style="display:grid;justify-items:center;text-align:center;gap:8px"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">MUESTRA ESTE CÓDIGO AL PAGAR</p>
+  <b id="cjc" style="font-size:52px;letter-spacing:.14em;font-variant-numeric:tabular-nums">${esc(String(c.codigo).replace(/(\d{3})(\d{3})/,'$1 $2'))}</b>
+  <h3 style="margin:0">${esc(c.premio)}</h3><p class="pill">${nfmt(c.puntos)} ${c.tipo==='LOCAL'?'puntos de aquí':'puntos Xyro'}</p>
+  <p class="mu sm" id="cjt">Vence en 15:00</p></div><button class="btn l" id="cjx">Ya no lo quiero</button><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  const fin=new Date(c.vence).getTime(),fn=async()=>{if(!o.isConnected)return clearInterval(tm);const s=Math.max(0,Math.round((fin-Date.now())/1e3));const t=o.querySelector('#cjt');t&&(t.textContent=s?`Vence en ${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`:'Venció. Pide otro código.');
+   if(s%4)return;try{const e=await rpc('xy_canje_estado',{p_id:c.id});if(e&&e.estado==='LISTO'){clearInterval(tm);delete PRM[slug];close();confeti();toast(`✅ ¡Canje listo! Se descontaron ${nfmt(c.puntos)} puntos`);ptsCarga();pinta()}else if(e&&e.estado!=='PENDIENTE'){clearInterval(tm);delete PRM[slug]}}catch(_){}};
+  tm=setInterval(fn,1000);o.querySelector('#cjx').onclick=async()=>{try{await rpc('xy_canje_cancelar',{p_id:c.id})}catch(_){}clearInterval(tm);delete PRM[slug];close();pinta()}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-cjp],[data-cjver]');if(!b)return;e.preventDefault();if(b.dataset.cjp)return canjeAbrir(b.dataset.slug,b.dataset.cjp);const s=b.dataset.cjver,pe=(PRM[s]||{}).pendiente;pe&&canjeCodigo(s,pe)});
+
+/* --- Premios del negocio (dueño) y cobrar canje (dueño o equipo) --- */
+async function premiosNeg(slug,nom){vib();let R;try{R=await rpc('xy_premios_mios',{p_slug:slug})}catch(e){return toast(errDe(e))}const L=R.premios||[],C=R.canjes||[];
+ const pts=p=>[p.pts_local&&nfmt(p.pts_local)+' de aquí',p.pts_global&&nfmt(p.pts_global)+' Xyro'].filter(Boolean).join(' · ');
+ hoja(`<h2>🎁 Premios por puntos</h2><p class="mu sm">Tú eliges qué das por puntos. Así tus clientes vuelven y compran más. Les sale en tu perfil de Mi Xyro.</p>
+  <button class="btn p" data-cjcob>🎟️ Cobrar un canje</button>
+  <div class="card" style="gap:0">${L.map(p=>`<div class="li"><span class="sp"><b>${esc(p.nombre)}</b>${p.activo?'':' <span class="pill">Pausado</span>'}<br><span class="mu xs">${pts(p)} puntos</span></span><button class="btn" data-pre="${esc(p.id)}" style="width:auto;align-self:center">Editar</button></div>`).join('')||'<p class="mu sm">Aún no tienes premios. Ej.: «Café gratis» por 300 puntos de aquí.</p>'}</div>
+  ${L.length<12?'<button class="btn" data-pre="">＋ Agregar premio</button>':''}
+  ${C.length?`<h3 style="margin-top:6px">Últimos canjes${R.mes?` · ${nfmt(R.mes)} este mes`:''}</h3>${C.slice(0,6).map(x=>`<div class="li"><span class="dot">✓</span><span class="sp sm"><b>${esc(x.premio)}</b> · ${esc(x.persona)}<br><span class="mu xs">${nfmt(x.puntos)} ${x.tipo==='LOCAL'?'de aquí':'Xyro'} · ${fF(x.fecha)}</span></span></div>`).join('')}`:''}
+  <button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  o.querySelector('[data-cjcob]').onclick=()=>{close();canjeCobrar(slug,rpc)};
+  o.querySelectorAll('[data-pre]').forEach(b=>b.onclick=()=>{close();premioEditar(slug,nom,L.find(x=>x.id===b.dataset.pre)||null)})})}
+function premioEditar(slug,nom,p){const n=!p;p=p||{};
+ hoja(`<h2>${n?'＋ Nuevo premio':'Editar premio'}</h2>
+  <label class="sm">¿Qué das?<input id="pn" maxlength="60" value="${esc(p.nombre||'')}" placeholder="Ej. Café gratis · S/ 10 de descuento"></label>
+  <label class="sm">Detalle (opcional)<input id="pd" maxlength="200" value="${esc(p.detalle||'')}" placeholder="Ej. Cualquier café mediano"></label>
+  <div class="row" style="gap:8px"><label class="sm sp">Puntos de aquí<input id="pl" type="number" min="10" inputmode="numeric" value="${p.pts_local||''}" placeholder="Ej. 300"></label><label class="sm sp">Puntos Xyro<input id="pg" type="number" min="10" inputmode="numeric" value="${p.pts_global||''}" placeholder="Vacío = no"></label></div>
+  <p class="mu xs"><b>De aquí</b>: los que tus clientes ganan comprando contigo (unos 8 por cada US$ 1). <b>Xyro</b>: los de toda la red; aceptarlos te trae clientes nuevos. Deja vacío el que no quieras.</p>
+  <button class="btn p" id="ps">Guardar</button>${n?'':`<button class="btn" id="pa">${p.activo?'⏸️ Pausar':'▶️ Activar'}</button><button class="btn l" id="pb" style="color:#ef4444">Borrar</button>`}<button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  const v=s=>o.querySelector(s).value.trim(),sv=async x=>{try{await rpc('xy_premio_guardar',{p_slug:slug,p:Object.assign({id:p.id||null,nombre:v('#pn'),detalle:v('#pd'),pts_local:v('#pl')||null,pts_global:v('#pg')||null},x||{})});close();delete PRM[slug];toast('✅ Guardado: ya sale en tu perfil');premiosNeg(slug,nom)}catch(e){toast(errDe(e))}};
+  o.querySelector('#ps').onclick=()=>sv();const a=o.querySelector('#pa');a&&(a.onclick=()=>sv({activo:!p.activo}));
+  const b=o.querySelector('#pb');b&&(b.onclick=async()=>{try{await rpc('xy_premio_borrar',{p_slug:slug,p_id:p.id});close();delete PRM[slug];toast('Premio borrado');premiosNeg(slug,nom)}catch(e){toast(errDe(e))}})})}
+function canjeCobrar(slug,cli){vib();
+ hoja(`<h2>🎟️ Cobrar un canje</h2><p class="mu sm">Pide al cliente su código de 6 dígitos de Mi Xyro y escríbelo. Los puntos se le descuentan al toque.</p>
+  <input id="cjk" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="000 000" style="font-size:30px;text-align:center;letter-spacing:.2em">
+  <div id="cjr"></div><button class="btn p" id="cjg">Confirmar canje</button><button class="btn l" data-x>Cerrar</button>`,o=>{
+  const k=o.querySelector('#cjk'),g=o.querySelector('#cjg'),r=o.querySelector('#cjr');setTimeout(()=>k.focus(),100);
+  k.oninput=()=>{const d=k.value.replace(/\D/g,'').slice(0,6);k.value=d.length>3?d.slice(0,3)+' '+d.slice(3):d};
+  const go=async()=>{const c=k.value.replace(/\D/g,'');if(c.length!==6)return toast('Son 6 dígitos');g.disabled=true;
+   try{const x=await cli('xy_canje_confirmar',{p_slug:slug,p_codigo:c});if(!x||x.ok===false)throw new Error((x&&x.error)||'No se pudo');vib();confeti();
+    r.innerHTML=`<div class="card" style="border-color:#22c55e;text-align:center"><b style="font-size:22px">✅ Entrega: ${esc(x.premio)}</b><span class="sm">a ${esc(x.persona)} · −${nfmt(x.puntos)} ${x.tipo==='LOCAL'?'puntos de aquí':'puntos Xyro'}</span></div>`;k.value=''}
+   catch(e){r.innerHTML=`<p class="sm" style="color:#ef4444;text-align:center">${esc(errDe(e))}</p>`}g.disabled=false};
+  g.onclick=go;k.onkeydown=e=>{if(e.key==='Enter')go()}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-prmneg]');if(!b)return;e.preventDefault();premiosNeg(b.dataset.prmneg,b.dataset.nom)});
+
+/* --- Demo --- */
+{const d5=demoRpc;demoRpc=async function(f,a){const Z=window._PRZ||(window._PRZ={L:[{id:'pz1',nombre:'Café americano gratis',detalle:'Tamaño mediano',pts_local:300,pts_global:450,activo:true},{id:'pz2',nombre:'S/ 10 de descuento',pts_local:600,pts_global:null,activo:true}],loc:1240,glo:684,C:[],pe:null});
+ if(f==='xy_invitar_info')return{idn:(D&&D.persona&&D.persona.idn)||48203716,invitador:100,invitado:50,invitados:3,compraron:1,ganados:100,me_invito:null,lista:[{nombre:'Lucía',compro:true},{nombre:'Marco',compro:false},{nombre:'Andrea',compro:false}]};
+ if(f==='xy_invitar_usar')return{ok:false};
+ if(f==='xy_premios')return{premios:Z.L.filter(x=>x.activo),local:Z.loc,global:Z.glo,pendiente:Z.pe};
+ if(f==='xy_canje_pedir'){const p=Z.L.find(x=>x.id===a.p_premio),t=a.p_tipo,c=t==='LOCAL'?p.pts_local:p.pts_global;Z.pe={id:'cj1',codigo:'482915',premio:p.nombre,puntos:c,tipo:t,vence:new Date(Date.now()+9e5).toISOString(),t0:Date.now()};return Z.pe}
+ if(f==='xy_canje_estado'){if(Z.pe&&Date.now()-Z.pe.t0>8000){const p=Z.pe;Z.pe=null;p.tipo==='LOCAL'?Z.loc-=p.puntos:Z.glo-=p.puntos;return{estado:'LISTO'}}return{estado:'PENDIENTE'}}
+ if(f==='xy_canje_cancelar'){Z.pe=null;return{ok:true}}
+ if(f==='xy_premios_mios')return{premios:Z.L,canjes:[{premio:'Café americano gratis',persona:'Lucía',puntos:300,tipo:'LOCAL',fecha:new Date().toISOString()}],mes:14};
+ if(f==='xy_premio_guardar'){const p=a.p;if(!p.nombre||p.nombre.length<2)throw new Error('Escribe qué das (ej. Café gratis)');if(!p.pts_local&&!p.pts_global)throw new Error('Pon cuántos puntos cuesta');const o=Z.L.find(x=>x.id===p.id);const v={nombre:p.nombre,detalle:p.detalle,pts_local:+p.pts_local||null,pts_global:+p.pts_global||null};if(o)Object.assign(o,v,'activo'in p?{activo:p.activo}:{});else Z.L.push(Object.assign({id:'pz'+Date.now(),activo:true},v));return{ok:true}}
+ if(f==='xy_premio_borrar'){Z.L=Z.L.filter(x=>x.id!==a.p_id);return{ok:true}}
+ if(f==='xy_canje_confirmar')return a.p_codigo==='123456'?{ok:true,premio:'Café americano gratis',persona:'Lucía',puntos:300,tipo:'LOCAL'}:{ok:false,error:'Código no válido o vencido. Pídele que lo genere de nuevo (en la demo usa 123456)'};
+ return d5(f,a)}}
+{const n5=demoNegRpc;demoNegRpc=async function(f,a){if(f==='xy_canje_confirmar')return demoRpc(f,a);return n5(f,a)}}
 </script>
 <script>/* Partículas Xyro */(function(){var cv=document.getElementById('fx');if(!cv)return;var cx=cv.getContext('2d'),P=[],W,H,DPR=Math.min(1.5,devicePixelRatio||1),m={x:-999,y:-999},RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);var n=Math.round(Math.min(70,W*H/14000));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3})}

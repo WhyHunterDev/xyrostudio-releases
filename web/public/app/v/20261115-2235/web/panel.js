@@ -178,7 +178,7 @@
   // Recuperación de contraseña por correo (solo en modo nube).
   const forgotBtn = $('#forgotLink');
   if (forgotBtn) { if (!B()) forgotBtn.hidden = true; else { forgotBtn.addEventListener('click', () => { const fb = $('#forgotBox'); fb.hidden = !fb.hidden; $('#err').hidden = true; $('#okm').hidden = true; });
-  const fs = $('#forgotSend'); if (fs) fs.addEventListener('click', () => { const em = $('#em').value.trim(); fs.href = 'https://wa.me/51936449066?text=' + encodeURIComponent('Hola, soy administrador del Panel Santos y olvidé mi contraseña.' + (em ? ' Mi correo de acceso es: ' + em : '')); });
+  const fs = $('#forgotSend'); if (fs) fs.addEventListener('click', () => { const em = $('#em').value.trim(); fs.href = 'https://discord.gg/R39CwRC2bP?text=' + encodeURIComponent('Hola, soy administrador del Panel Santos y olvidé mi contraseña.' + (em ? ' Mi correo de acceso es: ' + em : '')); });
   } }
   if (B()) B().sb.auth.onAuthStateChange((ev) => { if (ev === 'PASSWORD_RECOVERY') { (async () => { try { const p = await B().auth.actual(); if (p) { const { data: au } = await B().sb.auth.getUser(); me = asMe(p, au.user?.email || ''); data = await SS.load(); data.actividad = data.actividad || []; start(); go('cuenta'); toast('Crea tu nueva contraseña'); } } catch (_) {} })(); } });
   let idleT; const bump = () => { try { sessionStorage.setItem('ss-ses', JSON.stringify({ id: me.id, t: Date.now() })); } catch (_) {} clearTimeout(idleT);  };
@@ -365,7 +365,7 @@
         <div style="padding:10px 12px"><b>${k === est ? '✓ ' : ''}${n}</b><div class="d" style="font-size:.8rem;margin:2px 0 6px">${d}</div><a href="${esc(prev(k))}" target="_blank" rel="noopener" style="font-size:.8rem;font-weight:700;color:${col}">Ver ↗</a></div></label>`).join('')}</div></div>
       <div class="panel"><h3>🧩 Secciones</h3><p class="d">Apaga lo que tu gym aún no tiene (por ejemplo, cafetín o nutrición). Desaparece de la web y de este panel; tus datos quedan guardados para cuando lo vuelvas a activar.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px">${SECC_W.map(([k, n]) => `<label style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line2,#2e2e2e);border-radius:12px;cursor:pointer"><input type="checkbox" data-secw="${k}" ${sc[k] === false ? '' : 'checked'} style="width:18px;height:18px">${n}</label>`).join('')}</div>
-      <p class="hint" style="margin-top:10px">Inicio siempre se muestra. ¿Quieres una sección nueva o un diseño propio? Eso lo hacemos a medida: <a target="_blank" rel="noopener" href="https://wa.me/51936449066?text=${encodeURIComponent('Hola XyroStudio 👋 Quiero una sección o un diseño a medida para mi web.')}">escríbenos</a>.</p></div>
+      <p class="hint" style="margin-top:10px">Inicio siempre se muestra. ¿Quieres una sección nueva o un diseño propio? Eso lo hacemos a medida: <a target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Hola XyroStudio 👋 Quiero una sección o un diseño a medida para mi web.')}">escríbenos</a>.</p></div>
       <button class="btn btn-y" data-savediseno>Guardar diseño y secciones</button>`;
   };
   document.addEventListener('change', (e) => { if (e.target.name === 'estW') $$('input[name=estW]').forEach((r) => { r.parentElement.style.borderColor = r.checked ? (getComputedStyle(document.documentElement).getPropertyValue('--y').trim() || '#f5c400') : 'var(--line2,#2e2e2e)'; }); });
@@ -485,7 +485,7 @@
     const d = el.dataset, list = DEF ? getP(data, DEF.key) : [];
     try {
       if (d.v) return go(d.v);
-      if (d.xup) { const x = XYROS.find((y) => y[0] === d.xup); log('pidió ' + x[1]); open('https://wa.me/51936449066?text=' + encodeURIComponent(`Hola XyroStudio, quiero sumar ${x[1]} a Santos Strength.`), '_blank', 'noopener'); return toast('Te contactamos pronto ✓'); }
+      if (d.xup) { const x = XYROS.find((y) => y[0] === d.xup); log('pidió ' + x[1]); open('https://discord.gg/R39CwRC2bP?text=' + encodeURIComponent(`Hola XyroStudio, quiero sumar ${x[1]} a Santos Strength.`), '_blank', 'noopener'); return toast('Te contactamos pronto ✓'); }
       if ('xapps' in d) return abrirXyroApps();
       if ('logout' in d) return logout();
       if (el.id === 'menuBtn') return $('#side').classList.toggle('open');
