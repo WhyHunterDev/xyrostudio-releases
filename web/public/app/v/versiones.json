@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261119-0146",
+  "fecha": "2026-11-19 01:46",
+  "titulo": "Pagos por ticket",
+  "notas": "Pagos por ticket",
+  "cambios": [
+   "Ya no se muestran las cuentas de XyroStudio",
+   "Para pagar el plan, pides los datos por ticket o Discord"
+  ],
+  "requiere": "SQL 110"
+ },
+ {
   "id": "20261118-2127",
   "fecha": "2026-11-18 21:27",
   "titulo": "Pedidos para recoger",

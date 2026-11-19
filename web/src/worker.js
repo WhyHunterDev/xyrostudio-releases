@@ -698,7 +698,7 @@ async function xyroPago(req, env) {
   const H = { apikey: env.SB_KEY, authorization: "Bearer " + token, "content-type": "application/json" };
   const cfg = await fetch(env.SB_URL + "/rest/v1/xa_xyro_cobro?id=eq.1&select=*", { headers: H }).then(r => r.ok ? r.json() : null).catch(() => null);
   if (!cfg) return json({ error: "Inicia sesión" }, 401);
-  const C = cfg[0] || {};
+  const C = (await rpcAnon(env, "xy_cobro_privado", { p_clave: env.WA_CLAVE })) || cfg[0] || {};   // privado (SQL 110): nadie más lo lee
   let d = { es_pago: false, monto: "", operacion: "", fecha: "", metodo: "", destinatario: "", destino_ok: true, lectura: "sin leer" };
   try {
     const im = await fetch(foto);
