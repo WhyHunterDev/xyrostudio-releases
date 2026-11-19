@@ -689,16 +689,22 @@ V.discord=async ()=>{
   ${paso(enS,'2. Meter el bot a tu servidor',enS?'En: <b>'+E.servidores.map(x=>esc(x.nombre)).join(', ')+'</b>':E.invitar?`<a class="btn btn-p" href="${esc(E.invitar)}" target="_blank" rel="noopener">➕ Invitar al bot a mi servidor</a>`:'Primero el paso 1.')}
   ${paso(!!cfg.armado,'3. Armar el servidor',cfg.armado?'Último armado: '+f(cfg.armado):'Crea roles, categorías, canales, reglas y el panel de tickets.')}
   ${E.error&&E.token?`<div class="note">⚠️ ${esc(E.error)}</div>`:''}
-  ${enS?`<form class="form" onsubmit="return false"><label class="full"><span><input id="dcar" type="checkbox" checked style="width:auto"> Esconder los canales viejos en «📦 ARCHIVO» (no se borra nada; solo el equipo los ve)</span></label></form><button class="btn btn-p" data-dcarmar>🛠️ ${cfg.armado?'Actualizar':'Armar'} mi Discord</button><div id="dclog" class="d" style="margin-top:8px"></div>`:''}
+  ${enS?`<form class="form" onsubmit="return false"><label class="full"><span><input id="dcar" type="checkbox" style="width:auto"> 🗑️ Borrar todo lo del Discord anterior (canales, categorías y roles viejos). Se guarda el canal de la invitación de la web y los tickets abiertos.</span></label></form><button class="btn btn-p" data-dcarmar>🛠️ ${cfg.armado?'Actualizar':'Armar'} mi Discord</button><div id="dclog" class="d" style="margin-top:8px"></div>`:''}
  </div>
  <div class="panel"><h3>🎫 Tickets de Discord · ${(+G.vinculados||0).toLocaleString('es-PE')} cuentas vinculadas</h3><p class="d">Se atienden en Discord. Aquí ves el resumen y quién es cada persona.</p>
   ${T.length?`<div class="tbl"><table><tr><th>#</th><th>Persona</th><th>Tema</th><th>Estado</th><th>Fecha</th></tr>${T.map(t=>`<tr><td>${t.num}</td><td>${esc(t.usuario||'')}${t.persona?'<br><small style="color:var(--mu)">'+esc(t.persona)+'</small>':'<br><small style="color:var(--mu)">sin vincular</small>'}</td><td>${esc(t.tipo||'')}<br><small style="color:var(--mu)">${esc(t.texto||'')}</small></td><td>${t.estado==='abierto'?(t.canal&&cfg.guild?`<a href="https://discord.com/channels/${esc(cfg.guild)}/${esc(t.canal)}" target="_blank" rel="noopener">🟢 Abierto</a>`:'🟢 Abierto'):'Cerrado'+(t.cerro?' · '+esc(t.cerro):'')}</td><td>${f(t.creado)}</td></tr>`).join('')}</table></div>`:'<p class="d">Aún no hay tickets.</p>'}
  </div>`};
-document.addEventListener('click',async e=>{const t=e.target.closest('[data-dcarmar]');if(!t||!me)return;e.preventDefault();t.disabled=true;t.textContent='Armando… (puede tardar 1 minuto)';
- try{const{data:ss}=await sb.auth.getSession();const r=await fetch('/api/discord/armar',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+(ss&&ss.session?ss.session.access_token:'')},body:JSON.stringify({archivar:$('#dcar').checked})});const j=await r.json();
-  if(j.error==='invitar'){toast('Primero invita al bot a tu servidor');return go('discord')}if(j.error)throw new Error(j.error);touch('Armó el Discord de Xyro');toast('✅ Discord listo: '+(j.cambios||[]).length+' cambios');
-  $('#dclog').innerHTML=(j.cambios||[]).map(x=>'• '+esc(x)).join('<br>')||'Todo ya estaba al día.';t.textContent='✅ Listo';setTimeout(()=>go('discord'),4000)}
- catch(err){toast(String(err.message||err));t.disabled=false;t.textContent='🛠️ Reintentar'}});
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-dcarmar]');if(!t||!me)return;e.preventDefault();
+ const borrar=$('#dcar').checked;if(borrar&&!confirm('¿Borrar TODOS los canales, categorías y roles viejos del Discord? No se puede deshacer.'))return;
+ t.disabled=true;const L=$('#dclog'),todo=[],pinta=x=>{L.innerHTML=todo.slice(-12).map(y=>'• '+esc(y)).join('<br>')+(x?'<br><b>'+esc(x)+'</b>':'')};
+ const P=async paso=>{const{data:ss}=await sb.auth.getSession();const r=await fetch('/api/discord/armar',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+(ss&&ss.session?ss.session.access_token:'')},body:JSON.stringify({paso})});const j=await r.json();
+  if(j.error==='invitar'){const er=new Error('invitar');throw er}if(j.error)throw new Error(j.error);todo.push(...(j.cambios||[]));return j};
+ try{t.textContent='1/4 · Canales y roles…';pinta();await P('base');
+  if(borrar){for(let i=0;i<20;i++){t.textContent='2/4 · Borrando lo viejo…';pinta();const j=await P('limpiar');if(!j.quedan)break}}
+  t.textContent='3/4 · Banners y mensajes…';pinta();await P('mensajes');
+  t.textContent='4/4 · Nombre e ícono…';pinta();await P('servidor');
+  touch('Armó el Discord de Xyro');toast('✅ Discord listo');pinta('✅ Listo ('+todo.length+' cambios)');t.textContent='✅ Listo';setTimeout(()=>go('discord'),5000)}
+ catch(err){if(err.message==='invitar'){toast('Primero invita al bot a tu servidor');return go('discord')}toast(String(err.message||err));pinta('⚠️ '+(err.message||err));t.disabled=false;t.textContent='🛠️ Reintentar'}});
 V.retos=async ()=>{
  H('Puntos y retos','Crea retos (la gente compra y gana puntos), campañas de puntos x2 y regala puntos globales a una persona por su ID.');
  $('#acts').innerHTML='<button class="btn btn-p" data-v="retos">↻ Actualizar</button>';
