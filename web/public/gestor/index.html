@@ -391,7 +391,11 @@ function side(){
     `<div class="me"><b>${esc(me.nombre)}</b><small>${esc(ROL_NOMBRE[me.rol]||me.rol)} · ${esc(me.email)}</small><button class="btn btn-g btn-sm" data-logout style="width:100%">Cerrar sesión</button></div>`;
 }
 async function go(v){ document.querySelectorAll('body>.vmenu').forEach(m=>m.remove()); if(recovery)v='cuenta'; if(!puede(v))v=NAV.flatMap(([,it])=>it).map(([id])=>id).find(id=>puede(id))||'cuenta'; if(v!==view)editing=null; view=v; side(); $('#side').classList.remove('open'); $('#acts').innerHTML=''; $('#view').innerHTML=await V[v](); scrollTo(0,0); if($('#nfBox'))nfCargar().catch(()=>{}); }
-async function start(){ show('app'); setTimeout(tkCuenta,1500); setTimeout(pdCuenta,2500); setTimeout(xgCuenta,3000); setTimeout(mxCuenta,3500); setTimeout(grCuenta,4000); setTimeout(pgCuenta,4500); setTimeout(vfCuenta,5000); setInterval(vfCuenta,300000); setInterval(pgCuenta,120000); setInterval(tkCuenta,120000); setInterval(xgCuenta,300000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
+/* Ley 29733: capturas de pago de Mi Xyro (mi/<id>/pago-*) se borran solas a los 90 días (SQL 111). Corre 1 vez al día al abrir el Panel. */
+async function capLimpia(){try{const k='cap-limpia',hoy=new Date().toDateString();if(localStorage.getItem(k)===hoy)return;
+ for(let i=0;i<10;i++){const{data,error}=await sb.rpc('xy_capturas_viejas',{p_dias:90});if(error||!data||!data.length)break;const r=await sb.storage.from('medios').remove(data);if(r.error)break}
+ localStorage.setItem(k,hoy)}catch(_){}}
+async function start(){ show('app'); setTimeout(capLimpia,8000); setTimeout(tkCuenta,1500); setTimeout(pdCuenta,2500); setTimeout(xgCuenta,3000); setTimeout(mxCuenta,3500); setTimeout(grCuenta,4000); setTimeout(pgCuenta,4500); setTimeout(vfCuenta,5000); setInterval(vfCuenta,300000); setInterval(pgCuenta,120000); setInterval(tkCuenta,120000); setInterval(xgCuenta,300000); try{await cargar();}catch(ex){toast('No pude cargar los clientes: '+ex.message);} go(recovery?'cuenta':'resumen'); }
 
 const H=(t,s)=>{$('#h').innerHTML=`<div><h1>${esc(t)}</h1>${s?`<p class="sub" style="margin:4px 0 0">${esc(s)}</p>`:''}</div>`;};
 
