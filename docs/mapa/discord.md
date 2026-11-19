@@ -5,3 +5,8 @@
 - Tickets: botón → formulario → canal privado `🎫┃0007-usuario` (persona + Equipo) con ficha de la cuenta vinculada (`xy_discord_ficha_de`). «🔒 Cerrar» → conversación en .txt a registro-tickets y borra el canal. 1 abierto por persona, 5/día.
 - Vincular: Mi Xyro Perfil → «💬 Comunidad Xyro en Discord» (`dcAbrir`) → código de 6 letras (10 min) → en Discord «🔗 Vincular mi cuenta Xyro» o `/vincular`. Da roles según cuenta (negocios, Xyro+, gestor).
 - Gestor: vista «🎮 Discord» (pasos, botón Armar/Actualizar, tickets).
+
+## Premio por vincular (SQL 114, 2026-11-19)
+- `xy_discord_vincular` da XyroPoints UNA vez (tabla `xy_discord_premios`, única por cuenta y por discord_id; reason `DISCORD_LINK`). Monto `system_settings.discord_premio.puntos` (20). Si se cambia, ajustar el texto «gana 20» de `dcCard()` y del botón en Perfil de Mi Xyro.
+- Mi Xyro: tarjeta en Inicio `dcCard()` (se oculta con ✕ o al vincular, localStorage `mi-dc-ok`); `xy_discord_mio` devuelve `premio`/`premiado`.
+- Armar servidor ahora deja SOLO /vincular y /ticket: borra los comandos globales viejos de la app de videos (/planes, /dar-dias, /dar-videos, /usuario, /vincular viejo).

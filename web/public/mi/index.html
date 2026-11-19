@@ -677,7 +677,7 @@ function vInicioGen(){mkaLazy();const per=(D&&D.persona)||{},M=negs(),G=(D&&D.gu
  const f0=post;post=()=>{f0&&f0();xCardFx();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
  const it=feed(),pr=promosFeed();
  return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${nomHTML(per.apodo||String(per.nombre||'').split(' ')[0]||'',(XST&&XST.actual&&estC()?XST.actual.color:''),estE(),'span')} 👋</h1>${titHTML(estT())}</div>${avatarHTML(per,'hav')}</div>
-  ${per.idn?xCard(per):''}${recCard()}${mkAvisosHTML(3)}
+  ${per.idn?xCard(per):''}${recCard()}${per.idn?dcCard():''}${mkAvisosHTML(3)}
   ${ptsHTML()}
   ${M.length?`<div class="qk"${M.length===1?' style="grid-template-columns:1fr"':''}>${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}</div>`:''}
   ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}${av}<div class="g">${misPlanesProHTML()}${it.join('')}${pr}
@@ -974,7 +974,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
-  <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord · ideas, ayuda y promos</button>
+  <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord${ls.g('mi-dc-ok')?' · ideas, ayuda y promos':' · vincula y gana 20 XyroPoints 🎁'}</button>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
@@ -3124,11 +3124,15 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
 {const ir=P.get('ir')||'';if(/^\/pedir\/\?s=[a-z0-9_-]+/.test(ir))try{sessionStorage.setItem('mi-ir',ir)}catch(_){}
  if(/^[A-Za-z0-9]{40}$/.test(P.get('rc')||''))setTimeout(()=>toast('🛍️ Este QR es de un pedido para recoger: lo escanea el negocio desde «Pedidos para recoger»'),1500)}
 /* ===== Discord de Xyro (SQL 105): comunidad, tickets y vincular la cuenta con un código de 6 letras ===== */
+/* Premio por vincular (SQL 114): aviso en Inicio hasta vincular o cerrarlo */
+function dcCard(){if(ls.g('mi-dc-ok'))return'';return`<div class="card" style="border-color:#5865f288;background:#5865f214"><div class="row"><span style="font-size:26px">🎮</span><div class="sp"><h3>Vincula tu Discord y gana 20 XyroPoints</h3><p class="mu sm">Un toque: te damos un código y lo pegas en el Discord de Xyro. Solo una vez por cuenta.</p></div><button class="btn l" data-dcno aria-label="Cerrar" style="width:auto;padding:6px 10px">✕</button></div><button class="btn p" data-dcabrir>🎁 Vincular y ganar</button></div>`}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-dcno]');if(!b)return;ls.s('mi-dc-ok','1');b.closest('.card').remove()});
 async function dcAbrir(){vib();if(!D)return window.open('https://discord.gg/R39CwRC2bP','_blank','noopener');let M;
- try{M=DEMO?{vinculado:false,invitacion:'https://discord.gg/R39CwRC2bP'}:await rpc('xy_discord_mio')}catch(_){M={vinculado:false,invitacion:'https://discord.gg/R39CwRC2bP',off:1}}
+ try{M=DEMO?{vinculado:false,premio:20,invitacion:'https://discord.gg/R39CwRC2bP'}:await rpc('xy_discord_mio')}catch(_){M={vinculado:false,invitacion:'https://discord.gg/R39CwRC2bP',off:1}}
+ if(M.vinculado||M.premiado)ls.s('mi-dc-ok','1')
  const inv=M.invitacion||'https://discord.gg/R39CwRC2bP';
  hoja(`<h2>💬 Comunidad Xyro en Discord</h2><p class="mu sm">Anuncios, promos, eventos, ideas y dudas. Si necesitas ayuda, abre un ticket privado con el equipo.</p>
-  ${M.vinculado?`<div class="card" style="border-color:#22c55e"><b>✅ Cuenta vinculada</b><span class="mu sm">Discord: ${esc(M.usuario||'')}. En soporte ya sabemos quién eres.</span></div>`:M.off?'':`<div class="card"><b>🔗 Vincula tu cuenta</b><span class="mu sm">Así, cuando abras un ticket, el equipo ya sabe quién eres y cuáles son tus negocios. Te damos un código y lo pegas en Discord.</span><button class="btn p" id="dcv">Obtener mi código</button></div>`}
+  ${M.vinculado?`<div class="card" style="border-color:#22c55e"><b>✅ Cuenta vinculada</b><span class="mu sm">Discord: ${esc(M.usuario||'')}. En soporte ya sabemos quién eres.</span></div>`:M.off?'':`<div class="card"><b>🔗 Vincula tu cuenta${M.premio>0&&!M.premiado?` y gana ${M.premio} XyroPoints 🎁`:''}</b><span class="mu sm">Así, cuando abras un ticket, el equipo ya sabe quién eres y cuáles son tus negocios. Te damos un código y lo pegas en Discord.</span><button class="btn p" id="dcv">Obtener mi código</button></div>`}
   <a class="btn ${M.vinculado||M.off?'p':''}" href="${esc(inv)}" target="_blank" rel="noopener" style="text-decoration:none">Abrir el Discord de Xyro</a>
   ${M.vinculado?'<button class="btn l" id="dcd">Desvincular mi Discord</button>':''}<button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
   const v=o.querySelector('#dcv');v&&(v.onclick=async()=>{let c;try{c=DEMO?{codigo:'K7P2QX'}:await rpc('xy_discord_codigo')}catch(e){return toast(errDe(e))}close();
