@@ -110,3 +110,7 @@ Monetización (SQL 98): 📣 avisos a seguidores (`xy_avisos_neg`, `xy_aviso_inf
 - Tablas `xy_uso` (xp_uso, racha, nivel_visto, pais/ciudad/continente) y `xy_xp_dia`. Ubicación: Worker `/api/geo` (cf.country/city) o manual `xy_mi_ubicacion`.
 - Ranking `xy_ranking_xyro(alcance ciudad|pais|continente|mundo, periodo semana|mes|siempre)` + `grupos` (ciudades/países que más compiten). Front: `nvCardHTML`, `nivelAbrir`, `nivelFx` (animación de nivel/rango), `rachaFx`, `rankAbrir` (podio). Si el SQL no está, cae a `rankAbrir1`/`estiloAbrir1`.
 - Cosméticos v2: setting `cosmeticos` (frame/color/efecto/titulo con regla libre|plus|ruleta|rango:x|racha:n|fundador), `xy_estilo2`/`xy_estilo_set2`, front `FRM0`, `CO2`, `EFN`, `TIN`, `nomHTML`, `titHTML`. `confeti(f)` en canvas y `celebra({e,t,s,oro})` al pagar/canjear.
+
+## Marketplace: avisos y stock (SQL 108, 2026-11-19)
+- Avisos (solo front): `mkaCarga` lee tratos (orders con listing_id) + `p2p_messages` del otro; «nuevo» si hay mensaje/pago/pedido posterior a `localStorage mk-v-<id>`. Sale en Avisos e Inicio (`mkAvisosHTML`), suma al punto de Avisos y avisa con toast cada 20 s. Abrir el trato lo marca visto.
+- Stock: `marketplace_listings.stock` (0–9999) y `orders.p2p_qty`. `xy_create_p2p_order2(listing, cantidad)`; trigger `xy_mk_stock` recalcula ACTIVE/RESERVED/SOLD según stock y tratos abiertos; SOLD descuenta unidades; en 0 = SOLD (se quita sola). Subir stock la republica.
