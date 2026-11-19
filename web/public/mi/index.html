@@ -3139,12 +3139,12 @@ let INVT=0;
 async function invRef(){const r=ls.g('mi-ref');if(!r||INVT||DEMO||!D)return;INVT=1;try{const x=await rpc('xy_invitar_usar',{p_idn:+r});ls.s('mi-ref',null);if(x&&x.ok)setTimeout(()=>{confeti();toast(`🎉 Te invitó ${x.invitador}: con tu primera compra ganas ${nfmt(x.puntos)} puntos`)},800)}catch(_){}}
 async function invitarAbrir(){vib();if(!D)return toast('Inicia sesión para invitar');let I;try{I=await rpc('xy_invitar_info')}catch(e){return toast(errDe(e))}
  const url=HOME+'?ref='+I.idn,t=`Te invito a Mi Xyro: promos y puntos en negocios cerca de ti. Con tu primera compra ganas ${I.invitado} puntos 🎁 `+url,L=I.lista||[];
- hoja(`<h2>👥 Invita a tus amigos</h2><p class="mu sm">Cuando tu amigo haga su <b>primera compra</b> con Mi Xyro, tú ganas <b>${nfmt(I.invitador)} puntos</b> y él <b>${nfmt(I.invitado)}</b>. Sirven en cualquier negocio Xyro.</p>
+ hoja(`<h2>👥 Invita a tus amigos</h2>${+I.registro?`<p class="sm" style="margin:0">🎁 <b>+${nfmt(I.registro)} puntos</b> por cada amigo que solo cree su cuenta con tu enlace.</p>`:''}<p class="mu sm">Y cuando haga su <b>primera compra</b> con Mi Xyro, tú ganas <b>${nfmt(I.invitador)} puntos</b> y él <b>${nfmt(I.invitado)}</b>. Sirven en cualquier negocio Xyro.</p>
   ${I.me_invito&&!I.me_invito.premiado?`<p class="pill" style="background:#7c5cff22;color:var(--a)">🎉 Te invitó ${esc(I.me_invito.nombre)}: con tu 1.ª compra ganas ${nfmt(I.invitado)}</p>`:''}
   <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;gap:4px"><div><b style="font-size:24px">${nfmt(I.invitados)}</b><p class="mu xs" style="margin:0">invitados</p></div><div><b style="font-size:24px">${nfmt(I.compraron)}</b><p class="mu xs" style="margin:0">ya compraron</p></div><div><b style="font-size:24px;color:var(--a)">+${nfmt(I.ganados)}</b><p class="mu xs" style="margin:0">puntos</p></div></div>
   <a class="btn p" href="https://wa.me/?text=${encodeURIComponent(t)}" target="_blank" rel="noopener" style="text-decoration:none">📲 Invitar por WhatsApp</a>
   <button class="btn" id="ivc">📋 Copiar mi enlace</button>
-  ${L.length?`<div>${L.slice(0,10).map(x=>`<div class="li"><span class="dot">${x.compro?'✓':'⏳'}</span><span class="sp sm"><b>${esc(x.nombre)}</b><br><span class="mu xs">${x.compro?'Ya compró · ganaste tus puntos':'Falta su primera compra'}</span></span></div>`).join('')}</div>`:''}
+  ${L.length?`<div>${L.slice(0,10).map(x=>`<div class="li"><span class="dot">${x.compro?'✓':'⏳'}</span><span class="sp sm"><b>${esc(x.nombre)}</b><br><span class="mu xs">${x.compro?'Ya compró · ganaste tus puntos':(+x.registro?`+${nfmt(x.registro)} por registrarse · falta su primera compra`:'Falta su primera compra')}</span></span></div>`).join('')}</div>`:''}
   <p class="mu xs">Los puntos llegan cuando la compra de tu amigo pasa la revisión (unos 7 días). Cuentas falsas no suman.</p><button class="btn l" data-x>Cerrar</button>`,o=>{
   o.querySelector('#ivc').onclick=async()=>{try{if(navigator.share)return await navigator.share({title:'Mi Xyro',text:t})}catch(_){return}try{await navigator.clipboard.writeText(url);toast('📋 Enlace copiado')}catch(_){toast(url)}}})}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-xy="invitar"]');if(!b)return;e.preventDefault();document.querySelectorAll('.ov').forEach(o=>o.contains(b)&&o.remove());invitarAbrir()});
@@ -3257,7 +3257,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-prmneg]');
 
 /* --- Demo --- */
 {const d5=demoRpc;demoRpc=async function(f,a){const Z=window._PRZ||(window._PRZ={L:[{id:'pz1',nombre:'Café americano gratis',detalle:'Tamaño mediano',pts_local:300,pts_global:450,activo:true},{id:'pz2',nombre:'S/ 10 de descuento',pts_local:600,pts_global:null,activo:true}],loc:1240,glo:684,C:[],pe:null});
- if(f==='xy_invitar_info')return{idn:(D&&D.persona&&D.persona.idn)||48203716,invitador:100,invitado:50,invitados:3,compraron:1,ganados:100,me_invito:null,lista:[{nombre:'Lucía',compro:true},{nombre:'Marco',compro:false},{nombre:'Andrea',compro:false}]};
+ if(f==='xy_invitar_info')return{idn:(D&&D.persona&&D.persona.idn)||48203716,invitador:100,invitado:50,registro:5,invitados:3,compraron:1,ganados:100,me_invito:null,lista:[{nombre:'Lucía',compro:true},{nombre:'Marco',compro:false},{nombre:'Andrea',compro:false}]};
  if(f==='xy_invitar_usar')return{ok:false};
  if(f==='xy_premios')return{premios:Z.L.filter(x=>x.activo),local:Z.loc,global:Z.glo,pendiente:Z.pe};
  if(f==='xy_canje_pedir'){const p=Z.L.find(x=>x.id===a.p_premio),t=a.p_tipo,c=t==='LOCAL'?p.pts_local:p.pts_global;Z.pe={id:'cj1',codigo:'482915',premio:p.nombre,puntos:c,tipo:t,vence:new Date(Date.now()+9e5).toISOString(),t0:Date.now()};return Z.pe}
