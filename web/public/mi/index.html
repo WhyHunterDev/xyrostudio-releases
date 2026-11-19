@@ -2558,19 +2558,18 @@ async function subirCaptura(fl){if(!/^image\//.test(fl.type))throw new Error('Su
  const{data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Inicia sesión');
  const path='mi/'+session.user.id+'/pago-'+Date.now()+'-'+rnd()+'.jpg';const{error}=await sb.storage.from('medios').upload(path,b,{contentType:'image/jpeg'});if(error)throw error;
  return sb.storage.from('medios').getPublicUrl(path).data.publicUrl}
-async function pagoTicket(o){const C=await cobCarga(),pe=String(o.moneda||'PEN').toUpperCase()==='PEN',us=+o.usd>0?(Math.ceil(+o.usd*100)/100).toFixed(2):'';let foto='';
+async function pagoTicket(o){const C={},pe=String(o.moneda||'PEN').toUpperCase()==='PEN',us=+o.usd>0?(Math.ceil(+o.usd*100)/100).toFixed(2):'';let foto='';
  const cp=(l,v)=>v?`<div class="row" style="padding:6px 0"><span class="sp"><span class="mu xs">${l}</span><br><b>${esc(v)}</b></span><button type="button" class="btn s2" data-cp="${esc(v)}" style="flex:0 0 auto;width:auto">📋</button></div>`:'';
  hoja(`<h2>${esc(o.titulo)}</h2>${o.detalle||''}
   <div class="card" style="text-align:center;padding:14px"><span class="mu xs">TOTAL A PAGAR</span>${!pe&&us?`<b style="font-size:32px">US$ ${us}</b><span class="mu xs">≈ ${moneyX(o.monto,o.moneda)} · paga exacto en dólares (USDT)</span>`:`<b style="font-size:32px">${moneyX(o.monto,o.moneda)}</b>${us&&C.binance?`<span class="mu xs">Desde otro país: <b>US$ ${us}</b> por Binance</span>`:''}`}</div>
-  <div class="card" style="gap:2px"><p class="mu xs" style="font-weight:700">1 · PAGA A XYROSTUDIO</p>${C.titular?`<p class="sm">Titular: <b>${esc(C.titular)}</b></p>`:''}
-   ${pe?cp('Yape',C.yape)+cp('Plin',C.plin):''}${pe||!C.binance?cp(C.banco?'Cuenta '+C.banco:'Cuenta',C.cuenta)+cp('CCI (desde otro banco)',C.cci):''}${cp('Binance Pay ID'+(pe?' (desde otro país)':''),C.binance)}
-   ${!pe?(C.binance?'<p class="mu xs">Desde fuera de Perú paga con <b>Binance Pay</b> exactamente '+(us?'<b>US$ '+us+'</b> en USDT':'el equivalente en dólares (USDT)')+'. En el N.º de operación pon el ID de la orden de Binance.</p>':'<p class="mu xs">¿Estás fuera de Perú? Escribe en el N.º de operación cómo puedes pagar y te respondemos.</p>'):''}${C.nota?`<p class="mu xs">${esc(C.nota)}</p>`:''}</div>
+  <div class="card" style="gap:8px"><p class="mu xs" style="font-weight:700">1 · PIDE LOS DATOS PARA PAGAR</p><p class="sm" style="margin:0">Por seguridad no mostramos cuentas aquí. Abre un ticket y te pasamos los datos por privado${pe?'':' (desde otro país, también por Binance)'}.</p>
+   <button type="button" class="btn" id="tkch">💬 Pedir por el chat de Xyro</button><a class="btn" href="https://discord.gg/R39CwRC2bP" target="_blank" rel="noopener" style="text-decoration:none">🎮 Abrir ticket en Discord</a></div>
   <div class="card" style="gap:8px"><p class="mu xs" style="font-weight:700">2 · MANDA TU TICKET DE PAGO</p>
    <label>N.º de operación<input id="tkr" maxlength="40" placeholder="Sale en tu Yape o banco"></label>
    <input id="tkf" type="file" accept="image/*" hidden><button type="button" class="btn" id="tkb">📎 Subir captura del pago</button><div id="tkp"></div></div>
   <div class="msg" id="tkm"></div><button class="btn p" id="tks">Enviar ticket de pago</button><p class="mu xs" style="text-align:center">XyroStudio revisa tu pago y lo activa. Ves el estado en Perfil → «Mis pagos».</p><button class="btn l" data-x>Cancelar</button>`,(el,close)=>{
   const q=s=>el.querySelector(s),say=t=>{const m=q('#tkm');m.textContent=t;m.className='msg on'};
-  el.querySelectorAll('[data-cp]').forEach(b=>b.onclick=()=>{try{navigator.clipboard.writeText(b.dataset.cp.replace(/\s/g,''));toast('📋 Copiado')}catch(_){toast(b.dataset.cp)}});
+  q('#tkch').onclick=()=>{const t=`Hola 👋 Quiero pagar ${o.titulo} (${moneyX(o.monto,o.moneda)}). ¿Me pasan los datos para pagar?`;document.querySelectorAll('.ov').forEach(x=>x.remove());ayuda();setTimeout(()=>{const i=document.getElementById('aymi');if(i){i.value=t;i.focus()}},350)};
   q('#tkb').onclick=()=>q('#tkf').click();
   q('#tkf').onchange=async()=>{const f=q('#tkf').files[0];if(!f)return;q('#tkb').disabled=true;q('#tkb').textContent='Subiendo…';
    try{foto=await subirCaptura(f);q('#tkp').innerHTML=`<p class="sm">✅ Captura lista</p>`;q('#tkb').textContent='📎 Cambiar captura'}catch(e){say(errDe(e));q('#tkb').textContent='📎 Subir captura del pago'}q('#tkb').disabled=false};
