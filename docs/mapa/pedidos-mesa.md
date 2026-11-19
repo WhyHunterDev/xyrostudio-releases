@@ -19,3 +19,7 @@ Detalle movido desde CLAUDE.md (2026-11-15). Lee solo la parte que necesitas (`g
 - Anti ratas: 15 min para subir pago, 1 sin pagar por negocio, 3 activos máx, 3 «no vino» en 60 días = solo mesa, N.º de operación único, QR solo lo acepta el equipo del negocio (`xa_recojo_sid` = `xy_equipo_sitio` o dueño gratis).
 - Negocio: Mi Xyro `recojoNeg(slug,cli)` (botón en carta gratis `data-recneg`, Más/Cafetín `data-recnegn`) y Xyro Apps `#qk` «🛍️ Recojo» (`recojoAbrir`, versión con SQL 104). Apagar: `xa_recojo_config` (`mesas.recojo=false`).
 - Persona: tarjeta en Inicio de Mi Xyro (`recCard`, `xa_recojo_mios`).
+
+## Billeteras por país (SQL 113, 2026-11-19)
+- `mesas.yape` = {on, metodo, num, titular, qr}: metodo = Yape, Plin, PIX, Nequi, Mercado Pago, Zelle, Bizum, Transferencia u Otro. Yape/Plin = 9 dígitos; otros = 3-80 caracteres (`xa_bil_ok`).
+- Lista por país: `BILS` en Mi Xyro (gcYape) y Xyro Apps (mpYapeCfg). /pedir/ muestra `BN()` en vez de «Yape».
