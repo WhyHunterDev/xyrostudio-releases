@@ -10,3 +10,8 @@
 - `xy_discord_vincular` da XyroPoints UNA vez (tabla `xy_discord_premios`, única por cuenta y por discord_id; reason `DISCORD_LINK`). Monto `system_settings.discord_premio.puntos` (20). Si se cambia, ajustar el texto «gana 20» de `dcCard()` y del botón en Perfil de Mi Xyro.
 - Mi Xyro: tarjeta en Inicio `dcCard()` (se oculta con ✕ o al vincular, localStorage `mi-dc-ok`); `xy_discord_mio` devuelve `premio`/`premiado`.
 - Armar servidor ahora deja SOLO /vincular y /ticket: borra los comandos globales viejos de la app de videos (/planes, /dar-dias, /dar-videos, /usuario, /vincular viejo).
+
+## Comandos (SQL 115, 2026-11-19)
+- `DC_CMDS` en el Worker: /vincular, /ticket, /mi-cuenta (ficha + XyroPoints/LocalPoints, privado) y /usuario (equipo: @miembro o ID Mi Xyro → ficha, puntos, últimos movimientos, tickets; `default_member_permissions` 8192 + revisa rol equipo o admin). Nunca correo/celular/datos de cobro.
+- `dcComandos()` corre solo en la 1.ª interacción de cada instancia del Worker (y en Armar servidor): pone los comandos del servidor, borra los globales viejos de la app de videos y da «Gestionar mensajes» al rol Equipo Xyro.
+- SQL: `xy_discord_cuenta(p_clave, discord_id)`, `xy_discord_staff_ver(p_clave, discord_id, idn)`, interna `xy_discord_datos(uid, staff)`.

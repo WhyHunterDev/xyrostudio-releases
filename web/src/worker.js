@@ -798,6 +798,31 @@ const fichaEmbed = f => f ? {
     { name: `Negocios (${(f.negocios || []).length})`, value: (f.negocios || []).slice(0, 8).map(n => `• **${n.nombre}** · ${n.rubro || "—"} · plan ${n.plan || "FREE"}${n.verificado ? " · ✓" : ""}\n  xyrostudio.net/mi/?n=${n.slug}`).join("\n").slice(0, 1000) || "—" }],
 } : { title: "⚠️ Cuenta no vinculada", color: 0xf59e0b, description: "Para atenderte más rápido, vincula tu cuenta: en Mi Xyro ve a **Perfil → Discord**, copia tu código y toca **🔗 Vincular mi cuenta Xyro** aquí abajo." };
 
+const MOTIVO = { PURCHASE: "Compra", INVITE_SIGNUP: "Amigo invitado", INVITE: "Invitar amigos", DISCORD_LINK: "Vincular Discord", SPIN: "Ruleta", REDEEM: "Canje", BOOST_SPEND: "Boost", RETO: "Reto", GESTOR: "Regalo de Xyro" };
+const ptsEmbed = (r, staff) => ({
+  title: "⭐ Puntos", color: 0x7c5cff,
+  fields: [{ name: "XyroPoints", value: String(r.xyro || 0), inline: true }, { name: "LocalPoints", value: String(r.local || 0), inline: true }, { name: "En espera", value: String(r.espera || 0), inline: true }]
+    .concat(staff ? [{ name: "Discord", value: String(r.discord || "—").slice(0, 60), inline: true }, { name: "Tickets", value: String(r.tickets || 0), inline: true }, { name: "Estado", value: r.bloqueado ? "⛔ Bloqueada" : "✅ Activa", inline: true },
+      { name: "Últimos movimientos", value: (r.movs || []).map(m => `${m.d > 0 ? "+" : ""}${m.d} ${m.b === "USER_LOCAL" ? "Local" : m.b === "USER_GLOBAL" ? "Xyro" : m.b} · ${MOTIVO[m.r] || m.r}${m.s !== "AVAILABLE" ? " (" + String(m.s).toLowerCase() + ")" : ""} · ${new Date(m.f).toLocaleDateString("es-PE", { timeZone: "America/Lima", day: "numeric", month: "short" })}`).join("\n").slice(0, 1000) || "—" }] : []),
+  footer: { text: staff ? "Solo tú ves esto · Xyro Staff" : "Solo tú ves esto · Mi Xyro" },
+});
+const DC_CMDS = [
+  { name: "vincular", description: "Vincula tu cuenta de Mi Xyro (y gana XyroPoints)", type: 1 },
+  { name: "ticket", description: "Abre un ticket de ayuda con el equipo de Xyro", type: 1 },
+  { name: "mi-cuenta", description: "Mira tu cuenta de Mi Xyro: ID, negocios y puntos (solo tú lo ves)", type: 1 },
+  { name: "usuario", description: "(Equipo) Ver la cuenta Xyro de una persona", type: 1, default_member_permissions: "8192",
+    options: [{ name: "miembro", description: "La persona en Discord", type: 6, required: false }, { name: "id", description: "O su ID de Mi Xyro (8 dígitos)", type: 4, required: false, min_value: 1 }] },
+];
+let DC_CMD_OK = false;
+async function dcComandos(env, app, guild) {   // deja SOLO los comandos de Xyro y borra los viejos de la app de videos (/planes, /dar-dias…)
+  await dc(env, "PUT", `/applications/${app.id}/guilds/${guild}/commands`, DC_CMDS);
+  await dc(env, "PUT", `/applications/${app.id}/commands`, []);
+  try {   // el rol «Equipo Xyro» necesita «Gestionar mensajes» para ver /usuario y moderar
+    const eq = ((await dcCfg(env)).roles || {}).equipo, rs = eq ? await dc(env, "GET", `/guilds/${guild}/roles`) : [], r = (rs || []).find(x => x.id === eq);
+    if (r && (BigInt(r.permissions) & PM) !== PM) await dc(env, "PATCH", `/guilds/${guild}/roles/${eq}`, { permissions: (BigInt(r.permissions) | PM).toString() });
+  } catch { }
+}
+
 async function dcRoles(env, cfg, uid, f) {
   const R = cfg.roles || {}, L = [R.cuenta, (f.negocios || []).length && R.negocio, f.plus && R.plus, f.equipo && R.equipo].filter(Boolean);
   for (const r of L) { try { await dc(env, "PUT", `/guilds/${cfg.guild}/members/${uid}/roles/${r}`); } catch { } }
@@ -814,7 +839,23 @@ async function dcInter(req, env, ctx) {
   const u = (i.member && i.member.user) || i.user || {}, cid = (i.data && i.data.custom_id) || "", app = await dcApp(env);
   const eph = (t, comp) => json({ type: 4, data: { content: t, flags: 64, components: comp || [] } });
   if (!i.guild_id) return eph("Escríbenos dentro del servidor de Xyro.");
+  if (!DC_CMD_OK && ctx) { DC_CMD_OK = true; ctx.waitUntil(dcComandos(env, app, i.guild_id).catch(() => { DC_CMD_OK = false; })); }
   if (i.type === 2) {
+    if (i.data.name === "mi-cuenta") {
+      const r = await rpcAnon(env, "xy_discord_cuenta", { p_clave: env.WA_CLAVE, p_discord_id: u.id }).catch(() => null);
+      if (!r || !r.vinculado) return json({ type: 4, data: { flags: 64, content: "Aún no vinculaste tu cuenta de Mi Xyro. Ve a **Mi Xyro → Perfil → Discord**, copia tu código y toca el botón (ganas XyroPoints 🎁).", components: [{ type: 1, components: [btnVincular] }] } });
+      return json({ type: 4, data: { flags: 64, embeds: [fichaEmbed(r.ficha), ptsEmbed(r)] } });
+    }
+    if (i.data.name === "usuario") {
+      const cfg = await dcCfg(env), m = i.member || {}, eq = cfg.roles && cfg.roles.equipo;
+      const staff = (eq && (m.roles || []).includes(eq)) || ((BigInt(m.permissions || "0") & 8n) === 8n);
+      if (!staff) return eph("Este comando es solo para el equipo de Xyro.");
+      const op = Object.fromEntries((i.data.options || []).map(o => [o.name, o.value]));
+      if (!op.miembro && !op.id) return eph("Elige a la persona (@miembro) o escribe su ID de Mi Xyro.");
+      const r = await rpcAnon(env, "xy_discord_staff_ver", { p_clave: env.WA_CLAVE, p_discord_id: op.miembro || null, p_idn: op.id || null }).catch(() => null);
+      if (!r || !r.encontrado) return eph(op.miembro ? `<@${op.miembro}> aún no vinculó su cuenta de Mi Xyro. Pídele que use **/vincular**.` : "No hay ninguna cuenta con ese ID.");
+      return json({ type: 4, data: { flags: 64, embeds: [fichaEmbed(r.ficha), ptsEmbed(r, true)], allowed_mentions: { parse: [] } } });
+    }
     if (i.data.name === "vincular") return modalVin();
     if (i.data.name === "ticket") return eph("¿En qué te ayudamos? Elige un tema y te abrimos un canal privado con el equipo:", btnsTicket());
   }
@@ -943,7 +984,7 @@ async function dcArmar(req, env) {
       const roles = await dc(env, "GET", `/guilds/${g}/roles`);
       for (const [k, nm, color, hoist] of DC_ROL) {
         let r = roles.find(x => x.id === (old.roles || {})[k]) || roles.find(x => x.name === nm);
-        if (!r) { r = await dc(env, "POST", `/guilds/${g}/roles`, { name: nm, color, hoist, mentionable: k === "equipo", permissions: "0" }); log.push("Rol " + nm); }
+        if (!r) { r = await dc(env, "POST", `/guilds/${g}/roles`, { name: nm, color, hoist, mentionable: k === "equipo", permissions: k === "equipo" ? ps(PM) : "0" }); log.push("Rol " + nm); }
         cfg.roles[k] = r.id;
       }
       const OW = dcOW(g, cfg.roles.equipo), chs = await dc(env, "GET", `/guilds/${g}/channels`);
@@ -1018,8 +1059,7 @@ async function dcArmar(req, env) {
       return json({ ok: true, cambios: log });
     }
     if (paso === "servidor") {
-      try { await dc(env, "PUT", `/applications/${app.id}/guilds/${g}/commands`, [{ name: "vincular", description: "Vincula tu cuenta de Mi Xyro", type: 1 }, { name: "ticket", description: "Abre un ticket de ayuda con el equipo de Xyro", type: 1 }]); log.push("Comandos /vincular y /ticket"); } catch (e) { log.push("Comandos: " + e.message); }
-      try { await dc(env, "PUT", `/applications/${app.id}/commands`, []); log.push("Comandos viejos (/planes, /dar-dias, /dar-videos, /usuario…) borrados"); } catch (e) { log.push("Comandos viejos: " + e.message); }
+      try { await dcComandos(env, app, g); DC_CMD_OK = true; log.push("Comandos /vincular /ticket /mi-cuenta /usuario (equipo); los viejos borrados"); } catch (e) { log.push("Comandos: " + e.message); }
       try { if (app.interactions_endpoint_url !== "https://xyrostudio.net/api/discord") { await dc(env, "PATCH", "/applications/@me", { interactions_endpoint_url: "https://xyrostudio.net/api/discord" }); DC_APP = null; log.push("Botones conectados a xyrostudio.net"); } } catch (e) { log.push("Botones: " + e.message); }
       const G = { name: "Xyro", system_channel_id: cfg.canales.general };
       try { const r = await env.ASSETS.fetch(new Request("https://xyrostudio.net/img/discord/icono.png")); if (r.ok) G.icon = "data:image/png;base64," + b64(await r.arrayBuffer()); } catch { }
