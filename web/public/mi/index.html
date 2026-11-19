@@ -1136,7 +1136,7 @@ ${dg?'':`  <label>Dirección<input id="ea" maxlength="150" value="${esc(se.direc
   <div style="display:grid;gap:8px;grid-template-columns:1fr 1fr"><label>Distrito<input id="eds" maxlength="60" value="${esc(se.distrito||'')}" placeholder="Miraflores"></label><label>Google Maps <span class="mu xs">(opcional)</span><input id="em" maxlength="300" value="${esc(se.maps||'')}" placeholder="https://maps.app.goo.gl/…"></label></div>
   <button type="button" class="btn s2" id="egeo">📍 ${se.lat?'Ubicación guardada · actualizar':'Marcar mi ubicación exacta (estoy en el local)'}</button>
   <label>Horario <span class="mu xs">(una línea por día o grupo)</span><textarea id="eh" rows="3" placeholder="Lunes a sábado: 7 am – 9 pm&#10;Domingos: 8 am – 1 pm">${esc((se.horario||[]).map(h=>Array.isArray(h)?h.filter(Boolean).join(': '):h).join('\n'))}</textarea></label>`}
-  <div class="msg" id="emg"></div><button class="btn p" id="egb">Guardar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  <div class="msg" id="emg"></div><button class="btn p" id="egb">Guardar</button><button class="btn l" data-x>Cancelar</button>${g.estado==='pago'?'':`<button class="btn l" data-negdel="${esc(g.slug)}" data-nom="${esc(g.nombre||'')}" style="color:#ef4444;margin-top:10px">🗑️ Eliminar mi negocio</button>`}`,(o,close)=>{
   const q=s=>o.querySelector(s),m=q('#emg'),say=t=>{m.textContent=t;m.className='msg on'};let geo=se.lat?{lat:+se.lat,lng:+se.lng}:null;
   const rg=RUBG.find(r=>r[0]===g.rubro)||RUBG[RUBG.length-1],vv=s=>{const e=q(s);return e?e.value.trim():''};
   const prev=()=>{const lg=F.logo||g.logo,cv=F.portada||pf.portada,nm=vv('#en')||'Tu negocio',ds=vv('#ed'),di=vv('#eds'),h1=(vv('#eh').split('\n')[0]||''),rs=[vv('#ei')&&'📸',vv('#ek')&&'🎵',vv('#ef')&&'👍'].filter(Boolean).join(' ');
@@ -2861,6 +2861,14 @@ async function dcAbrir(){vib();if(!D)return window.open('https://discord.gg/R39C
   const d=o.querySelector('#dcd');d&&(d.onclick=async()=>{if(!confirm('¿Desvincular tu Discord?'))return;try{await rpc('xy_discord_desvincular');close();toast('Discord desvinculado')}catch(e){toast(errDe(e))}})})}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-dcabrir]');if(!b)return;e.preventDefault();dcAbrir()});
 if(P.get('discord'))setTimeout(()=>{if(D)dcAbrir()},2200);
+/* Eliminar negocio (SQL 106): el dueño escribe el nombre para confirmar. Se borra perfil, carta, promos y mesas. */
+function negEliminar(slug,nom){vib();hoja(`<h2>🗑️ Eliminar ${esc(nom)}</h2><p class="sm">Se borra para siempre: tu perfil, carta, promos, mesas, empleos y seguidores. <b>No se puede deshacer.</b></p><p class="mu sm">Tus clientes conservan los puntos que ya ganaron.</p>
+  <label class="sm">Escribe <b>${esc(nom)}</b> para confirmar<input id="ndc" autocomplete="off" placeholder="${esc(nom)}"></label>
+  <button class="btn" id="ndg" style="background:#ef4444;color:#fff;border-color:#ef4444">Eliminar para siempre</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  o.querySelector('#ndg').onclick=async()=>{const b=o.querySelector('#ndg');if(DEMO)return toast('En la demo no se borra nada');b.disabled=true;
+   try{await rpc('xy_negocio_eliminar',{p_slug:slug,p_confirma:o.querySelector('#ndc').value});close();document.querySelectorAll('.ov').forEach(x=>x.remove());GR=null;delete NEG[slug];SUB=null;TAB='perfil';try{await cargar()}catch(_){}pinta();toast('Negocio eliminado')}
+   catch(e){toast(errDe(e));b.disabled=false}}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-negdel]');if(!b)return;e.preventDefault();negEliminar(b.dataset.negdel,b.dataset.nom||b.dataset.negdel)});
 function irPend(){let ir='';try{ir=sessionStorage.getItem('mi-ir')||'';sessionStorage.removeItem('mi-ir')}catch(_){}if(/^\/pedir\/\?s=[a-z0-9_-]+/.test(ir)&&D)location.assign(ir+(ir.includes('de=mi')?'':'&de=mi'))}
 {const r=(P.get('ref')||'').replace(/\D/g,'');if(r.length>=6&&r.length<=10){ls.s('mi-ref',r);setTimeout(()=>{if(!D)toast('🎁 Te invitaron a Mi Xyro: regístrate y gana puntos con tu primera compra')},1200)}}
 let INVT=0;

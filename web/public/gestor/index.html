@@ -815,7 +815,7 @@ V.gratis=async ()=>{
    <p class="d" style="margin:6px 0">Dueño: <b>${esc(x.dueno||'—')}</b> <small style="color:var(--mu)">@${esc(x.usuario||'')} · ID ${esc(String(x.idn||'').replace(/(\d{4})(\d{4})/,'$1 $2'))} · ${esc(x.email||'')}</small></p>
    ${x.descripcion?`<p class="d" style="margin:0;color:var(--mu)">${esc(x.descripcion)}</p>`:''}${x.motivo?`<p class="d" style="margin:6px 0 0;color:var(--warn)">Motivo: ${esc(x.motivo)}</p>`:''}</div>
    <div class="acts">${x.estado==='pendiente'||x.estado==='suspendido'?`<button class="btn btn-p btn-sm" data-grok="${esc(x.slug)}">✅ Aprobar</button>`:''}
-    ${x.estado==='pendiente'||x.estado==='activo'?`<button class="btn btn-g btn-sm" data-grno="${esc(x.slug)}">⛔ Suspender</button>`:''}
+    ${x.estado==='pendiente'||x.estado==='activo'?`<button class="btn btn-g btn-sm" data-grno="${esc(x.slug)}">⛔ Suspender</button>`:''}${x.estado!=='pago'?`<button class="btn btn-g btn-sm" data-grdel="${esc(x.slug)}" data-nom="${esc(x.negocio||x.slug)}" style="color:#ef4444">🗑️ Eliminar</button>`:''}
     ${x.estado!=='pago'?`<button class="btn btn-g btn-sm" data-grpay="${esc(x.slug)}" data-n="${esc(x.negocio)}" data-r="${esc(x.rubro)}">⭐ Dar Plus o Pro</button>`:''}
     ${DLX&&x.estado!=='suspendido'?`<button class="btn btn-g btn-sm" data-dneg="${esc(x.slug)}">📣 Destacar 30 días</button>`:''}
     <a class="btn btn-g btn-sm" href="/mi/?n=${encodeURIComponent(x.slug)}" target="_blank" rel="noopener">Ver ↗</a>
@@ -850,6 +850,9 @@ document.addEventListener('click',async e=>{const t=e.target.closest('[data-dpro
   if(d.dres){if(d.e==='borrar'&&!confirm('¿Borrar esta opinión para siempre?'))return;r=await sb.rpc('xa_dir_g_resena',{p_id:d.dres,p_estado:d.e});if(r.error)throw r.error;touch('Explorar: opinión '+d.e);toast('✅ Listo')}
   if(d.dneg){r=await sb.rpc('xa_dir_g_negocio',{p_slug:d.dneg,p_oculto:null,p_destacar_dias:30});if(r.error)throw r.error;touch('Explorar: destacó '+d.dneg);toast('📣 Destacado 30 días')}
   go('gratis')}catch(er){toast(er.message||er)}});
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-grdel]');if(!t||!me)return;e.preventDefault();const n=t.dataset.nom;
+ const c=prompt(`Eliminar «${n}» para siempre (perfil, carta, promos, mesas). Escribe el nombre para confirmar:`);if(c===null)return;
+ const{error}=await sb.rpc('xy_negocio_eliminar',{p_slug:t.dataset.grdel,p_confirma:c});if(error)return toast(error.message.includes('function')?'Falta correr 106-xyro-eliminar-negocio.sql':error.message);touch('Eliminó el negocio '+n);toast('🗑️ Eliminado');go('gratis')});
 document.addEventListener('click',async e=>{const t=e.target.closest('[data-grf],[data-grok],[data-grno],[data-grpay]');if(!t||!me)return;e.preventDefault();const d=t.dataset;
  try{
   if(d.grf){GRF=d.grf;return go('gratis')}
