@@ -318,7 +318,7 @@ function yapear(L){if(!YP||!L.length)return;const t=Math.round(L.reduce((a,o)=>a
   <ol><li>Abre tu Yape y ${YP.qr?'escanea el QR o ':''}yapea al número.</li><li>Paga exacto <b>${sol(t)}</b>${L.length>1?' ('+L.length+' pedidos)':''}.</li><li>Escribe abajo el <b>N.º de operación</b> que sale en tu constancia.</li></ol>
   <input id="yop" inputmode="numeric" maxlength="14" autocomplete="off" placeholder="N.º de operación">
   <input id="ynm" maxlength="60" placeholder="Tu nombre como sale en Yape (opcional)" value="${esc(ls.g('xp-nom','')||M.yo||'')}" style="font-size:15px;letter-spacing:0;font-weight:600">
-  ${token()||DEMO?'<input type="file" id="yfo" accept="image/*" hidden><button class="btn" id="yfb" style="padding:10px">📎 Subir captura del Yape</button><p class="mu xs" style="margin:0">Con la captura ganas tus puntos en Mi Xyro.</p>':''}
+  ${token()||DEMO?'<p class="mu xs" style="margin:0">🔒 Tu captura solo la ven quien recibe tu pago y XyroStudio, para confirmar el pago y tus puntos. Se borra sola a los 90 días.</p><input type="file" id="yfo" accept="image/*" hidden><button class="btn" id="yfb" style="padding:10px">📎 Subir captura del Yape</button><p class="mu xs" style="margin:0">Con la captura ganas tus puntos en Mi Xyro.</p>':''}
   <button class="btn yb" id="yok">Ya pagué</button><p class="mu xs" style="margin:0">${esc(elL().replace(/^./,c=>c.toUpperCase()))} revisa su Yape y te confirma aquí mismo. El dinero va directo a ${esc(M.negocio)}.</p></div>`;
  o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o);
  o.querySelector('#ycp').onclick=async()=>{try{await navigator.clipboard.writeText(YP.num);toast('📋 Número copiado')}catch(_){toast(YP.num)}};
@@ -383,7 +383,7 @@ function pagarR(r){if(!r)return;if(!YP)return toast('Este negocio aún no tiene 
   <div><p class="mu xs" style="margin:0">Yapea al número</p><div class="nu">${esc(YP.num.replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</div>${YP.titular?`<p class="mu sm" style="margin:0">a nombre de <b style="color:var(--tx)">${esc(YP.titular)}</b></p>`:''}</div>
   <button class="btn" id="ycp" style="padding:10px">📋 Copiar número</button>
   <ol><li>Paga exacto <b>${sol(r.total)}</b> en tu Yape.</li><li>Sube la <b>captura</b> y escribe el <b>N.º de operación</b>.</li><li>Cuando confirmen tu pago, lo preparan y te avisamos.</li></ol>
-  <input type="file" id="yfo" accept="image/*" hidden><button class="btn" id="yfb" style="padding:10px">📎 Subir captura del pago</button>
+  <p class="mu xs" style="margin:0">🔒 Tu captura solo la ven quien recibe tu pago y XyroStudio, para confirmar el pago y tus puntos. Se borra sola a los 90 días.</p><input type="file" id="yfo" accept="image/*" hidden><button class="btn" id="yfb" style="padding:10px">📎 Subir captura del pago</button>
   <input id="yop" inputmode="numeric" maxlength="14" autocomplete="off" placeholder="N.º de operación">
   <button class="btn yb" id="yok">Ya pagué</button><p class="mu xs" style="margin:0">El dinero va directo a ${esc(M.negocio)}. Tienes 15 minutos; si no, el pedido se cancela solo.</p></div>`;
  o.onclick=e=>{if(e.target===o||e.target.closest('[data-x]'))o.remove()};document.body.appendChild(o);
