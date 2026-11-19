@@ -691,10 +691,10 @@ function vInicioGen(){mkaLazy();const per=(D&&D.persona)||{},M=negs(),G=(D&&D.gu
  const f0=post;post=()=>{f0&&f0();xCardFx();const a=$('#hav');a&&(a.onclick=()=>{TAB='perfil';pinta()});app.querySelectorAll('[data-qr]').forEach(b=>b.onclick=()=>{vib();qrGrande(negs()[+b.dataset.qr])})};
  const it=feed(),pr=promosFeed();
  return`<div class="hdr"><div class="sp"><p class="mu sm">${saludo()},</p><h1>${nomHTML(per.apodo||String(per.nombre||'').split(' ')[0]||'',(XST&&XST.actual&&estC()?XST.actual.color:''),estE(),'span')} 👋</h1>${titHTML(estT())}</div>${avatarHTML(per,'hav')}</div>
-  ${per.idn?xCard(per):''}${recCard()}${per.idn?dcCard():''}${mkAvisosHTML(3)}
+  ${per.idn?xCard(per):''}${recCard()}${per.idn?dcCard():''}
   ${ptsHTML()}
   ${M.length?`<div class="qk"${M.length===1?' style="grid-template-columns:1fr"':''}>${M.map((n,i)=>`<button class="qkb" data-qr="${i}">${I.qr}<span><b>Mi QR</b><small>${esc(n.negocio)}</small></span></button>`).join('')}</div>`:''}
-  ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}${av}<div class="g">${misPlanesProHTML()}${it.join('')}${pr}
+  ${resumenHTML(M)}${resumenHTML(M)?'<div style="height:14px"></div>':''}<div class="g">${misPlanesProHTML()}${it.join('')}${pr}
   ${M.length?'':`<div class="card" style="text-align:center;justify-items:center;padding:26px 18px 18px;gap:12px"><div class="ibox big">${I.qr.replace('width="22" height="22"','width="40" height="40"')}</div><h2>Escanea el QR de tu negocio</h2>
    <p class="mu sm" style="max-width:300px">Tu gym, consultorio o tienda favorita tiene su QR de Xyro. Escanéalo y mira sus promos solo por Mi Xyro.</p><button class="btn p" data-scan style="width:100%">${I.scan}Escanear QR</button></div>
   <div class="card"><div class="row"><div class="ibox">${I.id}</div><div class="sp"><h3>¿Ya eres socio o paciente?</h3><p class="mu sm">Conecta tu membresía, tu QR y tus rutinas o citas.</p></div></div><button class="btn" data-yo>Ya estoy registrado en un negocio</button></div>`}
@@ -988,7 +988,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button><button class="btn" data-lang data-noi18n>🌐 ${window.XY_LANG==='en'?'Idioma: Español':'Language: English'}</button>
-  <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord${ls.g('mi-dc-ok')?' · ideas, ayuda y promos':' · vincula y gana 20 XyroPoints 🎁'}</button>
+  ${ls.g('mi-dc-ok')?'<button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord</button>':''}
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
@@ -1689,10 +1689,8 @@ function vAvisos(){mkaLazy();const G=((D&&D.guardados)||[]).filter(g=>g.promos),
   ${mkAvisosHTML()}
   ${av}
   ${avisosNegHTML()}
-  ${G.length?`<p class="mu xs" style="font-weight:700">PROMOS POR MI XYRO</p>${G.map(g=>`<button class="card" data-neg="${esc(g.slug)}" style="text-align:left;width:100%;cursor:pointer"><div class="row"><div class="ibox">${I.gift}</div><div class="sp"><b>${esc(g.negocio)}</b><p class="mu sm">${g.promos} promo${g.promos>1?'s':''} solo por usar Mi Xyro</p></div><span class="mu">›</span></div></button>`).join('')}`:''}
   ${c?`<p class="mu xs" style="font-weight:700">AYUDA</p><button class="card" data-sub="ayuda" style="text-align:left;width:100%;cursor:pointer"><div class="row"><div class="ibox">${I.help}</div><div class="sp"><b>Chat con XyroStudio${c.visto===false?' <span class="pdot nv" style="display:inline-block;vertical-align:middle"></span>':''}</b><p class="mu sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.estado==='cerrado'?'Atención terminada':esc(u?(u.de==='yo'?'Tú: ':'')+u.texto:'')}</p></div><span class="mu">›</span></div></button>`:''}
-  ${!av&&!G.length&&!c&&!(AVN||[]).length&&!mkaNuevos()?`<div class="card" style="text-align:center;justify-items:center;padding:28px 18px"><div class="ibox big">${I.bell.replace('width="22" height="22"','width="36" height="36"')}</div><h2>Todo al día</h2><p class="mu sm" style="max-width:280px">Aquí verás cuando un negocio quiera conectar tu cuenta, sus promos y el chat de ayuda.</p></div>`:''}
-  ${c&&c.estado!=='cerrado'?'':`<button class="btn" id="ayu">${I.help}Necesito ayuda</button>`}</div>`}
+  ${!av&&!c&&!(AVN||[]).length&&!mkaNuevos()?`<div class="card" style="text-align:center;justify-items:center;padding:28px 18px"><div class="ibox big">${I.bell.replace('width="22" height="22"','width="36" height="36"')}</div><h2>Todo al día</h2><p class="mu sm" style="max-width:280px">Aquí verás cuando un negocio quiera conectar tu cuenta, sus promos y el chat de ayuda.</p></div>`:''}</div>`}
 function ayuda(){vib();if(SOP&&SOP.estado==='cerrado')sopFin();TAB='avisos';SUB='ayuda';pinta()}
 setInterval(async()=>{if(document.hidden||DEMO||!D||document.querySelector('.ov,.cam'))return;
  if(MODO==='cliente'&&SUB==='pedido'){const p0=JSON.stringify((PEDS().find(x=>x.id===PEDID)||{}).msgs||[]);try{await cargar()}catch(_){return}const p=PEDS().find(x=>x.id===PEDID),c=$('#cht');if(p&&c&&SUB==='pedido'&&JSON.stringify(p.msgs||[])!==p0){c.innerHTML=chatHTML(p);c.scrollTop=c.scrollHeight;vib();if(p.visto_persona===false){p.visto_persona=true;rpc('xa_yo_plan_visto',{p_id:p.id}).catch(()=>{})}}}
@@ -1970,7 +1968,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
   <div class="seg">${[['top','⭐ Mejores'],['cerca','📍 Cerca de mí']].map(([k,t])=>`<button data-ord="${k}" id="exo-${k}" class="${EX.orden===k?'on':''}">${t}</button>`).join('')}</div>
   <div class="g" id="exl">${exLista()}</div>
   ${G.length?`<p class="mu xs" style="font-weight:700;margin-top:6px">GUARDADOS</p>${G.map(tarjNeg).join('')}`:''}
-  <div class="row"><button class="btn p sp" data-scan>${I.scan}Escanear QR</button><button class="btn sp" data-yo>${I.id}Ya soy socio</button></div></div>`}
+  <button class="btn" data-yo>${I.id}Ya soy socio de un negocio</button></div>`}
 
 // Reseñas (negocio: k='n', entrenador: k='p')
 async function resCarga(k,slug){try{RES[k+slug]=await rpc('xa_resenas_de',k==='n'?{p_slug:slug,p_pro:null}:{p_slug:null,p_pro:slug})||{n:0,lista:[]}}catch(_){RES[k+slug]={n:0,lista:[],err:1}}
@@ -2154,15 +2152,14 @@ setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB===
 function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga(),nvCarga(),paisSync()].map(x=>Promise.resolve(x).catch(()=>{}))).then(()=>repinta(()=>MODO!=='negocio'&&TAB==='inicio'&&!SUB))}
  const P=PTS||{},g=XR?+XR.giros||0:0; // simple (pedido del usuario 2026-11-19): un número, un botón
  return`${nvCardHTML()}<div class="card"><div class="row"><span style="font-size:30px">⭐</span><div class="sp"><p style="margin:0"><b style="font-size:28px" data-pts="global_points">${nfmt(P.global_points)}</b> <span class="mu sm">puntos para descuentos</span></p>
-  <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas XyroPoints al pagar por tu billetera o transferencia'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div>
-  <button class="btn" data-xy="ganar" style="width:auto">❓ ¿Cómo funcionan?</button></div>
+  <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas XyroPoints al pagar por tu billetera o transferencia'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div></div>
   </div>${xjHTML(g)}`}
 /* Juegos a la vista (pedido del usuario 2026-11-19: «si está escondido qué sentido tiene»): ruleta, ranking, retos e invitar en Inicio */
 function betaHTML(){return`<button class="card" data-xy="error" style="width:100%;text-align:left;border-color:#f59e0b66;background:#f59e0b14"><div class="row"><span style="font-size:24px">🐞</span><div class="sp"><b>Xyro está en beta</b><p class="mu sm">¿Algo falla o no se entiende? Repórtalo y gana XyroPoints.</p></div><span class="mu">›</span></div></button>`}
 function errorAbrir(){vib();hoja(`<h2>🐞 Reportar un error</h2><p class="mu sm">Xyro está en <b>beta</b>: ya lo puede usar todo el mundo, pero aún lo estamos puliendo. Si algo falla, cuéntanos qué hiciste y qué pasó (mejor con captura). Si es un error real, te regalamos <b>XyroPoints</b>.</p><button class="btn p" id="erb">Contar el error</button><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{o.querySelector('#erb').onclick=()=>{close();const t='🐞 Encontré un error: ';if(!D){toast('Entra a tu cuenta para reportarlo');return}ayuda();setTimeout(()=>{const i=document.getElementById('aymi');if(i){i.value=t;i.focus()}},350)}})}
-function xjHTML(g){const T=[['ruleta','🎡','Ruleta',g?`¡${g} giro${g>1?'s':''} gratis!`:'Gira y gana','#f59e0b,#ef4444',g],['ranking','🏆','Ranking','¿En qué puesto vas?','#7c5cff,#38bdf8'],['retos','🎯','Retos','Puntos extra','#22c55e,#0ea5e9'],['invitar','👥','Invitar','Gana XyroPoints','#ec4899,#8b5cf6'],['estilo','🎨','Mi estilo','Marcos y colores','#14b8a6,#6366f1'],['valor','📊','Valor de puntos','¿Cuánto valen?','#64748b,#334155']];
+function xjHTML(g){const T=[['ruleta','🎡','Ruleta',g?`¡${g} giro${g>1?'s':''} gratis!`:'Gira y gana','#f59e0b,#ef4444',g],['ranking','🏆','Ranking','¿En qué puesto vas?','#7c5cff,#38bdf8'],['retos','🎯','Retos','Puntos extra','#22c55e,#0ea5e9'],['invitar','👥','Invitar','Gana XyroPoints','#ec4899,#8b5cf6'],['estilo','🎨','Mi estilo','Marcos y colores','#14b8a6,#6366f1'],['valor','📊','¿Cómo funcionan?','Valor de tus puntos','#64748b,#334155']];
  return`<div class="xjg">${T.map(([k,i,t,d,c,n])=>`<button class="xj${n?' on':''}" data-xy="${k}" style="--xg:linear-gradient(135deg,${c})"><i>${i}</i><b>${t}</b><small>${d}</small>${n?`<em>${n}</em>`:''}</button>`).join('')}</div>${betaHTML()}`}
-function ganarAbrir(){const g=XR?+XR.giros||0:0;hoja(`<h2>❓ ¿Cómo funcionan los puntos?</h2><p class="mu sm">Tus puntos se usan como descuento. <b>XyroPoints</b>: en cualquier negocio Xyro. <b>LocalPoints</b>: solo donde los ganaste. Se suman cuando pagas por Yape, Plin, transferencia u otro medio virtual (con captura) y el negocio lo confirma. En efectivo no se ganan puntos.</p><button class="btn p" data-x>Entendido</button>`)}
+function ganarAbrir(){return ptsTabla(false);hoja(`<h2>❓ ¿Cómo funcionan los puntos?</h2><p class="mu sm">Tus puntos se usan como descuento. <b>XyroPoints</b>: en cualquier negocio Xyro. <b>LocalPoints</b>: solo donde los ganaste. Se suman cuando pagas por Yape, Plin, transferencia u otro medio virtual (con captura) y el negocio lo confirma. En efectivo no se ganan puntos.</p><button class="btn p" data-x>Entendido</button>`)}
 let PTSR=0;
 function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'XyroPoints')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 (function(){const st=document.createElement('style');st.textContent='.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff;box-shadow:0 20px 60px #7c5cff66;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}.plan{display:grid;gap:4px;text-align:left;width:100%;cursor:pointer}.plan .row b{font-size:18px}.mpag{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14}.mpag .sp{min-width:0}';document.head.appendChild(st)})();
@@ -3223,7 +3220,7 @@ function monPais(){const p=bilPais(),m=PMON[p];if(m)return{c:m[0],r:m[1]};const 
 const enLocal=usd=>{const m=monPais();return moneyX(usd*m.r,m.c)};
 function ptsTabla(neg){vib();const m=monPais(),U=t=>m.c==='USD'?null:t,ej=[1,5,10,20].map(u=>Math.round(u*m.r)>0?u:u);
  const fila=(a,b,c)=>`<div class="li"><span class="sp sm">${a}</span><b class="sm" style="text-align:right">${b}</b>${c!=null?`<span class="mu xs" style="min-width:70px;text-align:right">${c}</span>`:''}</div>`;
- hoja(`<h2>📊 ¿Cuánto valen los puntos?</h2><p class="mu sm">Valores públicos e iguales para todos. Montos en ${m.c==='USD'?'dólares':'tu moneda (aprox.)'}.</p>
+ hoja(`<h2>📊 ¿Cómo funcionan los puntos?</h2><p class="mu sm">Tus puntos se usan como descuento. <b>XyroPoints</b>: en cualquier negocio Xyro. <b>LocalPoints</b>: solo donde los ganaste. Se suman cuando pagas por Yape, Plin, transferencia u otro medio virtual (con captura) y el negocio lo confirma. En efectivo no se ganan puntos.</p><p class="mu sm">Valores públicos e iguales para todos. Montos en ${m.c==='USD'?'dólares':'tu moneda (aprox.)'}.</p>
   <div class="card" style="gap:0;border-color:var(--a)">${fila('<b>100 XyroPoints</b>','≈ '+enLocal(1),U('US$ 1'))}${fila('<b>1 XyroPoint</b>','≈ '+enLocal(.01),U('US$ 0.01'))}${fila('<b>200 LocalPoints</b> (sugerido)','≈ '+enLocal(1),U('US$ 1'))}</div>
   <h3>🙋 Para personas: cuánto ganas</h3>
   <div class="card" style="gap:0">${fila('Pagas '+enLocal(1)+' con tu billetera o transferencia (con captura)','10 LocalPoints + 2 XyroPoints')}${fila('Con Xyro+','×1.5')}${fila('Negocio con ⚡ Boost','×2')}${fila('En efectivo','0 puntos')}
