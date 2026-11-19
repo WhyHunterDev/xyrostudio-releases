@@ -987,8 +987,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
-  <button class="btn" data-ptab="">📊 ¿Cuánto valen los puntos? · tabla pública</button>
-  <button class="btn" id="ayu">${I.help}Necesito ayuda</button><button class="btn" data-xy="error">🐞 Reportar un error · gana XyroPoints</button><button class="btn" data-lang data-noi18n>🌐 ${window.XY_LANG==='en'?'Idioma: Español':'Language: English'}</button>
+  <button class="btn" id="ayu">${I.help}Necesito ayuda</button><button class="btn" data-lang data-noi18n>🌐 ${window.XY_LANG==='en'?'Idioma: Español':'Language: English'}</button>
   <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord${ls.g('mi-dc-ok')?' · ideas, ayuda y promos':' · vincula y gana 20 XyroPoints 🎁'}</button>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
