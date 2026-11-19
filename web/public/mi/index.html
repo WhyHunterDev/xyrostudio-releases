@@ -948,6 +948,7 @@ async function escanear(onCode,txt){
    if(tp){vib();fin();return abrirPro(tp)}
    if(s){vib();fin();await abrirNeg(s);if(D&&NEG[s]&&!NEG[s].guardado&&!NEG[s].socio)guardarNeg(s,true);return}
    if(c){vib();fin();return conCodigo(c)}
+   const xq=/^https:\/\/(www\.)?xyrostudio\.net\/x\/\?(?:.*&)?q=([\w-]{6,80})/.exec(t);if(xq){vib();fin();if(D)return chkTok(xq[2],t);return location.assign(t)}
    m.textContent='Ese QR no es de un negocio Xyro.';m.className='msg on'}
   setTimeout(leer,250)};
  leer();
@@ -962,7 +963,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
  return`<div class="g"><div class="row"><div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
    <div class="sp"><h2>${esc(per.nombre||'')}</h2>${per.apodo?`<p class="sm">«${esc(per.apodo)}»</p>`:''}<p class="mu sm" style="color:var(--a)">@${esc(per.usuario||'')}</p>${per.fundador?`<p style="margin-top:6px">${fBad(per)}</p>`:''}</div></div>
   ${per.fundador?`<div class="card fcard"><div class="row"><span style="font-size:28px">🏅</span><div class="sp"><h3>Fundador ${fNum(per.fundador)} de Mi Xyro</h3><p class="mu sm">Eres de las primeras 50 personas en Mi Xyro. Tu insignia, tu carnet dorado y tu @ corto son para siempre.</p></div></div></div>`:''}
-  ${ptsHTML()}${misPagosHTML()}
+  ${ptsHTML()}${D?`<div class="row"><button class="btn sp" data-pases>🎟️ Mis pases</button><button class="btn sp" data-boveda>🔐 Bóveda</button></div>`:''}${misPagosHTML()}
   <button class="btn" id="ed">✏️ Editar mi perfil</button>
   <div class="idbox"><span class="mu xs" style="font-weight:700;display:inline-flex;gap:6px;align-items:center;justify-content:center;color:var(--a)">${I.id}ID DE CUENTA</span><b>${esc(idTxt(per.idn))}</b><p class="mu xs">Es tuyo y nunca cambia. Dáselo a recepción para que conecten tu membresía a Mi Xyro.</p><button class="btn" id="cpi">📋 Copiar mi ID</button></div>
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
@@ -1886,7 +1887,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
  const f0=post;post=()=>{f0&&f0();exBind();
   app.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{vib();EX.cat=b.dataset.cat;ls.s('mi-excat',EX.cat);EX.items=null;pinta();const h=$('.exch .on');h&&h.scrollIntoView({inline:'center',block:'nearest'})});
   app.querySelectorAll('[data-ord]').forEach(b=>b.onclick=()=>{vib();const o=b.dataset.ord;if(o==='cerca'&&!EX.geo){EX.orden='cerca';return exGeo()}EX.orden=o;ls.s('mi-exord',o);EX.items=null;pinta()});
-  const mb=$('#exmap');mb&&(mb.onclick=mapaAbrir);mb&&mapaPre();const eb=$('#exemp');eb&&(eb.onclick=empAbrir);
+  const mb=$('#exmap');mb&&(mb.onclick=mapaAbrir);mb&&mapaPre();const eb=$('#exemp');eb&&(eb.onclick=empAbrir);const mkb=$('#exmk');mkb&&(mkb.onclick=mkAbrir);
   const q=$('#exq');let tq;q&&(q.oninput=()=>{clearTimeout(tq);tq=setTimeout(()=>{EX.q=q.value.trim();EX.items=null;exCarga();const l=$('#exl');l&&(l.innerHTML=exLista())},450)});
   const lu=$('#exlu');lu&&(lu.onclick=()=>hoja(`<h2>📍 ¿Dónde buscas?</h2><p class="mu sm">Escribe un distrito, ciudad o país.</p><input id="lgi" maxlength="40" value="${esc(EX.lugar)}" placeholder="Ej. Miraflores, Bogotá, México"><button class="btn p" id="lgb">Buscar ahí</button>${EX.lugar?'<button class="btn" id="lgx">Ver todo el mundo 🌎</button>':''}`,(o,close)=>{
    const i=o.querySelector('#lgi');i.focus();const ir=v=>{EX.lugar=v;EX.items=null;close();pinta()};o.querySelector('#lgb').onclick=()=>ir(i.value.trim());i.onkeydown=e=>{if(e.key==='Enter')ir(i.value.trim())};const x=o.querySelector('#lgx');x&&(x.onclick=()=>ir(''))}))};
@@ -1895,6 +1896,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
   ${M.length?`<p class="mu xs" style="font-weight:700">DONDE ERES ${M.some(n=>citR(n.rubro))?'CLIENTE':'SOCIO'}</p>${mis}`:''}
   <div class="exs"><span>${I.search}</span><input id="exq" type="search" maxlength="40" placeholder="Busca un gym, café, entrenador…" value="${esc(EX.q)}" autocomplete="off"><button class="exlu" id="exlu">📍 ${esc(EX.lugar||'Todo')}</button></div>
   <button class="mapbtn" id="exmap"><span class="mapbg"></span><span class="sp" style="position:relative"><b>🗺️ Ver el mapa</b><br><span class="xs" style="opacity:.85">Negocios Xyro cerca de ti</span></span><span style="position:relative;font-size:20px">›</span></button>
+  <button class="mapbtn" id="exmk" style="padding:12px 16px"><span class="sp" style="position:relative"><b>🛍️ Marketplace</b><br><span class="xs" style="opacity:.85">Compra y vende entre personas</span></span><span style="position:relative;font-size:20px">›</span></button>
   <button class="mapbtn" id="exemp" style="padding:12px 16px"><span class="sp" style="position:relative"><b>💼 Empleos</b><br><span class="xs" style="opacity:.85">Trabaja en negocios de Xyro</span></span><span style="position:relative;font-size:20px">›</span></button>
   <div class="hs exch">${CATS.map(([k,i,t])=>`<button class="chip${EX.cat===k?' on':''}" data-cat="${k}">${i} ${t}</button>`).join('')}</div>
   <div class="seg s3">${[['top','⭐ Mejor puntuados'],['cerca','📍 Cerca de mí'],['nuevos','🆕 Nuevos']].map(([k,t])=>`<button data-ord="${k}" id="exo-${k}" class="${EX.orden===k?'on':''}">${t}</button>`).join('')}</div>
@@ -2088,7 +2090,7 @@ const PLK={MEMBERSHIP:'Plan',CLASS_PACK:'Paquete',SESSION:'Sesión',SERVICE:'Ser
 function planesHTML(p){const x=p.x;if(!D)return`<div class="card"><b>💪 Planes y paquetes</b><p class="mu sm">Entra a tu cuenta para ver sus planes y pagar dentro de Xyro.</p></div>`;
  if(!x)return'';const L=x.planes||[],mio=x.mio;
  const dias=mio&&mio.valid_until?Math.max(0,Math.ceil((new Date(mio.valid_until)-Date.now())/864e5)):null;
- return`${mio?`<div class="card" style="border-color:#22c55e66"><div class="row"><span style="font-size:26px">🎟️</span><div class="sp"><b>Eres su alumno activo</b><p class="mu sm">${mio.kind==='CLASS_PACK'?`Te quedan <b>${mio.sessions_left||0}</b> sesiones`:`Te quedan <b>${dias}</b> días`}${mio.valid_until?' · vence '+fF(mio.valid_until):''}</p></div></div><a class="btn" style="text-decoration:none" href="/x/${DEMO?'?demo=1':''}#/billetera">🎫 Ver mi Pase QR</a></div>`:''}
+ return`${mio?`<div class="card" style="border-color:#22c55e66"><div class="row"><span style="font-size:26px">🎟️</span><div class="sp"><b>Eres su alumno activo</b><p class="mu sm">${mio.kind==='CLASS_PACK'?`Te quedan <b>${mio.sessions_left||0}</b> sesiones`:`Te quedan <b>${dias}</b> días`}${mio.valid_until?' · vence '+fF(mio.valid_until):''}</p></div></div><button class="btn" data-pases>🎫 Ver mi pase</button></div>`:''}
  ${x.pendiente?`<button class="btn" id="ppend" style="border-color:#f5a524">⏳ Tienes un pago por confirmar · ver</button>`:''}
  ${L.length?`<h2>💪 Planes y paquetes</h2><div class="g">${L.map(c=>`<button class="card plan" data-plan="${esc(c.id)}"><div class="row"><span class="sp"><span class="mu xs">${PLK[c.kind]||'Plan'}${c.days?' · '+c.days+' días':''}${c.sessions?' · '+c.sessions+' sesiones':''}</span><br><b>${esc(c.title)}</b></span><b>${moneyX(c.price,c.currency)}</b></div>${c.description?`<p class="mu sm">${esc(c.description)}</p>`:''}<span class="sm" style="color:var(--a);font-weight:700">${mio?'Renovar / sumar':'Elegir y pagar'} ›</span></button>`).join('')}</div>`
   :`<p class="mu sm" style="text-align:center">Aún no publica sus planes. Escríbele por el chat.</p>`}`}
@@ -2102,7 +2104,7 @@ async function ordenHoja(slug,oid,pi){try{pi=pi||await rpc('xy_order_payinfo',{p
    if(done){const pt=(+((pi.points||{}).USER_GLOBAL)||0)+(+((pi.points||{}).USER_LOCAL)||0),m=pi.membership;
     b.innerHTML=`<div style="text-align:center;display:grid;gap:8px;justify-items:center"><span style="font-size:52px">🎉</span><h2>¡Pago confirmado!</h2><p class="sm">${esc(it.title||'Tu plan')} está activo${m&&m.valid_until?' hasta el '+fF(m.valid_until):''}.</p>
      ${pt?`<p class="pill" style="background:#7c5cff22;color:var(--a);font-size:15px">+${nfmt(pt)} puntos · ${nfmt((pi.points||{}).USER_LOCAL||0)} locales + ${nfmt((pi.points||{}).USER_GLOBAL||0)} globales</p>`:''}
-     <a class="btn p" style="text-decoration:none;width:100%" href="/x/${DEMO?'?demo=1':''}#/billetera">🎫 Ver mi Pase QR</a><p class="mu xs">Ya puedes dejarle una opinión verificada en su perfil.</p><button class="btn l" data-cx>Listo</button></div>`;
+     <button class="btn p" style="width:100%" data-pases>🎫 Ver mi pase</button><p class="mu xs">Ya puedes dejarle una opinión verificada en su perfil.</p><button class="btn l" data-cx>Listo</button></div>`;
     o.querySelector('[data-cx]').onclick=()=>{close();PRO[slug]=null;abrirPro(slug)};return}
    b.innerHTML=`<h2>${rep?'⏳ Esperando confirmación':'Tu orden en Xyro'}</h2>
     <div class="card"><div class="row"><span class="sp"><b>${esc(it.title||'Plan')}</b><br><span class="mu xs">${esc((pi.entity||{}).name||'')} · código <b>${esc(pi.code)}</b></span></span><b style="font-size:20px">${moneyX(pi.total,pi.currency)}</b></div></div>
@@ -2555,6 +2557,139 @@ function empDestacar(e,pr){let d=7;const P=x=>moneyX(Math.round(x*(+pr.monto||0)
   o.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>{d=+b.dataset.dd;o.querySelectorAll('[data-dd]').forEach(x=>x.classList.toggle('on',x===b))});
   o.querySelector('#dgo').onclick=()=>{close();pagoTicket({titulo:`⚡ Destacar empleo · ${d} días`,detalle:`<p class="mu sm">${esc(e.titulo)}</p>`,monto:Math.round(d*(+pr.monto||0)*100)/100,moneda:pr.moneda,rpc:'xy_empleo_destacar_pagar',args:{p_empleo:e.id,p_dias:d}})}})}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-empneg]');if(b)empNeg(b.dataset.empneg,b.dataset.nom)});
+/* 🛍️ Marketplace entre personas, 🔐 Bóveda y 🎟️ Mis pases: antes vivían en /x/ (decisión 2026-11-19: una sola app = Mi Xyro).
+   Xyro NO recibe dinero: comprador y vendedor coordinan por chat y el pago va directo (SQL 79/91). */
+const MKC={NEW:'Nuevo',LIKE_NEW:'Como nuevo',USED:'Usado'},MKE={CREATED:'Coordinando',COMPLETED:'Vendido',CANCELLED:'Cancelado',DISPUTED:'En revisión',REFUNDED:'Devuelto'};
+const MK={v:'todo',q:'',L:null,me:null};let MKD=null;
+const mkDemo=()=>MKD||(MKD={L:[{id:'d1',seller_id:'otro',title:'Mancuernas 10 kg (par)',price:120,currency:'PEN',condition:'USED',ships:false,status:'ACTIVE',photos:[],emoji:'🏋️',description:'Poco uso. Entrego en Miraflores o San Isidro.',created_at:new Date(Date.now()-864e5).toISOString()},
+ {id:'d2',seller_id:'otro',title:'Bicicleta de ruta talla M',price:850,currency:'PEN',condition:'LIKE_NEW',ships:false,status:'ACTIVE',photos:[],emoji:'🚲',description:'Con casco de regalo.',created_at:new Date(Date.now()-3*864e5).toISOString()},
+ {id:'d3',seller_id:'yo',title:'Proteína whey 2 lb sellada',price:95,currency:'PEN',condition:'NEW',ships:true,status:'ACTIVE',photos:[],emoji:'🥤',description:'',created_at:new Date(Date.now()-2*864e5).toISOString()}],
+ O:[{id:'o1',code:'XY-4821',status:'CREATED',total:120,currency:'PEN',buyer_id:'yo',seller_user_id:'otro',listing_id:'d1',created_at:new Date().toISOString(),marketplace_listings:{title:'Mancuernas 10 kg (par)'}}],
+ M:{o1:[{id:1,sender_id:'otro',body:'¡Hola! Sí, todavía las tengo. ¿Te queda bien mañana a las 6 pm?',created_at:new Date().toISOString()}]}});
+async function mkYo(){if(MK.me)return MK.me;if(DEMO)return MK.me='yo';try{const{data}=await sb.auth.getSession();MK.me=data.session&&data.session.user.id}catch(_){}return MK.me}
+function mkOv(html){const ov=document.createElement('div');ov.className='emov';ov.innerHTML=`<div class="g" style="max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px 40px">${html}</div>`;
+ document.body.appendChild(ov);ov._x=()=>history.back();return ov} // el «atrás» lo maneja HN (.emov)
+const mkFoto=m=>(m.photos&&m.photos[0])||'';
+function mkCard(m,i){const f=mkFoto(m);return`<button class="card" data-mki="${i}" style="text-align:left;cursor:pointer;padding:0;overflow:hidden;gap:0">
+ <div style="aspect-ratio:4/3;background:${f?`#111 center/cover url('${esc(f)}')`:'var(--c2,#ffffff0d)'};display:grid;place-items:center;font-size:44px;position:relative">${f?'':esc(m.emoji||'📦')}${m.status!=='ACTIVE'?`<span class="pill" style="position:absolute;top:8px;left:8px">${({RESERVED:'Reservado',SOLD:'Vendido',REMOVED:'Oculto',BANNED:'Bloqueado'})[m.status]||''}</span>`:''}</div>
+ <div style="padding:10px 12px;display:grid;gap:2px;min-width:0"><b class="sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(m.title)}</b><b>${moneyX(m.price,m.currency)}</b><span class="mu xs">${MKC[m.condition]||''}${m.ships?' · Envío':' · En persona'}</span></div></button>`}
+async function mkAbrir(){vib();await mkYo();
+ const ov=mkOv(`<div class="row"><button class="back" data-mkx>‹ Volver</button><span class="sp"></span><button class="btn p" id="mkp" style="width:auto">＋ Publicar</button></div>
+  <div><h1>🛍️ Marketplace</h1><p class="mu sm">Compra y vende entre personas. Pagas directo a quien vende y, con la captura del pago, sumas Xyro Points.</p></div>
+  <div class="seg s3">${[['todo','Explorar'],['mias','Lo que vendo'],['tratos','Mis tratos']].map(([k,t])=>`<button data-mkv="${k}" class="${MK.v===k?'on':''}">${t}</button>`).join('')}</div>
+  <div class="exs" id="mkqs"><span>${I.search}</span><input id="mkq" type="search" maxlength="40" placeholder="Busca «bici», «mancuernas»…" value="${esc(MK.q)}" autocomplete="off"></div>
+  <div id="mkl" class="g" style="grid-template-columns:repeat(2,minmax(0,1fr));gap:10px"></div>
+  <p class="mu xs" style="text-align:center">Xyro no recibe tu dinero: solo los conecta. Paga cuando estés seguro, mejor al recibir el producto.</p>`);
+ ov.querySelector('[data-mkx]').onclick=ov._x;
+ ov.querySelector('#mkp').onclick=()=>{if(!D)return toast('Entra a tu cuenta para publicar');mkPublicar(null,()=>{MK.v='mias';carga()})};
+ const lista=()=>{const box=ov.querySelector('#mkl');ov.querySelector('#mkqs').style.display=MK.v==='tratos'?'none':'';
+  if(MK.L==null){box.innerHTML=Array(4).fill('<div class="card" style="height:190px;opacity:.4"></div>').join('');return}
+  if(MK.v==='tratos'){box.style.gridTemplateColumns='1fr';box.innerHTML=MK.L.length?MK.L.map((o,i)=>{const yoC=o.buyer_id===MK.me;return`<button class="card" data-mko="${i}" style="text-align:left;cursor:pointer"><div class="row"><span style="font-size:24px">🤝</span><span class="sp"><b class="sm">${esc((o.marketplace_listings||{}).title||'Publicación')}</b><br><span class="mu xs">${yoC?'Compras':'Vendes'} · ${moneyX(o.total,o.currency)} · ${fF(o.created_at,{day:'numeric',month:'short'})}</span></span><span class="pill">${MKE[o.status]||esc(o.status)}</span></div></button>`}).join('')
+   :'<div class="vacio"><span class="e">🤝</span><p class="mu">Aún no tienes tratos. Cuando toques «Lo quiero» en algo, aparece aquí.</p></div>';
+   box.querySelectorAll('[data-mko]').forEach(b=>b.onclick=()=>mkTrato(MK.L[+b.dataset.mko].id,carga));return}
+  box.style.gridTemplateColumns='repeat(2,minmax(0,1fr))';const q=MK.q.toLowerCase(),V=MK.L.map((m,i)=>[m,i]).filter(([m])=>!q||(m.title+' '+(m.description||'')).toLowerCase().includes(q));
+  box.innerHTML=V.length?V.map(([m,i])=>mkCard(m,i)).join(''):`<div class="vacio" style="grid-column:1/-1"><span class="e">📦</span><p class="mu">${MK.v==='mias'?'Aún no vendes nada. Toma una foto y publícalo en 1 minuto.':'No hay publicaciones todavía. ¡Sé el primero en publicar!'}</p></div>`;
+  box.querySelectorAll('[data-mki]').forEach(b=>b.onclick=()=>mkDetalle(MK.L[+b.dataset.mki],carga))};
+ const carga=async()=>{MK.L=null;ov.querySelectorAll('[data-mkv]').forEach(b=>b.classList.toggle('on',b.dataset.mkv===MK.v));lista();
+  try{if(DEMO){const d=mkDemo();MK.L=MK.v==='tratos'?d.O:d.L.filter(m=>MK.v==='mias'?m.seller_id==='yo':m.status==='ACTIVE')}
+   else if(MK.v==='tratos'){if(!MK.me){MK.L=[];return lista()}const{data,error}=await sb.from('orders').select('id,code,status,total,currency,buyer_id,seller_user_id,listing_id,created_at,marketplace_listings(title)').not('listing_id','is',null).or(`buyer_id.eq.${MK.me},seller_user_id.eq.${MK.me}`).order('created_at',{ascending:false}).limit(50);if(error)throw error;MK.L=data||[]}
+   else{const sel='id,seller_id,title,description,price,currency,condition,ships,status,photos,created_at';let x=sb.from('marketplace_listings').select(sel);
+    x=MK.v==='mias'?(MK.me?x.eq('seller_id',MK.me).neq('status','BANNED'):x.eq('id','00000000-0000-0000-0000-000000000000')):x.eq('status','ACTIVE').order('featured_until',{ascending:false,nullsFirst:false});
+    const{data,error}=await x.order('created_at',{ascending:false}).limit(60);if(error)throw error;MK.L=data||[]}}
+  catch(e){MK.L=[];toast(errDe(e))}lista()};
+ ov.querySelectorAll('[data-mkv]').forEach(b=>b.onclick=()=>{vib();MK.v=b.dataset.mkv;if(MK.v!=='todo'&&!D){MK.v='todo';return toast('Entra a tu cuenta para ver esto')}carga()});
+ let tq;ov.querySelector('#mkq').oninput=e=>{clearTimeout(tq);tq=setTimeout(()=>{MK.q=e.target.value.trim();lista()},200)};
+ carga()}
+function mkPublicar(x,listo){const fotos=x?[...(x.photos||[])]:[];
+ hoja(`<h2>${x?'✏️ Editar publicación':'📦 Publicar algo'}</h2><div class="row" id="mkft" style="flex-wrap:wrap;gap:8px"></div>
+  <label>¿Qué vendes?<input id="mkT" maxlength="120" placeholder="Ej: Mancuernas 10 kg (par)" value="${esc(x?x.title:'')}"></label>
+  <div style="display:grid;grid-template-columns:1fr 110px;gap:10px"><label>Precio<input id="mkP" type="number" min="0" step="0.1" inputmode="decimal" value="${x?esc(x.price):''}"></label>
+   <label>Moneda<select id="mkM">${['PEN','USD','MXN','COP','CLP','ARS','BOB','EUR'].map(c=>`<option ${c===((x&&x.currency)||(D&&D.persona&&D.persona.moneda)||'PEN')?'selected':''}>${c}</option>`).join('')}</select></label></div>
+  <label>Estado<select id="mkC">${Object.entries(MKC).map(([k,t])=>`<option value="${k}" ${(x?x.condition:'USED')===k?'selected':''}>${t}</option>`).join('')}</select></label>
+  <label>Descripción<textarea id="mkD" maxlength="2000" rows="3" placeholder="Medidas, detalles, dónde lo entregas…">${esc((x&&x.description)||'')}</textarea></label>
+  <label class="row" style="color:var(--tx)"><input type="checkbox" id="mkS" style="width:auto" ${x&&x.ships?'checked':''}> Puedo enviarlo</label>
+  <p class="mu xs">Al publicar aceptas los <a href="/terminos.html" target="_blank" rel="noopener" style="color:var(--a)">términos</a>. Nada de armas, medicinas, animales ni cosas robadas.</p>
+  <button class="btn p" id="mkok">${x?'Guardar cambios':'Publicar'}</button><button class="btn l" data-x>Cancelar</button>`,(h,close)=>{
+  const pf=()=>{h.querySelector('#mkft').innerHTML=fotos.map((u,i)=>`<span style="width:72px;height:72px;border-radius:12px;background:#111 center/cover url('${esc(u)}');position:relative"><button type="button" data-q="${i}" aria-label="Quitar foto" style="position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:#000c;color:#fff">✕</button></span>`).join('')
+    +(fotos.length<4?`<label style="width:72px;height:72px;border-radius:12px;border:1px dashed var(--ln);display:grid;place-items:center;cursor:pointer;font-size:22px">📷<input type="file" accept="image/*" id="mkfi" hidden></label>`:'');
+   h.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{fotos.splice(+b.dataset.q,1);pf()});
+   const fi=h.querySelector('#mkfi');fi&&(fi.onchange=async()=>{const f=fi.files[0];if(!f)return;fi.parentElement.style.opacity=.4;try{fotos.push(DEMO?URL.createObjectURL(f):await subirFotoAncha(f))}catch(e){toast(errDe(e))}pf()})};pf();
+  h.querySelector('#mkok').onclick=async ev=>{const d={title:h.querySelector('#mkT').value.trim(),price:+h.querySelector('#mkP').value,currency:h.querySelector('#mkM').value,condition:h.querySelector('#mkC').value,
+    description:h.querySelector('#mkD').value.trim()||null,ships:h.querySelector('#mkS').checked,protected_available:false,photos:fotos};
+   if(d.title.length<3)return toast('Escribe qué vendes');if(h.querySelector('#mkP').value===''||!(d.price>=0))return toast('Escribe el precio');
+   ev.target.disabled=true;try{if(DEMO){const L=mkDemo().L;if(x)Object.assign(x,d);else L.unshift({id:'n'+Date.now(),seller_id:'yo',status:'ACTIVE',created_at:new Date().toISOString(),...d})}
+    else{const r=x?await sb.from('marketplace_listings').update(d).eq('id',x.id):await sb.from('marketplace_listings').insert({...d,seller_id:MK.me});if(r.error)throw r.error}
+    close();confeti();toast(x?'Guardado ✓':'¡Publicado! 🎉');listo&&listo()}catch(e){toast(errDe(e));ev.target.disabled=false}}})}
+function mkDetalle(m,recargar){const mia=m.seller_id===MK.me,F=m.photos||[];
+ hoja(`${F.length?`<div class="hs">${F.map(u=>`<img src="${esc(u)}" alt="" loading="lazy" style="height:220px;border-radius:14px;object-fit:cover">`).join('')}</div>`:`<div style="height:140px;border-radius:16px;background:#ffffff0d;display:grid;place-items:center;font-size:60px">${esc(m.emoji||'📦')}</div>`}
+  <div><span class="mu sm">${MKC[m.condition]||''} · ${m.ships?'Con envío':'Entrega en persona'} · ${fF(m.created_at,{day:'numeric',month:'short'})}</span><h2>${esc(m.title)}</h2></div><b style="font-size:24px">${moneyX(m.price,m.currency)}</b>
+  ${m.description?`<p class="sm" style="white-space:pre-line;margin:0">${esc(m.description)}</p>`:''}<p class="mu sm" id="mkv"></p>
+  ${mia?`<div class="card"><b class="sm">Es tu publicación</b><span class="mu xs">Las conversaciones con compradores están en «Mis tratos».</span></div><button class="btn" id="mked">✏️ Editar</button>${m.status==='ACTIVE'?'<button class="btn l" id="mkqt">Quitar publicación</button>':m.status==='REMOVED'?'<button class="btn" id="mkrp">Volver a publicar</button>':''}`
+   :m.status!=='ACTIVE'?'<div class="card"><b>Ya no está disponible</b></div>':`<button class="btn p" id="mkcd">🤝 Lo quiero</button><p class="mu xs" style="text-align:center">Coordinan por chat y pagas directo a quien vende. Sube la captura del pago y suma Xyro Points.</p><button class="btn l" id="mkrep">🚩 Reportar</button>`}
+  <button class="btn l" data-x>Cerrar</button>`,(h,close)=>{const on=(s,fn)=>{const b=h.querySelector(s);b&&(b.onclick=fn)};
+  if(!DEMO&&m.seller_id)rpc('xy_users_public',{p_ids:[m.seller_id]}).then(u=>{u=u&&u[0];const v=h.querySelector('#mkv');if(v&&u)v.textContent='Vende: '+(u.display_name||(u.username?'@'+u.username:'Persona en Xyro'))}).catch(()=>{});
+  on('#mkcd',async ev=>{if(!D){close();return toast('Entra a tu cuenta para comprar')}ev.target.disabled=true;
+   try{const r=DEMO?{order_id:'o1'}:await rpc('xy_create_p2p_order',{p_listing:m.id,p_protected:false});close();vib();mkTrato(r.order_id,recargar)}catch(e){toast(errDe(e));ev.target.disabled=false}});
+  on('#mked',()=>{close();mkPublicar(m,recargar)});
+  const est=(s,t)=>async()=>{try{if(DEMO)m.status=s;else{const{error}=await sb.from('marketplace_listings').update({status:s}).eq('id',m.id);if(error)throw error}close();toast(t);recargar&&recargar()}catch(e){toast(errDe(e))}};
+  on('#mkqt',est('REMOVED','Publicación quitada'));on('#mkrp',est('ACTIVE','Publicada de nuevo ✓'));
+  on('#mkrep',()=>{close();hoja(`<h2>🚩 Reportar</h2><p class="mu sm">Lo revisamos. Con varios reportes se oculta sola.</p>${['Es una estafa','Producto prohibido','Foto o texto ofensivo','Otra cosa'].map(t=>`<button class="btn" data-r="${t}">${t}</button>`).join('')}<button class="btn l" data-x>Cancelar</button>`,(h2,c2)=>
+   h2.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{try{if(!DEMO)await rpc('xy_listing_report',{p_listing:m.id,p_reason:b.dataset.r});c2();toast('Gracias, lo revisaremos')}catch(e){toast(errDe(e))}}))})})}
+async function mkTrato(id,recargar){await mkYo();let o=null,n=-1,poll=0;
+ const ov=mkOv('<div id="mktr"><div class="vacio"><span class="e">⏳</span></div></div>');
+ const cargar=async()=>{if(DEMO)return mkDemo().O.find(x=>x.id===id);const{data,error}=await sb.from('orders').select('id,code,status,total,currency,buyer_id,seller_user_id,listing_id,created_at,buyer_paid_at,buyer_pay_method,buyer_pay_ref,buyer_pay_foto,marketplace_listings(title)').eq('id',id).maybeSingle();if(error)throw error;return data};
+ const msgs=async()=>{try{const M=DEMO?(mkDemo().M[id]||[]):((await sb.from('p2p_messages').select('id,sender_id,body,created_at').eq('order_id',id).order('id').limit(300)).data||[]);
+  const b=ov.querySelector('#mkms');if(!b||M.length===n)return;n=M.length;
+  b.innerHTML=M.length?M.map(x=>`<div style="max-width:80%;justify-self:${x.sender_id===MK.me?'end':'start'};background:${x.sender_id===MK.me?'var(--a)':'#ffffff12'};color:${x.sender_id===MK.me?'#fff':'inherit'};padding:8px 12px;border-radius:14px;white-space:pre-wrap">${esc(x.body)}<br><span class="xs" style="opacity:.7">${fH(x.created_at)}</span></div>`).join(''):'<p class="mu sm" style="text-align:center">Aún no hay mensajes. ¡Saluda!</p>';b.scrollTop=b.scrollHeight}catch(_){}};
+ const pinta=()=>{const box=ov.querySelector('#mktr');if(!o){box.innerHTML='<button class="back" data-mkx>‹ Volver</button><div class="vacio"><span class="e">🤝</span><p class="mu">No encontramos este trato.</p></div>';box.querySelector('[data-mkx]').onclick=ov._x;return}
+  const yoC=o.buyer_id===MK.me,ab=!['CANCELLED','REFUNDED'].includes(o.status);
+  const txt={CREATED:o.buyer_paid_at?(yoC?'Avisaste que pagaste. Cuando quien vende lo confirme, sumas tus puntos.':'El comprador dice que ya pagó. Revisa tu Yape o efectivo y confirma la venta.'):(yoC?'Coordina por el chat. Paga directo a quien vende y luego toca «Ya pagué» con tu captura.':'Coordina la entrega por el chat. El comprador te paga directo a ti.'),
+   COMPLETED:yoC?(o.buyer_pay_foto?'¡Listo! Tus puntos ya están en camino.':'Vendido. Sin captura del pago no hubo puntos.'):'Vendido. ¡Gracias por usar Xyro!',DISPUTED:'Xyro está revisando este caso.'}[o.status]||'Este trato no siguió.';
+  const B=[];if(o.status==='CREATED'&&yoC&&!o.buyer_paid_at)B.push('<button class="btn p" id="mkpag">💳 Ya pagué · subir captura</button>');
+  if(o.status==='CREATED'&&!yoC){if(o.buyer_paid_at)B.push(`<div class="card"><b class="sm">Pago reportado: ${esc(({YAPE:'Yape',PLIN:'Plin',TRANSFER:'Transferencia',CASH:'Efectivo'})[o.buyer_pay_method]||'Otro')}${o.buyer_pay_ref?' · N.º '+esc(o.buyer_pay_ref):''}</b>${/^https:/.test(o.buyer_pay_foto||'')?`<a href="${esc(o.buyer_pay_foto)}" target="_blank" rel="noopener"><img src="${esc(o.buyer_pay_foto)}" alt="Captura" style="max-width:200px;max-height:260px;border-radius:12px"></a>`:'<span class="mu xs">Sin captura</span>'}<span class="mu xs">Revisa que el dinero llegó antes de confirmar.</span></div>`);B.push('<button class="btn p" id="mkvnd">✅ Recibí el pago · confirmar venta</button>')}
+  if(o.status==='CREATED')B.push('<button class="btn l" id="mkcan">Cancelar trato</button>');if(['CREATED','COMPLETED'].includes(o.status))B.push('<button class="btn l" id="mkdis">⚠️ Tengo un problema</button>');
+  box.innerHTML=`<div class="row"><button class="back" data-mkx>‹ Volver</button><span class="sp"></span><span class="pill">${MKE[o.status]||esc(o.status)}</span></div>
+   <div class="card" style="text-align:center;justify-items:center"><span class="mu sm">🤝 ${yoC?'Compras':'Vendes'}</span><b style="font-size:18px">${esc((o.marketplace_listings||{}).title||'Publicación')}</b><b>${moneyX(o.total,o.currency)}</b><span class="mu xs">Código ${esc(o.code||'')}</span><p class="mu sm">${txt}</p></div>${B.join('')}
+   <div class="card" style="gap:8px"><b>💬 Chat ${yoC?'con quien vende':'con quien compra'}</b><span class="mu xs">No compartas claves ni datos de tarjetas. Xyro nunca te pide pagar fuera de este chat.</span>
+    <div id="mkms" class="g" style="gap:6px;max-height:50vh;overflow:auto"></div>${ab?'<form class="row" id="mkfm"><input id="mkmt" maxlength="600" placeholder="Escribe un mensaje…" autocomplete="off" class="sp"><button class="btn p" style="width:auto">Enviar</button></form>':''}</div>`;
+  n=-1;box.querySelector('[data-mkx]').onclick=ov._x;const on=(s,fn)=>{const b=box.querySelector(s);b&&(b.onclick=fn)};
+  const ref=async()=>{try{o=await cargar();pinta()}catch(e){toast(errDe(e))}};
+  on('#mkpag',()=>hoja(`<h2>💳 ¿Cómo pagaste?</h2><p class="mu sm">Pagaste directo a quien vende. Sube la captura para sumar tus Xyro Points cuando confirme.</p>
+   <select id="pm"><option value="YAPE">Yape</option><option value="PLIN">Plin</option><option value="TRANSFER">Transferencia</option><option value="CASH">Efectivo</option><option value="OTHER">Otro</option></select>
+   <input id="pr" maxlength="40" placeholder="N.º de operación (opcional)"><input type="file" id="pf" accept="image/*" hidden><button class="btn" id="pfb">📎 Subir captura del pago</button>
+   <button class="btn p" id="pok">Avisar que pagué</button><button class="btn l" data-x>Cancelar</button>`,(h,c)=>{let ft='';const fb=h.querySelector('#pfb'),fi=h.querySelector('#pf');fb.onclick=()=>fi.click();
+   fi.onchange=async()=>{const fl=fi.files[0];if(!fl)return;fb.disabled=true;fb.textContent='Subiendo…';try{ft=await subirCaptura(fl);fb.textContent='✅ Captura lista'}catch(e){toast(errDe(e));fb.textContent='📎 Subir captura del pago'}fb.disabled=false};
+   h.querySelector('#pok').onclick=async ev=>{ev.target.disabled=true;try{if(DEMO){o.buyer_paid_at=new Date().toISOString();o.buyer_pay_method=h.querySelector('#pm').value}else await rpc('xy_order_report_payment',Object.assign({p_order:o.id,p_method:h.querySelector('#pm').value,p_ref:h.querySelector('#pr').value},/^https:/.test(ft)?{p_foto:ft}:{}));c();vib();toast('Listo. Avisamos a quien vende');ref()}catch(e){toast(errDe(e));ev.target.disabled=false}}}));
+  const cerrarT=a=>async()=>{try{if(DEMO)o.status=a==='SOLD'?'COMPLETED':'CANCELLED';else await rpc('xy_p2p_close',{p_order:o.id,p_action:a});toast(a==='SOLD'?'Vendido ✓':'Trato cancelado');ref()}catch(e){toast(errDe(e))}};
+  on('#mkvnd',cerrarT('SOLD'));on('#mkcan',cerrarT('CANCEL'));
+  on('#mkdis',()=>hoja(`<h2>⚠️ ¿Qué pasó?</h2><p class="mu sm">Cuéntanos y te respondemos. Xyro no guarda dinero: revisamos el caso y podemos sancionar a quien incumplió.</p><textarea id="dt" rows="4" maxlength="1000" placeholder="Ej: el producto llegó roto, no responde…"></textarea><button class="btn p" id="dok">Enviar a Xyro</button><button class="btn l" data-x>Cancelar</button>`,(h,c)=>{
+   h.querySelector('#dok').onclick=async ev=>{ev.target.disabled=true;try{if(!DEMO)await rpc('xy_order_dispute',{p_order:o.id,p_text:h.querySelector('#dt').value});c();toast('Enviado. Te respondemos pronto');ref()}catch(e){toast(errDe(e));ev.target.disabled=false}}}));
+  const f=box.querySelector('#mkfm');f&&(f.onsubmit=async e=>{e.preventDefault();const i=box.querySelector('#mkmt'),t=i.value.trim();if(!t)return;i.value='';
+   try{if(DEMO)(mkDemo().M[id]=mkDemo().M[id]||[]).push({id:Date.now(),sender_id:'yo',body:t,created_at:new Date().toISOString()});else{const{error}=await sb.from('p2p_messages').insert({order_id:o.id,sender_id:MK.me,body:t});if(error)throw error}msgs()}catch(er){toast(errDe(er));i.value=t}});
+  msgs()};
+ try{o=await cargar()}catch(e){toast(errDe(e))}pinta();poll=setInterval(()=>{if(!ov.isConnected){clearInterval(poll);return recargar&&recargar()}if(!document.hidden)msgs()},5000)}
+function bovedaAbrir(){vib();hoja('<h2>🔐 Bóveda digital</h2><p class="mu sm">Tus compras digitales (ebooks, rutinas, cursos). Solo tú puedes abrirlas.</p><div id="bvl" class="g"><div class="vacio"><span class="e">⏳</span></div></div><button class="btn l" data-x>Cerrar</button>',async o=>{
+ const b=o.querySelector('#bvl');try{const L=DEMO?[{title:'Rutina de fuerza 12 semanas',entity_name:'Coach Ana',bought_at:new Date().toISOString(),ready:true,order_id:'x',item_id:'y'}]:await rpc('xy_vault',{});
+  b.innerHTML=(L&&L.length)?L.map(x=>`<div class="li"><span class="dot">💾</span><span class="sp sm"><b>${esc(x.title)}</b><br><span class="mu xs">${esc(x.entity_name||'')} · ${fF(x.bought_at,{day:'numeric',month:'short'})}</span></span>${x.ready?`<button class="btn p" style="width:auto" data-bo="${esc(x.order_id)}" data-bi="${esc(x.item_id)}">Abrir</button>`:'<span class="pill">Preparando</span>'}</div>`).join('')
+   :'<div class="vacio"><span class="e">💾</span><p class="mu sm">Aún no tienes compras digitales. Cuando compres un ebook o curso y te confirmen el pago, aparece aquí.</p></div>';
+  b.querySelectorAll('[data-bo]').forEach(x=>x.onclick=async()=>{if(DEMO)return toast('En la demo no hay archivos reales');x.disabled=true;try{const d=await rpc('xy_digital_get',{p_order:x.dataset.bo,p_item:x.dataset.bi});if(d&&d.url)window.open(d.url,'_blank','noopener')}catch(e){toast(errDe(e))}x.disabled=false})}
+ catch(e){b.innerHTML=`<p class="mu sm">${esc(errDe(e))}</p>`}})}
+/* 🎟️ Mis pases: membresías activas con entrada por QR + GPS (xy_checkin) */
+function pasesAbrir(){vib();hoja('<h2>🎟️ Mis pases</h2><p class="mu sm">Tus planes activos. En la entrada, toca «Marcar entrada» y escanea el QR del local.</p><div id="psl" class="g"><div class="vacio"><span class="e">⏳</span></div></div><button class="btn l" data-x>Cerrar</button>',async(o,close)=>{
+ const b=o.querySelector('#psl');try{await mkYo();let M;
+  if(DEMO)M=[{id:'m1',kind:'PASS',valid_from:new Date(Date.now()-10*864e5).toISOString(),valid_until:new Date(Date.now()+20*864e5).toISOString(),entities:{name:'Coach Ana',category:'entrenador'}}];
+  else{const{data,error}=await sb.from('user_entity_memberships').select('id,kind,status,valid_from,valid_until,sessions_left,stamps,entities(name,slug,category)').eq('user_id',MK.me).eq('status','ACTIVE').neq('kind','FOLLOW').order('valid_until',{ascending:true,nullsFirst:false}).limit(30);if(error)throw error;M=(data||[]).filter(m=>!m.valid_until||new Date(m.valid_until)>new Date())}
+  b.innerHTML=M.length?M.map(m=>{const e=m.entities||{},d=m.valid_until?Math.max(0,Math.ceil((new Date(m.valid_until)-Date.now())/864e5)):null;
+   return`<div class="card" style="border-color:color-mix(in srgb,var(--a) 45%,var(--ln))"><div class="row"><span style="font-size:26px">🎟️</span><span class="sp"><b>${esc(e.name||'Negocio')}</b><br><span class="mu xs">${({PASS:'Membresía',CLASS_PACK:'Paquete de clases',STAMP_CARD:'Tarjeta de sellos'})[m.kind]||'Plan'}${m.valid_until?' · vence '+fF(m.valid_until,{day:'numeric',month:'short'}):''}</span></span>
+    <b style="font-size:22px">${m.kind==='CLASS_PACK'?(m.sessions_left||0)+' <span class="xs">ses.</span>':m.kind==='STAMP_CARD'?(m.stamps||0)+'/10':d==null?'∞':d+' <span class="xs">días</span>'}</b></div>${m.kind!=='STAMP_CARD'?'<button class="btn p" data-chk>📍 Marcar entrada</button>':''}</div>`}).join('')
+   :'<div class="vacio"><span class="e">🎟️</span><p class="mu sm">Aún no tienes planes activos. Cuando te afilies a un gym o entrenador, tu pase aparece aquí.</p></div>';
+  b.querySelectorAll('[data-chk]').forEach(x=>x.onclick=()=>{close();checkinQR()})}catch(e){b.innerHTML=`<p class="mu sm">${esc(errDe(e))}</p>`}})}
+async function checkinQR(){escanear(async t=>{const m=/[?&]q=([\w-]{6,80})/.exec(t);if(!m){toast('Ese no es el QR de la entrada');return false}chkTok(m[1]);return true},'Escanea el QR de la entrada')}
+async function chkTok(tok,url){let g=null;try{g=await new Promise(ok=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>ok({lat:p.coords.latitude,lng:p.coords.longitude}),()=>ok(null),{enableHighAccuracy:true,timeout:10000}):ok(null))}catch(_){}
+ try{const d=DEMO?{ok:true,entity_name:'Coach Ana',days_left:20}:await rpc('xy_checkin',{p_token:tok,p_lat:g?g.lat:null,p_lng:g?g.lng:null});
+  if(d.ok){vib();confeti();toast(d.repeated?'👍 Ya marcaste tu entrada hace poco':'✅ ¡Entrada registrada! '+(d.entity_name||'')+(d.sessions_left!=null&&d.kind==='CLASS_PACK'?` · te quedan ${d.sessions_left} sesiones`:d.days_left!=null?` · te quedan ${d.days_left} días`:''))}
+  else if(url&&d.reason==='NO_PLAN')location.assign(url);else toast(d.message||(d.reason==='NO_PLAN'?'No tienes un plan activo aquí':'Acércate a la entrada (máx. 50 m)'))}catch(e){if(url)location.assign(url);else toast(errDe(e))}}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-pases],[data-boveda]');if(!t)return;e.preventDefault();const ov=t.closest('.ov');ov&&ov.remove();if(t.dataset.pases!==undefined)pasesAbrir();else bovedaAbrir()});
 (()=>{const st=document.createElement('style');st.textContent=`.emov{position:fixed;inset:0;z-index:8;background:var(--bg,#05060a);overflow:auto;animation:fd .2s}.emc{text-align:left;cursor:pointer;width:100%}.emc.dest{border-color:#facc1588;background:linear-gradient(135deg,#facc1514,transparent)}`;document.head.appendChild(st)})();
 {const d2=demoRpc;demoRpc=async function(f,a){
  const E0=[{id:'e1',titulo:'Mozo / Moza',tipo:'MEDIO',modalidad:'PRESENCIAL',sueldo_min:1200,sueldo_max:1500,moneda:'PEN',vacantes:2,pais:'PE',ciudad:'Miraflores',slug:'la-mar',negocio:'Cevichería La Mar',logo:'',ver:true,dest:true,km:1.2,creado:new Date().toISOString(),descripcion:'Atención en mesas de 12 pm a 6 pm. Buen trato y ganas de aprender.\nPropinas + menú del día.',requisitos:'Experiencia mínima de 6 meses (deseable).',vistas:84,estado:'ABIERTO',created_at:new Date(Date.now()-864e5*2).toISOString()},
