@@ -28,7 +28,7 @@ const inicial = () => esc(((S.me && (S.me.display_name || S.me.username)) || '?'
 // Xyro Edits oculto hasta lanzarlo (decisión 2026-11-18). Entrenadores/profesionales no usan QR de mesa.
 const esPro = () => !!(S.entidad && S.entidad.type === 'PROFESSIONAL');
 function pintarMarco(r) {
-  const m = modoDe(r), md = MODOS[m], nav = NAV[m].filter(([k]) => !(k === 'c-qr' && esPro()));
+  const m = modoDe(r), md = MODOS[m], nav = NAV[m].filter(([k]) => !(k === 'c-qr' && esPro())).map((x) => x[0] === 'c-catalogo' && esPro() ? ['c-catalogo', 'Mis planes', x[2]] : x);
   const eq = m === 'panel', vol = `<a class="modo" href="${MI()}" aria-label="Volver a Mi Xyro">‹ <span class="ell">Mi Xyro</span></a>`;
   $('#top').innerHTML = `${logo()}${eq ? `<button class="modo ${md.c}" id="bModo" aria-label="Cambiar de modo"><i></i><span class="ell">${esc(md.t)}</span>▾</button>` : vol}<span class="sp"></span>
     ${S.demo ? '<span class="pill warn">Demo</span>' : ''}<button class="av" id="bAv" aria-label="Perfil">${inicial()}</button>`;
