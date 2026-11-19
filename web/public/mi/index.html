@@ -2865,7 +2865,7 @@ function mkaEs(id){const x=(MKA||[]).find(o=>o.id===id);return x?x.nv:''}
 function mkaLazy(){if(MKA==null&&D&&!DEMO&&Date.now()-(MKAT||0)>5e3){MKAT=Date.now();mkaCarga().then(()=>{if(!SUB&&mkaNuevos()&&!document.querySelector('.ov,.emov'))pinta()})}}
 function mkaNuevos(){return(MKA||[]).filter(o=>o.nv).length}
 async function mkaCarga(){if(!D||DEMO||MODO!=='cliente')return;const me=await mkYo();if(!me)return;
- try{const{data:O,error}=await sb.from('orders').select('*,marketplace_listings(title)').not('listing_id','is',null).or(`buyer_id.eq.${me},seller_user_id.eq.${me}`).order('created_at',{ascending:false}).limit(30);if(error)throw error;
+ try{const{data:O,error}=await mkOrd(q=>q.not('listing_id','is',null).or(`buyer_id.eq.${me},seller_user_id.eq.${me}`).order('created_at',{ascending:false}).limit(30));if(error)throw error;
   const A=(O||[]).filter(o=>['CREATED','AWAITING_PAYMENT','DISPUTED'].includes(o.status)||Date.now()-new Date(o.updated_at||o.created_at)<3*864e5);
   let M=[];if(A.length){const r=await sb.from('p2p_messages').select('order_id,sender_id,body,created_at').in('order_id',A.map(o=>o.id)).neq('sender_id',me).order('id',{ascending:false}).limit(200);M=r.data||[]}
   MKA=A.map(o=>{const v=ls.g('mk-v-'+o.id)||'',ven=o.seller_user_id===me,m=M.find(x=>x.order_id===o.id),t=(o.marketplace_listings||{}).title||'tu publicación';let nv='';
@@ -2908,7 +2908,7 @@ async function mkAbrir(){vib();await mkYo();
   box.querySelectorAll('[data-mki]').forEach(b=>b.onclick=()=>mkDetalle(MK.L[+b.dataset.mki],carga))};
  const carga=async()=>{MK.L=null;ov.querySelectorAll('[data-mkv]').forEach(b=>b.classList.toggle('on',b.dataset.mkv===MK.v));lista();
   try{if(DEMO){const d=mkDemo();MK.L=MK.v==='tratos'?d.O:d.L.filter(m=>MK.v==='mias'?m.seller_id==='yo':m.status==='ACTIVE')}
-   else if(MK.v==='tratos'){if(!MK.me){MK.L=[];return lista()}const{data,error}=await sb.from('orders').select('*,marketplace_listings(title)').not('listing_id','is',null).or(`buyer_id.eq.${MK.me},seller_user_id.eq.${MK.me}`).order('created_at',{ascending:false}).limit(50);if(error)throw error;MK.L=data||[]}
+   else if(MK.v==='tratos'){if(!MK.me){MK.L=[];return lista()}const{data,error}=await mkOrd(q=>q.not('listing_id','is',null).or(`buyer_id.eq.${MK.me},seller_user_id.eq.${MK.me}`).order('created_at',{ascending:false}).limit(50));if(error)throw error;MK.L=data||[]}
    else{const sel='*';let x=sb.from('marketplace_listings').select(sel);
     x=MK.v==='mias'?(MK.me?x.eq('seller_id',MK.me).neq('status','BANNED'):x.eq('id','00000000-0000-0000-0000-000000000000')):x.eq('status','ACTIVE').order('featured_until',{ascending:false,nullsFirst:false});
     const{data,error}=await x.order('created_at',{ascending:false}).limit(60);if(error)throw error;MK.L=data||[];if(MK.L.length)MKST='stock' in MK.L[0]}}
@@ -2952,9 +2952,10 @@ function mkDetalle(m,recargar){const mia=m.seller_id===MK.me,F=m.photos||[];
   on('#mkqt',est('REMOVED','Publicación quitada'));on('#mkrp',est('ACTIVE','Publicada de nuevo ✓'));
   on('#mkrep',()=>{close();hoja(`<h2>🚩 Reportar</h2><p class="mu sm">Lo revisamos. Con varios reportes se oculta sola.</p>${['Es una estafa','Producto prohibido','Foto o texto ofensivo','Otra cosa'].map(t=>`<button class="btn" data-r="${t}">${t}</button>`).join('')}<button class="btn l" data-x>Cancelar</button>`,(h2,c2)=>
    h2.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{try{if(!DEMO)await rpc('xy_listing_report',{p_listing:m.id,p_reason:b.dataset.r});c2();toast('Gracias, lo revisaremos')}catch(e){toast(errDe(e))}}))})})}
+var MKOQ=true;async function mkOrd(f){const C='id,code,status,total,currency,buyer_id,seller_user_id,listing_id,created_at,updated_at,buyer_paid_at,buyer_pay_method,buyer_pay_ref,buyer_pay_foto';let r=MKOQ?await f(sb.from('orders').select(C+',p2p_qty,marketplace_listings(title)')):null;if(!r||(r.error&&/p2p_qty|permission|column/i.test(r.error.message||''))){if(r)MKOQ=false;r=await f(sb.from('orders').select(C+',marketplace_listings(title)'))}return r}
 async function mkTrato(id,recargar){await mkYo();let o=null,n=-1,poll=0;
  const ov=mkOv('<div id="mktr"><div class="vacio"><span class="e">⏳</span></div></div>');
- const cargar=async()=>{if(DEMO)return mkDemo().O.find(x=>x.id===id);const{data,error}=await sb.from('orders').select('*,marketplace_listings(title)').eq('id',id).maybeSingle();if(error)throw error;return data};
+ const cargar=async()=>{if(DEMO)return mkDemo().O.find(x=>x.id===id);const{data,error}=await mkOrd(q=>q.eq('id',id).maybeSingle());if(error)throw error;return data};
  const msgs=async()=>{try{const M=DEMO?(mkDemo().M[id]||[]):((await sb.from('p2p_messages').select('id,sender_id,body,created_at').eq('order_id',id).order('id').limit(300)).data||[]);
   mkaVisto(id);const b=ov.querySelector('#mkms');if(!b||M.length===n)return;n=M.length;
   b.innerHTML=M.length?M.map(x=>`<div style="max-width:80%;justify-self:${x.sender_id===MK.me?'end':'start'};background:${x.sender_id===MK.me?'var(--a)':'#ffffff12'};color:${x.sender_id===MK.me?'#fff':'inherit'};padding:8px 12px;border-radius:14px;white-space:pre-wrap">${esc(x.body)}<br><span class="xs" style="opacity:.7">${fH(x.created_at)}</span></div>`).join(''):'<p class="mu sm" style="text-align:center">Aún no hay mensajes. ¡Saluda!</p>';b.scrollTop=b.scrollHeight}catch(_){}};
