@@ -1709,7 +1709,12 @@ let NFUND=null;
 const NFR={gym:'gimnasios',consultorio:'consultorios',barberia:'barberías',restaurante:'restaurantes',cafeteria:'cafeterías',academia:'academias'};
 function nfBan(){if(!NFUND||LS.g('xa-nf-'+SLUG,'')==='1')return'';setTimeout(()=>{const x=$('#nfX');x&&(x.onclick=()=>{LS.s('xa-nf-'+SLUG,'1');$('#nfB').remove()})},0);
  return`<div class="card" id="nfB" style="border:1px solid #e6b84d66;background:linear-gradient(135deg,#e6b84d1f,#14141400);display:flex;gap:14px;align-items:center;margin-bottom:14px"><span style="font-size:34px">🏅</span><div style="flex:1"><b style="color:#e6b84d">Negocio fundador de XyroStudio</b><p class="mu" style="margin:4px 0 0">Fueron los primeros ${esc(NFR[NFUND.rubro]||'negocios')} en creer en este proyecto. Gracias por confiar en nosotros: este reconocimiento es solo suyo y se ve en su Mi Xyro y en su carta.</p></div><button class="btn" id="nfX" style="padding:6px 10px">✕</button></div>`}
-function inicio(){return nfBan()+inicio0()}
+function ubiBan(){if(DEMO||!isAdmin()||CFG.rubro==='digital')return'';const s0=((PF().sedes||[])[0])||{};if(s0.lat||((CFG.mesas||{}).geo||[]).length)return'';
+ setTimeout(()=>{const b=$('#ubiG');b&&(b.onclick=()=>{if(!navigator.geolocation)return toast('Este equipo no da ubicación. Hazlo desde tu celular, en el local.');b.disabled=true;b.textContent='⏳ Buscando…';
+  navigator.geolocation.getCurrentPosition(async q=>{try{const P=Object.assign({},PF()),S=(P.sedes||[]).slice();S[0]=Object.assign({},S[0]||{nombre:'Local'},{lat:+q.coords.latitude.toFixed(6),lng:+q.coords.longitude.toFixed(6)});P.sedes=S;await DB.cfg({perfil:P});toast('📍 Ubicación guardada: ya sales en el mapa');const x=$('#ubiB');x&&x.remove()}catch(e){toast(e.message||'No se pudo guardar');b.disabled=false;b.textContent='📍 Estoy en el local: guardar ubicación'}},
+   ()=>{toast('Activa la ubicación de tu celular y vuelve a intentar');b.disabled=false;b.textContent='📍 Estoy en el local: guardar ubicación'},{enableHighAccuracy:true,timeout:15000})})},0);
+ return`<div class="card" id="ubiB" style="border:1px solid #f59e0b66;background:#f59e0b14;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px"><span style="font-size:30px">📍</span><div style="flex:1;min-width:200px"><b style="color:#f59e0b">Te falta la ubicación de tu local</b><p class="mu" style="margin:4px 0 0">Sin ella no sales en el mapa de Mi Xyro y tus clientes no te encuentran. Hazlo desde tu celular estando en el local.</p></div><button class="btn p" id="ubiG">📍 Estoy en el local: guardar ubicación</button></div>`}
+function inicio(){return ubiBan()+nfBan()+inicio0()}
 function inicio0(){
  if(R.resto)return inicioResto();
  if(R.citas&&citOn())return inicioDent();
