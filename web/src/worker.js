@@ -907,92 +907,127 @@ async function dcEstado(req, env) {
   } catch (e) { return json({ token: true, error: String(e.message || e).slice(0, 200) }); }
 }
 
+// Armar el servidor por pasos (el plan gratis de Cloudflare permite ~50 llamadas por pedido):
+// base → limpiar (se repite hasta quedan:0) → mensajes → servidor. El gestor los llama en orden.
+const INV = "R39CwRC2bP";   // invitación que está en toda la web: su canal NUNCA se borra (se reusa como bienvenida)
+const IMG = n => `https://xyrostudio.net/img/discord/${n}.jpg?v=2`;
+const DC_ROL = [["equipo", "Equipo Xyro", 0x7c5cff, true], ["negocio", "Negocio Xyro", 0xf59e0b, true], ["plus", "Xyro+", 0xc026d3, true], ["cuenta", "Cuenta Xyro", 0x22c55e, false]];
+const DC_ESTR = [
+  ["bienvenida", "📌 BIENVENIDA", "RO", [["bienvenida", "👋┃bienvenida", "Empieza aquí: qué es Xyro y cómo vincular tu cuenta."], ["reglas", "📜┃reglas", "Normas para que la comunidad sea un buen lugar."], ["anuncios", "📣┃anuncios", "Noticias oficiales de Xyro."], ["actualizaciones", "🚀┃actualizaciones", "Lo nuevo en Mi Xyro y Xyro Apps."]]],
+  ["promos", "🎁 PROMOS Y EVENTOS", "RO", [["promos", "🎁┃promos", "Promos de Xyro y de negocios Xyro."], ["eventos", "🎉┃eventos", "Eventos, retos y campañas de puntos x2."]]],
+  ["comunidad", "💬 COMUNIDAD", "PUB", [["general", "💬┃general", "Habla con la comunidad de Xyro."], ["ideas", "💡┃ideas-y-recomendaciones", "¿Qué le falta a Xyro? Propón ideas y vota con 👍. Las mejores las hacemos."], ["dudas", "❓┃dudas", "Preguntas de la comunidad. Para temas privados (pagos, tu cuenta) abre un ticket."], ["negocios", "🏪┃muestra-tu-negocio", "Presenta tu negocio Xyro: tu enlace de Mi Xyro, promos y novedades."]]],
+  ["soporte", "🎫 SOPORTE", "RO", [["abrir-ticket", "🎫┃abrir-ticket", "Abre un ticket privado con el equipo de Xyro."]]],
+  ["tickets", "🎫 TICKETS ABIERTOS", "PRIV", []],
+  ["equipo", "🔒 EQUIPO XYRO", "PRIV", [["equipo", "🔒┃equipo", "Solo el equipo de Xyro."], ["registro-tickets", "🗂┃registro-tickets", "Cada ticket abierto y cerrado, con su conversación."]]],
+];
+const dcOW = (g, eq) => ({
+  RO: [{ id: g, type: 0, deny: ps(PS, PT), allow: ps(PV, PH, PR) }, { id: eq, type: 0, allow: ps(PV, PS, PH, PA, PE, PM) }],
+  PUB: [{ id: g, type: 0, allow: ps(PV, PS, PH, PA, PE, PR) }, { id: eq, type: 0, allow: ps(PM) }],
+  PRIV: [{ id: g, type: 0, deny: ps(PV) }, { id: eq, type: 0, allow: ps(PV, PS, PH, PA, PE, PM) }],
+});
+const dcInvite = `https://discord.com/oauth2/authorize?scope=bot%20applications.commands&permissions=8&client_id=`;
+
 async function dcArmar(req, env) {
   if (req.method !== "POST") return json({ error: "POST" }, 405);
   if (!(await dcGestor(req, env))) return json({ error: "sin acceso" }, 403);
   if (!env.DISCORD_BOT_TOKEN || !env.WA_CLAVE) return json({ error: "Falta el secreto DISCORD_BOT_TOKEN en Cloudflare" }, 400);
   let body = {}; try { body = await req.json(); } catch { }
-  const log = [];
+  const paso = body.paso || "base", log = [];
+  const guardar = async cfg => { await rpcAnon(env, "xy_discord_cfg_guardar", { p_clave: env.WA_CLAVE, p_cfg: cfg }); DC_CFG = cfg; DC_CFG_T = Date.now(); };
   try {
-    const app = await dcApp(env), old = await dcCfg(env, true), gs = (await dc(env, "GET", "/users/@me/guilds")) || [];
-    const gi = gs.find(g => g.id === (body.guild || old.guild)) || gs[0];
-    if (!gi) return json({ error: "invitar", invitar: `https://discord.com/oauth2/authorize?client_id=${app.id}&scope=bot%20applications.commands&permissions=8` });
-    const g = gi.id, cfg = { guild: g, roles: {}, cats: {}, canales: {}, msgs: Object.assign({}, old.msgs || {}), invitacion: old.invitacion || "https://discord.gg/R39CwRC2bP", archivo: old.archivo || [] };
-    // Roles
-    let roles = await dc(env, "GET", `/guilds/${g}/roles`);
-    const ROL = [["equipo", "Equipo Xyro", 0x7c5cff, true], ["negocio", "Negocio Xyro", 0xf59e0b, true], ["plus", "Xyro+", 0xc026d3, true], ["cuenta", "Cuenta Xyro", 0x22c55e, false]];
-    for (const [k, nm, color, hoist] of ROL) {
-      let r = roles.find(x => x.id === (old.roles || {})[k]) || roles.find(x => x.name === nm);
-      if (!r) { r = await dc(env, "POST", `/guilds/${g}/roles`, { name: nm, color, hoist, mentionable: k === "equipo", permissions: "0" }); log.push("Rol " + nm); }
-      cfg.roles[k] = r.id;
-    }
-    const EQ = cfg.roles.equipo, ev = g;
-    const RO = [{ id: ev, type: 0, deny: ps(PS, PT), allow: ps(PV, PH, PR) }, { id: EQ, type: 0, allow: ps(PV, PS, PH, PA, PE, PM) }];   // solo leer
-    const PUB = [{ id: ev, type: 0, allow: ps(PV, PS, PH, PA, PE, PR) }, { id: EQ, type: 0, allow: ps(PM) }];
-    const PRIV = [{ id: ev, type: 0, deny: ps(PV) }, { id: EQ, type: 0, allow: ps(PV, PS, PH, PA, PE, PM) }];
-    const ESTR = [
-      ["bienvenida", "📌 BIENVENIDA", RO, [["bienvenida", "👋┃bienvenida", "Empieza aquí: qué es Xyro y cómo vincular tu cuenta."], ["reglas", "📜┃reglas", "Normas para que la comunidad sea un buen lugar."], ["anuncios", "📣┃anuncios", "Noticias oficiales de Xyro."], ["actualizaciones", "🚀┃actualizaciones", "Lo nuevo en Mi Xyro y Xyro Apps."]]],
-      ["promos", "🎁 PROMOS Y EVENTOS", RO, [["promos", "🎁┃promos", "Promos de Xyro y de negocios Xyro."], ["eventos", "🎉┃eventos", "Eventos, retos y campañas de puntos x2."]]],
-      ["comunidad", "💬 COMUNIDAD", PUB, [["general", "💬┃general", "Habla con la comunidad de Xyro."], ["ideas", "💡┃ideas-y-recomendaciones", "¿Qué le falta a Xyro? Propón ideas y vota con 👍. Las mejores las hacemos."], ["dudas", "❓┃dudas", "Preguntas de la comunidad. Para temas privados (pagos, tu cuenta) abre un ticket."], ["negocios", "🏪┃muestra-tu-negocio", "Presenta tu negocio Xyro: tu enlace de Mi Xyro, promos y novedades."]]],
-      ["soporte", "🎫 SOPORTE", RO, [["abrir-ticket", "🎫┃abrir-ticket", "Abre un ticket privado con el equipo de Xyro."]]],
-      ["tickets", "🎫 TICKETS ABIERTOS", PRIV, []],
-      ["equipo", "🔒 EQUIPO XYRO", PRIV, [["equipo", "🔒┃equipo", "Solo el equipo de Xyro."], ["registro-tickets", "🗂┃registro-tickets", "Cada ticket abierto y cerrado, con su conversación."]]],
-    ];
-    let chs = await dc(env, "GET", `/guilds/${g}/channels`);
-    const busca = (id, nm, type) => chs.find(c => c.id === id) || chs.find(c => c.name === nm && c.type === type);
-    let pos = 0;
-    for (const [ck, cn, ow, lista] of ESTR) {
-      let cat = busca((old.cats || {})[ck], cn, 4);
-      if (!cat) { cat = await dc(env, "POST", `/guilds/${g}/channels`, { name: cn, type: 4, permission_overwrites: ow, position: pos }); log.push("Categoría " + cn); }
-      else await dc(env, "PATCH", `/channels/${cat.id}`, { name: cn, permission_overwrites: ow, position: pos });
-      cfg.cats[ck] = cat.id; pos++;
-      for (const [k, nm, topic] of lista) {
-        let c = busca((old.canales || {})[k], nm, 0);
-        if (!c) { c = await dc(env, "POST", `/guilds/${g}/channels`, { name: nm, type: 0, topic, parent_id: cat.id, permission_overwrites: ow }); log.push("Canal " + nm); }
-        else await dc(env, "PATCH", `/channels/${c.id}`, { name: nm, topic, parent_id: cat.id, permission_overwrites: ow });
-        cfg.canales[k] = c.id;
+    const app = await dcApp(env), old = await dcCfg(env, true);
+    if (paso === "base") {
+      const gs = (await dc(env, "GET", "/users/@me/guilds")) || [], gi = gs.find(g => g.id === old.guild) || gs[0];
+      if (!gi) return json({ error: "invitar", invitar: dcInvite + app.id });
+      const g = gi.id, cfg = Object.assign({}, old, { guild: g, roles: {}, cats: {}, canales: {}, msgs: Object.assign({}, old.msgs || {}), invitacion: "https://discord.gg/" + INV });
+      const roles = await dc(env, "GET", `/guilds/${g}/roles`);
+      for (const [k, nm, color, hoist] of DC_ROL) {
+        let r = roles.find(x => x.id === (old.roles || {})[k]) || roles.find(x => x.name === nm);
+        if (!r) { r = await dc(env, "POST", `/guilds/${g}/roles`, { name: nm, color, hoist, mentionable: k === "equipo", permissions: "0" }); log.push("Rol " + nm); }
+        cfg.roles[k] = r.id;
       }
-    }
-    if (old.cats && old.cats.tickets && old.cats.tickets !== cfg.cats.tickets) log.push("Tickets: categoría nueva");
-    // Esconder lo viejo (no se borra nada): pasa a «📦 ARCHIVO», que solo ve el equipo
-    chs = await dc(env, "GET", `/guilds/${g}/channels`);
-    const nuestros = new Set([...Object.values(cfg.cats), ...Object.values(cfg.canales)]);
-    const viejos = chs.filter(c => !nuestros.has(c.id) && c.parent_id !== cfg.cats.tickets && c.id !== (old.cats || {}).archivo && !(c.parent_id && c.parent_id === (old.cats || {}).archivo) && !/^ticket-/.test(c.name) && !(c.name === "📦 ARCHIVO" && c.type === 4));
-    if (body.archivar !== false && viejos.length) {
-      let ar = busca((old.cats || {}).archivo, "📦 ARCHIVO", 4);
-      if (!ar) ar = await dc(env, "POST", `/guilds/${g}/channels`, { name: "📦 ARCHIVO", type: 4, permission_overwrites: PRIV, position: 99 });
-      cfg.cats.archivo = ar.id;
-      for (const c of viejos) {
-        if (!cfg.archivo.some(a => a.id === c.id) && cfg.archivo.length < 150) cfg.archivo.push({ id: c.id, n: c.name, p: c.parent_id || null, t: c.type });
-        try {
-          if (c.type === 4) await dc(env, "PATCH", `/channels/${c.id}`, { permission_overwrites: PRIV, position: 100 });
-          else await dc(env, "PATCH", `/channels/${c.id}`, { parent_id: ar.id, lock_permissions: true });
-          log.push("Escondido " + c.name);
-        } catch (e) { log.push("No se pudo esconder " + c.name); }
+      const OW = dcOW(g, cfg.roles.equipo), chs = await dc(env, "GET", `/guilds/${g}/channels`);
+      let invCh = null; try { const iv = await dc(env, "GET", `/invites/${INV}`); invCh = iv && iv.channel && iv.channel.id; } catch { }
+      const busca = (ids, nm, type) => { for (const id of ids) { const c = id && chs.find(x => x.id === id); if (c) return c; } return chs.find(c => c.name === nm && c.type === type); };
+      let pos = 0;
+      for (const [ck, cn, tipo, lista] of DC_ESTR) {
+        const ow = OW[tipo]; let cat = busca([(old.cats || {})[ck]], cn, 4);
+        if (!cat) { cat = await dc(env, "POST", `/guilds/${g}/channels`, { name: cn, type: 4, permission_overwrites: ow, position: pos }); log.push("Categoría " + cn); }
+        else await dc(env, "PATCH", `/channels/${cat.id}`, { name: cn, permission_overwrites: ow, position: pos });
+        cfg.cats[ck] = cat.id; pos++;
+        for (const [k, nm, topic] of lista) {
+          const ids = k === "bienvenida" ? [invCh, (old.canales || {})[k]] : [(old.canales || {})[k]];
+          let c = busca(ids, nm, 0);
+          if (!c) { c = await dc(env, "POST", `/guilds/${g}/channels`, { name: nm, type: 0, topic, parent_id: cat.id, permission_overwrites: ow }); log.push("Canal " + nm); }
+          else await dc(env, "PATCH", `/channels/${c.id}`, { name: nm, topic, parent_id: cat.id, permission_overwrites: ow });
+          if (k === "bienvenida" && c.id === invCh && (old.canales || {}).bienvenida && old.canales.bienvenida !== invCh) { cfg.limpiarMsgs = invCh; delete cfg.msgs.bienvenida; }
+          if (k === "bienvenida" && c.id === invCh && !(old.canales || {}).bienvenida) cfg.limpiarMsgs = invCh;
+          cfg.canales[k] = c.id;
+        }
       }
-    } else if ((old.cats || {}).archivo) cfg.cats.archivo = old.cats.archivo;
-    // Mensajes fijos (se editan si ya existen)
-    const L = (label, url, emoji) => ({ type: 2, style: 5, label, url, emoji: { name: emoji } });
-    const MSG = {
-      bienvenida: { embeds: [{ title: "👋 Bienvenido a la comunidad de Xyro", color: 0x7c5cff, description: "**Xyro conecta personas con negocios.** Encuentra promos, gana puntos en cada compra y canjéalos por premios en tus lugares favoritos. Si tienes un negocio, Xyro te trae más clientes.\n\n**¿Qué hay aquí?**\n📣 <#" + cfg.canales.anuncios + "> y 🚀 <#" + cfg.canales.actualizaciones + "> · lo nuevo de Xyro\n🎁 <#" + cfg.canales.promos + "> y 🎉 <#" + cfg.canales.eventos + "> · promos, retos y eventos\n💡 <#" + cfg.canales.ideas + "> · dinos qué mejorar\n❓ <#" + cfg.canales.dudas + "> · pregunta a la comunidad\n🎫 <#" + cfg.canales["abrir-ticket"] + "> · ayuda privada con el equipo\n\n**Primer paso:** vincula tu cuenta de Mi Xyro. Así te reconocemos al toque y recibes tu rol ✅", footer: { text: "Xyro · xyrostudio.net" } }],
-        components: [{ type: 1, components: [L("Abrir Mi Xyro", "https://xyrostudio.net/mi/", "📲"), L("Registrar mi negocio gratis", "https://xyrostudio.net/mi/?registro=1", "🏪"), btnVincular] }] },
-      reglas: { embeds: [{ title: "📜 Reglas de la comunidad", color: 0x3a8bff, description: "1. **Respeto siempre.** Nada de insultos, acoso ni discriminación.\n2. **Sin spam.** Publicidad solo en <#" + cfg.canales.negocios + "> y de negocios Xyro.\n3. **Tus datos son tuyos.** No publiques capturas de pagos, teléfonos ni datos personales: para eso abre un ticket.\n4. **El equipo de Xyro nunca te pedirá tu clave** ni dinero por mensaje privado.\n5. **Estafas o suplantación = expulsión** inmediata.\n6. Cada tema en su canal. ¡Gracias por cuidar la comunidad! 💜" }] },
-      "abrir-ticket": { embeds: [{ title: "🎫 ¿Necesitas ayuda?", color: 0x22c55e, description: "Elige un tema y se abre un **canal privado** donde solo tú y el equipo de Xyro pueden escribir.\n\n🔗 Si vinculaste tu cuenta de Mi Xyro, ya sabremos quién eres y cuáles son tus negocios: no tendrás que repetir tus datos.\n\n💳 Para pagos, ten a mano tu **N.º de operación** y la captura." }], components: btnsTicket() },
-      ideas: { embeds: [{ title: "💡 Ideas y recomendaciones", color: 0xf59e0b, description: "¿Qué le falta a Xyro? ¿Qué negocio quieres ver? Escribe tu idea en un mensaje y la comunidad vota con 👍. Revisamos las más votadas cada semana." }] },
-    };
-    for (const [k, m] of Object.entries(MSG)) {
-      const cid = cfg.canales[k], mid = cfg.msgs[k] && cfg.msgs[k].c === cid ? cfg.msgs[k].m : null;
-      let ok = false;
-      if (mid) { try { await dc(env, "PATCH", `/channels/${cid}/messages/${mid}`, m); ok = true; } catch { } }
-      if (!ok) { const r = await dc(env, "POST", `/channels/${cid}/messages`, m); cfg.msgs[k] = { c: cid, m: r.id }; try { await dc(env, "PUT", `/channels/${cid}/pins/${r.id}`); } catch { } log.push("Mensaje en " + k); }
+      await guardar(cfg);
+      return json({ ok: true, servidor: gi.name, cambios: log });
     }
-    // Comandos /vincular y /ticket, y que los botones lleguen a este Worker
-    try { await dc(env, "PUT", `/applications/${app.id}/guilds/${g}/commands`, [{ name: "vincular", description: "Vincula tu cuenta de Mi Xyro", type: 1 }, { name: "ticket", description: "Abre un ticket de ayuda con el equipo de Xyro", type: 1 }]); } catch (e) { log.push("Comandos: " + e.message); }
-    try { if (app.interactions_endpoint_url !== "https://xyrostudio.net/api/discord") { await dc(env, "PATCH", "/applications/@me", { interactions_endpoint_url: "https://xyrostudio.net/api/discord" }); DC_APP = null; log.push("Botones conectados a xyrostudio.net"); } } catch (e) { log.push("Botones: " + e.message); }
-    try { await dc(env, "PATCH", `/guilds/${g}`, { system_channel_id: cfg.canales.general }); } catch { }
-    cfg.armado = new Date().toISOString();
-    await rpcAnon(env, "xy_discord_cfg_guardar", { p_clave: env.WA_CLAVE, p_cfg: cfg }); DC_CFG = cfg; DC_CFG_T = Date.now();
-    return json({ ok: true, servidor: gi.name, cambios: log });
+    const cfg = old, g = cfg.guild;
+    if (!g || !cfg.canales) return json({ error: "Primero el paso base" }, 400);
+    if (paso === "limpiar") {   // borra TODO lo del Discord anterior (canales, categorías y roles que no son de Xyro), de a poco
+      let n = 0; const MAX = 30;
+      if (cfg.limpiarMsgs) {   // el canal de la invitación de la web se reusa: se vacían sus mensajes viejos
+        const ms = (await dc(env, "GET", `/channels/${cfg.limpiarMsgs}/messages?limit=25`).catch(() => [])) || [];
+        for (const m of ms) { if (n >= 20) break; try { await dc(env, "DELETE", `/channels/${cfg.limpiarMsgs}/messages/${m.id}`); n++; } catch { } }
+        if (ms.length && n) { await guardar(cfg); return json({ ok: true, quedan: 1, cambios: [`Vaciando la bienvenida vieja (${n} mensajes)`] }); }
+        delete cfg.limpiarMsgs; await guardar(cfg);
+      }
+      const nuestros = new Set([...Object.values(cfg.cats || {}), ...Object.values(cfg.canales || {})]);
+      const chs = await dc(env, "GET", `/guilds/${g}/channels`);
+      const viejos = chs.filter(c => !nuestros.has(c.id) && c.parent_id !== cfg.cats.tickets).sort((a, b) => (a.type === 4) - (b.type === 4));   // primero canales, luego categorías
+      for (const c of viejos) { if (n >= MAX) break; try { await dc(env, "DELETE", `/channels/${c.id}`); log.push("Borrado #" + c.name); } catch (e) { log.push("No se pudo borrar " + c.name); } n++; }
+      let quedan = viejos.length - Math.min(viejos.length, MAX);
+      if (n < MAX) {
+        const roles = await dc(env, "GET", `/guilds/${g}/roles`), mios = new Set(Object.values(cfg.roles || {}));
+        const vr = roles.filter(r => r.id !== g && !r.managed && !mios.has(r.id) && !(BigInt(r.permissions || "0") & 8n));
+        for (const r of vr) { if (n >= MAX) break; try { await dc(env, "DELETE", `/guilds/${g}/roles/${r.id}`); log.push("Rol borrado " + r.name); } catch { log.push("No se pudo borrar el rol " + r.name); } n++; }
+        quedan += Math.max(0, vr.length - (MAX - Math.min(viejos.length, MAX)));
+      }
+      if (cfg.cats.archivo) { delete cfg.cats.archivo; cfg.archivo = []; await guardar(cfg); }
+      return json({ ok: true, quedan, cambios: log });
+    }
+    if (paso === "mensajes") {
+      const C = cfg.canales, L = (label, url, emoji) => ({ type: 2, style: 5, label, url, emoji: { name: emoji } });
+      const ban = n => ({ color: 0x7c5cff, image: { url: IMG(n) } });
+      const MSG = {
+        bienvenida: { embeds: [ban("bienvenida"), { title: "👋 Bienvenido a la comunidad de Xyro", color: 0x7c5cff, description: `**Xyro conecta personas con negocios.** Encuentra promos, gana puntos en cada compra y canjéalos por premios en tus lugares favoritos. Si tienes un negocio, Xyro te trae más clientes.\n\n**¿Qué hay aquí?**\n📣 <#${C.anuncios}> y 🚀 <#${C.actualizaciones}> · lo nuevo de Xyro\n🎁 <#${C.promos}> y 🎉 <#${C.eventos}> · promos, retos y eventos\n💡 <#${C.ideas}> · dinos qué mejorar\n❓ <#${C.dudas}> · pregunta a la comunidad\n🎫 <#${C["abrir-ticket"]}> · ayuda privada con el equipo\n\n**Primer paso:** vincula tu cuenta de Mi Xyro. Así te reconocemos al toque y recibes tu rol ✅`, footer: { text: "Xyro · xyrostudio.net" } }],
+          components: [{ type: 1, components: [L("Abrir Mi Xyro", "https://xyrostudio.net/mi/", "📲"), L("Registrar mi negocio gratis", "https://xyrostudio.net/mi/?registro=1", "🏪"), btnVincular] }] },
+        reglas: { embeds: [ban("reglas"), { title: "📜 Reglas de la comunidad", color: 0x3a8bff, description: `1. **Respeto siempre.** Nada de insultos, acoso ni discriminación.\n2. **Sin spam.** Publicidad solo en <#${C.negocios}> y de negocios Xyro.\n3. **Tus datos son tuyos.** No publiques capturas de pagos, teléfonos ni datos personales: para eso abre un ticket.\n4. **El equipo de Xyro nunca te pedirá tu clave** ni dinero por mensaje privado.\n5. **Estafas o suplantación = expulsión** inmediata.\n6. Cada tema en su canal. ¡Gracias por cuidar la comunidad! 💜` }] },
+        anuncios: { embeds: [ban("anuncios"), { color: 0x7c5cff, description: "Aquí publicamos las noticias oficiales de Xyro. Activa las notificaciones de este canal para enterarte primero 🔔" }] },
+        actualizaciones: { embeds: [ban("actualizaciones"), { color: 0x3ad6ff, description: "Cada mejora de Mi Xyro y Xyro Apps, explicada simple." }] },
+        promos: { embeds: [ban("promos"), { color: 0xf59e0b, description: "Promos de Xyro y de negocios Xyro. Guárdalos en Mi Xyro para no perderte ninguna 🎁" }], components: [{ type: 1, components: [L("Ver negocios en Mi Xyro", "https://xyrostudio.net/mi/", "📍")] }] },
+        eventos: { embeds: [ban("eventos"), { color: 0xc026d3, description: "Retos, campañas de puntos x2 y eventos de la comunidad. ¡Participa y gana! 🏆" }] },
+        general: { embeds: [ban("general"), { color: 0x7c5cff, description: "Conversa con la comunidad de Xyro. Respeta las reglas y diviértete 💬" }] },
+        ideas: { embeds: [ban("ideas"), { title: "💡 Ideas y recomendaciones", color: 0xf59e0b, description: "¿Qué le falta a Xyro? ¿Qué negocio quieres ver? Escribe tu idea en un mensaje y la comunidad vota con 👍. Revisamos las más votadas cada semana." }] },
+        dudas: { embeds: [ban("dudas"), { color: 0x3ad6ff, description: `Pregunta lo que quieras sobre Xyro. Para temas privados (pagos, tu cuenta) mejor abre un ticket en <#${C["abrir-ticket"]}>.` }] },
+        negocios: { embeds: [ban("negocios"), { color: 0x22c55e, description: "¿Tienes un negocio en Xyro? Preséntalo: qué ofreces, tu enlace de Mi Xyro y tus promos. Una publicación por semana 🙌" }], components: [{ type: 1, components: [L("Registrar mi negocio gratis", "https://xyrostudio.net/mi/?registro=1", "🏪")] }] },
+        "abrir-ticket": { embeds: [ban("soporte"), { title: "🎫 ¿Necesitas ayuda?", color: 0x22c55e, description: "Elige un tema y se abre un **canal privado** donde solo tú y el equipo de Xyro pueden escribir.\n\n🔗 Si vinculaste tu cuenta de Mi Xyro, ya sabremos quién eres y cuáles son tus negocios: no tendrás que repetir tus datos.\n\n💳 Para pagos, ten a mano tu **N.º de operación** y la captura." }], components: btnsTicket() },
+      };
+      for (const [k, m] of Object.entries(MSG)) {
+        const cid = C[k]; if (!cid) continue;
+        const mid = cfg.msgs[k] && cfg.msgs[k].c === cid ? cfg.msgs[k].m : null; let ok = false;
+        if (mid) { try { await dc(env, "PATCH", `/channels/${cid}/messages/${mid}`, Object.assign({ components: [] }, m)); ok = true; } catch { } }
+        if (!ok) { const r = await dc(env, "POST", `/channels/${cid}/messages`, m); cfg.msgs[k] = { c: cid, m: r.id }; log.push("Mensaje en " + k); }
+      }
+      await guardar(cfg);
+      return json({ ok: true, cambios: log });
+    }
+    if (paso === "servidor") {
+      try { await dc(env, "PUT", `/applications/${app.id}/guilds/${g}/commands`, [{ name: "vincular", description: "Vincula tu cuenta de Mi Xyro", type: 1 }, { name: "ticket", description: "Abre un ticket de ayuda con el equipo de Xyro", type: 1 }]); log.push("Comandos /vincular y /ticket"); } catch (e) { log.push("Comandos: " + e.message); }
+      try { if (app.interactions_endpoint_url !== "https://xyrostudio.net/api/discord") { await dc(env, "PATCH", "/applications/@me", { interactions_endpoint_url: "https://xyrostudio.net/api/discord" }); DC_APP = null; log.push("Botones conectados a xyrostudio.net"); } } catch (e) { log.push("Botones: " + e.message); }
+      const G = { name: "Xyro", system_channel_id: cfg.canales.general };
+      try { const r = await env.ASSETS.fetch(new Request("https://xyrostudio.net/img/discord/icono.png")); if (r.ok) G.icon = "data:image/png;base64," + b64(await r.arrayBuffer()); } catch { }
+      try { await dc(env, "PATCH", `/guilds/${g}`, G); log.push("Nombre «Xyro» e ícono nuevo"); } catch (e) { log.push("Servidor: " + e.message); }
+      cfg.armado = new Date().toISOString(); await guardar(cfg);
+      return json({ ok: true, cambios: log });
+    }
+    return json({ error: "paso no válido" }, 400);
   } catch (e) { return json({ error: String(e.message || e).slice(0, 300), cambios: log }, 500); }
 }
 
