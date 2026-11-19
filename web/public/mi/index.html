@@ -1095,7 +1095,7 @@ function vMiGr(){const g=G0();
  if(dg&&!(g.slug in DIG)){DIG[g.slug]=null;rpc('xy_digital',{p_slug:g.slug}).then(r=>{DIG[g.slug]=r||{};if(SUB==='migr')pinta()}).catch(()=>{DIG[g.slug]={}})}
  post=()=>{const q=s=>$(s);
   q('#gqr')&&qrLib().then(()=>{const el=$('#gqr');el&&(el.innerHTML=qrSVG(url))}).catch(()=>{});
-  q('#gped')&&(q('#gped').onclick=()=>grEditar(g));q('#gver')&&(q('#gver').onclick=()=>{delete NEG[g.slug];abrirNeg(g.slug)});
+  q('#gped')&&(q('#gped').onclick=()=>grEditar(g));q('#gubi')&&(q('#gubi').onclick=()=>{grEditar(g);setTimeout(()=>{const e=document.querySelector('#egeo');if(e){e.scrollIntoView({block:'center'});e.click()}},350)});q('#gver')&&(q('#gver').onclick=()=>{delete NEG[g.slug];abrirNeg(g.slug)});
   q('#gpn')&&(q('#gpn').onclick=()=>grPromo(g,null));app.querySelectorAll('[data-gpr]').forEach(b=>b.onclick=()=>grPromo(g,+b.dataset.gpr));
   q('#gsh')&&(q('#gsh').onclick=async()=>{const t='Guárdanos en Mi Xyro y mira nuestras promos: '+url;try{if(navigator.share)return await navigator.share({title:g.nombre,text:t,url})}catch(_){return}try{await navigator.clipboard.writeText(url);toast('📋 Enlace copiado')}catch(_){toast(url)}});
   q('#gcar')&&(q('#gcar').onclick=()=>cartelXyro(g.nombre,url));q('#gmej')&&(q('#gmej').onclick=()=>grMejorar(g));q('#gayu')&&(q('#gayu').onclick=()=>{SUB='ayuda';pinta()});
@@ -1104,6 +1104,7 @@ function vMiGr(){const g=G0();
  return`<div class="g"><div class="row"><div class="av">${logo}</div><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">MI NEGOCIO · ${g.estado==='pago'?'PANEL COMPLETO':'PLAN GRATIS'}</p><h2>${esc(g.nombre)}</h2><span class="pill ${ec}">${et}</span></div></div>
   <p class="mu sm">${esc(g.estado==='suspendido'&&g.motivo?g.motivo:ed)}</p>
   ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${dg?digCardHTML(g):''}${crecerHTML(g)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
+  ${!dg&&!se.lat?`<div class="card" style="border-color:#f59e0b88;background:#f59e0b14"><div class="row"><span style="font-size:28px">📍</span><div class="sp"><h3 style="color:#f59e0b">Te falta tu ubicación</h3><p class="mu sm">Sin ella no sales en el mapa y tus clientes no te encuentran. Hazlo estando en tu local.</p></div></div><button class="btn p" id="gubi">📍 Marcar mi ubicación</button></div>`:''}
   <div class="card"><div class="row"><div class="ibox">${I.store}</div><div class="sp"><h3>Tu perfil</h3><p class="mu sm">${lis===5?'✅ Completo. ¡Se ve muy bien!':lis+' de 5 listos · '+(dg?['logo','portada','descripción','tu web','tus planes']:['logo','portada','descripción','dirección','horario']).filter((_,i)=>!ok[i]).join(', ')}</p></div></div>
    <button class="btn p" id="gped">✏️ Editar mi perfil</button><button class="btn l" id="gver">Ver cómo lo ven tus clientes ›</button></div>
   ${dg?digCardHTML(g):''}

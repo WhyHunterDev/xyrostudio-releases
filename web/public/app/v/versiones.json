@@ -1,5 +1,14 @@
 [
  {
+  "id": "20261119-0233",
+  "fecha": "2026-11-19 02:33",
+  "titulo": "Aviso de ubicación",
+  "notas": "Aviso de ubicación",
+  "cambios": [
+   "Si falta la ubicación del local, Inicio avisa y la guarda con un toque"
+  ]
+ },
+ {
   "id": "20261119-0213",
   "fecha": "2026-11-19 02:13",
   "titulo": "Capturas protegidas",
