@@ -971,7 +971,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
-  <a class="btn" href="https://discord.gg/R39CwRC2bP" target="_blank" rel="noopener" style="text-decoration:none">💬 Comunidad Xyro en Discord · ideas, promos y eventos</a>
+  <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord · ideas, ayuda y promos</button>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
 /* Foto de perfil: recorte cuadrado al centro, 400 px, webp (o jpg) liviano; se sube a medios/mi/<id>/ */
@@ -2846,6 +2846,21 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
    y el equipo lo escribe: los puntos se descuentan al toque. */
 {const ir=P.get('ir')||'';if(/^\/pedir\/\?s=[a-z0-9_-]+/.test(ir))try{sessionStorage.setItem('mi-ir',ir)}catch(_){}
  if(/^[A-Za-z0-9]{40}$/.test(P.get('rc')||''))setTimeout(()=>toast('🛍️ Este QR es de un pedido para recoger: lo escanea el negocio desde «Pedidos para recoger»'),1500)}
+/* ===== Discord de Xyro (SQL 105): comunidad, tickets y vincular la cuenta con un código de 6 letras ===== */
+async function dcAbrir(){vib();if(!D)return window.open('https://discord.gg/R39CwRC2bP','_blank','noopener');let M;
+ try{M=DEMO?{vinculado:false,invitacion:'https://discord.gg/R39CwRC2bP'}:await rpc('xy_discord_mio')}catch(_){M={vinculado:false,invitacion:'https://discord.gg/R39CwRC2bP',off:1}}
+ const inv=M.invitacion||'https://discord.gg/R39CwRC2bP';
+ hoja(`<h2>💬 Comunidad Xyro en Discord</h2><p class="mu sm">Anuncios, promos, eventos, ideas y dudas. Si necesitas ayuda, abre un ticket privado con el equipo.</p>
+  ${M.vinculado?`<div class="card" style="border-color:#22c55e"><b>✅ Cuenta vinculada</b><span class="mu sm">Discord: ${esc(M.usuario||'')}. En soporte ya sabemos quién eres.</span></div>`:M.off?'':`<div class="card"><b>🔗 Vincula tu cuenta</b><span class="mu sm">Así, cuando abras un ticket, el equipo ya sabe quién eres y cuáles son tus negocios. Te damos un código y lo pegas en Discord.</span><button class="btn p" id="dcv">Obtener mi código</button></div>`}
+  <a class="btn ${M.vinculado||M.off?'p':''}" href="${esc(inv)}" target="_blank" rel="noopener" style="text-decoration:none">Abrir el Discord de Xyro</a>
+  ${M.vinculado?'<button class="btn l" id="dcd">Desvincular mi Discord</button>':''}<button class="btn l" data-x>Cerrar</button>`,(o,close)=>{
+  const v=o.querySelector('#dcv');v&&(v.onclick=async()=>{let c;try{c=DEMO?{codigo:'K7P2QX'}:await rpc('xy_discord_codigo')}catch(e){return toast(errDe(e))}close();
+   hoja(`<h2>🔗 Tu código</h2><div style="font-size:40px;font-weight:900;letter-spacing:.2em;text-align:center;padding:10px 0">${esc(c.codigo)}</div><p class="mu sm" style="text-align:center">Vale 10 minutos.</p>
+    <ol class="sm" style="padding-left:20px;display:grid;gap:4px"><li>Abre el Discord de Xyro (canal <b>🎫┃abrir-ticket</b> o <b>👋┃bienvenida</b>).</li><li>Toca <b>🔗 Vincular mi cuenta Xyro</b>.</li><li>Pega este código y listo.</li></ol>
+    <button class="btn p" id="dcc">📋 Copiar y abrir Discord</button><button class="btn l" data-x>Cerrar</button>`,(h)=>{h.querySelector('#dcc').onclick=async()=>{try{await navigator.clipboard.writeText(c.codigo);toast('📋 Código copiado')}catch(_){}window.open(M.canal||inv,'_blank','noopener')}})});
+  const d=o.querySelector('#dcd');d&&(d.onclick=async()=>{if(!confirm('¿Desvincular tu Discord?'))return;try{await rpc('xy_discord_desvincular');close();toast('Discord desvinculado')}catch(e){toast(errDe(e))}})})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-dcabrir]');if(!b)return;e.preventDefault();dcAbrir()});
+if(P.get('discord'))setTimeout(()=>{if(D)dcAbrir()},2200);
 function irPend(){let ir='';try{ir=sessionStorage.getItem('mi-ir')||'';sessionStorage.removeItem('mi-ir')}catch(_){}if(/^\/pedir\/\?s=[a-z0-9_-]+/.test(ir)&&D)location.assign(ir+(ir.includes('de=mi')?'':'&de=mi'))}
 {const r=(P.get('ref')||'').replace(/\D/g,'');if(r.length>=6&&r.length<=10){ls.s('mi-ref',r);setTimeout(()=>{if(!D)toast('🎁 Te invitaron a Mi Xyro: regístrate y gana puntos con tu primera compra')},1200)}}
 let INVT=0;

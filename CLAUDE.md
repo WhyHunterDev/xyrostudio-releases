@@ -17,6 +17,7 @@ Responde en español, corto. Ahorra tokens: no explores el repo entero; usa este
 - **Pedidos por QR de mesa** (SQL 50, `/pedir/?s=&m=`, `#/pedidos`, solo gym + Control). → `docs/mapa/pedidos-mesa.md`.
 - `web/public/mi/` · **Mi Xyro** (app PWA de las personas y modo negocio, SQL 45–48, storageKey `xyro-mi-auth`). → `docs/mapa/mi-xyro.md`.
 - Mensaje de acceso del equipo (`accMsg`): enlace único `https://xyrostudio.net/app/`; la cuenta (usuario@negocio) ya dice a qué negocio entra. Asistencia: solo el botón de arriba (`#qk`), no en el menú lateral ni en Inicio.
+- **Discord de Xyro** (bot en Worker `/api/discord*`, SQL 105, tickets y vincular cuenta). → `docs/mapa/discord.md`.
 - `plantilla/` · base para cada proyecto nuevo de cliente (web + panel + conexion.js). Ver `plantilla/README.md`. No se publica.
 - `marca/` y `web/public/img/marca/` · logos (misma X; el centro cambia por división).
 
