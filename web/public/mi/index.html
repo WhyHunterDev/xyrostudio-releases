@@ -459,8 +459,11 @@ function nuevaClave(){hoja(`<h2>🔑 Crea tu clave nueva</h2><input id="nc" type
  o.querySelector('#ncb').onclick=async()=>{const v=o.querySelector('#nc').value;if(v.length<6){const m=o.querySelector('#ncm');m.textContent='Mínimo 6 caracteres.';m.className='msg on';return}
   const{error}=await sb.auth.updateUser({password:v});if(error){const m=o.querySelector('#ncm');m.textContent=errDe(error);m.className='msg on';return}close();toast('✅ Clave guardada');entrar()}})}
 
+/* Al recargar se pinta primero lo guardado (rápido) y ahí las cargas de puntos/nivel/novedades salían antes de que la sesión estuviera lista:
+   fallaban y quedaban marcadas como «ya cargadas» (Inicio feo, 0 puntos). Al tener la sesión real se vuelven a pedir. */
+let CACHEP=0;function recargaTodo(){CACHEP=0;PTS=null;NVC=0;XEC=0;PPM=null;FEEDT={}}
 async function entrar(){
- try{await cargar()}catch(e){const c=ls.g('mi-data');if(c){D=JSON.parse(c);toast('Sin conexión: mostrando lo último guardado')}else return pantallaEntrada('Sin conexión. Revisa tu internet.')}
+ try{await cargar();if(CACHEP)recargaTodo()}catch(e){const c=ls.g('mi-data');if(c){D=JSON.parse(c);toast('Sin conexión: mostrando lo último guardado')}else return pantallaEntrada('Sin conexión. Revisa tu internet.')}
  history.replaceState(0,'','/mi/'+(DEMO?'?demo='+DEMO:''));
  if(!DEMO){rpc('xa_yo_ping',{p_equipo:equipo()}).catch(()=>{});cargaSop().then(()=>{if(MODO==='cliente'&&!document.querySelector('.ov,.cam'))pinta()})}
  const p=pend.get();pend.set(null);
@@ -3119,7 +3122,7 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
  setTimeout(bannerApp,2500);
  if(DEMO){D=demoData();CUR=0;if(/^negocio/.test(DEMO))return modoNegocio();return pinta()}
  const n=(P.get('n')||'').toLowerCase().replace(/[^a-z0-9-]/g,''),c=codigoDe(P.get('c')||''),tp=(P.get('t')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
- const cache=ls.g('mi-data');if(cache&&!n&&!c&&!tp&&!/[#&?](access_token|code)=/.test(location.href)){try{D=JSON.parse(cache);pinta()}catch(_){}}
+ const cache=ls.g('mi-data');if(cache&&!n&&!c&&!tp&&!/[#&?](access_token|code)=/.test(location.href)){try{D=JSON.parse(cache);CACHEP=1;pinta()}catch(_){}}
  try{await cliente()}catch(_){if(!D)pantallaEntrada('Sin conexión. Revisa tu internet.');return}
  if(MODO==='negocio'&&!n&&!c&&await modoNegocio(true))return;
  const{data:{session}}=await sb.auth.getSession();
