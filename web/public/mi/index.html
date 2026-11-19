@@ -493,6 +493,9 @@ addEventListener('popstate',e=>{
  HN.pop=true;try{MODO=m.m;ls.s('mi-modo',MODO);TAB=m.t;SUB=m.s;NTAB=m.nt;NPID=m.np;PEDID=m.pe;CUR=m.c;HN.k=JSON.stringify(m);const i=HN.st.lastIndexOf(HN.k);if(i>=0)HN.st.length=i+1;else HN.st=[HN.k];pinta();const sc=document.querySelector('#sc');sc&&(sc.scrollTop=0)}catch(_){}HN.pop=false});
 // ---------- Navegación ----------
 const SUBV={migr:()=>vMiGr(),mi:vMi,rutina:vRutina,dieta:vDieta,citas:vCitas,trat:vTrat,pedido:vPedido,ayuda:()=>vAyuda()};
+/* Repintar cuando llegan datos: si hay una hoja abierta, espera a que se cierre (antes se saltaba y Inicio quedaba a medio cargar: 0 puntos, sin nivel ni novedades) */
+function repinta(ok){const sel='.ov,.cam,.qrfull',t0=Date.now();if(ok&&!ok())return;if(!document.querySelector(sel))return pinta();
+ const t=setInterval(()=>{if(ok&&!ok())return clearInterval(t);if(!document.querySelector(sel)){clearInterval(t);pinta()}else if(Date.now()-t0>120000)clearInterval(t)},500)}
 function pinta(){const r=pinta0();try{hSync()}catch(_){}if(MODO!=='negocio')fundBienvenida();return r}
 function pinta0(){
  try{document.body.classList.toggle('fund',!!(D&&D.persona&&D.persona.fundador&&!D.persona.rango)&&MODO!=='negocio')}catch(_){}
@@ -615,7 +618,7 @@ function vDieta(n){const e=(n.rutinas||[]).find(r=>r.tipo==='nutri');
 let FEEDT={};
 function feedCarga(){const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.guardados)||[]).map(g=>g.slug)])].filter(s=>s&&!NEG[s]&&!FEEDT[s]).slice(0,8);
  if(!S.length)return;S.forEach(s=>FEEDT[s]=1);
- Promise.all(S.map(cargaNeg)).then(()=>{if(MODO==='cliente'&&TAB==='inicio'&&!SUB&&!document.querySelector('.ov,.cam,.qrfull'))pinta()})}
+ Promise.all(S.map(x=>cargaNeg(x).catch(()=>{}))).then(()=>repinta(()=>MODO==='cliente'&&TAB==='inicio'&&!SUB))}
 function medDe(n,u){const w=WEBN;WEBN=n.web||'';const r=media(u,n.rubro);WEBN=w;return r}
 const idxCli=cid=>negs().findIndex(n=>n.cliente===cid);
 function feed(){const h=hoyL(),out=[],M=negs();
@@ -961,8 +964,8 @@ async function escanear(onCode,txt){
 
 // ---------- Perfil ----------
 function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim()[0]||'?';
- if(GR===null)grCarga().then(()=>{if(TAB==='perfil'&&!SUB&&MODO!=='negocio'&&!document.querySelector('.ov'))pinta()});
- if(PROM===undefined&&D)proMioCarga().then(()=>{if(TAB==='perfil'&&!SUB&&MODO!=='negocio'&&!document.querySelector('.ov'))pinta()});
+ if(GR===null)grCarga().then(()=>repinta(()=>TAB==='perfil'&&!SUB&&MODO!=='negocio'));
+ if(PROM===undefined&&D)proMioCarga().then(()=>repinta(()=>TAB==='perfil'&&!SUB&&MODO!=='negocio'));
  const f0=post;post=()=>{f0&&f0();const i=$('#inst');i&&(i.onclick=instalar);$('#mneg').onclick=e=>{e.preventDefault();negElegir()};const s=$('#salir');s&&(s.onclick=salir);const bc=$('#bcta');bc&&(bc.onclick=e=>{e.preventDefault();borrarCuenta()});const gr=$('#greg');gr&&(gr.onclick=()=>grRegistro());const mp=$('#mpro');mp&&(mp.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});
   const nN=$('#ngN');nN&&(nN.onclick=negNuevo);const nG=$('#ngG');nG&&(nG.onclick=()=>{vib();SUB='migr';pinta();$('#sc')&&($('#sc').scrollTop=0)});const nP=$('#ngP');nP&&(nP.onclick=()=>{vib();SUB='mipro';pinta();$('#sc')&&($('#sc').scrollTop=0)});$('#ed').onclick=editarPerfil;$('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(String(per.idn));toast('📋 ID copiado')}catch(_){toast('Tu ID: '+per.idn)}}};
  return`<div class="g"><div class="row"><div class="av">${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc(ini.toUpperCase())}</div>
@@ -2125,7 +2128,7 @@ async function ptsCarga(fx){if(!D)return;try{if(!DEMO&&!PTSR){PTSR=1;try{await r
   app.querySelectorAll('[data-pts]').forEach(e=>{const k=e.dataset.pts;e.textContent=nfmt(PTS[k])})}catch(_){PTS=PTS||{global_points:0,local_points:0,business_points:0}}
  if(!PTSCH&&sb&&!DEMO&&D){try{const{data:{session}}=await sb.auth.getSession();const uid=session&&session.user.id;if(uid){PTSCH=sb.channel('mi-pts').on('postgres_changes',{event:'*',schema:'public',table:'points_ledger',filter:'user_id=eq.'+uid},()=>ptsCarga(true)).subscribe()}}catch(_){}}}
 setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB==='mipro'))ptsCarga(true)},30000);
-function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga(),nvCarga(),paisSync()]).then(()=>{if(!document.querySelector('.ov'))pinta()})}
+function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga(),nvCarga(),paisSync()].map(x=>Promise.resolve(x).catch(()=>{}))).then(()=>repinta(()=>MODO!=='negocio'&&TAB==='inicio'&&!SUB))}
  const P=PTS||{},g=XR?+XR.giros||0:0; // simple (pedido del usuario 2026-11-19): un número, un botón
  return`${nvCardHTML()}<div class="card"><div class="row"><span style="font-size:30px">⭐</span><div class="sp"><p style="margin:0"><b style="font-size:28px" data-pts="global_points">${nfmt(P.global_points)}</b> <span class="mu sm">puntos para descuentos</span></p>
   <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas XyroPoints al pagar por tu billetera o transferencia'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div>
