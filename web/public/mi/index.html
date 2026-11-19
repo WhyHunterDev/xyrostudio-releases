@@ -2090,10 +2090,10 @@ setInterval(()=>{if(!document.hidden&&D&&(TAB==='inicio'||TAB==='perfil'||SUB===
 function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsCarga(),xEstCarga()]).then(()=>{if(!document.querySelector('.ov'))pinta()})}
  const P=PTS||{},g=XR?+XR.giros||0:0; // simple (pedido del usuario 2026-11-19): un número, un botón
  return`<div class="card"><div class="row"><span style="font-size:30px">⭐</span><div class="sp"><p style="margin:0"><b style="font-size:28px" data-pts="global_points">${nfmt(P.global_points)}</b> <span class="mu sm">puntos para descuentos</span></p>
-  <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas puntos cada vez que compras con Xyro'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div>
+  <p class="mu xs" style="margin:0">${+P.local_points?`+<b data-pts="local_points">${nfmt(P.local_points)}</b> en tus negocios`:'Ganas puntos al pagar por Yape, Plin o transferencia'}${+P.pending>0?` · ⏳ ${nfmt(P.pending)} en espera`:''}</p></div>
   <button class="btn p" data-xy="ganar" style="width:auto;position:relative">🎁 Gana más${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button></div>
   <button class="btn" data-xy="invitar" style="margin-top:4px">👥 Invita amigos y gana puntos</button></div>`}
-function ganarAbrir(){const g=XR?+XR.giros||0:0;hoja(`<h2>🎁 Gana más puntos</h2><p class="mu sm">Tus puntos se usan como descuento. <b>Globales</b>: en cualquier negocio Xyro. <b>Locales</b>: solo donde los ganaste. Se suman cuando el negocio confirma tu pago.</p>
+function ganarAbrir(){const g=XR?+XR.giros||0:0;hoja(`<h2>🎁 Gana más puntos</h2><p class="mu sm">Tus puntos se usan como descuento. <b>Globales</b>: en cualquier negocio Xyro. <b>Locales</b>: solo donde los ganaste. Se suman cuando pagas por Yape, Plin, transferencia u otro medio virtual (con captura) y el negocio lo confirma. En efectivo no se ganan puntos.</p>
  <button class="btn p" data-xy="invitar">👥 Invitar amigos</button><button class="btn" data-xy="ruleta">🎡 Girar la ruleta${g?` · tienes ${g} giro${g>1?'s':''}`:''}</button><button class="btn" data-xy="retos">🎯 Retos: gana puntos extra</button><button class="btn" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo">🎨 Mi estilo</button><button class="btn l" data-x>Cerrar</button>`,o=>o.querySelectorAll('[data-xy]').forEach(b=>b.addEventListener('click',()=>o.remove())))}
 let PTSR=0;
 function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'Xyro Points')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
@@ -2706,7 +2706,7 @@ async function mkTrato(id,recargar){await mkYo();let o=null,n=-1,poll=0;
   n=-1;box.querySelector('[data-mkx]').onclick=ov._x;const on=(s,fn)=>{const b=box.querySelector(s);b&&(b.onclick=fn)};
   const ref=async()=>{try{o=await cargar();pinta()}catch(e){toast(errDe(e))}};
   on('#mkpag',()=>hoja(`<h2>💳 ¿Cómo pagaste?</h2><p class="mu sm">Pagaste directo a quien vende. Sube la captura para sumar tus Xyro Points cuando confirme.</p>
-   <select id="pm"><option value="YAPE">Yape</option><option value="PLIN">Plin</option><option value="TRANSFER">Transferencia</option><option value="CASH">Efectivo</option><option value="OTHER">Otro</option></select>
+   <select id="pm"><option value="YAPE">Yape</option><option value="PLIN">Plin</option><option value="TRANSFER">Transferencia</option><option value="CASH">Efectivo (no da puntos)</option><option value="OTHER">Otro</option></select>
    <input id="pr" maxlength="40" placeholder="N.º de operación (opcional)"><input type="file" id="pf" accept="image/*" hidden><button class="btn" id="pfb">📎 Subir captura del pago</button>
    <button class="btn p" id="pok">Avisar que pagué</button><button class="btn l" data-x>Cancelar</button>`,(h,c)=>{let ft='';const fb=h.querySelector('#pfb'),fi=h.querySelector('#pf');fb.onclick=()=>fi.click();
    fi.onchange=async()=>{const fl=fi.files[0];if(!fl)return;fb.disabled=true;fb.textContent='Subiendo…';try{ft=await subirCaptura(fl);fb.textContent='✅ Captura lista'}catch(e){toast(errDe(e));fb.textContent='📎 Subir captura del pago'}fb.disabled=false};
