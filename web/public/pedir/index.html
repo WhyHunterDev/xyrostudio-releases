@@ -136,7 +136,8 @@ const SB='https://szvdzcaoxjstdyblhxrd.supabase.co',KEY='sb_publishable_LOmoV7GD
 const Q=new URLSearchParams(location.search),DEMO=Q.has('demo'),SLUG=(Q.get('s')||'').toLowerCase().replace(/[^a-z0-9_-]/g,'').slice(0,60),MESA=Math.max(0,parseInt(Q.get('m'),10)||0);
 const app=document.getElementById('app'),$=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const sol=n=>'S/ '+(+n||0).toFixed(2);
+let MCP='PEN';const MONPP=(()=>{const o={};'PE:PEN MX:MXN CO:COP CL:CLP AR:ARS BO:BOB PY:PYG UY:UYU BR:BRL GT:GTQ CR:CRC DO:DOP HN:HNL NI:NIO CA:CAD GB:GBP CH:CHF JP:JPY CN:CNY IN:INR PH:PHP ID:IDR KR:KRW AU:AUD NZ:NZD ZA:ZAR NG:NGN EG:EGP TR:TRY MA:MAD KE:KES RU:RUB PL:PLN SE:SEK NO:NOK DK:DKK CZ:CZK HU:HUF AE:AED SA:SAR IL:ILS TH:THB MY:MYR VN:VND PK:PKR BD:BDT JM:JMD TT:TTD HT:HTG'.split(' ').forEach(x=>{const[k,v]=x.split(':');o[k]=v});'ES DE FR IT PT NL BE AT IE FI GR SK SI EE LV LT LU MT CY HR'.split(' ').forEach(k=>o[k]='EUR');return o})();
+const sol=n=>{if(MCP==='PEN')return'S/ '+(+n||0).toFixed(2);try{return new Intl.NumberFormat('es',{style:'currency',currency:MCP,currencyDisplay:'narrowSymbol'}).format(+n||0)}catch(_){return MCP+' '+(+n||0).toFixed(2)}};
 const ls={g(k,d){try{const v=localStorage.getItem(k);return v==null?d:v}catch(_){return d}},s(k,v){try{localStorage.setItem(k,v)}catch(_){}}};
 const vib=()=>{try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}};
 const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)};
@@ -189,6 +190,7 @@ async function init(){
  if(!DEMO&&!SLUG)return err('🪑','Escanea el QR de tu mesa','Este enlace está incompleto. Usa la cámara de tu celular con el QR pegado en tu mesa.');
  const SOLO=!MESA&&(!DEMO||Q.has('carta')); // sin mesa: solo ver la carta
  try{M=await api(SOLO?'xa_carta':'xa_mesa_menu',SOLO?{p_slug:SLUG}:{p_slug:SLUG,p_mesa:MESA})}catch(e){return err('📶','No pudimos abrir el menú',esc(e.message))}
+ if(!DEMO&&SLUG){try{const pz=await api('xa_neg_pais',{p_slug:SLUG});if(/^[A-Z]{2}$/.test(pz||''))MCP=MONPP[pz]||'USD'}catch(_){}}
  if(!M||M.error==='negocio')return err('🔎','No encontramos este negocio','Vuelve a escanear el QR de tu mesa.');
  if(M.color&&/^#[0-9a-f]{6}$/i.test(M.color))document.documentElement.style.setProperty('--a',M.color);
  if(M.error==='off')return err('🍽️',SOLO?'Carta no disponible':'Pedidos por QR no disponibles',esc(M.negocio)+(SOLO?' aún no publica su carta.':' aún no recibe pedidos desde la mesa. Pide directo en '+(M.rubro==='restaurante'?'caja.':'el cafetín.')));
