@@ -1,5 +1,14 @@
 [
  {
+  "id": "20261119-0303",
+  "fecha": "2026-11-19 03:03",
+  "titulo": "XyroPoints y LocalPoints",
+  "notas": "XyroPoints y LocalPoints",
+  "cambios": [
+   "Los puntos ahora se llaman XyroPoints (en todo Xyro) y LocalPoints (del negocio)"
+  ]
+ },
+ {
   "id": "20261119-0254",
   "fecha": "2026-11-19 02:54",
   "titulo": "Cobro con cualquier billetera",
