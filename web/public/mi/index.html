@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"><script src="/i18n/i18n.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Mi Xyro</title>
 <meta name="description" content="Tu gimnasio, tu consultorio y más en tu celular: tu QR de entrada, tu plan, tus rutinas y tus citas.">
@@ -308,7 +308,7 @@ const cel=t=>String(t||'').replace(/\D/g,'').slice(-9);
 const hoyL=()=>new Date(Date.now()-5*36e5).toISOString().slice(0,10);
 const dLima=t=>new Date(new Date(t).getTime()-5*36e5).toISOString().slice(0,10);
 const TZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'America/Lima'}catch(_){return'America/Lima'}})();
-const fF=(d,o)=>new Date(String(d).length===10?d+'T12:00:00Z':d).toLocaleDateString('es-PE',{timeZone:String(d).length===10?'UTC':TZ,...(o||{day:'numeric',month:'short',year:'numeric'})});
+const fF=(d,o)=>new Date(String(d).length===10?d+'T12:00:00Z':d).toLocaleDateString(window.XY_LOC||'es-PE',{timeZone:String(d).length===10?'UTC':TZ,...(o||{day:'numeric',month:'short',year:'numeric'})});
 /* Horas en am/pm (nada de 24 h): cada input type=time se cambia por hora · minutos · am/pm; el input queda oculto con su valor HH:MM. */
 const h12=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||'');if(!m)return h||'';const x=+m[1];return(x%12||12)+':'+m[2]+' '+(x<12?'am':'pm')};
 function tpAmPm(root){(root||document).querySelectorAll('input[type=time]:not([data-tp])').forEach(i=>{i.dataset.tp=1;const st=+i.step||300,paso=Math.max(5,Math.round(st/60)),MI=[];for(let m=0;m<60;m+=paso)MI.push(m);
@@ -320,9 +320,9 @@ function tpAmPm(root){(root||document).querySelectorAll('input[type=time]:not([d
  [sh,sm,sa].forEach(s=>{s.onchange=lee;w.appendChild(s)});sh.setAttribute('aria-label','Hora');sm.setAttribute('aria-label','Minutos');sa.setAttribute('aria-label','am o pm');
  if(i.id)sh.id=i.id+'_h';pinta();i.type='hidden';i.after(w)})}
 new MutationObserver(()=>tpAmPm()).observe(document.documentElement,{childList:true,subtree:true});
-const fH=d=>new Date(d).toLocaleTimeString('es-PE',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
+const fH=d=>new Date(d).toLocaleTimeString(window.XY_LOC||'es-PE',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
 const dias=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
-let MC='';const money=n=>{const c=MC||(typeof monPais==='function'?monPais().c:'PEN');return c==='PEN'?'S/ '+(Math.round(+n*100)/100).toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:2}):moneyX(n,c)};
+let MC='';const money=n=>{const c=MC||(typeof monPais==='function'?monPais().c:'PEN');return c==='PEN'?'S/ '+(Math.round(+n*100)/100).toLocaleString(window.XY_LOC||'es-PE',{minimumFractionDigits:0,maximumFractionDigits:2}):moneyX(n,c)};
 const js=src=>new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.head.appendChild(s)});
 const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)};
 const vib=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}};
@@ -420,7 +420,7 @@ const LOGO='<div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width
 function pantallaEntrada(msg,modo){
  acento(null);const p=pend.get();modo=modo||'entrar';
  app.innerHTML=`<div class="scr"><div class="hero in">
-  <div class="top">${LOGO}<span class="eyb">MI XYRO · BETA</span><h1>${p&&p.negocio?`Guarda <span style="color:var(--a)">${esc(p.negocio)}</span> en tu Mi Xyro`:p&&p.reg?'Registra tu negocio <span style="color:var(--a)">gratis</span>':'Tus negocios favoritos,<br>en tu celular'}</h1>
+  <div class="top">${LOGO}<span class="eyb">MI XYRO · BETA</span><button class="chip" data-lang data-noi18n style="justify-self:start;cursor:pointer">🌐 ${window.XY_LANG==='en'?'Español':'English'}</button><h1>${p&&p.negocio?`Guarda <span style="color:var(--a)">${esc(p.negocio)}</span> en tu Mi Xyro`:p&&p.reg?'Registra tu negocio <span style="color:var(--a)">gratis</span>':'Tus negocios favoritos,<br>en tu celular'}</h1>
    <p class="mu">${p&&p.reg?'Crea tu cuenta de Mi Xyro (o entra) y en un minuto tu negocio tiene perfil, promos y QR.':'Todo lo de tu gym, tu consultorio y tus lugares favoritos en un solo lugar.'}</p>
    <div class="chips"><span class="chip">${I.gift}Promos</span><span class="chip">${I.qr}Tu QR</span><span class="chip">${I.dumb}Rutinas</span><span class="chip">${I.cal}Citas</span></div></div>
   <button class="btn gbtn" id="gg"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar con Google</button>
@@ -988,7 +988,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
   <button class="btn" data-ptab="">📊 ¿Cuánto valen los puntos? · tabla pública</button>
-  <button class="btn" id="ayu">${I.help}Necesito ayuda</button><button class="btn" data-xy="error">🐞 Reportar un error · gana XyroPoints</button>
+  <button class="btn" id="ayu">${I.help}Necesito ayuda</button><button class="btn" data-xy="error">🐞 Reportar un error · gana XyroPoints</button><button class="btn" data-lang data-noi18n>🌐 ${window.XY_LANG==='en'?'Idioma: Español':'Language: English'}</button>
   <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord${ls.g('mi-dc-ok')?' · ideas, ayuda y promos':' · vincula y gana 20 XyroPoints 🎁'}</button>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
@@ -1380,7 +1380,7 @@ function nHead(sub){const lg=logoURL(NB.logo);
  return`<div class="nh"><span class="nlg">${lg?`<img src="${esc(lg)}" alt="">`:(nDent()?nP('🦷'):'🏋️')}</span><div class="sp" style="min-width:0"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">${esc(sub||'MODO NEGOCIO')}</p><h1 style="font-size:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(NB.negocio)}</h1>
   <p class="xs" style="color:#cfc6ff;font-weight:700">${esc(ROLN[NB.rol]||NB.rol)}${NB.sede?' · '+esc(NB.sede):''}</p></div></div>`}
 const kpi=(l,v,s,ic)=>`<div class="kp"><span class="mu xs">${ic||''}${l}</span><b>${v}</b>${s?`<span class="mu xs">${s}</span>`:''}</div>`;
-function nResumen(){if(!NB)return'';const dn=nDent(),C=NB.citas||[],h=new Date().toLocaleDateString('es-PE',{timeZone:'America/Lima',weekday:'short',day:'numeric',month:'short'});
+function nResumen(){if(!NB)return'';const dn=nDent(),C=NB.citas||[],h=new Date().toLocaleDateString(window.XY_LOC||'es-PE',{timeZone:'America/Lima',weekday:'short',day:'numeric',month:'short'});
  const sem=NB.semana||[],mx=Math.max(1,...sem.map(x=>+x.v||0));
  return`${nHead(h.toUpperCase())}<div class="g">
   <div class="kps">${NB.plata?kpi('Ingresos de hoy',money(NB.ing_hoy||0),(NB.cobros_hoy||0)+' cobro'+(NB.cobros_hoy==1?'':'s'),I.cash):''}
@@ -1773,9 +1773,9 @@ setInterval(async()=>{if(document.hidden||DEMO||MODO!=='negocio'||!NB||!nPedOn()
 const CATS=[['','✨','Todo'],['gym','🏋️','Gimnasios'],['entrenadores','🧑‍🏫','Entrenadores'],['cafeteria','☕','Cafeterías'],['restaurante','🍽️','Restaurantes'],['barberia','💈','Barberías'],['consultorio','🦷','Consultorios'],['digital','💻','Digital'],['otro','🏪','Otros']];
 const PAIS_TOP=['PE','MX','CO','CL','AR','EC','BO','VE','UY','PY','CR','PA','DO','GT','HN','SV','NI','CU','PR','BR','ES','US'];
 const PAISES=(()=>{const ISO='AD AE AF AG AL AM AO AT AU AZ BA BB BD BE BF BG BH BI BJ BN BS BT BW BY BZ CA CD CF CG CH CI CM CN CV CY CZ DE DJ DK DM DZ EE EG ER ET FI FJ FM FR GA GB GD GE GH GM GN GQ GR GW GY HK HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KR KW KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MO MR MT MU MV MW MY MZ NA NE NG NL NO NP NR NZ OM PG PH PK PL PS PT PW QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SY SZ TD TG TH TJ TL TM TN TO TR TT TV TW TZ UA UG UZ VA VC VN VU WS XK YE ZA ZM ZW'.split(' ');
- let dn=null;try{dn=new Intl.DisplayNames(['es'],{type:'region'})}catch(_){}const FX={PE:'Perú',MX:'México',DO:'Rep. Dominicana',US:'Estados Unidos',ES:'España',PA:'Panamá'};
+ let dn=null;try{dn=new Intl.DisplayNames([window.XY_LANG||'es'],{type:'region'})}catch(_){}const FX=(window.XY_LANG||'es')==='es'?{PE:'Perú',MX:'México',DO:'Rep. Dominicana',US:'Estados Unidos',ES:'España',PA:'Panamá'}:{};
  const t=k=>{if(FX[k])return FX[k];try{return dn&&dn.of(k)||k}catch(_){return k}};
- return[...PAIS_TOP.map(k=>[k,t(k)]),...ISO.map(k=>[k,t(k)]).sort((a,b)=>a[1].localeCompare(b[1],'es')),['OT','Otro país']]})();
+ return[...PAIS_TOP.map(k=>[k,t(k)]),...ISO.map(k=>[k,t(k)]).sort((a,b)=>a[1].localeCompare(b[1],'es')),['OT',(window.XY_LANG||'es')==='es'?'Otro país':'Other country']]})();
 const paisN=k=>(PAISES.find(p=>p[0]===k)||[k,k||''])[1];
 const PROT={entrenador:['🏋️','Entrenador personal'],profesor:['📚','Profesor'],nutricionista:['🥗','Nutricionista'],otro:['⭐','Profesional']};
 const MODT={presencial:'Presencial',online:'Online',ambas:'Presencial y online'};
@@ -3321,7 +3321,7 @@ function recDemo(f,a){const t=m=>new Date(Date.now()-m*6e4).toISOString(),F='htt
  return{}}
 function recojoNeg(slug,cli){vib();const C=DEMO?async(f,a)=>recDemo(f,a):cli;let R=null,tm=0;
  const its=o=>(o.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ');
- const hora=d=>new Date(d).toLocaleTimeString('es-PE',{hour:'numeric',minute:'2-digit',hour12:true}).replace(/\s?a\.?\s?m\.?/i,' am').replace(/\s?p\.?\s?m\.?/i,' pm');
+ const hora=d=>new Date(d).toLocaleTimeString(window.XY_LOC||'es-PE',{hour:'numeric',minute:'2-digit',hour12:true}).replace(/\s?a\.?\s?m\.?/i,' am').replace(/\s?p\.?\s?m\.?/i,' pm');
  const card=(o,bt)=>`<div class="card" style="gap:6px"><div class="row"><b class="sp">#${o.num} · ${esc(o.cliente||'Cliente')}</b><b>S/ ${(+o.total).toFixed(2)}</b></div><span class="mu sm">${its(o)}</span>${o.nota?`<span class="sm">📝 ${esc(o.nota)}</span>`:''}${bt}</div>`;
  const draw=o=>{const L=(R&&R.pedidos)||[],by=e=>L.filter(x=>x.estado===e),rv=by('por_revisar'),pr=by('preparando'),li=by('listo'),pp=by('por_pagar'),en=by('entregado');
   o.querySelector('#rcl').innerHTML=`${R&&!R.yape?'<div class="card" style="border-color:#f59e0b"><p class="sm">📱 Para recibir pedidos para recoger, primero pon tu <b>billetera</b> (Yape, PIX, Nequi…) en tu carta: «Poner mi billetera».</p></div>':''}
@@ -3407,5 +3407,6 @@ function f(){if(document.hidden){setTimeout(function(){requestAnimationFrame(f)}
 size();addEventListener('resize',size);addEventListener('pointermove',function(e){m.x=e.clientX;m.y=e.clientY;var s=document.documentElement.style;s.setProperty('--mx',e.clientX+'px');s.setProperty('--my',e.clientY+'px')},{passive:true});
 addEventListener('pointerdown',function(e){m.x=e.clientX;m.y=e.clientY},{passive:true});
 requestAnimationFrame(f)})();</script>
+<script>document.addEventListener('click',function(e){var b=e.target.closest('[data-lang]');if(!b)return;e.preventDefault();xyLang(window.XY_LANG==='en'?'es':'en')});</script>
 </body>
 </html>
