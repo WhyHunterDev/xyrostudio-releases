@@ -104,3 +104,9 @@ Monetización (SQL 98): 📣 avisos a seguidores (`xy_avisos_neg`, `xy_aviso_inf
 - 2026-11-18: «✏️ Editar mi perfil» (grEditar) con vista previa en vivo (#epv). Cartel imprimible A5 para caja `cartelXyro(nom,url)` («¿Tienes Xyro? Escanea y gana puntos»).
 - 2026-11-18 (SQL 103): puntos SOLO con pago virtual + captura; efectivo = 0 puntos (antes daba en verificados). Textos en Mi Xyro avisan.
 - Eliminar negocio (SQL 106, `xy_negocio_eliminar`): dueño en «✏️ Editar mi perfil» → «🗑️ Eliminar mi negocio» (escribe el nombre); gestor en «🆓 Registros gratis». No aplica a negocios con panel completo (estado pago). Si tuvo compras, la entidad queda SUSPENDED «(eliminado)» para no perder pedidos/puntos.
+
+## Niveles, rachas y ranking (SQL 107, 2026-11-19)
+- XP = 10 por punto global de compra + uso diario (`xy_racha_marcar`, 1 vez al día al abrir; 10 XP + racha hasta +20; hitos 3/7/14/30/60/100). Nivel = 1+√(XP/25). Rangos Bronce 1, Plata 10, Oro 25, Platino 45, Diamante 70, Leyenda 100 (giros de regalo al subir: `xy_nivel_sync`). Giro gratis cada 7 días de racha solo si compró en 30 días. Xyro+ salva la racha 1 día por semana.
+- Tablas `xy_uso` (xp_uso, racha, nivel_visto, pais/ciudad/continente) y `xy_xp_dia`. Ubicación: Worker `/api/geo` (cf.country/city) o manual `xy_mi_ubicacion`.
+- Ranking `xy_ranking_xyro(alcance ciudad|pais|continente|mundo, periodo semana|mes|siempre)` + `grupos` (ciudades/países que más compiten). Front: `nvCardHTML`, `nivelAbrir`, `nivelFx` (animación de nivel/rango), `rachaFx`, `rankAbrir` (podio). Si el SQL no está, cae a `rankAbrir1`/`estiloAbrir1`.
+- Cosméticos v2: setting `cosmeticos` (frame/color/efecto/titulo con regla libre|plus|ruleta|rango:x|racha:n|fundador), `xy_estilo2`/`xy_estilo_set2`, front `FRM0`, `CO2`, `EFN`, `TIN`, `nomHTML`, `titHTML`. `confeti(f)` en canvas y `celebra({e,t,s,oro})` al pagar/canjear.

@@ -1034,6 +1034,7 @@ export default {
   async fetch(req, env, ctx) {
     const u = new URL(req.url);
     if (u.pathname === "/api/ia") return ia(req, env);
+    if (u.pathname === "/api/geo") { const c = req.cf || {}; return json({ pais: c.country || null, ciudad: c.city || null, continente: c.continent || null }); }   // para el ranking por lugar (Mi Xyro)
     if (u.pathname === "/api/bot") return botApi(req, env);
     if (u.pathname === "/api/wa") return waApi(req, env, ctx);
     if (u.pathname === "/api/wa/responder") return waResponder(req, env);
