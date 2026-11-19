@@ -178,7 +178,7 @@
   // Recuperación de contraseña por correo (solo en modo nube).
   const forgotBtn = $('#forgotLink');
   if (forgotBtn) { if (!B()) forgotBtn.hidden = true; else { forgotBtn.addEventListener('click', () => { const fb = $('#forgotBox'); fb.hidden = !fb.hidden; $('#err').hidden = true; $('#okm').hidden = true; });
-  const fs = $('#forgotSend'); if (fs) fs.addEventListener('click', () => { const em = $('#em').value.trim(); fs.href = 'https://wa.me/51936449066?text=' + encodeURIComponent('Hola, soy administrador del Panel Santos y olvidé mi contraseña.' + (em ? ' Mi correo de acceso es: ' + em : '')); });
+  const fs = $('#forgotSend'); if (fs) fs.addEventListener('click', () => { const em = $('#em').value.trim(); fs.href = 'https://discord.gg/R39CwRC2bP?text=' + encodeURIComponent('Hola, soy administrador del Panel Santos y olvidé mi contraseña.' + (em ? ' Mi correo de acceso es: ' + em : '')); });
   } }
   if (B()) B().sb.auth.onAuthStateChange((ev) => { if (ev === 'PASSWORD_RECOVERY') { (async () => { try { const p = await B().auth.actual(); if (p) { const { data: au } = await B().sb.auth.getUser(); me = asMe(p, au.user?.email || ''); data = await SS.load(); data.actividad = data.actividad || []; start(); go('cuenta'); toast('Crea tu nueva contraseña'); } } catch (_) {} })(); } });
   let idleT; const bump = () => { try { sessionStorage.setItem('ss-ses', JSON.stringify({ id: me.id, t: Date.now() })); } catch (_) {} clearTimeout(idleT);  };
@@ -457,7 +457,7 @@
     const d = el.dataset, list = DEF ? getP(data, DEF.key) : [];
     try {
       if (d.v) return go(d.v);
-      if (d.xup) { const x = XYROS.find((y) => y[0] === d.xup); log('pidió ' + x[1]); open('https://wa.me/51936449066?text=' + encodeURIComponent(`Hola XyroStudio, quiero sumar ${x[1]} a Santos Strength.`), '_blank', 'noopener'); return toast('Te contactamos pronto ✓'); }
+      if (d.xup) { const x = XYROS.find((y) => y[0] === d.xup); log('pidió ' + x[1]); open('https://discord.gg/R39CwRC2bP?text=' + encodeURIComponent(`Hola XyroStudio, quiero sumar ${x[1]} a Santos Strength.`), '_blank', 'noopener'); return toast('Te contactamos pronto ✓'); }
       if ('xapps' in d) return abrirXyroApps();
       if ('logout' in d) return logout();
       if (el.id === 'menuBtn') return $('#side').classList.toggle('open');

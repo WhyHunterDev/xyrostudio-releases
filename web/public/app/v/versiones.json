@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261118-2036",
+  "fecha": "2026-11-18 20:36",
+  "titulo": "Premios por puntos y canjes",
+  "notas": "Premios por puntos y canjes",
+  "cambios": [
+   "Nuevo: elige qué das por puntos (ej. un batido gratis) en «Clientes en Mi Xyro» → 🎁 Mis premios",
+   "Nuevo botón 🎟️ Canje arriba: escribe el código del cliente y sus puntos se descuentan"
+  ],
+  "requiere": "SQL 102"
+ },
+ {
   "id": "20261118-1357",
   "fecha": "2026-11-18 13:57",
   "titulo": "Empleos",

@@ -95,7 +95,7 @@ async function planCard(box) {
     ${f.max_qrs !== undefined ? `<div class="li"><span class="ico">${I.qr}</span><span class="sp sm">Códigos QR: <b>${lim(f.qrs, f.max_qrs)}</b></span></div>` : ''}
     <div class="li"><span class="ico">🏷️</span><span class="sp sm">Planes o productos: <b>${lim(f.items, f.max_items)}</b></span></div>
     <div class="li"><span class="ico">🌐</span><span class="sp sm">${f.web ? '<b>Tu web en xyrostudio.net incluida</b>' : 'Web propia: solo en Pro'}</span></div>
-    ${sig ? `<a class="btn p w" target="_blank" rel="noopener" href="https://wa.me/${WA_XYRO}?text=${encodeURIComponent('Hola XyroStudio, quiero el plan ' + sig + ' para ' + (S.entidad.name || 'mi negocio'))}">⭐ Pasar a ${sig}</a><span class="mu xs">${sig === 'Plus' ? 'Plus: 2,000 clientes, 25 productos, 10 QR y mesas, 5 videos al mes sin marca.' : 'Pro: sin límites, tu web en xyrostudio.net, 15 videos al mes y Bots al lanzarse.'}</span>` : ''}`;
+    ${sig ? `<a class="btn p w" target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Hola XyroStudio, quiero el plan ' + sig + ' para ' + (S.entidad.name || 'mi negocio'))}">⭐ Pasar a ${sig}</a><span class="mu xs">${sig === 'Plus' ? 'Plus: 2,000 clientes, 25 productos, 10 QR y mesas, 5 videos al mes sin marca.' : 'Pro: sin límites, tu web en xyrostudio.net, 15 videos al mes y Bots al lanzarse.'}</span>` : ''}`;
 }
 
 const filaPedido = (o) => `<div class="li"><span class="ico">${I.orders}</span><span class="sp"><b>#${esc(o.code)}</b> <span class="pill ${EST[o.status] ? EST[o.status][1] : ''}">${EST[o.status] ? EST[o.status][0] : esc(o.status)}</span><br>
@@ -221,7 +221,7 @@ async function boost(el) {
       <span class="mu sm">${activo ? `Hasta las ${hora(e.boost_until)} del ${fecha(e.boost_until)}` : 'Actívalo con los puntos que gana tu negocio en cada venta.'}</span></span>${activo ? '<span class="pill boost">⚡ x2</span>' : ''}</div>
       <span class="mu sm">Puntos de tu negocio: <b id="pn">…</b></span></div>
     <div class="card"><b>Elige cuánto tiempo</b>${PLAN_B.map(([h, p, t]) => `<button class="mopt" data-h="${h}" data-p="${p}"><span class="ico">⚡</span><span class="sp"><b>${h} horas</b><br><span class="mu xs">${t}</span></span><b>${num(p)} pts</b></button>`).join('')}
-      <a class="btn w" target="_blank" rel="noopener" href="https://wa.me/51936449066?text=${encodeURIComponent('Hola, quiero activar Boost con pago para ' + e.name + ' (' + e.slug + ')')}">💳 Boost con pago por Yape</a>
+      <a class="btn w" target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Hola, quiero activar Boost con pago para ' + e.name + ' (' + e.slug + ')')}">💳 Boost con pago por Yape</a>
       <p class="mu xs">Con pago: nos escribes, pagas por Yape y lo activamos al momento.</p></div></div>`);
   let P = 0; try { P = await ptsNegocio(); } catch (_) {}
   $('#pn', el).textContent = num(P);

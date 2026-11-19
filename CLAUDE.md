@@ -27,7 +27,7 @@ Push a `main` = se publica solo (Cloudflare Workers Builds, raíz `web/`). Verif
 - Nunca la service_role key en el frontend. No publicar `.sql`. RLS en toda tabla nueva.
 - Datos personales del dueño: privados.
 - Rendimiento: sin librerías pesadas, imágenes webp/jpg chicas, nada de frameworks.
-- Diseño: nada de landing estática; demos interactivas. Sin precios altos visibles (precios por WhatsApp 51936449066).
+- Diseño: nada de landing estática; demos interactivas. Sin precios altos visibles. NUNCA el WhatsApp del dueño (retirado 2026-11-18): consultas y comunidad = Discord https://discord.gg/R39CwRC2bP; pagos por ticket.
 
 ## Otro repo
 `WhyHunterDev/WhyHunterDev.github.io`: web y panel de Santos Strength (`/santos-strength/`) y el gestor viejo (`/gestor/`). La web de Santos se trabaja en otro proyecto.

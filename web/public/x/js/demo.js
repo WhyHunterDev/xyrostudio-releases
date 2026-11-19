@@ -84,7 +84,7 @@ export function demoFrom(t) {
   ];
   if (t === 'entity_points') return [{ entity_id: 'e1', bucket: 'ENTITY_GLOBAL', available: 312, pending: 0 }];
   if (t === 'user_entity_memberships') return [
-    { id: 'ms1', entity_id: 'iron', kind: 'PASS', status: 'ACTIVE', valid_from: new Date(Date.now() - 864e5 * 12).toISOString(), valid_until: new Date(Date.now() + 864e5 * 18).toISOString(), entities: { name: 'Iron Gym Miraflores', slug: 'iron-gym', category: 'gym', phone: '51936449066' }, emoji: '🏋️' },
+    { id: 'ms1', entity_id: 'iron', kind: 'PASS', status: 'ACTIVE', valid_from: new Date(Date.now() - 864e5 * 12).toISOString(), valid_until: new Date(Date.now() + 864e5 * 18).toISOString(), entities: { name: 'Iron Gym Miraflores', slug: 'iron-gym', category: 'gym', phone: '51999888777' }, emoji: '🏋️' },
     { id: 'ms2', entity_id: 'coach', kind: 'CLASS_PACK', status: 'ACTIVE', sessions_left: 5, valid_from: new Date(Date.now() - 864e5 * 20).toISOString(), valid_until: new Date(Date.now() + 864e5 * 40).toISOString(), entities: { name: 'Coach Diego Ramírez', slug: 'coach-diego', category: 'entrenador', phone: null }, emoji: '🧑‍🏫' },
     { id: 'ms4', entity_id: 'yoga', kind: 'PASS', status: 'ACTIVE', valid_from: new Date(Date.now() - 864e5 * 28).toISOString(), valid_until: new Date(Date.now() + 864e5 * 2).toISOString(), entities: { name: 'Yoga con Ana', slug: 'yoga-ana', category: 'entrenador', phone: null }, emoji: '🧘' },
     { id: 'ms3', entity_id: 'e1', kind: 'STAMP_CARD', status: 'ACTIVE', stamps: 6, entities: { name: 'Café Aurora', slug: 'cafe-aurora', category: 'cafeteria' }, emoji: '☕' },

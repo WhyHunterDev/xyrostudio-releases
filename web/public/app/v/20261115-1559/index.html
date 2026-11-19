@@ -370,7 +370,7 @@ body:not(.dentro){background:#05060a}
 'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const P=new URLSearchParams(location.search), DEMO=P.has('demo')||P.has('prueba'), WA='51936449066';
+const P=new URLSearchParams(location.search), DEMO=P.has('demo')||P.has('prueba'), WA='';
 const SB={url:'https://szvdzcaoxjstdyblhxrd.supabase.co',key:'sb_publishable_LOmoV7GDpORg5J1eE7YriA_tB4Y6EYe'};
 const LS={g(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(_){return d}},s(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}},r(k){try{localStorage.removeItem(k)}catch(_){}}};
 
@@ -422,7 +422,7 @@ const XYROS_D=[['apps','Xyro Apps','Agenda por odontólogo, pacientes, odontogra
  ['edits','Xyro Edits','Videos y reels para tus redes: antes y después de tratamientos, consejos de salud dental y presentación de tus especialistas.',1,['🎬 Antes y después','💡 Consejos','📣 Reels']]];
 const XYR=()=>R.citas?XYROS_D:R.resto?XYROS_R:XYROS;
 const PRONTO=k=>{const x=XYR().find(y=>y[0]===k);return!!(x&&x[3])};
-const soporteWA=()=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;
+const soporteWA=()=>`https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Hola XyroStudio, necesito ayuda con Xyro Apps de '+nombre()+(ME&&ME.nombre?' (soy '+ME.nombre+')':''))}`;
 const soporteURL=()=>DEMO?soporteWA():'#/soporte';const soporteTgt=()=>DEMO?' target="_blank" rel="noopener"':'';
 const tiene=k=>DEMO||XY.includes(k);
 const CTL=()=>tiene('control')||!!R.resto; // en restaurantes la carta, caja y stock vienen incluidos
@@ -468,7 +468,7 @@ const PRB=(P.get('prueba')||'').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,2
 const DKEY=()=>PRB?'xa-prueba-'+PRB:'xa-demo-'+(CFG.rubro||'gym');
 async function pruebaRPC(abrir){const r=await fetch(SB.url+'/rest/v1/rpc/xa_prueba',{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify({p_codigo:PRB,p_abrir:!!abrir})});if(!r.ok)throw new Error('prueba');return r.json()}
 function pruebaFin(x){try{LS.r(DKEY())}catch(_){}document.querySelectorAll('.ov').forEach(o=>o.remove());$('#boot').hidden=true;$('#login').hidden=true;const a=$('#app');a&&(a.hidden=true);document.querySelector('.demo')?.remove();
- const n=(x&&x.nombre)||'tu negocio',d=document.createElement('div');d.className='cen';d.innerHTML=`<div class="lg" style="max-width:420px;text-align:center"><img src="/img/marca/logo-apps-app.svg" alt=""><h2>${x&&x.motivo==='vencido'?'⏳ Tu acceso de prueba terminó':'🔒 Este acceso de prueba no está activo'}</h2><p class="mu">Gracias por probar Xyro Apps. Si te gustó, lo dejamos listo para ${esc(n)} con tus datos reales.</p><a class="btn p" href="https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio 👋 Probé Xyro Apps para '+n+' y quiero seguir.')}" target="_blank" rel="noopener">💬 Quiero mi Xyro Apps</a></div>`;document.body.appendChild(d)}
+ const n=(x&&x.nombre)||'tu negocio',d=document.createElement('div');d.className='cen';d.innerHTML=`<div class="lg" style="max-width:420px;text-align:center"><img src="/img/marca/logo-apps-app.svg" alt=""><h2>${x&&x.motivo==='vencido'?'⏳ Tu acceso de prueba terminó':'🔒 Este acceso de prueba no está activo'}</h2><p class="mu">Gracias por probar Xyro Apps. Si te gustó, lo dejamos listo para ${esc(n)} con tus datos reales.</p><a class="btn p" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Hola XyroStudio 👋 Probé Xyro Apps para '+n+' y quiero seguir.')}" target="_blank" rel="noopener">💬 Quiero mi Xyro Apps</a></div>`;document.body.appendChild(d)}
 async function pruebaBoot(){
  let x=null;try{x=await pruebaRPC(true)}catch(_){fatal('No pude abrir tu acceso de prueba. Revisa tu internet e intenta de nuevo.');return}
  if(!x||!x.ok)return pruebaFin(x);
@@ -1527,7 +1527,7 @@ document.addEventListener('carnets',()=>{
 });
 document.addEventListener('masivo',()=>{
  const L=cliS().map(c=>[c,est(c)]).filter(x=>x[1].k==='venc'&&x[0].telefono&&x[1].d>=-60);
- sheet(`<h3>📲 Recordatorios por WhatsApp</h3><p class="mu sm">Toca cada uno: se abre WhatsApp con el mensaje listo. Con Xyro Bots se envían solos.</p><div class="tl">${L.map(([c,e])=>`<a class="row" target="_blank" rel="noopener" href="${waLink(c,waMsg(c,e))}" onclick="this.style.opacity=.4">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${e.t}</small></span>📲</a>`).join('')||'<p class="mu">Nadie con celular registrado.</p>'}</div><div class="bt"><a class="btn" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Bots para enviar recordatorios automáticos')}">🤖 Automatizar con Xyro Bots</a><button class="btn p" data-x>Listo</button></div>`);
+ sheet(`<h3>📲 Recordatorios por WhatsApp</h3><p class="mu sm">Toca cada uno: se abre WhatsApp con el mensaje listo. Con Xyro Bots se envían solos.</p><div class="tl">${L.map(([c,e])=>`<a class="row" target="_blank" rel="noopener" href="${waLink(c,waMsg(c,e))}" onclick="this.style.opacity=.4">${av(c)}<span class="nm"><b>${esc(c.nombre)}</b><small>${e.t}</small></span>📲</a>`).join('')||'<p class="mu">Nadie con celular registrado.</p>'}</div><div class="bt"><a class="btn" target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Quiero Xyro Bots para enviar recordatorios automáticos')}">🤖 Automatizar con Xyro Bots</a><button class="btn p" data-x>Listo</button></div>`);
 });
 function socio(){
  if(R.citas&&citOn())return socioDent();
@@ -1761,7 +1761,7 @@ function caja(){
  ${reg&&reg.length?`<div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">📒 Registro ${cjP==='anio'?'mensual':'diario'}</h3><div class="sc"><table class="tb"><tr><th>${cjP==='anio'?'Mes':'Día'}</th><th class="r">Cobros</th><th class="r">${esc(R.plan)}s</th>${CTL()?`<th class="r">${esc(tiendaN())}</th>`:''}<th class="r">Otros</th><th class="r">Efectivo</th><th class="r">Digital</th><th class="r">Total</th>${cjP==='anio'?'':'<th>Cierre</th>'}</tr>${reg.map(b=>{const cs=(rx&&RX.cie?RX.cie:S.cie).filter(c=>(c.dia||ymd(new Date(c.hasta)))===b.ir);return`<tr data-ir="${b.ir}" class="${b.tot?'':'mu'}"><td><b>${cjP==='anio'?esc(MESL[+b.ir.slice(5,7)-1]):fF(b.ir)}</b></td><td class="r">${b.n}</td><td class="r">${sol(b.memb)}</td>${CTL()?`<td class="r">${sol(b.tienda)}</td>`:''}<td class="r">${sol(b.otro)}</td><td class="r">${sol(b.ef)}</td><td class="r">${sol(b.tot-b.ef)}</td><td class="r"><b>${sol(b.tot)}</b></td>${cjP==='anio'?'':`<td>${cs.length?cs.map(c=>c.auto?'🌙':+c.diferencia===0?'✅':'⚠️').join(' '):b.ir===hoy()?'<span class="mu">abierta</span>':'—'}</td>`}</tr>`}).join('')}<tr class="ft"><td><b>Total</b></td><td class="r">${L.length}</td><td class="r">${sol(sT('memb'))}</td>${CTL()?`<td class="r">${sol(sT('tienda'))}</td>`:''}<td class="r">${sol(sT('otro'))}</td><td class="r">${sol(ef)}</td><td class="r">${sol(dg)}</td><td class="r"><b>${sol(tot)}</b></td>${cjP==='anio'?'':'<td></td>'}</tr></table></div></div>`:''}
  <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">Movimientos <span class="mu sm">${L.length}${L.length>200?' · mostrando 200':''}</span><button class="btn sm" id="csv">⬇ Excel (CSV)</button></h3><div class="tl">${L.slice(0,200).map(p=>{const c=cli(p.cliente_id),t=tipoDe(p);return`<a class="row" href="#" data-p="${p.id}">${c?av(c):`<span class="av" style="--h:${t==='tienda'?40:220}">${t==='tienda'?'🛒':'S/'}</span>`}<span class="nm"><b>${esc(p.concepto||'Pago')}${c?' · '+esc(c.nombre):''}</b><small>${cjP==='dia'?'':fF(p.fecha)+' '}${fH(p.fecha)} · ${esc(p.metodo||'')}${GK[p.fecha+'|'+p.concepto]>1?' · ➗ pago dividido':''}${p.comp&&p.comp.serie?' · '+compTxt(p.comp):''}${p.quien?' · '+esc(p.quien):''}</small></span><span class="pill cjt ${t==='memb'?'act':t==='tienda'?'pronto':'sin'}">${esc(TN[t])}</span><b>${sol(p.monto)}</b></a>`}).join('')||`<div class="empty">Sin movimientos ${nf?'con estos filtros':'en este período'}</div>`}</div></div>
  <div class="card" style="margin-top:14px;padding:8px"><h3 style="padding:10px 10px 0">🔒 Cierres de caja <span class="mu sm">${turnosOn()?'🕐 por turno · 🔒 general · ':''}🌙 automático a las 12 de la noche</span></h3><div class="tl">${CIE.map(c=>`<a class="row" href="#" data-cie="${c.id}" onclick="return false"><span class="nm"><b>${c.auto?'🌙 Cierre automático · '+fF(c.dia||c.desde):(c.turno?'🕐 '+esc(c.turno)+' · '+esc(areaN(c))+' · ':esGen(c)&&turnosOn()?'🔒 General · ':'')+fF(c.hasta)+' '+fH(c.hasta)+' · '+esc(c.quien||'')}</b><small>${c.auto?'Total '+sol(totCie(c))+' · efectivo '+sol(c.esperado):'Esperado '+sol(c.esperado)+' · contado '+sol(c.contado)}${c.nota?' · '+esc(c.nota):''}</small></span>${c.auto?`<b>${sol(totCie(c))}</b>`:`<b style="color:${+c.diferencia===0?'var(--ok)':+c.diferencia>0?'var(--wa)':'var(--bad)'}">${+c.diferencia===0?'✅ Cuadró':(+c.diferencia>0?'+':'')+sol(c.diferencia)}</b>`} 🖨️</a>`).join('')||'<p class="mu" style="padding:10px">Sin cierres en este período.</p>'}</div>${NEED19&&isAdmin()?'<p class="mu sm" style="padding:10px">Para el cierre automático de medianoche corre el SQL 19 en Supabase.</p>':''}</div>
- <p class="mu sm" style="margin-top:12px">🧾 Toca un movimiento para reimprimir su comprobante. ¿Boletas y facturas electrónicas SUNAT? <a class="grad" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero boletas SUNAT en Xyro Apps')}"><b>Actívalo aquí</b></a></p>`;
+ <p class="mu sm" style="margin-top:12px">🧾 Toca un movimiento para reimprimir su comprobante. ¿Boletas y facturas electrónicas SUNAT? <a class="grad" target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Quiero boletas SUNAT en Xyro Apps')}"><b>Actívalo aquí</b></a></p>`;
 }
 /* Cierre automático de medianoche: el servidor lo hace con pg_cron; la app completa los días que falten. */
 async function autoCierres(){
@@ -2695,9 +2695,9 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href="#/web"]'
 /* ===== Integraciones: Xyro Apps es la base y el resto se activa en el mismo panel ===== */
 function xyros(){
  const on=k=>k==='apps'||XY.includes(k)||(DEMO&&k==='control');
- const wa=n=>`https://wa.me/${WA}?text=${encodeURIComponent('Hola XyroStudio, quiero activar '+n+' para '+nombre())}`;
+ const wa=n=>`https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Hola XyroStudio, quiero activar '+n+' para '+nombre())}`;
  const desc=k=>k==='apps'?'Tu sistema base: '+R.clis.toLowerCase()+', '+R.plan.toLowerCase()+'s, cobros, asistencia, caja, metas y equipo.':XYROS.find(x=>x[0]===k)[2]+'.';
- const wa2=t=>`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
+ const wa2=t=>`https://discord.gg/R39CwRC2bP?text=${encodeURIComponent(t)}`;
  if(R.citas||R.resto)return xyrosDent(on,wa,wa2);
  const acc=k=>{if(!on(k)&&PRONTO(k))return'';if(!on(k))return isAdmin()?`${k==='webs'||k==='control'||k==='bots'?`<a class="btn sm" href="#/xyros/${arg==='demos'+k?'':'demos'+k}">${arg==='demos'+k?'Ocultar demos':'👀 Ver demos'}</a>`:''}<a class="btn sm p" target="_blank" rel="noopener" href="${wa(XYROS.find(x=>x[0]===k)[1])}">Activar por WhatsApp</a>`:'<small class="mu">Pídele al administrador que lo active.</small>';
   if(k==='control')return'<a class="btn sm" href="#/tienda">Abrir punto de venta</a>';
@@ -3619,7 +3619,7 @@ function demoBoot(){
  const rl=P.get('rol');ME=['supervisor','recepcion','cafetin','entrenador','nutricionista','profesional'].includes(rl)?{rol:rl,nombre:{supervisor:'Rosa Quispe',recepcion:'Ana Torres',cafetin:'Carlos Díaz',entrenador:'Diego Salas',nutricionista:'Valeria Ríos',profesional:'Dra. Paola Ríos'}[rl],email:'demo',id:'d-'+rl}:{rol:'admin',nombre:'Lucía Ramos',email:'demo',id:'yo'};
  const arrancar=()=>{
   R=RUBROS[CFG.rubro]||rubDe(CFG)||R;demoMetas();asegS();if(R.citas&&(!(CFG.profesionales||[]).length||!S.pre)){S.pre=[];demoClinica();S.pag.sort((a,b)=>b.fecha>a.fecha?1:-1);saveDemo()}if(!isAdmin()&&!ME.sede)ME.sede=(sedesL()[0]||{}).id||'todas';start();
-  const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo de prueba · se borra en 24 h</span><a class="btn p sm" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
+  const b=document.createElement('div');b.className='demo';b.innerHTML=`<span>✨ Demo de prueba · se borra en 24 h</span><a class="btn p sm" target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Quiero Xyro Apps para '+nombre())}">Lo quiero</a><button class="btn sm" title="Reiniciar demo" id="drst">↺</button>`;document.body.appendChild(b);
   b.querySelector('#drst').onclick=()=>{LS.r(DKEY());location.href=PRB?'?prueba='+PRB:'?demo='+CFG.rubro};
  };
  if(g&&g.S&&!n){S=g.S;CFG=g.CFG;asegS();if(!S.pro.length&&R.productos){const keep=S;semilla(rub);keep.pro=S.pro;S=keep;saveDemo()}return arrancar()}
@@ -3696,7 +3696,7 @@ async function entrar(u){
  const{data:cs}=await sb.from('contenido').select('clave,valor').eq('sitio_id',SID);
  const C={};(cs||[]).forEach(r=>C[r.clave]=r.valor||{});
  const xy=(C.config&&C.config.xyros)||[];XY=xy;TEMP=temasDe(C.config||{});
- if(!ME.gestor&&!xy.includes('apps'))return fatal('Xyro Apps aún no está activo para tu negocio',`<a class="btn p" target="_blank" rel="noopener" href="https://wa.me/${WA}?text=${encodeURIComponent('Quiero activar Xyro Apps para '+(s.negocio||s.slug))}">Activarlo por WhatsApp</a>`);
+ if(!ME.gestor&&!xy.includes('apps'))return fatal('Xyro Apps aún no está activo para tu negocio',`<a class="btn p" target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Quiero activar Xyro Apps para '+(s.negocio||s.slug))}">Activarlo por WhatsApp</a>`);
  WEB=deWeb(C);
  CFG=Object.assign({rubro:'gym',nombre:WEB.nombre||s.negocio||s.slug},C.app||{});R=rubDe(CFG);
  if(ME.gestor&&(!CFG.web||!CFG.panelWeb)){try{const{data:ca}=await sb.from('clientes_agencia').select('url,panel').ilike('url','%'+SLUG+'%').limit(1);const c0=ca&&ca[0]||{};CFG.web=CFG.web||c0.url||'';if(!CFG.panelWeb&&c0.panel){CFG.panelWeb=c0.panel;setTimeout(()=>DB.cfg({panelWeb:c0.panel}).catch(()=>{}),1500)}}catch(_){}}

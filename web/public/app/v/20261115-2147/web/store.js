@@ -45,7 +45,7 @@
 
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const today = (o = 0) => { const d = new Date(); d.setDate(d.getDate() + o); return d.toISOString().slice(0, 10); };
-  const DEMO_WA = '51936449066';
+  const DEMO_WA = '51999888777';
   const VERSION = 4;
   const H = ['Lunes a sábado', '5:00 am – 11:00 pm'], H2 = ['Domingos y feriados', '8:00 am – 9:00 pm'];
 
