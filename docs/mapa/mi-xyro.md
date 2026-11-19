@@ -89,3 +89,7 @@ Monetización (SQL 98): 📣 avisos a seguidores (`xy_avisos_neg`, `xy_aviso_inf
 ## Libro de Reclamaciones y CAPTCHA (2026-11-19, SQL 100)
 - `/reclamaciones.html`: hoja virtual (Ley 29571) → RPC `xy_reclamo_crear(jsonb)` (anon, tope 5/día por correo). Gestor → 📕 Reclamos (`V.reclamos`, `xy_reclamos_lista`, `xy_reclamo_responder` + mailto). Enlazada en portada, Mi Xyro, términos y privacidad.
 - CAPTCHA registro: `TS_KEY` en mi/index.html (vacío = apagado). El token va en `user_metadata.ts`; lo valida el Worker `/api/auth/antes` (hook «Before User Created» de Supabase, firma Standard Webhooks con `AUTH_HOOK_SECRET`, Turnstile con `TURNSTILE_SECRET`). Sin secretos deja pasar todo. Google pasa siempre.
+
+## Una sola app (2026-11-19, decisión del usuario «Unir todo en Mi Xyro»)
+- Marketplace entre personas ahora en Mi Xyro: Explorar → 🛍️ Marketplace (`mkAbrir`, `mkPublicar`, `mkDetalle`, `mkTrato` con chat `p2p_messages`). Perfil → 🎟️ Mis pases (`pasesAbrir`, marcar entrada `chkTok` → `xy_checkin`) y 🔐 Bóveda (`bovedaAbrir`, `xy_vault`). El escáner de Mi Xyro entiende los QR `/x/?q=` (entrada; sin plan → abre /x/ para la carta).
+- `/x/` ya no es otra app: Explorar/Marketplace/Perfil redirigen a /mi/, sin selector de modo (salvo panel del equipo `p-*`), botón «‹ Mi Xyro». Quedan ahí solo Xyro Control del entrenador (c-*), carta/pedido en local y el panel del equipo. Pendiente: pasar c-* a Mi Xyro.

@@ -14,7 +14,11 @@ const VISTA = {
   'c-inicio': 'control', 'c-pedidos': 'control', 'c-qr': 'control', 'c-boost': 'control', 'c-catalogo': 'control', 'c-videos': 'control',
   'p-inicio': 'panel', 'p-negocios': 'panel', 'p-soporte': 'panel', 'p-pagos': 'panel', 'p-videos': 'panel',
 };
-const INICIO = { user: 'explorar', control: 'c-inicio', panel: 'p-inicio' };
+const INICIO = { user: 'billetera', control: 'c-inicio', panel: 'p-inicio' };
+// Decisión 2026-11-19: una sola app = Mi Xyro. Aquí solo quedan las pantallas a las que Mi Xyro manda
+// (cobros del entrenador, Pase QR, escanear QR del negocio) y el panel del equipo. Lo demás vuelve a Mi Xyro.
+const A_MI = ['explorar', 'market', 'trato', 'boveda', 'ayuda', 'perfil'];
+const MI = () => '/mi/' + (S.demo ? '?demo=1' : '');
 const modoDe = (r) => r.startsWith('c-') ? 'control' : r.startsWith('p-') ? 'panel' : 'user';
 const rutaAct = () => (location.hash.replace(/^#\/?/, '').split('?')[0]) || INICIO[S.modo];
 
@@ -25,17 +29,18 @@ const inicial = () => esc(((S.me && (S.me.display_name || S.me.username)) || '?'
 const esPro = () => !!(S.entidad && S.entidad.type === 'PROFESSIONAL');
 function pintarMarco(r) {
   const m = modoDe(r), md = MODOS[m], nav = NAV[m].filter(([k]) => !(k === 'c-qr' && esPro()));
-  $('#top').innerHTML = `${logo()}<button class="modo ${md.c}" id="bModo" aria-label="Cambiar de modo"><i></i><span class="ell">${esc(md.t)}</span>▾</button><span class="sp"></span>
+  const eq = m === 'panel', vol = `<a class="modo" href="${MI()}" aria-label="Volver a Mi Xyro">‹ <span class="ell">Mi Xyro</span></a>`;
+  $('#top').innerHTML = `${logo()}${eq ? `<button class="modo ${md.c}" id="bModo" aria-label="Cambiar de modo"><i></i><span class="ell">${esc(md.t)}</span>▾</button>` : vol}<span class="sp"></span>
     ${S.demo ? '<span class="pill warn">Demo</span>' : ''}<button class="av" id="bAv" aria-label="Perfil">${inicial()}</button>`;
-  $('#tabs').innerHTML = nav.map(([k, t, ic, fab]) => `<a class="tab${fab ? ' fab' : ''}${k === r ? ' on' : ''}" href="#/${k}" aria-label="${t}">${fab ? `<span>${ic}</span>` : ic}${fab ? '' : `<span>${t}</span>`}</a>`).join('');
+  $('#tabs').innerHTML = m === 'user' ? '' : nav.map(([k, t, ic, fab]) => `<a class="tab${fab ? ' fab' : ''}${k === r ? ' on' : ''}" href="#/${k}" aria-label="${t}">${fab ? `<span>${ic}</span>` : ic}${fab ? '' : `<span>${t}</span>`}</a>`).join('');
   $('#side').innerHTML = `${logo()}
-    <button class="mopt" id="sModo" style="padding:10px 12px"><span class="sp"><b class="sm">${esc(md.t)}</b><br><span class="mu xs">${esc(md.d)}</span></span>▾</button>
+    ${eq ? `<button class="mopt" id="sModo" style="padding:10px 12px"><span class="sp"><b class="sm">${esc(md.t)}</b><br><span class="mu xs">${esc(md.d)}</span></span>▾</button>` : `<a class="mopt" href="${MI()}" style="padding:10px 12px"><b class="sm">‹ Volver a Mi Xyro</b></a>`}
     <div class="lbl">${m === 'user' ? 'MI XYRO' : m === 'control' ? 'MI NEGOCIO' : 'EQUIPO'}</div>
-    ${nav.map(([k, t, ic]) => `<a class="nv${k === r ? ' on' : ''}" href="#/${k}">${ic}${t}</a>`).join('')}
+    ${(m === 'user' ? [] : nav).map(([k, t, ic]) => `<a class="nv${k === r ? ' on' : ''}" href="#/${k}">${ic}${t}</a>`).join('')}
     <div class="pie">${S.me ? `<div class="row"><span class="av">${inicial()}</span><span class="sp ell sm b">${esc(S.me.display_name || S.me.username || '')}</span></div>` : ''}
       ${S.demo ? '' : `<button class="nv" id="sOut">${I.out}Salir</button>`}</div>`;
-  $('#bModo').onclick = $('#sModo').onclick = elegirModo;
-  $('#bAv').onclick = () => { location.hash = '#/perfil'; };
+  if (eq) $('#bModo').onclick = $('#sModo').onclick = elegirModo;
+  $('#bAv').onclick = () => { location.href = MI(); };
   const so = $('#sOut'); so && (so.onclick = salir);
 }
 
@@ -92,6 +97,7 @@ function pantallaEntrar() {
 let limpiar = null;
 async function ir() {
   let r = rutaAct();
+  if (A_MI.includes(r)) { location.replace(MI()); return; }
   if (!VISTA[r]) r = INICIO[S.modo];
   const m = modoDe(r);
   if (!puedeModo(m)) { location.replace('#/' + INICIO.user); return; }
@@ -119,7 +125,7 @@ async function arrancar() {
   try {
     if (!S.demo) await cliente();
     const ok = await cargarCuenta();
-    if (!ok) return pantallaEntrar();
+    if (!ok) { let q = null; try { q = sessionStorage.getItem('x-qr'); } catch (_) {} if (!q) { location.replace(MI()); return; } return pantallaEntrar(); }
     if (!puedeModo(S.modo)) S.modo = 'user';
   } catch (e) { console.error(e); toast(errDe(e)); if (!S.me) return pantallaEntrar(); }
   addEventListener('hashchange', ir);
