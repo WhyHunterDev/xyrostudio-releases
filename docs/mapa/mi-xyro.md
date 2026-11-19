@@ -114,3 +114,4 @@ Monetización (SQL 98): 📣 avisos a seguidores (`xy_avisos_neg`, `xy_aviso_inf
 ## Marketplace: avisos y stock (SQL 108, 2026-11-19)
 - Avisos (solo front): `mkaCarga` lee tratos (orders con listing_id) + `p2p_messages` del otro; «nuevo» si hay mensaje/pago/pedido posterior a `localStorage mk-v-<id>`. Sale en Avisos e Inicio (`mkAvisosHTML`), suma al punto de Avisos y avisa con toast cada 20 s. Abrir el trato lo marca visto.
 - Stock: `marketplace_listings.stock` (0–9999) y `orders.p2p_qty`. `xy_create_p2p_order2(listing, cantidad)`; trigger `xy_mk_stock` recalcula ACTIVE/RESERVED/SOLD según stock y tratos abiertos; SOLD descuenta unidades; en 0 = SOLD (se quita sola). Subir stock la republica.
+- Mapa sin ubicación (2026-11-19): abre en el país de la persona (`paisAprox()`: perfil.pais → zona horaria del equipo → idioma; centros en `PCEN`), ya no fijo en Lima.
