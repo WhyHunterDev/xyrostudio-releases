@@ -1070,7 +1070,7 @@ function negCard(){const g=GRN?null:G0(),p=PROM;
  const fila=(id,ic,t,d)=>`<button class="li" id="${id}" style="all:unset;display:flex;gap:12px;align-items:center;cursor:pointer;padding:6px 0"><div class="ibox">${ic}</div><span class="sp"><b>${t}</b><br><span class="mu xs">${d}</span></span><span class="mu">›</span></button>`;
  return`<div class="card"><p class="mu xs" style="font-weight:700">MODO NEGOCIO</p>
   ${g?fila('ngG',I.store,esc(g.nombre),(GREST[g.estado]||GREST.pendiente)[1]+' · Plan '+(g.estado==='pago'?'completo':'Gratis')):''}
-  ${p?fila('ngP',I.dumb,'Mi perfil de '+esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase()),(p.estado==='activo'?'✅ Visible en Explorar':p.estado==='suspendido'?'⛔ Suspendido':'⏳ En revisión')+(p.nuevos?` · <b style="color:var(--a)">${p.nuevos} nuevo${p.nuevos>1?'s':''}</b>`:'')):''}
+  ${p?fila('ngP',I.dumb,'Mi perfil de '+esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase()),(p.estado==='activo'?'✅ Visible en Explorar':p.estado==='suspendido'?'⛔ Suspendido':'🕓 Revisando el nombre')+(p.nuevos?` · <b style="color:var(--a)">${p.nuevos} nuevo${p.nuevos>1?'s':''}</b>`:'')):''}
   ${g||p?'':`<p class="mu sm">¿Vendes productos o das un servicio? Regístralo gratis y cobra dentro de Xyro.</p><button class="btn p" id="ngN">Registrar mi negocio gratis</button>`}
   ${p&&!g?'<button class="btn l" id="ngN" style="padding:6px 0">＋ Registrar también un negocio (local, tienda, barbería…)</button>':''}${g&&!p?'<button class="btn l" id="ngN" style="padding:6px 0">＋ Crear también mi perfil de entrenador o profesor</button>':''}
   <button class="btn${g||p?' p':''}" id="mneg">${I.brief}Entrar al modo negocio</button></div>`}
@@ -2014,7 +2014,7 @@ function vPro(slug){const p=PRO[slug];
   <h1>${esc(p.nombre)}${p.plus?' <span class="pill dst">PRO</span>':''}</h1><p class="sm" style="color:var(--a);font-weight:700">${t[0]} ${esc(p.titulo||t[1])}</p>
   <p class="mu sm">${[p.ciudad,p.pais&&p.pais!=='PE'?paisN(p.pais):''].filter(Boolean).map(esc).join(' · ')}${p.modalidad?' · '+MODT[p.modalidad]:''}</p>
   <p id="resh">${RES['p'+slug]?estr(RES['p'+slug].prom,RES['p'+slug].n,1):''}</p>${+p.alumnos?`<p class="mu xs">👥 ${p.alumnos} alumno${p.alumnos>1?'s':''} en Mi Xyro</p>`:''}
-  ${p.estado==='pendiente'?`<p class="pill" style="background:#f5a52422;color:#f5a524">${p.mio?'En revisión: ya puedes compartir tu QR; pronto sales en Explorar':'Perfil nuevo'}</p>`:''}</div></div>
+  ${p.estado==='pendiente'?`<p class="pill" style="background:#f5a52422;color:#f5a524">${p.mio?'Revisando el nombre: ya puedes compartir tu QR':'Perfil nuevo'}</p>`:''}</div></div>
  <div class="g" style="margin-top:14px">
   ${p.mio?`<div class="row"><button class="btn p sp" id="pqr">${I.qr}Mi QR para alumnos</button><button class="btn sp" id="ped">✏️ Editar</button></div>`
    :p.chat?`<button class="btn p" id="pch">${I.chat}Ver mi conversación</button>`
@@ -2050,7 +2050,7 @@ async function proMioCarga(){try{PROM=await rpc('xa_pro_mio')}catch(_){PROM=PROM
 async function pchCarga(){try{PCH=await rpc('xa_pro_chats')}catch(_){PCH=PCH||{mios:[],bandeja:[]}}}
 const pchNuevos=()=>PCH?(PCH.mios||[]).filter(c=>c.nuevo).length+(PCH.bandeja||[]).filter(c=>c.nuevo&&c.estado!=='cerrada').length:0;
 function proCard(){const p=PROM;
- return`<div class="card procard"><div class="row"><div class="ibox">${I.dumb}</div><div class="sp"><h3>${p?'Mi perfil de '+esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase()):'¿Eres entrenador o profesor?'}</h3><p class="mu sm">${p?(p.estado==='activo'?'✅ Visible en Explorar':p.estado==='suspendido'?'⛔ Suspendido':'⏳ En revisión')+(p.nuevos?` · <b style="color:var(--a)">${p.nuevos} nuevo${p.nuevos>1?'s':''}</b>`:''):'Crea tu perfil gratis: tus alumnos te encuentran, te califican y te escriben por aquí. Solo necesitas tu celular.'}</p></div>${p&&p.nuevos?'<span class="nvd"></span>':''}</div><button class="btn${p?'':' p'}" id="mpro">${p?'Abrir mi perfil y mensajes':'Crear mi perfil gratis'}</button></div>`}
+ return`<div class="card procard"><div class="row"><div class="ibox">${I.dumb}</div><div class="sp"><h3>${p?'Mi perfil de '+esc((PROT[p.tipo]||PROT.otro)[1].toLowerCase()):'¿Eres entrenador o profesor?'}</h3><p class="mu sm">${p?(p.estado==='activo'?'✅ Visible en Explorar':p.estado==='suspendido'?'⛔ Suspendido':'🕓 Revisando el nombre')+(p.nuevos?` · <b style="color:var(--a)">${p.nuevos} nuevo${p.nuevos>1?'s':''}</b>`:''):'Crea tu perfil gratis: tus alumnos te encuentran, te califican y te escriben por aquí. Solo necesitas tu celular.'}</p></div>${p&&p.nuevos?'<span class="nvd"></span>':''}</div><button class="btn${p?'':' p'}" id="mpro">${p?'Abrir mi perfil y mensajes':'Crear mi perfil gratis'}</button></div>`}
 function vMiPro(){const p=PROM;
  if(PROM===undefined){proMioCarga().then(()=>SUB==='mipro'&&pinta());return'<button class="back" id="mpb">‹ Volver</button><div class="exsk"></div>'}
  if(PCH===null)pchCarga().then(()=>SUB==='mipro'&&pinta());
@@ -2064,7 +2064,7 @@ function vMiPro(){const p=PROM;
   <button class="btn p" id="mpe">Crear mi perfil</button></div></div>`;
  const B=(PCH&&PCH.bandeja)||[],TT={entreno:'🔥 Quiere entrenar',alumno:'🙋 Dice que es tu alumno',mensaje:'💬 Mensaje'},R=p.res||{};
  return`<button class="back" id="mpb">‹ Volver</button><div class="g"><div class="row"><div class="av">${/^https:|^blob:/.test(p.foto||'')?`<img src="${esc(p.foto)}" alt="">`:(PROT[p.tipo]||PROT.otro)[0]}</div><div class="sp"><h2>${esc(p.nombre)}</h2><p class="mu sm">${esc(p.titulo||(PROT[p.tipo]||PROT.otro)[1])}</p></div></div>
-  ${p.estado==='pendiente'?'<div class="card" style="border-color:#f5a524"><p class="sm">⏳ <b>Tu perfil está en revisión.</b> Ya puedes compartir tu QR con tus alumnos. Cuando lo aprobemos sales en Explorar para todo el mundo.</p></div>':p.estado==='suspendido'?`<div class="card" style="border-color:#e5484d"><p class="sm">⛔ Tu perfil está suspendido.${p.motivo?' Motivo: '+esc(p.motivo):''} Escríbenos desde «Necesito ayuda».</p></div>`:''}
+  ${p.estado==='pendiente'?'<div class="card" style="border-color:#f5a524"><p class="sm">🕓 <b>Tu nombre se parece a una marca conocida</b>, así que XyroStudio lo revisa antes de mostrarlo en Explorar. Ya puedes compartir tu QR. Si la marca es tuya, escríbenos desde «Necesito ayuda».</p></div>':p.estado==='suspendido'?`<div class="card" style="border-color:#e5484d"><p class="sm">⛔ Tu perfil está suspendido.${p.motivo?' Motivo: '+esc(p.motivo):''} Escríbenos desde «Necesito ayuda».</p></div>`:''}
   <div class="kps k3"><div class="kp"><b>${p.alumnos||0}</b><span class="mu xs">Alumnos</span></div><div class="kp"><b>${R.n?'★ '+(+R.prom).toFixed(1):'—'}</b><span class="mu xs">${R.n||0} opiniones</span></div><div class="kp"><b>${p.nuevos||0}</b><span class="mu xs">Nuevos</span></div></div>
   <div class="row"><button class="btn p sp" id="mpq">${I.qr}Mi QR</button><button class="btn sp" id="mpv">👁️ Ver</button><button class="btn sp" id="mpe">✏️ Editar</button></div>
   ${proCobrosHTML(p)}${proPlanesCardHTML()}
@@ -2092,7 +2092,7 @@ function proEditar(){const p=PROM||{},per=(D&&D.persona)||{},E=p.especialidades|
   <button type="button" class="btn" id="pfpo">🖼️ ${portada?'Cambiar':'Poner'} foto de portada</button>
   <div class="row"><label class="sp">Instagram<input id="pfri" maxlength="60" value="${esc((p.redes||{}).instagram||'')}" placeholder="@usuario"></label><label class="sp">TikTok<input id="pfrt" maxlength="60" value="${esc((p.redes||{}).tiktok||'')}" placeholder="@usuario"></label></div>
   <input type="file" id="pfi" accept="image/*" hidden><div class="msg" id="pfmg"></div><button class="btn p" id="pfok">Guardar</button>
-  <p class="mu xs" style="text-align:center">Al publicar aceptas los <a href="/terminos.html" target="_blank" rel="noopener" style="color:var(--a)">términos</a>. XyroStudio revisa cada perfil antes de mostrarlo en Explorar.</p>${p.id||p.slug?'<button type="button" class="btn l" id="pfdel" style="color:#ef4444">🗑️ Eliminar mi perfil de entrenador</button>':''}</form>`,(o,close)=>{
+  <p class="mu xs" style="text-align:center">Al publicar aceptas los <a href="/terminos.html" target="_blank" rel="noopener" style="color:var(--a)">términos</a>. Tu perfil sale al toque en Explorar.</p>${p.id||p.slug?'<button type="button" class="btn l" id="pfdel" style="color:#ef4444">🗑️ Eliminar mi perfil de entrenador</button>':''}</form>`,(o,close)=>{
   const dl=o.querySelector('#pfdel');dl&&(dl.onclick=()=>{close();proEliminar(p)});
   const q=s=>o.querySelector(s),m=q('#pfmg'),say=t=>{m.textContent=t;m.className='msg on'};let para='';
   const gal=()=>{q('#pfg').innerHTML=fotos.map((u,i)=>`<span><img src="${esc(u)}" alt=""><button type="button" data-fx="${i}" aria-label="Quitar">✕</button></span>`).join('')+(fotos.length<mx?'<button type="button" id="pfadd">＋</button>':'');
