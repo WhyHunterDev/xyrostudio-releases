@@ -472,8 +472,13 @@ async function entrar(){
  if(p&&p.n){await guardarNeg(p.n,true);TAB='negocios';SUB={neg:p.n}}
  else if(p&&p.t){await proCarga(p.t);TAB='negocios';SUB={pro:p.t}}
  else if(p&&p.c){pinta();return conCodigo(p.c)}
+ if(TAB==='inicio'&&!SUB&&MODO!=='negocio')await precarga();
  pinta();
 }
+/* Todo lo de Inicio (puntos, nivel, Xyro+, novedades) se pide ANTES de mostrarlo, con tope de 4 s, para que salga completo de una vez */
+function precarga(){if(!D)return Promise.resolve();PTS=undefined;const ok=x=>Promise.resolve(x).catch(()=>{});
+ const fd=(()=>{const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.guardados)||[]).map(g=>g.slug)])].filter(s=>s&&!NEG[s]&&!FEEDT[s]).slice(0,8);S.forEach(s=>FEEDT[s]=1);return Promise.all(S.map(x=>ok(cargaNeg(x))))})();
+ return Promise.race([Promise.all([ok(ptsCarga()),ok(xEstCarga()),ok(nvCarga()),ok(paisSync()),fd]),new Promise(r=>setTimeout(r,4000))]).then(()=>{if(PTS===undefined)PTS=null})}
 
 // ---------- Botón «atrás» del celular: cierra la ventana abierta en vez de salir ----------
 const HN={k:'',st:[],skip:0,ov:0,pop:false,ir:''},HSEL='.ov,.cam,.qrfull,.emov';
@@ -621,7 +626,7 @@ function vDieta(n){const e=(n.rutinas||[]).find(r=>r.tipo==='nutri');
 let FEEDT={};
 function feedCarga(){const S=[...new Set([...negs().map(n=>n.slug),...((D&&D.guardados)||[]).map(g=>g.slug)])].filter(s=>s&&!NEG[s]&&!FEEDT[s]).slice(0,8);
  if(!S.length)return;S.forEach(s=>FEEDT[s]=1);
- Promise.all(S.map(x=>cargaNeg(x).catch(()=>{}))).then(()=>repinta(()=>MODO==='cliente'&&TAB==='inicio'&&!SUB))}
+ return Promise.all(S.map(x=>cargaNeg(x).catch(()=>{}))).then(()=>repinta(()=>MODO==='cliente'&&TAB==='inicio'&&!SUB))}
 function medDe(n,u){const w=WEBN;WEBN=n.web||'';const r=media(u,n.rubro);WEBN=w;return r}
 const idxCli=cid=>negs().findIndex(n=>n.cliente===cid);
 function feed(){const h=hoyL(),out=[],M=negs();
@@ -3122,7 +3127,7 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
  setTimeout(bannerApp,2500);
  if(DEMO){D=demoData();CUR=0;if(/^negocio/.test(DEMO))return modoNegocio();return pinta()}
  const n=(P.get('n')||'').toLowerCase().replace(/[^a-z0-9-]/g,''),c=codigoDe(P.get('c')||''),tp=(P.get('t')||'').toLowerCase().replace(/[^a-z0-9-]/g,'');
- const cache=ls.g('mi-data');if(cache&&!n&&!c&&!tp&&!/[#&?](access_token|code)=/.test(location.href)){try{D=JSON.parse(cache);CACHEP=1;pinta()}catch(_){}}
+ const cache=ls.g('mi-data');/* sin pintar lo guardado: así no se ve un Inicio incompleto que luego cambia (pedido del usuario 2026-11-19) */
  try{await cliente()}catch(_){if(!D)pantallaEntrada('Sin conexión. Revisa tu internet.');return}
  if(MODO==='negocio'&&!n&&!c&&await modoNegocio(true))return;
  const{data:{session}}=await sb.auth.getSession();
