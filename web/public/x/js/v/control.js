@@ -16,7 +16,7 @@ function cabecera(el, titulo, sub) {
   el.insertAdjacentHTML('beforeend', `<div class="row wrap"><div class="sp"><h1>${titulo}</h1><p class="mu">${sub}</p></div>
     ${varias ? `<select id="ent" style="width:auto;max-width:100%">${S.entidades.map((x) => `<option value="${x.id}" ${x.id === e.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>` : `<span class="pill">${esc(e.name)}</span>`}</div>`);
   const s = $('#ent', el); s && (s.onchange = () => { ls.s('x-ent', s.value); dispatchEvent(new HashChangeEvent('hashchange')); });
-  if (e.status === 'PENDING') el.insertAdjacentHTML('beforeend', '<div class="aviso" style="margin:0">⏳ Tu negocio está en revisión. Mientras tanto puedes preparar tus QR; aparecerás en Explorar cuando lo aprobemos.</div>');
+  if (e.status === 'PENDING') el.insertAdjacentHTML('beforeend', `<div class="aviso" style="margin:0">⏳ ${e.type === 'PROFESSIONAL' ? 'Tu perfil está en revisión. Mientras tanto puedes armar tus planes y compartir tu QR con tus alumnos; saldrás en Explorar cuando lo aprobemos.' : 'Tu negocio está en revisión. Mientras tanto puedes preparar tus QR; aparecerás en Explorar cuando lo aprobemos.'}</div>`);
 }
 
 export async function vista(r, el) {
@@ -39,7 +39,7 @@ const ptsNegocio = async () => {
 };
 
 async function inicio(el) {
-  cabecera(el, 'Resumen', 'Lo importante de hoy en tu negocio.');
+  cabecera(el, 'Resumen', S.entidad.type === 'PROFESSIONAL' ? 'Lo importante de hoy con tus alumnos.' : 'Lo importante de hoy en tu negocio.');
   el.insertAdjacentHTML('beforeend', `<div class="kpis" id="k">${Array(4).fill('<div class="sk" style="height:86px"></div>').join('')}</div>
     <div class="dos"><div class="card"><div class="row"><b class="sp">Últimos pedidos</b><a class="btn sm" href="#/c-pedidos">Ver todos</a></div><div id="ul"></div></div>
     <div class="card"><b>Accesos rápidos</b>
@@ -94,8 +94,8 @@ async function planCard(box) {
   const T = { FREE: 'Gratis', PLUS: 'Plus', PRO: 'Pro', ENTERPRISE: 'Empresa' }, t = f.tier || (f.pro ? 'PRO' : 'FREE'), sig = t === 'FREE' ? 'Plus' : t === 'PLUS' ? 'Pro' : null;
   box.innerHTML = `<div class="row"><b class="sp">Tu plan</b><span class="pill ${f.pro ? 'ok' : ''}">${f.pro ? '⭐ ' : ''}${T[t] || t}</span></div>
     <div class="li"><span class="ico">👥</span><span class="sp sm">${f.type === 'PROFESSIONAL' ? 'Alumnos' : 'Clientes'} activos: <b>${lim(f.clients ?? f.students, f.max_clients ?? f.max_students)}</b></span></div>
-    ${f.max_qrs !== undefined ? `<div class="li"><span class="ico">${I.qr}</span><span class="sp sm">Códigos QR: <b>${lim(f.qrs, f.max_qrs)}</b></span></div>` : ''}
-    <div class="li"><span class="ico">🏷️</span><span class="sp sm">Planes o productos: <b>${lim(f.items, f.max_items)}</b></span></div>
+    ${f.max_qrs !== undefined && f.type !== 'PROFESSIONAL' ? `<div class="li"><span class="ico">${I.qr}</span><span class="sp sm">Códigos QR: <b>${lim(f.qrs, f.max_qrs)}</b></span></div>` : ''}
+    <div class="li"><span class="ico">🏷️</span><span class="sp sm">${f.type === 'PROFESSIONAL' ? 'Planes' : 'Productos'}: <b>${lim(f.items, f.max_items)}</b></span></div>
     <div class="li"><span class="ico">🌐</span><span class="sp sm">${f.web ? '<b>Tu web en xyrostudio.net incluida</b>' : 'Web propia: solo en Pro'}</span></div>
     ${sig ? `<a class="btn p w" target="_blank" rel="noopener" href="https://discord.gg/R39CwRC2bP?text=${encodeURIComponent('Hola XyroStudio, quiero el plan ' + sig + ' para ' + (S.entidad.name || 'mi negocio'))}">⭐ Pasar a ${sig}</a><span class="mu xs">${sig === 'Plus' ? 'Plus: 2,000 clientes, 25 productos, 10 QR y mesas, 5 videos al mes sin marca.' : 'Pro: sin límites, tu web en xyrostudio.net, 15 videos al mes y Bots al lanzarse.'}</span>` : ''}`;
 }
@@ -238,14 +238,15 @@ const KIND = { PRODUCT: 'Producto', SERVICE: 'Servicio', SESSION: 'Sesión', CLA
 const MODOS_V = [['IN_STORE', '🍽️ En el local'], ['PICKUP', '🛍️ Para recoger'], ['DELIVERY', '🛵 Delivery'], ['DIGITAL', '💾 Digital']];
 let DEMO_CAT = null;
 async function catalogo(el) {
-  cabecera(el, 'Catálogo', 'Tus productos y servicios: aparecen en tu carta al escanear el QR y en Explorar.');
+  const pro = S.entidad.type === 'PROFESSIONAL';
+  cabecera(el, pro ? 'Mis planes' : 'Catálogo', pro ? 'Tus planes y sesiones: tus alumnos los eligen en tu perfil y te pagan directo.' : 'Tus productos y servicios: aparecen en tu carta al escanear el QR y en Explorar.');
   el.insertAdjacentHTML('beforeend', `<div class="row"><span class="sp"></span><button class="btn p" id="nuevo">＋ Agregar</button></div><div class="card" id="lc"><div class="sk" style="height:120px"></div></div>`);
   let L = [];
   const pinta = () => {
     $('#lc', el).innerHTML = L.length ? L.map((x) => `<div class="li"><span class="ico"${x.photos && x.photos[0] ? ` style="background:url('${esc(x.photos[0])}') center/cover"` : ''}>${x.photos && x.photos[0] ? '' : esc(x.emoji || (x.kind === 'DIGITAL' ? '💾' : '🏷️'))}</span><span class="sp"><b class="ell">${esc(x.title)}</b><br>
       <span class="mu xs">${esc(x.category || 'Sin categoría')} · ${KIND[x.kind] || ''} · ${(x.fulfillment_modes || []).map((m) => (MODOS_V.find((v) => v[0] === m) || ['', m])[1].split(' ')[0]).join(' ')}${x.stock != null ? ' · stock ' + num(x.stock) : ''}</span></span>
       <span style="text-align:right"><b>${money(x.price, x.currency)}</b><br><span class="pill ${x.active ? 'ok' : ''}">${x.active ? 'Visible' : 'Oculto'}</span></span><button class="btn sm" data-ed="${x.id}">Editar</button></div>`).join('')
-      : '<div class="vacio"><div class="e">🏷️</div><b>Aún no tienes productos</b><span class="mu sm">Agrega lo que vendes para que tus clientes pidan desde la mesa o para recoger.</span></div>';
+      : (pro ? '<div class="vacio"><div class="e">📋</div><b>Aún no tienes planes</b><span class="mu sm">Agrega tus planes (ej. «Mensual 3 veces por semana» o «Paquete de 8 sesiones») para que tus alumnos los elijan y te paguen.</span></div>' : '<div class="vacio"><div class="e">🏷️</div><b>Aún no tienes productos</b><span class="mu sm">Agrega lo que vendes para que tus clientes pidan desde la mesa o para recoger.</span></div>');
     $$('[data-ed]', el).forEach((b) => b.onclick = () => form(L.find((x) => x.id === b.dataset.ed)));
   };
   const cargar = async () => {
@@ -255,13 +256,13 @@ async function catalogo(el) {
       pinta();
     } catch (e) { toast(errDe(e)); }
   };
-  const form = (x) => { let fotoU = (x && x.photos && x.photos[0]) || null; hoja(`<h2>${x ? 'Editar' : 'Nuevo'} producto o servicio</h2>
+  const form = (x) => { let fotoU = (x && x.photos && x.photos[0]) || null; hoja(`<h2>${x ? 'Editar' : 'Nuevo'} ${pro ? 'plan' : 'producto o servicio'}</h2>
     <div class="fotos" id="cf"></div>
     <label>Nombre<input id="fT" maxlength="120" value="${esc(x ? x.title : '')}" required></label>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Precio (${esc(S.entidad.currency || 'PEN')})<input id="fP" type="number" min="0" step="0.1" inputmode="decimal" value="${x ? esc(x.price) : ''}"></label>
-      <label>Categoría<input id="fC" maxlength="40" placeholder="Bebidas, Postres…" value="${esc((x && x.category) || '')}"></label></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Tipo<select id="fK">${Object.entries(KIND).map(([k, t]) => `<option value="${k}" ${x && x.kind === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
-      <label>Stock<input id="fS" type="number" min="0" placeholder="Sin control" value="${x && x.stock != null ? esc(x.stock) : ''}"></label></div>
+      <label>Categoría<input id="fC" maxlength="40" placeholder="${pro ? 'Presencial, Online…' : 'Bebidas, Postres…'}" value="${esc((x && x.category) || '')}"></label></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Tipo<select id="fK">${Object.entries(KIND).filter(([k]) => !pro || ['MEMBERSHIP', 'CLASS_PACK', 'SESSION', 'DIGITAL'].includes(k)).map(([k, t]) => `<option value="${k}" ${x && x.kind === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <label${pro ? ' hidden' : ''}>Stock<input id="fS" type="number" min="0" placeholder="Sin control" value="${x && x.stock != null ? esc(x.stock) : ''}"></label></div>
     <label>Descripción<input id="fD" maxlength="300" value="${esc((x && x.description) || '')}"></label>
     <div id="mbw" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label>Días del plan<input id="fDy" type="number" min="1" max="730" placeholder="30" value="${x && x.membership_days ? esc(x.membership_days) : ''}"></label>
       <label>Sesiones<input id="fSe" type="number" min="1" max="500" placeholder="—" value="${x && x.sessions_included ? esc(x.sessions_included) : ''}"></label></div>
@@ -271,7 +272,7 @@ async function catalogo(el) {
     <label class="row" style="color:var(--tx)"><input type="checkbox" id="fA" style="width:auto" ${!x || x.active ? 'checked' : ''}> Visible para clientes</label>
     <button class="btn p" id="gd">Guardar</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
     $$('[data-mo]', h).forEach((b) => b.onclick = () => b.classList.toggle('on'));
-    const dig = () => { const k = $('#fK', h).value, d = k === 'DIGITAL'; $('#mdw', h).hidden = d; $('#dgw', h).hidden = !d; $('#mbw', h).hidden = !['MEMBERSHIP', 'CLASS_PACK', 'SESSION'].includes(k); };
+    const dig = () => { const k = $('#fK', h).value, d = k === 'DIGITAL'; $('#mdw', h).hidden = d || pro; $('#dgw', h).hidden = !d; $('#mbw', h).hidden = !['MEMBERSHIP', 'CLASS_PACK', 'SESSION'].includes(k); };
     $('#fK', h).onchange = dig; dig();
     const pf = () => {
       $('#cf', h).innerHTML = fotoU ? `<span class="fto" style="background-image:url('${esc(fotoU)}')"><button type="button" id="cq" aria-label="Quitar foto">✕</button></span>`
