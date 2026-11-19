@@ -846,7 +846,7 @@ async function dcVincular(env, app, i, u, codigo) {
     const r = await rpcAnon(env, "xy_discord_vincular", { p_clave: env.WA_CLAVE, p_codigo: codigo, p_discord_id: u.id, p_usuario: u.global_name || u.username || "" });
     if (!r || !r.ok) return dcEdit(env, app, i.token, { content: "❌ " + ((r && r.error) || "No se pudo vincular. Intenta otra vez.") });
     const cfg = await dcCfg(env); await dcRoles(env, cfg, u.id, r.ficha || {});
-    return dcEdit(env, app, i.token, { content: `✅ ¡Listo${r.ficha && r.ficha.nombre ? ", " + String(r.ficha.nombre).split(" ")[0] : ""}! Tu cuenta de Mi Xyro quedó vinculada. Cuando abras un ticket, ya sabremos quién eres.` });
+    return dcEdit(env, app, i.token, { content: `✅ ¡Listo${r.ficha && r.ficha.nombre ? ", " + String(r.ficha.nombre).split(" ")[0] : ""}! Tu cuenta de Mi Xyro quedó vinculada.${r.puntos > 0 ? " 🎁 Ganaste **" + r.puntos + " XyroPoints**." : ""} Cuando abras un ticket, ya sabremos quién eres.` });
   } catch (e) { return dcEdit(env, app, i.token, { content: "❌ No se pudo vincular. Intenta en un momento." }); }
 }
 
@@ -1019,6 +1019,7 @@ async function dcArmar(req, env) {
     }
     if (paso === "servidor") {
       try { await dc(env, "PUT", `/applications/${app.id}/guilds/${g}/commands`, [{ name: "vincular", description: "Vincula tu cuenta de Mi Xyro", type: 1 }, { name: "ticket", description: "Abre un ticket de ayuda con el equipo de Xyro", type: 1 }]); log.push("Comandos /vincular y /ticket"); } catch (e) { log.push("Comandos: " + e.message); }
+      try { await dc(env, "PUT", `/applications/${app.id}/commands`, []); log.push("Comandos viejos (/planes, /dar-dias, /dar-videos, /usuario…) borrados"); } catch (e) { log.push("Comandos viejos: " + e.message); }
       try { if (app.interactions_endpoint_url !== "https://xyrostudio.net/api/discord") { await dc(env, "PATCH", "/applications/@me", { interactions_endpoint_url: "https://xyrostudio.net/api/discord" }); DC_APP = null; log.push("Botones conectados a xyrostudio.net"); } } catch (e) { log.push("Botones: " + e.message); }
       const G = { name: "Xyro", system_channel_id: cfg.canales.general };
       try { const r = await env.ASSETS.fetch(new Request("https://xyrostudio.net/img/discord/icono.png")); if (r.ok) G.icon = "data:image/png;base64," + b64(await r.arrayBuffer()); } catch { }
