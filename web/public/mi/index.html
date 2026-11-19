@@ -307,7 +307,8 @@ const ls={g(k){try{return localStorage.getItem(k)}catch(_){return null}},s(k,v){
 const cel=t=>String(t||'').replace(/\D/g,'').slice(-9);
 const hoyL=()=>new Date(Date.now()-5*36e5).toISOString().slice(0,10);
 const dLima=t=>new Date(new Date(t).getTime()-5*36e5).toISOString().slice(0,10);
-const fF=(d,o)=>new Date(String(d).length===10?d+'T12:00:00-05:00':d).toLocaleDateString('es-PE',{timeZone:'America/Lima',...(o||{day:'numeric',month:'short',year:'numeric'})});
+const TZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'America/Lima'}catch(_){return'America/Lima'}})();
+const fF=(d,o)=>new Date(String(d).length===10?d+'T12:00:00Z':d).toLocaleDateString('es-PE',{timeZone:String(d).length===10?'UTC':TZ,...(o||{day:'numeric',month:'short',year:'numeric'})});
 /* Horas en am/pm (nada de 24 h): cada input type=time se cambia por hora · minutos · am/pm; el input queda oculto con su valor HH:MM. */
 const h12=h=>{const m=/^(\d{1,2}):(\d{2})/.exec(h||'');if(!m)return h||'';const x=+m[1];return(x%12||12)+':'+m[2]+' '+(x<12?'am':'pm')};
 function tpAmPm(root){(root||document).querySelectorAll('input[type=time]:not([data-tp])').forEach(i=>{i.dataset.tp=1;const st=+i.step||300,paso=Math.max(5,Math.round(st/60)),MI=[];for(let m=0;m<60;m+=paso)MI.push(m);
@@ -319,9 +320,9 @@ function tpAmPm(root){(root||document).querySelectorAll('input[type=time]:not([d
  [sh,sm,sa].forEach(s=>{s.onchange=lee;w.appendChild(s)});sh.setAttribute('aria-label','Hora');sm.setAttribute('aria-label','Minutos');sa.setAttribute('aria-label','am o pm');
  if(i.id)sh.id=i.id+'_h';pinta();i.type='hidden';i.after(w)})}
 new MutationObserver(()=>tpAmPm()).observe(document.documentElement,{childList:true,subtree:true});
-const fH=d=>new Date(d).toLocaleTimeString('es-PE',{timeZone:'America/Lima',hour:'numeric',minute:'2-digit'});
+const fH=d=>new Date(d).toLocaleTimeString('es-PE',{timeZone:TZ,hour:'numeric',minute:'2-digit'});
 const dias=(a,b)=>Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/864e5);
-const money=n=>'S/ '+(Math.round(+n*100)/100).toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:2});
+let MC='';const money=n=>{const c=MC||(typeof monPais==='function'?monPais().c:'PEN');return c==='PEN'?'S/ '+(Math.round(+n*100)/100).toLocaleString('es-PE',{minimumFractionDigits:0,maximumFractionDigits:2}):moneyX(n,c)};
 const js=src=>new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.head.appendChild(s)});
 const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2800)};
 const vib=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(_){}};
@@ -419,7 +420,7 @@ const LOGO='<div class="orb"><img src="/img/marca/logo-xyrostudio-app.svg" width
 function pantallaEntrada(msg,modo){
  acento(null);const p=pend.get();modo=modo||'entrar';
  app.innerHTML=`<div class="scr"><div class="hero in">
-  <div class="top">${LOGO}<span class="eyb">MI XYRO</span><h1>${p&&p.negocio?`Guarda <span style="color:var(--a)">${esc(p.negocio)}</span> en tu Mi Xyro`:p&&p.reg?'Registra tu negocio <span style="color:var(--a)">gratis</span>':'Tus negocios favoritos,<br>en tu celular'}</h1>
+  <div class="top">${LOGO}<span class="eyb">MI XYRO · BETA</span><h1>${p&&p.negocio?`Guarda <span style="color:var(--a)">${esc(p.negocio)}</span> en tu Mi Xyro`:p&&p.reg?'Registra tu negocio <span style="color:var(--a)">gratis</span>':'Tus negocios favoritos,<br>en tu celular'}</h1>
    <p class="mu">${p&&p.reg?'Crea tu cuenta de Mi Xyro (o entra) y en un minuto tu negocio tiene perfil, promos y QR.':'Todo lo de tu gym, tu consultorio y tus lugares favoritos en un solo lugar.'}</p>
    <div class="chips"><span class="chip">${I.gift}Promos</span><span class="chip">${I.qr}Tu QR</span><span class="chip">${I.dumb}Rutinas</span><span class="chip">${I.cal}Citas</span></div></div>
   <button class="btn gbtn" id="gg"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar con Google</button>
@@ -506,6 +507,7 @@ function repinta(ok){const sel='.ov,.cam,.qrfull',t0=Date.now();if(ok&&!ok())ret
  const t=setInterval(()=>{if(ok&&!ok())return clearInterval(t);if(!document.querySelector(sel)){clearInterval(t);pinta()}else if(Date.now()-t0>120000)clearInterval(t)},500)}
 function pinta(){const r=pinta0();try{hSync()}catch(_){}if(MODO!=='negocio')fundBienvenida();return r}
 function pinta0(){
+ try{MC=MODO==='negocio'&&NB?(NB.pais?monDe(NB.pais):'PEN'):SUB&&SUB.neg&&NEG[SUB.neg]?monDe(NEG[SUB.neg].pais||'PE'):TAB==='perfil'&&G0()?monDe((G0().perfil||{}).pais||'PE'):''}catch(_){MC=''}
  try{document.body.classList.toggle('fund',!!(D&&D.persona&&D.persona.fundador&&!D.persona.rango)&&MODO!=='negocio')}catch(_){}
  if(MODO==='negocio'&&NB)return pintaNeg();
  if(!D&&!(SUB&&(SUB.neg||SUB.pro)))return pantallaEntrada();
@@ -547,11 +549,11 @@ function avisos(){return((D&&D.avisos)||[]).map(a=>`<div class="aviso"><div clas
   <p class="sm">Así verás aquí tu ${a.rubro==='barberia'?'ficha de cliente, tus citas y tus sellos':a.rubro==='consultorio'?'ficha de paciente, tus citas y tu tratamiento':'membresía, días que te quedan, tu QR y tus rutinas'}. Te registraron como <b>${esc(a.nombre)}</b>${a.quien?' ('+esc(a.quien)+')':''}.</p>
   <div class="row"><button class="btn p sp" data-av="${esc(a.id)}" data-ok="1">✅ Sí, acepto</button><button class="btn" data-av="${esc(a.id)}" data-ok="0">No soy yo</button></div></div>`).join('')}
 async function responder(id,ok,b){b.disabled=true;try{await rpc('xa_yo_responder',{p_id:id,p_ok:ok});await cargar();if(ok){CUR=negs().length-1;ls.s('mi-neg',CUR);TAB='negocios';SUB='mi';confeti();toast('🎉 ¡Listo! Ya tienes tu cuenta conectada')}pinta()}catch(e){toast(errDe(e));b.disabled=false}}
-function cabeza(n){const lg=logoURL(n.logo),h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0,per=(D&&D.persona)||{};
+function cabeza(n){const lg=logoURL(n.logo),h=new Date().toLocaleString('en-US',{timeZone:TZ,hour:'numeric',hour12:false})|0,per=(D&&D.persona)||{};
  const sal=h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches',nm=per.apodo||String(per.nombre||n.nombre||'').trim().split(' ')[0];
  return`<div class="row" style="margin-bottom:14px">${lg?`<img class="lg" style="width:46px;height:46px;border-radius:14px" src="${esc(lg)}" alt="">`:''}<div class="sp"><p class="mu sm">${sal},</p><h2>${esc(nm)} ${dental(n)?'😁':'💪'}</h2></div><button class="btn l xs" data-neg="${esc(n.slug)}" style="font-weight:700">${esc(n.negocio)} ›</button></div>`}
 
-const saludo=()=>{const h=new Date().toLocaleString('en-US',{timeZone:'America/Lima',hour:'numeric',hour12:false})|0;return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
+const saludo=()=>{const h=new Date().toLocaleString('en-US',{timeZone:TZ,hour:'numeric',hour12:false})|0;return h<12?'Buenos días':h<19?'Buenas tardes':'Buenas noches'};
 const fNum=n=>'#'+String(n).padStart(3,'0'),fBad=per=>per&&per.fundador?`<span class="fbad">★ Fundador ${fNum(per.fundador)}</span>`:'';
 function fundBienvenida(){const per=D&&D.persona;if(!per||!per.fundador||ls.g('mi-fund-'+per.idn))return;ls.s('mi-fund-'+per.idn,'1');setTimeout(()=>{hoja(`<div style="text-align:center;display:grid;gap:10px;justify-items:center"><div style="font-size:52px">🏅</div>${fBad(per)}<h2>¡Eres fundador de Mi Xyro!</h2><p class="mu sm">Eres de las primeras 50 personas en tener Mi Xyro. Tu número es tuyo para siempre y nadie más lo tendrá.</p><div class="card fcard" style="text-align:left;width:100%"><p class="sm">★ Insignia de fundador en tu perfil</p><p class="sm">✨ Carnet dorado en todos tus negocios</p><p class="sm">@ Puedes usar un @usuario corto, de 3 o 4 letras</p></div><button class="btn p" data-x>¡Genial!</button></div>`);confeti()},600)}
 const avatarHTML=(per,id)=>{const h=`<div class="av"${id?` id="${id}"`:''}>${/^(https:|blob:)/.test(per.foto||'')?`<img src="${esc(per.foto)}" alt="" referrerpolicy="no-referrer">`:esc((String(per.nombre||'?').trim()[0]||'?').toUpperCase())}</div>`;return D&&per===D.persona&&typeof estF==='function'?avMarco(h,estF()):h};
@@ -851,7 +853,7 @@ function vNegocios(){const M=negs(),G=(D&&D.guardados)||[];
 var VLOC=/[?&]ver=locales/.test(location.search);if(VLOC){let k=0;const t=setInterval(()=>{const e=document.getElementById('nloc');if(e){clearInterval(t);VLOC=false;setTimeout(()=>e.scrollIntoView({behavior:'smooth',block:'start'}),300)}else if(++k>40){clearInterval(t);VLOC=false}},300)}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-gup]');if(!b)return;e.preventDefault();vib();planesAbrir(b.dataset.gup,b.dataset.gun||'')});
 async function abrirNeg(slug){vib();SUB={neg:slug};TAB='negocios';if(!NEG[slug]){app.querySelector('#sc')&&($('#sc').innerHTML='<div class="vacio"><span class="e">⏳</span></div>');await cargaNeg(slug)}pinta();$('#sc')&&($('#sc').scrollTop=0)}
-async function cargaNeg(slug){try{const[d,v]=await Promise.all([rpc('xa_yo_negocio',{p_slug:slug}),rpc('xa_verificado',{p_slug:slug}).catch(()=>false)]);if(d){d.ver=!!v;if(d.rubro==='digital')DIG[slug]=await rpc('xy_digital',{p_slug:slug}).catch(()=>null);digClic(slug,'perfil');NEG[slug]=d}}catch(_){}}
+async function cargaNeg(slug){try{const[d,v,pz]=await Promise.all([rpc('xa_yo_negocio',{p_slug:slug}),rpc('xa_verificado',{p_slug:slug}).catch(()=>false),rpc('xa_neg_pais',{p_slug:slug}).catch(()=>null)]);if(d){d.ver=!!v;if(pz&&!d.pais)d.pais=pz;if(d.rubro==='digital')DIG[slug]=await rpc('xy_digital',{p_slug:slug}).catch(()=>null);digClic(slug,'perfil');NEG[slug]=d}}catch(_){}}
 function vNegocio(slug){const n=NEG[slug];
  if(!n)return`<button class="back" data-back>‹ Volver</button><div class="card vacio"><span class="e">🤔</span><h2>No encontramos este negocio</h2><p class="mu">Revisa tu internet o escanea otra vez su QR.</p></div>`;
  WEBN=n.web||'';const rub=n.gratis&&n.rubro!=='restaurante'&&n.rubro!=='digital'?'otro':n.rubro,lg=logoURL(n.logo),mi=negs().findIndex(x=>x.slug===slug),sesion=!!D;
@@ -986,7 +988,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
   <button class="btn" data-ptab="">📊 ¿Cuánto valen los puntos? · tabla pública</button>
-  <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
+  <button class="btn" id="ayu">${I.help}Necesito ayuda</button><button class="btn" data-xy="error">🐞 Reportar un error · gana XyroPoints</button>
   <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord${ls.g('mi-dc-ok')?' · ideas, ayuda y promos':' · vincula y gana 20 XyroPoints 🎁'}</button>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
   <p class="mu xs" style="text-align:center">Mi Xyro · XyroStudio · <a href="/privacidad.html" style="color:inherit">Privacidad</a> · <a href="/reclamaciones.html" style="color:inherit">Libro de Reclamaciones</a>${DEMO?'':' · <a href="#" id="bcta" style="color:inherit">Eliminar mi cuenta</a>'}</p></div>`}
@@ -1039,14 +1041,15 @@ function grRegistro(tipo){if(!D)return;const RB=tipo==='producto'?RUBG.filter(r=
  <form class="g" id="rf"><label>Nombre del negocio<input id="rn" maxlength="60" required placeholder="Ej. Café Aurora"></label>
   <label>Tipo de negocio<select id="rr">${RB.map(([k,i,t])=>`<option value="${k}">${i} ${t}</option>`).join('')}</select></label>
   <p class="mu xs" id="rdig" hidden>💻 Tu negocio sale para todo el mundo (sin país ni mapa). Después agregas tu web, tus planes y un cupón.</p>
-  <div class="g" id="rloc"><label>País<select id="rpa">${PAISES.map(([k,t])=>`<option value="${k}">${t}</option>`).join('')}</select></label>
+  <div class="g" id="rloc"><label>País<select id="rpa">${PAISES.map(([k,t])=>`<option value="${k}"${k===bilPais()?' selected':''}>${t}</option>`).join('')}</select></label>
   <label>WhatsApp del negocio<input id="rt" inputmode="tel" maxlength="18" required placeholder="9XX XXX XXX"></label>
-  <label>Distrito o ciudad<input id="rd" maxlength="60" required placeholder="Ej. Miraflores"></label>
+  <label>Ciudad o distrito<input id="rd" maxlength="60" required placeholder="Ej. Centro"></label>
   <label>Dirección <span class="mu xs">(opcional)</span><input id="ra" maxlength="150" placeholder="Av. Principal 123"></label></div>
   <label style="display:flex;gap:10px;align-items:flex-start;color:var(--tx)"><input type="checkbox" id="rk" style="width:auto;margin-top:2px"><span class="sm">Soy el dueño o encargado de este negocio y acepto los <a href="/terminos.html" target="_blank" rel="noopener" style="color:var(--a)">términos</a>.</span></label>
   <input id="rh" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0" aria-hidden="true">
   <div class="msg" id="rm"></div><button class="btn p" id="rb">Registrar gratis</button><button type="button" class="btn l" data-x>Ahora no</button></form>`,(o,close)=>{
   const m=o.querySelector('#rm'),say=t=>{m.textContent=t;m.className='msg on'},q=s=>o.querySelector(s),dig=()=>q('#rr').value==='digital';
+  const rph=()=>{q('#rt').placeholder=q('#rpa').value==='PE'?'9XX XXX XXX':'Con el código de tu país: +52 55 1234 5678'};q('#rpa').onchange=rph;rph();
   q('#rr').onchange=()=>{const d=dig();q('#rloc').hidden=d;q('#rdig').hidden=!d;q('#rt').required=q('#rd').required=!d};
   q('#rf').onsubmit=async e=>{e.preventDefault();if(q('#rh').value)return;
    if(dig()){if(q('#rn').value.trim().length<3)return say('Escribe el nombre de tu negocio.');if(!q('#rk').checked)return say('Confirma que eres el dueño o encargado.');
@@ -1057,7 +1060,7 @@ function grRegistro(tipo){if(!D)return;const RB=tipo==='producto'?RUBG.filter(r=
    const pa=q('#rpa').value,pe=pa==='PE',t=pe?q('#rt').value.replace(/\D/g,'').replace(/^51(?=9\d{8}$)/,''):q('#rt').value.replace(/\D/g,'');
    if(q('#rn').value.trim().length<3)return say('Escribe el nombre de tu negocio.');
    if(pe&&!/^9\d{8}$/.test(t))return say('Escribe un WhatsApp de 9 dígitos que empiece con 9.');
-   if(!pe&&(t.length<8||t.length>15))return say('Escribe el WhatsApp con el código de tu país (ej. 57 300 123 4567).');
+   if(!pe&&(t.length<8||t.length>15))return say('Escribe el WhatsApp con el código de tu país (ej. +52 55 1234 5678).');
    if(!q('#rk').checked)return say('Confirma que eres el dueño o encargado.');
    const b=q('#rb');b.disabled=true;b.textContent='Registrando…';
    try{await rpc('xa_gr_registrar',{p_nombre:q('#rn').value.trim(),p_rubro:q('#rr').value,p_telefono:t,p_distrito:q('#rd').value.trim(),p_direccion:q('#ra').value.trim(),...(pe?{}:{p_pais:pa})});
@@ -1169,7 +1172,8 @@ ${dg?'':`  <label>Dirección<input id="ea" maxlength="150" value="${esc(se.direc
    ff.onchange=async()=>{const fl=ff.files[0];if(!fl)return;b.disabled=true;b.textContent='Subiendo…';
     try{F[k]=await grFoto(fl,g,k);o.querySelector(`[data-fv="${k}"]`).style.backgroundImage=`url('${F[k]}')`;b.textContent='📷 Cambiar';prev()}catch(_){say('No pude subir la foto. Prueba con otra imagen.');b.textContent='📷 Subir'}b.disabled=false;ff.value=''}});
   q('#egb').onclick=async()=>{const w=dg?'':q('#ew').value.replace(/\D/g,'').replace(/^51(?=9\d{8}$)/,''),mp=dg?'':q('#em').value.trim();
-   if(w&&!/^9\d{8}$/.test(w))return say('Escribe un WhatsApp de 9 dígitos que empiece con 9.');
+   const gpe=String((g.perfil||{}).pais||'PE')==='PE';
+   if(w&&(gpe?!/^9\d{8}$/.test(w):(w.length<8||w.length>15)))return say(gpe?'Escribe un WhatsApp de 9 dígitos que empiece con 9.':'Escribe el WhatsApp con el código de tu país (ej. +52 55 1234 5678).');
    if(mp&&!/^https:\/\//.test(mp))return say('El enlace de Google Maps debe empezar con https://');
    const b=q('#egb');b.disabled=true;b.textContent='Guardando…';
    try{await grGuardar(g,{nombre:q('#en').value.trim(),...F,descripcion:q('#ed').value.trim(),redes:{instagram:q('#ei').value.trim(),tiktok:q('#ek').value.trim(),facebook:q('#ef').value.trim()},
@@ -1767,7 +1771,11 @@ setInterval(async()=>{if(document.hidden||DEMO||MODO!=='negocio'||!NB||!nPedOn()
  if(NTAB==='ped'){const p=(NPED||[]).find(x=>x.id===NPID),c=$('#ncht');if(p&&c){c.innerHTML=nChat(p);c.scrollTop=c.scrollHeight}}else if(NTAB!=='plan')pinta();if(nPedN()>n0){vib();toast('📥 Nueva solicitud desde Mi Xyro')}},30000);
 // ---------- Explorar (SQL 75): categorías, cerca de mí, mejor puntuados, reseñas y entrenadores/profesores ----------
 const CATS=[['','✨','Todo'],['gym','🏋️','Gimnasios'],['entrenadores','🧑‍🏫','Entrenadores'],['cafeteria','☕','Cafeterías'],['restaurante','🍽️','Restaurantes'],['barberia','💈','Barberías'],['consultorio','🦷','Consultorios'],['digital','💻','Digital'],['otro','🏪','Otros']];
-const PAISES=[['PE','Perú'],['MX','México'],['CO','Colombia'],['CL','Chile'],['AR','Argentina'],['EC','Ecuador'],['BO','Bolivia'],['VE','Venezuela'],['UY','Uruguay'],['PY','Paraguay'],['CR','Costa Rica'],['PA','Panamá'],['DO','Rep. Dominicana'],['GT','Guatemala'],['ES','España'],['US','Estados Unidos'],['OT','Otro país']];
+const PAIS_TOP=['PE','MX','CO','CL','AR','EC','BO','VE','UY','PY','CR','PA','DO','GT','HN','SV','NI','CU','PR','BR','ES','US'];
+const PAISES=(()=>{const ISO='AD AE AF AG AL AM AO AT AU AZ BA BB BD BE BF BG BH BI BJ BN BS BT BW BY BZ CA CD CF CG CH CI CM CN CV CY CZ DE DJ DK DM DZ EE EG ER ET FI FJ FM FR GA GB GD GE GH GM GN GQ GR GW GY HK HR HT HU ID IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KR KW KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MO MR MT MU MV MW MY MZ NA NE NG NL NO NP NR NZ OM PG PH PK PL PS PT PW QA RO RS RU RW SA SB SC SD SE SG SI SK SL SM SN SO SR SS ST SY SZ TD TG TH TJ TL TM TN TO TR TT TV TW TZ UA UG UZ VA VC VN VU WS XK YE ZA ZM ZW'.split(' ');
+ let dn=null;try{dn=new Intl.DisplayNames(['es'],{type:'region'})}catch(_){}const FX={PE:'Perú',MX:'México',DO:'Rep. Dominicana',US:'Estados Unidos',ES:'España',PA:'Panamá'};
+ const t=k=>{if(FX[k])return FX[k];try{return dn&&dn.of(k)||k}catch(_){return k}};
+ return[...PAIS_TOP.map(k=>[k,t(k)]),...ISO.map(k=>[k,t(k)]).sort((a,b)=>a[1].localeCompare(b[1],'es')),['OT','Otro país']]})();
 const paisN=k=>(PAISES.find(p=>p[0]===k)||[k,k||''])[1];
 const PROT={entrenador:['🏋️','Entrenador personal'],profesor:['📚','Profesor'],nutricionista:['🥗','Nutricionista'],otro:['⭐','Profesional']};
 const MODT={presencial:'Presencial',online:'Online',ambas:'Presencial y online'};
@@ -2151,8 +2159,10 @@ function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsC
   <button class="btn p" data-xy="ganar" style="width:auto;position:relative">🎁 Gana más${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button></div>
   </div>${xjHTML(g)}`}
 /* Juegos a la vista (pedido del usuario 2026-11-19: «si está escondido qué sentido tiene»): ruleta, ranking, retos e invitar en Inicio */
+function betaHTML(){return`<button class="card" data-xy="error" style="width:100%;text-align:left;border-color:#f59e0b66;background:#f59e0b14"><div class="row"><span style="font-size:24px">🐞</span><div class="sp"><b>Xyro está en beta</b><p class="mu sm">¿Algo falla o no se entiende? Repórtalo y gana XyroPoints.</p></div><span class="mu">›</span></div></button>`}
+function errorAbrir(){vib();hoja(`<h2>🐞 Reportar un error</h2><p class="mu sm">Xyro está en <b>beta</b>: ya lo puede usar todo el mundo, pero aún lo estamos puliendo. Si algo falla, cuéntanos qué hiciste y qué pasó (mejor con captura). Si es un error real, te regalamos <b>XyroPoints</b>.</p><button class="btn p" id="erb">Contar el error</button><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{o.querySelector('#erb').onclick=()=>{close();const t='🐞 Encontré un error: ';if(!D){toast('Entra a tu cuenta para reportarlo');return}ayuda();setTimeout(()=>{const i=document.getElementById('aymi');if(i){i.value=t;i.focus()}},350)}})}
 function xjHTML(g){const T=[['ruleta','🎡','Ruleta',g?`¡${g} giro${g>1?'s':''} gratis!`:'Gira y gana','#f59e0b,#ef4444',g],['ranking','🏆','Ranking','¿En qué puesto vas?','#7c5cff,#38bdf8'],['retos','🎯','Retos','Puntos extra','#22c55e,#0ea5e9'],['invitar','👥','Invitar','Gana XyroPoints','#ec4899,#8b5cf6']];
- return`<div class="xjg">${T.map(([k,i,t,d,c,n])=>`<button class="xj${n?' on':''}" data-xy="${k}" style="--xg:linear-gradient(135deg,${c})"><i>${i}</i><b>${t}</b><small>${d}</small>${n?`<em>${n}</em>`:''}</button>`).join('')}</div>`}
+ return`<div class="xjg">${T.map(([k,i,t,d,c,n])=>`<button class="xj${n?' on':''}" data-xy="${k}" style="--xg:linear-gradient(135deg,${c})"><i>${i}</i><b>${t}</b><small>${d}</small>${n?`<em>${n}</em>`:''}</button>`).join('')}</div>${betaHTML()}`}
 function ganarAbrir(){const g=XR?+XR.giros||0:0;hoja(`<h2>🎁 Gana más puntos</h2><p class="mu sm">Tus puntos se usan como descuento. <b>XyroPoints</b>: en cualquier negocio Xyro. <b>LocalPoints</b>: solo donde los ganaste. Se suman cuando pagas por Yape, Plin, transferencia u otro medio virtual (con captura) y el negocio lo confirma. En efectivo no se ganan puntos.</p>
  <button class="btn p" data-xy="invitar">👥 Invitar amigos</button><button class="btn" data-xy="ruleta">🎡 Girar la ruleta${g?` · tienes ${g} giro${g>1?'s':''}`:''}</button><button class="btn" data-xy="retos">🎯 Retos: gana puntos extra</button><button class="btn" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo">🎨 Mi estilo</button><button class="btn" data-ptab="">📊 ¿Cuánto valen los puntos?</button><button class="btn l" data-x>Cerrar</button>`,o=>o.querySelectorAll('[data-xy],[data-ptab]').forEach(b=>b.addEventListener('click',()=>o.remove())))}
 let PTSR=0;
@@ -2273,7 +2283,7 @@ const avMarco=(h,f,cl)=>{const m=f&&FRM0[f];if(!m)return h;return`<span class="a
 const nomHTML=(t,color,ef,tag)=>`<${tag||'b'} class="nm${ef&&EFN[ef]?' ef-'+ef:''}"${color&&CO2[color]&&!(ef&&EFN[ef])?` style="color:${CO2[color]}"`:''}>${esc(t)}</${tag||'b'}>`;
 const titHTML=t=>t&&TIN[t]?`<span class="tit t-${t}">${esc(TIN[t])}</span>`:'';
 document.addEventListener('click',e=>{const b=e.target.closest('[data-xy]');if(!b)return;const k=b.dataset.xy;
- if(k==='ganar')ganarAbrir();else if(k==='ruleta')ruletaAbrir();else if(k==='ranking')rankAbrir();else if(k==='plus')plusAbrir();else if(k==='estilo')estiloAbrir();else if(k==='retos')retosAbrir();else if(k==='boost')boostAbrir(b.dataset.slug,b.dataset.nom);else if(k==='nivel')nivelAbrir()});
+ if(k==='ganar')ganarAbrir();else if(k==='ruleta')ruletaAbrir();else if(k==='ranking')rankAbrir();else if(k==='plus')plusAbrir();else if(k==='estilo')estiloAbrir();else if(k==='retos')retosAbrir();else if(k==='boost')boostAbrir(b.dataset.slug,b.dataset.nom);else if(k==='nivel')nivelAbrir();else if(k==='error')errorAbrir()});
 function xJuegosHTML(){const g=XR?+XR.giros||0:0;
  return`<div style="display:grid;gap:8px;grid-template-columns:repeat(3,minmax(0,1fr)) 52px"><button class="btn sp" data-xy="ruleta">🎡 Ruleta${g?` <span class="pill" style="background:#facc15;color:#111">${g}</span>`:''}</button><button class="btn sp" data-xy="ranking">🏆 Ranking</button><button class="btn sp" data-xy="retos">🎯 Retos</button><button class="btn" data-xy="estilo" aria-label="Mi estilo" style="flex:0 0 52px">🎨</button></div>`}
 const PLB=[['⚡','+50% de puntos','En cada compra con Xyro'],['🎡','Ruleta a mitad','Giros más baratos'],['🎨','Tu perfil único','Marcos y colores'],['🎁','Promos exclusivas','Solo para Xyro+'],['⭐','Reseñas x2','Tu opinión pesa el doble'],['🏆','Destaca','Insignia en el ranking']];
@@ -3208,7 +3218,10 @@ const PRM={};
    LocalPoints recomendados: 200 por US$ 1 de premio (devuelves 5 %); menos de 100 por US$ 1 = devuelves más del 10 % (pierdes). */
 const PV={xpu:100,lpu:200,lpMin:100,ganaXP:2,ganaLP:10,negPorUsd:5};
 const PMON={PE:['PEN',3.75],BO:['BOB',6.96],CO:['COP',4000],MX:['MXN',18],CL:['CLP',950],AR:['ARS',1000],PY:['PYG',7500],UY:['UYU',40],BR:['BRL',5.5],GT:['GTQ',7.8],CR:['CRC',510],DO:['DOP',60],ES:['EUR',.92]};
-function monPais(){const p=bilPais(),m=PMON[p];if(m)return{c:m[0],r:m[1]};return{c:'USD',r:1}}
+const FXU={USD:1,PEN:.27,EUR:1.08,MXN:.055,COP:.00025,CLP:.00105,ARS:.001,BRL:.18,BOB:.145,PYG:.000133,UYU:.025,GTQ:.13,CRC:.002,DOP:.0165,HNL:.04,NIO:.027,CAD:.72,GBP:1.27,CHF:1.13,JPY:.0066,CNY:.14,INR:.012,PHP:.017,IDR:.000063,KRW:.00072,AUD:.65,NZD:.59,ZAR:.055,NGN:.00065,EGP:.02,TRY:.029,MAD:.1,KES:.0077,RUB:.011,PLN:.25,SEK:.095,NOK:.092,DKK:.145,CZK:.043,HUF:.0027,AED:.272,SAR:.267,ILS:.27,THB:.029,MYR:.22,VND:.00004,PKR:.0036,BDT:.0083,JMD:.0064,TTD:.147,HTG:.0076};
+const MONP=Object.assign({PE:'PEN',MX:'MXN',CO:'COP',CL:'CLP',AR:'ARS',BO:'BOB',PY:'PYG',UY:'UYU',BR:'BRL',GT:'GTQ',CR:'CRC',DO:'DOP',HN:'HNL',NI:'NIO',CA:'CAD',GB:'GBP',CH:'CHF',JP:'JPY',CN:'CNY',IN:'INR',PH:'PHP',ID:'IDR',KR:'KRW',AU:'AUD',NZ:'NZD',ZA:'ZAR',NG:'NGN',EG:'EGP',TR:'TRY',MA:'MAD',KE:'KES',RU:'RUB',PL:'PLN',SE:'SEK',NO:'NOK',DK:'DKK',CZ:'CZK',HU:'HUF',AE:'AED',SA:'SAR',IL:'ILS',TH:'THB',MY:'MYR',VN:'VND',PK:'PKR',BD:'BDT',JM:'JMD',TT:'TTD',HT:'HTG'},...'ES DE FR IT PT NL BE AT IE FI GR SK SI EE LV LT LU MT CY HR'.split(' ').map(k=>({[k]:'EUR'})));
+function monDe(p){return MONP[String(p||'').toUpperCase()]||'USD'}
+function monPais(){const p=bilPais(),m=PMON[p];if(m)return{c:m[0],r:m[1]};const c=monDe(p);return{c,r:c==='USD'?1:Math.round(1/(FXU[c]||1)*100)/100}}
 const enLocal=usd=>{const m=monPais();return moneyX(usd*m.r,m.c)};
 function ptsTabla(neg){vib();const m=monPais(),U=t=>m.c==='USD'?null:t,ej=[1,5,10,20].map(u=>Math.round(u*m.r)>0?u:u);
  const fila=(a,b,c)=>`<div class="li"><span class="sp sm">${a}</span><b class="sm" style="text-align:right">${b}</b>${c!=null?`<span class="mu xs" style="min-width:70px;text-align:right">${c}</span>`:''}</div>`;
