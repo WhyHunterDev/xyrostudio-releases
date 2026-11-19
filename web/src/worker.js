@@ -982,15 +982,14 @@ async function dcArmar(req, env) {
       const chs = await dc(env, "GET", `/guilds/${g}/channels`);
       const viejos = chs.filter(c => !nuestros.has(c.id) && c.parent_id !== cfg.cats.tickets).sort((a, b) => (a.type === 4) - (b.type === 4));   // primero canales, luego categorías
       for (const c of viejos) { if (n >= MAX) break; try { await dc(env, "DELETE", `/channels/${c.id}`); log.push("Borrado #" + c.name); } catch (e) { log.push("No se pudo borrar " + c.name); } n++; }
-      let quedan = viejos.length - Math.min(viejos.length, MAX);
-      if (n < MAX) {
+            if (n < MAX) {
         const roles = await dc(env, "GET", `/guilds/${g}/roles`), mios = new Set(Object.values(cfg.roles || {}));
-        const vr = roles.filter(r => r.id !== g && !r.managed && !mios.has(r.id) && !(BigInt(r.permissions || "0") & 8n));
-        for (const r of vr) { if (n >= MAX) break; try { await dc(env, "DELETE", `/guilds/${g}/roles/${r.id}`); log.push("Rol borrado " + r.name); } catch { log.push("No se pudo borrar el rol " + r.name); } n++; }
-        quedan += Math.max(0, vr.length - (MAX - Math.min(viejos.length, MAX)));
+        let fallo = 0; const vr = roles.filter(r => r.id !== g && !r.managed && !mios.has(r.id));   // todos los roles viejos (Fundador, Moderador, Studio…): la gente empieza sin rol y al vincular recibe «Cuenta Xyro»
+        for (const r of vr) { if (n >= MAX) break; try { await dc(env, "DELETE", `/guilds/${g}/roles/${r.id}`); log.push("Rol borrado " + r.name); } catch { fallo = 1; log.push("No se pudo borrar el rol " + r.name); } n++; }
+        if (fallo) log.push("⚠️ Para borrar esos roles: en Discord → Ajustes del servidor → Roles, arrastra el rol del bot XyroStudio hasta arriba y vuelve a pulsar el botón.");
       }
       if (cfg.cats.archivo) { delete cfg.cats.archivo; cfg.archivo = []; await guardar(cfg); }
-      return json({ ok: true, quedan, cambios: log });
+      return json({ ok: true, quedan: n >= MAX ? 1 : 0, cambios: log });   // si llegó al tope, el gestor vuelve a llamar
     }
     if (paso === "mensajes") {
       const C = cfg.canales, L = (label, url, emoji) => ({ type: 2, style: 5, label, url, emoji: { name: emoji } });
