@@ -1668,7 +1668,7 @@ function shell(){
  $$('#side details.ng').forEach(d=>d.ontoggle=()=>LS.s('xa-ng-'+d.dataset.g,d.open?'1':''));
  const o=$('#out');o&&(o.onclick=salir);const cb=$('#cambia');cb&&(cb.onclick=cambiarNegocio);
  marca();{const L=sedesL(),b=$('#sedeB');if(b){b.hidden=!L.length;b.textContent=SEDE?'📍 '+sedeN(SEDE):verTodas()&&LS.g('xa-sede-'+(SID||'demo'),'')==='*'?'🌎 Todas las sedes':'📍 Elegir sede';b.onclick=elegirSede}}
- {const q=$('#qk');q&&(q.innerHTML=n.filter(x=>x[0]==='kiosco'||(!R.citas&&x[0]==='seguimiento')).sort((a,b)=>a[0]==='kiosco'?-1:1).map(([k,i,t])=>`<a class="btn" href="#/${k}" data-k="${k}">${i} ${esc(t)}</a>`).join('')+(isProf()||isCoach()?'':'<button class="btn" data-cjcobrar title="Cobrar un canje de puntos de Mi Xyro">🎟️ Canje</button>'))}
+ {const q=$('#qk');q&&(q.innerHTML=n.filter(x=>x[0]==='kiosco'||(!R.citas&&x[0]==='seguimiento')).sort((a,b)=>a[0]==='kiosco'?-1:1).map(([k,i,t])=>`<a class="btn" href="#/${k}" data-k="${k}">${i} ${esc(t)}</a>`).join('')+(isProf()||isCoach()?'':'<button class="btn" data-cjcobrar title="Cobrar un canje de puntos de Mi Xyro">🎟️ Canje</button>'+(R.citas?'':'<button class="btn" data-recojo title="Pedidos para recoger: pagan por Yape y recogen con su QR">🛍️ Recojo</button>')))}
  document.title=nombre()+' · Xyro Apps';
 }
 let ruta='inicio',arg='',filtro='todos',qtxt='',mesSel='';
@@ -4363,6 +4363,43 @@ function premioEditar(p){const nv=!p;p=p||{};
   const v=s=>o.querySelector(s).value.trim(),sv=async x=>{try{await pzRpc('xy_premio_guardar',{p_slug:SLUG,p:Object.assign({id:p.id||null,nombre:v('#pn'),detalle:v('#pd'),pts_local:v('#pl')||null,pts_global:v('#pg')||null},x||{})});close();toast('✅ Guardado: ya sale en Mi Xyro');premiosAbrir()}catch(e){toast(e.message)}};
   o.querySelector('#ps').onclick=()=>sv();const a=o.querySelector('#pa');a&&(a.onclick=()=>sv({activo:!p.activo}));
   const b=o.querySelector('#pb');b&&(b.onclick=async()=>{try{await pzRpc('xy_premio_borrar',{p_slug:SLUG,p_id:p.id});close();toast('Premio borrado');premiosAbrir()}catch(e){toast(e.message)}})})}
+/* ===== Pagar y recoger (SQL 104): pagan por Yape con captura, el equipo confirma, prepara y entrega con su QR o código ===== */
+const RCD={L:null};
+async function recRpc(f,a){if(DEMO){const t=m=>new Date(Date.now()-m*6e4).toISOString();
+  if(!RCD.L)RCD.L=[{id:'q1',num:7,cliente:'Valeria',items:[{n:'Batido Whey Chocolate',c:2,p:12}],total:24,estado:'por_revisar',yape_op:'04512873',yape_at:t(1)},{id:'q2',num:6,cliente:'Diego',items:[{n:'Bowl Pollo & Quinua',c:1,p:16}],total:16,estado:'preparando'},{id:'q3',num:5,cliente:'Lucía',items:[{n:'Agua 625 ml',c:2,p:2.5}],total:5,estado:'listo'}];
+  const L=RCD.L,x=L.find(o=>o.id===a.p_id);
+  if(f==='xa_recojo_lista')return{on:RCD.on!==false,yape:true,pedidos:L};
+  if(f==='xa_recojo_config'){RCD.on=a.p_on;return{ok:true,on:a.p_on}}
+  if(f==='xa_recojo_accion'){x.estado={pago_ok:'preparando',pago_no:'por_pagar',listo:'listo',no_vino:'no_vino',cancelar:'cancelado'}[a.p_accion];return{ok:true}}
+  const y=L.find(o=>['preparando','listo'].includes(o.estado)&&(String(a.p_cod).replace(/\D/g,'')==='482913'||/rc=/.test(a.p_cod)));
+  if(f==='xa_recojo_ver')return y?{ok:true,pedido:y}:{ok:false,error:'No es un pedido de tu negocio (en la demo usa 482913)'};
+  if(f==='xa_recojo_entregar'){if(!y)return{ok:false,error:'No se encontró'};y.estado='entregado';return{ok:true,puntos:true}}}
+ const{data,error}=await sb.rpc(f,a);if(error){if(/function|does not exist|schema cache/i.test(error.message||''))throw new Error('Falta activar esta función (SQL 104). Avisa a XyroStudio.');throw error}return data}
+function recojoAbrir(){let D0=null,tm=0;const S=x=>'S/ '+(+x||0).toFixed(2),its=o=>(o.items||[]).map(i=>i.c+'× '+esc(i.n)).join(', ');
+ const card=(o,bt)=>`<div class="card" style="display:grid;gap:6px;margin:6px 0"><div class="row"><b style="flex:1">#${o.num} · ${esc(o.cliente||'Cliente')}</b><b>${S(o.total)}</b></div><small class="mu">${its(o)}</small>${o.nota?`<small>📝 ${esc(o.nota)}</small>`:''}${bt}</div>`;
+ const draw=o=>{const L=(D0&&D0.pedidos)||[],by=e=>L.filter(x=>x.estado===e),rv=by('por_revisar'),pr=by('preparando'),li=by('listo');
+  o.querySelector('#rcl').innerHTML=`${D0&&!D0.yape?'<p class="mu sm">📱 Primero pon tu Yape en Pedidos de mesa → «Cobrar con Yape».</p>':''}
+   ${rv.length?`<h4>💰 Pago por revisar</h4>${rv.map(x=>card(x,`<small style="color:#f59e0b">Dice que pagó · op. <b>${esc(x.yape_op||'')}</b>. Revisa tu Yape.</small>${/^https:\/\//.test(x.yape_foto||'')?`<a class="btn" href="${esc(x.yape_foto)}" target="_blank" rel="noopener">🧾 Ver captura</a>`:''}<div class="row" style="gap:6px"><button class="btn p" style="flex:1" data-ra="${x.id}|pago_ok">✅ Pago recibido</button><button class="btn" style="flex:1" data-ra="${x.id}|pago_no">❌ No llegó</button></div>`)).join('')}`:''}
+   ${pr.length?`<h4>👨‍🍳 Preparando</h4>${pr.map(x=>card(x,`<div class="row" style="gap:6px"><button class="btn p" style="flex:1" data-ra="${x.id}|listo">🛍️ Listo para recoger</button><button class="btn" data-ra="${x.id}|cancelar">Cancelar compra</button></div>`)).join('')}`:''}
+   ${li.length?`<h4>🛍️ Esperando que lo recojan</h4>${li.map(x=>card(x,`<div class="row" style="gap:6px"><button class="btn" style="flex:1" data-ra="${x.id}|no_vino">🚫 No vino</button><button class="btn" data-ra="${x.id}|cancelar">Cancelar compra</button></div>`)).join('')}`:''}
+   ${!rv.length&&!pr.length&&!li.length?'<p class="mu sm" style="text-align:center">No hay pedidos para recoger ahora.</p>':''}`;
+  const sw=o.querySelector('#rcon');sw.textContent=D0&&D0.on?'🟢 Recibiendo pedidos para recoger · apagar':'⚪ Apagado · encender';
+  o.querySelectorAll('[data-ra]').forEach(b=>b.onclick=async()=>{const[id,ac]=b.dataset.ra.split('|');
+   if(['cancelar','no_vino','pago_no'].includes(ac)&&!confirm(ac==='pago_no'?'¿No llegó el pago?':ac==='no_vino'?'¿No vino a recoger? No gana puntos.':'¿Cancelar la compra? Sin puntos. Si ya te pagó, la devolución la ves tú.'))return;
+   b.disabled=true;try{await recRpc('xa_recojo_accion',{p_slug:SLUG,p_id:id,p_accion:ac});toast('✓ Listo');await carga(o)}catch(e){toast(e.message||'No se pudo');b.disabled=false}})};
+ const carga=async o=>{try{D0=await recRpc('xa_recojo_lista',{p_slug:SLUG})}catch(e){D0=D0||{pedidos:[]};toast(e.message||'No se pudo cargar')}if(o.isConnected)draw(o)};
+ sheet(`<h3>🛍️ Pedidos para recoger</h3><p class="mu sm">Te pagan por Yape directo y suben su captura. Confirmas, preparas y entregas con su QR o código. Al entregar, los dos ganan puntos.</p>
+  <div class="row" style="gap:6px;margin:8px 0"><input id="rck" autocomplete="off" placeholder="Código de 6 dígitos o escanea con el lector" style="flex:1"><button class="btn p" id="rcb">Entregar</button></div><div id="rcr"></div>
+  <div id="rcl"><p class="mu sm">⏳ Cargando…</p></div><div class="row" style="gap:8px;margin-top:8px"><button class="btn" id="rcon" style="flex:1"></button><button class="btn" data-x>Cerrar</button></div>`,o=>{
+  carga(o);tm=setInterval(()=>{if(!o.isConnected)return clearInterval(tm);if(!document.hidden)carga(o)},8000);setTimeout(()=>o.querySelector('#rck').focus(),100);
+  const k=o.querySelector('#rck'),r=o.querySelector('#rcr'),go=async()=>{const c=k.value.trim();if(!c)return;
+   try{const v=await recRpc('xa_recojo_ver',{p_slug:SLUG,p_cod:c});if(!v||v.ok===false)throw new Error((v&&v.error)||'No se encontró');const x=v.pedido;
+    r.innerHTML=`<div class="card" style="border-color:#22c55e;display:grid;gap:6px"><b>#${x.num} · ${esc(x.cliente||'Cliente')} · ${S(x.total)} pagado</b><small>${its(x)}</small><button class="btn p" id="rde">✅ Entregado</button></div>`;
+    r.querySelector('#rde').onclick=async()=>{try{const z=await recRpc('xa_recojo_entregar',{p_slug:SLUG,p_cod:c});if(!z||z.ok===false)throw new Error((z&&z.error)||'No se pudo');confeti(40);toast(z.puntos?'🎉 Entregado: los dos ganaron puntos':'✅ Entregado');r.innerHTML='';k.value='';carga(o)}catch(e){toast(e.message)}}}
+   catch(e){r.innerHTML=`<p class="sm" style="color:#ef4444">${esc(e.message||'No se encontró')}</p>`}};
+  o.querySelector('#rcb').onclick=go;k.onkeydown=e=>{if(e.key==='Enter')go()};
+  o.querySelector('#rcon').onclick=async()=>{try{const x=await recRpc('xa_recojo_config',{p_slug:SLUG,p_on:!(D0&&D0.on)});toast(x.on?'🟢 Encendido':'Apagado');carga(o)}catch(e){toast(e.message||'Solo el dueño o un administrador')}}})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-recojo]');if(!b)return;e.preventDefault();recojoAbrir()});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pzabrir],[data-cjcobrar]');if(!b)return;e.preventDefault();b.dataset.pzabrir!==undefined?premiosAbrir():canjeCobrar()});
 boot();
 })();

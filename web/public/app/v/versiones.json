@@ -1,5 +1,16 @@
 [
  {
+  "id": "20261118-2127",
+  "fecha": "2026-11-18 21:27",
+  "titulo": "Pedidos para recoger",
+  "notas": "Pedidos para recoger",
+  "cambios": [
+   "Botón 🛍️ Recojo: tus clientes piden desde la carta, te pagan por Yape y suben su captura",
+   "Tú confirmas el pago, avisas «listo» y entregas con su código o QR; los dos ganan puntos"
+  ],
+  "requiere": "SQL 104"
+ },
+ {
   "id": "20261118-2036",
   "fecha": "2026-11-18 20:36",
   "titulo": "Premios por puntos y canjes",
