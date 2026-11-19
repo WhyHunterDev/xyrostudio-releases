@@ -45,7 +45,7 @@ async function inicio(el) {
     <div class="card"><b>Accesos rápidos</b>
       ${S.entidad.type === 'PROFESSIONAL' ? '' : `<a class="li" href="#/c-qr" style="text-decoration:none"><span class="ico">${I.qr}</span><span class="sp">Crear QR de mesa o mostrador</span>›</a>`}
       <a class="li" href="#/c-boost" style="text-decoration:none"><span class="ico">${I.bolt}</span><span class="sp">Destacar mi negocio (Boost)</span>›</a>
-      <a class="li" href="/app/" style="text-decoration:none"><span class="ico">${I.catalog}</span><span class="sp">Abrir mi panel completo</span>›</a></div></div>
+      <a class="li" id="xpan" href="/app/" style="text-decoration:none;display:none"><span class="ico">${I.catalog}</span><span class="sp">Abrir mi panel completo</span>›</a></div></div>
     <div class="dos"><div class="card" id="pm"><div class="sk" style="height:60px"></div></div><div class="card" id="pl"><div class="sk" style="height:60px"></div></div></div>`);
   pagosCard($('#pm', el)); planCard($('#pl', el));
   try {
@@ -88,6 +88,8 @@ async function pagosCard(box) {
 async function planCard(box) {
   let f = null; try { f = await rpc('xy_entity_features', { p_entity: S.entidad.id }); } catch (_) {}
   if (!f) { box.innerHTML = '<b>Tu plan</b><p class="mu sm">No disponible por ahora.</p>'; return; }
+  // El panel completo (Xyro Apps) es solo para planes pagados que lo incluyen (Pro / Empresa): a Gratis y Plus no se les muestra (pedido del usuario 2026-11-19)
+  const pan = document.getElementById('xpan'); if (pan && (f.pro || f.tier === 'PRO' || f.tier === 'ENTERPRISE')) pan.style.display = '';
   const lim = (n, m) => m == null ? `${num(n)} (ilimitado)` : `${num(n)} de ${num(m)}`;
   const T = { FREE: 'Gratis', PLUS: 'Plus', PRO: 'Pro', ENTERPRISE: 'Empresa' }, t = f.tier || (f.pro ? 'PRO' : 'FREE'), sig = t === 'FREE' ? 'Plus' : t === 'PLUS' ? 'Pro' : null;
   box.innerHTML = `<div class="row"><b class="sp">Tu plan</b><span class="pill ${f.pro ? 'ok' : ''}">${f.pro ? '⭐ ' : ''}${T[t] || t}</span></div>
