@@ -957,7 +957,7 @@ async function dcArmar(req, env) {
     // Esconder lo viejo (no se borra nada): pasa a «📦 ARCHIVO», que solo ve el equipo
     chs = await dc(env, "GET", `/guilds/${g}/channels`);
     const nuestros = new Set([...Object.values(cfg.cats), ...Object.values(cfg.canales)]);
-    const viejos = chs.filter(c => !nuestros.has(c.id) && c.parent_id !== cfg.cats.tickets && c.id !== (old.cats || {}).archivo && !(c.parent_id && c.parent_id === (old.cats || {}).archivo) && !(c.name === "📦 ARCHIVO" && c.type === 4));
+    const viejos = chs.filter(c => !nuestros.has(c.id) && c.parent_id !== cfg.cats.tickets && c.id !== (old.cats || {}).archivo && !(c.parent_id && c.parent_id === (old.cats || {}).archivo) && !/^ticket-/.test(c.name) && !(c.name === "📦 ARCHIVO" && c.type === 4));
     if (body.archivar !== false && viejos.length) {
       let ar = busca((old.cats || {}).archivo, "📦 ARCHIVO", 4);
       if (!ar) ar = await dc(env, "POST", `/guilds/${g}/channels`, { name: "📦 ARCHIVO", type: 4, permission_overwrites: PRIV, position: 99 });
