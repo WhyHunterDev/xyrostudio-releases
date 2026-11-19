@@ -2006,7 +2006,7 @@ function vPro(slug){const p=PRO[slug];
   q('#pqr')&&(q('#pqr').onclick=()=>proQR(p));q('#ped')&&(q('#ped').onclick=()=>proEditar());
   app.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>proContactar(slug,b.dataset.pc));
   q('#pch')&&(q('#pch').onclick=()=>abrirChat(p.chat.id));
-  app.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>proComprar(slug,b.dataset.plan));q('#ppend')&&(q('#ppend').onclick=()=>ordenHoja(slug,p.x.pendiente));
+  app.querySelectorAll('[data-plan]').forEach(b=>b.onclick=()=>planVer(slug,b.dataset.plan));q('#ppend')&&(q('#ppend').onclick=()=>ordenHoja(slug,p.x.pendiente));
   app.querySelectorAll('[data-foto]').forEach(b=>b.onclick=()=>{const d=document.createElement('div');d.className='qrfull';d.innerHTML=`<img src="${esc(b.dataset.foto)}" alt="" style="max-width:94vw;max-height:84vh;border-radius:18px">`;d.onclick=()=>d.remove();document.body.appendChild(d)})};
  return`<div class="nwrap"><button class="back fl" data-back aria-label="Volver">‹</button>
  <div class="cover" style="${/^https:|^blob:/.test(p.portada||'')?`background-image:url('${esc(p.portada)}')`:'background:radial-gradient(120% 90% at 20% 0%,#7c5cff,#1b1340 55%,#05060a)'}"></div>
@@ -2169,8 +2169,15 @@ function planesHTML(p){const x=p.x;if(!D)return`<div class="card"><b>💪 Planes
  const dias=mio&&mio.valid_until?Math.max(0,Math.ceil((new Date(mio.valid_until)-Date.now())/864e5)):null;
  return`${mio?`<div class="card" style="border-color:#22c55e66"><div class="row"><span style="font-size:26px">🎟️</span><div class="sp"><b>Eres su alumno activo</b><p class="mu sm">${mio.kind==='CLASS_PACK'?`Te quedan <b>${mio.sessions_left||0}</b> sesiones`:`Te quedan <b>${dias}</b> días`}${mio.valid_until?' · vence '+fF(mio.valid_until):''}</p></div></div><button class="btn" data-pases>🎫 Ver mi pase</button></div>`:''}
  ${x.pendiente?`<button class="btn" id="ppend" style="border-color:#f5a524">⏳ Tienes un pago por confirmar · ver</button>`:''}
- ${L.length?`<h2>💪 Planes y paquetes</h2><div class="g">${L.map(c=>`<button class="card plan" data-plan="${esc(c.id)}"><div class="row"><span class="sp"><span class="mu xs">${PLK[c.kind]||'Plan'}${c.days?' · '+c.days+' días':''}${c.sessions?' · '+c.sessions+' sesiones':''}</span><br><b>${esc(c.title)}</b></span><b>${moneyX(c.price,c.currency)}</b></div>${c.description?`<p class="mu sm">${esc(c.description)}</p>`:''}<span class="sm" style="color:var(--a);font-weight:700">${mio?'Renovar / sumar':'Elegir y pagar'} ›</span></button>`).join('')}</div>`
+ ${L.length?`<h2>💪 Planes y paquetes</h2><div class="g">${L.map(c=>`<button class="card plan" data-plan="${esc(c.id)}"><div class="row"><span class="sp"><span class="mu xs">${PLK[c.kind]||'Plan'}${c.days?' · '+c.days+' días':''}${c.sessions?' · '+c.sessions+' sesiones':''}</span><br><b>${esc(c.title)}</b></span><b>${moneyX(c.price,c.currency)}</b></div>${c.description?`<p class="mu sm">${esc(c.description)}</p>`:''}<span class="sm" style="color:var(--a);font-weight:700">Ver detalle ›</span></button>`).join('')}</div>`
   :`<p class="mu sm" style="text-align:center">Aún no publica sus planes. Escríbele por el chat.</p>`}`}
+/* Ver el plan antes de comprar (pedido del usuario 2026-11-19: tocar un plan no debe crear un pedido) */
+function planVer(slug,id){const x=(PRO[slug]||{}).x||{},c=(x.planes||[]).find(p=>String(p.id)===String(id));if(!c)return;vib();const mio=x.mio;
+ const fila=(i,t)=>`<div class="li"><span class="dot">${i}</span><span class="sp sm">${t}</span></div>`;
+ hoja(`<p class="mu xs" style="font-weight:700">${PLK[c.kind]||'Plan'}</p><h2>${esc(c.title)}</h2><p style="margin:0"><b style="font-size:30px">${moneyX(c.price,c.currency)}</b></p>
+  ${c.description?`<p class="sm" style="white-space:pre-line">${esc(c.description)}</p>`:''}
+  <div class="card" style="gap:0">${c.days?fila('📅',`Dura <b>${c.days}</b> días`):''}${c.sessions?fila('🏋️',`<b>${c.sessions}</b> sesiones`):''}${fila('💸','Le pagas directo al entrenador (Yape, Plin o transferencia)')}${fila('⭐','Ganas puntos cuando confirma tu pago')}</div>
+  <button class="btn p" id="plcp">${mio?'Renovar con este plan':'Quiero este plan'}</button><button class="btn l" data-x>Cerrar</button>`,(o,close)=>{o.querySelector('#plcp').onclick=()=>{close();proComprar(slug,c.id)}})}
 async function proComprar(slug,item){if(!D){pend.set({t:slug});return pantallaEntrada('Crea tu cuenta (o entra) para elegir tu plan.','crear')}
  vib();try{const pi=await rpc('xy_pro_comprar',{p_slug:slug,p_item:item});PRO[slug].x&&(PRO[slug].x.pendiente=pi.order_id);ordenHoja(slug,pi.order_id,pi)}catch(e){toast(errDe(e))}}
 const MPN={YAPE:['🟣','Yape'],PLIN:['🔵','Plin'],TRANSFER:['🏦','Transferencia']};
