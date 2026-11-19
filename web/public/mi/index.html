@@ -1098,14 +1098,14 @@ function vMiGr(){const g=G0();
   q('#gped')&&(q('#gped').onclick=()=>grEditar(g));q('#gver')&&(q('#gver').onclick=()=>{delete NEG[g.slug];abrirNeg(g.slug)});
   q('#gpn')&&(q('#gpn').onclick=()=>grPromo(g,null));app.querySelectorAll('[data-gpr]').forEach(b=>b.onclick=()=>grPromo(g,+b.dataset.gpr));
   q('#gsh')&&(q('#gsh').onclick=async()=>{const t='Guárdanos en Mi Xyro y mira nuestras promos: '+url;try{if(navigator.share)return await navigator.share({title:g.nombre,text:t,url})}catch(_){return}try{await navigator.clipboard.writeText(url);toast('📋 Enlace copiado')}catch(_){toast(url)}});
-  q('#gmej')&&(q('#gmej').onclick=()=>grMejorar(g));q('#gayu')&&(q('#gayu').onclick=()=>{SUB='ayuda';pinta()});
+  q('#gcar')&&(q('#gcar').onclick=()=>cartelXyro(g.nombre,url));q('#gmej')&&(q('#gmej').onclick=()=>grMejorar(g));q('#gayu')&&(q('#gayu').onclick=()=>{SUB='ayuda';pinta()});
   q('#gpan')&&(q('#gpan').onclick=()=>modoNegocio());if(g.estado!=='pago'&&g.estado!=='suspendido')gcBind(g)};
  const logo=/^(https:|blob:)/.test(g.logo||'')?`<img src="${esc(g.logo)}" alt="">`:esc(rg[1]);
  return`<div class="g"><div class="row"><div class="av">${logo}</div><div class="sp"><p class="mu xs" style="font-weight:700;letter-spacing:.08em">MI NEGOCIO · ${g.estado==='pago'?'PANEL COMPLETO':'PLAN GRATIS'}</p><h2>${esc(g.nombre)}</h2><span class="pill ${ec}">${et}</span></div></div>
   <p class="mu sm">${esc(g.estado==='suspendido'&&g.motivo?g.motivo:ed)}</p>
   ${g.estado==='pago'?`<button class="btn p" id="gpan">${I.grid}Entrar a mi negocio</button>${dg?digCardHTML(g):''}${crecerHTML(g)}`:g.estado==='suspendido'?`<button class="btn" id="gayu">${I.help}Necesito ayuda</button>`:`
   <div class="card"><div class="row"><div class="ibox">${I.store}</div><div class="sp"><h3>Tu perfil</h3><p class="mu sm">${lis===5?'✅ Completo. ¡Se ve muy bien!':lis+' de 5 listos · '+(dg?['logo','portada','descripción','tu web','tus planes']:['logo','portada','descripción','dirección','horario']).filter((_,i)=>!ok[i]).join(', ')}</p></div></div>
-   <button class="btn" id="gped">✏️ Editar perfil</button><button class="btn l" id="gver">Ver cómo lo ven tus clientes ›</button></div>
+   <button class="btn p" id="gped">✏️ Editar mi perfil</button><button class="btn l" id="gver">Ver cómo lo ven tus clientes ›</button></div>
   ${dg?digCardHTML(g):''}
   <div class="card"><div class="row"><div class="ibox">${I.gift}</div><div class="sp"><h3>Promos por Mi Xyro</h3><p class="mu sm">${P.length} de ${PMX} · solo para quienes te tienen en Mi Xyro</p></div></div>
    ${P.length?`<div>${P.map((p,i)=>`<button class="li" data-gpr="${i}" style="width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;text-align:left;cursor:pointer;font:inherit"><span class="dot">🎁</span><span class="sp"><b>${esc(p.titulo)}</b>${p.plus?' <span class="pill" style="background:#7c5cff33;color:#c4b5fd">Xyro+</span>':''}<br><span class="mu xs">${p.hasta?(p.hasta<hoyL()?'Venció el ':'Hasta el ')+fF(p.hasta,{day:'numeric',month:'long'}):'Sin fecha de fin'}</span></span><span class="mu">›</span></button>`).join('')}</div>`:''}
@@ -1114,7 +1114,7 @@ function vMiGr(){const g=G0();
   ${g.estado==='activo'?crecerHTML(g):''}
   <div class="card" style="justify-items:center;text-align:center"><h3>QR para que te guarden</h3><div id="gqr" style="background:#fff;padding:12px;border-radius:18px;width:210px;aspect-ratio:1"></div>
    <p class="mu xs" style="max-width:300px">${dg?'Ponlo en tus lives, videos y bio: al escanearlo te guardan en Mi Xyro y ven tus promos y tu cupón.':'Ponlo en tu caja o mostrador: al escanearlo, tus clientes te guardan en Mi Xyro y ven tus promos.'}</p>
-   <p class="sm"><b>${g.seguidores||0}</b> ${(g.seguidores|0)===1?'persona te guardó':'personas te guardaron'}</p><button class="btn" id="gsh" style="width:100%">Compartir mi enlace</button></div>
+   <p class="sm"><b>${g.seguidores||0}</b> ${(g.seguidores|0)===1?'persona te guardó':'personas te guardaron'}</p><button class="btn p" id="gcar" style="width:100%">🖨️ Imprimir cartel para mi caja</button><button class="btn" id="gsh" style="width:100%">Compartir mi enlace</button></div>
   <div class="card" style="border-color:color-mix(in srgb,var(--a) 45%,var(--ln))"><div class="row"><div class="ibox">${I.trophy}</div><div class="sp"><h3>Pásate a Plus o Pro</h3><p class="mu sm">${esc(grIncluye(g.rubro).slice(0,3).join(', '))} y más. Lo que ya armaste se queda.</p></div></div>
    <button class="btn p" id="gmej">⭐ Mejorar mi plan</button>${g.mejora_t?`<p class="mu xs" style="text-align:center">Pediste mejorar el ${fF(g.mejora_t,{day:'numeric',month:'short'})}.</p>`:''}</div>`}</div>`}
 function grIncluye(r){return r==='barberia'?['Agenda por barbero','cola de clientes sin cita','comisiones de cada barbero','reservas desde Mi Xyro','tarjeta de sellos','caja y reportes']:r==='consultorio'?['Agenda por profesional','pacientes e historia clínica','odontograma y presupuestos','citas desde Mi Xyro','caja y reportes','equipo con roles']
@@ -1125,7 +1125,8 @@ function grIncluye(r){return r==='barberia'?['Agenda por barbero','cola de clien
 function grMejorar(g){planesAbrir(g.slug,g.nombre)}
 function grEditar(g){const pf=g.perfil||{},rd=pf.redes||{},se=(pf.sedes||[])[0]||{},F={},dg=g.rubro==='digital';
  const fotoUI=(k,u,lbl,cuad)=>`<div class="row" style="gap:12px"><div data-fv="${k}" style="width:${cuad?64:112}px;height:64px;border-radius:16px;background:var(--c2) center/cover no-repeat;flex:none${u?`;background-image:url('${esc(u)}')`:''}"></div><div class="sp g" style="gap:4px"><b class="sm">${lbl}</b><button type="button" class="btn s2" data-fb="${k}">📷 ${u?'Cambiar':'Subir'}</button></div><input type="file" accept="image/*" hidden data-ff="${k}"></div>`;
- hoja(`<h2>✏️ Tu perfil en Mi Xyro</h2><p class="mu sm">Esto ven tus clientes al abrir tu negocio en Mi Xyro.</p>
+ hoja(`<h2>✏️ Editar mi perfil</h2><p class="mu sm">Cambia algo y mira al toque cómo te verán tus clientes.</p>
+  <div id="epv" style="position:sticky;top:-20px;z-index:2;margin:0 -16px;padding:8px 16px;background:#0b0d14;box-shadow:0 10px 20px -10px #000"></div>
   <label>Nombre del negocio<input id="en" maxlength="60" value="${esc(g.nombre)}"></label>
   ${fotoUI('logo',g.logo,'Logo',1)}${fotoUI('portada',pf.portada,dg?'Portada (banner o captura de tu software)':'Portada (foto horizontal del local)')}
   <label>Descripción corta<textarea id="ed" rows="3" maxlength="300" placeholder="Ej. Cafetería de especialidad con postres caseros y wifi.">${esc(pf.descripcion||'')}</textarea></label>
@@ -1137,11 +1138,18 @@ ${dg?'':`  <label>Dirección<input id="ea" maxlength="150" value="${esc(se.direc
   <label>Horario <span class="mu xs">(una línea por día o grupo)</span><textarea id="eh" rows="3" placeholder="Lunes a sábado: 7 am – 9 pm&#10;Domingos: 8 am – 1 pm">${esc((se.horario||[]).map(h=>Array.isArray(h)?h.filter(Boolean).join(': '):h).join('\n'))}</textarea></label>`}
   <div class="msg" id="emg"></div><button class="btn p" id="egb">Guardar</button><button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
   const q=s=>o.querySelector(s),m=q('#emg'),say=t=>{m.textContent=t;m.className='msg on'};let geo=se.lat?{lat:+se.lat,lng:+se.lng}:null;
+  const rg=RUBG.find(r=>r[0]===g.rubro)||RUBG[RUBG.length-1],vv=s=>{const e=q(s);return e?e.value.trim():''};
+  const prev=()=>{const lg=F.logo||g.logo,cv=F.portada||pf.portada,nm=vv('#en')||'Tu negocio',ds=vv('#ed'),di=vv('#eds'),h1=(vv('#eh').split('\n')[0]||''),rs=[vv('#ei')&&'📸',vv('#ek')&&'🎵',vv('#ef')&&'👍'].filter(Boolean).join(' ');
+   q('#epv').innerHTML=`<div style="border:1px solid var(--ln);border-radius:18px;overflow:hidden;background:var(--c1,#10131c)"><div style="height:92px;background:${cv?`url('${esc(cv)}') center/cover`:'linear-gradient(135deg,var(--a),#000)'}"></div>
+    <div style="display:grid;justify-items:center;text-align:center;gap:4px;padding:0 12px 12px;margin-top:-30px"><div style="width:60px;height:60px;border-radius:18px;border:3px solid var(--c1,#10131c);background:var(--c2) center/cover;display:grid;place-items:center;font-size:28px;${lg?`background-image:url('${esc(lg)}')`:''}">${lg?'':esc(rg[1])}</div>
+    <b style="font-size:18px">${esc(nm)}</b>${ds?`<span class="xs" style="opacity:.85;max-width:300px">${esc(ds.slice(0,110))}${ds.length>110?'…':''}</span>`:'<span class="mu xs">Agrega una descripción corta</span>'}
+    <span class="mu xs">${[di&&'📍 '+esc(di),h1&&'🕒 '+esc(h1),rs].filter(Boolean).join(' · ')||'📍 Pon tu distrito y horario'}</span></div></div>`};
+  prev();o.addEventListener('input',prev);
   q('#egeo')&&(q('#egeo').onclick=()=>{const b=q('#egeo');if(!navigator.geolocation)return say('Tu equipo no comparte la ubicación.');b.disabled=true;b.textContent='📍 Buscando…';
    navigator.geolocation.getCurrentPosition(p=>{geo={lat:+p.coords.latitude.toFixed(6),lng:+p.coords.longitude.toFixed(6)};b.disabled=false;b.textContent='📍 Ubicación lista ✓ (se guarda al tocar Guardar)'},()=>{b.disabled=false;b.textContent='📍 Marcar mi ubicación exacta (estoy en el local)';say('No pude leer tu ubicación. Revisa el permiso de ubicación.')},{enableHighAccuracy:true,timeout:15000})});
   o.querySelectorAll('[data-fb]').forEach(b=>{const k=b.dataset.fb,ff=o.querySelector(`[data-ff="${k}"]`);b.onclick=()=>ff.click();
    ff.onchange=async()=>{const fl=ff.files[0];if(!fl)return;b.disabled=true;b.textContent='Subiendo…';
-    try{F[k]=await grFoto(fl,g,k);o.querySelector(`[data-fv="${k}"]`).style.backgroundImage=`url('${F[k]}')`;b.textContent='📷 Cambiar'}catch(_){say('No pude subir la foto. Prueba con otra imagen.');b.textContent='📷 Subir'}b.disabled=false;ff.value=''}});
+    try{F[k]=await grFoto(fl,g,k);o.querySelector(`[data-fv="${k}"]`).style.backgroundImage=`url('${F[k]}')`;b.textContent='📷 Cambiar';prev()}catch(_){say('No pude subir la foto. Prueba con otra imagen.');b.textContent='📷 Subir'}b.disabled=false;ff.value=''}});
   q('#egb').onclick=async()=>{const w=dg?'':q('#ew').value.replace(/\D/g,'').replace(/^51(?=9\d{8}$)/,''),mp=dg?'':q('#em').value.trim();
    if(w&&!/^9\d{8}$/.test(w))return say('Escribe un WhatsApp de 9 dígitos que empiece con 9.');
    if(mp&&!/^https:\/\//.test(mp))return say('El enlace de Google Maps debe empezar con https://');
@@ -2920,6 +2928,17 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-prmneg]');
  if(f==='xy_canje_confirmar')return a.p_codigo==='123456'?{ok:true,premio:'Café americano gratis',persona:'Lucía',puntos:300,tipo:'LOCAL'}:{ok:false,error:'Código no válido o vencido. Pídele que lo genere de nuevo (en la demo usa 123456)'};
  return d5(f,a)}}
 {const n5=demoNegRpc;demoNegRpc=async function(f,a){if(f==='xy_canje_confirmar')return demoRpc(f,a);return n5(f,a)}}
+
+/* Cartel imprimible para la caja: «¿Tienes Xyro? Escanea y gana puntos» (pedido del usuario 2026-11-18: que todos pregunten si el negocio tiene Xyro) */
+async function cartelXyro(nom,url){vib();let qr='';try{await qrLib();qr=qrSVG(url)}catch(_){return toast('No pude crear el QR. Revisa tu internet.')}
+ const w=window.open('','_blank');if(!w)return toast('Permite ventanas emergentes para imprimir');
+ w.document.write(`<!doctype html><meta charset="utf-8"><title>Cartel Xyro · ${esc(nom)}</title><style>@page{size:A5;margin:0}body{margin:0;font-family:system-ui,sans-serif;background:#fff;color:#111}
+ .c{width:148mm;height:210mm;box-sizing:border-box;padding:12mm;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;background:linear-gradient(160deg,#7c5cff,#3ad6ff);color:#fff}
+ h1{font-size:30pt;margin:0;line-height:1.05}h2{font-size:15pt;margin:0;font-weight:600;opacity:.95}.q{background:#fff;border-radius:8mm;padding:6mm;width:78mm;height:78mm}.q svg{width:100%;height:100%}
+ .b{font-size:12pt;line-height:1.5}.n{font-size:16pt;font-weight:800}.l{font-size:10pt;opacity:.9}</style>
+ <div class="c"><div><h2>¿Tienes Xyro?</h2><h1>Escanea y<br>gana puntos</h1></div><div class="q">${qr}</div>
+ <div class="b">🎁 Promos solo en Xyro<br>⭐ Puntos en cada compra<br>👥 Invita a tus amigos y ganan los dos</div><div><div class="n">${esc(nom)}</div><div class="l">xyrostudio.net · Xyro, lo mejor de tu ciudad a un toque</div></div></div>
+ <script>setTimeout(function(){print()},400)<\/script>`);w.document.close()}
 </script>
 <script>/* Partículas Xyro */(function(){var cv=document.getElementById('fx');if(!cv)return;var cx=cv.getContext('2d'),P=[],W,H,DPR=Math.min(1.5,devicePixelRatio||1),m={x:-999,y:-999},RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 function size(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);var n=Math.round(Math.min(70,W*H/14000));P=[];for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3})}
