@@ -985,6 +985,7 @@ function vPerfil(){const per=(D&&D.persona)||{},ini=String(per.nombre||'?').trim
   <div class="card"><p class="mu xs" style="font-weight:700">MIS DATOS</p><p class="sm">✉️ ${esc(per.email||'—')}</p>${per.celular?`<p class="sm">📱 ${esc(String(per.celular).replace(/(\d{3})(\d{3})(\d{3})/,'$1 $2 $3'))}</p>`:''}<p class="mu xs">Al guardar un negocio, este ve tu nombre, @usuario, correo y celular para atenderte mejor.</p></div>
   ${esApp()?'':`<button class="btn p" id="inst">📲 Agregar a mi inicio</button>`}
   ${negCard()}
+  <button class="btn" data-ptab="">📊 ¿Cuánto valen los puntos? · tabla pública</button>
   <button class="btn" id="ayu">${I.help}Necesito ayuda</button>
   <button class="btn" data-dcabrir>💬 Comunidad Xyro en Discord${ls.g('mi-dc-ok')?' · ideas, ayuda y promos':' · vincula y gana 20 XyroPoints 🎁'}</button>
   ${DEMO?'<a class="btn" href="/mi/" style="text-decoration:none;color:var(--tx)">Salir de la demo</a>':'<button class="btn l" id="salir">Cerrar sesión</button>'}
@@ -2146,7 +2147,7 @@ function ptsHTML(){if(!D)return'';if(PTS===null){PTS=undefined;Promise.all([ptsC
 function xjHTML(g){const T=[['ruleta','🎡','Ruleta',g?`¡${g} giro${g>1?'s':''} gratis!`:'Gira y gana','#f59e0b,#ef4444',g],['ranking','🏆','Ranking','¿En qué puesto vas?','#7c5cff,#38bdf8'],['retos','🎯','Retos','Puntos extra','#22c55e,#0ea5e9'],['invitar','👥','Invitar','Gana XyroPoints','#ec4899,#8b5cf6']];
  return`<div class="xjg">${T.map(([k,i,t,d,c,n])=>`<button class="xj${n?' on':''}" data-xy="${k}" style="--xg:linear-gradient(135deg,${c})"><i>${i}</i><b>${t}</b><small>${d}</small>${n?`<em>${n}</em>`:''}</button>`).join('')}</div>`}
 function ganarAbrir(){const g=XR?+XR.giros||0:0;hoja(`<h2>🎁 Gana más puntos</h2><p class="mu sm">Tus puntos se usan como descuento. <b>XyroPoints</b>: en cualquier negocio Xyro. <b>LocalPoints</b>: solo donde los ganaste. Se suman cuando pagas por Yape, Plin, transferencia u otro medio virtual (con captura) y el negocio lo confirma. En efectivo no se ganan puntos.</p>
- <button class="btn p" data-xy="invitar">👥 Invitar amigos</button><button class="btn" data-xy="ruleta">🎡 Girar la ruleta${g?` · tienes ${g} giro${g>1?'s':''}`:''}</button><button class="btn" data-xy="retos">🎯 Retos: gana puntos extra</button><button class="btn" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo">🎨 Mi estilo</button><button class="btn l" data-x>Cerrar</button>`,o=>o.querySelectorAll('[data-xy]').forEach(b=>b.addEventListener('click',()=>o.remove())))}
+ <button class="btn p" data-xy="invitar">👥 Invitar amigos</button><button class="btn" data-xy="ruleta">🎡 Girar la ruleta${g?` · tienes ${g} giro${g>1?'s':''}`:''}</button><button class="btn" data-xy="retos">🎯 Retos: gana puntos extra</button><button class="btn" data-xy="ranking">🏆 Ranking</button><button class="btn" data-xy="estilo">🎨 Mi estilo</button><button class="btn" data-ptab="">📊 ¿Cuánto valen los puntos?</button><button class="btn l" data-x>Cerrar</button>`,o=>o.querySelectorAll('[data-xy],[data-ptab]').forEach(b=>b.addEventListener('click',()=>o.remove())))}
 let PTSR=0;
 function ptsFx(n,txt){vib();confeti();const d=document.createElement('div');d.className='ptsfx';d.innerHTML=`<b>+${nfmt(n)}</b><span>${esc(txt||'XyroPoints')}</span>`;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
 (function(){const st=document.createElement('style');st.textContent='.ptsfx{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:99;display:grid;justify-items:center;gap:2px;padding:18px 26px;border-radius:22px;background:linear-gradient(135deg,#7c5cff,#c026d3);color:#fff;box-shadow:0 20px 60px #7c5cff66;animation:ptsup 2.6s ease forwards;pointer-events:none}.ptsfx b{font-size:44px;line-height:1}.ptsfx span{font-weight:700;font-size:14px}@keyframes ptsup{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}}.plan{display:grid;gap:4px;text-align:left;width:100%;cursor:pointer}.plan .row b{font-size:18px}.mpag{display:flex;gap:10px;align-items:center;padding:12px;border-radius:14px;background:#ffffff0a;border:1px solid #ffffff14}.mpag .sp{min-width:0}';document.head.appendChild(st)})();
@@ -3195,10 +3196,32 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-xy="invita
 
 /* --- Premios del negocio (persona) --- */
 const PRM={};
+/* ===== Tabla de valor de los puntos (pedido del usuario 2026-11-19: que nadie regale una pizza por 10 XyroPoints) =====
+   Ancla: 100 XyroPoints ≈ US$ 1 (igual que el Boost: 500 puntos de negocio = US$ 5). Se ganan 2 XyroPoints y 10 LocalPoints por US$ 1 (SQL 88).
+   LocalPoints recomendados: 200 por US$ 1 de premio (devuelves 5 %); menos de 100 por US$ 1 = devuelves más del 10 % (pierdes). */
+const PV={xpu:100,lpu:200,lpMin:100,ganaXP:2,ganaLP:10,negPorUsd:5};
+const PMON={PE:['PEN',3.75],BO:['BOB',6.96],CO:['COP',4000],MX:['MXN',18],CL:['CLP',950],AR:['ARS',1000],PY:['PYG',7500],UY:['UYU',40],BR:['BRL',5.5],GT:['GTQ',7.8],CR:['CRC',510],DO:['DOP',60],ES:['EUR',.92]};
+function monPais(){const p=bilPais(),m=PMON[p];if(m)return{c:m[0],r:m[1]};return{c:'USD',r:1}}
+const enLocal=usd=>{const m=monPais();return moneyX(usd*m.r,m.c)};
+function ptsTabla(neg){vib();const m=monPais(),U=t=>m.c==='USD'?null:t,ej=[1,5,10,20].map(u=>Math.round(u*m.r)>0?u:u);
+ const fila=(a,b,c)=>`<div class="li"><span class="sp sm">${a}</span><b class="sm" style="text-align:right">${b}</b>${c!=null?`<span class="mu xs" style="min-width:70px;text-align:right">${c}</span>`:''}</div>`;
+ hoja(`<h2>📊 ¿Cuánto valen los puntos?</h2><p class="mu sm">Valores públicos e iguales para todos. Montos en ${m.c==='USD'?'dólares':'tu moneda (aprox.)'}.</p>
+  <div class="card" style="gap:0;border-color:var(--a)">${fila('<b>100 XyroPoints</b>','≈ '+enLocal(1),U('US$ 1'))}${fila('<b>1 XyroPoint</b>','≈ '+enLocal(.01),U('US$ 0.01'))}${fila('<b>200 LocalPoints</b> (sugerido)','≈ '+enLocal(1),U('US$ 1'))}</div>
+  <h3>🙋 Para personas: cuánto ganas</h3>
+  <div class="card" style="gap:0">${fila('Pagas '+enLocal(1)+' con tu billetera o transferencia (con captura)','10 LocalPoints + 2 XyroPoints')}${fila('Con Xyro+','×1.5')}${fila('Negocio con ⚡ Boost','×2')}${fila('En efectivo','0 puntos')}
+   ${fila('Vincular tu Discord (1 vez)','20 XyroPoints','≈ '+enLocal(.2))}${fila('Amigo que invitas hace su 1.ª compra','100 XyroPoints','≈ '+enLocal(1))}${fila('Tú, si te invitaron (tras tu 1.ª compra)','50 XyroPoints','≈ '+enLocal(.5))}${fila('Giro de ruleta comprado','cuesta 50 XyroPoints','≈ '+enLocal(.5))}</div>
+  <p class="mu xs">O sea: con XyroPoints recuperas ≈ 2 % de lo que compras, y con LocalPoints ≈ 5 % en el negocio donde compras. Es real y no se infla.</p>
+  <h3>🏪 Para negocios: cuánto cobrar un premio</h3>
+  <div class="card" style="gap:0">${fila('<b>Lo que das vale…</b>','<b>LocalPoints</b>','<b>XyroPoints</b>')}${ej.map(u=>fila(enLocal(u),nfmt(u*PV.lpu),nfmt(u*PV.xpu))).join('')}</div>
+  <p class="mu xs">Fórmula: <b>precio en US$ × 200</b> LocalPoints (devuelves 5 %) · mínimo × 100 (10 %). XyroPoints: <b>precio en US$ × 100</b> como mínimo. Ej.: una pizza de ${enLocal(10)} = 2,000 LocalPoints o 1,000 XyroPoints. Ponerla a 10 XyroPoints sería regalarla por ${enLocal(.1)} 🤡.</p>
+  <div class="card" style="gap:0">${fila('Tu negocio gana por cada '+enLocal(1)+' vendido con Xyro','5 puntos de negocio')}${fila('Con plan Plus/Pro','×1.3')}${fila('⚡ Boost 1 hora','500 puntos de negocio','= US$ 5')}</div>
+  ${neg?'':'<p class="mu xs">¿Tienes negocio? En «🎁 Premios por puntos» te calculamos esto solo al crear cada premio.</p>'}
+  <button class="btn l" data-x>Cerrar</button>`)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-ptab]');if(!b)return;e.preventDefault();ptsTabla(!!b.dataset.ptab)});
 function premiosSec(slug){if(!(slug in PRM)){PRM[slug]=null;rpc('xy_premios',{p_slug:slug}).then(r=>{PRM[slug]=r||{premios:[]};if(SUB&&SUB.neg===slug&&!document.querySelector('.ov'))pinta()}).catch(()=>{PRM[slug]={premios:[]}})}
  const R=PRM[slug];if(!R||!(R.premios||[]).length)return'';const pe=R.pendiente;
  const c=(p,k)=>p['pts_'+k]?`<span class="pill" style="${k==='global'?'background:#7c5cff22;color:var(--a)':''}">${nfmt(p['pts_'+k])} ${k==='local'?'LocalPoints':'XyroPoints'}</span>`:'';
- return`<h2>🎁 Canjea tus puntos aquí</h2>${pe?`<button class="card" data-cjver="${esc(slug)}" style="width:100%;text-align:left;cursor:pointer;border-color:var(--a)"><b>🎟️ Tu código: ${esc(pe.codigo)}</b><span class="mu xs">${esc(pe.premio)} · muéstralo al pagar</span></button>`:''}
+ return`<h2>🎁 Canjea tus puntos aquí</h2><button class="btn l sm" data-ptab="" style="width:auto;padding:4px 0;justify-self:start">📊 ¿Cuánto valen los puntos?</button>${pe?`<button class="card" data-cjver="${esc(slug)}" style="width:100%;text-align:left;cursor:pointer;border-color:var(--a)"><b>🎟️ Tu código: ${esc(pe.codigo)}</b><span class="mu xs">${esc(pe.premio)} · muéstralo al pagar</span></button>`:''}
   <div class="card" style="gap:0">${R.premios.map(p=>`<div class="li"><span class="sp"><b>${esc(p.nombre)}</b>${p.detalle?`<br><span class="mu xs">${esc(p.detalle)}</span>`:''}<br><span style="display:inline-flex;gap:6px;flex-wrap:wrap;margin-top:6px">${c(p,'local')}${c(p,'global')}</span></span><button class="btn p" data-cjp="${esc(p.id)}" data-slug="${esc(slug)}" style="width:auto;align-self:center">Canjear</button></div>`).join('')}
   ${D?`<p class="mu xs" style="margin:10px 0 0">Tienes <b>${nfmt(R.local)}</b> LocalPoints y <b>${nfmt(R.global)}</b> XyroPoints.</p>`:''}</div>`}
 async function canjeAbrir(slug,id){vib();if(!D)return toast('Inicia sesión para canjear');const R=PRM[slug]||{},p=(R.premios||[]).find(x=>x.id===id);if(!p)return;
@@ -3221,7 +3244,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-cjp],[data
 async function premiosNeg(slug,nom){vib();let R;try{R=await rpc('xy_premios_mios',{p_slug:slug})}catch(e){return toast(errDe(e))}const L=R.premios||[],C=R.canjes||[];
  const pts=p=>[p.pts_local&&nfmt(p.pts_local)+' LocalPoints',p.pts_global&&nfmt(p.pts_global)+' XyroPoints'].filter(Boolean).join(' · ');
  hoja(`<h2>🎁 Premios por puntos</h2><p class="mu sm">Tú eliges qué das por puntos. Así tus clientes vuelven y compran más. Les sale en tu perfil de Mi Xyro.</p>
-  <button class="btn p" data-cjcob>🎟️ Cobrar un canje</button>
+  <button class="btn p" data-cjcob>🎟️ Cobrar un canje</button><button class="btn" data-ptab="1">📊 Tabla de valores: cuánto cobrar</button>
   <div class="card" style="gap:0">${L.map(p=>`<div class="li"><span class="sp"><b>${esc(p.nombre)}</b>${p.activo?'':' <span class="pill">Pausado</span>'}<br><span class="mu xs">${pts(p)} puntos</span></span><button class="btn" data-pre="${esc(p.id)}" style="width:auto;align-self:center">Editar</button></div>`).join('')||'<p class="mu sm">Aún no tienes premios. Ej.: «Café gratis» por 300 LocalPoints.</p>'}</div>
   ${L.length<12?'<button class="btn" data-pre="">＋ Agregar premio</button>':''}
   ${C.length?`<h3 style="margin-top:6px">Últimos canjes${R.mes?` · ${nfmt(R.mes)} este mes`:''}</h3>${C.slice(0,6).map(x=>`<div class="li"><span class="dot">✓</span><span class="sp sm"><b>${esc(x.premio)}</b> · ${esc(x.persona)}<br><span class="mu xs">${nfmt(x.puntos)} ${x.tipo==='LOCAL'?'LocalPoints':'XyroPoints'} · ${fF(x.fecha)}</span></span></div>`).join('')}`:''}
@@ -3233,8 +3256,16 @@ function premioEditar(slug,nom,p){const n=!p;p=p||{};
   <label class="sm">¿Qué das?<input id="pn" maxlength="60" value="${esc(p.nombre||'')}" placeholder="Ej. Café gratis · S/ 10 de descuento"></label>
   <label class="sm">Detalle (opcional)<input id="pd" maxlength="200" value="${esc(p.detalle||'')}" placeholder="Ej. Cualquier café mediano"></label>
   <div class="row" style="gap:8px"><label class="sm sp">LocalPoints<input id="pl" type="number" min="10" inputmode="numeric" value="${p.pts_local||''}" placeholder="Ej. 300"></label><label class="sm sp">XyroPoints<input id="pg" type="number" min="10" inputmode="numeric" value="${p.pts_global||''}" placeholder="Vacío = no"></label></div>
-  <p class="mu xs"><b>De aquí</b>: los que tus clientes ganan comprando contigo (unos 8 por cada US$ 1). <b>Xyro</b>: los de toda la red; aceptarlos te trae clientes nuevos. Deja vacío el que no quieras.</p>
+  <label class="sm">¿Cuánto cuesta normalmente? (${monPais().c}, para calcular)<input id="pv" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Ej. ${Math.round(5*monPais().r)}"></label>
+  <div id="pch" class="card" style="gap:4px;font-size:13px"></div>
+  <p class="mu xs"><b>LocalPoints</b>: los que tus clientes ganan comprando contigo (10 por cada ${enLocal(1)}). <b>XyroPoints</b>: los de toda la red (100 ≈ ${enLocal(1)}); aceptarlos te trae clientes nuevos. Deja vacío el que no quieras. <a href="#" data-ptab="1" style="color:var(--a)">Ver tabla</a></p>
   <button class="btn p" id="ps">Guardar</button>${n?'':`<button class="btn" id="pa">${p.activo?'⏸️ Pausar':'▶️ Activar'}</button><button class="btn l" id="pb" style="color:#ef4444">Borrar</button>`}<button class="btn l" data-x>Cancelar</button>`,(o,close)=>{
+  const M=monPais(),ch=o.querySelector('#pch'),calc=()=>{const val=(+o.querySelector('#pv').value||0)/M.r,lp=+o.querySelector('#pl').value||0,xp=+o.querySelector('#pg').value||0;let h='',mal=false;
+   if(val>0)h+=`💡 Sugerido: <b>${nfmt(Math.ceil(val*PV.lpu))} LocalPoints</b> y/o <b>${nfmt(Math.ceil(val*PV.xpu))} XyroPoints</b> como mínimo.<br>`;
+   if(lp){const g=lp/PV.ganaLP;h+=`LocalPoints: tu cliente lo consigue gastando ≈ <b>${enLocal(g)}</b> contigo.`;if(val>0&&lp<val*PV.lpMin){h+=` <b style="color:#ef4444">⚠️ Devuelves ${Math.round(val/g*100)}%: pierdes. Sube a ${nfmt(Math.ceil(val*PV.lpMin))} o más.</b>`;mal=true}h+='<br>'}
+   if(xp){h+=`XyroPoints: ${nfmt(xp)} valen ≈ <b>${enLocal(xp/PV.xpu)}</b>.`;if(val>0&&xp<val*PV.xpu){h+=` <b style="color:#ef4444">⚠️ Lo regalas por menos de lo que vale. Mínimo ${nfmt(Math.ceil(val*PV.xpu))}.</b>`;mal=true}}
+   ch.innerHTML=h||'<span class="mu">Escribe el precio normal y te decimos cuántos puntos poner.</span>';ch.style.borderColor=mal?'#ef4444':'';o.querySelector('#ps').disabled=mal&&xp>0&&val>0&&xp<val*PV.xpu;return mal};
+  ['#pv','#pl','#pg'].forEach(k=>o.querySelector(k).addEventListener('input',calc));calc();
   const v=s=>o.querySelector(s).value.trim(),sv=async x=>{try{await rpc('xy_premio_guardar',{p_slug:slug,p:Object.assign({id:p.id||null,nombre:v('#pn'),detalle:v('#pd'),pts_local:v('#pl')||null,pts_global:v('#pg')||null},x||{})});close();delete PRM[slug];toast('✅ Guardado: ya sale en tu perfil');premiosNeg(slug,nom)}catch(e){toast(errDe(e))}};
   o.querySelector('#ps').onclick=()=>sv();const a=o.querySelector('#pa');a&&(a.onclick=()=>sv({activo:!p.activo}));
   const b=o.querySelector('#pb');b&&(b.onclick=async()=>{try{await rpc('xy_premio_borrar',{p_slug:slug,p_id:p.id});close();delete PRM[slug];toast('Premio borrado');premiosNeg(slug,nom)}catch(e){toast(errDe(e))}})})}

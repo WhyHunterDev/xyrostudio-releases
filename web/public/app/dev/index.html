@@ -4364,13 +4364,25 @@ async function premiosAbrir(){let R0;try{R0=await pzRpc('xy_premios_mios',{p_slu
   <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">${L.length<12?'<button class="btn p" data-pze="">＋ Agregar premio</button>':''}<button class="btn" data-pzc>🎟️ Cobrar un canje</button><button class="btn" data-x>Cerrar</button></div>`,(o,close)=>{
   o.querySelector('[data-pzc]').onclick=()=>{close();canjeCobrar()};
   o.querySelectorAll('[data-pze]').forEach(b=>b.onclick=()=>{close();premioEditar(L.find(x=>x.id===b.dataset.pze)||null)})})}
+/* Valor de los puntos (igual que la tabla pública de Mi Xyro): 100 XyroPoints ≈ US$ 1; LocalPoints sugeridos 200 por US$ 1 (mín. 100) */
+var PVMON={PE:['PEN',3.75],BO:['BOB',6.96],CO:['COP',4000],MX:['MXN',18],CL:['CLP',950],AR:['ARS',1000],PY:['PYG',7500],UY:['UYU',40],BR:['BRL',5.5],GT:['GTQ',7.8],CR:['CRC',510],DO:['DOP',60],ES:['EUR',.92]};
+function pvMon(){const pa=String(CFG.pais||PF().pais||'PE').toUpperCase(),m=PVMON[pa];return m?{c:m[0],r:m[1]}:{c:'USD',r:1}}
+function pvL(usd){const m=pvMon();try{return new Intl.NumberFormat('es-PE',{style:'currency',currency:m.c,currencyDisplay:'narrowSymbol'}).format(usd*m.r)}catch(_){return m.c+' '+(usd*m.r).toFixed(2)}}
 function premioEditar(p){const nv=!p;p=p||{};
  sheet(`<h3>${nv?'＋ Nuevo premio':'Editar premio'}</h3>
   <label class="sm">¿Qué das?<input id="pn" maxlength="60" value="${esc(p.nombre||'')}" placeholder="Ej. Batido gratis · S/ 10 de descuento"></label>
   <label class="sm">Detalle (opcional)<input id="pd" maxlength="200" value="${esc(p.detalle||'')}"></label>
   <div class="row" style="gap:8px"><label class="sm" style="flex:1">LocalPoints<input id="pl" type="number" min="10" value="${p.pts_local||''}" placeholder="Ej. 400"></label><label class="sm" style="flex:1">XyroPoints<input id="pg" type="number" min="10" value="${p.pts_global||''}" placeholder="Vacío = no"></label></div>
-  <p class="mu sm"><b>De aquí</b>: los que tus clientes ganan comprando contigo (unos 8 por cada US$ 1). <b>Xyro</b>: los de toda la red; aceptarlos te trae clientes nuevos.</p>
+  <label class="sm">¿Cuánto cuesta normalmente? (${pvMon().c}, para calcular)<input id="pv" type="number" min="0" step="0.1" placeholder="Ej. ${Math.round(5*pvMon().r)}"></label>
+  <div id="pch" class="sm" style="padding:10px;border:1px solid var(--bd,#333);border-radius:12px;margin:6px 0"></div>
+  <p class="mu sm"><b>LocalPoints</b>: los que tus clientes ganan comprando contigo (10 por cada US$ 1). <b>XyroPoints</b>: los de toda la red (100 ≈ US$ 1); aceptarlos te trae clientes nuevos. Tabla pública completa en Mi Xyro → Perfil → «📊 ¿Cuánto valen los puntos?».</p>
   <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn p" id="ps">Guardar</button>${nv?'':`<button class="btn" id="pa">${p.activo?'⏸️ Pausar':'▶️ Activar'}</button><button class="btn" id="pb" style="color:#ef4444">Borrar</button>`}<button class="btn" data-x>Cancelar</button></div>`,(o,close)=>{
+  const M=pvMon(),ch=o.querySelector('#pch'),calc=()=>{const val=(+o.querySelector('#pv').value||0)/M.r,lp=+o.querySelector('#pl').value||0,xp=+o.querySelector('#pg').value||0;let h='',mal=false;
+   if(val>0)h+=`💡 Sugerido: <b>${Math.ceil(val*200)} LocalPoints</b> y/o <b>${Math.ceil(val*100)} XyroPoints</b> como mínimo.<br>`;
+   if(lp){const g=lp/10;h+=`LocalPoints: tu cliente lo consigue gastando ≈ <b>${pvL(g)}</b> contigo.`;if(val>0&&lp<val*100){h+=` <b style="color:#ef4444">⚠️ Devuelves ${Math.round(val/g*100)}%: pierdes. Sube a ${Math.ceil(val*100)} o más.</b>`;mal=true}h+='<br>'}
+   if(xp){h+=`XyroPoints: ${xp} valen ≈ <b>${pvL(xp/100)}</b>.`;if(val>0&&xp<val*100){h+=` <b style="color:#ef4444">⚠️ Lo regalas por menos de lo que vale. Mínimo ${Math.ceil(val*100)}.</b>`;mal=true}}
+   ch.innerHTML=h||'<span class="mu">Escribe el precio normal y te decimos cuántos puntos poner.</span>';ch.style.borderColor=mal?'#ef4444':'';o.querySelector('#ps').disabled=xp>0&&val>0&&xp<val*100};
+  ['#pv','#pl','#pg'].forEach(k=>o.querySelector(k).addEventListener('input',calc));calc();
   const v=s=>o.querySelector(s).value.trim(),sv=async x=>{try{await pzRpc('xy_premio_guardar',{p_slug:SLUG,p:Object.assign({id:p.id||null,nombre:v('#pn'),detalle:v('#pd'),pts_local:v('#pl')||null,pts_global:v('#pg')||null},x||{})});close();toast('✅ Guardado: ya sale en Mi Xyro');premiosAbrir()}catch(e){toast(e.message)}};
   o.querySelector('#ps').onclick=()=>sv();const a=o.querySelector('#pa');a&&(a.onclick=()=>sv({activo:!p.activo}));
   const b=o.querySelector('#pb');b&&(b.onclick=async()=>{try{await pzRpc('xy_premio_borrar',{p_slug:SLUG,p_id:p.id});close();toast('Premio borrado');premiosAbrir()}catch(e){toast(e.message)}})})}

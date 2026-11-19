@@ -1,5 +1,15 @@
 [
  {
+  "id": "20261119-0403",
+  "fecha": "2026-11-19 04:03",
+  "titulo": "Premios: calculadora de puntos",
+  "notas": "Premios: calculadora de puntos",
+  "cambios": [
+   "Al crear un premio escribes cuánto cuesta y te sugiere cuántos LocalPoints y XyroPoints poner",
+   "Te avisa en rojo si pierdes dinero y no deja regalar por menos de lo que vale en XyroPoints"
+  ]
+ },
+ {
   "id": "20261119-0303",
   "fecha": "2026-11-19 03:03",
   "titulo": "XyroPoints y LocalPoints",
