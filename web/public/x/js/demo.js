@@ -20,7 +20,7 @@ const MKT = [
   { id: 'm4', seller_id: 'u9', protected_available: true, title: 'Proteína whey 2 kg (sellada)', price: 210, currency: 'PEN', condition: 'NEW', ships: true, status: 'ACTIVE', photos: [], emoji: '🥤', created_at: new Date(Date.now() - 864e5 * 3).toISOString() },
 ];
 const FRB = {};
-const PMD = [{ type: 'YAPE', dato: '999 888 777', titular: 'Café Aurora' }];
+const PMD = [{ tipo: 'YAPE', dato: '999 888 777', titular: 'Café Aurora' }];
 const ORD = [
   { id: 'o1', code: 'A7F3K2Q9', fulfillment_mode: 'IN_STORE', status: 'AWAITING_PAYMENT', total: 36, currency: 'PEN', created_at: new Date(Date.now() - 6e5).toISOString(), buyer_paid_at: new Date(Date.now() - 3e5).toISOString(), buyer_pay_method: 'YAPE', buyer_pay_ref: '4821', buyer_id: 'u2', entity_id: 'e1' },
   { id: 'o2', code: 'B2M8P1X4', fulfillment_mode: 'PICKUP', status: 'PAID', total: 54, currency: 'PEN', created_at: new Date(Date.now() - 36e5).toISOString(), buyer_id: 'u3', entity_id: 'e1' },

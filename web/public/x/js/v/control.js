@@ -67,16 +67,16 @@ async function pagosCard(box) {
   const pinta = () => {
     box.innerHTML = `<div class="row"><b class="sp">💳 Cómo te pagan</b><button class="btn sm" id="pmE">Editar</button></div>
       <span class="mu xs">Tus clientes los ven solo dentro de su orden en Xyro, nunca en público.</span>
-      ${M.length ? M.map((m) => `<div class="li"><span class="ico">💸</span><span class="sp"><b class="sm">${esc((PMT.find((p) => p[0] === m.type) || ['', m.type])[1])}</b><br><span class="mu xs">${esc(m.dato || '')}${m.titular ? ' · ' + esc(m.titular) : ''}</span></span></div>`).join('')
+      ${M.length ? M.map((m) => `<div class="li"><span class="ico">💸</span><span class="sp"><b class="sm">${esc((PMT.find((p) => p[0] === (m.tipo || m.type)) || ['', m.tipo || m.type])[1])}</b><br><span class="mu xs">${esc(m.dato || '')}${m.titular ? ' · ' + esc(m.titular) : ''}</span></span></div>`).join('')
         : '<p class="sm" style="color:#fbbf24">Aún no agregas cómo te pagan: tus clientes no podrán pagarte.</p>'}`;
     $('#pmE', box).onclick = editar;
   };
   const editar = () => hoja(`<h2>Cómo te pagan</h2><p class="mu sm">Hasta 3. Número de Yape/Plin o cuenta/CCI.</p>
-    ${[0, 1, 2].map((i) => { const m = M[i] || {}; return `<div class="card" style="background:var(--c2);gap:6px"><select data-ty="${i}"><option value="">— Ninguno —</option>${PMT.map(([k, t]) => `<option value="${k}" ${m.type === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
+    ${[0, 1, 2].map((i) => { const m = M[i] || {}; return `<div class="card" style="background:var(--c2);gap:6px"><select data-ty="${i}"><option value="">— Ninguno —</option>${PMT.map(([k, t]) => `<option value="${k}" ${(m.tipo || m.type) === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
       <input data-da="${i}" maxlength="120" placeholder="Número o cuenta" value="${esc(m.dato || '')}"><input data-ti="${i}" maxlength="80" placeholder="A nombre de (opcional)" value="${esc(m.titular || '')}"></div>`; }).join('')}
     <button class="btn p" id="ok">Guardar</button><button class="btn l" data-x>Cancelar</button>`, (h, close) => {
     $('#ok', h).onclick = async (ev) => {
-      const L = [0, 1, 2].map((i) => ({ type: $(`[data-ty="${i}"]`, h).value, dato: $(`[data-da="${i}"]`, h).value.trim(), titular: $(`[data-ti="${i}"]`, h).value.trim() || null })).filter((m) => m.type);
+      const L = [0, 1, 2].map((i) => ({ tipo: $(`[data-ty="${i}"]`, h).value, dato: $(`[data-da="${i}"]`, h).value.trim(), titular: $(`[data-ti="${i}"]`, h).value.trim() || null })).filter((m) => m.tipo);
       if (L.some((m) => m.dato.length < 6)) return toast('Escribe el número o cuenta completo');
       ev.target.disabled = true;
       try { await rpc('xy_paymethods_set', { p_entity: S.entidad.id, p_methods: L }); M = L; close(); pinta(); toast('Guardado ✓'); } catch (e) { toast(errDe(e)); ev.target.disabled = false; }
